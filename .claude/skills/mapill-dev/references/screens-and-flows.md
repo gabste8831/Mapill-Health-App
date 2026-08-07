@@ -93,11 +93,54 @@ de `styling.md`, e o padrão de card de destaque da Home quando fizer sentido.
   cadastrados ainda" nem um indicador visual de "dados não sincronizados" (o app é
   offline-first, mas a Home hoje não comunica esse estado ao usuário).
 
-## Perguntas em aberto para fechar antes de implementar
+## Decisões fechadas (conferência de 2026-08-07)
 
-1. O limiar de "estoque baixo" (Home mostra "4 dias restantes") é calculado automaticamente
-   a partir da posologia + quantidade, ou o usuário define manualmente um número de dias?
-2. Confirmação de dose: sempre inline na Home, ou abre uma tela dedicada quando disparada por
-   notificação com o app fechado?
-3. Onboarding/LGPD: prioridade alta — sem essa tela, nenhum outro fluxo pode ser implementado
-   de forma compatível com a skill.
+1. **Estoque baixo**: controle total do usuário. Por medicamento, ele decide (a) se quer ser
+   avisado, e (b) com quantos dias/quanto de antecedência. Não há cálculo silencioso —
+   monitoramento crônico (recompra) e agudo (ex: antibiótico de curso curto) usam a mesma
+   mecânica, o usuário só configura diferente.
+2. **Alarme vs notificação**: dois modos, escolha do usuário (global ou por medicamento — a
+   confirmar no detalhamento):
+   - **Modo alarme**: toca "estilo despertador" até o usuário desligar; ao desligar, pede
+     confirmação (Tomei / Não tomei / Adiar 5 min). Confirmar/não confirmar decide baixa de
+     estoque (ver item 6) e alimenta a gamificação.
+   - **Modo notificação simples**: notificação padrão, sem bloquear tela.
+   - Em ambos os casos, tocar na notificação/alarme abre uma **tela dedicada de gerenciamento
+     de dose** (não a Home) — fluxo com objetivo único.
+   - ⚠️ **Ressalva técnica**: alarme full-screen que interrompe o SO como um despertador nativo
+     provavelmente exige development build (EAS) em vez de Expo Go puro — `expo-notifications`
+     managed não garante esse comportamento. Validar viabilidade antes de prometer na UI.
+3. **Onboarding**: tutorial guiado (telas explicando as funcionalidades principais) seguido do
+   consentimento LGPD.
+4. **Login/backup**: opcional. Login via Google (Supabase Auth) habilita backup/recuperação em
+   outro aparelho; usar sem login é permitido, mas sem sync remoto. Perfil local (ficha médica)
+   funciona independente de login.
+5. **Perfil / ficha médica** (nova seção, além do que já estava no domínio): foto, nome,
+   sobrenome, tipo sanguíneo, alergias, campos de preenchimento livre — funciona como "fichinha
+   médica auxiliar" que o paciente sempre tem à mão (ex: tipo sanguíneo que ele mesmo esquece).
+   Precisa entrar no modelo de dados como entidade própria (`patient_profile` ou similar).
+6. **Baixa de estoque ao confirmar dose**: só desconta quando o paciente confirma que tomou.
+   Dose não confirmada não desconta, mas fica marcada com destaque visual de falha (ex: "X" no
+   calendário/histórico) — tratamento crítico, falha de adesão precisa ter ênfase visual, não
+   passar despercebida. O registro é sempre editável depois (o paciente pode ter tomado e
+   esquecido de marcar) — toda edição retroativa deve re-sincronizar o estoque calculado.
+   Considerar um popup/lembrete de "seu estoque físico está alinhado com o app?" como reforço
+   periódico, não obrigatório a cada dose.
+7. **Gamificação**: manter simples por ora — barra de progresso diário + streak, só na Home.
+   Sem tela dedicada de conquistas/badges nesta fase.
+8. **Agenda/Compromissos**: escopo amplo — consultas, exames e renovação de receita, todos como
+   parte de "gerenciamento completo para mitigação de falhas ao tratamento". Inclui upload de
+   foto da receita com data de validade e data de renovação, gerando lembrete próprio (mesmo
+   mecanismo de alarme/notificação de dose, adaptado).
+9. **Configurações**: perfil/ficha médica, tema e cores (acessibilidade — contraste, paleta
+   mais leve conforme preferência do paciente), backup/conta (status de login, última sync,
+   exportar/excluir dados LGPD), permissões do app (câmera, notificações) — um lugar central
+   pra esse tipo de ajuste.
+10. **Fotos/anexos** (receita, foto de perfil, embalagem): sempre salvas localmente primeiro
+    (offline-first). Backup no Supabase Storage é opt-out por registro — se o paciente não
+    quiser aquele anexo específico na nuvem, ele não sobe, sem afetar o resto do sync. Dado
+    sensível, tratado com o mesmo rigor de LGPD do restante.
+11. **Agente/MCP Anvisa** (IA conversacional sobre medicamentos, ex: "existe paracetamol de
+    1g?", preço médio de dipirona): ideia registrada para **Fase 2**, depois do core (cadastro,
+    estoque, alarmes, sync, agenda) estar pronto. Sempre com disclaimer de que não substitui
+    prescrição/orientação médica. Ver nota em `cmed-data.md`.

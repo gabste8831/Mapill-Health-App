@@ -49,3 +49,21 @@ Se um dia a Anvisa disponibilizar uma API oficial (o usuário já pesquisou e n�
 no momento da escrita do artigo), esse processo de seed pode ser trocado por chamadas diretas
 — mas a camada de `repository` de medicamentos deve abstrair essa fonte, para que trocar de
 "seed local" para "API remota" não exija mudança nos use-cases que consomem os dados.
+
+## Ideia futura (Fase 2): agente conversacional / MCP Anvisa
+
+Registrado na conferência de contexto de 2026-08-07 — **não implementar antes do core estar
+pronto** (cadastro, estoque, alarmes/notificações, sync, agenda). Ideia:
+
+- Um agente conversacional, disponível só com internet, que responde perguntas de contexto
+  sobre medicamentos usando a base CMED/Anvisa como fonte (ex: "existe paracetamol de 1g?",
+  "qual a média de preço de dipirona?") — complementa o autocomplete/seed local, não o
+  substitui como fonte de verdade offline.
+- Existem MCPs públicos da Anvisa que podem servir de base/inspiração — avaliar quando essa
+  fase começar.
+- **Limite inegociável**: nunca fornecer dose, interação medicamentosa ou qualquer orientação
+  clínica — sempre com disclaimer explícito de "não substitui prescrição/orientação médica",
+  mesmo mode de resposta usado em `medication-safety-validation`.
+- Arquitetura: se implementado, deve entrar como uma camada adicional por trás do mesmo
+  `repository` de medicamentos (mesma abstração já prevista acima), nunca acoplado direto na
+  UI — mantém a troca de fonte transparente pros use-cases.
