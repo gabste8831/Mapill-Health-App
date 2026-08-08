@@ -26,6 +26,7 @@ export class RegisterIntake {
       doseScheduleId: input.doseScheduleId,
       status: input.status,
       occurredAt: input.occurredAt,
+      correctsLogId: null,
       updatedAt: input.occurredAt,
       syncedAt: null,
       deletedAt: null,
