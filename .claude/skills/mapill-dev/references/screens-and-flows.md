@@ -99,14 +99,21 @@ de `styling.md`, e o padrão de card de destaque da Home quando fizer sentido.
    avisado, e (b) com quantos dias/quanto de antecedência. Não há cálculo silencioso —
    monitoramento crônico (recompra) e agudo (ex: antibiótico de curso curto) usam a mesma
    mecânica, o usuário só configura diferente.
-2. **Alarme vs notificação**: dois modos, escolha do usuário (global ou por medicamento — a
-   confirmar no detalhamento):
-   - **Modo alarme**: toca "estilo despertador" até o usuário desligar; ao desligar, pede
-     confirmação (Tomei / Não tomei / Adiar 5 min). Confirmar/não confirmar decide baixa de
-     estoque (ver item 6) e alimenta a gamificação.
+2. **Alarme vs notificação**: modo é **por prescrição** (`Prescription.reminderMode`), não
+   global — cada tratamento tem sua própria criticidade (insulina vs suplemento de rotina).
+   Três opções: `alarm` | `notification` | `none`.
+   - **Modo alarme**: toca "estilo despertador" até o paciente desligar. Ao desligar, pede
+     confirmação (Tomei / Não tomei / Adiar 5 min). **Adiamento máximo: 1 vez** (toca no
+     máximo duas vezes no total) — `DoseSchedule.snoozeCount` trava em `0 | 1`. Existe também
+     "ignorar por agora", que registra `IntakeLog.status = "deferred"` (visto, mas resolvido
+     depois — diferente de nunca ter visto) em vez de forçar uma resposta.
    - **Modo notificação simples**: notificação padrão, sem bloquear tela.
-   - Em ambos os casos, tocar na notificação/alarme abre uma **tela dedicada de gerenciamento
-     de dose** (não a Home) — fluxo com objetivo único.
+   - **Modo none**: sem lembrete algum — o paciente confirma manualmente quando quiser, pela
+     Home ou pela tela de gerenciamento de dose.
+   - Confirmar/pular decide baixa de estoque (ver item 6) e alimenta a gamificação.
+   - Em qualquer modo, tocar na notificação/alarme abre uma **tela dedicada de gerenciamento
+     de dose**: mostra a dose que disparou em destaque **+ outras doses pendentes/atrasadas do
+     dia** abaixo (não é uma tela de foco único nem a Home).
    - ⚠️ **Ressalva técnica**: alarme full-screen que interrompe o SO como um despertador nativo
      provavelmente exige development build (EAS) em vez de Expo Go puro — `expo-notifications`
      managed não garante esse comportamento. Validar viabilidade antes de prometer na UI.
@@ -140,7 +147,27 @@ de `styling.md`, e o padrão de card de destaque da Home quando fizer sentido.
     (offline-first). Backup no Supabase Storage é opt-out por registro — se o paciente não
     quiser aquele anexo específico na nuvem, ele não sobe, sem afetar o resto do sync. Dado
     sensível, tratado com o mesmo rigor de LGPD do restante.
-11. **Agente/MCP Anvisa** (IA conversacional sobre medicamentos, ex: "existe paracetamol de
+11.5. **Tratamento de exceções (conferência de 2026-08-07, parte 2)**:
+   - **`reminderMode = "none"`**: sem push algum. Quando o horário previsto passa sem
+     confirmação, a dose vira "atrasada" com destaque visual forte na Home/tela de dose —
+     reforço passivo, nunca notificação ativa.
+   - **Doses nunca resolvidas** (`deferred` indefinido, "none" ignorado, notificação simples
+     ignorada): ficam pendentes para sempre, sem fechamento automático por tempo. Só o próprio
+     paciente resolve manualmente — nenhuma lógica decide "skipped" por conta própria.
+   - **Permissão de notificação**: verificada no momento em que o paciente ativa
+     `reminderMode = alarm/notification` numa prescrição (previne na raiz). Se a permissão for
+     revogada depois, o app precisa detectar isso e sinalizar de forma visível sempre que
+     houver prescrição ativa que dependa dela (ex: aviso persistente na Home) — nunca falhar
+     silenciosamente.
+   - **Correção retroativa de `IntakeLog` x estoque**: toda correção gera um novo `IntakeLog`
+     (nunca sobrescreve o antigo, via `correctsLogId`) e, se o novo status muda o consumo
+     efetivo, um novo `InventoryAdjustment` com `reason: "intake_correction"` aplicando só a
+     diferença (delta) — nunca recalculando o estoque do zero. Isso preserva auditoria
+     completa e compõe corretamente com recontagens manuais/sync de outro dispositivo que
+     tenham acontecido nesse meio tempo, porque cada ajuste é um evento independente somado ao
+     total, não uma substituição de valor. Implementado em `use-cases/correct-intake.ts`.
+
+12. **Agente/MCP Anvisa** (IA conversacional sobre medicamentos, ex: "existe paracetamol de
     1g?", preço médio de dipirona): ideia registrada para **Fase 2**, depois do core (cadastro,
     estoque, alarmes, sync, agenda) estar pronto. Sempre com disclaimer de que não substitui
     prescrição/orientação médica. Ver nota em `cmed-data.md`.
