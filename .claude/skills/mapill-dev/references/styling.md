@@ -186,6 +186,14 @@ export const radius = { sm: 2, md: 4, lg: 8, full: 12 };
   texto branco) para se destacar — isso é o card mais importante da Home e justifica ser a
   única exceção "chamativa" da tela.
 
+### Logo / marca (pendente de aplicar)
+
+Usuário tem uma referência de logo pronta: pílula em duas metades (cheia + contorno), na cor
+`primary` (#0057BF), traço fino. Ainda não aplicada no código — hoje `LoginScreen` usa um "M"
+de texto como placeholder da marca. Quando o asset for entregue: substituir esse placeholder,
+gerar `icon.png`/`adaptive-icon`/`splash-icon` a partir dele (ver `app.json`), e considerar
+reusar a mesma forma como ícone da FAB da Home (hoje é só um "+").
+
 ### O que evitar
 
 - Não usar `style={{ ... }}` inline exceto para valores verdadeiramente dinâmicos (ex: cor que
