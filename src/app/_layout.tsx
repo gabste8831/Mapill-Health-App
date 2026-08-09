@@ -13,6 +13,7 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
+import { LoginScreen } from '@/components/screens/LoginScreen/LoginScreen';
 import { initializeDatabase } from '@/data/local/database';
 
 SplashScreen.preventAutoHideAsync();
@@ -27,6 +28,9 @@ export default function TabLayout() {
     PlusJakartaSans_700Bold,
   });
   const [databaseReady, setDatabaseReady] = useState(false);
+  // TODO: trocar por sessão real do Supabase Auth (persistida via expo-secure-store) quando o
+  // login for implementado de verdade — hoje é só um gate de UI, reseta a cada abertura do app.
+  const [hasEnteredApp, setHasEnteredApp] = useState(false);
 
   useEffect(() => {
     initializeDatabase().then(() => setDatabaseReady(true));
@@ -36,9 +40,20 @@ export default function TabLayout() {
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
   if (!fontsLoaded || !databaseReady) return null;
 
+  if (!hasEnteredApp) {
+    return (
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AnimatedSplashOverlay />
+        <LoginScreen
+          onAuthenticated={() => setHasEnteredApp(true)}
+          onContinueWithoutLogin={() => setHasEnteredApp(true)}
+        />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
       <AppTabs />
     </ThemeProvider>
   );
