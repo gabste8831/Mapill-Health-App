@@ -67,47 +67,112 @@ nunca vira o layout inteiro nem compete com a legibilidade clínica.
 
 ### Tokens de tema (`shared/theme/`)
 
-Cores extraídas do design aprovado (adaptar nomes conforme necessário, mas manter esses valores
-como ponto de partida):
+**Atualizado em 2026-08-09** a partir dos protótipos HTML reais (Home/Dashboard, Escanear
+código, Cadastro manual) — sistema de cores Material 3 completo, não mais um placeholder.
+Mapeamento `role M3 → token do app`; manter os nomes dos roles (facilita comparar com specs
+futuras do mesmo protótipo):
 
 ```ts
 // shared/theme/colors.ts
 export const colors = {
-  primary: '#2B7FFF',        // ações primárias, estados ativos, foco
-  secondary: '#1E293B',      // texto principal, ícones de alto contraste
-  background: '#F8FAFC',     // fundo neutro
-  surface: '#FFFFFF',        // cards e containers
-  border: '#E2E8F0',         // bordas finas (1px), estrutura
-  borderStrong: '#CBD5E1',   // bordas de modais/popovers
+  primary: '#0057BF',
+  onPrimary: '#FFFFFF',
+  primaryContainer: '#026FEF',
+  onPrimaryContainer: '#FEFCFF',
+
+  secondary: '#545F73',
+  onSecondary: '#FFFFFF',
+  secondaryContainer: '#D5E0F8',
+  onSecondaryContainer: '#586377',
+
+  tertiary: '#994200',       // reservado — não usado nas 3 telas ainda recebidas
+  tertiaryContainer: '#C05400',
+  onTertiaryContainer: '#FFFBFF',
+
   error: '#BA1A1A',
+  onError: '#FFFFFF',
   errorContainer: '#FFDAD6',
-  // Cor de destaque para gamificação (streak, progresso) — reaproveita o primary
-  // para não introduzir uma paleta paralela; variação de opacidade/tint é suficiente.
+  onErrorContainer: '#93000A',
+  // error/onError é a cor do card de "Alerta de Estoque" na Home — fundo cheio vermelho,
+  // não um tom claro, porque é uma ação que pede atenção imediata (Nielsen: visibilidade
+  // do status do sistema).
+
+  background: '#F7F9FB',
+  onBackground: '#191C1E',
+  surface: '#F7F9FB',
+  surfaceBright: '#F7F9FB',      // header e nav fixos
+  surfaceContainerLowest: '#FFFFFF',  // cards elevados (ex: dose em destaque)
+  surfaceContainerLow: '#F2F4F6',
+  surfaceContainer: '#ECEEF0',
+  surfaceContainerHigh: '#E6E8EA',
+  onSurface: '#191C1E',
+  onSurfaceVariant: '#414754',   // texto secundário, labels, ícones neutros
+
+  outline: '#727786',
+  outlineVariant: '#C1C6D7',     // bordas finas de card/input — o "border" antigo
 };
 ```
 
 ```ts
 // shared/theme/typography.ts
-// Fonte: Plus Jakarta Sans. ATENÇÃO: pesos leves (300) valem para telas de apresentação/
-// marketing, mas para o público idoso/polimedicado, priorizar peso 500-600 em qualquer
-// texto que carregue informação crítica (nome do remédio, horário, dose) — legibilidade
-// tem prioridade sobre a estética editorial nesses pontos.
+// Fonte: Plus Jakarta Sans (Google Fonts). ATENÇÃO: pesos leves (300) valem para telas de
+// apresentação/marketing (ex: título "Hello, David." na Home usa peso 300 no protótipo),
+// mas para o público idoso/polimedicado, priorizar peso 500-600 em qualquer texto que
+// carregue informação crítica (nome do remédio, horário, dose) — legibilidade tem
+// prioridade sobre a estética editorial nesses pontos.
 export const typography = {
-  headingLg: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 24, lineHeight: 32 },
-  headingMd: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 18, lineHeight: 24 },
-  bodyLg: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 16, lineHeight: 26 },
+  headlineXl: { fontFamily: 'PlusJakartaSans_300Light', fontSize: 40, lineHeight: 48, letterSpacing: -0.02 },
+  headlineLg: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 32, lineHeight: 40, letterSpacing: -0.01 },
+  headlineMd: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 24, lineHeight: 32, letterSpacing: -0.01 },
+  headlineSm: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 18, lineHeight: 24 },
+  bodyLg: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 16, lineHeight: 28 },
   bodyMd: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, lineHeight: 22 },
-  label: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, lineHeight: 16, letterSpacing: 0.5 },
+  label: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, lineHeight: 16, letterSpacing: 0.6 }, // uppercase no protótipo
   // Uso crítico (dose, horário, nome do medicamento em destaque): sempre 500+ de peso,
-  // nunca 300, independente do que o DESIGN.md original sugira para telas de marketing.
+  // nunca 300 — ex: "14:30" e "Metformina 500mg" no card de próxima dose usam bold/600+,
+  // mesmo a headline de saudação ao lado usando peso leve.
 };
 ```
 
 ```ts
 // shared/theme/spacing.ts
-export const spacing = { xs: 4, sm: 8, md: 16, lg: 32, xl: 48, xxl: 80 };
-export const radius = { sm: 4, md: 8, full: 9999 };
+export const spacing = { unit: 4, xs: 4, sm: 8, md: 16, gutter: 24, lg: 32, xl: 48, xxl: 80 };
+export const marginMobile = 16;
+export const marginDesktop = 64; // só relevante se houver versão web/tablet do app
+
+// Radius do protótipo é sutil (quase "clínico", cantos quase retos) — bem mais discreto
+// que o "full: 9999" antigo, que só se aplica a pílulas/avatares/FAB.
+export const radius = { sm: 2, md: 4, lg: 8, full: 12 };
 ```
+
+### Padrões de componente observados no protótipo (referência ao implementar)
+
+- **Card de "Próxima Dose"** (Home): fundo `primary` cheio, texto branco, ícone de pílula
+  grande semi-transparente no canto — é a única exceção "chamativa" da paleta neutra
+  (justificado por ser o elemento mais importante da tela).
+- **Lista de doses do dia**: item por linha com horário à esquerda, nome/nota no meio, ícone
+  de status à direita. Três estados visuais claros: concluída (opacidade reduzida +
+  `line-through` + check preenchido em `primary`), próxima/destaque (borda `primary` 2px,
+  fundo `surfaceContainerLowest`, botão "Confirmar" cheio), futura (ícone de relógio em
+  `outlineVariant`, sem ação).
+- **Alerta de estoque baixo**: card cheio em `error`/`onError` (não um tom claro) com ação
+  primária ("Atualizar Medicação", botão branco sobre vermelho) e ação secundária de texto
+  ("Ignorar Lembrete") — consistente com a decisão de que o alerta não bloqueia a tela mas
+  precisa de destaque forte.
+- **Gráfico semanal de adesão**: barras simples em `primary` com opacidade variável por dia
+  (dia atual = opacidade cheia), sem biblioteca de gráficos — dá pra fazer só com `View`s de
+  altura proporcional.
+- **Scanner de código de barras**: metade superior é a câmera com moldura de cantos
+  destacados (`primary`, 4px) + linha de varredura animada; metade inferior é sempre visível
+  com campo de entrada manual — reforça que o manual nunca é "escondido" atrás da câmera
+  (acessibilidade, conforme já documentado em `screens-and-flows.md`).
+- **Formulário de cadastro manual**: seções em cards separados (`surfaceContainerLowest` +
+  borda `outlineVariant`) por bloco de responsabilidade (dados básicos / posologia / estoque)
+  — não um formulário corrido. Frequência é um seletor de chips (Diário/Intervalo/Semanal/SOS),
+  horários são chips removíveis com "+ Adicionar", estoque é um stepper (+/-) sem campo de
+  limiar — bate exatamente com o que já estava documentado.
+- **Navegação inferior fixa** (mobile): Home / Calendário / Remédios / Ajustes, ícone
+  preenchido (`FILL 1`) só no item ativo.
 
 ### Onde a gamificação entra (elementos permitidos)
 
