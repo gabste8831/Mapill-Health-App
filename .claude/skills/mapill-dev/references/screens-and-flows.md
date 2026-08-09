@@ -166,6 +166,13 @@ de `styling.md`, e o padrão de card de destaque da Home quando fizer sentido.
      completa e compõe corretamente com recontagens manuais/sync de outro dispositivo que
      tenham acontecido nesse meio tempo, porque cada ajuste é um evento independente somado ao
      total, não uma substituição de valor. Implementado em `use-cases/correct-intake.ts`.
+   - **Camada de domínio fechada** para esta rodada: `ports/prescription-repository.ts`,
+     `ports/dose-schedule-repository.ts` (com `findPendingForDay`, base da tela dedicada de
+     dose) e `use-cases/snooze-dose-alarm.ts` (aplica o limite de 1 adiamento).
+   - **Pendência técnica anotada, não domínio**: checagem/observação de permissão de
+     notificação depende da API do Expo — vai precisar de um port tipo
+     `NotificationPermissionGateway` quando `src/notifications/` for implementado, pra manter
+     o domínio sem dependência direta do Expo.
 
 12. **Agente/MCP Anvisa** (IA conversacional sobre medicamentos, ex: "existe paracetamol de
     1g?", preço médio de dipirona): ideia registrada para **Fase 2**, depois do core (cadastro,
