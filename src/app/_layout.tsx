@@ -9,7 +9,7 @@ import {
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
@@ -33,6 +33,14 @@ export default function TabLayout() {
   const [hasEnteredApp, setHasEnteredApp] = useState(false);
 
   useEffect(() => {
+    // expo-sqlite web depende de OPFS/SharedArrayBuffer, que é instável em dev (worker às
+    // vezes trava com "Sync operation timeout"). O Mapill não é um app web — pular a
+    // inicialização real do banco nessa plataforma e liberar a UI (hoje ainda com dados mock)
+    // é melhor do que travar a tela de carregamento. Native (Expo Go/EAS) não é afetado.
+    if (Platform.OS === 'web') {
+      setDatabaseReady(true);
+      return;
+    }
     initializeDatabase().then(() => setDatabaseReady(true));
   }, []);
 
