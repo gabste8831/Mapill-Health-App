@@ -1,3 +1,4 @@
+import { Comfortaa_400Regular, Comfortaa_700Bold } from '@expo-google-fonts/comfortaa';
 import {
   PlusJakartaSans_300Light,
   PlusJakartaSans_400Regular,
@@ -14,9 +15,14 @@ import { Platform, useColorScheme } from 'react-native';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { LoginScreen } from '@/components/screens/LoginScreen/LoginScreen';
+import { PatientProfileScreen } from '@/components/screens/PatientProfileScreen/PatientProfileScreen';
 import { initializeDatabase } from '@/data/local/database';
 
 SplashScreen.preventAutoHideAsync();
+
+// TODO: quando o onboarding (tutorial + consentimento LGPD) for implementado, ele entra entre
+// 'login' e 'profile' — ver decisão de onboarding em screens-and-flows.md.
+type FirstRunStep = 'login' | 'profile' | 'app';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -26,11 +32,14 @@ export default function TabLayout() {
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
+    // Comfortaa é só pro wordmark "Mapill" (a fonte da logo) — nunca pro resto da UI.
+    Comfortaa_400Regular,
+    Comfortaa_700Bold,
   });
   const [databaseReady, setDatabaseReady] = useState(false);
   // TODO: trocar por sessão real do Supabase Auth (persistida via expo-secure-store) quando o
   // login for implementado de verdade — hoje é só um gate de UI, reseta a cada abertura do app.
-  const [hasEnteredApp, setHasEnteredApp] = useState(false);
+  const [step, setStep] = useState<FirstRunStep>('login');
 
   useEffect(() => {
     // expo-sqlite web depende de OPFS/SharedArrayBuffer, que é instável em dev (worker às
@@ -48,13 +57,26 @@ export default function TabLayout() {
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
   if (!fontsLoaded || !databaseReady) return null;
 
-  if (!hasEnteredApp) {
+  if (step === 'login') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AnimatedSplashOverlay />
         <LoginScreen
-          onAuthenticated={() => setHasEnteredApp(true)}
-          onContinueWithoutLogin={() => setHasEnteredApp(true)}
+          onAuthenticated={() => setStep('profile')}
+          onContinueWithoutLogin={() => setStep('profile')}
+        />
+      </ThemeProvider>
+    );
+  }
+
+  if (step === 'profile') {
+    return (
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <PatientProfileScreen
+          // TODO: persistir via PatientProfileRepository (src/data/repositories) quando a tela
+          // estiver ligada ao SQLite — hoje só avança o fluxo, não salva nada ainda.
+          onContinue={() => setStep('app')}
+          onSkip={() => setStep('app')}
         />
       </ThemeProvider>
     );
