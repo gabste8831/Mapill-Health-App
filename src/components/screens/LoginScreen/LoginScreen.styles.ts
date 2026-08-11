@@ -11,64 +11,73 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
     padding: spacing.md,
     justifyContent: "center",
-    gap: spacing.xl,
+    gap: spacing.lg,
   },
   brand: {
     alignItems: "center",
     gap: spacing.sm,
   },
-  brandMark: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.lg,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  brandMarkText: {
-    ...typography.headlineMd,
-    color: colors.onPrimary,
-  },
-  brandTitle: {
-    ...typography.headlineLg,
-    color: colors.onSurface,
+  brandLogo: {
+    width: 220,
+    height: 68,
   },
   brandSubtitle: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
     textAlign: "center",
+    maxWidth: 400,
   },
   form: {
+    alignItems: "center",
     gap: spacing.md,
+  },
+  // Largura máxima acompanhando a logo (mesmos 220 de brandLogo) — os dois botões de ação
+  // ficam visualmente ancorados à marca em vez de esticar a largura toda da tela.
+  actionButtonWidth: {
+    width: "100%",
+    maxWidth: 350,
   },
   googleButton: {
     height: 52,
-    borderRadius: radius.md,
+    borderRadius: radius.full,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
     backgroundColor: colors.surfaceContainerLowest,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   googleButtonText: {
     ...typography.bodyLg,
     color: colors.onSurface,
   },
+  continueWithoutLoginButton: {
+    height: 52,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   footer: {
     alignItems: "center",
-    gap: spacing.xs,
-    paddingTop: spacing.sm,
+  },
+  footerDivider: {
+    width: "100%",
+    maxWidth: 350,
+    height: 1,
+    backgroundColor: colors.outlineVariant,
+    opacity: 0.6,
+    marginBottom: spacing.lg,
   },
   footerCaption: {
-    ...typography.bodyMd,
+    ...typography.bodysm,
     color: colors.onSurfaceVariant,
     textAlign: "center",
-    opacity: 0.8,
-  },
-  continueWithoutLoginButton: {
-    paddingVertical: spacing.sm,
+    opacity: 0.6,
+    maxWidth: 350,
   },
   continueWithoutLoginText: {
     ...typography.label,
