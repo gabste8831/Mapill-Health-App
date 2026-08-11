@@ -1,17 +1,26 @@
 import type { SyncableEntity } from "./syncable";
 
-export type BloodType = "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | null;
+export type BloodType =
+  | "A+"
+  | "A-"
+  | "B+"
+  | "B-"
+  | "AB+"
+  | "AB-"
+  | "O+"
+  | "O-"
+  | null;
 
 /**
  * Sexo biológico — relevante clinicamente (ex: dosagem, referência de exames), diferente de
  * identidade de gênero, que o Mapill não coleta por não ter uso clínico definido no domínio.
  */
-export type BiologicalSex = "male" | "female" | "intersex" | null;
+export type BiologicalSex = "male" | "female" | "other" | null;
 
 /**
- * Contato pra acionar em emergência. Grupo opcional como um todo — se o paciente preencher
- * qualquer um dos três campos, os outros dois passam a ser exigidos (ver PatientProfileScreen),
- * pra nunca salvar um contato incompleto e inútil numa emergência de verdade.
+ * Contato pra acionar em emergência. O paciente pode cadastrar quantos quiser (ver
+ * PatientProfileScreen) — cada um é preenchido por completo num popup próprio antes de ser
+ * adicionado à lista, então nunca existe um contato salvo pela metade.
  */
 export type EmergencyContact = {
   name: string;
@@ -36,7 +45,7 @@ export type PatientProfile = SyncableEntity & {
   bloodType: BloodType;
   /** Texto livre, um item por alergia — sem validação clínica, é o próprio paciente relatando. */
   allergies: string[];
-  emergencyContact: EmergencyContact | null;
+  emergencyContacts: EmergencyContact[];
   /** Campo aberto pra qualquer outra informação que o paciente ache relevante ter registrada. */
   notes: string | null;
   /**
