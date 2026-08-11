@@ -8,6 +8,11 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
+    flexGrow: 1,
+    // `flexGrow: 1` faz o conteúdo ocupar pelo menos a altura da tela; `justifyContent: "center"`
+    // só tem efeito nesse caso (conteúdo mais curto que a tela) — se o formulário crescer (ex:
+    // mais campos, teclado aberto), o ScrollView volta a rolar normalmente sem quebrar isso.
+    justifyContent: "center",
     padding: spacing.md,
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -16,6 +21,7 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   title: {
+    paddingTop: spacing.sm,
     ...typography.headlineLg,
     color: colors.onSurface,
   },
@@ -25,13 +31,16 @@ export const styles = StyleSheet.create({
   },
   infoBanner: {
     flexDirection: "row",
-    gap: spacing.sm,
+    alignItems: "center",
+    gap: spacing.xs,
     backgroundColor: colors.secondaryContainer,
-    borderRadius: radius.lg,
-    padding: spacing.md,
+    borderRadius: radius.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
   },
   infoBannerText: {
     ...typography.bodyMd,
+    fontSize: 12,
     color: colors.onSecondaryContainer,
     flex: 1,
   },
@@ -55,147 +64,24 @@ export const styles = StyleSheet.create({
     ...typography.label,
     color: colors.primary,
   },
-  section: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
-  fieldGroup: {
-    gap: spacing.xs,
-  },
+  // Label "solta" usada dentro de um Card quando o campo abaixo não é um TextField com label
+  // própria (ex: título da seção "Alergias"/"Contato de emergência" acima de um grupo de campos).
   fieldLabel: {
     ...typography.label,
     color: colors.onSurfaceVariant,
-  },
-  requiredMark: {
-    color: colors.error,
-  },
-  input: {
-    height: 52,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLowest,
-    ...typography.bodyLg,
-    color: colors.onSurface,
-  },
-  multilineInput: {
-    height: 96,
-    paddingTop: spacing.sm,
-    textAlignVertical: "top",
-  },
-  bloodTypeRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  bloodTypeChip: {
-    minWidth: 56,
-    height: 40,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bloodTypeChipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  bloodTypeChipText: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-  },
-  bloodTypeChipTextSelected: {
-    color: colors.onPrimary,
   },
   allergyChipsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
-  },
-  allergyChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    paddingLeft: spacing.md,
-    paddingRight: spacing.sm,
-    height: 40,
-    borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainerLow,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  allergyChipText: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-  },
-  allergyChipRemove: {
-    width: 20,
-    height: 20,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  allergyChipRemoveText: {
-    ...typography.label,
-    color: colors.error,
-    fontSize: 14,
+    marginTop: spacing.sm,
   },
   allergyInputRow: {
     flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
   },
-  allergyInput: {
+  allergyInputField: {
     flex: 1,
-    height: 44,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainerLowest,
-    ...typography.bodyMd,
-    color: colors.onSurface,
-  },
-  allergyAddButton: {
-    height: 44,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  allergyAddButtonText: {
-    ...typography.label,
-    color: colors.primary,
-  },
-  primaryButton: {
-    height: 52,
-    borderRadius: radius.full,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonDisabled: {
-    opacity: 0.4,
-  },
-  primaryButtonText: {
-    ...typography.headlineSm,
-    fontSize: 16,
-    color: colors.onPrimary,
-  },
-  skipButton: {
-    alignItems: "center",
-    paddingVertical: spacing.sm,
-  },
-  skipButtonText: {
-    ...typography.label,
-    color: colors.onSurfaceVariant,
   },
 });
