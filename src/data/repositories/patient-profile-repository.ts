@@ -1,4 +1,4 @@
-import type { BiologicalSex, BloodType, PatientProfile } from "../../domain/entities/patient-profile";
+import type { BiologicalSex, BloodType, EmergencyContact, PatientProfile } from "../../domain/entities/patient-profile";
 import type { PatientProfileRepository as PatientProfileRepositoryPort } from "../../domain/ports/patient-profile-repository";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
@@ -12,9 +12,11 @@ type PatientProfileRow = SyncableRow & {
   blood_type: string | null;
   /** JSON array serializado — não há tabela própria de alergias, é texto livre do paciente. */
   allergies: string;
-  emergency_contact_name: string | null;
-  emergency_contact_phone: string | null;
-  emergency_contact_relationship: string | null;
+  /**
+   * JSON array serializado (migration 005) — as colunas soltas de um contato único (migration
+   * 004) ficaram pra trás, sem uso; não fazem mais parte do mapeamento.
+   */
+  emergency_contacts: string;
   notes: string | null;
   photo_sync_opt_out: number;
 };
@@ -37,15 +39,7 @@ export class PatientProfileRepository
       photoUri: row.photo_uri,
       bloodType: row.blood_type as BloodType,
       allergies: JSON.parse(row.allergies) as string[],
-      // Os três campos do contato são gravados juntos (ver toRow) — se o nome existe, o resto
-      // também existe, então basta checar um pra reconstruir o objeto ou null.
-      emergencyContact: row.emergency_contact_name
-        ? {
-            name: row.emergency_contact_name,
-            phone: row.emergency_contact_phone ?? "",
-            relationship: row.emergency_contact_relationship ?? "",
-          }
-        : null,
+      emergencyContacts: JSON.parse(row.emergency_contacts) as EmergencyContact[],
       notes: row.notes,
       photoSyncOptOut: row.photo_sync_opt_out === 1,
       updatedAt: row.updated_at,
@@ -64,9 +58,7 @@ export class PatientProfileRepository
       photo_uri: entity.photoUri,
       blood_type: entity.bloodType,
       allergies: JSON.stringify(entity.allergies),
-      emergency_contact_name: entity.emergencyContact?.name ?? null,
-      emergency_contact_phone: entity.emergencyContact?.phone ?? null,
-      emergency_contact_relationship: entity.emergencyContact?.relationship ?? null,
+      emergency_contacts: JSON.stringify(entity.emergencyContacts),
       notes: entity.notes,
       photo_sync_opt_out: entity.photoSyncOptOut ? 1 : 0,
       updated_at: entity.updatedAt,

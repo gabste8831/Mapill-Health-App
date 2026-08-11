@@ -75,7 +75,7 @@ export default function TabLayout() {
         biologicalSex: draft.biologicalSex,
         bloodType: draft.bloodType,
         allergies: draft.allergies,
-        emergencyContact: draft.emergencyContact,
+        emergencyContacts: draft.emergencyContacts,
         notes: draft.notes,
         photoUri: existingProfile?.photoUri ?? null,
         photoSyncOptOut: existingProfile?.photoSyncOptOut ?? false,
