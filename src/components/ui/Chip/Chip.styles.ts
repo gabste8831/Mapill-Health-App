@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     paddingLeft: spacing.md,
     paddingRight: spacing.sm,
     height: 36,
-    borderRadius: radius.full,
+    // borderRadius: radius.full,
     backgroundColor: colors.surfaceContainerLow,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
   chipRemove: {
     width: 20,
     height: 20,
-    borderRadius: radius.full,
+    // borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
   },

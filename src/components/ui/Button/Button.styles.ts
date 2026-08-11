@@ -5,7 +5,7 @@ import { colors, radius, spacing, typography } from "@/shared/theme";
 export const styles = StyleSheet.create({
   base: {
     height: 52,
-    borderRadius: radius.full,
+    // borderRadius: radius.full,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
