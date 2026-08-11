@@ -1,49 +1,125 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import type { BloodType } from "@/domain/entities/patient-profile";
+import { KeyboardAwareScrollView } from "@/components/keyboard-aware-scroll-view";
+import { Button, Card, Chip, IconButton, SelectField, TextField, type SelectOption } from "@/components/ui";
+import type { BiologicalSex, BloodType, EmergencyContact } from "@/domain/entities/patient-profile";
+import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { colors } from "@/shared/theme";
 import { styles } from "./PatientProfileScreen.styles";
 
-const BLOOD_TYPE_OPTIONS: NonNullable<BloodType>[] = [
-  "A+",
-  "A-",
-  "B+",
-  "B-",
-  "AB+",
-  "AB-",
-  "O+",
-  "O-",
+const BLOOD_TYPE_OPTIONS: SelectOption<NonNullable<BloodType>>[] = [
+  { value: "A+", label: "A+" },
+  { value: "A-", label: "A-" },
+  { value: "B+", label: "B+" },
+  { value: "B-", label: "B-" },
+  { value: "AB+", label: "AB+" },
+  { value: "AB-", label: "AB-" },
+  { value: "O+", label: "O+" },
+  { value: "O-", label: "O-" },
+];
+
+const BIOLOGICAL_SEX_OPTIONS: SelectOption<NonNullable<BiologicalSex>>[] = [
+  { value: "female", label: "Feminino" },
+  { value: "male", label: "Masculino" },
+  { value: "intersex", label: "Intersexo" },
 ];
 
 export type PatientProfileDraft = {
   firstName: string;
   lastName: string;
+  /** ISO 8601 (`YYYY-MM-DD`) — convertido a partir do input `DD/MM/AAAA` da tela. */
+  dateOfBirth: string;
+  biologicalSex: BiologicalSex;
   bloodType: BloodType;
   allergies: string[];
+  emergencyContact: EmergencyContact | null;
   notes: string | null;
 };
 
 type PatientProfileScreenProps = {
-  /** Só chamado com `firstName` preenchido — é o único campo obrigatório (ver screens-and-flows.md). */
+  /** Só chamado com nome, sobrenome e data de nascimento válidos preenchidos. */
   onContinue: (draft: PatientProfileDraft) => void;
   /** "Preencher depois": não salva nada agora, o paciente completa a ficha em Configurações. */
   onSkip: () => void;
 };
 
-// Todo o resto além do nome é opcional de propósito — é uma "fichinha médica auxiliar" que o
-// paciente preenche no próprio ritmo, nunca um formulário que bloqueia o uso do app.
+/** Aceita só dígitos e insere as barras conforme o paciente digita — sem depender de libs de máscara. */
+function formatDateOfBirthInput(rawValue: string, previousValue: string): string {
+  const digitsOnly = rawValue.replace(/\D/g, "").slice(0, 8);
+  // Deleção: se o usuário está apagando, não força a barra de volta.
+  if (rawValue.length < previousValue.length) return rawValue;
+
+  const day = digitsOnly.slice(0, 2);
+  const month = digitsOnly.slice(2, 4);
+  const year = digitsOnly.slice(4, 8);
+
+  if (digitsOnly.length <= 2) return day;
+  if (digitsOnly.length <= 4) return `${day}/${month}`;
+  return `${day}/${month}/${year}`;
+}
+
+/** `DD/MM/AAAA` plausível (dia/mês válidos, ano de 1900 até hoje) → ISO `YYYY-MM-DD`, ou `null` se inválida. */
+function parseDateOfBirth(displayValue: string): string | null {
+  const match = displayValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return null;
+
+  const [, dayText, monthText, yearText] = match;
+  const day = Number(dayText);
+  const month = Number(monthText);
+  const year = Number(yearText);
+  const currentYear = new Date().getFullYear();
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900 || year > currentYear) {
+    return null;
+  }
+
+  const date = new Date(year, month - 1, day);
+  const isRealCalendarDate = date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+  if (!isRealCalendarDate || date > new Date()) return null;
+
+  return `${yearText}-${monthText}-${dayText}`;
+}
+
+// Todo o resto além de nome/sobrenome/nascimento é opcional de propósito — é uma "fichinha
+// médica auxiliar" que o paciente preenche no próprio ritmo, nunca um formulário que bloqueia
+// o uso do app.
 export function PatientProfileScreen({ onContinue, onSkip }: PatientProfileScreenProps) {
+  const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [dateOfBirthInput, setDateOfBirthInput] = useState("");
+  const [biologicalSex, setBiologicalSex] = useState<BiologicalSex>(null);
   const [bloodType, setBloodType] = useState<BloodType>(null);
   const [allergies, setAllergies] = useState<string[]>([]);
   const [allergyDraft, setAllergyDraft] = useState("");
+  const [emergencyContactName, setEmergencyContactName] = useState("");
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
+  const [emergencyContactRelationship, setEmergencyContactRelationship] = useState("");
   const [notes, setNotes] = useState("");
 
-  const canContinue = firstName.trim().length > 0;
+  const dateOfBirthIso = useMemo(() => parseDateOfBirth(dateOfBirthInput), [dateOfBirthInput]);
+  const hasDateOfBirthError = dateOfBirthInput.length === 10 && dateOfBirthIso === null;
+
+  // Grupo opcional como um todo, mas se o paciente começar a preencher, não faz sentido salvar
+  // um contato pela metade (ex: telefone sem nome de quem atende) — então vira obrigatório
+  // completar os três assim que qualquer um deles for tocado.
+  const hasAnyEmergencyContactField =
+    emergencyContactName.trim().length > 0 ||
+    emergencyContactPhone.trim().length > 0 ||
+    emergencyContactRelationship.trim().length > 0;
+  const isEmergencyContactComplete =
+    emergencyContactName.trim().length > 0 &&
+    emergencyContactPhone.trim().length > 0 &&
+    emergencyContactRelationship.trim().length > 0;
+  const hasEmergencyContactError = hasAnyEmergencyContactField && !isEmergencyContactComplete;
+
+  const canContinue =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    dateOfBirthIso !== null &&
+    !hasEmergencyContactError;
 
   function addAllergy() {
     const value = allergyDraft.trim();
@@ -57,31 +133,41 @@ export function PatientProfileScreen({ onContinue, onSkip }: PatientProfileScree
   }
 
   function handleContinue() {
-    if (!canContinue) return;
+    if (!canContinue || dateOfBirthIso === null) return;
     onContinue({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
+      dateOfBirth: dateOfBirthIso,
+      biologicalSex,
       bloodType,
       allergies,
+      emergencyContact: isEmergencyContactComplete
+        ? {
+            name: emergencyContactName.trim(),
+            phone: emergencyContactPhone.trim(),
+            relationship: emergencyContactRelationship.trim(),
+          }
+        : null,
       notes: notes.trim().length > 0 ? notes.trim() : null,
     });
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        onScroll={onScroll}
+        scrollEventThrottle={16}>
         <View style={styles.header}>
           <Text style={styles.title}>Sua ficha de saúde</Text>
-          <Text style={styles.subtitle}>Só o nome é obrigatório — o resto você preenche quando quiser.</Text>
+          <Text style={styles.subtitle}>Nome, sobrenome e nascimento são obrigatórios.</Text>
         </View>
 
         <View style={styles.infoBanner}>
-          <Ionicons name="information-circle-outline" size={20} color={colors.onSecondaryContainer} />
-          <Text style={styles.infoBannerText}>
-            Esses dados funcionam como uma ficha cadastral com informações relevantes à sua
-            saúde — uma fonte de dados pessoal que pode ser útil em algum momento (ex: tipo
-            sanguíneo, alergias). Fica salva só no seu dispositivo, a menos que você faça login.
-          </Text>
+          <Ionicons name="lock-closed-outline" size={16} color={colors.onSecondaryContainer} />
+          <Text style={styles.infoBannerText}>Fica só no seu dispositivo, a menos que você faça login.</Text>
         </View>
 
         <View style={styles.photoRow}>
@@ -92,112 +178,119 @@ export function PatientProfileScreen({ onContinue, onSkip }: PatientProfileScree
           <Text style={styles.photoAddLabel}>Adicionar foto</Text>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>
-              NOME <Text style={styles.requiredMark}>*</Text>
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Seu nome"
-              placeholderTextColor={colors.onSurfaceVariant}
-              value={firstName}
-              onChangeText={setFirstName}
-            />
-          </View>
+        <Card>
+          <TextField
+            label="NOME"
+            required
+            placeholder="Seu nome"
+            value={firstName}
+            onChangeText={setFirstName}
+            onFocus={scrollToFocusedInput}
+          />
+          <TextField
+            label="SOBRENOME"
+            required
+            placeholder="Seu sobrenome"
+            value={lastName}
+            onChangeText={setLastName}
+            onFocus={scrollToFocusedInput}
+          />
+          <TextField
+            label="DATA DE NASCIMENTO"
+            required
+            placeholder="DD/MM/AAAA"
+            value={dateOfBirthInput}
+            onChangeText={(value) => setDateOfBirthInput(formatDateOfBirthInput(value, dateOfBirthInput))}
+            onFocus={scrollToFocusedInput}
+            keyboardType="number-pad"
+            maxLength={10}
+            error={hasDateOfBirthError ? "Data inválida." : undefined}
+          />
+          <SelectField
+            label="SEXO BIOLÓGICO"
+            value={biologicalSex}
+            options={BIOLOGICAL_SEX_OPTIONS}
+            onChange={setBiologicalSex}
+          />
+        </Card>
 
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>SOBRENOME</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Seu sobrenome"
-              placeholderTextColor={colors.onSurfaceVariant}
-              value={lastName}
-              onChangeText={setLastName}
-            />
-          </View>
-        </View>
+        <Card>
+          <SelectField label="TIPO SANGUÍNEO" value={bloodType} options={BLOOD_TYPE_OPTIONS} onChange={setBloodType} />
+        </Card>
 
-        <View style={styles.section}>
-          <Text style={styles.fieldLabel}>TIPO SANGUÍNEO</Text>
-          <View style={styles.bloodTypeRow}>
-            {BLOOD_TYPE_OPTIONS.map((option) => {
-              const selected = bloodType === option;
-              return (
-                <Pressable
-                  key={option}
-                  style={[styles.bloodTypeChip, selected && styles.bloodTypeChipSelected]}
-                  onPress={() => setBloodType(selected ? null : option)}
-                  accessibilityRole="button">
-                  <Text style={[styles.bloodTypeChipText, selected && styles.bloodTypeChipTextSelected]}>
-                    {option}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.section}>
+        <Card>
           <Text style={styles.fieldLabel}>ALERGIAS</Text>
-          {allergies.length > 0 ? (
-            <View style={styles.allergyChipsRow}>
-              {allergies.map((allergy, index) => (
-                <View key={`${allergy}-${index}`} style={styles.allergyChip}>
-                  <Text style={styles.allergyChipText}>{allergy}</Text>
-                  <Pressable
-                    style={styles.allergyChipRemove}
-                    onPress={() => removeAllergy(index)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Remover alergia ${allergy}`}>
-                    <Text style={styles.allergyChipRemoveText}>×</Text>
-                  </Pressable>
-                </View>
-              ))}
-            </View>
-          ) : null}
           <View style={styles.allergyInputRow}>
-            <TextInput
-              style={styles.allergyInput}
+            <TextField
+              label=""
+              containerStyle={styles.allergyInputField}
               placeholder="Ex: Dipirona, látex..."
-              placeholderTextColor={colors.onSurfaceVariant}
               value={allergyDraft}
               onChangeText={setAllergyDraft}
               onSubmitEditing={addAllergy}
+              onFocus={scrollToFocusedInput}
               returnKeyType="done"
             />
-            <Pressable style={styles.allergyAddButton} onPress={addAllergy} accessibilityRole="button">
-              <Text style={styles.allergyAddButtonText}>+ Adicionar</Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>OBSERVAÇÕES</Text>
-            <TextInput
-              style={[styles.input, styles.multilineInput]}
-              placeholder="Qualquer outra informação que você ache relevante..."
-              placeholderTextColor={colors.onSurfaceVariant}
-              value={notes}
-              onChangeText={setNotes}
-              multiline
+            <IconButton
+              icon={<Ionicons name="add" size={20} color={colors.onPrimary} />}
+              onPress={addAllergy}
+              accessibilityLabel="Adicionar alergia"
             />
           </View>
-        </View>
+          {allergies.length > 0 ? (
+            <View style={styles.allergyChipsRow}>
+              {allergies.map((allergy, index) => (
+                <Chip key={`${allergy}-${index}`} label={allergy} onRemove={() => removeAllergy(index)} />
+              ))}
+            </View>
+          ) : null}
+        </Card>
 
-        <Pressable
-          style={[styles.primaryButton, !canContinue && styles.primaryButtonDisabled]}
-          onPress={handleContinue}
-          disabled={!canContinue}
-          accessibilityRole="button">
-          <Text style={styles.primaryButtonText}>Salvar e continuar</Text>
-        </Pressable>
+        <Card>
+          <Text style={styles.fieldLabel}>CONTATO DE EMERGÊNCIA</Text>
+          <TextField
+            label="NOME"
+            placeholder="Nome do contato"
+            value={emergencyContactName}
+            onChangeText={setEmergencyContactName}
+            onFocus={scrollToFocusedInput}
+            error={hasEmergencyContactError}
+          />
+          <TextField
+            label="TELEFONE"
+            placeholder="(00) 00000-0000"
+            value={emergencyContactPhone}
+            onChangeText={setEmergencyContactPhone}
+            onFocus={scrollToFocusedInput}
+            keyboardType="phone-pad"
+            error={hasEmergencyContactError}
+          />
+          <TextField
+            label="VÍNCULO"
+            placeholder="Ex: Filha, cônjuge, vizinho..."
+            value={emergencyContactRelationship}
+            onChangeText={setEmergencyContactRelationship}
+            onFocus={scrollToFocusedInput}
+            error={
+              hasEmergencyContactError ? "Preencha nome, telefone e vínculo, ou deixe os três em branco." : undefined
+            }
+          />
+        </Card>
 
-        <Pressable style={styles.skipButton} onPress={onSkip} accessibilityRole="button">
-          <Text style={styles.skipButtonText}>Preencher depois, nas Configurações</Text>
-        </Pressable>
-      </ScrollView>
+        <Card>
+          <TextField
+            label="OBSERVAÇÕES"
+            placeholder="Qualquer outra informação que você ache relevante..."
+            value={notes}
+            onChangeText={setNotes}
+            onFocus={scrollToFocusedInput}
+            multiline
+          />
+        </Card>
+
+        <Button label="Salvar e continuar" onPress={handleContinue} disabled={!canContinue} />
+        <Button variant="text" label="Preencher depois, nas Configurações" onPress={onSkip} />
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
