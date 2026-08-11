@@ -8,6 +8,7 @@ import {
   useFonts,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import * as Crypto from 'expo-crypto';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { Platform, useColorScheme } from 'react-native';
@@ -15,8 +16,12 @@ import { Platform, useColorScheme } from 'react-native';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { LoginScreen } from '@/components/screens/LoginScreen/LoginScreen';
-import { PatientProfileScreen } from '@/components/screens/PatientProfileScreen/PatientProfileScreen';
+import {
+  PatientProfileScreen,
+  type PatientProfileDraft,
+} from '@/components/screens/PatientProfileScreen/PatientProfileScreen';
 import { initializeDatabase } from '@/data/local/database';
+import { PatientProfileRepository } from '@/data/repositories/patient-profile-repository';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -57,6 +62,31 @@ export default function TabLayout() {
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
   if (!fontsLoaded || !databaseReady) return null;
 
+  async function handleProfileContinue(draft: PatientProfileDraft) {
+    // Web pula o SQLite (ver useEffect acima) — nada a persistir nessa plataforma ainda.
+    if (Platform.OS !== 'web') {
+      const repository = new PatientProfileRepository();
+      const existingProfile = await repository.getCurrent();
+      await repository.save({
+        id: existingProfile?.id ?? Crypto.randomUUID(),
+        firstName: draft.firstName,
+        lastName: draft.lastName,
+        dateOfBirth: draft.dateOfBirth,
+        biologicalSex: draft.biologicalSex,
+        bloodType: draft.bloodType,
+        allergies: draft.allergies,
+        emergencyContact: draft.emergencyContact,
+        notes: draft.notes,
+        photoUri: existingProfile?.photoUri ?? null,
+        photoSyncOptOut: existingProfile?.photoSyncOptOut ?? false,
+        updatedAt: new Date().toISOString(),
+        syncedAt: null,
+        deletedAt: null,
+      });
+    }
+    setStep('app');
+  }
+
   if (step === 'login') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -72,12 +102,7 @@ export default function TabLayout() {
   if (step === 'profile') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <PatientProfileScreen
-          // TODO: persistir via PatientProfileRepository (src/data/repositories) quando a tela
-          // estiver ligada ao SQLite — hoje só avança o fluxo, não salva nada ainda.
-          onContinue={() => setStep('app')}
-          onSkip={() => setStep('app')}
-        />
+        <PatientProfileScreen onContinue={handleProfileContinue} onSkip={() => setStep('app')} />
       </ThemeProvider>
     );
   }
