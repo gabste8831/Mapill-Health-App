@@ -186,13 +186,21 @@ export const radius = { sm: 2, md: 4, lg: 8, full: 12 };
   texto branco) para se destacar — isso é o card mais importante da Home e justifica ser a
   única exceção "chamativa" da tela.
 
-### Logo / marca (pendente de aplicar)
+### Logo / marca (pendente de aplicar o asset, fonte já integrada)
 
-Usuário tem uma referência de logo pronta: pílula em duas metades (cheia + contorno), na cor
-`primary` (#0057BF), traço fino. Ainda não aplicada no código — hoje `LoginScreen` usa um "M"
-de texto como placeholder da marca. Quando o asset for entregue: substituir esse placeholder,
-gerar `icon.png`/`adaptive-icon`/`splash-icon` a partir dele (ver `app.json`), e considerar
-reusar a mesma forma como ícone da FAB da Home (hoje é só um "+").
+Usuário tem uma referência de logo pronta: pílula em duas metades (uma inteira, uma clara),
+dentro de um quadrado azul (`primary`), ao lado do wordmark "Mapill" em **Comfortaa** (peso
+bold, arredondada — contraste proposital com a Plus Jakarta Sans do resto da UI).
+
+- **Fonte**: `Comfortaa` já instalada (`@expo-google-fonts/comfortaa`) e carregada em
+  `_layout.tsx`. Token `typography.brandWordmark` (`shared/theme/typography.ts`) — **uso
+  exclusivo da marca/wordmark**, nunca pro resto da UI (formulários, listas, texto corrido
+  continuam em Plus Jakarta Sans).
+- **Imagem do ícone (pílula)**: ainda não aplicada — falta o arquivo em si. `LoginScreen` usa
+  um "M" de texto como placeholder do `brandMark`. Quando o asset (PNG/SVG) for salvo em
+  `assets/images/`, substituir esse placeholder por `<Image>`, gerar `icon.png`/
+  `adaptive-icon`/`splash-icon` a partir dele (ver `app.json`), e considerar reusar a mesma
+  forma como ícone da FAB da Home (hoje é só um "+").
 
 ### O que evitar
 

@@ -55,4 +55,11 @@ export const typography: Record<string, TextStyle> = {
     lineHeight: 48,
     letterSpacing: -0.8,
   },
+  // Comfortaa (`@expo-google-fonts/comfortaa`) é a fonte da wordmark "Mapill" — reservada
+  // pra marca/logo, nunca pro resto da UI (formulários, listas, texto corrido).
+  brandWordmark: {
+    fontFamily: "Comfortaa_700Bold",
+    fontSize: 32,
+    lineHeight: 40,
+  },
 };
