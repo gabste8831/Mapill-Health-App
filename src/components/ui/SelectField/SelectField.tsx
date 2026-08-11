@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
+import { BottomSheet } from "@/components/ui/BottomSheet/BottomSheet";
 import { colors } from "@/shared/theme";
 import { styles } from "./SelectField.styles";
 
@@ -16,7 +17,7 @@ export type SelectFieldProps<TValue extends string> = {
 };
 
 /**
- * Campo "select": em vez de abrir o teclado, abre um bottom-sheet com as opções. Usado onde
+ * Campo "select": em vez de abrir o teclado, abre um `BottomSheet` com as opções. Usado onde
  * antes existiam fileiras de chips (tipo sanguíneo, sexo biológico) — mais compacto e mais
  * fácil de escanear visualmente.
  */
@@ -44,38 +45,33 @@ export function SelectField<TValue extends string>({
         <Ionicons name="chevron-down" size={18} color={colors.onSurfaceVariant} />
       </Pressable>
 
-      <Modal visible={isPickerOpen} transparent animationType="fade" onRequestClose={() => setPickerOpen(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setPickerOpen(false)}>
-          <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>{label}</Text>
-            {value !== null ? (
-              <Pressable
-                style={styles.modalOption}
-                onPress={() => {
-                  onChange(null);
-                  setPickerOpen(false);
-                }}>
-                <Text style={styles.modalOptionTextMuted}>Limpar seleção</Text>
-              </Pressable>
-            ) : null}
-            {options.map((option) => (
-              <Pressable
-                key={option.value}
-                style={styles.modalOption}
-                onPress={() => {
-                  onChange(option.value);
-                  setPickerOpen(false);
-                }}
-                accessibilityRole="button">
-                <Text style={option.value === value ? styles.modalOptionTextSelected : styles.modalOptionText}>
-                  {option.label}
-                </Text>
-                {option.value === value ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
-              </Pressable>
-            ))}
-          </View>
-        </Pressable>
-      </Modal>
+      <BottomSheet visible={isPickerOpen} onClose={() => setPickerOpen(false)} title={label}>
+        {value !== null ? (
+          <Pressable
+            style={styles.modalOption}
+            onPress={() => {
+              onChange(null);
+              setPickerOpen(false);
+            }}>
+            <Text style={styles.modalOptionTextMuted}>Limpar seleção</Text>
+          </Pressable>
+        ) : null}
+        {options.map((option) => (
+          <Pressable
+            key={option.value}
+            style={styles.modalOption}
+            onPress={() => {
+              onChange(option.value);
+              setPickerOpen(false);
+            }}
+            accessibilityRole="button">
+            <Text style={option.value === value ? styles.modalOptionTextSelected : styles.modalOptionText}>
+              {option.label}
+            </Text>
+            {option.value === value ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
+          </Pressable>
+        ))}
+      </BottomSheet>
     </View>
   );
 }
