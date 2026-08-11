@@ -4,9 +4,11 @@ import { colors, radius } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   base: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.full,
+    // Mesma altura do TextField (52) — hoje o único uso é ao lado do input de alergias, e
+    // ficava mais baixo que o campo, com os dois desalinhados na mesma linha.
+    width: 52,
+    height: 52,
+    // borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
   },
