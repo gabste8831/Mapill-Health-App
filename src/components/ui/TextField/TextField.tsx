@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import type { StyleProp, TextInputProps, TextStyle, ViewStyle } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
-import { colors, spacing } from "@/shared/theme";
+import { colors, spacing, withOpacity } from "@/shared/theme";
 import { styles } from "./TextField.styles";
 
 export type TextFieldProps = Omit<TextInputProps, "style"> & {
@@ -41,7 +41,9 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
             error ? styles.inputError : null,
             style,
           ]}
-          placeholderTextColor={colors.onSurfaceVariant}
+          // Mais sutil que o label (onSurfaceVariant) de propósito — o placeholder é uma dica,
+          // não deve competir visualmente com o texto que o paciente já preencheu.
+          placeholderTextColor={withOpacity(colors.outline, 0.6)}
           multiline={multiline}
           {...inputProps}
         />
