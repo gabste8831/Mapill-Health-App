@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -37,30 +37,6 @@ export const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 350,
   },
-  googleButton: {
-    height: 52,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surfaceContainerLowest,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: spacing.md,
-  },
-  googleButtonText: {
-    ...typography.bodyLg,
-    color: colors.onSurface,
-  },
-  continueWithoutLoginButton: {
-    height: 52,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   footer: {
     alignItems: "center",
   },
@@ -78,9 +54,5 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     opacity: 0.6,
     maxWidth: 350,
-  },
-  continueWithoutLoginText: {
-    ...typography.label,
-    color: colors.onSurfaceVariant,
   },
 });

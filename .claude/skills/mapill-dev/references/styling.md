@@ -3,6 +3,40 @@
 Decisão do usuário: **sem Tailwind/NativeWind**. Preferência declarada: um estilo parecido
 com o do Angular — estilos "colados" ao componente, não classes utilitárias espalhadas no JSX.
 
+## Kit de UI compartilhado (`src/components/ui/`)
+
+**Decisão de 2026-08-11**: peças de formulário/interação genéricas (botão, campo de texto,
+select, card, chip) **não são reimplementadas em cada tela** — vivem uma vez em
+`src/components/ui/`, cada uma com seu `.tsx` + `.styles.ts` co-localizado (mesmo padrão do
+resto do app), e são importadas via `@/components/ui`. Telas (`components/screens/*`) só
+compõem essas peças + layout específico da tela; o `.styles.ts` da tela fica só com o que é
+realmente único dela (linhas, espaçamento entre seções, etc.).
+
+Motivo: antes cada tela redefinia `height: 52` / `borderRadius: radius.full` / cores do zero
+pro próprio botão — mudar o padrão visual do app exigia editar N arquivos. Agora é um lugar só.
+
+Peças hoje disponíveis (ver `src/components/ui/index.ts`):
+
+- **`Button`** — `variant: "primary" | "outline" | "text"`, suporta `icon` e `loading`.
+- **`IconButton`** — botão circular só com ícone (ex: "adicionar alergia").
+- **`TextField`** — label + input + erro. `label=""` omite a linha de label (campo já rotulado
+  por fora). `error` aceita `string` (mostra mensagem) ou `true` (só borda vermelha, pra campos
+  de um grupo que valida como conjunto — ex: contato de emergência).
+- **`SelectField`** — campo que abre um bottom-sheet com opções em vez de teclado (tipo
+  sanguíneo, sexo biológico).
+- **`Card`** — bloco com borda/fundo/cantos, usado pra separar seções de formulário.
+- **`Chip`** — tag removível (alergias hoje, reutilizável pra qualquer lista curta de tags).
+
+**Como ajustar**: mudar o padrão de TODAS as instâncias → editar o `.styles.ts` daquele
+componente em `components/ui/`. Ajustar só UMA instância específica → toda peça aceita uma prop
+`style` (ou `containerStyle` no `TextField`) que soma/sobrescreve o padrão sem tocar no
+compartilhado.
+
+**Quando criar uma peça nova no kit vs. deixar local à tela**: se o elemento é genérico o
+bastante pra aparecer em outra tela sem mudar de cara (outro botão, outro campo de texto), ele
+vai pro kit. Se é específico de uma tela (ex: o card "Próxima Dose" da Home, com seu layout
+particular), fica local em `components/home/` ou dentro da própria pasta da tela.
+
 ## Padrão a seguir
 
 Cada componente tem seu próprio arquivo de estilos usando `StyleSheet.create`, no mesmo

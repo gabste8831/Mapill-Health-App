@@ -1,14 +1,22 @@
-import type { BloodType, PatientProfile } from "../../domain/entities/patient-profile";
+import type { BiologicalSex, BloodType, EmergencyContact, PatientProfile } from "../../domain/entities/patient-profile";
 import type { PatientProfileRepository as PatientProfileRepositoryPort } from "../../domain/ports/patient-profile-repository";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
 type PatientProfileRow = SyncableRow & {
   first_name: string;
   last_name: string;
+  /** Nullable no schema por restrição de ALTER TABLE — obrigatório na camada de apresentação. */
+  date_of_birth: string | null;
+  biological_sex: string | null;
   photo_uri: string | null;
   blood_type: string | null;
   /** JSON array serializado — não há tabela própria de alergias, é texto livre do paciente. */
   allergies: string;
+  /**
+   * JSON array serializado (migration 005) — as colunas soltas de um contato único (migration
+   * 004) ficaram pra trás, sem uso; não fazem mais parte do mapeamento.
+   */
+  emergency_contacts: string;
   notes: string | null;
   photo_sync_opt_out: number;
 };
@@ -24,9 +32,14 @@ export class PatientProfileRepository
       id: row.id,
       firstName: row.first_name,
       lastName: row.last_name,
+      // Registros antigos (pré-migration 003) podem não ter data de nascimento salva — a UI
+      // trata isso como perfil incompleto e pede o dado de novo, não infere nada.
+      dateOfBirth: row.date_of_birth ?? "",
+      biologicalSex: row.biological_sex as BiologicalSex,
       photoUri: row.photo_uri,
       bloodType: row.blood_type as BloodType,
       allergies: JSON.parse(row.allergies) as string[],
+      emergencyContacts: JSON.parse(row.emergency_contacts) as EmergencyContact[],
       notes: row.notes,
       photoSyncOptOut: row.photo_sync_opt_out === 1,
       updatedAt: row.updated_at,
@@ -40,9 +53,12 @@ export class PatientProfileRepository
       id: entity.id,
       first_name: entity.firstName,
       last_name: entity.lastName,
+      date_of_birth: entity.dateOfBirth,
+      biological_sex: entity.biologicalSex,
       photo_uri: entity.photoUri,
       blood_type: entity.bloodType,
       allergies: JSON.stringify(entity.allergies),
+      emergency_contacts: JSON.stringify(entity.emergencyContacts),
       notes: entity.notes,
       photo_sync_opt_out: entity.photoSyncOptOut ? 1 : 0,
       updated_at: entity.updatedAt,

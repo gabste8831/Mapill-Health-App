@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -8,32 +8,42 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
+    flexGrow: 1,
+    // `flexGrow: 1` faz o conteúdo ocupar pelo menos a altura da tela; `justifyContent: "center"`
+    // só tem efeito nesse caso (conteúdo mais curto que a tela) — se o formulário crescer (ex:
+    // mais campos, teclado aberto), o ScrollView volta a rolar normalmente sem quebrar isso.
+    justifyContent: "center",
     padding: spacing.md,
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
   },
   header: {
-    gap: spacing.xs,
+    gap: spacing.md,
   },
   title: {
+    paddingTop: spacing.xl,
     ...typography.headlineLg,
     color: colors.onSurface,
   },
   subtitle: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    ...typography.bodySm,
+    color: colors.outline,
   },
   infoBanner: {
     flexDirection: "row",
-    gap: spacing.sm,
+    alignItems: "center",
+    gap: spacing.xs,
     backgroundColor: colors.secondaryContainer,
-    borderRadius: radius.lg,
-    padding: spacing.md,
+    // borderRadius: radius.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
   },
   infoBannerText: {
     ...typography.bodyMd,
+    fontSize: 12,
     color: colors.onSecondaryContainer,
     flex: 1,
+    padding: spacing.sm,
   },
   photoRow: {
     flexDirection: "row",
@@ -43,7 +53,7 @@ export const styles = StyleSheet.create({
   photoPlaceholder: {
     width: 72,
     height: 72,
-    borderRadius: radius.full * 3,
+    // borderRadius: radius.full * 3,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
     borderStyle: "dashed",
@@ -55,147 +65,69 @@ export const styles = StyleSheet.create({
     ...typography.label,
     color: colors.primary,
   },
-  section: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
-  fieldGroup: {
-    gap: spacing.xs,
-  },
+  // Label "solta" usada dentro de um Card quando o campo abaixo não é um TextField com label
+  // própria (ex: título da seção "Alergias"/"Contato de emergência" acima de um grupo de campos).
   fieldLabel: {
     ...typography.label,
     color: colors.onSurfaceVariant,
-  },
-  requiredMark: {
-    color: colors.error,
-  },
-  input: {
-    height: 52,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLowest,
-    ...typography.bodyLg,
-    color: colors.onSurface,
-  },
-  multilineInput: {
-    height: 96,
-    paddingTop: spacing.sm,
-    textAlignVertical: "top",
-  },
-  bloodTypeRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  bloodTypeChip: {
-    minWidth: 56,
-    height: 40,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bloodTypeChipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  bloodTypeChipText: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-  },
-  bloodTypeChipTextSelected: {
-    color: colors.onPrimary,
   },
   allergyChipsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+    marginTop: spacing.sm,
   },
-  allergyChip: {
+  allergyInputRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.xs,
-    paddingLeft: spacing.md,
-    paddingRight: spacing.sm,
-    height: 40,
-    borderRadius: radius.full,
+    gap: spacing.sm,
+  },
+  allergyInputField: {
+    flex: 1,
+  },
+  // Mesmo ritmo do Card (md) — o Contato de Emergência tem um wrapper a mais (label + lista +
+  // botão) que Alergias não tem, mas o espaçamento entre eles segue o mesmo padrão.
+  fieldGroup: {
+    gap: spacing.md,
+  },
+  // Sem marginTop extra (diferente de contactList/allergyChipsRow): é só uma legenda simples,
+  // não uma lista dinâmica que precise de respiro a mais — mantém o Card compacto quando ainda
+  // não há nenhum contato cadastrado.
+  emptyHint: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+  },
+  contactList: {
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  contactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.sm,
+    padding: spacing.sm,
+    // borderRadius: radius.md,
     backgroundColor: colors.surfaceContainerLow,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
   },
-  allergyChipText: {
-    ...typography.bodyMd,
-    color: colors.onSurface,
-  },
-  allergyChipRemove: {
-    width: 20,
-    height: 20,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  allergyChipRemoveText: {
-    ...typography.label,
-    color: colors.error,
-    fontSize: 14,
-  },
-  allergyInputRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  allergyInput: {
+  contactInfo: {
     flex: 1,
-    height: 44,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainerLowest,
-    ...typography.bodyMd,
+    gap: 2,
+  },
+  contactName: {
+    ...typography.bodyLg,
     color: colors.onSurface,
   },
-  allergyAddButton: {
-    height: 44,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.full,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  allergyAddButtonText: {
-    ...typography.label,
-    color: colors.primary,
-  },
-  primaryButton: {
-    height: 52,
-    borderRadius: radius.full,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryButtonDisabled: {
-    opacity: 0.4,
-  },
-  primaryButtonText: {
-    ...typography.headlineSm,
-    fontSize: 16,
-    color: colors.onPrimary,
-  },
-  skipButton: {
-    alignItems: "center",
-    paddingVertical: spacing.sm,
-  },
-  skipButtonText: {
-    ...typography.label,
+  contactMeta: {
+    ...typography.bodyMd,
     color: colors.onSurfaceVariant,
+  },
+  contactRemove: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
