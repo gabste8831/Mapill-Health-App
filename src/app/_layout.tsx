@@ -16,18 +16,19 @@ import { Platform, useColorScheme } from 'react-native';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { LoginScreen } from '@/components/screens/LoginScreen/LoginScreen';
+import { OnboardingConsentScreen } from '@/components/screens/OnboardingConsentScreen/OnboardingConsentScreen';
+import { CURRENT_TERMS_VERSION } from '@/components/screens/OnboardingConsentScreen/legal-content';
 import {
   PatientProfileScreen,
   type PatientProfileDraft,
 } from '@/components/screens/PatientProfileScreen/PatientProfileScreen';
 import { initializeDatabase } from '@/data/local/database';
+import { ConsentRepository } from '@/data/repositories/consent-repository';
 import { PatientProfileRepository } from '@/data/repositories/patient-profile-repository';
 
 SplashScreen.preventAutoHideAsync();
 
-// TODO: quando o onboarding (tutorial + consentimento LGPD) for implementado, ele entra entre
-// 'login' e 'profile' — ver decisão de onboarding em screens-and-flows.md.
-type FirstRunStep = 'login' | 'profile' | 'app';
+type FirstRunStep = 'login' | 'consent' | 'profile' | 'app';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -62,6 +63,36 @@ export default function TabLayout() {
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
   if (!fontsLoaded || !databaseReady) return null;
 
+  // Chamado ao sair do login (com ou sem conta) — decide se o consentimento já foi dado antes
+  // (versão vigente) ou se precisa passar pela tela de novo. Web nunca persiste (ver
+  // useEffect acima), então sempre mostra o consentimento nessa plataforma.
+  async function handleLoginContinue() {
+    if (Platform.OS === 'web') {
+      setStep('consent');
+      return;
+    }
+    const consentRepository = new ConsentRepository();
+    const currentConsent = await consentRepository.getCurrent();
+    const hasValidConsent = currentConsent?.termsVersion === CURRENT_TERMS_VERSION;
+    setStep(hasValidConsent ? 'profile' : 'consent');
+  }
+
+  async function handleConsentAccept() {
+    if (Platform.OS !== 'web') {
+      const consentRepository = new ConsentRepository();
+      const now = new Date().toISOString();
+      await consentRepository.save({
+        id: Crypto.randomUUID(),
+        termsVersion: CURRENT_TERMS_VERSION,
+        acceptedAt: now,
+        updatedAt: now,
+        syncedAt: null,
+        deletedAt: null,
+      });
+    }
+    setStep('profile');
+  }
+
   async function handleProfileContinue(draft: PatientProfileDraft) {
     // Web pula o SQLite (ver useEffect acima) — nada a persistir nessa plataforma ainda.
     if (Platform.OS !== 'web') {
@@ -92,9 +123,17 @@ export default function TabLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AnimatedSplashOverlay />
         <LoginScreen
-          onAuthenticated={() => setStep('profile')}
-          onContinueWithoutLogin={() => setStep('profile')}
+          onAuthenticated={handleLoginContinue}
+          onContinueWithoutLogin={handleLoginContinue}
         />
+      </ThemeProvider>
+    );
+  }
+
+  if (step === 'consent') {
+    return (
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <OnboardingConsentScreen onAccept={handleConsentAccept} />
       </ThemeProvider>
     );
   }

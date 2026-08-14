@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     backgroundColor: colors.secondaryContainer,
-    // borderRadius: radius.md,
+    borderRadius: radius.md,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
   },
@@ -53,7 +53,7 @@ export const styles = StyleSheet.create({
   photoPlaceholder: {
     width: 72,
     height: 72,
-    // borderRadius: radius.full * 3,
+    borderRadius: radius.full * 3,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
     borderStyle: "dashed",
@@ -107,7 +107,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: spacing.sm,
     padding: spacing.sm,
-    // borderRadius: radius.md,
+    borderRadius: radius.md,
     backgroundColor: colors.surfaceContainerLow,
     borderWidth: 1,
     borderColor: colors.outlineVariant,

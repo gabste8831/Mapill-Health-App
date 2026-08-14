@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainerLowest,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    // borderRadius: radius.lg,
+    borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.md,
   },

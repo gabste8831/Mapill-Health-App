@@ -4,6 +4,7 @@
 export * from "./BottomSheet/BottomSheet";
 export * from "./Button/Button";
 export * from "./Card/Card";
+export * from "./Checkbox/Checkbox";
 export * from "./Chip/Chip";
 export * from "./IconButton/IconButton";
 export * from "./SelectField/SelectField";

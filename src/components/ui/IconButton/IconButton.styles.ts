@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     // ficava mais baixo que o campo, com os dois desalinhados na mesma linha.
     width: 52,
     height: 52,
-    // borderRadius: radius.full,
+    borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
   },

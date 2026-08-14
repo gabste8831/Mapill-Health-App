@@ -22,10 +22,16 @@ type LoginScreenProps = {
 
 // Só existe um único caminho de conta (Google), então não faz sentido pedir e-mail/senha
 // próprios do app — quem não quer login/backup usa "Continuar sem login" direto.
-export function LoginScreen({ onAuthenticated, onContinueWithoutLogin }: LoginScreenProps) {
+export function LoginScreen({
+  onAuthenticated,
+  onContinueWithoutLogin,
+}: LoginScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.brand}>
           <Image
             source={require("@/assets/images/brand/mark-transparent-a.png")}
@@ -33,7 +39,9 @@ export function LoginScreen({ onAuthenticated, onContinueWithoutLogin }: LoginSc
             contentFit="contain"
             accessibilityLabel="Mapill"
           />
-          <Text style={styles.brandSubtitle}>Sua saúde, organizada em um só lugar.</Text>
+          <Text style={styles.brandSubtitle}>
+            Sua saúde organizada em um só lugar.
+          </Text>
         </View>
 
         <View style={styles.form}>
@@ -55,8 +63,8 @@ export function LoginScreen({ onAuthenticated, onContinueWithoutLogin }: LoginSc
         <View style={styles.footer}>
           <View style={styles.footerDivider} />
           <Text style={styles.footerCaption}>
-            Login habilita backup e sincronização entre dispositivos. É opcional, você pode usar
-            o Mapill offline, sem conta.
+            Login habilita backup e sincronização entre dispositivos. É
+            opcional, você pode usar o Mapill offline, sem conta.
           </Text>
         </View>
       </ScrollView>
