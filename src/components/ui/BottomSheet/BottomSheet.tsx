@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, Text } from "react-native";
 
 import { styles } from "./BottomSheet.styles";
 
@@ -19,10 +19,14 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
-        <View style={styles.sheet}>
+        {/* Pressable próprio (em vez de View) + stopPropagation: sem isso, um toque em
+            qualquer área do sheet que não seja ela mesma interativa (ex: entre o label e o
+            input de um TextField) borbulha pro Pressable do fundo e fecha o popup — foi
+            exatamente o que quebrava o campo "Nome" do contato de emergência. */}
+        <Pressable style={styles.sheet} onPress={(event) => event.stopPropagation()}>
           <Text style={styles.title}>{title}</Text>
           {children}
-        </View>
+        </Pressable>
       </Pressable>
     </Modal>
   );
