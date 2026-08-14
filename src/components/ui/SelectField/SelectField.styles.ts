@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    // borderRadius: radius.md,
+    borderRadius: radius.md,
     backgroundColor: colors.surfaceContainerLowest,
     flexDirection: "row",
     alignItems: "center",

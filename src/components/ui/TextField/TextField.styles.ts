@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   // Mesmo espaçamento label→conteúdo usado nas labels soltas dentro de Card (ex: "ALERGIAS",
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    // borderRadius: radius.md,
+    borderRadius: radius.md,
     backgroundColor: colors.surfaceContainerLowest,
     ...typography.bodyLg,
     color: colors.onSurface,

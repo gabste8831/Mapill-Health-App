@@ -10,8 +10,8 @@ export const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.surfaceContainerLowest,
-    // borderTopLeftRadius: radius.lg,
-    // borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.md,
   },
