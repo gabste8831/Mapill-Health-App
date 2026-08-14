@@ -12,7 +12,7 @@
  */
 
 /** Bump ao editar TERMS_OF_USE_SECTIONS ou PRIVACY_POLICY_SECTIONS — força re-consentimento. */
-export const CURRENT_TERMS_VERSION = "1.0.0";
+export const CURRENT_TERMS_VERSION = "1.0.1";
 
 export const APP_PURPOSE_TEXT =
   "O Mapill existe para ajudar você a manter sua rotina de medicamentos, estoque e " +
