@@ -1,3 +1,7 @@
+// Precisa ser o primeiro import do app — supabase-js depende de URL/URLSearchParams, que o
+// runtime do React Native não implementa nativamente (ver data/remote/supabase-client.ts).
+import 'react-native-url-polyfill/auto';
+
 import { Comfortaa_400Regular, Comfortaa_700Bold } from '@expo-google-fonts/comfortaa';
 import {
   PlusJakartaSans_300Light,
@@ -11,7 +15,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import * as Crypto from 'expo-crypto';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { Platform, useColorScheme } from 'react-native';
+import { Alert, Platform, useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
@@ -23,6 +27,8 @@ import {
   type PatientProfileDraft,
 } from '@/components/screens/PatientProfileScreen/PatientProfileScreen';
 import { initializeDatabase } from '@/data/local/database';
+import { isSupabaseConfigured } from '@/data/remote/supabase-client';
+import { SupabaseAuthGateway } from '@/data/remote/supabase-auth-gateway';
 import { ConsentRepository } from '@/data/repositories/consent-repository';
 import { PatientProfileRepository } from '@/data/repositories/patient-profile-repository';
 
@@ -43,9 +49,37 @@ export default function TabLayout() {
     Comfortaa_700Bold,
   });
   const [databaseReady, setDatabaseReady] = useState(false);
-  // TODO: trocar por sessão real do Supabase Auth (persistida via expo-secure-store) quando o
-  // login for implementado de verdade — hoje é só um gate de UI, reseta a cada abertura do app.
   const [step, setStep] = useState<FirstRunStep>('login');
+
+  // "Ficha completa" = tem nome preenchido — é o único campo que já era obrigatório antes de
+  // sexo/tipo sanguíneo/contato existirem, então serve como marcador simples de "o paciente já
+  // passou por essa tela". Web nunca persiste (ver useEffect abaixo), então nunca considera
+  // completa nessa plataforma.
+  async function hasCompletedProfile(): Promise<boolean> {
+    if (Platform.OS === 'web') return false;
+    const profileRepository = new PatientProfileRepository();
+    const existingProfile = await profileRepository.getCurrent();
+    return (existingProfile?.firstName.trim().length ?? 0) > 0;
+  }
+
+  // Chamado ao sair do login (com ou sem conta) — decide entre consentimento, ficha ou ir
+  // direto pro app, checando o que já foi salvo antes (versão do consentimento aceito, ficha já
+  // preenchida). Web nunca persiste (ver useEffect abaixo), então sempre mostra o fluxo completo
+  // nessa plataforma.
+  async function handleLoginContinue() {
+    if (Platform.OS === 'web') {
+      setStep('consent');
+      return;
+    }
+    const consentRepository = new ConsentRepository();
+    const currentConsent = await consentRepository.getCurrent();
+    const hasValidConsent = currentConsent?.termsVersion === CURRENT_TERMS_VERSION;
+    if (!hasValidConsent) {
+      setStep('consent');
+      return;
+    }
+    setStep((await hasCompletedProfile()) ? 'app' : 'profile');
+  }
 
   useEffect(() => {
     // expo-sqlite web depende de OPFS/SharedArrayBuffer, que é instável em dev (worker às
@@ -59,22 +93,44 @@ export default function TabLayout() {
     initializeDatabase().then(() => setDatabaseReady(true));
   }, []);
 
+  useEffect(() => {
+    // Sessão do Supabase persiste sozinha entre aberturas do app (AsyncStorage, ver
+    // supabase-client.ts) — sem isso, o usuário logaria de novo toda vez mesmo já autenticado.
+    // Só roda depois do banco pronto porque handleLoginContinue consulta o SQLite.
+    if (!databaseReady || !isSupabaseConfigured) return;
+    const authGateway = new SupabaseAuthGateway();
+    authGateway.getCurrentUser().then((user) => {
+      if (user) handleLoginContinue();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleLoginContinue é recriada a
+    // cada render (não é useCallback) e não deve disparar esse efeito de novo.
+  }, [databaseReady]);
+
   // Splash continua visível (ver AnimatedSplashOverlay) até fonte e migrations estarem prontas —
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
   if (!fontsLoaded || !databaseReady) return null;
 
-  // Chamado ao sair do login (com ou sem conta) — decide se o consentimento já foi dado antes
-  // (versão vigente) ou se precisa passar pela tela de novo. Web nunca persiste (ver
-  // useEffect acima), então sempre mostra o consentimento nessa plataforma.
-  async function handleLoginContinue() {
-    if (Platform.OS === 'web') {
-      setStep('consent');
+  // Google OAuth de verdade via Supabase Auth. Se as credenciais ainda não estiverem no .env
+  // (ver .env.example), avisa e não deixa o usuário preso numa tela que nunca vai responder —
+  // "continuar sem login" continua funcionando normalmente nesse caso.
+  async function handleGoogleSignIn() {
+    if (!isSupabaseConfigured) {
+      Alert.alert(
+        'Login indisponível',
+        'O login com Google ainda não foi configurado neste app. Você pode continuar sem login por enquanto — isso não afeta o uso local do Mapill.',
+      );
       return;
     }
-    const consentRepository = new ConsentRepository();
-    const currentConsent = await consentRepository.getCurrent();
-    const hasValidConsent = currentConsent?.termsVersion === CURRENT_TERMS_VERSION;
-    setStep(hasValidConsent ? 'profile' : 'consent');
+    try {
+      const authGateway = new SupabaseAuthGateway();
+      await authGateway.signInWithGoogle();
+      await handleLoginContinue();
+    } catch (error) {
+      Alert.alert(
+        'Não foi possível entrar',
+        error instanceof Error ? error.message : 'Tente novamente em instantes.',
+      );
+    }
   }
 
   async function handleConsentAccept() {
@@ -90,7 +146,9 @@ export default function TabLayout() {
         deletedAt: null,
       });
     }
-    setStep('profile');
+    // Cobre o caso de reconsentimento (ex: termos mudaram de versão) num paciente que já tinha
+    // ficha preenchida antes — não faz sentido pedir a ficha de novo só porque os termos mudaram.
+    setStep((await hasCompletedProfile()) ? 'app' : 'profile');
   }
 
   async function handleProfileContinue(draft: PatientProfileDraft) {
@@ -123,7 +181,7 @@ export default function TabLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AnimatedSplashOverlay />
         <LoginScreen
-          onAuthenticated={handleLoginContinue}
+          onAuthenticated={handleGoogleSignIn}
           onContinueWithoutLogin={handleLoginContinue}
         />
       </ThemeProvider>

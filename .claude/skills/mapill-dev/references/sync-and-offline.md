@@ -31,6 +31,30 @@ eventual consistency; Kleppmann, 2017 — LWW).
 - Autenticação via Supabase Auth (JWT) — vincular à conta Google do usuário para permitir
   "backup" entre dispositivos, conforme a intenção original do usuário.
 
+## Autenticação (Google via Supabase Auth) — implementado em 2026-08-14
+
+- Credenciais (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`) ficam em `.env`
+  (nunca commitado — ver `.env.example`). Prefixo `EXPO_PUBLIC_` é exigido pelo Expo pra expor a
+  variável ao bundle do app. A chave é a `anon public`, nunca a `service_role`.
+- `src/data/remote/supabase-client.ts` — cliente único do supabase-js, com `AsyncStorage` como
+  storage da sessão (JWT de vida curta + refresh token, não é segredo estático como senha).
+  Exporta `isSupabaseConfigured`: `false` enquanto o `.env` não tiver as credenciais — todo
+  ponto de entrada de auth checa isso antes de agir, pra login continuar opcional de verdade.
+- `src/domain/ports/auth-gateway.ts` (`AuthGateway`) + `src/data/remote/supabase-auth-gateway.ts`
+  (`SupabaseAuthGateway`) — mesmo princípio dos outros ports: domínio não conhece Supabase.
+- Fluxo OAuth: `expo-auth-session` (`makeRedirectUri`) + `expo-web-browser`
+  (`openAuthSessionAsync`) abrem o navegador nativo pro Google, e o Supabase redireciona de
+  volta pro app via o `scheme` do `app.json` (`mapillapp://`). Tokens vêm no fragmento da URL de
+  retorno — parseados manualmente e aplicados via `supabase.auth.setSession()`.
+- `src/app/_layout.tsx`: ao abrir o app, se já existir sessão persistida (`getCurrentUser()`),
+  pula a tela de Login automaticamente — sem isso, o usuário logaria de novo a cada abertura
+  mesmo com a sessão válida salva.
+- `react-native-url-polyfill/auto` importado no topo de `_layout.tsx` — supabase-js depende de
+  `URL`/`URLSearchParams`, que o runtime do React Native não implementa nativamente.
+- **Ainda não implementado**: a sincronização SQLite↔Supabase em si (seção acima) — hoje o login
+  só autentica a conta, não sobe/baixa nenhum dado ainda. Também falta popular as tabelas
+  remotas espelhando o schema local e configurar RLS (ver seção "Segurança" acima).
+
 ## Notificações/alarmes
 
 - Usar `expo-notifications` para agendar notificações locais nativas — nunca depender de um
