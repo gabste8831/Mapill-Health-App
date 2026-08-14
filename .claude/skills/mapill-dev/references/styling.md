@@ -22,10 +22,14 @@ Peças hoje disponíveis (ver `src/components/ui/index.ts`):
 - **`TextField`** — label + input + erro. `label=""` omite a linha de label (campo já rotulado
   por fora). `error` aceita `string` (mostra mensagem) ou `true` (só borda vermelha, pra campos
   de um grupo que valida como conjunto — ex: contato de emergência).
-- **`SelectField`** — campo que abre um bottom-sheet com opções em vez de teclado (tipo
+- **`SelectField`** — campo que abre um `BottomSheet` com opções em vez de teclado (tipo
   sanguíneo, sexo biológico).
+- **`BottomSheet`** — popup em bottom-sheet genérico (fundo escurecido, fecha ao tocar fora).
+  Base do `SelectField` e de qualquer "adicionar item" pontual (ex: contato de emergência).
 - **`Card`** — bloco com borda/fundo/cantos, usado pra separar seções de formulário.
 - **`Chip`** — tag removível (alergias hoje, reutilizável pra qualquer lista curta de tags).
+- **`Checkbox`** — área de toque cobre label inteira, não só o quadrado (importante pro público
+  idoso). Usado no consentimento LGPD (`OnboardingConsentScreen`).
 
 **Como ajustar**: mudar o padrão de TODAS as instâncias → editar o `.styles.ts` daquele
 componente em `components/ui/`. Ajustar só UMA instância específica → toda peça aceita uma prop

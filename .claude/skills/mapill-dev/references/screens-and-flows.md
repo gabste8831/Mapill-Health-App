@@ -71,9 +71,16 @@ Estas foram identificadas como necessárias pelo domínio (`SKILL.md` principal)
 protótipo visual ainda. Ao desenhá-las, seguir a base "Clinical Precision" + gamificação leve
 de `styling.md`, e o padrão de card de destaque da Home quando fizer sentido.
 
-- **Onboarding / Consentimento LGPD**: obrigatória antes do primeiro registro clínico (ver
-  `SKILL.md` — seção LGPD). Ainda não tem tela nenhuma no protótipo — é bloqueante para
-  qualquer implementação de cadastro, então vale priorizar o desenho dela cedo.
+- ~~**Onboarding / Consentimento LGPD**~~ — ✅ Implementada em 2026-08-13
+  (`OnboardingConsentScreen`, entre Login e a ficha de saúde). Propósito do app, práticas de
+  dado resumidas, Termos de Uso + Política de Privacidade completos (expansíveis,
+  `legal-content.ts`), dois checkboxes obrigatórios (leitura dos termos + autorização de
+  tratamento de dado sensível conforme art. 11 LGPD). Prova de consentimento persistida em
+  `consent_records` (migration 006), versionada via `CURRENT_TERMS_VERSION` — se o texto legal
+  mudar, bump na versão força reconsentimento. **Pendência não bloqueante**: `legal-content.ts`
+  tem um `[PREENCHER]` na seção 7 (identificação do responsável pelo tratamento) — preencher
+  antes de qualquer uso além de demonstração acadêmica, e idealmente validar o texto com
+  orientador/banca antes da defesa.
 - **Confirmação de dose (tela do alarme)**: o Plano Mestre descreve o fluxo (`Tratar na Hora` /
   `Adiar 5 min` / `Cancelar`), com uma segunda etapa de confirmação real ("Você tomou
   efetivamente?"). Não há tela desenhada — só o botão "Confirmar" já aparece embutido na Home.
