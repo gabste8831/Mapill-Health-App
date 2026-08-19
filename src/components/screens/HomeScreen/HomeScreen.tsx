@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -37,6 +38,7 @@ const MOCK_WEEKLY_ADHERENCE = [
 ];
 
 export function HomeScreen() {
+  const router = useRouter();
   const dailyProgressRatio = 3 / 5;
 
   return (
@@ -92,7 +94,11 @@ export function HomeScreen() {
         <WeeklyAdherenceCard days={MOCK_WEEKLY_ADHERENCE} summary="Adesão de 100% mantida nesta semana." />
       </ScrollView>
 
-      <Pressable style={styles.fab} accessibilityRole="button" accessibilityLabel="Cadastrar medicação ou compromisso">
+      <Pressable
+        style={styles.fab}
+        accessibilityRole="button"
+        accessibilityLabel="Cadastrar medicação ou compromisso"
+        onPress={() => router.push("/cadastro/escolha")}>
         <Text style={styles.fabIcon}>+</Text>
       </Pressable>
     </SafeAreaView>
