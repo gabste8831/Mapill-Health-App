@@ -591,8 +591,97 @@ Não entram nesta versão, mesmo que a ideia seja boa:
 
 ---
 
-## 5. Log de progresso
+## 5. Como rodar em aparelho físico (ambiente de teste)
+
+Estado do projeto: **managed** (sem pastas `android/`/`ios/`), com `expo-dev-client` já instalado
+e o perfil `development` já configurado no `eas.json`. Metade do caminho do dev build já está feita.
+
+### Por que dev build, e não Expo Go
+
+Não é só pelas notificações. O OAuth monta o redirect com `makeRedirectUri()`
+(`supabase-auth-gateway.ts:47`), que se comporta diferente em cada ambiente:
+
+| Ambiente | Redirect gerado | Consequência |
+|---|---|---|
+| **Dev build** | `mapillapp://` (scheme do `app.json`) | Fixo — cadastra uma vez no Supabase e esquece |
+| **Expo Go** | `exp://192.168.x.x:8081/--/...` | Muda com o **IP da máquina na rede** — teria que atualizar os Redirect URLs do Supabase a cada mudança |
+
+Somado ao fato de que o Expo Go no Android não dispara push desde o SDK 53 (ver C1.0), o dev build
+é o ambiente de teste padrão do projeto.
+
+### Opção A — Build na nuvem (EAS) — recomendada
+
+Não depende do Android SDK estar corretamente configurado.
+
+```bash
+npm install                       # resolve o expo-auth-session ausente em node_modules
+npm install -g eas-cli
+eas login                         # conta Expo gratuita
+eas build --profile development --platform android
+```
+
+Ao final, o EAS devolve link/QR → abrir no celular, baixar o `.apk`, instalar (o Android pede
+para permitir instalação de fonte desconhecida).
+
+- **Prós**: independe do ambiente local. **Contras**: fila do plano gratuito pode demorar.
+
+### Opção B — Build local (Android Studio)
+
+Aparelho no cabo USB, com depuração USB ativada:
+
+```bash
+npm install
+npx expo run:android
+```
+
+- **Prós**: sem fila, sem conta Expo; rebuilds seguintes mais rápidos.
+- **Contras**: primeira compilação leva 10–20 min e exige `ANDROID_HOME`/SDK configurados.
+
+**Ativar depuração USB**: Configurações → Sobre o telefone → tocar 7× em "Número da versão" →
+voltar → Opções do desenvolvedor → Depuração USB. Ao plugar, aceitar o popup "Permitir depuração
+USB?" no aparelho. Conferir se o PC enxerga:
+
+```bash
+"$LOCALAPPDATA/Android/Sdk/platform-tools/adb" devices   # deve listar o aparelho como "device"
+```
+
+### Ciclo de trabalho depois do build
+
+O build é feito **uma vez**. Ele instala um app "Mapill (dev)" que funciona como um Expo Go
+exclusivo do projeto. No dia a dia:
+
+```bash
+npx expo start --dev-client
+```
+
+Só é necessário **rebuildar** ao mudar dependência nativa ou o `app.json`. Mudança de código
+JS/TS não exige rebuild — hot reload funciona normalmente.
+
+### Checklist do primeiro teste de login
+
+- [ ] `npm install` rodado (`expo-auth-session` está no `package.json` mas ausente de `node_modules`
+      — sem isso o login quebra no import, antes de chegar no OAuth).
+- [ ] Dev build instalado no aparelho.
+- [ ] `.env` com `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (ver `.env.example`).
+- [ ] Supabase → Authentication → URL Configuration → **Redirect URLs** contém `mapillapp://`.
+      ⚠️ Sem isso o sintoma é confuso: o Google autentica, mas o app volta para a tela de login
+      como se nada tivesse acontecido.
+- [ ] Login com Google conclui e o app avança para consentimento/ficha.
+- [ ] Fechar e reabrir o app **não** pede login de novo (sessão persistida via AsyncStorage).
+
+### Pendência técnica conhecida (bloco A2)
+
+`assertConfigured()` em `supabase-auth-gateway.ts:26` usa `asserts supabase is ...` sobre um
+import de módulo — assinatura de assertion só é válida sobre **parâmetro** (ou `this`), daí o
+`TS1225` e os dois `TS18047` em cascata. Em runtime o `throw` funciona; o que não funciona é o
+estreitamento de tipo. Corrigir trocando por um guard que recebe o cliente e o devolve não-nulo.
+
+---
+
+## 6. Log de progresso
 
 | Data | Bloco | Status | Observação |
 |---|---|---|---|
 | 2026-08-19 | — | — | Plano criado a partir da auditoria do repositório |
+| 2026-08-19 | A1 | Iniciado | Gate de primeira execução extraído para `use-first-run-gate` / `use-database-ready` (ainda não ligados ao `_layout.tsx`) |
+| 2026-08-19 | A2 | Pendente | Teste do login com Google em aparelho físico (ver seção 5) |
