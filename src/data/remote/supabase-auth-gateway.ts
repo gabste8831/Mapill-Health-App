@@ -23,12 +23,17 @@ function toAuthUser(user: SupabaseAuthUser): AuthUser {
   };
 }
 
-function assertConfigured(): asserts supabase is NonNullable<typeof supabase> {
+/**
+ * `asserts x is T` só é válido sobre parâmetro (ou `this`), não sobre um import de módulo —
+ * daí retornar o cliente em vez de tentar estreitar o tipo da variável importada.
+ */
+function ensureSupabaseConfigured(): NonNullable<typeof supabase> {
   if (!isSupabaseConfigured || !supabase) {
     throw new Error(
       "Login com Google ainda não foi configurado neste app (faltam as credenciais do Supabase no .env).",
     );
   }
+  return supabase;
 }
 
 /** Implementação real do `AuthGateway` via Supabase Auth (OAuth do Google). */
@@ -40,12 +45,12 @@ export class SupabaseAuthGateway implements AuthGateway {
   }
 
   async signInWithGoogle(): Promise<AuthUser> {
-    assertConfigured();
+    const client = ensureSupabaseConfigured();
 
     // Sem esquema fixo: `makeRedirectUri()` já usa o `scheme` do app.json (`mapillapp`) em
     // builds nativos, e o proxy do Expo Go em desenvolvimento.
     const redirectTo = makeRedirectUri();
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await client.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo, skipBrowserRedirect: true },
     });
@@ -68,7 +73,7 @@ export class SupabaseAuthGateway implements AuthGateway {
       throw new Error("Resposta de login incompleta — tente novamente.");
     }
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+    const { data: sessionData, error: sessionError } = await client.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });

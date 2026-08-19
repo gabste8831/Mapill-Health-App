@@ -46,10 +46,10 @@ Nenhum bloco fecha sem estes seis itens:
 | Onboarding LGPD | `OnboardingConsentScreen` + `consent_records` versionado por `CURRENT_TERMS_VERSION` |
 | Ficha de saúde | `PatientProfileScreen` completa (nascimento, sexo, contatos de emergência em lista) |
 | Home | Layout visual completo — **mas 100% com dados mockados** (`MOCK_TODAY_DOSES`, etc.) |
+| Navegação | Tabs reais (Home/Calendário/Remédios/Ajustes) via `expo-router/unstable-native-tabs`; grupo `cadastro` como stack modal (`escolha` → `medicamento` → `scanner`/manual, `compromisso`); FAB da Home abre o fluxo; `_layout.tsx` sem lógica de estado (`useFirstRunGate`/`useDatabaseReady`) — **pendente de teste em device/emulador** |
 
 ### Buracos conhecidos ❌
 
-- **Navegação**: só existem 2 rotas (`index`, `explore`). Não há tabs reais (Home/Calendário/Remédios/Ajustes), não há stack de cadastro. `explore.tsx` é resíduo do template.
 - **Nenhum fluxo de escrita pelo usuário**: não dá para cadastrar um medicamento pelo app hoje.
 - **Notificações**: `expo-notifications` instalado, mas `src/notifications/` não existe. Zero alarmes.
 - **Sync**: login autentica, mas nada sobe/desce. Sem tabelas no Supabase, sem RLS.
@@ -115,10 +115,10 @@ nova vira gambiarra no `_layout.tsx`.
 **Não entra**: conteúdo das telas novas — só rotas com placeholder.
 
 **Pronto quando**
-- [ ] As 4 tabs navegam e mantêm estado.
-- [ ] O FAB abre "O que deseja cadastrar? → Medicação | Compromisso" e daí "Como? → Escanear | Manual" (ordem já decidida em `screens-and-flows.md` §2).
-- [ ] Botão físico de voltar (Android) se comporta corretamente em todos os modais.
-- [ ] `_layout.tsx` não contém mais lógica de decisão de fluxo.
+- [ ] As 4 tabs navegam e mantêm estado. — implementado, **pendente de teste em device/emulador**.
+- [ ] O FAB abre "O que deseja cadastrar? → Medicação | Compromisso" e daí "Como? → Escanear | Manual" (ordem já decidida em `screens-and-flows.md` §2). — implementado, **pendente de teste em device/emulador**.
+- [ ] Botão físico de voltar (Android) se comporta corretamente em todos os modais. — **pendente de teste em device/emulador** (depende do dev build, ver seção 5).
+- [x] `_layout.tsx` não contém mais lógica de decisão de fluxo. — `useFirstRunGate`/`useDatabaseReady` ligados; `_layout.tsx` só decide o que renderizar pro `step` atual.
 
 **Rastreabilidade**: §2.6 (separação de responsabilidades).
 
@@ -685,3 +685,5 @@ estreitamento de tipo. Corrigir trocando por um guard que recebe o cliente e o d
 | 2026-08-19 | — | — | Plano criado a partir da auditoria do repositório |
 | 2026-08-19 | A1 | Iniciado | Gate de primeira execução extraído para `use-first-run-gate` / `use-database-ready` (ainda não ligados ao `_layout.tsx`) |
 | 2026-08-19 | A2 | Pendente | Teste do login com Google em aparelho físico (ver seção 5) |
+| 2026-08-19 | A1 | Quase pronto | Hooks ligados ao `_layout.tsx`; tabs reais (`(tabs)/`) + stack modal `cadastro/` (`escolha`→`medicamento`→`scanner`/manual, `compromisso`) criadas; FAB da Home navega pra `cadastro/escolha`; template residual removido (`explore.tsx`, `app-tabs*.tsx`, `web-badge.tsx`, `themed-*.tsx`, `external-link.tsx`, `hint-row.tsx`, `ui/collapsible.tsx`, `use-theme`/`use-color-scheme`). `npx tsc --noEmit` limpo; `npx expo lint` limpo (0 erros — só 1 warning pré-existente em `inventory-repository.ts`, fora de escopo). ESLint não estava configurado no repo; `expo lint` configurou sozinho na primeira execução. Faltam só os 3 itens de "Pronto quando" que dependem de rodar em device/emulador de verdade (tabs navegando, FAB, botão de voltar nos modais) — retomar testando no dev build junto com a A2. |
+| 2026-08-19 | A2 (bug fix) | Concluído | Corrigido `assertConfigured` em `supabase-auth-gateway.ts` (TS1225/TS18047 — assertion signature só vale sobre parâmetro, não sobre import de módulo); trocado por `ensureSupabaseConfigured()` que retorna o cliente não-nulo. |

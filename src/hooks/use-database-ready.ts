@@ -14,13 +14,13 @@ import { initializeDatabase } from "@/data/local/database";
  * não é afetado.
  */
 export function useDatabaseReady(): boolean {
-  const [isDatabaseReady, setIsDatabaseReady] = useState(false);
+  // Lazy init em vez de setState síncrono dentro do effect pro caso web (Platform.OS não muda
+  // entre renders, então não precisa de effect nenhum pra esse ramo — só o nativo precisa
+  // esperar a Promise das migrations).
+  const [isDatabaseReady, setIsDatabaseReady] = useState(Platform.OS === "web");
 
   useEffect(() => {
-    if (Platform.OS === "web") {
-      setIsDatabaseReady(true);
-      return;
-    }
+    if (Platform.OS === "web") return;
     initializeDatabase().then(() => setIsDatabaseReady(true));
   }, []);
 
