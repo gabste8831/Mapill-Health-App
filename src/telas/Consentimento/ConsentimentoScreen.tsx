@@ -1,17 +1,13 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, Checkbox, Header } from "@/ui";
-import { colors } from "@/shared/theme";
+import { Button, Checkbox, Header, LegalAccordion } from "@/ui";
 import {
   APP_PURPOSE_TEXT,
   DATA_PRACTICE_HIGHLIGHTS,
   PRIVACY_POLICY_SECTIONS,
   TERMS_OF_USE_SECTIONS,
-  type LegalSection,
 } from "./texto-legal";
 import { styles } from "./ConsentimentoScreen.styles";
 
@@ -24,50 +20,6 @@ type ConsentimentoScreenProps = {
    */
   onBack?: () => void;
 };
-
-type LegalAccordionProps = {
-  title: string;
-  sections: LegalSection[];
-};
-
-/** Bloco expansível com o texto completo de Termos de Uso ou Política de Privacidade. */
-function LegalAccordion({ title, sections }: LegalAccordionProps) {
-  const [isExpanded, setExpanded] = useState(false);
-
-  return (
-    <View style={styles.accordionSection}>
-      <Pressable
-        style={styles.accordionHeader}
-        onPress={() => setExpanded((current) => !current)}
-        accessibilityRole="button"
-        accessibilityLabel={`${isExpanded ? "Recolher" : "Expandir"} ${title}`}>
-        <Text style={styles.accordionHeaderText}>{title}</Text>
-        <Ionicons
-          name={isExpanded ? "chevron-up" : "chevron-down"}
-          size={18}
-          color={colors.onSurfaceVariant}
-        />
-      </Pressable>
-      {isExpanded ? (
-        <Animated.View
-          entering={FadeIn.duration(220)}
-          exiting={FadeOut.duration(150)}
-          style={styles.accordionContent}>
-          {sections.map((section) => (
-            <View key={section.title}>
-              <Text style={styles.accordionSectionTitle}>{section.title}</Text>
-              {section.paragraphs.map((paragraph, index) => (
-                <Text key={index} style={styles.accordionParagraph}>
-                  {paragraph}
-                </Text>
-              ))}
-            </View>
-          ))}
-        </Animated.View>
-      ) : null}
-    </View>
-  );
-}
 
 // Bloqueante de propósito: sem "pular" nem "decidir depois". Dado de saúde é sensível por
 // definição legal e atravessa toda funcionalidade central — não existe modo sem consentimento.

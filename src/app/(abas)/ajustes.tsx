@@ -47,6 +47,7 @@ export default function AjustesRoute() {
       patientName={patientName}
       accountEmail={accountEmail}
       onEditProfile={() => router.push("/ficha")}
+      onOpenTerms={() => router.push("/termos")}
       onSignIn={handleSignIn}
       onSignOut={handleSignOut}
     />

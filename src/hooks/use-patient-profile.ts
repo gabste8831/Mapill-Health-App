@@ -15,6 +15,7 @@ export async function loadPatientProfileDraft(): Promise<PatientProfileDraft | n
   if (!profile) return null;
   return {
     fullName: profile.fullName,
+    photoUri: profile.photoUri,
     dateOfBirth: profile.dateOfBirth,
     biologicalSex: profile.biologicalSex,
     bloodType: profile.bloodType,
@@ -44,7 +45,9 @@ export async function savePatientProfileDraft(draft: PatientProfileDraft): Promi
     allergies: draft.allergies,
     emergencyContacts: draft.emergencyContacts,
     notes: draft.notes,
-    photoUri: existingProfile?.photoUri ?? null,
+    photoUri: draft.photoUri,
+    // Escolha de privacidade feita fora do formulário — preservada pra não ser desfeita por
+    // uma edição que não a tocou.
     photoSyncOptOut: existingProfile?.photoSyncOptOut ?? false,
     updatedAt: new Date().toISOString(),
     syncedAt: null,

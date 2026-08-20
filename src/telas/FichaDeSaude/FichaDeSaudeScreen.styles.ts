@@ -69,9 +69,25 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  // Mesma medida do placeholder, mas com a borda sólida e recortando a imagem.
+  photoFrame: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.full * 3,
+    overflow: "hidden",
+    backgroundColor: colors.surfaceContainerLow,
+  },
+  photo: {
+    width: "100%",
+    height: "100%",
+  },
   photoAddLabel: {
     ...typography.label,
     color: colors.primary,
+  },
+  photoRemoveLabel: {
+    ...typography.label,
+    color: colors.error,
   },
   // Label "solta" usada dentro de um Card quando o campo abaixo não é um TextField com label
   // própria (ex: título da seção "Alergias"/"Contato de emergência" acima de um grupo de campos).

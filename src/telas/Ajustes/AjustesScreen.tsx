@@ -13,6 +13,7 @@ export type AjustesScreenProps = {
   /** E-mail da conta Google, ou `null` quando o app está sendo usado sem conta. */
   accountEmail: string | null;
   onEditProfile: () => void;
+  onOpenTerms: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
 };
@@ -44,6 +45,7 @@ export function AjustesScreen({
   patientName,
   accountEmail,
   onEditProfile,
+  onOpenTerms,
   onSignIn,
   onSignOut,
 }: AjustesScreenProps) {
@@ -84,6 +86,16 @@ export function AjustesScreen({
               onPress={onSignIn}
             />
           )}
+        </Card>
+
+        <Card>
+          <Text style={styles.sectionTitle}>PRIVACIDADE</Text>
+          <LinhaDeAjuste
+            icon="document-text-outline"
+            label="Termos e privacidade"
+            hint="Ler os termos aceitos e ver a data do seu aceite"
+            onPress={onOpenTerms}
+          />
         </Card>
       </ScrollView>
     </SafeAreaView>

@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
-import { Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import type {
@@ -10,6 +11,7 @@ import type {
   EmergencyContact,
   PatientProfileDraft,
 } from "@/domain/entities/patient-profile";
+import { useProfilePhotoPicker } from "@/hooks/use-profile-photo";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { colors } from "@/shared/theme";
 import {
@@ -270,6 +272,8 @@ export function FichaDeSaudeScreen({
   const { scrollViewRef, scrollToFocusedInput, onScroll } =
     useScrollToFocusedInput();
   const [fullName, setFullName] = useState(initialValue?.fullName ?? "");
+  const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
+  const { isPicking, pickPhoto } = useProfilePhotoPicker();
   const [dateOfBirthInput, setDateOfBirthInput] = useState(
     toDateOfBirthInput(initialValue?.dateOfBirth ?? ""),
   );
@@ -301,6 +305,23 @@ export function FichaDeSaudeScreen({
   const canContinue =
     fullName.trim().length > 0 && dateOfBirthError === undefined;
 
+  // Texto de UI fica aqui (camada de apresentação) — o hook só devolve o motivo da falha.
+  async function handlePickPhoto() {
+    const result = await pickPhoto();
+    if (result.status === "picked") {
+      setPhotoUri(result.uri);
+      return;
+    }
+    // Desistir de escolher é uma ação normal, não um erro digno de alerta.
+    if (result.reason === "cancelled") return;
+    Alert.alert(
+      result.reason === "permission-denied" ? "Sem acesso às fotos" : "Não foi possível usar a foto",
+      result.reason === "permission-denied"
+        ? "Para escolher uma imagem, libere o acesso às fotos nas configurações do aparelho."
+        : "Tente novamente com outra imagem.",
+    );
+  }
+
   function addAllergy() {
     const value = allergyDraft.trim();
     if (value.length === 0) return;
@@ -324,6 +345,7 @@ export function FichaDeSaudeScreen({
     if (!canContinue) return;
     onContinue({
       fullName: fullName.trim(),
+      photoUri,
       // Vazio quando o paciente não informou - a ficha guarda a ausência, não um valor inventado.
       dateOfBirth: dateOfBirthIso ?? "",
       biologicalSex,
@@ -363,19 +385,27 @@ export function FichaDeSaudeScreen({
         </View>
 
         <View style={styles.photoRow}>
-          {/* TODO: integrar expo-image-picker quando formos anexar foto de verdade. */}
           <Pressable
-            style={styles.photoPlaceholder}
+            style={photoUri ? styles.photoFrame : styles.photoPlaceholder}
+            onPress={handlePickPhoto}
+            disabled={isPicking}
             accessibilityRole="button"
-            accessibilityLabel="Adicionar foto"
+            accessibilityLabel={photoUri ? "Trocar foto da ficha" : "Adicionar foto à ficha"}
           >
-            <Ionicons
-              name="camera-outline"
-              size={24}
-              color={colors.onSurfaceVariant}
-            />
+            {photoUri ? (
+              <Image source={{ uri: photoUri }} style={styles.photo} contentFit="cover" />
+            ) : (
+              <Ionicons name="camera-outline" size={24} color={colors.onSurfaceVariant} />
+            )}
           </Pressable>
-          <Text style={styles.photoAddLabel}>Adicionar foto</Text>
+          <Pressable onPress={handlePickPhoto} disabled={isPicking} accessibilityRole="button">
+            <Text style={styles.photoAddLabel}>{photoUri ? "Trocar foto" : "Adicionar foto"}</Text>
+          </Pressable>
+          {photoUri ? (
+            <Pressable onPress={() => setPhotoUri(null)} accessibilityRole="button">
+              <Text style={styles.photoRemoveLabel}>Remover</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <Card>

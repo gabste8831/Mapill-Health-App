@@ -56,14 +56,14 @@ export type PatientProfile = SyncableEntity & {
 };
 
 /**
- * O que o paciente informa na ficha. O que o sistema controla — id, metadados de sincronização,
- * foto e o opt-out dela — fica de fora de propósito: uma edição do formulário não pode apagar
- * nada disso. Derivado de `PatientProfile` pra não sair de sincronia quando um campo for
- * adicionado à entidade.
+ * O que o paciente informa na ficha. Fica de fora o que o sistema controla — id e metadados de
+ * sincronização — e o `photoSyncOptOut`, que é uma escolha de privacidade feita em outro lugar,
+ * não um campo do formulário. Derivado de `PatientProfile` pra não sair de sincronia quando um
+ * campo for adicionado à entidade.
  */
 export type PatientProfileDraft = Omit<
   PatientProfile,
-  keyof SyncableEntity | "photoUri" | "photoSyncOptOut"
+  keyof SyncableEntity | "photoSyncOptOut"
 >;
 
 /**

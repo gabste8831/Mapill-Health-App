@@ -95,6 +95,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(abas)" />
         <Stack.Screen name="ficha" />
+        <Stack.Screen name="termos" />
         <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>

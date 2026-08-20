@@ -10,6 +10,7 @@ export * from "./GoogleLogo/GoogleLogo";
 export * from "./Header/Header";
 export * from "./IconButton/IconButton";
 export * from "./KeyboardAwareScrollView/KeyboardAwareScrollView";
+export * from "./LegalAccordion/LegalAccordion";
 export * from "./SelectField/SelectField";
 export * from "./SplashOverlay/SplashOverlay";
 export * from "./TextField/TextField";

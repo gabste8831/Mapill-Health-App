@@ -10,6 +10,8 @@
  * com o orientador/banca ou um profissional qualificado.
  */
 
+import type { LegalSection } from "@/ui";
+
 /** Bump ao editar TERMS_OF_USE_SECTIONS ou PRIVACY_POLICY_SECTIONS - força re-consentimento. */
 export const CURRENT_TERMS_VERSION = "1.0.1";
 
@@ -49,11 +51,6 @@ export const DATA_PRACTICE_HIGHLIGHTS: DataPracticeHighlight[] = [
       "Você pode acessar, corrigir ou excluir seus dados quando quiser, em Configurações.",
   },
 ];
-
-export type LegalSection = {
-  title: string;
-  paragraphs: string[];
-};
 
 export const TERMS_OF_USE_SECTIONS: LegalSection[] = [
   {
