@@ -212,10 +212,11 @@ function EmergencyContactsField({
         <Text style={styles.emptyHint}>Nenhum contato adicionado ainda.</Text>
       )}
 
+      {/* Primário como o "+" de alergia: adicionar item é a ação convidativa da seção. */}
       <Button
-        variant="outline"
         label="Adicionar contato"
-        icon={<Ionicons name="add" size={18} color={colors.onSurface} />}
+        style={styles.addContactButton}
+        icon={<Ionicons name="add" size={18} color={colors.onPrimary} />}
         onPress={() => setAddingContact(true)}
       />
 
@@ -376,11 +377,11 @@ export function FichaDeSaudeScreen({
           <Ionicons
             name="lock-closed-outline"
             size={16}
-            color={colors.onSecondaryContainer}
+            color={colors.onPrimaryContainer}
           />
           <Text style={styles.infoBannerText}>
             Esses dados são sensíveis e ficam protegidos. O Mapill não
-            compartilha essas informações com ninguém sem o seu consentimento.
+            compartilha essas informações com terceiros.
           </Text>
         </View>
 
@@ -410,10 +411,12 @@ export function FichaDeSaudeScreen({
 
         <Card>
           <View style={styles.fieldGroup}>
-            <Text style={styles.sectionTitle}>DADOS BÁSICOS</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>DADOS BÁSICOS</Text>
+              <Text style={[styles.selo, styles.seloObrigatorio]}>OBRIGATÓRIO</Text>
+            </View>
             <Text style={styles.sectionHint}>
-              O nome completo é obrigatório. É o mínimo para a ficha identificar você num
-              atendimento.
+              Seu nome completo é obrigatório. É o mínimo para identificarmos as rotinas e manter uma boa experiência no aplicativo.
             </Text>
           </View>
           <TextField
@@ -429,9 +432,12 @@ export function FichaDeSaudeScreen({
 
         <Card>
           <View style={styles.fieldGroup}>
-            <Text style={styles.sectionTitle}>COMPLEMENTAR</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>COMPLEMENTAR</Text>
+              <Text style={[styles.selo, styles.seloOpcional]}>OPCIONAL</Text>
+            </View>
             <Text style={styles.sectionHint}>
-              Tudo daqui pra baixo é opcional. Serve para você centralizar suas informações
+              O preenchimento abaixo é opcional. Serve para você centralizar suas informações
               médicas e ter acesso facilitado a elas no seu cotidiano.
             </Text>
           </View>

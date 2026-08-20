@@ -15,12 +15,12 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Alert, useColorScheme } from 'react-native';
 
-import { SplashOverlay } from '@/ui';
-import { LoginScreen } from '@/telas/Login/LoginScreen';
-import { ConsentimentoScreen } from '@/telas/Consentimento/ConsentimentoScreen';
-import { FichaDeSaudeScreen } from '@/telas/FichaDeSaude/FichaDeSaudeScreen';
 import { useDatabaseReady } from '@/hooks/use-database-ready';
 import { useFirstRunGate } from '@/hooks/use-first-run-gate';
+import { ConsentimentoScreen } from '@/telas/Consentimento/ConsentimentoScreen';
+import { FichaDeSaudeScreen } from '@/telas/FichaDeSaude/FichaDeSaudeScreen';
+import { LoginScreen } from '@/telas/Login/LoginScreen';
+import { SplashOverlay } from '@/ui';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -83,7 +83,7 @@ export default function RootLayout() {
         <FichaDeSaudeScreen
           onContinue={gate.saveProfile}
           onBack={gate.canGoBack ? gate.goBack : undefined}
-          footerHint="Você poderá voltar aqui e modificar a ficha quando quiser, pela aba Ajustes."
+          footerHint="Você poderá voltar aqui e modificar qualquer informação da ficha quando quiser, acessando aba de ajustes."
         />
       </ThemeProvider>
     );

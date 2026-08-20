@@ -20,9 +20,36 @@ export const styles = StyleSheet.create({
   header: {
     gap: spacing.md,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
   sectionTitle: {
     ...typography.label,
     color: colors.onSurface,
+  },
+  /**
+   * As duas seções são marcadas, não só a obrigatória: o contraste entre "obrigatório" e
+   * "opcional" comunica mais rápido do que destacar uma sozinha. Em texto, e não só em cor —
+   * cor sozinha não é sinal legível pra quem não a distingue.
+   */
+  selo: {
+    ...typography.label,
+    fontSize: 10,
+    overflow: "hidden",
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  seloObrigatorio: {
+    backgroundColor: colors.primary,
+    color: colors.onPrimary,
+  },
+  seloOpcional: {
+    backgroundColor: colors.surfaceContainerHigh,
+    color: colors.onSurfaceVariant,
   },
   sectionHint: {
     ...typography.bodyMd,
@@ -41,15 +68,15 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
-    backgroundColor: colors.secondaryContainer,
+    backgroundColor: colors.primary,
     borderRadius: radius.md,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   infoBannerText: {
     ...typography.bodyMd,
-    fontSize: 12,
-    color: colors.onSecondaryContainer,
+    fontSize: 13,
+    color: colors.onPrimaryContainer,
     flex: 1,
     padding: spacing.sm,
   },
@@ -118,6 +145,10 @@ export const styles = StyleSheet.create({
   emptyHint: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
+  },
+  // Mesmo respiro de contactList/allergyChipsRow — separa a ação da lista acima dela.
+  addContactButton: {
+    marginTop: spacing.sm,
   },
   contactList: {
     gap: spacing.sm,
