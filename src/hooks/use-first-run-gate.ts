@@ -3,11 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { BackHandler, Platform } from "react-native";
 
 import { CURRENT_TERMS_VERSION } from "@/telas/Consentimento/texto-legal";
-import type { PatientProfileDraft } from "@/telas/FichaDeSaude/FichaDeSaudeScreen";
+import type { PatientProfileDraft } from "@/domain/entities/patient-profile";
 import { SupabaseAuthGateway } from "@/data/remote/supabase-auth-gateway";
 import { isSupabaseConfigured } from "@/data/remote/supabase-client";
 import { ConsentRepository } from "@/data/repositories/consent-repository";
 import { PatientProfileRepository } from "@/data/repositories/patient-profile-repository";
+import { savePatientProfileDraft } from "@/hooks/use-patient-profile";
 
 /** Etapas obrigatórias antes do app propriamente dito, na ordem em que acontecem. */
 export type FirstRunStep = "login" | "consent" | "profile" | "app";
@@ -127,26 +128,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   }, []);
 
   const saveProfile = useCallback(async (draft: PatientProfileDraft) => {
-    if (persistsLocally) {
-      const repository = new PatientProfileRepository();
-      const existingProfile = await repository.getCurrent();
-      await repository.save({
-        id: existingProfile?.id ?? Crypto.randomUUID(),
-        firstName: draft.firstName,
-        lastName: draft.lastName,
-        dateOfBirth: draft.dateOfBirth,
-        biologicalSex: draft.biologicalSex,
-        bloodType: draft.bloodType,
-        allergies: draft.allergies,
-        emergencyContacts: draft.emergencyContacts,
-        notes: draft.notes,
-        photoUri: existingProfile?.photoUri ?? null,
-        photoSyncOptOut: existingProfile?.photoSyncOptOut ?? false,
-        updatedAt: new Date().toISOString(),
-        syncedAt: null,
-        deletedAt: null,
-      });
-    }
+    await savePatientProfileDraft(draft);
     setStep("app");
   }, []);
 

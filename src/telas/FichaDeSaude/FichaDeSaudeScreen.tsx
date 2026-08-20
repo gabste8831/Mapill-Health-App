@@ -8,6 +8,7 @@ import type {
   BiologicalSex,
   BloodType,
   EmergencyContact,
+  PatientProfileDraft,
 } from "@/domain/entities/patient-profile";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { colors } from "@/shared/theme";
@@ -38,27 +39,29 @@ const BIOLOGICAL_SEX_OPTIONS: SelectOption<NonNullable<BiologicalSex>>[] = [
   { value: "other", label: "Prefiro não informar" },
 ];
 
-export type PatientProfileDraft = {
-  firstName: string;
-  lastName: string;
-  /** ISO 8601 (`YYYY-MM-DD`) - convertido a partir do input `DD/MM/AAAA` da tela. */
-  dateOfBirth: string;
-  biologicalSex: BiologicalSex;
-  bloodType: BloodType;
-  allergies: string[];
-  emergencyContacts: EmergencyContact[];
-  notes: string | null;
-};
-
 type FichaDeSaudeScreenProps = {
-  /** Só chamado com nome, sobrenome e data de nascimento válidos preenchidos. */
+  /** Só chamado com nome e sobrenome preenchidos e a data vazia ou válida. */
   onContinue: (draft: PatientProfileDraft) => void;
   /**
-   * Volta pra tela de consentimento. Omitir esconde o botão - quem sabe se há retorno
-   * possível é o gate (`useFirstRunGate.canGoBack`), não esta tela.
+   * Volta pra tela anterior. Omitir esconde o botão - quem sabe se há retorno possível é quem
+   * conhece a navegação, não esta tela.
    */
   onBack?: () => void;
+  /** Ficha já salva, quando a tela abre em modo edição. Ausente = primeira execução. */
+  initialValue?: PatientProfileDraft;
+  /** O rótulo muda com o contexto: primeira execução continua o fluxo, edição só salva. */
+  submitLabel?: string;
+  /** Texto acima do botão. A primeira execução avisa que dá pra completar depois. */
+  footerHint?: string;
 };
+
+/** `YYYY-MM-DD` guardado no banco → `DD/MM/AAAA` do input. Vazio continua vazio. */
+function toDateOfBirthInput(isoDate: string): string {
+  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return "";
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
+}
 
 /** Aceita só dígitos e insere as barras conforme o paciente digita - sem depender de libs de máscara. */
 function formatDateOfBirthInput(
@@ -260,20 +263,25 @@ function EmergencyContactsField({
 export function FichaDeSaudeScreen({
   onContinue,
   onBack,
+  initialValue,
+  submitLabel = "Salvar e continuar",
+  footerHint,
 }: FichaDeSaudeScreenProps) {
   const { scrollViewRef, scrollToFocusedInput, onScroll } =
     useScrollToFocusedInput();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirthInput, setDateOfBirthInput] = useState("");
-  const [biologicalSex, setBiologicalSex] = useState<BiologicalSex>(null);
-  const [bloodType, setBloodType] = useState<BloodType>(null);
-  const [allergies, setAllergies] = useState<string[]>([]);
+  const [firstName, setFirstName] = useState(initialValue?.firstName ?? "");
+  const [lastName, setLastName] = useState(initialValue?.lastName ?? "");
+  const [dateOfBirthInput, setDateOfBirthInput] = useState(
+    toDateOfBirthInput(initialValue?.dateOfBirth ?? ""),
+  );
+  const [biologicalSex, setBiologicalSex] = useState<BiologicalSex>(initialValue?.biologicalSex ?? null);
+  const [bloodType, setBloodType] = useState<BloodType>(initialValue?.bloodType ?? null);
+  const [allergies, setAllergies] = useState<string[]>(initialValue?.allergies ?? []);
   const [allergyDraft, setAllergyDraft] = useState("");
   const [emergencyContacts, setEmergencyContacts] = useState<
     EmergencyContact[]
-  >([]);
-  const [notes, setNotes] = useState("");
+  >(initialValue?.emergencyContacts ?? []);
+  const [notes, setNotes] = useState(initialValue?.notes ?? "");
 
   const dateOfBirthIso = useMemo(
     () => parseDateOfBirth(dateOfBirthInput),
@@ -498,11 +506,9 @@ export function FichaDeSaudeScreen({
           />
         </Card>
 
-        <Text style={styles.footerHint}>
-          Você poderá voltar aqui e modificar a ficha quando quiser, pela aba Ajustes.
-        </Text>
+        {footerHint ? <Text style={styles.footerHint}>{footerHint}</Text> : null}
         <Button
-          label="Salvar e continuar"
+          label={submitLabel}
           onPress={handleContinue}
           disabled={!canContinue}
         />

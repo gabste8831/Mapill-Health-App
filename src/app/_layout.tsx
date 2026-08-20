@@ -83,6 +83,7 @@ export default function RootLayout() {
         <FichaDeSaudeScreen
           onContinue={gate.saveProfile}
           onBack={gate.canGoBack ? gate.goBack : undefined}
+          footerHint="Você poderá voltar aqui e modificar a ficha quando quiser, pela aba Ajustes."
         />
       </ThemeProvider>
     );
@@ -93,6 +94,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(abas)" />
+        <Stack.Screen name="ficha" />
         <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
