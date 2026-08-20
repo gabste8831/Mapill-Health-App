@@ -7,6 +7,7 @@ export * from "./Card/Card";
 export * from "./Checkbox/Checkbox";
 export * from "./Chip/Chip";
 export * from "./GoogleLogo/GoogleLogo";
+export * from "./Header/Header";
 export * from "./IconButton/IconButton";
 export * from "./KeyboardAwareScrollView/KeyboardAwareScrollView";
 export * from "./SelectField/SelectField";

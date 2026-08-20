@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Header } from "@/ui";
 import { ItemDeDose } from "@/telas/Inicio/componentes/ItemDeDose/ItemDeDose";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
@@ -43,6 +44,7 @@ export function InicioScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <Header onAccount={() => router.push("/ajustes")} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.greetingRow}>
           <View style={styles.greetingText}>

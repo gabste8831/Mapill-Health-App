@@ -20,20 +20,6 @@ export const styles = StyleSheet.create({
   header: {
     gap: spacing.md,
   },
-  /**
-   * A margem negativa cancela o `gap: spacing.lg` do `scrollContent`: o respiro entre o botão
-   * e o título vem do `paddingTop` do próprio título, que já existia. Sem isso os dois
-   * espaçamentos somariam e empurrariam o formulário pra baixo.
-   */
-  backButton: {
-    alignSelf: "flex-start",
-    marginBottom: -spacing.lg,
-  },
-  title: {
-    paddingTop: spacing.xl,
-    ...typography.headlineLg,
-    color: colors.onSurface,
-  },
   subtitle: {
     ...typography.bodySm,
     color: colors.outline,

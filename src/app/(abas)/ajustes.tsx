@@ -5,7 +5,7 @@ export default function AjustesScreen() {
     <EmConstrucaoScreen
       icon="settings-outline"
       title="Ajustes"
-      description="Ficha médica, tema, backup e os direitos de exportar/excluir dados (LGPD) chegam no bloco D3 do plano de desenvolvimento."
+      description="A edição da ficha de saúde, o backup e os seus direitos sobre os dados ainda estão sendo desenvolvidos."
     />
   );
 }

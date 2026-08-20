@@ -14,11 +14,6 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.lg,
   },
-  title: {
-    ...typography.headlineMd,
-    color: colors.onSurface,
-    textAlign: "center",
-  },
   description: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,

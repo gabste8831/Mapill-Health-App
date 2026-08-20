@@ -4,7 +4,7 @@ import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { KeyboardAwareScrollView } from "@/ui";
+import { Header, KeyboardAwareScrollView } from "@/ui";
 import {
   BottomSheet,
   Button,
@@ -56,8 +56,6 @@ export type PatientProfileDraft = {
 type FichaDeSaudeScreenProps = {
   /** Só chamado com nome, sobrenome e data de nascimento válidos preenchidos. */
   onContinue: (draft: PatientProfileDraft) => void;
-  /** "Preencher depois": não salva nada agora, o paciente completa a ficha em Configurações. */
-  onSkip: () => void;
   /**
    * Volta pra tela de consentimento. Omitir esconde o botão — quem sabe se há retorno
    * possível é o gate (`useFirstRunGate.canGoBack`), não esta tela.
@@ -264,7 +262,6 @@ function EmergencyContactsField({
 // o uso do app.
 export function FichaDeSaudeScreen({
   onContinue,
-  onSkip,
   onBack,
 }: FichaDeSaudeScreenProps) {
   const { scrollViewRef, scrollToFocusedInput, onScroll } =
@@ -328,6 +325,7 @@ export function FichaDeSaudeScreen({
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Header title="Ficha de saúde" onBack={onBack} />
       <KeyboardAwareScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
@@ -335,18 +333,7 @@ export function FichaDeSaudeScreen({
         onScroll={onScroll}
         scrollEventThrottle={16}
       >
-        {onBack ? (
-          <IconButton
-            variant="outline"
-            style={styles.backButton}
-            onPress={onBack}
-            accessibilityLabel="Voltar para o consentimento"
-            icon={<Ionicons name="arrow-back" size={20} color={colors.onSurface} />}
-          />
-        ) : null}
-
         <View style={styles.header}>
-          <Text style={styles.title}>Sua ficha de saúde</Text>
           <Text style={styles.subtitle}>
             Aqui você pode registrar informações pessoais e médicas, para uma
             melhor experiencia no aplicativo, e segurança pessoal.
@@ -490,11 +477,6 @@ export function FichaDeSaudeScreen({
           label="Salvar e continuar"
           onPress={handleContinue}
           disabled={!canContinue}
-        />
-        <Button
-          variant="text"
-          label="Preencher depois, nas Configurações"
-          onPress={onSkip}
         />
       </KeyboardAwareScrollView>
     </SafeAreaView>

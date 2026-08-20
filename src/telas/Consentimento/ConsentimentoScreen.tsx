@@ -4,7 +4,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, Checkbox, IconButton } from "@/ui";
+import { Button, Checkbox, Header } from "@/ui";
 import { colors } from "@/shared/theme";
 import {
   APP_PURPOSE_TEXT,
@@ -84,21 +84,9 @@ export function ConsentimentoScreen({ onAccept, onBack }: ConsentimentoScreenPro
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Header title="Antes de começar" onBack={onBack} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {onBack ? (
-          <IconButton
-            variant="outline"
-            style={styles.backButton}
-            onPress={onBack}
-            accessibilityLabel="Voltar para a tela de entrada"
-            icon={<Ionicons name="arrow-back" size={20} color={colors.onSurface} />}
-          />
-        ) : null}
-
-        <View style={styles.header}>
-          <Text style={styles.title}>Antes de começar</Text>
-          <Text style={styles.purposeText}>{APP_PURPOSE_TEXT}</Text>
-        </View>
+        <Text style={styles.purposeText}>{APP_PURPOSE_TEXT}</Text>
 
         <View style={styles.highlightList}>
           {DATA_PRACTICE_HIGHLIGHTS.map((highlight) => (

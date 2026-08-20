@@ -5,7 +5,7 @@ export default function RemediosScreen() {
     <EmConstrucaoScreen
       icon="medkit-outline"
       title="Remédios"
-      description="Lista de medicamentos cadastrados e controle de estoque chegam no bloco B5 do plano de desenvolvimento."
+      description="A lista dos seus medicamentos e o controle de estoque ainda estão sendo desenvolvidos."
     />
   );
 }

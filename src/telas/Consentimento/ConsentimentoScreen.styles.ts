@@ -12,23 +12,6 @@ export const styles = StyleSheet.create({
     gap: spacing.xl,
     paddingBottom: spacing.xxl,
   },
-  header: {
-    gap: spacing.md,
-  },
-  /**
-   * A margem negativa cancela o `gap: spacing.xl` do `scrollContent`: quem dá o respiro entre
-   * o botão e o título é o `paddingTop` do próprio título, que já existia. Sem isso somariam
-   * os dois espaçamentos e o título cairia longe demais do topo.
-   */
-  backButton: {
-    alignSelf: "flex-start",
-    marginBottom: -spacing.xl,
-  },
-  title: {
-    paddingTop: spacing.xl,
-    ...typography.headlineLg,
-    color: colors.onSurface,
-  },
   purposeText: {
     ...typography.bodySm,
     color: colors.outline,

@@ -24,7 +24,6 @@ export type FirstRunGate = {
   continueWithoutLogin: () => Promise<void>;
   acceptConsent: () => Promise<void>;
   saveProfile: (draft: PatientProfileDraft) => Promise<void>;
-  skipProfile: () => void;
   /** Volta uma etapa. No-op em `login` (não há pra onde voltar) e em `app` (gate encerrado). */
   goBack: () => void;
   /** A tela usa isso pra decidir se desenha o botão de voltar. */
@@ -151,8 +150,6 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     setStep("app");
   }, []);
 
-  const skipProfile = useCallback(() => setStep("app"), []);
-
   const canGoBack = PREVIOUS_STEP[step] !== null;
 
   /**
@@ -187,7 +184,6 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     continueWithoutLogin: continueAfterLogin,
     acceptConsent,
     saveProfile,
-    skipProfile,
     goBack,
     canGoBack,
   };

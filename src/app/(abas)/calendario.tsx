@@ -5,7 +5,7 @@ export default function CalendarioScreen() {
     <EmConstrucaoScreen
       icon="calendar-outline"
       title="Calendário"
-      description="Consultas, exames e renovação de receita chegam no bloco C3 do plano de desenvolvimento."
+      description="A agenda de consultas, exames e renovação de receita ainda está sendo desenvolvida."
     />
   );
 }

@@ -82,7 +82,6 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <FichaDeSaudeScreen
           onContinue={gate.saveProfile}
-          onSkip={gate.skipProfile}
           onBack={gate.canGoBack ? gate.goBack : undefined}
         />
       </ThemeProvider>
