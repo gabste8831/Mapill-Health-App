@@ -166,8 +166,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "7. Responsável pelo tratamento e contato",
     paragraphs: [
       "O Mapill é um projeto acadêmico do curso de Sistemas de Informação pela " +
-        "UNIDAVI. [PREENCHER: nome do responsável pelo tratamento e e-mail de contato antes " +
-        "de qualquer uso além de demonstração acadêmica.]",
+        "UNIDAVI, desenvolvido por Gabriel Steffens (gabrielsteffens2003@gmail.com).",
     ],
   },
   {

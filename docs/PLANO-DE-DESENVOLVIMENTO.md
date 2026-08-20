@@ -32,7 +32,7 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 1. Estado atual (auditoria de 2026-08-19)
+## 1. Estado atual (atualizado em 2026-08-20)
 
 ### Já pronto ✅
 
@@ -40,22 +40,26 @@ Nenhum bloco fecha sem estes seis itens:
 |---|---|
 | Domínio | Entidades (`medication`, `prescription`, `dose-schedule`, `intake-log`, `inventory-item`, `appointment`, `patient-profile`, `consent`, `auth-user`) + ports fechados |
 | Use-cases | `register-intake`, `correct-intake`, `snooze-dose-alarm` |
-| SQLite | `database.ts` + migrations 001→006 + 9 repositórios |
-| Design system | `ui/` (Button, Card, TextField, SelectField, Checkbox, Chip, IconButton, BottomSheet) + `shared/theme` com paleta M3 real |
+| SQLite | `database.ts` + migrations 001→007 + 9 repositórios |
+| Design system | `src/ui/` (Button, Card, TextField, SelectField, Checkbox, Chip, IconButton, BottomSheet, Header, LegalAccordion, …) + `shared/theme` com paleta M3 real |
 | Login | Tela + Google via Supabase Auth (`SupabaseAuthGateway`), sessão persistida, "continuar sem login" |
-| Onboarding LGPD | `OnboardingConsentScreen` + `consent_records` versionado por `CURRENT_TERMS_VERSION` |
-| Ficha de saúde | `PatientProfileScreen` completa (nascimento, sexo, contatos de emergência em lista) |
+| Onboarding LGPD | `ConsentimentoScreen` + `consent_records` versionado por `CURRENT_TERMS_VERSION`; bump força reconsentimento |
+| Ficha de saúde | `FichaDeSaudeScreen` — nome completo obrigatório, demais campos opcionais, foto (galeria), contatos de emergência em lista. Serve à primeira execução **e** à edição |
+| Ajustes | Edição da ficha, estado da conta (entrar depois sem perder dado local) e consulta dos termos com data/versão do aceite |
 | Home | Layout visual completo — **mas 100% com dados mockados** (`MOCK_TODAY_DOSES`, etc.) |
-| Navegação | Tabs reais (Home/Calendário/Remédios/Ajustes) via `expo-router/unstable-native-tabs`; grupo `cadastro` como stack modal (`escolha` → `medicamento` → `scanner`/manual, `compromisso`); FAB da Home abre o fluxo; `_layout.tsx` sem lógica de estado (`useFirstRunGate`/`useDatabaseReady`) — **pendente de teste em device/emulador** |
+| Navegação | Abas reais (Home/Calendário/Remédios/Ajustes) — nativas no aparelho, barra em JS no preview web; grupo `cadastro` como stack modal; rotas `/ficha` e `/termos`; `_layout.tsx` sem lógica de estado — **pendente de teste em device** |
 
 ### Buracos conhecidos ❌
 
-- **Nenhum fluxo de escrita pelo usuário**: não dá para cadastrar um medicamento pelo app hoje.
+- **Nenhum fluxo de escrita clínica pelo usuário**: não dá para cadastrar um medicamento hoje.
 - **Notificações**: `expo-notifications` instalado, mas `src/notifications/` não existe. Zero alarmes.
 - **Sync**: login autentica, mas nada sobe/desce. Sem tabelas no Supabase, sem RLS.
 - **CMED**: nenhum script de ingestão, nenhum seed embarcado.
-- **Estoque/Agenda/Histórico/Configurações**: repositórios existem, telas não.
-- **Pendência legal**: `[PREENCHER]` na seção 7 de `legal-content.ts` (responsável pelo tratamento).
+- **Estoque / Agenda / Histórico**: repositórios existem, telas não.
+- **Direitos LGPD**: exportar, excluir e revogar consentimento ainda não existem (bloco D3).
+- **Pendência legal**: `[PREENCHER]` na seção 7 de `texto-legal.ts` (responsável pelo tratamento).
+- **Nada foi verificado em aparelho**: todo o fluxo acima só passou pelo preview web, que não
+  persiste nem roda OAuth, câmera ou galeria (ver §5.1).
 
 ---
 
