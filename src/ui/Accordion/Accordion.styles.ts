@@ -34,7 +34,14 @@ export const styles = StyleSheet.create({
     color: colors.primary,
     opacity: 0.7,
   },
-  content: {
+  bodyClip: {
+    overflow: "hidden",
+  },
+  bodyMeasure: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
     padding: spacing.md,
     paddingTop: 0,
     gap: spacing.md,

@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { type ReactNode, useState } from "react";
-import { Pressable, Text } from "react-native";
-import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
+import type { LayoutChangeEvent } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import Animated, { Easing, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
 import { colors } from "@/shared/theme";
 import { styles } from "./Accordion.styles";
@@ -15,30 +16,48 @@ export type AccordionProps = {
   tone?: AccordionTone;
   /** Rótulo ao lado da seta. Sem ele fica só a seta, pra blocos cuja função já é óbvia. */
   toggleLabel?: boolean;
-  /** A tela usa pra rolar até o item recém-aberto, já que ele empurra o conteúdo abaixo. */
-  onToggle?: (isExpanded: boolean) => void;
 };
+
+const TIMING = { duration: 260, easing: Easing.out(Easing.cubic) };
 
 /**
  * Título sempre visível, conteúdo sob demanda. Recolhido por padrão: o título é o que precisa
  * ser lido de relance; o texto inteiro é para quem quiser se aprofundar.
  */
-export function Accordion({ title, children, tone = "claro", toggleLabel = false, onToggle }: AccordionProps) {
+export function Accordion({ title, children, tone = "claro", toggleLabel = false }: AccordionProps) {
   const [isExpanded, setExpanded] = useState(false);
   const isBlue = tone === "azul";
   const foreground = isBlue ? colors.onPrimary : colors.primary;
 
+  /**
+   * Animar a altura de 0 até a real é o que faz o bloco "descer". Antes o conteúdo entrava com
+   * fade: a altura saltava de uma vez e só a opacidade animava, o que lê como pulo. O conteúdo
+   * fica sempre montado e é recortado por `overflow: hidden`.
+   */
+  const [contentHeight, setContentHeight] = useState(0);
+
+  const bodyStyle = useAnimatedStyle(() => ({
+    height: withTiming(isExpanded ? contentHeight : 0, TIMING),
+    opacity: withTiming(isExpanded ? 1 : 0, TIMING),
+  }));
+
+  const chevronStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: withTiming(isExpanded ? "180deg" : "0deg", TIMING) }],
+  }));
+
+  function measureContent(event: LayoutChangeEvent) {
+    const measured = event.nativeEvent.layout.height;
+    // `onLayout` dispara a cada reflow; sem a comparação, cada disparo causaria novo render.
+    setContentHeight((current) => (current === measured ? current : measured));
+  }
+
   function toggle() {
     const next = !isExpanded;
     setExpanded(next);
-    onToggle?.(next);
   }
 
   return (
-    // `layout` faz os irmãos deslizarem quando este cresce, em vez de saltarem de posição.
-    <Animated.View
-      layout={LinearTransition.duration(220)}
-      style={[styles.section, isBlue && styles.sectionAzul]}>
+    <View style={[styles.section, isBlue && styles.sectionAzul]}>
       <Pressable
         style={styles.header}
         onPress={toggle}
@@ -54,18 +73,19 @@ export function Accordion({ title, children, tone = "claro", toggleLabel = false
             {isExpanded ? "Ler menos" : "Ler mais"}
           </Text>
         ) : (
-          <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={18} color={foreground} />
+          <Animated.View style={chevronStyle}>
+            <Ionicons name="chevron-down" size={18} color={foreground} />
+          </Animated.View>
         )}
       </Pressable>
 
-      {isExpanded ? (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(120)}
-          style={styles.content}>
+      <Animated.View style={[styles.bodyClip, bodyStyle]}>
+        {/* Absoluto pra medir a altura natural: dentro de um pai com altura 0 o conteúdo seria
+            comprimido e a medida sairia errada. */}
+        <View style={styles.bodyMeasure} onLayout={measureContent}>
           {children}
-        </Animated.View>
-      ) : null}
-    </Animated.View>
+        </View>
+      </Animated.View>
+    </View>
   );
 }

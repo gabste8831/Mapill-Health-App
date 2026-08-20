@@ -11,13 +11,12 @@ export type LegalSection = {
 export type LegalAccordionProps = {
   title: string;
   sections: LegalSection[];
-  onToggle?: (isExpanded: boolean) => void;
 };
 
 /** Termos de Uso / Política de Privacidade: o `Accordion` do kit com o texto legal dentro. */
-export function LegalAccordion({ title, sections, onToggle }: LegalAccordionProps) {
+export function LegalAccordion({ title, sections }: LegalAccordionProps) {
   return (
-    <Accordion title={title} onToggle={onToggle}>
+    <Accordion title={title}>
       {sections.map((section) => (
         <View key={section.title}>
           <Text style={styles.sectionTitle}>{section.title}</Text>
