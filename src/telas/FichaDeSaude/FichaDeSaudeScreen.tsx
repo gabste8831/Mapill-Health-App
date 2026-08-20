@@ -11,7 +11,8 @@ import type {
   EmergencyContact,
   PatientProfileDraft,
 } from "@/domain/entities/patient-profile";
-import { useProfilePhotoPicker } from "@/hooks/use-profile-photo";
+import { usePhotoPicker } from "@/hooks/use-photo-picker";
+import { formatDateInput, parseDateInput, toDateInput } from "@/shared/date-input";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { colors } from "@/shared/theme";
 import {
@@ -23,6 +24,15 @@ import {
   type SelectOption
 } from "@/ui";
 import { styles } from "./FichaDeSaudeScreen.styles";
+
+/** Nascimento tem limites próprios: não pode ser no futuro nem antes de 1900. */
+function parseDateOfBirth(displayValue: string): string | null {
+  const isoDate = parseDateInput(displayValue);
+  if (isoDate === null) return null;
+  const year = Number(isoDate.slice(0, 4));
+  if (year < 1900) return null;
+  return new Date(isoDate) > new Date() ? null : isoDate;
+}
 
 const BLOOD_TYPE_OPTIONS: SelectOption<NonNullable<BloodType>>[] = [
   { value: "A+", label: "A+" },
@@ -56,63 +66,6 @@ type FichaDeSaudeScreenProps = {
   /** Texto acima do botão. A primeira execução avisa que dá pra completar depois. */
   footerHint?: string;
 };
-
-/** `YYYY-MM-DD` guardado no banco → `DD/MM/AAAA` do input. Vazio continua vazio. */
-function toDateOfBirthInput(isoDate: string): string {
-  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return "";
-  const [, year, month, day] = match;
-  return `${day}/${month}/${year}`;
-}
-
-/** Aceita só dígitos e insere as barras conforme o paciente digita - sem depender de libs de máscara. */
-function formatDateOfBirthInput(
-  rawValue: string,
-  previousValue: string,
-): string {
-  const digitsOnly = rawValue.replace(/\D/g, "").slice(0, 8);
-  // Deleção: se o usuário está apagando, não força a barra de volta.
-  if (rawValue.length < previousValue.length) return rawValue;
-
-  const day = digitsOnly.slice(0, 2);
-  const month = digitsOnly.slice(2, 4);
-  const year = digitsOnly.slice(4, 8);
-
-  if (digitsOnly.length <= 2) return day;
-  if (digitsOnly.length <= 4) return `${day}/${month}`;
-  return `${day}/${month}/${year}`;
-}
-
-/** `DD/MM/AAAA` plausível (dia/mês válidos, ano de 1900 até hoje) → ISO `YYYY-MM-DD`, ou `null` se inválida. */
-function parseDateOfBirth(displayValue: string): string | null {
-  const match = displayValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (!match) return null;
-
-  const [, dayText, monthText, yearText] = match;
-  const day = Number(dayText);
-  const month = Number(monthText);
-  const year = Number(yearText);
-  const currentYear = new Date().getFullYear();
-  if (
-    month < 1 ||
-    month > 12 ||
-    day < 1 ||
-    day > 31 ||
-    year < 1900 ||
-    year > currentYear
-  ) {
-    return null;
-  }
-
-  const date = new Date(year, month - 1, day);
-  const isRealCalendarDate =
-    date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day;
-  if (!isRealCalendarDate || date > new Date()) return null;
-
-  return `${yearText}-${monthText}-${dayText}`;
-}
 
 /**
  * Aceita só dígitos e monta a máscara `(DD) NNNNN-NNNN` (celular) ou `(DD) NNNN-NNNN` (fixo)
@@ -274,9 +227,9 @@ export function FichaDeSaudeScreen({
     useScrollToFocusedInput();
   const [fullName, setFullName] = useState(initialValue?.fullName ?? "");
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
-  const { isPicking, pickPhoto } = useProfilePhotoPicker();
+  const { isPicking, pickPhoto } = usePhotoPicker("ficha-foto.jpg");
   const [dateOfBirthInput, setDateOfBirthInput] = useState(
-    toDateOfBirthInput(initialValue?.dateOfBirth ?? ""),
+    toDateInput(initialValue?.dateOfBirth ?? ""),
   );
   const [biologicalSex, setBiologicalSex] = useState<BiologicalSex>(initialValue?.biologicalSex ?? null);
   const [bloodType, setBloodType] = useState<BloodType>(initialValue?.bloodType ?? null);
@@ -447,7 +400,7 @@ export function FichaDeSaudeScreen({
             value={dateOfBirthInput}
             onChangeText={(value) =>
               setDateOfBirthInput(
-                formatDateOfBirthInput(value, dateOfBirthInput),
+                formatDateInput(value, dateOfBirthInput),
               )
             }
             onFocus={scrollToFocusedInput}

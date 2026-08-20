@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+    // paddingVertical: 2,
   },
   seloObrigatorio: {
     backgroundColor: colors.primary,
