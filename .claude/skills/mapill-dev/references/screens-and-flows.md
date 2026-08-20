@@ -49,19 +49,36 @@ Confirmar essa ordem antes de implementar navegação — hoje são duas telas s
 - Ao capturar/digitar o EAN: buscar no dataset local da CMED (ver `cmed-data.md`) e
   pré-preencher o formulário manual (tela 4) com o que for encontrado.
 
-### 4. Cadastro manual de medicamento — ✅ Definida
-- Foto da embalagem (câmera ou galeria) — reconhecimento visual futuro (Nielsen).
-- Nome do medicamento, princípio ativo, dosagem, tipo (seletor: pílula, líquido, injetável etc.
-  — afeta quais campos aparecem depois, ex: "Volume" em vez de "Comprimidos").
-- Posologia: frequência (Diário / Intervalo / Semanal / SOS) + horários (lista editável de
-  horários, "+ Adicionar").
-- Estoque: quantidade em mãos com estepper (+/-), sem passo de "definir alerta" separado —
-  o alerta é derivado automaticamente (ver seção "Em aberto" abaixo sobre o limiar).
-- Botão único de salvar ("Salvar Medicamento").
+### 4. Cadastro manual de medicamento — ✅ Definida (escopo ampliado em 2026-08-20)
 
-**Gap identificado no protótipo**: não há campo pra local de guarda em casa, nem para anexar
-receita/PDF — ambos estavam no Plano Mestre (zip) mas não apareceram no formulário desenhado.
-Confirmar se entram nesta tela ou ficam pra uma "v2" do cadastro.
+Tem que cobrir **qualquer apresentação**, não só comprimido. A tensão do bloco é ser completo
+sem ficar difícil: obrigatório é o mínimo clínico, o resto é opcional e fica recolhido. Sete
+seções, as três primeiras sempre abertas:
+
+1. **O remédio** — foto da embalagem (identificação visual, Nielsen: reconhecimento em vez de
+   recordação), nome*, forma farmacêutica*, princípio ativo. O nome é onde o autocomplete da
+   CMED (B1) vai plugar.
+2. **A dose** — quantidade* + unidade*, com as unidades filtradas pela forma escolhida.
+3. **Quando tomar** — frequência (Diário / Intervalo / Semanal / SOS) + lista editável de
+   horários; início e fim (ou contínuo).
+4. **Lembrete** — alarme / notificação / nenhum, por prescrição (decisão nº2).
+5. **Estoque** *(opcional)* — quantidade em mãos e alerta de estoque baixo configurável pelo
+   próprio usuário (decisão nº1) — sem cálculo silencioso.
+6. **Onde guardo** *(opcional)* — texto livre ("na bolsa", "caixa sobre a geladeira").
+7. **Receita** *(opcional)* — anexo de foto ou documento, local com opt-out de nuvem (decisão nº10).
+
+Botão único de salvar ("Salvar medicamento").
+
+**Formas farmacêuticas cobertas**: comprimido/cápsula, líquido, gota, injeção, pomada/creme,
+sublingual, inalador, adesivo, sachê/pó, outro. A forma escolhida define as unidades de dose
+oferecidas (`comprimido`, `ml`, `mg`, `g`, `gota`, `UI`, `aplicação`, `jato`, `adesivo`,
+`sachê`) — filtrar não é inferir valor clínico, é evitar combinação sem sentido como "3 jatos de
+pomada".
+
+**Gap resolvido em 2026-08-20**: local de guarda e anexo de receita entram nesta tela, e não numa
+"v2" nem no C3. O paciente já está descrevendo o medicamento aqui; separar em outro bloco
+significaria ele cadastrar duas vezes a mesma coisa. O que fica no C3 é a receita como
+**compromisso** (validade, renovação, lembrete), não como anexo do remédio.
 
 ---
 

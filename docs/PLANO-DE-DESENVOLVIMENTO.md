@@ -200,27 +200,51 @@ depois custa retrabalho no componente de busca.
 
 ### B2. Cadastro de medicamento + prescrição (manual) ⭐ bloco mais importante
 
-**Escopo**
-- Formulário completo (`screens-and-flows.md` §4): foto da embalagem, nome (com autocomplete
-  CMED do B1), princípio ativo, dosagem, **tipo** (pílula/líquido/injetável — muda os campos
-  seguintes: "comprimidos" vs "volume").
-- Posologia: frequência **Diário | Intervalo | Semanal | SOS** + lista editável de horários.
-- `reminderMode` **por prescrição**: `alarm | notification | none` (decisão nº2).
-- Alerta de estoque: usuário decide se quer aviso e com quantos dias de antecedência (decisão nº1) — sem cálculo silencioso.
-- Quantidade inicial em estoque com stepper.
-- Geração dos `dose_schedules` a partir da posologia (use-case novo: `generate-dose-schedules`).
-- Validação seguindo `medication-safety-validation`: faixas plausíveis, sem inferir valor clínico,
-  bloqueio de horários duplicados/sobrepostos.
+**Escopo ampliado em 2026-08-20.** O cadastro precisa cobrir **qualquer apresentação**, não só
+comprimido: injeção, pomada, gotas, sublingual, adesivo, inalador, sachê. Isso muda a unidade de
+dose (ml, g, mg, UI de insulina, gota, aplicação, jato…) e, por consequência, o modelo de dados.
+Local de guarda e anexo de receita **entram aqui** — eram gap em aberto no protótipo e estavam
+provisoriamente no C3.
 
-**Não entra**: local de guarda em casa e anexo de receita — vão pro bloco C3 (decisão registrada
-como gap no protótipo).
+O desafio do bloco é ser completo **sem** ficar difícil de operar. A regra: obrigatório é o
+mínimo clínico; todo o resto é opcional e fica recolhido, com o mesmo par de selos
+OBRIGATÓRIO/OPCIONAL já usado na ficha de saúde.
+
+**Seções do formulário** (nesta ordem, as três primeiras sempre abertas):
+
+1. **O remédio** — foto da embalagem (identificação visual), nome*, forma farmacêutica*,
+   princípio ativo. O campo de nome é o ponto onde o B1 (CMED) vai plugar o autocomplete.
+2. **A dose** — quantidade* + unidade*, com as unidades filtradas pela forma escolhida.
+3. **Quando tomar** — frequência **Diário | Intervalo | Semanal | SOS** + lista editável de
+   horários; início do tratamento e fim (ou contínuo).
+4. **Lembrete** — `reminderMode` por prescrição: `alarm | notification | none` (decisão nº2).
+5. **Estoque** *(opcional)* — quantidade em mãos e alerta de estoque baixo, com o usuário
+   decidindo se quer aviso e com quanta antecedência (decisão nº1) — sem cálculo silencioso.
+6. **Onde guardo** *(opcional)* — texto livre ("na bolsa", "caixa sobre a geladeira").
+7. **Receita** *(opcional)* — anexo de foto ou documento, salvo local com opt-out de nuvem por
+   item (decisão nº10).
+
+- Geração dos `dose_schedules` a partir da posologia (`generate-dose-schedules`).
+- Validação seguindo `medication-safety-validation`: faixas plausíveis, sem inferir valor
+  clínico, bloqueio de horários duplicados/sobrepostos.
+
+**Mudanças de modelo que o escopo exige**
+- `Medication`: `form` (forma farmacêutica) e `photoUri`.
+- `PosologyUnit`: cresce para cobrir todas as apresentações.
+- `Prescription`: `notes`, anexo de receita (`attachmentUri`, `attachmentKind`, opt-out de nuvem).
+- `InventoryItem`: `storageLocation`.
+- `PosologySchedule` e `generate-dose-schedules` — ✅ entregues na migration 008.
 
 **Pronto quando**
 - [ ] Cadastro completo funciona 100% offline.
+- [ ] As formas farmacêuticas cobrem comprimido, líquido, gota, injeção, pomada, sublingual,
+      inalador, adesivo e sachê — e a unidade de dose oferecida acompanha a forma escolhida.
 - [ ] Editar e excluir (soft delete) uma prescrição existente funciona.
 - [ ] Excluir pede confirmação explícita e explica a consequência ("os registros de ingestão serão mantidos no histórico").
-- [ ] Horários gerados batem com a posologia em todas as 4 frequências, incluindo virada de dia.
+- [x] Horários gerados batem com a posologia em todas as 4 frequências, incluindo virada de dia.
+      — `generate-dose-schedules` verificado contra 8 casos (ver log de 2026-08-20).
 - [ ] Campo obrigatório vazio dá erro **antes** do submit, com mensagem no campo (prevenção de erro).
+- [ ] Seções opcionais ficam recolhidas: a tela abre mostrando só o que é obrigatório.
 
 **Rastreabilidade**: §2.6 (use-case isolado da UI), §2.7.1 (confiabilidade algorítmica), Nielsen (prevenção de erros).
 
@@ -508,7 +532,10 @@ outras pendentes/atrasadas do dia** abaixo (decisão nº2 — não é tela de fo
 **Escopo**: consultas, exames e renovação de receita (decisão nº8). Calendário mensal + lista.
 Upload de foto da receita com validade e data de renovação, gerando lembrete próprio pelo mesmo
 mecanismo do C1. Anexos salvos localmente primeiro, nuvem opt-out por registro (decisão nº10).
-Aqui também entram os campos adiados do B2 (local de guarda, anexo de receita).
+
+Local de guarda e anexo de receita **saíram daqui** em 2026-08-20 — foram para o B2, onde o
+paciente já está descrevendo o medicamento. O que fica no C3 é a receita como **compromisso**
+(validade, renovação, lembrete), não como anexo do remédio.
 
 **Pronto quando**
 - [ ] Compromisso gera lembrete que dispara como o de dose.
@@ -828,3 +855,5 @@ gerado no servidor do EAS.
 | 2026-08-20 | Ficha | Concluído | **Nome e sobrenome viraram um campo só** (migration 007, que remove as colunas antigas de verdade porque eram `NOT NULL` sem default). Só o nome bloqueia o "Salvar e continuar"; a data de nascimento virou opcional, mas ou está vazia ou completa e válida — meia digitada bloqueia, porque descartar dado clínico em silêncio é pior que exigir o campo. Saiu o "Preencher depois", que deixava entrar no app sem dado nenhum. |
 | 2026-08-20 | A2 | Quase pronto | **Aba Ajustes entregue**: edição da ficha (rota `/ficha`, a mesma tela em modo edição), estado da conta (entrar depois sem perder dado local) e consulta dos termos com data/versão do aceite. Foto de perfil funcionando (só galeria; `cameraPermission: false` por minimização — o app ainda não tira foto). O arquivo escolhido é copiado pro diretório de documentos: a URI que o picker devolve é de cache e o sistema a limpa, o que faria a foto sumir sozinha depois. Falta só o `[PREENCHER]` do texto legal, que depende de dado do responsável. |
 | 2026-08-20 | Preview web | Concluído | Barra de abas do navegador desenhada em JS em vez do tablist do Radix. A ramificação fica **dentro** do `_layout.tsx`: arquivo de rota vem do `require.context` do expo-router, que não resolve sufixo de plataforma (`getRoutes` não trata `.web`) — um `_layout.web.tsx` viraria uma rota chamada "_layout.web" e nunca substituiria a outra. |
+| 2026-08-20 | B2 (parte 1) | Concluído | **Domínio da posologia.** `Prescription` só tinha `frequencyMinutes`, que expressa apenas "intervalo" — as outras três formas exigidas não cabiam num número. Virou a união discriminada `PosologySchedule` (`daily`/`interval`/`weekly`/`asNeeded`), migration 008 converte a coluna pra JSON e remove `frequency_minutes`. Novo use-case `generate-dose-schedules`, regra pura, verificado contra 8 casos rodando o arquivo compilado em Node: as 4 frequências, virada de dia (a cada 8h desde 22:00 → 06:00 do dia seguinte), recorte por `endDate`, `startDate` futuro, intervalo zero e horário inválido. É o primeiro pedaço do app que dá pra **provar sem aparelho**. |
+| 2026-08-20 | B2 | Escopo ampliado | O cadastro passa a cobrir qualquer apresentação (injeção, pomada, gota, sublingual, adesivo, inalador, sachê), com a unidade de dose acompanhando a forma. **Local de guarda e anexo de receita saíram do C3 e entraram no B2** — o paciente já descreve o medicamento ali, e separar faria ele cadastrar duas vezes. Formulário organizado em 7 seções, com as opcionais recolhidas. Exige `Medication.form`/`photoUri`, `PosologyUnit` maior, anexo e notas em `Prescription`, e `storageLocation` em `InventoryItem`. |
