@@ -19,7 +19,7 @@ export type BiologicalSex = "male" | "female" | "other" | null;
 
 /**
  * Contato pra acionar em emergência. O paciente pode cadastrar quantos quiser (ver
- * PatientProfileScreen) — cada um é preenchido por completo num popup próprio antes de ser
+ * FichaDeSaudeScreen) — cada um é preenchido por completo num popup próprio antes de ser
  * adicionado à lista, então nunca existe um contato salvo pela metade.
  */
 export type EmergencyContact = {
@@ -37,7 +37,7 @@ export type EmergencyContact = {
 export type PatientProfile = SyncableEntity & {
   firstName: string;
   lastName: string;
-  /** ISO 8601 (`YYYY-MM-DD`). Obrigatório junto com nome/sobrenome — ver PatientProfileScreen. */
+  /** ISO 8601 (`YYYY-MM-DD`). Obrigatório junto com nome/sobrenome — ver FichaDeSaudeScreen. */
   dateOfBirth: string;
   biologicalSex: BiologicalSex;
   /** Caminho local do arquivo — nunca URL remota direta, ver `photoSyncOptOut`. */

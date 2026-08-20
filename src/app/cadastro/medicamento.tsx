@@ -1,8 +1,8 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 
-import { EntryChoiceScreen } from "@/components/EntryChoiceScreen/EntryChoiceScreen";
-import { PlaceholderScreen } from "@/components/PlaceholderScreen/PlaceholderScreen";
+import { EscolhaDeCadastroScreen } from "@/telas/EscolhaDeCadastro/EscolhaDeCadastroScreen";
+import { EmConstrucaoScreen } from "@/telas/EmConstrucao/EmConstrucaoScreen";
 
 // "Manual" ainda não tem rota própria — o formulário completo é o B2 do plano de
 // desenvolvimento. Fica como estado local nesta tela em vez de virar uma 5ª rota fantasma.
@@ -12,7 +12,7 @@ export default function MedicamentoScreen() {
 
   if (showManualPlaceholder) {
     return (
-      <PlaceholderScreen
+      <EmConstrucaoScreen
         icon="create-outline"
         title="Cadastro manual"
         description="O formulário completo (nome, posologia, estoque) chega no bloco B2 do plano de desenvolvimento."
@@ -21,7 +21,7 @@ export default function MedicamentoScreen() {
   }
 
   return (
-    <EntryChoiceScreen
+    <EscolhaDeCadastroScreen
       title="Como deseja cadastrar?"
       options={[
         { label: "Escanear código de barras", icon: "barcode-outline", onPress: () => router.push("/cadastro/scanner") },

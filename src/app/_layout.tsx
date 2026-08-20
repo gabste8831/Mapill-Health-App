@@ -15,10 +15,10 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Alert, useColorScheme } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import { LoginScreen } from '@/components/screens/LoginScreen/LoginScreen';
-import { OnboardingConsentScreen } from '@/components/screens/OnboardingConsentScreen/OnboardingConsentScreen';
-import { PatientProfileScreen } from '@/components/screens/PatientProfileScreen/PatientProfileScreen';
+import { SplashOverlay } from '@/ui';
+import { LoginScreen } from '@/telas/Login/LoginScreen';
+import { ConsentimentoScreen } from '@/telas/Consentimento/ConsentimentoScreen';
+import { FichaDeSaudeScreen } from '@/telas/FichaDeSaude/FichaDeSaudeScreen';
 import { useDatabaseReady } from '@/hooks/use-database-ready';
 import { useFirstRunGate } from '@/hooks/use-first-run-gate';
 
@@ -42,7 +42,7 @@ export default function RootLayout() {
   const isDatabaseReady = useDatabaseReady();
   const gate = useFirstRunGate(isDatabaseReady);
 
-  // Splash continua visível (ver AnimatedSplashOverlay) até fonte e migrations estarem prontas —
+  // Splash continua visível (ver SplashOverlay) até fonte e migrations estarem prontas —
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
   if (!fontsLoaded || !isDatabaseReady) return null;
 
@@ -64,7 +64,7 @@ export default function RootLayout() {
   if (gate.step === 'login') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AnimatedSplashOverlay />
+        <SplashOverlay />
         <LoginScreen onAuthenticated={handleGoogleSignIn} onContinueWithoutLogin={gate.continueWithoutLogin} />
       </ThemeProvider>
     );
@@ -73,7 +73,7 @@ export default function RootLayout() {
   if (gate.step === 'consent') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <OnboardingConsentScreen onAccept={gate.acceptConsent} onBack={gate.canGoBack ? gate.goBack : undefined} />
+        <ConsentimentoScreen onAccept={gate.acceptConsent} onBack={gate.canGoBack ? gate.goBack : undefined} />
       </ThemeProvider>
     );
   }
@@ -81,7 +81,7 @@ export default function RootLayout() {
   if (gate.step === 'profile') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <PatientProfileScreen
+        <FichaDeSaudeScreen
           onContinue={gate.saveProfile}
           onSkip={gate.skipProfile}
           onBack={gate.canGoBack ? gate.goBack : undefined}
@@ -95,7 +95,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(abas)" />
         <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>

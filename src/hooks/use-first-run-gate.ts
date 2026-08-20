@@ -2,8 +2,8 @@ import * as Crypto from "expo-crypto";
 import { useCallback, useEffect, useState } from "react";
 import { BackHandler, Platform } from "react-native";
 
-import { CURRENT_TERMS_VERSION } from "@/components/screens/OnboardingConsentScreen/legal-content";
-import type { PatientProfileDraft } from "@/components/screens/PatientProfileScreen/PatientProfileScreen";
+import { CURRENT_TERMS_VERSION } from "@/telas/Consentimento/texto-legal";
+import type { PatientProfileDraft } from "@/telas/FichaDeSaude/FichaDeSaudeScreen";
 import { SupabaseAuthGateway } from "@/data/remote/supabase-auth-gateway";
 import { isSupabaseConfigured } from "@/data/remote/supabase-client";
 import { ConsentRepository } from "@/data/repositories/consent-repository";

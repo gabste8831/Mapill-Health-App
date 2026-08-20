@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export const spacing = {
   unit: 4,
   xs: 4,
@@ -10,6 +12,9 @@ export const spacing = {
 } as const;
 
 export const marginMobile = spacing.md;
+
+/** Altura da barra de abas — o conteúdo rolável precisa reservar isso no fim pra não ficar sob ela. */
+export const bottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 
 /** Radius sutil e "clínico" do protótipo — bem mais discreto que arredondamentos genéricos. */
 export const radius = {
