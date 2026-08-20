@@ -734,24 +734,53 @@ npx expo start --dev-client
 Só é necessário **rebuildar** ao mudar dependência nativa ou o `app.json`. Mudança de código
 JS/TS não exige rebuild — hot reload funciona normalmente.
 
+### Configuração do Supabase + Google (feita uma vez)
+
+O fluxo implementado é **por navegador** (`signInWithOAuth` + `WebBrowser.openAuthSessionAsync`),
+não o nativo com Credential Manager. Essa distinção define toda a configuração abaixo: o Google
+**nunca fala com o app** — ele redireciona pro Supabase, e o Supabase é que redireciona pro
+`mapillapp://`. Por isso **não** é preciso client de Android nem fingerprint SHA-1, ao contrário
+do que a documentação do Supabase sugere. Isso também significa que trocar de build (EAS, local,
+outro aparelho) **não** exige regerar credencial no Google.
+
+A URL de retorno é `mapillapp://` — vem de `makeRedirectUri()` sem argumentos, que num dev build
+resolve pro `scheme` do `app.json`.
+
+1. **Supabase → Authentication → URL Configuration → Redirect URLs**: `mapillapp://` e
+   `mapillapp://*` (o wildcard cobre o caso de o redirect vir com path). ✅ configurado.
+   O **Site URL** não participa desse fluxo — é só o fallback de quando nada casa na allow list,
+   e serve de diagnóstico: parar numa página de erro em `localhost:3000` depois do login
+   significa "o redirect não casou com nenhuma entrada".
+2. **Supabase → Authentication → Providers → Google**: habilitado, com **Client ID e Client
+   Secret**. O secret é a lacuna mais comum — sem ele o Supabase não troca o code com o Google
+   e o fluxo morre no meio, mesmo com o Client ID correto.
+3. **Google Cloud Console → Credentials**: o OAuth client precisa ser do tipo
+   **`Web application`** (não `Android`), com o callback do Supabase
+   (`https://<ref>.supabase.co/auth/v1/callback`) em *Authorized redirect URIs*.
+4. **Google Cloud Console → OAuth consent screen**: em modo *Testing*, só contas listadas em
+   *Test users* conseguem entrar — o Google bloqueia antes mesmo de pedir a senha.
+
 ### Checklist do primeiro teste de login
 
-- [ ] `npm install` rodado (`expo-auth-session` está no `package.json` mas ausente de `node_modules`
-      — sem isso o login quebra no import, antes de chegar no OAuth).
+- [x] `npm install` rodado — `expo-auth-session` estava no `package.json` e ausente de
+      `node_modules`, o que quebrava o app no import antes de chegar no OAuth (em todas as
+      plataformas, não só web).
+- [x] `.env` preenchido com `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+      (ver `.env.example`). A URL é sempre `https://<ref>.supabase.co`, e o `ref` está no
+      payload da própria chave anon — dá pra derivar sem procurar no dashboard.
+      ⚠️ Depois de editar o `.env`, **reiniciar o `expo start`**: variáveis `EXPO_PUBLIC_` são
+      embutidas no bundle em build time, não lidas em runtime.
+- [x] Supabase → Redirect URLs contém `mapillapp://`.
+- [ ] Client Secret preenchido no provider Google (conferir).
+- [ ] OAuth client do tipo `Web application` no Google Cloud (conferir).
 - [ ] Dev build instalado no aparelho.
-- [ ] `.env` com `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` (ver `.env.example`).
-- [ ] Supabase → Authentication → URL Configuration → **Redirect URLs** contém `mapillapp://`.
-      ⚠️ Sem isso o sintoma é confuso: o Google autentica, mas o app volta para a tela de login
-      como se nada tivesse acontecido.
 - [ ] Login com Google conclui e o app avança para consentimento/ficha.
 - [ ] Fechar e reabrir o app **não** pede login de novo (sessão persistida via AsyncStorage).
 
-### Pendência técnica conhecida (bloco A2)
-
-`assertConfigured()` em `supabase-auth-gateway.ts:26` usa `asserts supabase is ...` sobre um
-import de módulo — assinatura de assertion só é válida sobre **parâmetro** (ou `this`), daí o
-`TS1225` e os dois `TS18047` em cascata. Em runtime o `throw` funciona; o que não funciona é o
-estreitamento de tipo. Corrigir trocando por um guard que recebe o cliente e o devolve não-nulo.
+Como o perfil `development` do `eas.json` usa `developmentClient: true`, o JS vem do Metro da
+máquina local em runtime — então o `.env` local **é** lido normalmente no dev build. A pegadinha
+de variável `EXPO_PUBLIC_` faltando só aparece em build `preview`/`production`, onde o bundle é
+gerado no servidor do EAS.
 
 ---
 
