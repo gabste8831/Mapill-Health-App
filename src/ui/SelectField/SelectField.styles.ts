@@ -1,12 +1,10 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
-  // Mesmo espaçamento label→conteúdo do TextField e das labels soltas em Card — um só ritmo
-  // em toda a tela de formulário (ver TextField.styles.ts).
   fieldGroup: {
-    gap: spacing.md,
+    gap: fieldLabelGap,
   },
   fieldLabel: {
     ...typography.label,

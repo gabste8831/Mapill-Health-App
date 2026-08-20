@@ -4,17 +4,6 @@ import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Header, KeyboardAwareScrollView } from "@/ui";
-import {
-  BottomSheet,
-  Button,
-  Card,
-  Chip,
-  IconButton,
-  SelectField,
-  TextField,
-  type SelectOption,
-} from "@/ui";
 import type {
   BiologicalSex,
   BloodType,
@@ -22,6 +11,14 @@ import type {
 } from "@/domain/entities/patient-profile";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { colors } from "@/shared/theme";
+import {
+  BottomSheet,
+  Button,
+  Card,
+  Chip, Header, IconButton, KeyboardAwareScrollView, SelectField,
+  TextField,
+  type SelectOption
+} from "@/ui";
 import { styles } from "./FichaDeSaudeScreen.styles";
 
 const BLOOD_TYPE_OPTIONS: SelectOption<NonNullable<BloodType>>[] = [
@@ -44,7 +41,7 @@ const BIOLOGICAL_SEX_OPTIONS: SelectOption<NonNullable<BiologicalSex>>[] = [
 export type PatientProfileDraft = {
   firstName: string;
   lastName: string;
-  /** ISO 8601 (`YYYY-MM-DD`) — convertido a partir do input `DD/MM/AAAA` da tela. */
+  /** ISO 8601 (`YYYY-MM-DD`) - convertido a partir do input `DD/MM/AAAA` da tela. */
   dateOfBirth: string;
   biologicalSex: BiologicalSex;
   bloodType: BloodType;
@@ -57,13 +54,13 @@ type FichaDeSaudeScreenProps = {
   /** Só chamado com nome, sobrenome e data de nascimento válidos preenchidos. */
   onContinue: (draft: PatientProfileDraft) => void;
   /**
-   * Volta pra tela de consentimento. Omitir esconde o botão — quem sabe se há retorno
+   * Volta pra tela de consentimento. Omitir esconde o botão - quem sabe se há retorno
    * possível é o gate (`useFirstRunGate.canGoBack`), não esta tela.
    */
   onBack?: () => void;
 };
 
-/** Aceita só dígitos e insere as barras conforme o paciente digita — sem depender de libs de máscara. */
+/** Aceita só dígitos e insere as barras conforme o paciente digita - sem depender de libs de máscara. */
 function formatDateOfBirthInput(
   rawValue: string,
   previousValue: string,
@@ -114,7 +111,7 @@ function parseDateOfBirth(displayValue: string): string | null {
 
 /**
  * Aceita só dígitos e monta a máscara `(DD) NNNNN-NNNN` (celular) ou `(DD) NNNN-NNNN` (fixo)
- * conforme o paciente digita — sem depender de libs de máscara. Igual ao formatDateOfBirthInput,
+ * conforme o paciente digita - sem depender de libs de máscara. Igual ao formatDateOfBirthInput,
  * não força a máscara de volta durante a deleção.
  */
 function formatPhoneInput(rawValue: string, previousValue: string): string {
@@ -146,7 +143,7 @@ type EmergencyContactsFieldProps = {
 /**
  * Lista de contatos de emergência + popup "Adicionar" (mesmo padrão de bottom-sheet do
  * `SelectField`, só que com um mini-formulário em vez de uma lista de opções). Cada contato só
- * entra na lista depois de completo — nunca existe um contato salvo pela metade.
+ * entra na lista depois de completo - nunca existe um contato salvo pela metade.
  */
 function EmergencyContactsField({
   contacts,
@@ -257,7 +254,7 @@ function EmergencyContactsField({
   );
 }
 
-// Todo o resto além de nome/sobrenome/nascimento é opcional de propósito — é uma "fichinha
+// Todo o resto além de nome/sobrenome/nascimento é opcional de propósito - é uma "fichinha
 // médica auxiliar" que o paciente preenche no próprio ritmo, nunca um formulário que bloqueia
 // o uso do app.
 export function FichaDeSaudeScreen({
@@ -282,13 +279,20 @@ export function FichaDeSaudeScreen({
     () => parseDateOfBirth(dateOfBirthInput),
     [dateOfBirthInput],
   );
-  const hasDateOfBirthError =
-    dateOfBirthInput.length === 10 && dateOfBirthIso === null;
+  /**
+   * A data é opcional, mas ou está vazia ou está completa e válida. O estado do meio - meia
+   * digitada - não pode passar: seria descartada em silêncio no salvamento.
+   */
+  const dateOfBirthError =
+    dateOfBirthInput.length === 0 || dateOfBirthIso !== null
+      ? undefined
+      : dateOfBirthInput.length === 10
+        ? "Data inválida."
+        : "Complete a data ou deixe o campo em branco.";
 
+  // Nome e sobrenome são o mínimo da ficha: sem eles o app não tem de quem é o tratamento.
   const canContinue =
-    firstName.trim().length > 0 &&
-    lastName.trim().length > 0 &&
-    dateOfBirthIso !== null;
+    firstName.trim().length > 0 && lastName.trim().length > 0 && dateOfBirthError === undefined;
 
   function addAllergy() {
     const value = allergyDraft.trim();
@@ -310,11 +314,12 @@ export function FichaDeSaudeScreen({
   }
 
   function handleContinue() {
-    if (!canContinue || dateOfBirthIso === null) return;
+    if (!canContinue) return;
     onContinue({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      dateOfBirth: dateOfBirthIso,
+      // Vazio quando o paciente não informou - a ficha guarda a ausência, não um valor inventado.
+      dateOfBirth: dateOfBirthIso ?? "",
       biologicalSex,
       bloodType,
       allergies,
@@ -335,8 +340,10 @@ export function FichaDeSaudeScreen({
       >
         <View style={styles.header}>
           <Text style={styles.subtitle}>
-            Aqui você pode registrar informações pessoais e médicas, para uma
-            melhor experiencia no aplicativo, e segurança pessoal.
+            Sua ficha pode reunir informações clínicas, como tipo sanguíneo, que
+            podem vir a ser úteis no seu cotidiano. Consultas e casos de emergência
+            podem exigir informações como essas, e o Mapill disponibiliza essa área 
+            para a sua própria segurança individual.
           </Text>
         </View>
 
@@ -369,6 +376,13 @@ export function FichaDeSaudeScreen({
         </View>
 
         <Card>
+          <View style={styles.fieldGroup}>
+            <Text style={styles.sectionTitle}>DADOS BÁSICOS</Text>
+            <Text style={styles.sectionHint}>
+              Nome e sobrenome são obrigatórios. É o mínimo para a ficha identificar você num
+              atendimento.
+            </Text>
+          </View>
           <TextField
             label="NOME"
             required
@@ -387,9 +401,18 @@ export function FichaDeSaudeScreen({
             onFocus={scrollToFocusedInput}
             maxLength={60}
           />
+        </Card>
+
+        <Card>
+          <View style={styles.fieldGroup}>
+            <Text style={styles.sectionTitle}>COMPLEMENTAR</Text>
+            <Text style={styles.sectionHint}>
+              Tudo daqui pra baixo é opcional. Serve para você centralizar suas informações
+              médicas e ter acesso facilitado a elas no seu cotidiano.
+            </Text>
+          </View>
           <TextField
             label="DATA DE NASCIMENTO"
-            required
             placeholder="DD/MM/AAAA"
             value={dateOfBirthInput}
             onChangeText={(value) =>
@@ -400,7 +423,7 @@ export function FichaDeSaudeScreen({
             onFocus={scrollToFocusedInput}
             keyboardType="number-pad"
             maxLength={10}
-            error={hasDateOfBirthError ? "Data inválida." : undefined}
+            error={dateOfBirthError}
           />
           <SelectField
             label="SEXO BIOLÓGICO"
@@ -420,24 +443,26 @@ export function FichaDeSaudeScreen({
         </Card>
 
         <Card>
-          <Text style={styles.fieldLabel}>ALERGIAS</Text>
-          <View style={styles.allergyInputRow}>
-            <TextField
-              label=""
-              containerStyle={styles.allergyInputField}
-              placeholder="Ex: Dipirona, látex..."
-              value={allergyDraft}
-              onChangeText={setAllergyDraft}
-              onSubmitEditing={addAllergy}
-              onFocus={scrollToFocusedInput}
-              returnKeyType="done"
-              maxLength={40}
-            />
-            <IconButton
-              icon={<Ionicons name="add" size={20} color={colors.onPrimary} />}
-              onPress={addAllergy}
-              accessibilityLabel="Adicionar alergia"
-            />
+          <View style={styles.fieldGroup}>
+            <Text style={styles.fieldLabel}>ALERGIAS</Text>
+            <View style={styles.allergyInputRow}>
+              <TextField
+                label=""
+                containerStyle={styles.allergyInputField}
+                placeholder="Ex: Dipirona, látex..."
+                value={allergyDraft}
+                onChangeText={setAllergyDraft}
+                onSubmitEditing={addAllergy}
+                onFocus={scrollToFocusedInput}
+                returnKeyType="done"
+                maxLength={40}
+              />
+              <IconButton
+                icon={<Ionicons name="add" size={20} color={colors.onPrimary} />}
+                onPress={addAllergy}
+                accessibilityLabel="Adicionar alergia"
+              />
+            </View>
           </View>
           {allergies.length > 0 ? (
             <View style={styles.allergyChipsRow}>
@@ -473,6 +498,9 @@ export function FichaDeSaudeScreen({
           />
         </Card>
 
+        <Text style={styles.footerHint}>
+          Você poderá voltar aqui e modificar a ficha quando quiser, pela aba Ajustes.
+        </Text>
         <Button
           label="Salvar e continuar"
           onPress={handleContinue}

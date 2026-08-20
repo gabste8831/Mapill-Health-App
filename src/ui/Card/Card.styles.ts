@@ -9,6 +9,6 @@ export const styles = StyleSheet.create({
     borderColor: colors.outlineVariant,
     borderRadius: radius.lg,
     padding: spacing.md,
-    gap: spacing.md,
+    gap: spacing.gutter,
   },
 });

@@ -13,6 +13,13 @@ export const spacing = {
 
 export const marginMobile = spacing.md;
 
+/**
+ * Distância da label até o campo dela (e do campo até a mensagem de erro). Um único valor pra
+ * todo formulário — TextField, SelectField e as labels soltas dentro de Card usam este token,
+ * senão o ritmo da tela desalinha conforme cada um é ajustado em separado.
+ */
+export const fieldLabelGap = spacing.sm;
+
 /** Altura da barra de abas — o conteúdo rolável precisa reservar isso no fim pra não ficar sob ela. */
 export const bottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 

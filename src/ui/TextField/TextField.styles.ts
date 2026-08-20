@@ -1,12 +1,10 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
-  // Mesmo espaçamento label→conteúdo usado nas labels soltas dentro de Card (ex: "ALERGIAS",
-  // "CONTATO DE EMERGÊNCIA" em FichaDeSaudeScreen) — um só ritmo em toda a tela de formulário.
   fieldGroup: {
-    gap: spacing.md,
+    gap: fieldLabelGap,
   },
   fieldLabel: {
     ...typography.label,

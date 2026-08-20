@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -19,6 +19,19 @@ export const styles = StyleSheet.create({
   },
   header: {
     gap: spacing.md,
+  },
+  sectionTitle: {
+    ...typography.label,
+    color: colors.onSurface,
+  },
+  sectionHint: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+  },
+  footerHint: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    textAlign: "center",
   },
   subtitle: {
     ...typography.bodySm,
@@ -80,10 +93,8 @@ export const styles = StyleSheet.create({
   allergyInputField: {
     flex: 1,
   },
-  // Mesmo ritmo do Card (md) — o Contato de Emergência tem um wrapper a mais (label + lista +
-  // botão) que Alergias não tem, mas o espaçamento entre eles segue o mesmo padrão.
   fieldGroup: {
-    gap: spacing.md,
+    gap: fieldLabelGap,
   },
   // Sem marginTop extra (diferente de contactList/allergyChipsRow): é só uma legenda simples,
   // não uma lista dinâmica que precise de respiro a mais — mantém o Card compacto quando ainda
