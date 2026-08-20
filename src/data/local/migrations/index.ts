@@ -8,6 +8,7 @@ import { MIGRATION_005_EMERGENCY_CONTACTS_LIST } from "./005-emergency-contacts-
 import { MIGRATION_006_CONSENT_RECORDS } from "./006-consent-records";
 import { MIGRATION_007_PATIENT_FULL_NAME } from "./007-patient-full-name";
 import { MIGRATION_008_PRESCRIPTION_SCHEDULE } from "./008-prescription-schedule";
+import { MIGRATION_009_MEDICATION_FORM_AND_ATTACHMENTS } from "./009-medication-form-and-attachments";
 
 type Migration = {
   version: number;
@@ -24,6 +25,7 @@ const MIGRATIONS: Migration[] = [
   { version: 6, sql: MIGRATION_006_CONSENT_RECORDS },
   { version: 7, sql: MIGRATION_007_PATIENT_FULL_NAME },
   { version: 8, sql: MIGRATION_008_PRESCRIPTION_SCHEDULE },
+  { version: 9, sql: MIGRATION_009_MEDICATION_FORM_AND_ATTACHMENTS },
 ];
 
 /**

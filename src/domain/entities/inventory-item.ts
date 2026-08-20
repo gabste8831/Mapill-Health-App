@@ -8,6 +8,8 @@ export type InventoryItem = SyncableEntity & {
   lowStockAlertEnabled: boolean;
   /** Dias de antecedência pro alerta. Só tem sentido quando `lowStockAlertEnabled` é true. */
   lowStockAlertLeadDays: number | null;
+  /** Onde a caixa está em casa ("na bolsa", "armário da cozinha"). Texto livre do paciente. */
+  storageLocation: string | null;
 };
 
 export type InventoryAdjustmentReason =

@@ -1,4 +1,9 @@
-import type { PosologySchedule, Prescription, ReminderMode } from "../../domain/entities/prescription";
+import type {
+  PosologySchedule,
+  Prescription,
+  PrescriptionAttachmentKind,
+  ReminderMode,
+} from "../../domain/entities/prescription";
 import type { PrescriptionRepository as PrescriptionRepositoryPort } from "../../domain/ports/prescription-repository";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
@@ -11,6 +16,10 @@ type PrescriptionRow = SyncableRow & {
   start_date: string;
   end_date: string | null;
   reminder_mode: string;
+  notes: string | null;
+  attachment_uri: string | null;
+  attachment_kind: string | null;
+  attachment_sync_opt_out: number;
 };
 
 export class PrescriptionRepository
@@ -29,6 +38,10 @@ export class PrescriptionRepository
       startDate: row.start_date,
       endDate: row.end_date,
       reminderMode: row.reminder_mode as ReminderMode,
+      notes: row.notes,
+      attachmentUri: row.attachment_uri,
+      attachmentKind: row.attachment_kind as PrescriptionAttachmentKind | null,
+      attachmentSyncOptOut: row.attachment_sync_opt_out === 1,
       updatedAt: row.updated_at,
       syncedAt: row.synced_at,
       deletedAt: row.deleted_at,
@@ -45,6 +58,10 @@ export class PrescriptionRepository
       start_date: entity.startDate,
       end_date: entity.endDate,
       reminder_mode: entity.reminderMode,
+      notes: entity.notes,
+      attachment_uri: entity.attachmentUri,
+      attachment_kind: entity.attachmentKind,
+      attachment_sync_opt_out: entity.attachmentSyncOptOut ? 1 : 0,
       updated_at: entity.updatedAt,
       synced_at: entity.syncedAt,
       deleted_at: entity.deletedAt,

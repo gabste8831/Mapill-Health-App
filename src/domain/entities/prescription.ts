@@ -1,6 +1,5 @@
+import type { PosologyUnit } from "./medication";
 import type { SyncableEntity } from "./syncable";
-
-export type PosologyUnit = "mg" | "ml" | "comprimido" | "gota" | "UI";
 
 /**
  * Livre por prescrição, não global — cada tratamento tem sua própria criticidade
@@ -29,6 +28,9 @@ export type PosologySchedule =
   /** Sem horário: o paciente toma quando precisa, e nada é agendado. */
   | { kind: "asNeeded" };
 
+/** Receita pode vir da câmera ou de um arquivo já salvo — muda como é aberta pra visualizar. */
+export type PrescriptionAttachmentKind = "image" | "document";
+
 export type Prescription = SyncableEntity & {
   medicationId: string;
   doseAmount: number;
@@ -38,4 +40,14 @@ export type Prescription = SyncableEntity & {
   /** null = tratamento contínuo, não "esqueceram de preencher". */
   endDate: string | null;
   reminderMode: ReminderMode;
+  /** Observação livre do paciente sobre este tratamento (ex: "tomar em jejum"). */
+  notes: string | null;
+  /** Receita anexada. Caminho local — nunca URL remota direta, ver `attachmentSyncOptOut`. */
+  attachmentUri: string | null;
+  attachmentKind: PrescriptionAttachmentKind | null;
+  /**
+   * LGPD: receita é dado sensível de saúde. Se true, o anexo nunca sobe pro Supabase Storage
+   * mesmo com backup habilitado — fica só no aparelho (decisão nº10).
+   */
+  attachmentSyncOptOut: boolean;
 };

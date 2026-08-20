@@ -8,6 +8,7 @@ type InventoryItemRow = SyncableRow & {
   unit: string;
   low_stock_alert_enabled: number;
   low_stock_alert_lead_days: number | null;
+  storage_location: string | null;
 };
 
 export class InventoryRepository
@@ -24,6 +25,7 @@ export class InventoryRepository
       unit: row.unit,
       lowStockAlertEnabled: row.low_stock_alert_enabled === 1,
       lowStockAlertLeadDays: row.low_stock_alert_lead_days,
+      storageLocation: row.storage_location,
       updatedAt: row.updated_at,
       syncedAt: row.synced_at,
       deletedAt: row.deleted_at,
@@ -38,6 +40,7 @@ export class InventoryRepository
       unit: entity.unit,
       low_stock_alert_enabled: entity.lowStockAlertEnabled ? 1 : 0,
       low_stock_alert_lead_days: entity.lowStockAlertLeadDays,
+      storage_location: entity.storageLocation,
       updated_at: entity.updatedAt,
       synced_at: entity.syncedAt,
       deleted_at: entity.deletedAt,

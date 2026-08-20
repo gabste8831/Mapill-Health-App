@@ -40,7 +40,7 @@ Nenhum bloco fecha sem estes seis itens:
 |---|---|
 | Domínio | Entidades (`medication`, `prescription`, `dose-schedule`, `intake-log`, `inventory-item`, `appointment`, `patient-profile`, `consent`, `auth-user`) + ports fechados |
 | Use-cases | `register-intake`, `correct-intake`, `snooze-dose-alarm` |
-| SQLite | `database.ts` + migrations 001→007 + 9 repositórios |
+| SQLite | `database.ts` + migrations 001→009 + 9 repositórios |
 | Design system | `src/ui/` (Button, Card, TextField, SelectField, Checkbox, Chip, IconButton, BottomSheet, Header, LegalAccordion, …) + `shared/theme` com paleta M3 real |
 | Login | Tela + Google via Supabase Auth (`SupabaseAuthGateway`), sessão persistida, "continuar sem login" |
 | Onboarding LGPD | `ConsentimentoScreen` + `consent_records` versionado por `CURRENT_TERMS_VERSION`; bump força reconsentimento |
