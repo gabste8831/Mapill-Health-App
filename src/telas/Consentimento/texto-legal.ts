@@ -5,9 +5,12 @@
  * IMPORTANTE: este texto foi redigido alinhado aos princípios da LGPD (finalidade específica,
  * minimização, base legal de consentimento explícito para dado sensível - art. 7º, I e art.
  * 11, I) para fins de TCC, mas não é uma peça jurídica revisada por um advogado. Antes de
- * qualquer uso além de demonstração acadêmica, vale (a) preencher os campos marcados como
- * [PREENCHER] com a identificação real do responsável pelo tratamento, e (b) validar o texto
- * com o orientador/banca ou um profissional qualificado.
+ * qualquer uso além de demonstração acadêmica, vale validar o texto com o orientador/banca ou
+ * um profissional qualificado.
+ *
+ * Editar TERMS_OF_USE_SECTIONS ou PRIVACY_POLICY_SECTIONS muda o que o paciente consentiu:
+ * bumpar CURRENT_TERMS_VERSION junto, senão o aceite antigo continua valendo para um texto
+ * que ele nunca leu.
  */
 
 import type { LegalSection } from "@/ui";

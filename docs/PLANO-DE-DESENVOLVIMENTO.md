@@ -57,7 +57,6 @@ Nenhum bloco fecha sem estes seis itens:
 - **CMED**: nenhum script de ingestão, nenhum seed embarcado.
 - **Estoque / Agenda / Histórico**: repositórios existem, telas não.
 - **Direitos LGPD**: exportar, excluir e revogar consentimento ainda não existem (bloco D3).
-- **Pendência legal**: `[PREENCHER]` na seção 7 de `texto-legal.ts` (responsável pelo tratamento).
 - **Nada foi verificado em aparelho**: todo o fluxo acima só passou pelo preview web, que não
   persiste nem roda OAuth, câmera ou galeria (ver §5.1).
 
@@ -144,7 +143,7 @@ consentimento não tem revogação.
 - Estado de conta: logado / anônimo, com opção de vincular conta Google depois (usuário que
   escolheu "continuar sem login" precisa poder mudar de ideia sem perder dado local).
 - Consulta dos termos aceitos + reconsentimento quando `CURRENT_TERMS_VERSION` mudar.
-- Preencher o `[PREENCHER]` da seção 7 de `texto-legal.ts`.
+- Preencher a seção 7 de `texto-legal.ts` (responsável pelo tratamento e contato).
 
 **Pronto quando**
 - [x] Dá pra voltar entre login → consentimento → ficha, inclusive pelo botão físico do Android
@@ -158,7 +157,7 @@ consentimento não tem revogação.
       "Entrar com o Google". O login não toca no SQLite. Pendente de device (depende do OAuth).
 - [x] Bump de versão dos termos força reconsentimento na próxima abertura — já funcionava,
       `hasValidConsent()` compara com `CURRENT_TERMS_VERSION`. Pendente de device.
-- [ ] Nenhum `[PREENCHER]` no texto legal.
+- [x] Nenhum `[PREENCHER]` no texto legal — seção 7 identifica o responsável e o contato.
 
 **Revogação de consentimento — movida para o D3.** A LGPD (art. 8º §5º) exige o direito de
 revogar, mas num app assim revogar só tem um significado prático: parar de tratar e apagar os
