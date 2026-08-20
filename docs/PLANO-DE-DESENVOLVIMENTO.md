@@ -136,23 +136,32 @@ consentimento não tem revogação.
 
 **Escopo**
 - Tela de **edição** da ficha de saúde (hoje só existe o preenchimento de primeira execução).
-- Foto de perfil (câmera/galeria, salva local — anexo com opt-out de nuvem, decisão nº10).
+- Foto de perfil (galeria, salva local — anexo com opt-out de nuvem, decisão nº10).
 - Estado de conta: logado / anônimo, com opção de vincular conta Google depois (usuário que
   escolheu "continuar sem login" precisa poder mudar de ideia sem perder dado local).
-- Revogação de consentimento + reconsentimento quando `CURRENT_TERMS_VERSION` mudar.
-- Preencher o `[PREENCHER]` da seção 7 de `legal-content.ts`.
+- Consulta dos termos aceitos + reconsentimento quando `CURRENT_TERMS_VERSION` mudar.
+- Preencher o `[PREENCHER]` da seção 7 de `texto-legal.ts`.
 
 **Pronto quando**
 - [x] Dá pra voltar entre login → consentimento → ficha, inclusive pelo botão físico do Android
-      (`useFirstRunGate.goBack`). Verificado no preview web; comportamento do botão físico
-      pendente de device.
-- [ ] Foto de perfil funciona de verdade: instalar `expo-image-picker`, declarar as permissões
-      de galeria/câmera no `app.json`, e ligar o `onPress` do placeholder que já existe em
-      `PatientProfileScreen.tsx`. Hoje o botão não faz nada.
-- [ ] Perfil editável a qualquer momento pela aba Ajustes.
-- [ ] Usuário anônimo consegue logar depois **sem perder** os dados locais já criados.
-- [ ] Bump de versão dos termos força reconsentimento na próxima abertura.
+      (`useFirstRunGate.goBack`). Verificado no preview web; botão físico pendente de device.
+- [x] Foto de perfil funciona: `expo-image-picker` instalado, permissão de galeria declarada no
+      `app.json`, e o arquivo copiado pro diretório de documentos antes de salvar. Pendente de
+      device — o picker não roda no preview web.
+- [x] Perfil editável a qualquer momento pela aba Ajustes (rota `/ficha`, a mesma tela em modo
+      edição).
+- [x] Usuário anônimo consegue logar depois sem perder os dados locais: Ajustes → CONTA →
+      "Entrar com o Google". O login não toca no SQLite. Pendente de device (depende do OAuth).
+- [x] Bump de versão dos termos força reconsentimento na próxima abertura — já funcionava,
+      `hasValidConsent()` compara com `CURRENT_TERMS_VERSION`. Pendente de device.
 - [ ] Nenhum `[PREENCHER]` no texto legal.
+
+**Revogação de consentimento — movida para o D3.** A LGPD (art. 8º §5º) exige o direito de
+revogar, mas num app assim revogar só tem um significado prático: parar de tratar e apagar os
+dados. É a mesma ação do direito de exclusão (art. 18), que já está no escopo do D3. Um botão
+"revogar" solto numa tela de leitura, que apenas devolvesse o usuário ao consentimento, seria
+pior que não ter. A tela de Ajustes → Termos e privacidade cobre a parte que faz sentido agora:
+ler o texto vigente e ver data e versão do aceite.
 
 **Rastreabilidade**: LGPD art. 8º §5º (revogação do consentimento), art. 11 (dado sensível).
 
@@ -544,16 +553,22 @@ destaque, e um resumo exportável (PDF/imagem) que o paciente possa mostrar ao m
 
 ### D3. Configurações + direitos LGPD
 
-**Escopo** (decisão nº9): ficha médica, tema/contraste, backup e status de conta, permissões do
-app, **exportar todos os dados** e **excluir conta** (hard delete no Supabase + purge local real,
-não só ocultar da UI).
+**Escopo** (decisão nº9): tema/contraste, permissões do app, **exportar todos os dados**,
+**excluir conta** (hard delete no Supabase + purge local real, não só ocultar da UI) e
+**revogar consentimento** — herdada do A2, onde ficou claro que revogar e excluir são a mesma
+ação: revogar o consentimento retira a base legal de todo o tratamento, então o que resta é
+apagar. Vira uma ação só, "Revogar consentimento e apagar meus dados".
+
+A ficha de saúde, o status de conta e a consulta dos termos já foram entregues no A2 —
+a aba Ajustes existe, este bloco só acrescenta seções a ela.
 
 **Pronto quando**
 - [ ] Exportação gera arquivo legível com todos os dados do titular.
 - [ ] Exclusão apaga de verdade nos dois lados — verificado no painel do Supabase.
 - [ ] Exclusão tem confirmação em duas etapas.
+- [ ] Revogar consentimento apaga os dados e devolve o app ao estado de primeira execução.
 
-**Rastreabilidade**: LGPD art. 18 (direitos do titular).
+**Rastreabilidade**: LGPD art. 18 (direitos do titular), art. 8º §5º (revogação).
 
 ---
 
@@ -806,3 +821,7 @@ gerado no servidor do EAS.
 | 2026-08-20 | A2 | Parcial | **Retorno entre as etapas da primeira execução** implementado (`useFirstRunGate.goBack`/`canGoBack`): consentimento → login e ficha → consentimento, com botão na tela e botão físico do Android (`BackHandler`) fazendo a mesma coisa. Motivo: a escolha de entrada é arrependível — quem clicou em "continuar sem login" precisa poder voltar e entrar com Google. Nada é desfeito ao voltar; `acceptConsent` passou a não duplicar registro quando já existe consentimento válido da versão vigente. Heurística de Nielsen nº3 (controle e liberdade do usuário). |
 | 2026-08-20 | Auditoria | — | **Persistência conferida estaticamente** (não dá pra executar sem device, §5.1): paridade de colunas OK em `consent_records` (6/6) e `patient_profiles` (as 14 colunas gravadas pelo `toRow` existem — base na 002 + `date_of_birth` 003 + `biological_sex` 004 + `emergency_contacts` 005; as 3 colunas soltas da 004 ficam NULL, como já documentado no repositório). `runMigrations` usa `PRAGMA user_version` e é idempotente. Nenhum erro de schema esperado no device. |
 | 2026-08-20 | A2 | Pendência confirmada | **Foto de perfil não funciona** — o `Pressable` de "Adicionar foto" em `PatientProfileScreen.tsx` não tem `onPress` (é placeholder visual, com `TODO` no código). `expo-image-picker` não está instalado e não há permissão de galeria/câmera declarada no `app.json`. O campo `photo_uri` existe no schema e no domínio, mas nada escreve nele. Continua no escopo do bloco A2. |
+| 2026-08-20 | UI | Concluído | **`Header` padrão do kit** com duas variantes: marca + atalho de conta (Home) e título centrado + voltar (resto). Os dois lados têm largura fixa mesmo vazios — é o que mantém o título opticamente centrado quando só um lado tem botão. Header nativo do Stack de cadastro desligado pra não duplicar. |
+| 2026-08-20 | Ficha | Concluído | **Nome e sobrenome viraram um campo só** (migration 007, que remove as colunas antigas de verdade porque eram `NOT NULL` sem default). Só o nome bloqueia o "Salvar e continuar"; a data de nascimento virou opcional, mas ou está vazia ou completa e válida — meia digitada bloqueia, porque descartar dado clínico em silêncio é pior que exigir o campo. Saiu o "Preencher depois", que deixava entrar no app sem dado nenhum. |
+| 2026-08-20 | A2 | Quase pronto | **Aba Ajustes entregue**: edição da ficha (rota `/ficha`, a mesma tela em modo edição), estado da conta (entrar depois sem perder dado local) e consulta dos termos com data/versão do aceite. Foto de perfil funcionando (só galeria; `cameraPermission: false` por minimização — o app ainda não tira foto). O arquivo escolhido é copiado pro diretório de documentos: a URI que o picker devolve é de cache e o sistema a limpa, o que faria a foto sumir sozinha depois. Falta só o `[PREENCHER]` do texto legal, que depende de dado do responsável. |
+| 2026-08-20 | Preview web | Concluído | Barra de abas do navegador desenhada em JS em vez do tablist do Radix. A ramificação fica **dentro** do `_layout.tsx`: arquivo de rota vem do `require.context` do expo-router, que não resolve sufixo de plataforma (`getRoutes` não trata `.web`) — um `_layout.web.tsx` viraria uma rota chamada "_layout.web" e nunca substituiria a outra. |

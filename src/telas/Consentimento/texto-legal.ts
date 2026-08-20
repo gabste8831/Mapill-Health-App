@@ -57,7 +57,7 @@ export const TERMS_OF_USE_SECTIONS: LegalSection[] = [
     title: "1. Sobre o Mapill",
     paragraphs: [
       "O Mapill é um aplicativo de apoio à rotina terapêutica, desenvolvido como Trabalho de " +
-        "Conclusão de Curso (TCC) do curso de Sistemas de Informação da UNIDAVI. Ele ajuda " +
+        "Conclusão de Curso do curso de Sistemas de Informação pela UNIDAVI. Ele ajuda " +
         "você a registrar medicamentos, controlar estoque, acompanhar doses e organizar " +
         "compromissos de saúde (consultas, exames, renovação de receita). Serve também como " +
         "uma central das suas anotações clínicas - a ficha de saúde reúne informações que " +
@@ -165,7 +165,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
   {
     title: "7. Responsável pelo tratamento e contato",
     paragraphs: [
-      "O Mapill é um projeto acadêmico (TCC) do curso de Sistemas de Informação da " +
+      "O Mapill é um projeto acadêmico do curso de Sistemas de Informação pela " +
         "UNIDAVI. [PREENCHER: nome do responsável pelo tratamento e e-mail de contato antes " +
         "de qualquer uso além de demonstração acadêmica.]",
     ],
