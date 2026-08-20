@@ -7,7 +7,7 @@ export default function ScannerScreen() {
 
   return (
     <EmConstrucaoScreen
-      icon="barcode-outline"
+      icon="barcode-scan"
       title="Escanear código"
       description="A leitura do código de barras da caixa ainda está sendo desenvolvida."
       onBack={() => router.back()}

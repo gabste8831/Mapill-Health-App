@@ -30,6 +30,16 @@ export const typography: Record<string, TextStyle> = {
     fontSize: 18,
     lineHeight: 24,
   },
+  /**
+   * Mesmo tamanho do `headlineSm`, em peso normal. Em 18px a Plus Jakarta fica encorpada demais
+   * em semibold — este é o título de item que não precisa disputar atenção, como o rótulo dos
+   * cards de escolha.
+   */
+  headlineSmRegular: {
+    fontFamily: "PlusJakartaSans_400Regular",
+    fontSize: 18,
+    lineHeight: 24,
+  },
   bodyLg: {
     fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 16,

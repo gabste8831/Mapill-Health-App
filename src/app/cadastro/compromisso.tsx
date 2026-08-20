@@ -7,7 +7,7 @@ export default function CompromissoScreen() {
 
   return (
     <EmConstrucaoScreen
-      icon="calendar-outline"
+      icon="calendar-month"
       title="Novo compromisso"
       description="O cadastro de consultas, exames e renovação de receita ainda está sendo desenvolvido."
       onBack={() => router.back()}
