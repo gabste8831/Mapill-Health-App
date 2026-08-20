@@ -1,6 +1,6 @@
 import * as Crypto from "expo-crypto";
 import { useCallback, useEffect, useState } from "react";
-import { Platform } from "react-native";
+import { BackHandler, Platform } from "react-native";
 
 import { CURRENT_TERMS_VERSION } from "@/components/screens/OnboardingConsentScreen/legal-content";
 import type { PatientProfileDraft } from "@/components/screens/PatientProfileScreen/PatientProfileScreen";
@@ -26,6 +26,19 @@ export type FirstRunGate = {
   acceptConsent: () => Promise<void>;
   saveProfile: (draft: PatientProfileDraft) => Promise<void>;
   skipProfile: () => void;
+  /** Volta uma etapa. No-op em `login` (não há pra onde voltar) e em `app` (gate encerrado). */
+  goBack: () => void;
+  /** A tela usa isso pra decidir se desenha o botão de voltar. */
+  canGoBack: boolean;
+};
+
+/** Etapa anterior de cada passo — `null` quando não há retorno possível. */
+const PREVIOUS_STEP: Record<FirstRunStep, FirstRunStep | null> = {
+  login: null,
+  consent: "login",
+  profile: "consent",
+  // O gate termina em `app`: a partir daí quem manda na navegação é o expo-router.
+  app: null,
 };
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`), então lá o fluxo é sempre completo. */
@@ -94,7 +107,9 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   }, [continueAfterLogin]);
 
   const acceptConsent = useCallback(async () => {
-    if (persistsLocally) {
+    // Voltar da ficha pro consentimento e aceitar de novo não pode gerar um segundo registro:
+    // o que a LGPD exige é a prova de consentimento da versão vigente, e ela já existe.
+    if (persistsLocally && !(await hasValidConsent())) {
       const consentRepository = new ConsentRepository();
       const now = new Date().toISOString();
       // Prova de consentimento persistida e versionada — é o registro que comprova o
@@ -139,6 +154,34 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
 
   const skipProfile = useCallback(() => setStep("app"), []);
 
+  const canGoBack = PREVIOUS_STEP[step] !== null;
+
+  /**
+   * Retorno explícito entre as etapas da primeira execução. Existe porque a escolha de entrada
+   * é arrependível: quem clicou em "continuar sem login" precisa poder voltar e entrar com o
+   * Google sem reinstalar o app. Nada é desfeito ao voltar — o consentimento já registrado
+   * continua válido (ver `acceptConsent`), só a tela exibida muda.
+   *
+   * Heurística de Nielsen nº3 ("controle e liberdade do usuário"): saída de emergência clara
+   * de um fluxo obrigatório.
+   */
+  const goBack = useCallback(() => {
+    setStep((current) => PREVIOUS_STEP[current] ?? current);
+  }, []);
+
+  // No Android o botão físico de voltar precisa fazer a mesma coisa que o botão da tela —
+  // sem isso ele fecharia o app no meio do onboarding, que é justamente o que o usuário não
+  // espera. Só registramos o handler quando há pra onde voltar, pra não sequestrar o gesto
+  // na tela de login (lá fechar o app é o comportamento correto).
+  useEffect(() => {
+    if (Platform.OS !== "android" || !canGoBack) return;
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      goBack();
+      return true; // evento consumido — impede o comportamento padrão de encerrar a activity.
+    });
+    return () => subscription.remove();
+  }, [canGoBack, goBack]);
+
   return {
     step,
     signInWithGoogle,
@@ -146,5 +189,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     acceptConsent,
     saveProfile,
     skipProfile,
+    goBack,
+    canGoBack,
   };
 }

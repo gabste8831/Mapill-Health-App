@@ -4,7 +4,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, Checkbox } from "@/components/ui";
+import { Button, Checkbox, IconButton } from "@/components/ui";
 import { colors } from "@/shared/theme";
 import {
   APP_PURPOSE_TEXT,
@@ -18,6 +18,11 @@ import { styles } from "./OnboardingConsentScreen.styles";
 type OnboardingConsentScreenProps = {
   /** Só chamado depois dos dois checkboxes marcados — registra o consentimento e libera o app. */
   onAccept: () => void;
+  /**
+   * Volta pra tela de login. Omitir esconde o botão — a tela não decide sozinha se há
+   * retorno possível, quem sabe isso é o gate (`useFirstRunGate.canGoBack`).
+   */
+  onBack?: () => void;
 };
 
 type LegalAccordionProps = {
@@ -68,7 +73,7 @@ function LegalAccordion({ title, sections }: LegalAccordionProps) {
 // dado de saúde (sensível por definição legal) em toda funcionalidade central, então não existe
 // um "modo sem consentimento" que faça sentido oferecer. Ver decisão de onboarding em
 // screens-and-flows.md e a nota de rodapé em legal-content.ts sobre revisão jurídica.
-export function OnboardingConsentScreen({ onAccept }: OnboardingConsentScreenProps) {
+export function OnboardingConsentScreen({ onAccept, onBack }: OnboardingConsentScreenProps) {
   const [hasReadTerms, setHasReadTerms] = useState(false);
   const [hasConsentedToDataProcessing, setHasConsentedToDataProcessing] = useState(false);
 
@@ -82,6 +87,16 @@ export function OnboardingConsentScreen({ onAccept }: OnboardingConsentScreenPro
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {onBack ? (
+          <IconButton
+            variant="outline"
+            style={styles.backButton}
+            onPress={onBack}
+            accessibilityLabel="Voltar para a tela de entrada"
+            icon={<Ionicons name="arrow-back" size={20} color={colors.onSurface} />}
+          />
+        ) : null}
+
         <View style={styles.header}>
           <Text style={styles.title}>Antes de começar</Text>
           <Text style={styles.purposeText}>{APP_PURPOSE_TEXT}</Text>

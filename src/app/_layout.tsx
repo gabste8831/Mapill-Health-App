@@ -73,7 +73,7 @@ export default function RootLayout() {
   if (gate.step === 'consent') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <OnboardingConsentScreen onAccept={gate.acceptConsent} />
+        <OnboardingConsentScreen onAccept={gate.acceptConsent} onBack={gate.canGoBack ? gate.goBack : undefined} />
       </ThemeProvider>
     );
   }
@@ -81,7 +81,11 @@ export default function RootLayout() {
   if (gate.step === 'profile') {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <PatientProfileScreen onContinue={gate.saveProfile} onSkip={gate.skipProfile} />
+        <PatientProfileScreen
+          onContinue={gate.saveProfile}
+          onSkip={gate.skipProfile}
+          onBack={gate.canGoBack ? gate.goBack : undefined}
+        />
       </ThemeProvider>
     );
   }

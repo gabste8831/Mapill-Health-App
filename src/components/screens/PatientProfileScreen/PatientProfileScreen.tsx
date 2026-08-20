@@ -58,6 +58,11 @@ type PatientProfileScreenProps = {
   onContinue: (draft: PatientProfileDraft) => void;
   /** "Preencher depois": não salva nada agora, o paciente completa a ficha em Configurações. */
   onSkip: () => void;
+  /**
+   * Volta pra tela de consentimento. Omitir esconde o botão — quem sabe se há retorno
+   * possível é o gate (`useFirstRunGate.canGoBack`), não esta tela.
+   */
+  onBack?: () => void;
 };
 
 /** Aceita só dígitos e insere as barras conforme o paciente digita — sem depender de libs de máscara. */
@@ -260,6 +265,7 @@ function EmergencyContactsField({
 export function PatientProfileScreen({
   onContinue,
   onSkip,
+  onBack,
 }: PatientProfileScreenProps) {
   const { scrollViewRef, scrollToFocusedInput, onScroll } =
     useScrollToFocusedInput();
@@ -329,6 +335,16 @@ export function PatientProfileScreen({
         onScroll={onScroll}
         scrollEventThrottle={16}
       >
+        {onBack ? (
+          <IconButton
+            variant="outline"
+            style={styles.backButton}
+            onPress={onBack}
+            accessibilityLabel="Voltar para o consentimento"
+            icon={<Ionicons name="arrow-back" size={20} color={colors.onSurface} />}
+          />
+        ) : null}
+
         <View style={styles.header}>
           <Text style={styles.title}>Sua ficha de saúde</Text>
           <Text style={styles.subtitle}>
