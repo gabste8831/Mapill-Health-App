@@ -115,10 +115,15 @@ nova vira gambiarra no `_layout.tsx`.
 **Não entra**: conteúdo das telas novas — só rotas com placeholder.
 
 **Pronto quando**
-- [ ] As 4 tabs navegam e mantêm estado. — implementado, **pendente de teste em device/emulador**.
-- [ ] O FAB abre "O que deseja cadastrar? → Medicação | Compromisso" e daí "Como? → Escanear | Manual" (ordem já decidida em `screens-and-flows.md` §2). — implementado, **pendente de teste em device/emulador**.
-- [ ] Botão físico de voltar (Android) se comporta corretamente em todos os modais. — **pendente de teste em device/emulador** (depende do dev build, ver seção 5).
+- [ ] As 4 tabs navegam e mantêm estado. — implementado; **preview web habilitado** (bundle
+      compila e renderiza), **comportamento pendente de device**.
+- [ ] O FAB abre "O que deseja cadastrar? → Medicação | Compromisso" e daí "Como? → Escanear | Manual" (ordem já decidida em `screens-and-flows.md` §2). — implementado e navegável no preview
+      web; **pendente de device**.
+- [ ] Botão físico de voltar (Android) se comporta corretamente em todos os modais. — **só
+      verificável em device** (ver §5). Não tem equivalente no web — item permanentemente
+      dependente do dev build.
 - [x] `_layout.tsx` não contém mais lógica de decisão de fluxo. — `useFirstRunGate`/`useDatabaseReady` ligados; `_layout.tsx` só decide o que renderizar pro `step` atual.
+- [x] Preview web do shell funciona (pré-requisito pra trabalhar layout sem aparelho, §5.1).
 
 **Rastreabilidade**: §2.6 (separação de responsabilidades).
 
@@ -591,7 +596,73 @@ Não entram nesta versão, mesmo que a ideia seja boa:
 
 ---
 
-## 5. Como rodar em aparelho físico (ambiente de teste)
+## 5. Ambientes de trabalho
+
+O projeto é desenvolvido em dois contextos diferentes, e **eles têm objetivos diferentes**.
+Confundir os dois é o que fez o bloco A1 travar em problema de plataforma em vez de avançar em
+funcionalidade. A regra abaixo é normativa.
+
+| Ambiente | Onde | Para que serve | Autoridade sobre |
+|---|---|---|---|
+| **Preview web** | `npm run web`, localhost | **Ver** a tela: layout, fluxo de navegação, texto, espaçamento, cor | Nada. Web nunca decide se uma feature está pronta |
+| **Dev build (Android)** | aparelho físico / emulador | Validar comportamento real: SQLite, notificações, OAuth, botão de voltar | Tudo. É o único ambiente que fecha um "Pronto quando" |
+
+### 5.1 Política de plataforma — web é vitrine, não alvo
+
+**Web não é plataforma suportada do Mapill.** É um espelho visual para trabalhar no layout e no
+fluxo sem depender de aparelho. Consequências práticas:
+
+- **Nunca** gastar tempo fazendo uma API nativa funcionar de verdade no navegador. SQLite,
+  notificações, câmera/scanner e OAuth **não precisam funcionar no web** — precisam só **não
+  quebrar o bundle**.
+- Se uma lib nativa impedir o app de *renderizar* no web, a correção é **isolar**, não portar:
+  criar um arquivo `.web.tsx` irmão com uma versão visual simplificada, ou `Platform.OS === "web"`
+  com um caminho neutro. O padrão já está em uso no repo — `useDatabaseReady` pula as migrations
+  no web e libera a UI, e `useFirstRunGate` usa `persistsLocally` pra não chamar repositório
+  nenhum. **Copiar esse padrão em vez de inventar outro.**
+- Um bug que só existe no web **não** é bug do app. Anotar aqui e seguir — nunca vira tarefa de
+  bloco.
+- No web o fluxo de primeira execução roda inteiro a cada reload (nada persiste, por design).
+  Pra chegar rápido no app: *Continuar sem login* → aceitar consentimento → *Pular* na ficha.
+
+### 5.2 Regra de resolução de módulo (Metro)
+
+Erro `Unable to resolve module X from node_modules/...` no web é **quase sempre** conflito de
+resolução, não código do projeto. Antes de mexer em qualquer coisa, checar nesta ordem:
+
+1. A dependência está mesmo instalada? (`npm install` — já mordeu uma vez: `expo-auth-session`
+   estava no `package.json` e ausente de `node_modules`, o que derrubava o app no boot em
+   **todas** as plataformas, não só no web.)
+2. O pacote expõe esse subpath só pelo mapa `exports` do `package.json`? Então
+   `unstable_enablePackageExports` **precisa** estar habilitado.
+3. Só então considerar um alias no `metro.config.js`.
+
+**`config.resolver.unstable_enablePackageExports` deve permanecer no padrão (habilitado).**
+Já foi desabilitado uma vez como workaround pro `react-native-svg`, e isso quebrou o bundle web
+inteiro na tela de tabs: o `NativeTabs` no web usa `@radix-ui/react-tabs`, e
+`@radix-ui/primitive` expõe `./is-development` **exclusivamente** pelo mapa `exports` — não há
+arquivo físico com esse nome. O workaround do svg ficou obsoleto na 15.15.4 (a lib deixou de
+declarar `exports`, então a resolução clássica dá conta). Ver comentário em `metro.config.js`.
+
+Lição geral: **kill switch global de resolver é dívida técnica** — ele conserta uma lib e
+quebra silenciosamente todas as outras que dependem do comportamento padrão. Preferir sempre o
+alias pontual.
+
+### 5.3 Checagem antes de dar um bloco como "visualmente pronto"
+
+```bash
+npx tsc --noEmit     # precisa sair limpo
+npx expo lint        # 0 erros (1 warning conhecido em inventory-repository.ts)
+npm run web          # precisa BUNDLAR e renderizar — não precisa persistir nada
+```
+
+Se o `tsc` reclamar de rota (`"/cadastro/x" is not assignable to...`), os tipos de rota em
+`.expo/types/router.d.ts` estão obsoletos: **subir o dev server uma vez** regenera. Não é erro
+de código.
+
+---
+
+## 5.4 Como rodar em aparelho físico (ambiente de teste)
 
 Estado do projeto: **managed** (sem pastas `android/`/`ios/`), com `expo-dev-client` já instalado
 e o perfil `development` já configurado no `eas.json`. Metade do caminho do dev build já está feita.
@@ -679,7 +750,6 @@ estreitamento de tipo. Corrigir trocando por um guard que recebe o cliente e o d
 ---
 
 ## 6. Log de progresso
-
 | Data | Bloco | Status | Observação |
 |---|---|---|---|
 | 2026-08-19 | — | — | Plano criado a partir da auditoria do repositório |
@@ -687,3 +757,5 @@ estreitamento de tipo. Corrigir trocando por um guard que recebe o cliente e o d
 | 2026-08-19 | A2 | Pendente | Teste do login com Google em aparelho físico (ver seção 5) |
 | 2026-08-19 | A1 | Quase pronto | Hooks ligados ao `_layout.tsx`; tabs reais (`(tabs)/`) + stack modal `cadastro/` (`escolha`→`medicamento`→`scanner`/manual, `compromisso`) criadas; FAB da Home navega pra `cadastro/escolha`; template residual removido (`explore.tsx`, `app-tabs*.tsx`, `web-badge.tsx`, `themed-*.tsx`, `external-link.tsx`, `hint-row.tsx`, `ui/collapsible.tsx`, `use-theme`/`use-color-scheme`). `npx tsc --noEmit` limpo; `npx expo lint` limpo (0 erros — só 1 warning pré-existente em `inventory-repository.ts`, fora de escopo). ESLint não estava configurado no repo; `expo lint` configurou sozinho na primeira execução. Faltam só os 3 itens de "Pronto quando" que dependem de rodar em device/emulador de verdade (tabs navegando, FAB, botão de voltar nos modais) — retomar testando no dev build junto com a A2. |
 | 2026-08-19 | A2 (bug fix) | Concluído | Corrigido `assertConfigured` em `supabase-auth-gateway.ts` (TS1225/TS18047 — assertion signature só vale sobre parâmetro, não sobre import de módulo); trocado por `ensureSupabaseConfigured()` que retorna o cliente não-nulo. |
+| 2026-08-20 | Ambientes | Concluído | Preview web destravado e política de ambientes documentada (§5, §5.1–5.3). Dois bloqueadores reais corrigidos: (1) `expo-auth-session` estava no `package.json` mas ausente de `node_modules` — como `_layout.tsx` → `useFirstRunGate` → `SupabaseAuthGateway` importa esse módulo, o app quebrava no boot em **todas** as plataformas, não só no web (era a pendência nº1 do checklist de login); (2) `metro.config.js` desabilitava `unstable_enablePackageExports` como workaround do `react-native-svg`, e isso derrubava o bundle web na tela de tabs (`NativeTabs` web → `@radix-ui/react-tabs` → `@radix-ui/primitive/is-development`, subpath que só existe no mapa `exports`). Workaround do svg estava obsoleto desde a 15.15.4 (lib não declara mais `exports`). Verificado: `npx tsc --noEmit` limpo, `npx expo lint` 0 erros, bundle web 200 OK sem erro de resolução. |
+| 2026-08-20 | A1 | Fechado no que cabe aqui | Restam só itens que exigem device (botão de voltar nos modais, confirmação de estado das tabs). Próximo passo de código: **B2**, com a ressalva de persistência do §5.1. |
