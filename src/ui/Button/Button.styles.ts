@@ -5,7 +5,7 @@ import { colors, radius, spacing, typography } from "@/shared/theme";
 export const styles = StyleSheet.create({
   base: {
     height: 52,
-    borderRadius: radius.full,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
@@ -15,10 +15,10 @@ export const styles = StyleSheet.create({
   primary: {
     backgroundColor: colors.primary,
   },
+  /** Mesma lógica do Card: sombra em vez de borda, pra ler como superfície e não como contorno. */
   outline: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
   },
   text: {
     backgroundColor: "transparent",

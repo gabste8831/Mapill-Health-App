@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
     bottom: bottomTabInset + spacing.md,
     width: 56,
     height: 56,
-    borderRadius: radius.full * 2,
+    borderRadius: radius.full,
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",

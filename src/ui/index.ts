@@ -9,6 +9,7 @@ export * from "./Chip/Chip";
 export * from "./GoogleLogo/GoogleLogo";
 export * from "./Header/Header";
 export * from "./IconButton/IconButton";
+export * from "./Accordion/Accordion";
 export * from "./KeyboardAwareScrollView/KeyboardAwareScrollView";
 export * from "./LegalAccordion/LegalAccordion";
 export * from "./SelectField/SelectField";

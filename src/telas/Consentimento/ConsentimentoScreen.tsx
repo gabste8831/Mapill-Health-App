@@ -2,7 +2,8 @@ import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, Checkbox, Header, LegalAccordion } from "@/ui";
+import { useScrollToExpanded } from "@/hooks/use-scroll-to-expanded";
+import { Accordion, Button, Checkbox, Header, LegalAccordion } from "@/ui";
 import {
   APP_PURPOSE_TEXT,
   DATA_PRACTICE_HIGHLIGHTS,
@@ -29,6 +30,8 @@ export function ConsentimentoScreen({ onAccept, onBack }: ConsentimentoScreenPro
 
   const canContinue = hasReadTerms && hasConsentedToDataProcessing;
 
+  const { scrollViewRef, registerItem, scrollToItem } = useScrollToExpanded();
+
   function handleContinue() {
     if (!canContinue) return;
     onAccept();
@@ -37,23 +40,44 @@ export function ConsentimentoScreen({ onAccept, onBack }: ConsentimentoScreenPro
   return (
     <SafeAreaView style={styles.safeArea}>
       <Header title="Antes de começar" onBack={onBack} />
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
         <Text style={styles.purposeText}>{APP_PURPOSE_TEXT}</Text>
 
+        {/* Resumo das práticas de dados: leitura breve, destacada do texto legal completo. */}
         <View style={styles.highlightList}>
           {DATA_PRACTICE_HIGHLIGHTS.map((highlight) => (
-            <View key={highlight.title} style={styles.highlightRow}>
-              <View style={styles.highlightTextGroup}>
-                <Text style={styles.highlightTitle}>{highlight.title}</Text>
+            <View key={highlight.title} onLayout={registerItem(highlight.title)}>
+              <Accordion
+                title={highlight.title}
+                tone="azul"
+                toggleLabel
+                onToggle={scrollToItem(highlight.title)}>
                 <Text style={styles.highlightDescription}>{highlight.description}</Text>
-              </View>
+              </Accordion>
             </View>
           ))}
         </View>
 
+        <View style={styles.divider} />
+
         <View style={styles.legalSectionsGroup}>
-          <LegalAccordion title="Termos de Uso" sections={TERMS_OF_USE_SECTIONS} />
-          <LegalAccordion title="Política de Privacidade" sections={PRIVACY_POLICY_SECTIONS} />
+          <View onLayout={registerItem("Termos de Uso")}>
+            <LegalAccordion
+              title="Termos de Uso"
+              sections={TERMS_OF_USE_SECTIONS}
+              onToggle={scrollToItem("Termos de Uso")}
+            />
+          </View>
+          <View onLayout={registerItem("Política de Privacidade")}>
+            <LegalAccordion
+              title="Política de Privacidade"
+              sections={PRIVACY_POLICY_SECTIONS}
+              onToggle={scrollToItem("Política de Privacidade")}
+            />
+          </View>
         </View>
 
         <View style={styles.consentGroup}>

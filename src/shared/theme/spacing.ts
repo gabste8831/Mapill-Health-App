@@ -23,10 +23,17 @@ export const fieldLabelGap = spacing.sm;
 /** Altura da barra de abas — o conteúdo rolável precisa reservar isso no fim pra não ficar sob ela. */
 export const bottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 
-/** Radius sutil e "clínico" do protótipo — bem mais discreto que arredondamentos genéricos. */
+/**
+ * Meio-termo entre o "clínico" dos protótipos (cantos quase retos) e o arredondado de app de
+ * consumo. Canto quase reto somado a borda de 1px é a gramática visual de um formulário HTML —
+ * é o que fazia as telas de lista parecerem planilha.
+ *
+ * `full` é círculo/pílula de verdade: usar direto, sem multiplicar. Botão usa `lg`, não `full`,
+ * pra ficar no mesmo idioma dos cards em vez de virar pílula.
+ */
 export const radius = {
-  sm: 2,
-  md: 4,
-  lg: 8,
-  full: 12,
+  sm: 6,
+  md: 10,
+  lg: 14,
+  full: 999,
 } as const;

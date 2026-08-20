@@ -13,6 +13,9 @@
  * que ele nunca leu.
  */
 
+import type { Ionicons } from "@expo/vector-icons";
+import type { ComponentProps } from "react";
+
 import type { LegalSection } from "@/ui";
 
 /** Bump ao editar TERMS_OF_USE_SECTIONS ou PRIVACY_POLICY_SECTIONS - força re-consentimento. */
@@ -26,16 +29,19 @@ export const APP_PURPOSE_TEXT =
 export type DataPracticeHighlight = {
   title: string;
   description: string;
+  icon: ComponentProps<typeof Ionicons>["name"];
 };
 
 export const DATA_PRACTICE_HIGHLIGHTS: DataPracticeHighlight[] = [
   {
+    icon: "locate-outline",
     title: "Finalidade específica",
     description:
       "Usamos seus dados só para o que o Mapill se propõe a fazer: lembrar você de tomar " +
       "seus medicamentos, controlar estoque e organizar seus compromissos.",
   },
   {
+    icon: "lock-closed-outline",
     title: "Dados sensíveis",
     description:
       "Informações de saúde (medicamentos, alergias, tipo sanguíneo etc.) são dados " +
@@ -43,12 +49,14 @@ export const DATA_PRACTICE_HIGHLIGHTS: DataPracticeHighlight[] = [
       "da LGPD (Lei Geral de Proteção de Dados).",
   },
   {
+    icon: "cloud-outline",
     title: "Backup opcional de dados",
     description:
       "Login com Google habilita backup dos seus dados em nuvem. É opcional. Seu aplicativo funcionará " +
       "independente dessa etapa, embora seja interessante para não perder dados caso troque de aparelho ou desinstale o app.",
   },
   {
+    icon: "key-outline",
     title: "Seus dados, suas regras",
     description:
       "Você pode acessar, corrigir ou excluir seus dados quando quiser, em Configurações.",

@@ -61,7 +61,7 @@ export const styles = StyleSheet.create({
   photoPlaceholder: {
     width: 72,
     height: 72,
-    borderRadius: radius.full * 3,
+    borderRadius: radius.full,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
     borderStyle: "dashed",
@@ -73,7 +73,7 @@ export const styles = StyleSheet.create({
   photoFrame: {
     width: 72,
     height: 72,
-    borderRadius: radius.full * 3,
+    borderRadius: radius.full,
     overflow: "hidden",
     backgroundColor: colors.surfaceContainerLow,
   },

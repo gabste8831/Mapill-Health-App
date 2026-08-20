@@ -45,6 +45,7 @@ export default function AjustesRoute() {
   return (
     <AjustesScreen
       patientName={patientName}
+      photoUri={draft?.photoUri ?? null}
       accountEmail={accountEmail}
       onEditProfile={() => router.push("/ficha")}
       onOpenTerms={() => router.push("/termos")}

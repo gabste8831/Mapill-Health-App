@@ -1,44 +1,44 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
   },
+  /**
+   * `paddingTop` igual ao `gap`: o primeiro filho é um parágrafo solto, e com o padrão de 16 no
+   * topo contra 48 de gap ele ficava colado no header e afastado do que vem abaixo.
+   */
   scrollContent: {
     padding: spacing.md,
-    gap: spacing.xl,
+    paddingTop: spacing.gutter,
+    gap: 28,
     paddingBottom: spacing.xxl,
   },
   purposeText: {
     ...typography.bodySm,
     color: colors.outline,
   },
+  /**
+   * Mesma régua do divisor da tela de login. Não encosta nas laterais de propósito: a linha
+   * curta separa sem virar mais uma borda dura na tela.
+   */
+  divider: {
+    width: "90%",
+    alignSelf: "center",
+    height: 1,
+    backgroundColor: colors.outlineVariant,
+    opacity: 0.5,
+  },
   highlightList: {
-    gap: spacing.md,
-  },
-  highlightRow: {
-    flexDirection: "row",
     gap: spacing.sm,
-    backgroundColor: colors.primary,
-    opacity: 0.9,
-    padding: spacing.md,
-    borderRadius: radius.full,
   },
-  highlightTextGroup: {
-    flex: 1,
-    gap: 5,
-  },
-  highlightTitle: {
-    ...typography.bodyLg,
-    color: colors.onPrimary,
-  },
+  /** Texto sobre o azul do bloco — precisa do contraste invertido em relação ao resto da tela. */
   highlightDescription: {
-    ...typography.bodySm,
+    ...typography.bodyMd,
     color: colors.onPrimary,
-    opacity: 0.6,
   },
   // Gap menor entre os dois (Termos de Uso / Política de Privacidade) do que o resto da tela —
   // são irmãos do mesmo assunto, faz sentido ficarem visualmente mais próximos um do outro.
