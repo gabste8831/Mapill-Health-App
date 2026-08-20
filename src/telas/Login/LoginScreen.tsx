@@ -8,13 +8,13 @@ import { styles } from "./LoginScreen.styles";
 type LoginScreenProps = {
   /**
    * Chamado após login com Google bem-sucedido. Hoje é um stub — a autenticação real
-   * (Supabase Auth + Google OAuth) ainda não está implementada, ver `sync-and-offline.md`.
+   * (Supabase Auth + Google OAuth) ainda não está implementada.
    */
   onAuthenticated: () => void;
   /**
    * Chamado quando o paciente opta por não fazer login. Semanticamente diferente de
    * `onAuthenticated` mesmo que hoje leve ao mesmo lugar: sem login não há backup/sync,
-   * só uso local (ver decisão de login/backup em screens-and-flows.md).
+   * só uso local.
    */
   onContinueWithoutLogin: () => void;
 };

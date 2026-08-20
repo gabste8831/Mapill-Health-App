@@ -13,10 +13,7 @@ type EmConstrucaoScreenProps = {
   icon?: ComponentProps<typeof Ionicons>["name"];
 };
 
-/**
- * Tela "em construção" — usada nas rotas já existentes (A1) cujo conteúdo ainda não foi
- * implementado (Calendário, Remédios, Ajustes, Scanner, Compromisso). Ver docs/PLANO-DE-DESENVOLVIMENTO.md.
- */
+/** Ocupa as rotas que já existem mas ainda não têm conteúdo: Calendário, Remédios, Ajustes, Scanner, Compromisso. */
 export function EmConstrucaoScreen({ title, description, icon = "construct-outline" }: EmConstrucaoScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>

@@ -57,8 +57,8 @@ export class DoseScheduleRepository
   }
 
   async findPendingForDay(referenceDate: string): Promise<DoseSchedule[]> {
-    // "confirmed"/"skipped" resolvem a dose; "deferred" (ou nenhum log) continua pendente —
-    // ver a regra de "doses nunca resolvidas ficam pendentes até ação manual" em screens-and-flows.md.
+    // "confirmed"/"skipped" resolvem a dose; "deferred" (ou nenhum log) continua pendente.
+    // Dose não resolvida nunca some sozinha — some só por ação do paciente.
     const rows = await this.database.getAllAsync<DoseScheduleRow>(
       `SELECT ds.* FROM dose_schedules ds
        WHERE ds.deleted_at IS NULL

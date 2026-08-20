@@ -69,10 +69,8 @@ function LegalAccordion({ title, sections }: LegalAccordionProps) {
   );
 }
 
-// Tela bloqueante: sem opção de "pular" ou "decidir depois" de propósito — o Mapill lida com
-// dado de saúde (sensível por definição legal) em toda funcionalidade central, então não existe
-// um "modo sem consentimento" que faça sentido oferecer. Ver decisão de onboarding em
-// screens-and-flows.md e a nota de rodapé em legal-content.ts sobre revisão jurídica.
+// Bloqueante de propósito: sem "pular" nem "decidir depois". Dado de saúde é sensível por
+// definição legal e atravessa toda funcionalidade central — não existe modo sem consentimento.
 export function ConsentimentoScreen({ onAccept, onBack }: ConsentimentoScreenProps) {
   const [hasReadTerms, setHasReadTerms] = useState(false);
   const [hasConsentedToDataProcessing, setHasConsentedToDataProcessing] = useState(false);

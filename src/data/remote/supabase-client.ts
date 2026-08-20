@@ -5,10 +5,8 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 /**
- * `false` enquanto o `.env` não estiver preenchido (ver `.env.example`) — permite o app rodar
- * normalmente offline-first mesmo sem Supabase configurado, já que login/backup são opcionais
- * por decisão de produto (ver `sync-and-offline.md`). Checar antes de qualquer chamada de auth
- * ou sync que dependa do Supabase.
+ * `false` enquanto o `.env` não estiver preenchido. Login e backup são opcionais, então o app
+ * roda offline-first sem Supabase — mas nada de auth/sync pode ser chamado sem checar isso.
  */
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 

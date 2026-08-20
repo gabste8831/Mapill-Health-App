@@ -1,7 +1,6 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
-// As 4 tabs reais do app (screens-and-flows.md §1) — substitui o template Home/Explore.
-// Ícone preenchido só no item ativo (padrão documentado em styling.md).
+// Ícone preenchido só na aba ativa.
 export default function AppTabsLayout() {
   return (
     <NativeTabs>

@@ -14,7 +14,7 @@ type CardAdesaoSemanalProps = {
   summary: string;
 };
 
-/** Mini-gráfico de barras sem lib externa — só Views com altura proporcional (ver styling.md). */
+/** Mini-gráfico de barras sem lib externa — só Views com altura proporcional. */
 export function CardAdesaoSemanal({ days, summary }: CardAdesaoSemanalProps) {
   return (
     <View style={styles.container}>

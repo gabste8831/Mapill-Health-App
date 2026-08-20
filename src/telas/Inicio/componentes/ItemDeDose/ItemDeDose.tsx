@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<ItemDeDoseStatus, string> = {
   upcoming: "A SEGUIR",
 };
 
-/** Uma linha da lista de doses do dia — três estados visuais (ver styling.md: "Lista de doses"). */
+/** Uma linha da lista de doses do dia — três estados visuais. */
 export function ItemDeDose({ time, medicationName, note, status, onConfirm }: ItemDeDoseProps) {
   return (
     <View style={[styles.base, status === "next" && styles.highlighted, status === "done" && styles.done]}>

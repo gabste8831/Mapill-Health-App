@@ -1,7 +1,6 @@
 /**
- * Conteúdo de propósito do app, termos de uso e política de privacidade — mostrado no
- * ConsentimentoScreen, entre o login e a ficha de saúde (ver decisão de onboarding em
- * screens-and-flows.md).
+ * Propósito do app, termos de uso e política de privacidade — mostrados no
+ * ConsentimentoScreen, entre o login e a ficha de saúde.
  *
  * IMPORTANTE: este texto foi redigido alinhado aos princípios da LGPD (finalidade específica,
  * minimização, base legal de consentimento explícito para dado sensível — art. 7º, I e art.

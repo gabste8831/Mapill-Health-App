@@ -10,9 +10,8 @@ type CardEstoqueBaixoProps = {
 };
 
 /**
- * Alerta de estoque baixo — só aparece quando o próprio paciente ativou o lembrete pro
- * medicamento (`InventoryItem.lowStockAlertEnabled`). Nunca bloqueia a tela (ver
- * screens-and-flows.md: "estoque baixo" — controle total do usuário).
+ * Alerta de estoque baixo — só aparece se o paciente ativou o lembrete pro medicamento
+ * (`InventoryItem.lowStockAlertEnabled`), e nunca bloqueia a tela.
  */
 export function CardEstoqueBaixo({
   medicationName,

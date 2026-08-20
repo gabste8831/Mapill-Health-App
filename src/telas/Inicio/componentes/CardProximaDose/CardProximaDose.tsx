@@ -8,7 +8,7 @@ type CardProximaDoseProps = {
   hint: string | null;
 };
 
-/** Card de maior destaque da Home — única quebra intencional da paleta neutra (ver styling.md). */
+/** Card de maior destaque da Home — única quebra intencional da paleta neutra. */
 export function CardProximaDose({ time, medicationLabel, hint }: CardProximaDoseProps) {
   return (
     <View style={styles.container}>

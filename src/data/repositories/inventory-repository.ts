@@ -10,12 +10,6 @@ type InventoryItemRow = SyncableRow & {
   low_stock_alert_lead_days: number | null;
 };
 
-type InventoryAdjustmentRow = SyncableRow & {
-  inventory_item_id: string;
-  delta: number;
-  reason: string;
-};
-
 export class InventoryRepository
   extends SqliteRepository<InventoryItem, InventoryItemRow>
   implements InventoryRepositoryPort

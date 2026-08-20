@@ -7,7 +7,7 @@ import type { SyncableEntity } from "./syncable";
  *
  * Se o texto de Termos/Política mudar, `termsVersion` muda junto — um registro de versão
  * antiga não conta como consentimento válido para a versão vigente, e o paciente precisa
- * consentir de novo (ver CURRENT_TERMS_VERSION em legal-content.ts).
+ * consentir de novo (ver CURRENT_TERMS_VERSION em texto-legal.ts).
  */
 export type ConsentRecord = SyncableEntity & {
   termsVersion: string;

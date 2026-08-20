@@ -19,9 +19,8 @@ type EscolhaDeCadastroScreenProps = {
 };
 
 /**
- * Tela de decisão binária do fluxo de cadastro ("O que deseja cadastrar?", "Como deseja
- * cadastrar?") — ver ordem fechada em screens-and-flows.md §2. Reutilizada pelas duas etapas
- * porque o layout (título + lista de opções) é idêntico, só as opções mudam.
+ * Serve as duas perguntas do fluxo de cadastro ("O que deseja cadastrar?" e "Como deseja
+ * cadastrar?") — o layout é o mesmo, só as opções mudam.
  */
 export function EscolhaDeCadastroScreen({ title, options }: EscolhaDeCadastroScreenProps) {
   return (

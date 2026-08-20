@@ -1,8 +1,7 @@
 import { Stack } from "expo-router";
 
-// Todo esse grupo sobe como modal por cima das tabs (ver root _layout.tsx, onde "cadastro" é
-// registrado com presentation: "modal"). Cada tela aqui é uma etapa do ponto de entrada de
-// cadastro documentado em screens-and-flows.md §2.
+// O grupo inteiro sobe como modal por cima das abas — quem define isso é o `_layout.tsx` raiz,
+// onde "cadastro" é registrado com `presentation: "modal"`.
 export default function CadastroLayout() {
   return (
     <Stack>

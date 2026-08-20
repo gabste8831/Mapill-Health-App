@@ -13,9 +13,8 @@ import { PatientProfileRepository } from "@/data/repositories/patient-profile-re
 export type FirstRunStep = "login" | "consent" | "profile" | "app";
 
 /**
- * Resultado do login com Google. A decisão do que mostrar ao usuário em cada caso é da
- * camada de apresentação — este hook não conhece `Alert` nem textos de UI (SRP, ver
- * `architecture.md`).
+ * Resultado do login com Google. O que mostrar em cada caso é decisão da camada de
+ * apresentação — este hook não conhece `Alert` nem texto de UI.
  */
 export type GoogleSignInResult = "signed-in" | "not-configured";
 

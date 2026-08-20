@@ -24,9 +24,8 @@ import { useFirstRunGate } from '@/hooks/use-first-run-gate';
 
 SplashScreen.preventAutoHideAsync();
 
-// Máquina de estados da primeira execução (login → consentimento → ficha → app) vive em
-// useFirstRunGate — este arquivo só decide o que renderizar para o step atual (SRP, ver
-// architecture.md e docs/PLANO-DE-DESENVOLVIMENTO.md, bloco A1).
+// A máquina de estados da primeira execução (login → consentimento → ficha → app) vive em
+// useFirstRunGate. Aqui só se decide o que renderizar pro step atual.
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
@@ -90,8 +89,7 @@ export default function RootLayout() {
     );
   }
 
-  // step === 'app': a partir daqui a navegação é 100% do expo-router (arquivos em src/app) —
-  // tabs reais + o grupo "cadastro" como modal por cima delas (bloco A1).
+  // step === 'app': daqui pra frente quem manda na navegação é o expo-router.
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>

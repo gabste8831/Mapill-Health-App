@@ -1,8 +1,4 @@
-/**
- * Paleta Material 3 extraída dos protótipos HTML reais recebidos em 2026-08-09
- * (Home/Dashboard, Escanear código, Cadastro manual). Ver `styling.md` para o
- * detalhamento de onde cada role é usado.
- */
+/** Paleta Material 3 extraída dos protótipos HTML (Home, Escanear código, Cadastro manual). */
 export const colors = {
   primary: "#0057BF",
   onPrimary: "#FFFFFF",

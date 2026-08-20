@@ -15,10 +15,7 @@ export function getDatabase(): SQLite.SQLiteDatabase {
   return database;
 }
 
-/**
- * Chamar uma vez na inicialização do app (ex: raiz de `src/app`), antes de qualquer
- * repositório ler/escrever. Memoizado — chamadas subsequentes reusam a mesma promise.
- */
+/** Roda na abertura do app, antes de qualquer repositório. Memoizado: reusa a mesma promise. */
 export function initializeDatabase(): Promise<void> {
   if (!migrationsReady) {
     migrationsReady = runMigrations(getDatabase());
