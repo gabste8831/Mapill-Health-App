@@ -628,6 +628,15 @@ fluxo sem depender de aparelho. Consequências práticas:
   nenhum. **Copiar esse padrão em vez de inventar outro.**
 - Um bug que só existe no web **não** é bug do app. Anotar aqui e seguir — nunca vira tarefa de
   bloco.
+- **`web.output` deve ser `"single"` no `app.json`** (SPA), nunca `"static"`. Com `"static"` o
+  expo-router pré-renderiza cada rota **em Node**, onde não existe `window` — e qualquer lib que
+  toque em `window` no import derruba o dev server inteiro. Foi o que aconteceu assim que o
+  `.env` do Supabase foi preenchido: o cliente passou a ser criado no carregamento do módulo,
+  o `supabase-js` tentou restaurar a sessão via `AsyncStorage` → `window.localStorage`, e o
+  servidor morreu com `ReferenceError: window is not defined` antes de servir a página.
+  Renderização estática serve pra HTML indexável por buscador; o Mapill não é site, então ela
+  só agrega modos de falha. `"single"` é inclusive o padrão do Expo — o `"static"` era resquício
+  de template.
 - No web o fluxo de primeira execução roda inteiro a cada reload (nada persiste, por design).
   Pra chegar rápido no app: *Continuar sem login* → aceitar consentimento → *Pular* na ficha.
 
