@@ -8,12 +8,32 @@ export type PosologyUnit = "mg" | "ml" | "comprimido" | "gota" | "UI";
  */
 export type ReminderMode = "alarm" | "notification" | "none";
 
+/** Horário do dia em `HH:MM`, 24h. */
+export type TimeOfDay = string;
+
+/** 0 = domingo … 6 = sábado, igual ao `Date.getDay()`. */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+/**
+ * As quatro formas de posologia que o app aceita. União discriminada porque cada uma precisa
+ * de dados diferentes — um único `frequencyMinutes` só conseguia expressar "intervalo", e
+ * forçava "todo dia às 8h e 20h" a virar uma aproximação errada.
+ */
+export type PosologySchedule =
+  /** Horários fixos, todo dia. Ex: 08:00 e 20:00. */
+  | { kind: "daily"; times: TimeOfDay[] }
+  /** De X em X minutos a partir de um horário. Ex: a cada 8h começando 06:00. */
+  | { kind: "interval"; everyMinutes: number; firstTime: TimeOfDay }
+  /** Horários fixos, só em certos dias. Ex: segunda e quinta às 09:00. */
+  | { kind: "weekly"; weekdays: Weekday[]; times: TimeOfDay[] }
+  /** Sem horário: o paciente toma quando precisa, e nada é agendado. */
+  | { kind: "asNeeded" };
+
 export type Prescription = SyncableEntity & {
   medicationId: string;
   doseAmount: number;
   doseUnit: PosologyUnit;
-  /** Intervalo entre doses em minutos (a cada 8h = 480). */
-  frequencyMinutes: number;
+  schedule: PosologySchedule;
   startDate: string;
   /** null = tratamento contínuo, não "esqueceram de preencher". */
   endDate: string | null;

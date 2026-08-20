@@ -1,4 +1,4 @@
-import type { Prescription, ReminderMode } from "../../domain/entities/prescription";
+import type { PosologySchedule, Prescription, ReminderMode } from "../../domain/entities/prescription";
 import type { PrescriptionRepository as PrescriptionRepositoryPort } from "../../domain/ports/prescription-repository";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
@@ -6,7 +6,8 @@ type PrescriptionRow = SyncableRow & {
   medication_id: string;
   dose_amount: number;
   dose_unit: string;
-  frequency_minutes: number;
+  /** JSON serializado de `PosologySchedule` — ver migration 008. */
+  schedule: string;
   start_date: string;
   end_date: string | null;
   reminder_mode: string;
@@ -24,7 +25,7 @@ export class PrescriptionRepository
       medicationId: row.medication_id,
       doseAmount: row.dose_amount,
       doseUnit: row.dose_unit as Prescription["doseUnit"],
-      frequencyMinutes: row.frequency_minutes,
+      schedule: JSON.parse(row.schedule) as PosologySchedule,
       startDate: row.start_date,
       endDate: row.end_date,
       reminderMode: row.reminder_mode as ReminderMode,
@@ -40,7 +41,7 @@ export class PrescriptionRepository
       medication_id: entity.medicationId,
       dose_amount: entity.doseAmount,
       dose_unit: entity.doseUnit,
-      frequency_minutes: entity.frequencyMinutes,
+      schedule: JSON.stringify(entity.schedule),
       start_date: entity.startDate,
       end_date: entity.endDate,
       reminder_mode: entity.reminderMode,
