@@ -45,6 +45,8 @@ export type Prescription = SyncableEntity & {
   /** Receita anexada. Caminho local — nunca URL remota direta, ver `attachmentSyncOptOut`. */
   attachmentUri: string | null;
   attachmentKind: PrescriptionAttachmentKind | null;
+  /** Validade da receita em ISO `YYYY-MM-DD` — base do lembrete de renovação (C3). */
+  attachmentValidUntil: string | null;
   /**
    * LGPD: receita é dado sensível de saúde. Se true, o anexo nunca sobe pro Supabase Storage
    * mesmo com backup habilitado — fica só no aparelho (decisão nº10).

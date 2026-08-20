@@ -52,22 +52,33 @@ Confirmar essa ordem antes de implementar navegação — hoje são duas telas s
 ### 4. Cadastro manual de medicamento — ✅ Definida (escopo ampliado em 2026-08-20)
 
 Tem que cobrir **qualquer apresentação**, não só comprimido. A tensão do bloco é ser completo
-sem ficar difícil: obrigatório é o mínimo clínico, o resto é opcional e fica recolhido. Sete
-seções, as três primeiras sempre abertas:
+sem ficar difícil.
 
-1. **O remédio** — foto da embalagem (identificação visual, Nielsen: reconhecimento em vez de
-   recordação), nome*, forma farmacêutica*, princípio ativo. O nome é onde o autocomplete da
-   CMED (B1) vai plugar.
-2. **A dose** — quantidade* + unidade*, com as unidades filtradas pela forma escolhida.
-3. **Quando tomar** — frequência (Diário / Intervalo / Semanal / SOS) + lista editável de
-   horários; início e fim (ou contínuo).
-4. **Lembrete** — alarme / notificação / nenhum, por prescrição (decisão nº2).
-5. **Estoque** *(opcional)* — quantidade em mãos e alerta de estoque baixo configurável pelo
-   próprio usuário (decisão nº1) — sem cálculo silencioso.
-6. **Onde guardo** *(opcional)* — texto livre ("na bolsa", "caixa sobre a geladeira").
-7. **Receita** *(opcional)* — anexo de foto ou documento, local com opt-out de nuvem (decisão nº10).
+**Duas etapas, e a primeira já salva** (decisão de 2026-08-20, implementada). Wizard puro foi
+descartado: abandonar no meio perderia tudo, e cadastrar remédio é tarefa feita apressado. O
+medicamento é gravado **ao avançar** para a etapa 2 — quem sai nos detalhes leva um cadastro
+completo e funcionando.
 
-Botão único de salvar ("Salvar medicamento").
+**Etapa 1 — o essencial** (só o que o app precisa pra lembrar da dose):
+1. **O remédio** — nome*, forma farmacêutica*, exigência de receita (tarja), princípio ativo.
+   O nome é onde o autocomplete da CMED (B1) vai plugar.
+2. **A dose** — quantidade* + unidade*, filtradas pela forma escolhida.
+3. **Quando tomar** — frequência (Diário / Intervalo / Semanal / SOS) + horários; início e, se
+   não for contínuo, fim.
+
+**Etapa 2 — detalhes**, tudo opcional: lembrete, anexos (foto da caixa e, quando a tarja exigir,
+foto da receita + validade), estoque com alerta configurável, onde guardo e observações.
+
+**Regras de exibição condicional** — ninguém deve preencher o que não se aplica ao seu caso;
+campo fora de contexto gera dúvida, não completude:
+
+| Situação | O que some |
+|---|---|
+| Tarja "não precisa de receita" | seção de receita e validade |
+| Frequência "se necessário" | seção de lembrete — não há horário pra lembrar |
+| "Tratamento contínuo" marcado | campo "até quando" |
+| "Não controlo estoque" | quantidade e alerta |
+| Alerta de estoque desmarcado | antecedência do aviso |
 
 **Formas farmacêuticas cobertas**: comprimido/cápsula, líquido, gota, injeção, pomada/creme,
 sublingual, inalador, adesivo, sachê/pó, outro. A forma escolhida define as unidades de dose

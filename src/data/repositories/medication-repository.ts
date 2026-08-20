@@ -1,4 +1,8 @@
-import type { Medication, MedicationForm } from "../../domain/entities/medication";
+import type {
+  Medication,
+  MedicationForm,
+  PrescriptionRequirement,
+} from "../../domain/entities/medication";
 import type { MedicationRepository as MedicationRepositoryPort } from "../../domain/ports/medication-repository";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
@@ -7,6 +11,7 @@ type MedicationRow = SyncableRow & {
   active_ingredient: string;
   presentation: string;
   form: string;
+  prescription_requirement: string;
   photo_uri: string | null;
   ean: string | null;
   from_cmed: number;
@@ -25,6 +30,7 @@ export class MedicationRepository
       activeIngredient: row.active_ingredient,
       presentation: row.presentation,
       form: row.form as MedicationForm,
+      prescriptionRequirement: row.prescription_requirement as PrescriptionRequirement,
       photoUri: row.photo_uri,
       ean: row.ean,
       fromCmed: row.from_cmed === 1,
@@ -41,6 +47,7 @@ export class MedicationRepository
       active_ingredient: entity.activeIngredient,
       presentation: entity.presentation,
       form: entity.form,
+      prescription_requirement: entity.prescriptionRequirement,
       photo_uri: entity.photoUri,
       ean: entity.ean,
       from_cmed: entity.fromCmed ? 1 : 0,

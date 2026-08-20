@@ -1,18 +1,18 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useMemo, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import type { MedicationForm, PosologyUnit } from "@/domain/entities/medication";
+import type {
+  MedicationForm,
+  PosologyUnit,
+  PrescriptionRequirement,
+} from "@/domain/entities/medication";
 import { unitsForMedicationForm } from "@/domain/entities/medication";
-import type { PosologySchedule, ReminderMode, TimeOfDay, Weekday } from "@/domain/entities/prescription";
-import { usePhotoPicker } from "@/hooks/use-photo-picker";
+import type { PosologySchedule, TimeOfDay, Weekday } from "@/domain/entities/prescription";
+import type { CadastroEssencial } from "@/hooks/use-medication-registration";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
-import { formatDateInput, parseDateInput, todayIsoDate, toDateInput } from "@/shared/date-input";
-import { colors } from "@/shared/theme";
+import { formatDateInput, parseDateInput, toDateInput, todayIsoDate } from "@/shared/date-input";
 import {
-  Accordion,
   Button,
   Card,
   Header,
@@ -22,7 +22,7 @@ import {
   type SelectOption,
 } from "@/ui";
 import { EditorDeHorarios } from "./EditorDeHorarios";
-import { styles } from "./CadastroDeMedicamentoScreen.styles";
+import { styles } from "./CadastroDeMedicamento.styles";
 
 const FORM_OPTIONS: SelectOption<MedicationForm>[] = [
   { value: "tablet", label: "Comprimido ou cápsula" },
@@ -35,6 +35,13 @@ const FORM_OPTIONS: SelectOption<MedicationForm>[] = [
   { value: "patch", label: "Adesivo" },
   { value: "sachet", label: "Sachê ou pó" },
   { value: "other", label: "Outra" },
+];
+
+const REQUIREMENT_OPTIONS: SelectOption<PrescriptionRequirement>[] = [
+  { value: "none", label: "Não precisa de receita" },
+  { value: "simple", label: "Tarja vermelha — receita simples" },
+  { value: "retained", label: "Tarja vermelha — receita retida" },
+  { value: "special", label: "Tarja preta — receituário especial" },
 ];
 
 const UNIT_LABELS: Record<PosologyUnit, string> = {
@@ -68,12 +75,6 @@ const INTERVAL_OPTIONS: SelectOption<string>[] = [
   { value: "1440", label: "A cada 24 horas" },
 ];
 
-const REMINDER_OPTIONS: SelectOption<ReminderMode>[] = [
-  { value: "alarm", label: "Alarme (som, mesmo no silencioso)" },
-  { value: "notification", label: "Notificação comum" },
-  { value: "none", label: "Sem lembrete" },
-];
-
 const WEEKDAYS: { value: Weekday; label: string }[] = [
   { value: 0, label: "Dom" },
   { value: 1, label: "Seg" },
@@ -87,7 +88,7 @@ const WEEKDAYS: { value: Weekday; label: string }[] = [
 /**
  * O `SelectField` permite limpar, devolvendo `null`. Nestes campos limpar não é uma opção que
  * faça sentido — não existe medicamento sem forma nem dose sem unidade —, então o `null` é
- * ignorado em vez de virar um estado inválido.
+ * ignorado em vez de virar estado inválido.
  */
 function semLimpar<TValue extends string>(set: (value: TValue) => void) {
   return (value: TValue | null) => {
@@ -95,36 +96,25 @@ function semLimpar<TValue extends string>(set: (value: TValue) => void) {
   };
 }
 
-/** Tudo que a tela produz. A montagem em Medication/Prescription/InventoryItem é da camada de dados. */
-export type CadastroDeMedicamentoDraft = {
-  name: string;
-  activeIngredient: string;
-  form: MedicationForm;
-  photoUri: string | null;
-  doseAmount: number;
-  doseUnit: PosologyUnit;
-  schedule: PosologySchedule;
-  startDate: string;
-  endDate: string | null;
-  reminderMode: ReminderMode;
-  notes: string | null;
-  stockQuantity: number | null;
-  storageLocation: string | null;
-};
-
-type CadastroDeMedicamentoScreenProps = {
-  onSubmit: (draft: CadastroDeMedicamentoDraft) => void;
+type EtapaEssencialScreenProps = {
+  /** Salva e encerra aqui mesmo. */
+  onSalvar: (essencial: CadastroEssencial) => void;
+  /** Salva e segue pros detalhes — por isso recebe o mesmo essencial. */
+  onContinuar: (essencial: CadastroEssencial) => void;
   onBack: () => void;
 };
 
-export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedicamentoScreenProps) {
+/**
+ * Etapa 1: só o que o app precisa pra lembrar o paciente da dose. Quem quer o básico termina
+ * aqui; os detalhes são um segundo passo opcional.
+ */
+export function EtapaEssencialScreen({ onSalvar, onContinuar, onBack }: EtapaEssencialScreenProps) {
   const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
-  const { isPicking, pickPhoto } = usePhotoPicker("medicamento-foto.jpg");
 
   const [name, setName] = useState("");
   const [activeIngredient, setActiveIngredient] = useState("");
   const [form, setForm] = useState<MedicationForm>("tablet");
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [requirement, setRequirement] = useState<PrescriptionRequirement>("none");
 
   const [doseAmount, setDoseAmount] = useState("");
   const [doseUnit, setDoseUnit] = useState<PosologyUnit>("tablet");
@@ -136,22 +126,17 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
   const [weekdays, setWeekdays] = useState<Weekday[]>([]);
 
   const [startDateInput, setStartDateInput] = useState(toDateInput(todayIsoDate()));
+  const [isContinuous, setContinuous] = useState(true);
   const [endDateInput, setEndDateInput] = useState("");
-  const [reminderMode, setReminderMode] = useState<ReminderMode>("notification");
-
-  const [notes, setNotes] = useState("");
-  const [stockQuantity, setStockQuantity] = useState("");
-  const [storageLocation, setStorageLocation] = useState("");
 
   /**
    * A unidade acompanha a forma: trocar para "pomada" com "comprimido(s)" selecionado deixaria a
    * dose sem sentido. Quando a atual não serve pra forma nova, cai na primeira disponível.
    */
-  const availableUnits = useMemo(() => unitsForMedicationForm(form), [form]);
-  const unitOptions: SelectOption<PosologyUnit>[] = availableUnits.map((unit) => ({
-    value: unit,
-    label: UNIT_LABELS[unit],
-  }));
+  const unitOptions: SelectOption<PosologyUnit>[] = useMemo(
+    () => unitsForMedicationForm(form).map((unit) => ({ value: unit, label: UNIT_LABELS[unit] })),
+    [form],
+  );
   function handleFormChange(nextForm: MedicationForm) {
     setForm(nextForm);
     const units = unitsForMedicationForm(nextForm);
@@ -159,19 +144,21 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
   }
 
   const parsedDoseAmount = Number(doseAmount.replace(",", "."));
-  const hasDoseAmountError = doseAmount.length > 0 && (!Number.isFinite(parsedDoseAmount) || parsedDoseAmount <= 0);
+  const hasDoseAmountError =
+    doseAmount.length > 0 && (!Number.isFinite(parsedDoseAmount) || parsedDoseAmount <= 0);
 
   const startDateIso = parseDateInput(startDateInput);
-  const startDateError = startDateInput.length === 10 && startDateIso === null ? "Data inválida." : undefined;
+  const startDateError =
+    startDateInput.length === 10 && startDateIso === null ? "Data inválida." : undefined;
 
-  const endDateIso = endDateInput.length === 0 ? null : parseDateInput(endDateInput);
+  const endDateIso = isContinuous || endDateInput.length === 0 ? null : parseDateInput(endDateInput);
   const endDateError =
-    endDateInput.length === 0
+    isContinuous || endDateInput.length === 0
       ? undefined
       : endDateIso === null
         ? endDateInput.length === 10
           ? "Data inválida."
-          : "Complete a data ou deixe em branco."
+          : "Complete a data ou marque como contínuo."
         : startDateIso !== null && endDateIso < startDateIso
           ? "O fim não pode ser antes do início."
           : undefined;
@@ -199,45 +186,25 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
     endDateError === undefined &&
     isScheduleComplete;
 
-  async function handlePickPhoto() {
-    const result = await pickPhoto();
-    if (result.status === "picked") {
-      setPhotoUri(result.uri);
-      return;
-    }
-    if (result.reason === "cancelled") return;
-    Alert.alert(
-      result.reason === "permission-denied" ? "Sem acesso às fotos" : "Não foi possível usar a foto",
-      result.reason === "permission-denied"
-        ? "Para escolher uma imagem, libere o acesso às fotos nas configurações do aparelho."
-        : "Tente novamente com outra imagem.",
-    );
-  }
-
   function toggleWeekday(weekday: Weekday) {
     setWeekdays((current) =>
       current.includes(weekday) ? current.filter((day) => day !== weekday) : [...current, weekday].sort(),
     );
   }
 
-  function handleSubmit() {
-    if (!canSubmit || startDateIso === null) return;
-    const parsedStock = Number(stockQuantity.replace(",", "."));
-    onSubmit({
+  function buildEssencial(): CadastroEssencial | null {
+    if (!canSubmit || startDateIso === null) return null;
+    return {
       name: name.trim(),
       activeIngredient: activeIngredient.trim(),
       form,
-      photoUri,
+      prescriptionRequirement: requirement,
       doseAmount: parsedDoseAmount,
       doseUnit,
       schedule,
       startDate: startDateIso,
       endDate: endDateIso,
-      reminderMode,
-      notes: notes.trim().length > 0 ? notes.trim() : null,
-      stockQuantity: Number.isFinite(parsedStock) && parsedStock > 0 ? parsedStock : null,
-      storageLocation: storageLocation.trim().length > 0 ? storageLocation.trim() : null,
-    });
+    };
   }
 
   return (
@@ -249,33 +216,12 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
         keyboardShouldPersistTaps="handled"
         onScroll={onScroll}
         scrollEventThrottle={16}>
+        <Text style={styles.stepLabel}>Etapa 1 de 2 · O essencial</Text>
+
         <Card>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>O REMÉDIO</Text>
             <Text style={[styles.selo, styles.seloObrigatorio]}>OBRIGATÓRIO</Text>
-          </View>
-
-          <View style={styles.photoRow}>
-            <Pressable
-              style={photoUri ? styles.photoFrame : styles.photoPlaceholder}
-              onPress={handlePickPhoto}
-              disabled={isPicking}
-              accessibilityRole="button"
-              accessibilityLabel={photoUri ? "Trocar foto da embalagem" : "Adicionar foto da embalagem"}>
-              {photoUri ? (
-                <Image source={{ uri: photoUri }} style={styles.photo} contentFit="cover" />
-              ) : (
-                <MaterialCommunityIcons name="camera-plus" size={24} color={colors.onSurfaceVariant} />
-              )}
-            </Pressable>
-            <View style={styles.photoTextGroup}>
-              <Pressable onPress={handlePickPhoto} disabled={isPicking} accessibilityRole="button">
-                <Text style={styles.photoAddLabel}>
-                  {photoUri ? "Trocar foto da caixa" : "Adicionar foto da caixa"}
-                </Text>
-              </Pressable>
-              <Text style={styles.photoHint}>Ajuda a reconhecer o remédio de relance.</Text>
-            </View>
           </View>
 
           <TextField
@@ -287,7 +233,18 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
             onFocus={scrollToFocusedInput}
             maxLength={120}
           />
-          <SelectField label="FORMA" value={form} options={FORM_OPTIONS} onChange={semLimpar(handleFormChange)} />
+          <SelectField
+            label="FORMA"
+            value={form}
+            options={FORM_OPTIONS}
+            onChange={semLimpar(handleFormChange)}
+          />
+          <SelectField
+            label="PRECISA DE RECEITA?"
+            value={requirement}
+            options={REQUIREMENT_OPTIONS}
+            onChange={semLimpar((next: PrescriptionRequirement) => setRequirement(next))}
+          />
           <TextField
             label="PRINCÍPIO ATIVO"
             placeholder="Ex: Losartana potássica"
@@ -319,7 +276,12 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
               error={hasDoseAmountError ? "Informe um número maior que zero." : undefined}
             />
             <View style={styles.doseUnitField}>
-              <SelectField label="UNIDADE" value={doseUnit} options={unitOptions} onChange={semLimpar((unit: PosologyUnit) => setDoseUnit(unit))} />
+              <SelectField
+                label="UNIDADE"
+                value={doseUnit}
+                options={unitOptions}
+                onChange={semLimpar((unit: PosologyUnit) => setDoseUnit(unit))}
+              />
             </View>
           </View>
         </Card>
@@ -386,23 +348,33 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
             </Text>
           ) : null}
 
-          <View style={styles.doseRow}>
+          <TextField
+            label="INÍCIO"
+            required
+            placeholder="DD/MM/AAAA"
+            value={startDateInput}
+            onChangeText={(value) => setStartDateInput(formatDateInput(value, startDateInput))}
+            onFocus={scrollToFocusedInput}
+            keyboardType="number-pad"
+            maxLength={10}
+            error={startDateError}
+          />
+
+          {/* Contínuo é o caso mais comum — perguntar "até quando" a quem não tem fim previsto
+              seria pedir um dado que não existe. */}
+          <Pressable
+            style={styles.switchRow}
+            onPress={() => setContinuous((current) => !current)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: isContinuous }}>
+            <View style={[styles.switchBox, isContinuous && styles.switchBoxChecked]} />
+            <Text style={styles.switchLabel}>Tratamento contínuo, sem data para acabar</Text>
+          </Pressable>
+
+          {!isContinuous ? (
             <TextField
-              label="INÍCIO"
-              required
-              containerStyle={styles.doseAmountField}
+              label="ATÉ QUANDO"
               placeholder="DD/MM/AAAA"
-              value={startDateInput}
-              onChangeText={(value) => setStartDateInput(formatDateInput(value, startDateInput))}
-              onFocus={scrollToFocusedInput}
-              keyboardType="number-pad"
-              maxLength={10}
-              error={startDateError}
-            />
-            <TextField
-              label="FIM"
-              containerStyle={styles.doseAmountField}
-              placeholder="Contínuo"
               value={endDateInput}
               onChangeText={(value) => setEndDateInput(formatDateInput(value, endDateInput))}
               onFocus={scrollToFocusedInput}
@@ -410,62 +382,29 @@ export function CadastroDeMedicamentoScreen({ onSubmit, onBack }: CadastroDeMedi
               maxLength={10}
               error={endDateError}
             />
-          </View>
+          ) : null}
         </Card>
 
-        <Card>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>LEMBRETE</Text>
-            <Text style={[styles.selo, styles.seloOpcional]}>OPCIONAL</Text>
-          </View>
-          <SelectField
-            label="COMO AVISAR"
-            value={reminderMode}
-            options={REMINDER_OPTIONS}
-            onChange={semLimpar((mode: ReminderMode) => setReminderMode(mode))}
-          />
-        </Card>
-
-        <Accordion title="Estoque">
-          <TextField
-            label="QUANTIDADE EM MÃOS"
-            placeholder="Ex: 30"
-            value={stockQuantity}
-            onChangeText={setStockQuantity}
-            onFocus={scrollToFocusedInput}
-            keyboardType="decimal-pad"
-            maxLength={8}
-          />
-        </Accordion>
-
-        <Accordion title="Onde guardo">
-          <TextField
-            label="LOCAL"
-            placeholder="Ex: caixa sobre a geladeira"
-            value={storageLocation}
-            onChangeText={setStorageLocation}
-            onFocus={scrollToFocusedInput}
-            maxLength={120}
-          />
-        </Accordion>
-
-        <Accordion title="Observações">
-          <TextField
-            label="ANOTAÇÃO"
-            placeholder="Ex: tomar em jejum"
-            value={notes}
-            onChangeText={setNotes}
-            onFocus={scrollToFocusedInput}
-            multiline
-            maxLength={500}
-          />
-        </Accordion>
-
-        <Button label="Salvar medicação" onPress={handleSubmit} disabled={!canSubmit} />
+        <Button
+          label="Continuar para os detalhes"
+          disabled={!canSubmit}
+          onPress={() => {
+            const essencial = buildEssencial();
+            if (essencial !== null) onContinuar(essencial);
+          }}
+        />
+        <Button
+          variant="text"
+          label="Salvar assim mesmo"
+          disabled={!canSubmit}
+          onPress={() => {
+            const essencial = buildEssencial();
+            if (essencial !== null) onSalvar(essencial);
+          }}
+        />
         {!canSubmit ? (
           <Text style={styles.submitHint}>
-            <Ionicons name="information-circle-outline" size={14} color={colors.onSurfaceVariant} />{" "}
-            Preencha o nome, a dose e quando tomar para salvar.
+            Preencha o nome, a dose e quando tomar para continuar.
           </Text>
         ) : null}
       </KeyboardAwareScrollView>

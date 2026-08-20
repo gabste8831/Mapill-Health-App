@@ -51,11 +51,34 @@ export function unitsForMedicationForm(form: MedicationForm): PosologyUnit[] {
   return UNITS_BY_FORM[form];
 }
 
+/**
+ * Tarja / exigência de receita. Comanda quais campos de receita o cadastro mostra: quem cadastra
+ * dipirona não deveria nem ver "validade da receita".
+ *
+ * Vem preenchido da CMED quando o medicamento está na base (bloco B1), e continua editável — a
+ * base pode estar desatualizada, e quem tem a caixa na mão é o paciente.
+ */
+export type PrescriptionRequirement =
+  /** Isento de prescrição (MIP). */
+  | "none"
+  /** Tarja vermelha, receita simples. */
+  | "simple"
+  /** Tarja vermelha com retenção. */
+  | "retained"
+  /** Tarja preta, receituário de controle especial. */
+  | "special";
+
+/** Se vale a pena pedir dados de receita para esta exigência. */
+export function requiresPrescription(requirement: PrescriptionRequirement): boolean {
+  return requirement !== "none";
+}
+
 export type Medication = SyncableEntity & {
   name: string;
   activeIngredient: string;
   presentation: string;
   form: MedicationForm;
+  prescriptionRequirement: PrescriptionRequirement;
   /** Foto da embalagem — identificação visual, não documento. Caminho local. */
   photoUri: string | null;
   ean: string | null;

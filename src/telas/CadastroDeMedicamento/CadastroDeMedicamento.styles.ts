@@ -162,6 +162,34 @@ export const styles = StyleSheet.create({
     color: colors.onPrimary,
   },
 
+  stepLabel: {
+    ...typography.label,
+    color: colors.primary,
+    textAlign: "center",
+  },
+  /** Checkbox simples de uma linha — o Checkbox do kit é pensado pro consentimento, com texto longo. */
+  switchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    minHeight: 52,
+  },
+  switchBox: {
+    width: 22,
+    height: 22,
+    borderRadius: radius.sm,
+    borderWidth: 2,
+    borderColor: colors.outline,
+  },
+  switchBoxChecked: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  switchLabel: {
+    ...typography.bodyMd,
+    color: colors.onSurface,
+    flex: 1,
+  },
   submitHint: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,

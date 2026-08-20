@@ -6,7 +6,7 @@ import type { TimeOfDay } from "@/domain/entities/prescription";
 import { formatTimeInput, parseTimeInput } from "@/shared/time-input";
 import { colors } from "@/shared/theme";
 import { Button, TextField } from "@/ui";
-import { styles } from "./CadastroDeMedicamentoScreen.styles";
+import { styles } from "./CadastroDeMedicamento.styles";
 
 type EditorDeHorariosProps = {
   times: TimeOfDay[];
