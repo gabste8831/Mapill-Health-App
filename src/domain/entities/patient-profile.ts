@@ -35,8 +35,8 @@ export type EmergencyContact = {
  * Um único registro por conta/dispositivo (não sincronizável entre pacientes diferentes).
  */
 export type PatientProfile = SyncableEntity & {
-  firstName: string;
-  lastName: string;
+  /** Como o paciente digitou. Não é separado em nome/sobrenome — ver migration 007. */
+  fullName: string;
   /** ISO 8601 (`YYYY-MM-DD`). Obrigatório junto com nome/sobrenome — ver FichaDeSaudeScreen. */
   dateOfBirth: string;
   biologicalSex: BiologicalSex;
@@ -65,3 +65,11 @@ export type PatientProfileDraft = Omit<
   PatientProfile,
   keyof SyncableEntity | "photoUri" | "photoSyncOptOut"
 >;
+
+/**
+ * Primeiro nome, para saudação ("Olá, Ana"). Derivado na hora de exibir em vez de guardado:
+ * o que o paciente digitou continua sendo a única versão salva.
+ */
+export function firstNameOf(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] ?? "";
+}

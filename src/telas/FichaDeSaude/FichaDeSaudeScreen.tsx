@@ -40,7 +40,7 @@ const BIOLOGICAL_SEX_OPTIONS: SelectOption<NonNullable<BiologicalSex>>[] = [
 ];
 
 type FichaDeSaudeScreenProps = {
-  /** Só chamado com nome e sobrenome preenchidos e a data vazia ou válida. */
+  /** Só chamado com o nome preenchido e a data vazia ou válida. */
   onContinue: (draft: PatientProfileDraft) => void;
   /**
    * Volta pra tela anterior. Omitir esconde o botão - quem sabe se há retorno possível é quem
@@ -269,8 +269,7 @@ export function FichaDeSaudeScreen({
 }: FichaDeSaudeScreenProps) {
   const { scrollViewRef, scrollToFocusedInput, onScroll } =
     useScrollToFocusedInput();
-  const [firstName, setFirstName] = useState(initialValue?.firstName ?? "");
-  const [lastName, setLastName] = useState(initialValue?.lastName ?? "");
+  const [fullName, setFullName] = useState(initialValue?.fullName ?? "");
   const [dateOfBirthInput, setDateOfBirthInput] = useState(
     toDateOfBirthInput(initialValue?.dateOfBirth ?? ""),
   );
@@ -298,9 +297,9 @@ export function FichaDeSaudeScreen({
         ? "Data inválida."
         : "Complete a data ou deixe o campo em branco.";
 
-  // Nome e sobrenome são o mínimo da ficha: sem eles o app não tem de quem é o tratamento.
+  // O nome é o mínimo da ficha: sem ele, ela não identifica ninguém num atendimento.
   const canContinue =
-    firstName.trim().length > 0 && lastName.trim().length > 0 && dateOfBirthError === undefined;
+    fullName.trim().length > 0 && dateOfBirthError === undefined;
 
   function addAllergy() {
     const value = allergyDraft.trim();
@@ -324,8 +323,7 @@ export function FichaDeSaudeScreen({
   function handleContinue() {
     if (!canContinue) return;
     onContinue({
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
+      fullName: fullName.trim(),
       // Vazio quando o paciente não informou - a ficha guarda a ausência, não um valor inventado.
       dateOfBirth: dateOfBirthIso ?? "",
       biologicalSex,
@@ -348,10 +346,7 @@ export function FichaDeSaudeScreen({
       >
         <View style={styles.header}>
           <Text style={styles.subtitle}>
-            Sua ficha pode reunir informações clínicas, como tipo sanguíneo, que
-            podem vir a ser úteis no seu cotidiano. Consultas e casos de emergência
-            podem exigir informações como essas, e o Mapill disponibiliza essa área 
-            para a sua própria segurança individual.
+            Mantenha seus dados clínicos atualizados no Mapill. Informações como tipo sanguíneo e alergias fazem a diferença em consultas e situações de emergência.
           </Text>
         </View>
 
@@ -387,27 +382,18 @@ export function FichaDeSaudeScreen({
           <View style={styles.fieldGroup}>
             <Text style={styles.sectionTitle}>DADOS BÁSICOS</Text>
             <Text style={styles.sectionHint}>
-              Nome e sobrenome são obrigatórios. É o mínimo para a ficha identificar você num
+              O nome completo é obrigatório. É o mínimo para a ficha identificar você num
               atendimento.
             </Text>
           </View>
           <TextField
-            label="NOME"
+            label="NOME COMPLETO"
             required
-            placeholder="Seu nome"
-            value={firstName}
-            onChangeText={setFirstName}
+            placeholder="Seu nome completo"
+            value={fullName}
+            onChangeText={setFullName}
             onFocus={scrollToFocusedInput}
-            maxLength={60}
-          />
-          <TextField
-            label="SOBRENOME"
-            required
-            placeholder="Seu sobrenome"
-            value={lastName}
-            onChangeText={setLastName}
-            onFocus={scrollToFocusedInput}
-            maxLength={60}
+            maxLength={120}
           />
         </Card>
 

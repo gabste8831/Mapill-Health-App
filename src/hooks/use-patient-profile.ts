@@ -14,8 +14,7 @@ export async function loadPatientProfileDraft(): Promise<PatientProfileDraft | n
   const profile = await new PatientProfileRepository().getCurrent();
   if (!profile) return null;
   return {
-    firstName: profile.firstName,
-    lastName: profile.lastName,
+    fullName: profile.fullName,
     dateOfBirth: profile.dateOfBirth,
     biologicalSex: profile.biologicalSex,
     bloodType: profile.bloodType,
@@ -38,8 +37,7 @@ export async function savePatientProfileDraft(draft: PatientProfileDraft): Promi
   const existingProfile = await repository.getCurrent();
   await repository.save({
     id: existingProfile?.id ?? Crypto.randomUUID(),
-    firstName: draft.firstName,
-    lastName: draft.lastName,
+    fullName: draft.fullName,
     dateOfBirth: draft.dateOfBirth,
     biologicalSex: draft.biologicalSex,
     bloodType: draft.bloodType,

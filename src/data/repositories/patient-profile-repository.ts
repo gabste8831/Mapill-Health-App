@@ -3,8 +3,7 @@ import type { PatientProfileRepository as PatientProfileRepositoryPort } from ".
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
 type PatientProfileRow = SyncableRow & {
-  first_name: string;
-  last_name: string;
+  full_name: string;
   /** Nullable no schema por restrição de ALTER TABLE — obrigatório na camada de apresentação. */
   date_of_birth: string | null;
   biological_sex: string | null;
@@ -30,8 +29,7 @@ export class PatientProfileRepository
   protected toEntity(row: PatientProfileRow): PatientProfile {
     return {
       id: row.id,
-      firstName: row.first_name,
-      lastName: row.last_name,
+      fullName: row.full_name,
       // Registros antigos (pré-migration 003) podem não ter data de nascimento salva — a UI
       // trata isso como perfil incompleto e pede o dado de novo, não infere nada.
       dateOfBirth: row.date_of_birth ?? "",
@@ -51,8 +49,7 @@ export class PatientProfileRepository
   protected toRow(entity: PatientProfile): PatientProfileRow {
     return {
       id: entity.id,
-      first_name: entity.firstName,
-      last_name: entity.lastName,
+      full_name: entity.fullName,
       date_of_birth: entity.dateOfBirth,
       biological_sex: entity.biologicalSex,
       photo_uri: entity.photoUri,

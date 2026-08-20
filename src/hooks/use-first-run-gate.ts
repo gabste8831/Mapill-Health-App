@@ -44,15 +44,14 @@ const PREVIOUS_STEP: Record<FirstRunStep, FirstRunStep | null> = {
 const persistsLocally = Platform.OS !== "web";
 
 /**
- * "Ficha completa" = tem nome preenchido. É o único campo que já era obrigatório antes de
- * sexo/tipo sanguíneo/contato de emergência existirem, então serve como marcador estável de
- * "o paciente já passou por essa tela", sem quebrar em bancos criados por versões antigas.
+ * "Ficha completa" = tem nome. É o único campo obrigatório, então serve como marcador estável
+ * de "o paciente já passou por essa tela", sem quebrar em bancos de versões antigas.
  */
 async function hasCompletedProfile(): Promise<boolean> {
   if (!persistsLocally) return false;
   const profileRepository = new PatientProfileRepository();
   const existingProfile = await profileRepository.getCurrent();
-  return (existingProfile?.firstName.trim().length ?? 0) > 0;
+  return (existingProfile?.fullName.trim().length ?? 0) > 0;
 }
 
 async function hasValidConsent(): Promise<boolean> {

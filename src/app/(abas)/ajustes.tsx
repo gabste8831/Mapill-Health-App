@@ -40,7 +40,7 @@ export default function AjustesRoute() {
     setAccountEmail(null);
   }
 
-  const patientName = draft ? `${draft.firstName} ${draft.lastName}`.trim() : "";
+  const patientName = draft?.fullName.trim() ?? "";
 
   return (
     <AjustesScreen
