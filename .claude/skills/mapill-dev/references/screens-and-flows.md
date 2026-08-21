@@ -70,13 +70,40 @@ instante da revelação. É ele que comunica "daqui pra baixo é opcional".
 **O essencial**:
 1. **Nome*** — onde o autocomplete da CMED (B1) vai plugar.
 2. **Como você toma*** — a forma farmacêutica, com rótulo humano.
-3. **Quanto por vez*** — quantidade + unidade (ver "unidade é consequência" abaixo).
-4. **Com que frequência*** — todo dia / dias da semana / a cada X horas / só quando precisar.
-5. **Por quanto tempo** — uso contínuo ou com prazo; no prazo, "por quantos dias" (é assim que o
-   médico fala e como a pessoa lembra) e a data final é derivada.
+3. **Quanto por vez*** — nas formas ambíguas a unidade vem **antes** da quantidade; nas demais
+   ela já está dentro da pergunta ("quantos comprimidos de cada vez").
+4. **Qual a frequência*** — todo dia / dias da semana / a cada X dias / só quando precisar.
+5. **Por quanto tempo** — uso contínuo ou com prazo; no prazo, número + dias/semanas/meses, e a
+   data final é derivada. Em "só quando precisar", "uso contínuo" vira "sempre disponível".
 
-**O opcional**: estoque (com alerta e onde guardo), receita, lembrete, foto da caixa e
-complemento (princípio ativo + observações).
+**O opcional**: estoque (com alerta e onde guardo), receita (foto ou PDF, com validade e aviso de
+vencimento), alerta, foto da caixa e informações adicionais (como tomar, princípio ativo,
+observação geral).
+
+**Quatro frequências, e nenhuma responde à mesma pergunta que outra.** "A cada X horas" existiu e
+foi removida em 21/08: era a única que misturava os dois eixos — *em quais dias* e *em que
+horários* —, e como todo intervalo oferecido dividia o dia por igual (4, 6, 8, 12, 24), produzia
+exatamente o mesmo agendamento que "todo dia" com os horários equivalentes. Dois caminhos para o
+mesmo destino é dúvida na hora de escolher, e nada além disso.
+
+"A cada X dias" é um mecanismo só (`cycle`: a cada N dias, tomando nos M primeiros) para três
+coisas que as pessoas dizem de jeitos diferentes: cartela 28/21, dia sim dia não 2/1 e injeção
+"de 30 em 30 dias" 30/1. Por isso não existe uma frequência "mensal" separada. Ele é ancorado na
+**data do primeiro dia do ciclo atual**, e não no dia do cadastro: quem cadastra no quinto dia da
+cartela receberia a pausa cinco dias atrasada, em silêncio. O preço assumido é que o ciclo
+escorrega no calendário (a cada 30 dias desde 25/01 cai em 24/02).
+
+**A dose pode variar por horário.** `ScheduledDose { at, amount }`, com `amount: null` querendo
+dizer "a dose da prescrição". É o que permite insulina 10 UI de manhã e 8 à noite num cadastro
+só, em vez de dois medicamentos iguais que quebrariam o estoque. A regra é override: horário com
+número próprio manda, em branco herda — e a tela **diz isso**, senão dois números apareceriam se
+contradizendo. O `DoseSchedule` grava a dose já resolvida, porque editar a posologia amanhã não
+pode reescrever o que estava agendado ontem.
+
+**Fração só onde ela existe.** `allowsFractionalDose` está na unidade, não no campo: meio
+comprimido é rotina e o sulco está lá pra isso; ml, mg, g e UI são contínuos. Cápsula, gota,
+adesivo, sachê, jato e aplicação só aceitam inteiro. As máscaras de `shared/number-input` filtram
+na digitação, porque o teclado decimal do sistema é sugestão e não trava.
 
 **A unidade é consequência, não pergunta.** Só três formas têm ambiguidade real e mostram
 seletor: líquido (ml/mg), injeção (ml/UI/mg) e "outra" (livre). Nas demais a unidade é derivada
@@ -87,14 +114,14 @@ se toma (2 gotas), o estoque é o que se compra (um frasco de 20 ml). Gota se to
 compra em ml, e é o ml que está impresso no frasco — contar na unidade errada quebra a única
 conta que o estoque existe pra fazer, "quantos dias ainda dá".
 
-**A frequência gera os horários.** Escolhido "todo dia", pergunta-se quantas vezes — botões de 1×
-a 4× e, no fim da mesma fileira, um campo pro resto (até 12; acima disso é "a cada X horas"). São
-criados exatamente esse número de horários, o que extingue por construção o erro de cadastrar "3
-vezes ao dia" e salvar com um horário só.
+**A frequência gera os horários.** Escolhida a frequência, pergunta-se quantas vezes por dia:
+botões de 1× a 4× e, no fim da mesma fileira, um campo pro resto (até 12). São criados
+exatamente esse número de horários, o que extingue por construção o erro de cadastrar "3 vezes ao
+dia" e salvar com um horário só.
 
 **Nada vem escolhido de fábrica.** Chegou a existir uma tabela de horários sugeridos; foi
 removida, e a regra virou geral. Forma, dose, unidade (quando ambígua), frequência, vezes por
-dia, intervalo, duração, lembrete e antecedência do alerta começam **todos vazios**.
+dia, ciclo, duração, modo de alerta e antecedência começam **todos vazios**.
 
 O motivo: um seletor já marcado é indistinguível de uma resposta dada. A pessoa passa por ele sem
 tocar e o cadastro sai com uma posologia que o app inventou — e erra em silêncio, que é pior do
@@ -103,10 +130,26 @@ quem marcou adesivo toma adesivo.
 
 Efeito colateral bom: o essencial virou cascata. A dose só aparece depois da forma (sem ela não
 dá pra saber se a pergunta é "quantos comprimidos" ou "quantos ml"), os horários só depois da
-quantidade de doses, o primeiro horário só depois do intervalo.
+quantidade de doses, e o dia em que o ciclo começou só depois do tamanho do ciclo.
 
 ⚠️ Armadilha registrada: `[].every(...)` é `true`, então "nenhum horário escolhido" passaria por
-"todos preenchidos". A validação testa `timeInputs.length > 0` explicitamente.
+"todos preenchidos". A validação testa `doseInputs.length > 0` explicitamente.
+
+**Toda conta é feita sobre as doses geradas, nunca por divisão.** O tratamento é resumido em
+doses e em quantidade consumida (`summarize-treatment`), e a duração do estoque vem de percorrer
+as doses uma a uma (`estimate-stock-depletion`). Dividir quantidade por dose erraria nos dois
+casos que o app suporta: dose que varia por horário e ciclo com dias de pausa. É isso que permite
+avisar que "30 dias de antecedência" não cabe num estoque de quatro dias — sem bloquear, porque
+comprar mais é o que resolve.
+
+**Alertas** (o nome de tela; no domínio segue `reminderMode`): quatro modos em grade 2×2 com
+ícone, cada um com uma linha de apoio. O texto enquadra a ferramenta como organização, não como
+transferência de responsabilidade, e repete as palavras da seção 3 dos Termos de Uso — duas
+versões da mesma promessa é como uma delas vira mentira. O aviso do aparelho é **condição, não
+ressalva**: "com permissão, volume e o app fora da economia de bateria, os alertas chegam". O
+acordeão "como funcionam" descreve o fluxo que o bloco C1 terá que entregar: o que o alerta
+mostra, o que confirmar/adiar/ignorar faz com o status e com o estoque, e a soneca de 5 minutos
+uma vez só.
 
 **O que é longo de preencher e curto de rever mora em popup**: horários, estoque e lembrete. Na
 tela fica só o resumo — fichinhas cinza com os horários, uma linha com a quantidade e o local do

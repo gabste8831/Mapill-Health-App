@@ -223,15 +223,20 @@ momento.
 **O essencial** (o mínimo pro app lembrar o paciente da dose):
 1. **Nome*** — onde o B1 (CMED) vai plugar o autocomplete.
 2. **Como você toma*** — a forma farmacêutica, com rótulo humano.
-3. **Quanto por vez*** — quantidade + unidade.
-4. **Com que frequência*** — todo dia | dias da semana | a cada X horas | só quando precisar.
-5. **Por quanto tempo** — uso contínuo ou com prazo; no prazo, "por quantos dias".
+3. **Quanto por vez*** — nas formas ambíguas, a unidade vem **antes** da quantidade; nas demais,
+   ela já está dentro da pergunta ("quantos comprimidos de cada vez").
+4. **Com que frequência*** — todo dia | dias da semana | a cada X dias | só quando precisar. As
+   três que agendam respondem à mesma pergunta (**em quais dias**), e os horários do dia são um
+   eixo separado, comum às três.
+5. **Por quanto tempo** — uso contínuo ou com prazo; no prazo, número + dias/semanas/meses.
 
 **O opcional**, tudo condicional:
 6. **Estoque** — quantidade, alerta configurável (decisão nº1) e onde guardo.
-7. **Receita** — anexo local com opt-out de nuvem (decisão nº10) e validade.
-8. **Lembrete** — `alarm | notification | none` (decisão nº2), num popup próprio.
-9. **Foto da caixa** e **Complemento** (princípio ativo + observações).
+7. **Receita** — anexo local (foto ou PDF) com opt-out de nuvem (decisão nº10), validade e
+   aviso prévio de vencimento.
+8. **Lembrete** — `alarm | notification | both | none` (decisão nº2), num popup próprio.
+9. **Foto da caixa** e **Informações adicionais** (como tomar — fichas + texto livre —,
+   princípio ativo, observação geral).
 
 **Três regras de dependência** que sustentam o resto:
 
@@ -240,8 +245,10 @@ momento.
 - **Estoque conta na unidade da embalagem, não na da dose.** Gota se toma em gota e se compra em
   ml, e é o ml que está impresso no frasco. Contar na unidade errada quebra a única conta que o
   estoque existe pra fazer: quantos dias ainda dá.
-- **A frequência gera os horários.** "3 vezes ao dia" abre exatamente três campos, já sugeridos
-  (`suggest-dose-times`). O erro de salvar 3 doses com um horário só deixa de ser possível.
+- **A frequência gera os horários.** "3 vezes ao dia" abre exatamente três campos — vazios, nunca
+  sugeridos: horário pré-preenchido é o que quem tem pressa aceita sem ler, e aí o app lembra a
+  dose na hora errada em silêncio. O erro de salvar 3 doses com um horário só deixa de existir por
+  construção.
 
 **Campos que saíram do formulário** (2026-08-21): tarja (quem cadastra à mão não sabe; segue no
 domínio esperando a CMED), "precisa de receita?" (anexar a receita já responde), princípio ativo
@@ -255,22 +262,32 @@ seu caso — campo fora de contexto gera dúvida, não completude.
 |---|---|
 | Essencial incompleto | todas as seções opcionais, e o botão fica cinza dizendo o que falta |
 | Forma sem ambiguidade de unidade | o seletor de unidade (vira selo) |
-| Frequência "só quando precisar" | seção de lembrete e os campos de horário |
+| Frequência "só quando precisar" | seção de alerta e os campos de horário |
 | Frequência ≠ "dias da semana" | seleção de dias |
+| Frequência ≠ "a cada X dias" | tamanho do ciclo, dias seguidos e início do ciclo |
+| Dose não varia por horário | campo de quantidade em cada horário |
 | "Uso contínuo" | duração em dias |
 | "Não controlo estoque" | quantidade, alerta e onde guardo |
 | Alerta de estoque desmarcado | antecedência do aviso |
-| Receita não anexada | validade da receita |
+| Receita não anexada | validade da receita e aviso de vencimento |
+| Receita sem validade preenchida | aviso de vencimento |
+| "Outra orientação" não marcada | campo livre de como tomar |
 
-- Geração dos `dose_schedules` a partir da posologia (`generate-dose-schedules`).
+- Geração dos `dose_schedules` a partir da posologia (`generate-dose-schedules`), com a dose de
+  cada ocorrência já resolvida.
+- Resumo do tratamento em doses e em quantidade (`summarize-treatment`) e previsão de esgotamento
+  do estoque (`estimate-stock-depletion`). As duas percorrem as doses geradas em vez de dividir
+  quantidade por dose, porque a divisão erra com dose variável e com ciclo que tem pausa.
 - Validação seguindo `medication-safety-validation`: faixas plausíveis, sem inferir valor
   clínico, bloqueio de horários duplicados/sobrepostos.
 
 **Mudanças de modelo que o escopo exige**
 - `Medication`: `form` (forma farmacêutica), `prescriptionRequirement` (tarja) e `photoUri`.
 - `PosologyUnit`: cresce para cobrir todas as apresentações.
-- `Prescription`: `notes` e anexo de receita (`attachmentUri`, `attachmentKind`,
-  `attachmentValidUntil`, opt-out de nuvem).
+- `Prescription`: `notes`, `intakeInstructions` + `intakeNote`, anexo de receita
+  (`attachmentUri`, `attachmentKind`, `attachmentValidUntil`, `renewalReminderLeadDays`, opt-out
+  de nuvem).
+- `DoseSchedule`: `amount` — a dose daquela ocorrência, gravada e não derivada.
 - `InventoryItem`: `storageLocation`.
 - `PosologySchedule` e `generate-dose-schedules` — ✅ entregues na migration 008.
 
@@ -279,8 +296,9 @@ seu caso — campo fora de contexto gera dúvida, não completude.
       horários derivados, tudo em SQLite local. **Pendente de device** (web não persiste).
 - [x] As formas farmacêuticas cobrem comprimido, líquido, gota, injeção, pomada, sublingual,
       inalador, adesivo e sachê — e a unidade de dose oferecida acompanha a forma escolhida.
-- [ ] Editar e excluir (soft delete) uma prescrição existente funciona.
-- [ ] Excluir pede confirmação explícita e explica a consequência ("os registros de ingestão serão mantidos no histórico").
+- [ ] Editar e excluir (soft delete) uma prescrição existente funciona. **Sai daqui e vira a
+      tela de listagem/edição**, feita depois de fechar o cadastro em si.
+- [ ] Excluir pede confirmação explícita e explica a consequência ("os registros de ingestão serão mantidos no histórico"). Anda junto da listagem.
 - [x] Horários gerados batem com a posologia em todas as 4 frequências, incluindo virada de dia.
       — `generate-dose-schedules` verificado contra 8 casos (ver log de 2026-08-20).
 - [x] Campo obrigatório vazio dá erro **antes** do submit, com mensagem no campo. Horário
@@ -292,12 +310,15 @@ seu caso — campo fora de contexto gera dúvida, não completude.
       horário só.
 - [x] Prazo e estoque conversam: o tratamento é resumido em doses (`summarize-treatment`,
       verificado contra 8 cenários em Node) e o estoque avisa quando não cobre o tratamento.
-- [ ] Anexo de receita em **PDF** — hoje só foto. Falta `expo-document-picker`.
-- [ ] Aviso prévio de vencimento da receita, pra renovar sem interromper o tratamento.
-      Antecedência a definir (proposta: 15 dias, tempo de conseguir consulta).
+- [x] Anexo de receita em **PDF** — `expo-document-picker`, com os formatos aceitos escritos na
+      tela (PDF, JPG ou PNG) em vez de descobertos no erro.
+- [x] Aviso prévio de vencimento da receita, pra renovar sem interromper o tratamento — 7, 15 ou
+      30 dias, e a tela mostra a data em que o aviso chega, não a antecedência.
 - [ ] Seletor nativo de horário (roda de hora/minuto) no popup de horários, no lugar do campo
-      mascarado. Nenhum picker está instalado hoje, e é componente só de aparelho — invisível na
-      prévia web, então entra junto com a leva de validação em device.
+      mascarado. Componente só de aparelho, invisível na prévia web — **entra na leva de
+      validação em device**, junto do login Google e da persistência (§5.1).
+- [ ] Seção de lembrete a ser retrabalhada em conversa própria (2026-08-21). O que existe hoje —
+      quatro modos, aviso de permissão e o acordeão "como funcionam" — fica como está até lá.
 
 **Rastreabilidade**: §2.6 (use-case isolado da UI), §2.7.1 (confiabilidade algorítmica), Nielsen (prevenção de erros).
 
@@ -918,3 +939,9 @@ gerado no servidor do EAS.
 | 2026-08-21 | B2 (parte 6) | Concluído | **Lembrete ganhou "os dois" e explicação de permissão.** `ReminderMode` passou a aceitar `both` — os dois canais fazem coisas diferentes (o alarme interrompe na hora, a notificação **fica** na barra depois de dispensado) e quem precisava das duas estava tendo que escolher uma. Coluna é TEXT, então não houve migration. O popup passou a avisar, antes de salvar, que o aviso depende de permissão do sistema e que o app não tem como contornar a recusa — sem isso a pessoa culpa o Mapill por um lembrete que o Android bloqueou. Junto veio um `Accordion` "Como funcionam os lembretes" dentro do próprio popup (nada de modal aninhado), pronto pra receber prints depois. **Resumo do estoque virou bloco rotulado** (QUANTIDADE / LOCAL / AVISO): "50 comprimidos · em cima da geladeira" numa linha só obrigava a decifrar o que era o quê pelo conteúdo. Aviso de estoque insuficiente ganhou fundo de atenção, e a explicação do intervalo ganhou fundo azul claro. |
 | 2026-08-21 | B2 (parte 7) | Concluído | **Duração em dias, semanas ou meses.** "Por 90 dias" não é como ninguém pensa um tratamento de três meses, e mês não tem tamanho fixo — converter pra dias na entrada erraria a conta. `lastDayOfTreatment` passou a receber a unidade e a somar meses de verdade, grudando no fim do mês quando o dia não existe (31/01 + 1 mês = 28/02). O inverso (`treatmentDuration`) reconhece a unidade ao reabrir um cadastro, preferindo dias abaixo de duas semanas pra quem escreveu "7 dias" não reencontrar "1 semana". Verificado contra 9 casos em Node, incluindo mês curto e virada de ano. O checkbox caseiro do estoque (quadrado que só pintava de azul) foi eliminado em favor do `Checkbox` do kit, que tem o "certinho" — agora existe um único checkbox no app. |
 | 2026-08-21 | B2 (parte 8) | Concluído | **Nenhum campo vem escolhido de fábrica.** Mesma razão que tirou os horários sugeridos, levada até o fim: um seletor já marcado é indistinguível de uma resposta dada, e a pessoa passa por ele sem tocar — o cadastro sai com uma posologia que o app inventou. Passaram a começar vazios: forma farmacêutica, quantidade da dose, unidade (nas formas ambíguas), frequência, quantas vezes por dia, intervalo, duração e sua unidade, modo de lembrete e antecedência do alerta de estoque. A unidade derivada da forma continua sendo preenchida sozinha — isso não é chute, é consequência. Como efeito colateral bom, o essencial virou cascata: a dose só aparece depois da forma (sem ela o app não sabe se pergunta "quantos comprimidos" ou "quantos ml"), os horários só depois da quantidade de doses, o primeiro horário só depois do intervalo. Trocar de frequência zera o que era da anterior. Cuidado de borda: `every` de lista vazia é `true`, então "nenhum horário" passaria por "todos preenchidos" — daí o teste explícito de `timeInputs.length > 0`. E o alerta de estoque só é gravado ligado se a antecedência foi escolhida, senão ficaria "ativo" sem nunca disparar. |
+| 2026-08-21 | B2 (parte 9) | Concluído | **Auditoria de cobertura, e os três buracos que ela achou.** Doze cadastros reais foram passados pelas regras do formulário; oito atravessavam inteiros e três falhavam **em silêncio**, que é o modo de falha que este bloco existe pra evitar. (a) **Dose diferente no mesmo tratamento** — insulina 10 UI de manhã e 8 à noite, varfarina por dia da semana, desmame de corticoide: `doseAmount` era um número por prescrição, então a saída era cadastrar o mesmo remédio duas vezes e quebrar o estoque. Os horários viraram `ScheduledDose { at, amount }`, com `amount: null` significando "o mesmo de sempre" — a dose uniforme continua morando num lugar só, e o número por horário só existe quando alguém o escreveu. `DoseSchedule` passou a gravar a dose já resolvida (migration 012), porque editar a posologia amanhã não pode reescrever o que estava agendado ontem. (b) **Cartela com pausa** — anticoncepcional 21/7 cadastrado como "todo dia" cobrava dose nos sete dias de pausa. Nova frequência `cyclic { daysOn, daysOff }`, ancorada no início do tratamento e não na janela de geração, senão o ciclo escorregaria a cada reabastecimento. Ela também é como "dias alternados" se expressa (1 e 1). (c) **A cada 48 horas** passou a ser oferecido — e só depois que o intervalo virou ancorado no início, pelo mesmo motivo. Efeito colateral: o aviso de estoque insuficiente passou a comparar **quantidade com quantidade** (`TreatmentSummary.totalAmount`) em vez de dividir estoque por dose, conta que deixou de existir quando a dose passou a variar. O JSON antigo (`times: string[]`) é convertido na leitura do repositório, e não numa migration: reescrever JSON dentro do SQLite não é verificável fora do aparelho, e a função é. 16 casos verificados rodando o domínio compilado em Node — cartela, pausa, regeração, dose por horário, herança da dose geral, 48h ancorado, virada de meia-noite, soma do tratamento e ciclo inválido. |
+| 2026-08-21 | B2 (parte 9) | Cobertura conhecida | Ainda **não** cabe no cadastro: tratamento que começa em data futura (a data de início segue fixa em hoje, esperando a tela de tratamentos) e intervalo livre em horas — a lista oferece 4/6/8/12/24/48, e "de 3 em 3 horas" se resolve como 8 horários no dia. Caneta de insulina se conta em doses e não em ml, então o estoque dela fica aproximado. |
+| 2026-08-21 | B2 (parte 10) | Concluído | **Frequência: cinco opções viraram quatro, e sumiu a que tinha dois caminhos.** "A cada X horas" saiu. Ela era a única opção que misturava os dois eixos da pergunta — *em quais dias* e *em que horários* —, e como todo intervalo oferecido dividia o dia por igual (4, 6, 8, 12, 24), produzia exatamente o mesmo agendamento que "todo dia" com os horários equivalentes: mesmo destino por duas estradas, o que é dúvida na hora de escolher e nada além disso. O que ela tinha de legítimo era o modelo mental de quem ouve "de 8 em 8 horas", e isso se resolve preenchendo os horários, não criando uma frequência. `cyclic` (dias tomando/dias de pausa) virou `cycle` (**a cada N dias, tomando nos M primeiros**), a pedido — a formulação genérica engole três coisas que as pessoas dizem de jeitos diferentes: cartela 28/21, dia sim dia não 2/1 e injeção "de 30 em 30 dias" 30/1. Com isso não é preciso uma frequência mensal separada; o preço, assumido, é que o ciclo escorrega no calendário (a cada 30 dias desde 25/01 cai em 24/02). A âncora deixou de ser um número ("que dia do ciclo é hoje") e virou **a data do primeiro dia do ciclo atual**, perguntada como "começa hoje" ou "já comecei antes" — pra injeção de 30 em 30, "que dia do ciclo é hoje" era pergunta que ninguém sabe responder. A tela confirma com **datas** e não com a regra: "a próxima é em 24/02", "você toma até 17/01 e recomeça em 25/01". E o "só quando precisar" trocou "uso contínuo" por **"sempre disponível"** — o Dorflex da mochila não é um tratamento contínuo, é um remédio sem agenda, e a palavra errada ali fazia a pergunta não encaixar em nada. As gravações antigas são convertidas na leitura do repositório: intervalo que divide o dia vira os horários equivalentes (conversão exata, não aproximação), 48h vira ciclo de dois dias, e o `cyclic` antigo vira `cycle` com a data reconstruída. 24 casos verificados em Node. |
+| 2026-08-21 | B2 (parte 11) | Concluído | **Receita ganhou PDF e aviso de vencimento; "como tomar" ganhou saída de emergência.** As fichas de como tomar cobrem o comum, mas lista fechada sempre deixa alguém de fora — entrou um campo livre ao lado delas (`intake_note`, migration 013), separado da observação geral porque tem destino diferente: acompanha a **dose** na hora de tomar ("diluir em meio copo"), não o tratamento. O anexo de receita passou a aceitar **PDF** (`expo-document-picker` 57.0.1), com duas portas de entrada — galeria pra quem tem o papel na mão, arquivo pra quem recebeu a receita digital —, e os formatos aceitos escritos na tela em vez de descobertos no erro. `attachmentKind` deixou de ser gravado fixo como `image`. O **aviso de vencimento** entrou em cascata: anexo → validade → "me avisar antes de vencer" → 7, 15 ou 30 dias. A menor opção é uma semana porque antecedência que não dá tempo de conseguir consulta é só um susto; e a confirmação mostra a **data** em que o aviso chega, não a antecedência, que é o único jeito de conferir se dá tempo. Remover a receita leva junto validade e aviso — sozinhos eles não descrevem nada. A persistência do arquivo escolhido saiu de `usePhotoPicker` e virou `shared/persist-picked-file`, usada pelos dois seletores; o de documento guarda a extensão real, senão um PDF gravado como `.jpg` não abriria. |
+| 2026-08-21 | B2 (parte 12) | Concluído | **Validação por tipo de campo, e a seção de alertas.** Número quebrado passava onde não existe: "1,5 gotas" era aceito e viraria estoque descontado com número impossível e um aviso que ninguém cumpre. `allowsFractionalDose` fixa isso na unidade e não no campo, porque é o mundo físico que decide: meio comprimido é rotina e o sulco está lá pra isso; cápsula não se parte sem derramar, gota, adesivo, sachê e jato não se dividem; ml, mg, g e UI são contínuos. A regra vale nos três lugares onde se digita quantidade (dose, dose por horário, estoque), e as máscaras de `shared/number-input` filtram na entrada, porque o teclado decimal do sistema é sugestão e não trava. Duração passou a aceitar só inteiro. **A dose por horário ficou visível**: a regra sempre foi override (horário preenchido manda, em branco herda), mas a tela não contava, e dois números apareciam se contradizendo. Agora, com a variação ligada, uma linha diz se o valor de cima ainda vale ou se todos os horários já têm o seu. O campo de orientação livre virou a ficha **"Outra orientação"** dentro de COMO TOMAR, que abre o campo — como campo fixo, ele parecia cobrar um texto de todo mundo. Na seção de alertas: os quatro modos viraram grade 2×2 com ícone (`OptionGroup` ganhou `icon` e `alto`), o aviso do aparelho virou **condição e não ressalva** ("com permissão, volume e o app fora da economia de bateria, os alertas chegam"), porque dizer "não garantimos" transfere a insegurança sem dar saída; o "como funcionam" ganhou fundo azul claro e passou a descrever o fluxo real: o que o alerta mostra, o que confirmar/adiar/ignorar faz com o status e com o estoque, a soneca de 5 minutos uma vez só, e três tópicos de o que o Mapill não faz. "Lembrete" virou **alerta** no texto de tela. Travessão removido de todo texto visível ao usuário. |
+| 2026-08-21 | B2 (parte 13) | Concluído | **Antecedência do alerta de estoque deixou de ser número solto.** Cadastrar "me avise 30 dias antes" com dez comprimidos e duas doses por dia era aceito calado, e o aviso já nascia vencido: o estoque dura quatro dias. Novo use-case `estimate-stock-depletion`, que **percorre as doses de verdade** em vez de dividir quantidade por dose, porque a divisão erra nos dois casos que o app agora suporta: dose que varia por horário (10 UI de manhã e 8 à noite consomem 18 por dia) e ciclo com pausa (uma cartela não consome nada em sete dias de cada vinte e oito). O popup de estoque passou a mostrar a consequência sempre que dá para estimar ("o que você tem dura até 25/08, cerca de 4 dias") e a trocar para cor de atenção quando a antecedência escolhida é maior que isso. Não bloqueia: comprar mais é o que resolve, e o estoque de hoje não pode impedir alguém de configurar o alerta que quer daqui em diante. 9 casos verificados em Node, incluindo estoque menor que uma dose e estoque além do horizonte de busca. Também: a grade de duas colunas voltou a ter o mesmo respiro na horizontal e na vertical (as opções crescem juntas e um preenchedor invisível segura a última linha ímpar, em vez de `space-between`, que engordava só o vão do meio), e o `Accordion` deixou de ser branco sobre branco. |
