@@ -12,6 +12,7 @@ export * from "./IconButton/IconButton";
 export * from "./Accordion/Accordion";
 export * from "./KeyboardAwareScrollView/KeyboardAwareScrollView";
 export * from "./LegalAccordion/LegalAccordion";
+export * from "./OptionGroup/OptionGroup";
 export * from "./SelectField/SelectField";
 export * from "./SplashOverlay/SplashOverlay";
 export * from "./TextField/TextField";

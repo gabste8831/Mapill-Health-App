@@ -26,7 +26,7 @@ export function Checkbox({ checked, onChange, label, accessibilityLabel }: Check
       accessibilityState={{ checked }}
       accessibilityLabel={accessibilityLabel}>
       <View style={[styles.box, checked && styles.boxChecked]}>
-        {checked ? <Ionicons name="checkmark" size={16} color={colors.onPrimary} /> : null}
+        {checked ? <Ionicons name="checkmark-sharp" size={18} color={colors.onPrimary} /> : null}
       </View>
       <Text style={styles.label}>{label}</Text>
     </Pressable>
