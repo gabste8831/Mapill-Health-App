@@ -1,17 +1,12 @@
 import * as Crypto from "expo-crypto";
 import { Platform } from "react-native";
 
-import type {
-  MedicationForm,
-  PosologyUnit,
-  PrescriptionRequirement,
-} from "@/domain/entities/medication";
-import type { PosologySchedule, ReminderMode } from "@/domain/entities/prescription";
-import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
+import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
+import type { MedicamentoDraft } from "@/telas/CadastroDeMedicamento/FormularioDeMedicamentoScreen";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`). */
 const persistsLocally = Platform.OS !== "web";
@@ -22,34 +17,8 @@ const persistsLocally = Platform.OS !== "web";
  */
 const SCHEDULE_HORIZON_DAYS = 30;
 
-/** O que a etapa 1 coleta: o mínimo pro app já conseguir lembrar o paciente da dose. */
-export type CadastroEssencial = {
-  name: string;
-  activeIngredient: string;
-  form: MedicationForm;
-  prescriptionRequirement: PrescriptionRequirement;
-  doseAmount: number;
-  doseUnit: PosologyUnit;
-  schedule: PosologySchedule;
-  startDate: string;
-  endDate: string | null;
-};
-
-/** O que a etapa 2 acrescenta. Tudo opcional — o medicamento já existe sem nada disto. */
-export type CadastroDetalhes = {
-  photoUri: string | null;
-  reminderMode: ReminderMode;
-  notes: string | null;
-  stockQuantity: number | null;
-  lowStockAlertEnabled: boolean;
-  lowStockAlertLeadDays: number | null;
-  storageLocation: string | null;
-  attachmentUri: string | null;
-  attachmentValidUntil: string | null;
-};
-
-/** Devolvido pela etapa 1 para a etapa 2 saber o que completar. */
-export type CadastroIds = {
+/** Identifica um cadastro existente. Ausente = criar; presente = atualizar. */
+export type MedicamentoIds = {
   medicationId: string;
   prescriptionId: string;
 };
@@ -59,104 +28,87 @@ function syncFields() {
 }
 
 /**
- * Grava o essencial e devolve os ids. É chamado ao **avançar** para os detalhes, não só ao
- * concluir: quem desiste no meio da etapa 2 sai com o medicamento já cadastrado e funcionando,
- * em vez de perder tudo o que digitou.
+ * Grava um cadastro inteiro — medicamento, tratamento, estoque e horários. Cria quando `ids` é
+ * omitido e atualiza quando vem preenchido; é a mesma operação porque a tela é a mesma, e
+ * duplicar isso em "salvar" e "atualizar" faria as duas divergirem com o tempo.
  *
- * Cria os três registros de uma vez porque nenhum faz sentido sozinho: prescrição sem
- * medicamento é órfã, e horário sem prescrição não sabe de que dose está falando.
+ * Os três registros andam juntos porque nenhum faz sentido sozinho: prescrição sem medicamento
+ * é órfã, e horário sem prescrição não sabe de que dose está falando.
  */
-export async function saveCadastroEssencial(essencial: CadastroEssencial): Promise<CadastroIds> {
-  const medicationId = Crypto.randomUUID();
-  const prescriptionId = Crypto.randomUUID();
+export async function salvarMedicamento(
+  draft: MedicamentoDraft,
+  ids?: MedicamentoIds,
+): Promise<MedicamentoIds> {
+  const medicationId = ids?.medicationId ?? Crypto.randomUUID();
+  const prescriptionId = ids?.prescriptionId ?? Crypto.randomUUID();
   if (!persistsLocally) return { medicationId, prescriptionId };
 
-  await new MedicationRepository().save({
+  const medicationRepository = new MedicationRepository();
+  const existingMedication = await medicationRepository.findById(medicationId);
+  await medicationRepository.save({
+    ...(existingMedication ?? {
+      // A apresentação textual vem da CMED (B1). No manual o paciente já descreve isso no nome,
+      // então gravar vazio é mais honesto que repetir a forma farmacêutica.
+      presentation: "",
+      ean: null,
+      fromCmed: false,
+    }),
     id: medicationId,
-    name: essencial.name,
-    activeIngredient: essencial.activeIngredient,
-    // A apresentação textual vem da CMED (B1). No manual o paciente já descreve isso no nome,
-    // então gravar vazio é mais honesto que repetir a forma farmacêutica.
-    presentation: "",
-    form: essencial.form,
-    prescriptionRequirement: essencial.prescriptionRequirement,
-    photoUri: null,
-    ean: null,
-    fromCmed: false,
+    name: draft.name,
+    activeIngredient: draft.activeIngredient,
+    form: draft.form,
+    prescriptionRequirement: draft.prescriptionRequirement,
+    photoUri: draft.photoUri,
     ...syncFields(),
   });
 
   const prescription = {
     id: prescriptionId,
     medicationId,
-    doseAmount: essencial.doseAmount,
-    doseUnit: essencial.doseUnit,
-    schedule: essencial.schedule,
-    startDate: essencial.startDate,
-    endDate: essencial.endDate,
-    // Notificação comum é o padrão até o paciente escolher outro nos detalhes — silêncio por
-    // omissão seria pior num app cuja função é lembrar.
-    reminderMode: "notification" as ReminderMode,
-    notes: null,
-    attachmentUri: null,
-    attachmentKind: null,
-    attachmentValidUntil: null,
+    doseAmount: draft.doseAmount,
+    doseUnit: draft.doseUnit,
+    schedule: draft.schedule,
+    startDate: draft.startDate,
+    endDate: draft.endDate,
+    reminderMode: draft.reminderMode,
+    notes: draft.notes,
+    attachmentUri: draft.attachmentUri,
+    attachmentKind: draft.attachmentUri === null ? null : ("image" as const),
+    attachmentValidUntil: draft.attachmentValidUntil,
     attachmentSyncOptOut: false,
     ...syncFields(),
   };
   await new PrescriptionRepository().save(prescription);
 
-  const from = new Date();
-  const until = new Date(from.getTime() + SCHEDULE_HORIZON_DAYS * 24 * 60 * 60_000);
+  const inventoryRepository = new InventoryRepository();
+  const existingInventory = await inventoryRepository.findByMedication(medicationId);
+  const tracksStock = draft.stockQuantity !== null || draft.storageLocation !== null;
+  if (tracksStock || existingInventory !== null) {
+    await inventoryRepository.save({
+      id: existingInventory?.id ?? Crypto.randomUUID(),
+      medicationId,
+      quantity: draft.stockQuantity ?? 0,
+      unit: draft.stockUnit,
+      lowStockAlertEnabled: draft.lowStockAlertEnabled,
+      lowStockAlertLeadDays: draft.lowStockAlertLeadDays,
+      storageLocation: draft.storageLocation,
+      ...syncFields(),
+    });
+  }
+
+  /**
+   * Numa edição a posologia pode ter mudado, então os horários futuros são regerados. Só os
+   * futuros: apagar os passados destruiria o histórico de quando a dose era pra ter acontecido,
+   * que é justamente o que o registro de ingestão referencia.
+   */
   const doseScheduleRepository = new DoseScheduleRepository();
+  const from = new Date();
+  if (ids !== undefined) await doseScheduleRepository.deleteUpcoming(prescriptionId, from.toISOString());
+
+  const until = new Date(from.getTime() + SCHEDULE_HORIZON_DAYS * 24 * 60 * 60_000);
   for (const doseSchedule of generateDoseSchedules({ prescription, from, until })) {
     await doseScheduleRepository.save({ id: Crypto.randomUUID(), ...doseSchedule, ...syncFields() });
   }
 
   return { medicationId, prescriptionId };
-}
-
-/**
- * Completa um cadastro já gravado. Só toca no que os detalhes trazem — o essencial permanece
- * como a etapa 1 deixou.
- */
-export async function completarCadastro(ids: CadastroIds, detalhes: CadastroDetalhes): Promise<void> {
-  if (!persistsLocally) return;
-
-  const medicationRepository = new MedicationRepository();
-  const medication = await medicationRepository.findById(ids.medicationId);
-  if (medication !== null) {
-    await medicationRepository.save({ ...medication, photoUri: detalhes.photoUri, ...syncFields() });
-  }
-
-  const prescriptionRepository = new PrescriptionRepository();
-  const prescription = await prescriptionRepository.findById(ids.prescriptionId);
-  if (prescription !== null) {
-    await prescriptionRepository.save({
-      ...prescription,
-      reminderMode: detalhes.reminderMode,
-      notes: detalhes.notes,
-      attachmentUri: detalhes.attachmentUri,
-      attachmentKind: detalhes.attachmentUri === null ? null : "image",
-      attachmentValidUntil: detalhes.attachmentValidUntil,
-      ...syncFields(),
-    });
-  }
-
-  const hasStockInfo =
-    detalhes.stockQuantity !== null || detalhes.storageLocation !== null || detalhes.lowStockAlertEnabled;
-  if (!hasStockInfo || prescription === null) return;
-
-  const inventoryRepository = new InventoryRepository();
-  const existing = await inventoryRepository.findByMedication(ids.medicationId);
-  await inventoryRepository.save({
-    id: existing?.id ?? Crypto.randomUUID(),
-    medicationId: ids.medicationId,
-    quantity: detalhes.stockQuantity ?? 0,
-    unit: prescription.doseUnit,
-    lowStockAlertEnabled: detalhes.lowStockAlertEnabled,
-    lowStockAlertLeadDays: detalhes.lowStockAlertEnabled ? detalhes.lowStockAlertLeadDays : null,
-    storageLocation: detalhes.storageLocation,
-    ...syncFields(),
-  });
 }
