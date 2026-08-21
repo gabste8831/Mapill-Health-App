@@ -68,6 +68,22 @@ export function needsUnitChoice(form: MedicationForm): boolean {
 }
 
 /**
+ * Unidades que aceitam fração. Não é preferência de formato: é o que existe no mundo físico.
+ *
+ * Meio comprimido é rotina e o sulco no meio dele está lá pra isso; meia gota não existe, meio
+ * adesivo não existe, meio sachê é sachê aberto. Cápsula fica de fora porque não se parte sem
+ * derramar o conteúdo. ml, mg, g e UI são medidas contínuas.
+ *
+ * Deixar passar "1,5 gotas" não é só feio: vira estoque descontado com número quebrado e um
+ * aviso de dose que ninguém consegue cumprir.
+ */
+const UNITS_WITH_FRACTION: readonly PosologyUnit[] = ["tablet", "ml", "mg", "g", "IU"];
+
+export function allowsFractionalDose(unit: PosologyUnit): boolean {
+  return UNITS_WITH_FRACTION.includes(unit);
+}
+
+/**
  * Unidade em que o estoque é contado — nem sempre a da dose. Gota se toma em gota mas se compra
  * em ml, e é o ml que está impresso no frasco. `null` = a forma é livre demais pra supor, então
  * segue a dose.

@@ -5,6 +5,7 @@ import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 type DoseScheduleRow = SyncableRow & {
   prescription_id: string;
   scheduled_for: string;
+  amount: number;
   notification_id: string | null;
   snooze_count: number;
 };
@@ -27,6 +28,7 @@ export class DoseScheduleRepository
       id: row.id,
       prescriptionId: row.prescription_id,
       scheduledFor: row.scheduled_for,
+      amount: row.amount,
       notificationId: row.notification_id,
       snoozeCount: row.snooze_count === 1 ? 1 : 0,
       updatedAt: row.updated_at,
@@ -40,6 +42,7 @@ export class DoseScheduleRepository
       id: entity.id,
       prescription_id: entity.prescriptionId,
       scheduled_for: entity.scheduledFor,
+      amount: entity.amount,
       notification_id: entity.notificationId,
       snooze_count: entity.snoozeCount,
       updated_at: entity.updatedAt,

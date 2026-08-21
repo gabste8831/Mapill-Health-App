@@ -2,7 +2,7 @@ import type { DoseScheduleRepository } from "../ports/dose-schedule-repository";
 
 export class DoseAlarmAlreadySnoozedError extends Error {
   constructor() {
-    super("Este alarme já foi adiado uma vez — não é possível adiar novamente.");
+    super("Este alarme já foi adiado uma vez, e não é possível adiar de novo.");
     this.name = "DoseAlarmAlreadySnoozedError";
   }
 }

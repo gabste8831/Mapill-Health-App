@@ -70,7 +70,7 @@ export class SupabaseAuthGateway implements AuthGateway {
     const accessToken = params.get("access_token");
     const refreshToken = params.get("refresh_token");
     if (!accessToken || !refreshToken) {
-      throw new Error("Resposta de login incompleta — tente novamente.");
+      throw new Error("Resposta de login incompleta. Tente novamente.");
     }
 
     const { data: sessionData, error: sessionError } = await client.auth.setSession({

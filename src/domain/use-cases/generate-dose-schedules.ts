@@ -1,5 +1,10 @@
 import type { DoseSchedule } from "../entities/dose-schedule";
-import type { PosologySchedule, Prescription, TimeOfDay } from "../entities/prescription";
+import type {
+  PosologySchedule,
+  Prescription,
+  TimeOfDay,
+  Weekday,
+} from "../entities/prescription";
 import type { SyncableEntity } from "../entities/syncable";
 
 /** Horário a agendar. `id` e metadados de sincronização são da camada de dados, não da regra. */
@@ -8,7 +13,7 @@ export type DoseScheduleDraft = Omit<DoseSchedule, keyof SyncableEntity>;
 /** Só o que a regra realmente lê. Deixa a prescrição inteira passar, e um rascunho também. */
 export type SchedulablePrescription = Pick<
   Prescription,
-  "id" | "schedule" | "startDate" | "endDate"
+  "id" | "schedule" | "startDate" | "endDate" | "doseAmount"
 >;
 
 export type GenerateDoseSchedulesInput = {
@@ -46,38 +51,52 @@ function parseIsoDate(isoDate: string): Date | null {
   return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 }
 
+/** Um instante agendado e quanto se toma nele — a dose já resolvida, sem `null`. */
+type Occurrence = { at: Date; amount: number };
+
+/** Só os dias em que este schedule tem dose. `weekday` é 0–6, igual ao `Date.getDay()`. */
+function ehDiaDeTomar(schedule: PosologySchedule, day: Date): boolean {
+  if (schedule.kind === "weekly") return schedule.weekdays.includes(day.getDay() as Weekday);
+  if (schedule.kind !== "cycle") return true;
+
+  const cycleStart = parseIsoDate(schedule.cycleStartDate);
+  if (cycleStart === null || schedule.activeDays < 1) return false;
+  if (schedule.activeDays > schedule.cycleLengthDays) return false;
+
+  // O resto fica negativo se o dia vier antes do início do ciclo (tratamento cadastrado com o
+  // ciclo começando amanhã); o `+ cycleLengthDays` devolve pro intervalo positivo.
+  const desdeOInicio = daysBetween(cycleStart, day);
+  const dayInCycle =
+    ((desdeOInicio % schedule.cycleLengthDays) + schedule.cycleLengthDays) %
+    schedule.cycleLengthDays;
+  return dayInCycle < schedule.activeDays;
+}
+
+/** Dias inteiros entre duas meia-noites. Positivo quando `day` vem depois de `origin`. */
+function daysBetween(origin: Date, day: Date): number {
+  return Math.round((day.getTime() - origin.getTime()) / (MINUTES_IN_DAY * 60_000));
+}
+
 /** Todos os instantes de um schedule dentro da janela, ainda sem filtrar por vigência. */
-function occurrencesInWindow(schedule: PosologySchedule, from: Date, until: Date): Date[] {
+function occurrencesInWindow(
+  schedule: PosologySchedule,
+  from: Date,
+  until: Date,
+  defaultAmount: number,
+): Occurrence[] {
   if (schedule.kind === "asNeeded") return [];
 
-  if (schedule.kind === "interval") {
-    const firstMinutes = toMinutesOfDay(schedule.firstTime);
-    if (firstMinutes === null || schedule.everyMinutes <= 0) return [];
+  const doses = schedule.doses
+    .map((dose) => ({ minutes: toMinutesOfDay(dose.at), amount: dose.amount ?? defaultAmount }))
+    .filter((dose): dose is { minutes: number; amount: number } => dose.minutes !== null);
+  if (doses.length === 0) return [];
 
-    const occurrences: Date[] = [];
-    // Começa no primeiro horário do dia da janela e caminha de intervalo em intervalo. Como o
-    // passo é somado ao instante absoluto, a virada de dia sai de graça: 22:00 + 8h = 06:00 do
-    // dia seguinte, sem tratamento especial.
-    let current = addMinutes(atMidnight(from), firstMinutes);
-    while (current < from) current = addMinutes(current, schedule.everyMinutes);
-    while (current < until) {
-      occurrences.push(current);
-      current = addMinutes(current, schedule.everyMinutes);
-    }
-    return occurrences;
-  }
-
-  const times = schedule.times
-    .map(toMinutesOfDay)
-    .filter((minutes): minutes is number => minutes !== null);
-  if (times.length === 0) return [];
-
-  const occurrences: Date[] = [];
+  const occurrences: Occurrence[] = [];
   for (let day = atMidnight(from); day < until; day = addMinutes(day, MINUTES_IN_DAY)) {
-    if (schedule.kind === "weekly" && !schedule.weekdays.includes(day.getDay() as never)) continue;
-    for (const minutes of times) {
-      const occurrence = addMinutes(day, minutes);
-      if (occurrence >= from && occurrence < until) occurrences.push(occurrence);
+    if (!ehDiaDeTomar(schedule, day)) continue;
+    for (const dose of doses) {
+      const at = addMinutes(day, dose.minutes);
+      if (at >= from && at < until) occurrences.push({ at, amount: dose.amount });
     }
   }
   return occurrences;
@@ -108,9 +127,15 @@ export function generateDoseSchedules({
   const windowEnd = treatmentEnd !== null && treatmentEnd < until ? treatmentEnd : until;
   if (windowStart >= windowEnd) return [];
 
-  return occurrencesInWindow(prescription.schedule, windowStart, windowEnd).map((occurrence) => ({
+  return occurrencesInWindow(
+    prescription.schedule,
+    windowStart,
+    windowEnd,
+    prescription.doseAmount,
+  ).map((occurrence) => ({
     prescriptionId: prescription.id,
-    scheduledFor: occurrence.toISOString(),
+    scheduledFor: occurrence.at.toISOString(),
+    amount: occurrence.amount,
     notificationId: null,
     snoozeCount: 0,
   }));

@@ -7,6 +7,12 @@ export type TreatmentSummary = {
   lastDay: string;
   /** Quantas doses cabem entre as duas pontas. */
   totalDoses: number;
+  /**
+   * Quanto o tratamento consome no total, na unidade da dose. Não é `totalDoses × doseAmount`
+   * quando a dose varia de um horário para outro — e é este número, não a contagem, que decide
+   * se o estoque alcança.
+   */
+  totalAmount: number;
 };
 
 /** Data local de um instante em ISO `YYYY-MM-DD` — `toISOString()` devolveria UTC e erraria o dia. */
@@ -45,5 +51,6 @@ export function summarizeTreatment(
     firstDay: toIsoDay(new Date(doses[0].scheduledFor)),
     lastDay: toIsoDay(new Date(doses[doses.length - 1].scheduledFor)),
     totalDoses: doses.length,
+    totalAmount: doses.reduce((total, dose) => total + dose.amount, 0),
   };
 }

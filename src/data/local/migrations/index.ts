@@ -10,6 +10,9 @@ import { MIGRATION_007_PATIENT_FULL_NAME } from "./007-patient-full-name";
 import { MIGRATION_008_PRESCRIPTION_SCHEDULE } from "./008-prescription-schedule";
 import { MIGRATION_009_MEDICATION_FORM_AND_ATTACHMENTS } from "./009-medication-form-and-attachments";
 import { MIGRATION_010_PRESCRIPTION_REQUIREMENT } from "./010-prescription-requirement";
+import { MIGRATION_011_PRESCRIPTION_INTAKE_INSTRUCTIONS } from "./011-prescription-intake-instructions";
+import { MIGRATION_012_DOSE_SCHEDULE_AMOUNT } from "./012-dose-schedule-amount";
+import { MIGRATION_013_PRESCRIPTION_INTAKE_NOTE_AND_RENEWAL } from "./013-prescription-intake-note-and-renewal";
 
 type Migration = {
   version: number;
@@ -28,6 +31,9 @@ const MIGRATIONS: Migration[] = [
   { version: 8, sql: MIGRATION_008_PRESCRIPTION_SCHEDULE },
   { version: 9, sql: MIGRATION_009_MEDICATION_FORM_AND_ATTACHMENTS },
   { version: 10, sql: MIGRATION_010_PRESCRIPTION_REQUIREMENT },
+  { version: 11, sql: MIGRATION_011_PRESCRIPTION_INTAKE_INSTRUCTIONS },
+  { version: 12, sql: MIGRATION_012_DOSE_SCHEDULE_AMOUNT },
+  { version: 13, sql: MIGRATION_013_PRESCRIPTION_INTAKE_NOTE_AND_RENEWAL },
 ];
 
 /**

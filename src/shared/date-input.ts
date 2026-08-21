@@ -55,6 +55,13 @@ export function toDateInput(isoDate: string): string {
  */
 export type DurationUnit = "days" | "weeks" | "months";
 
+/** ISO `YYYY-MM-DD` → data local à meia-noite, ou `null` se não for o formato. */
+function parseIsoDay(isoDate: string): Date | null {
+  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
 function toIsoDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -118,6 +125,46 @@ export function treatmentDuration(
   }
   if (days % 7 === 0) return { amount: days / 7, unit: "weeks" };
   return { amount: days, unit: "days" };
+}
+
+/**
+ * As duas viradas de um ciclo, contadas a partir de **hoje**.
+ *
+ * Existe porque "a cada 28 dias, 21 tomando" não diz nada sozinho: quem cadastra no quinto dia
+ * da cartela precisa ver a pausa cinco dias mais cedo, e é a data que ela reconhece — não a
+ * regra, que ela acabou de digitar. Devolver as duas datas é o que permite a tela mostrar a
+ * consequência antes de salvar.
+ *
+ * `null` quando o ciclo não fecha (dia de uso maior que o ciclo, datas inválidas).
+ */
+export function cycleTurningPoints(
+  todayIso: string,
+  cycleStartIso: string,
+  cycleLengthDays: number,
+  activeDays: number,
+): { lastDay: string; resumesOn: string; emPausa: boolean } | null {
+  const today = parseIsoDay(todayIso);
+  const cycleStart = parseIsoDay(cycleStartIso);
+  if (today === null || cycleStart === null) return null;
+  if (activeDays < 1 || cycleLengthDays < 2 || activeDays >= cycleLengthDays) return null;
+
+  const decorridos = Math.round((today.getTime() - cycleStart.getTime()) / 86_400_000);
+  const dayInCycle = ((decorridos % cycleLengthDays) + cycleLengthDays) % cycleLengthDays;
+
+  const somarDias = (dias: number) => {
+    const alvo = new Date(today);
+    alvo.setDate(today.getDate() + dias);
+    return toIsoDate(alvo);
+  };
+
+  const resumesOn = somarDias(cycleLengthDays - dayInCycle);
+  const emPausa = dayInCycle >= activeDays;
+
+  // Já na pausa, o trecho de uso que interessa é o do ciclo seguinte — dizer "você toma até
+  // ontem" seria tecnicamente verdade e inútil.
+  return emPausa
+    ? { lastDay: somarDias(cycleLengthDays - dayInCycle + activeDays - 1), resumesOn, emPausa }
+    : { lastDay: somarDias(activeDays - 1 - dayInCycle), resumesOn, emPausa };
 }
 
 /** Hoje em ISO `YYYY-MM-DD`, no fuso local — `toISOString()` devolveria UTC e erraria o dia. */
