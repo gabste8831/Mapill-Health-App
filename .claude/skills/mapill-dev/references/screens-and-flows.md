@@ -54,37 +54,101 @@ Confirmar essa ordem antes de implementar navegação — hoje são duas telas s
 Tem que cobrir **qualquer apresentação**, não só comprimido. A tensão do bloco é ser completo
 sem ficar difícil.
 
-**Duas etapas, e a primeira já salva** (decisão de 2026-08-20, implementada). Wizard puro foi
-descartado: abandonar no meio perderia tudo, e cadastrar remédio é tarefa feita apressado. O
-medicamento é gravado **ao avançar** para a etapa 2 — quem sai nos detalhes leva um cadastro
-completo e funcionando.
+**Uma tela, dois estados** (decisão de 2026-08-21, substitui as duas etapas de 20/08). Etapas e
+acordeões foram descartados pelo mesmo motivo: obrigam a pessoa a operar a interface antes de
+responder o que ela veio responder. Mas despejar tudo de uma vez polui. Então:
 
-**Etapa 1 — o essencial** (só o que o app precisa pra lembrar da dose):
-1. **O remédio** — nome*, forma farmacêutica*, exigência de receita (tarja), princípio ativo.
-   O nome é onde o autocomplete da CMED (B1) vai plugar.
-2. **A dose** — quantidade* + unidade*, filtradas pela forma escolhida.
-3. **Quando tomar** — frequência (Diário / Intervalo / Semanal / SOS) + horários; início e, se
-   não for contínuo, fim.
+1. **Só o essencial na tela.** Nome, como toma, dose, frequência, duração. Mais nada existe.
+2. Quando o essencial fica completo, **todo o resto aparece de uma vez**, anunciado por "Seu
+   medicamento já pode ser cadastrado!" seguido do que o opcional serve pra fazer (estoque,
+   receita à mão, lembrete). Uma transição só, previsível — seções nascendo a cada tecla fariam
+   a tela pular debaixo do dedo, virando acordeão disfarçado.
 
-**Etapa 2 — detalhes**, tudo opcional: lembrete, anexos (foto da caixa e, quando a tarja exigir,
-foto da receita + validade), estoque com alerta configurável, onde guardo e observações.
+O botão de salvar é **rodapé fixo**, nasce desabilitado dizendo o que falta e acende no mesmo
+instante da revelação. É ele que comunica "daqui pra baixo é opcional".
+
+**O essencial**:
+1. **Nome*** — onde o autocomplete da CMED (B1) vai plugar.
+2. **Como você toma*** — a forma farmacêutica, com rótulo humano.
+3. **Quanto por vez*** — quantidade + unidade (ver "unidade é consequência" abaixo).
+4. **Com que frequência*** — todo dia / dias da semana / a cada X horas / só quando precisar.
+5. **Por quanto tempo** — uso contínuo ou com prazo; no prazo, "por quantos dias" (é assim que o
+   médico fala e como a pessoa lembra) e a data final é derivada.
+
+**O opcional**: estoque (com alerta e onde guardo), receita, lembrete, foto da caixa e
+complemento (princípio ativo + observações).
+
+**A unidade é consequência, não pergunta.** Só três formas têm ambiguidade real e mostram
+seletor: líquido (ml/mg), injeção (ml/UI/mg) e "outra" (livre). Nas demais a unidade é derivada
+e exibida como selo apagado — quem marcou adesivo toma adesivo.
+
+**Estoque conta na unidade da embalagem, não na da dose.** São eixos diferentes: a dose é o que
+se toma (2 gotas), o estoque é o que se compra (um frasco de 20 ml). Gota se toma em gota e se
+compra em ml, e é o ml que está impresso no frasco — contar na unidade errada quebra a única
+conta que o estoque existe pra fazer, "quantos dias ainda dá".
+
+**A frequência gera os horários.** Escolhido "todo dia", pergunta-se quantas vezes — botões de 1×
+a 4× e, no fim da mesma fileira, um campo pro resto (até 12; acima disso é "a cada X horas"). São
+criados exatamente esse número de horários, o que extingue por construção o erro de cadastrar "3
+vezes ao dia" e salvar com um horário só.
+
+**Nada vem escolhido de fábrica.** Chegou a existir uma tabela de horários sugeridos; foi
+removida, e a regra virou geral. Forma, dose, unidade (quando ambígua), frequência, vezes por
+dia, intervalo, duração, lembrete e antecedência do alerta começam **todos vazios**.
+
+O motivo: um seletor já marcado é indistinguível de uma resposta dada. A pessoa passa por ele sem
+tocar e o cadastro sai com uma posologia que o app inventou — e erra em silêncio, que é pior do
+que exigir a digitação. A única exceção é a unidade derivada da forma, porque ali não há chute:
+quem marcou adesivo toma adesivo.
+
+Efeito colateral bom: o essencial virou cascata. A dose só aparece depois da forma (sem ela não
+dá pra saber se a pergunta é "quantos comprimidos" ou "quantos ml"), os horários só depois da
+quantidade de doses, o primeiro horário só depois do intervalo.
+
+⚠️ Armadilha registrada: `[].every(...)` é `true`, então "nenhum horário escolhido" passaria por
+"todos preenchidos". A validação testa `timeInputs.length > 0` explicitamente.
+
+**O que é longo de preencher e curto de rever mora em popup**: horários, estoque e lembrete. Na
+tela fica só o resumo — fichinhas cinza com os horários, uma linha com a quantidade e o local do
+estoque, o modo de lembrete escolhido. Além de encurtar a página, isso mata um efeito ruim: o
+checkbox de estoque, ao ser marcado, fazia nascer quatro campos e empurrava a tela para baixo
+debaixo do dedo de quem acabara de tocar nele.
+
+**Anexos são uma seção só** — foto da caixa e receita juntas, com a validade aparecendo apenas
+depois que há receita anexada.
+
+**Campos que saíram do formulário** (2026-08-21):
+- **Tarja** — quem cadastra à mão não sabe. Segue no domínio esperando a CMED (B1).
+- **"Precisa de receita?"** — o ato de anexar a receita já responde. Um campo a menos, nenhuma
+  informação perdida.
+- **Princípio ativo** — desceu pro complemento; a pessoa comum não sabe, e o valor dele é
+  comparar preço de genérico depois, não cadastrar agora.
+- **Data de início** — inútil em uso contínuo. Continua no domínio (a geração de horários parte
+  dela), gravada como hoje, e volta a ser editável quando "tratamentos" virar tela própria.
 
 **Regras de exibição condicional** — ninguém deve preencher o que não se aplica ao seu caso;
 campo fora de contexto gera dúvida, não completude:
 
 | Situação | O que some |
 |---|---|
-| Tarja "não precisa de receita" | seção de receita e validade |
-| Frequência "se necessário" | seção de lembrete — não há horário pra lembrar |
-| "Tratamento contínuo" marcado | campo "até quando" |
-| "Não controlo estoque" | quantidade e alerta |
+| Essencial incompleto | todas as seções opcionais e o botão de salvar |
+| Forma sem ambiguidade de unidade | o seletor de unidade (vira selo) |
+| Frequência "só quando precisar" | seção de lembrete e os campos de horário |
+| Frequência ≠ "dias da semana" | seleção de dias |
+| "Uso contínuo" | duração em dias |
+| "Não controlo estoque" | quantidade, alerta e onde guardo |
 | Alerta de estoque desmarcado | antecedência do aviso |
+| Receita não anexada | validade da receita |
 
 **Formas farmacêuticas cobertas**: comprimido/cápsula, líquido, gota, injeção, pomada/creme,
 sublingual, inalador, adesivo, sachê/pó, outro. A forma escolhida define as unidades de dose
 oferecidas (`comprimido`, `ml`, `mg`, `g`, `gota`, `UI`, `aplicação`, `jato`, `adesivo`,
 `sachê`) — filtrar não é inferir valor clínico, é evitar combinação sem sentido como "3 jatos de
 pomada".
+
+**Lembrete mora num popup próprio** (`ConfiguracaoDeLembrete`). É a única decisão do cadastro que
+depende de permissão do sistema e muda o comportamento do aparelho fora do app — merece espaço
+pra explicar alarme × notificação antes de escolher, em vez de três palavras num select.
 
 **Gap resolvido em 2026-08-20**: local de guarda e anexo de receita entram nesta tela, e não numa
 "v2" nem no C3. O paciente já está descrevendo o medicamento aqui; separar em outro bloco

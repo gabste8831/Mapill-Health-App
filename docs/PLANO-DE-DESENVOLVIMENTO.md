@@ -210,35 +210,57 @@ O desafio do bloco é ser completo **sem** ficar difícil de operar. A regra: ob
 mínimo clínico; todo o resto é opcional e fica recolhido, com o mesmo par de selos
 OBRIGATÓRIO/OPCIONAL já usado na ficha de saúde.
 
-**Duas etapas, e a primeira já salva** (decisão de 2026-08-20). Wizard puro foi descartado por um
-motivo concreto: abandonar no passo 3 perderia tudo, e cadastrar remédio é tarefa que se faz
-apressado. Aqui o medicamento é gravado **ao avançar** para a etapa 2, então sair no meio dos
-detalhes deixa um cadastro completo e funcionando.
+**Uma tela, dois estados** (decisão de 2026-08-21, substitui as duas etapas de 20/08). Etapas e
+acordeões caem pelo mesmo motivo: obrigam a pessoa a operar a interface antes de responder o que
+veio responder. Mas despejar tudo de uma vez polui. Então a tela mostra **só o essencial**, e
+quando ele fica completo **o resto aparece de uma vez**, anunciado por "Já dá pra salvar". Uma
+transição só, previsível — seções nascendo a cada tecla fariam a tela pular debaixo do dedo.
 
-**Etapa 1 — o essencial** (o mínimo pro app lembrar o paciente da dose):
-1. **O remédio** — nome*, forma farmacêutica*, **exigência de receita** (tarja), princípio
-   ativo. O nome é onde o B1 (CMED) vai plugar o autocomplete.
-2. **A dose** — quantidade* + unidade*, com as unidades filtradas pela forma escolhida.
-3. **Quando tomar** — frequência **Diário | Intervalo | Semanal | SOS** + horários; início e,
-   se não for contínuo, fim.
+O botão de salvar é **rodapé fixo**: nasce desabilitado dizendo o que falta e acende no mesmo
+instante da revelação. É ele que comunica, sem texto, que dá pra parar de preencher a qualquer
+momento.
 
-**Etapa 2 — detalhes**, tudo opcional e **condicional**:
-4. **Lembrete** — `alarm | notification | none` (decisão nº2).
-5. **Anexos** — foto da embalagem e, quando a tarja exigir, foto da receita + validade
-   (local, com opt-out de nuvem — decisão nº10).
-6. **Estoque** — quantidade em mãos e alerta configurável pelo paciente (decisão nº1).
-7. **Onde guardo** e **Observações** — texto livre.
+**O essencial** (o mínimo pro app lembrar o paciente da dose):
+1. **Nome*** — onde o B1 (CMED) vai plugar o autocomplete.
+2. **Como você toma*** — a forma farmacêutica, com rótulo humano.
+3. **Quanto por vez*** — quantidade + unidade.
+4. **Com que frequência*** — todo dia | dias da semana | a cada X horas | só quando precisar.
+5. **Por quanto tempo** — uso contínuo ou com prazo; no prazo, "por quantos dias".
+
+**O opcional**, tudo condicional:
+6. **Estoque** — quantidade, alerta configurável (decisão nº1) e onde guardo.
+7. **Receita** — anexo local com opt-out de nuvem (decisão nº10) e validade.
+8. **Lembrete** — `alarm | notification | none` (decisão nº2), num popup próprio.
+9. **Foto da caixa** e **Complemento** (princípio ativo + observações).
+
+**Três regras de dependência** que sustentam o resto:
+
+- **A unidade é consequência da forma, não pergunta.** Só líquido (ml/mg), injeção (ml/UI/mg) e
+  "outra" têm ambiguidade real e mostram seletor; nas demais a unidade é derivada e vira selo.
+- **Estoque conta na unidade da embalagem, não na da dose.** Gota se toma em gota e se compra em
+  ml, e é o ml que está impresso no frasco. Contar na unidade errada quebra a única conta que o
+  estoque existe pra fazer: quantos dias ainda dá.
+- **A frequência gera os horários.** "3 vezes ao dia" abre exatamente três campos, já sugeridos
+  (`suggest-dose-times`). O erro de salvar 3 doses com um horário só deixa de ser possível.
+
+**Campos que saíram do formulário** (2026-08-21): tarja (quem cadastra à mão não sabe; segue no
+domínio esperando a CMED), "precisa de receita?" (anexar a receita já responde), princípio ativo
+(desceu pro complemento — o valor dele é comparar preço de genérico depois) e data de início
+(inútil em uso contínuo; gravada como hoje, volta quando "tratamentos" virar tela própria).
 
 **Regras de exibição condicional.** O princípio: ninguém deve preencher o que não se aplica ao
 seu caso — campo fora de contexto gera dúvida, não completude.
 
 | Situação | O que some |
 |---|---|
-| Tarja "não precisa de receita" | seção de receita e validade |
-| Frequência "se necessário" | seção de lembrete (não há horário pra lembrar) |
-| "Tratamento contínuo" marcado | campo "até quando" |
-| "Não controlo estoque" | quantidade e alerta |
+| Essencial incompleto | todas as seções opcionais, e o botão fica cinza dizendo o que falta |
+| Forma sem ambiguidade de unidade | o seletor de unidade (vira selo) |
+| Frequência "só quando precisar" | seção de lembrete e os campos de horário |
+| Frequência ≠ "dias da semana" | seleção de dias |
+| "Uso contínuo" | duração em dias |
+| "Não controlo estoque" | quantidade, alerta e onde guardo |
 | Alerta de estoque desmarcado | antecedência do aviso |
+| Receita não anexada | validade da receita |
 
 - Geração dos `dose_schedules` a partir da posologia (`generate-dose-schedules`).
 - Validação seguindo `medication-safety-validation`: faixas plausíveis, sem inferir valor
@@ -264,9 +286,18 @@ seu caso — campo fora de contexto gera dúvida, não completude.
 - [x] Campo obrigatório vazio dá erro **antes** do submit, com mensagem no campo. Horário
       duplicado é barrado na digitação, e o texto abaixo do botão diz o que falta em vez de
       deixar a pessoa adivinhar por que ele está cinza.
-- [x] Seções opcionais ficam recolhidas e condicionais: a etapa 1 mostra só o obrigatório, e a
-      etapa 2 esconde o que não se aplica ao medicamento cadastrado.
+- [x] Seções opcionais só aparecem depois do essencial, e cada uma esconde o que não se aplica
+      ao medicamento cadastrado (tabela de regras condicionais acima).
+- [x] A frequência decide quantos horários existem — não há como salvar "3 vezes ao dia" com um
+      horário só.
+- [x] Prazo e estoque conversam: o tratamento é resumido em doses (`summarize-treatment`,
+      verificado contra 8 cenários em Node) e o estoque avisa quando não cobre o tratamento.
 - [ ] Anexo de receita em **PDF** — hoje só foto. Falta `expo-document-picker`.
+- [ ] Aviso prévio de vencimento da receita, pra renovar sem interromper o tratamento.
+      Antecedência a definir (proposta: 15 dias, tempo de conseguir consulta).
+- [ ] Seletor nativo de horário (roda de hora/minuto) no popup de horários, no lugar do campo
+      mascarado. Nenhum picker está instalado hoje, e é componente só de aparelho — invisível na
+      prévia web, então entra junto com a leva de validação em device.
 
 **Rastreabilidade**: §2.6 (use-case isolado da UI), §2.7.1 (confiabilidade algorítmica), Nielsen (prevenção de erros).
 
@@ -881,3 +912,9 @@ gerado no servidor do EAS.
 | 2026-08-20 | B2 | Escopo ampliado | O cadastro passa a cobrir qualquer apresentação (injeção, pomada, gota, sublingual, adesivo, inalador, sachê), com a unidade de dose acompanhando a forma. **Local de guarda e anexo de receita saíram do C3 e entraram no B2** — o paciente já descreve o medicamento ali, e separar faria ele cadastrar duas vezes. Formulário organizado em 7 seções, com as opcionais recolhidas. Exige `Medication.form`/`photoUri`, `PosologyUnit` maior, anexo e notas em `Prescription`, e `storageLocation` em `InventoryItem`. |
 | 2026-08-20 | B2 (parte 2) | Concluído | **Formulário de cadastro manual, em duas etapas.** Wizard puro foi descartado: abandonar no meio perderia tudo, e cadastrar remédio é tarefa feita apressado. O medicamento é gravado **ao avançar** pra etapa 2, então sair nos detalhes deixa um cadastro funcionando. A etapa 2 é toda condicional — tarja "isento" esconde receita, "se necessário" esconde lembrete (corrigindo um bug de lógica: perguntava como avisar de uma posologia que não agenda horário), "contínuo" esconde data de fim, "não controlo estoque" esconde quantidade e alerta. Novo campo de domínio `prescriptionRequirement` (migration 010), que virá da CMED no B1 e segue editável. Extraídos pra compartilhado: máscara de data (`shared/date-input`, com a regra de nascimento ficando na ficha porque início de tratamento pode ser futuro), `shared/time-input` e o seletor de foto (`usePhotoPicker(fileName)`). |
 | 2026-08-20 | B2 | Pendências | Falta: anexo de receita em PDF (`expo-document-picker`), e listar/editar/excluir na aba Remédios — adiado a pedido, o foco foi o cadastro. |
+| 2026-08-21 | B2 (parte 3) | Concluído | **Formulário reescrito: uma tela, dois estados.** As duas etapas de 20/08 caíram — etapa e acordeão obrigam a pessoa a operar a interface antes de responder o que veio responder. A tela mostra só o essencial e revela o resto de uma vez quando ele fica completo; botão de salvar virou rodapé fixo, cinza dizendo o que falta, aceso no instante da revelação. Três dependências novas sustentam a redução: (a) **a unidade é consequência da forma** — só líquido, injeção e "outra" têm ambiguidade real e mostram seletor, o resto vira selo; (b) **estoque conta na unidade da embalagem** (`stockUnitForMedicationForm`) porque gota se toma em gota mas se compra em ml, e é o ml impresso no frasco que faz a conta de "quantos dias ainda dá" fechar; (c) **a frequência gera os horários** (`suggest-dose-times`, tabela e não cálculo — 12h÷6 dá 10:24 e ninguém toma remédio às 10:24), extinguindo por construção o erro de salvar "3 vezes ao dia" com um horário só. Saíram do formulário: tarja, "precisa de receita?" (anexar já responde), princípio ativo (desceu pro complemento) e data de início (inútil em uso contínuo; gravada como hoje). "Até quando" virou "por quantos dias", que é como o médico fala. Novo `OptionGroup` no kit — escolha única com as opções à vista, pra quando comparar entre elas *é* a decisão. Lembrete saiu do corpo do formulário e virou popup próprio: é a única decisão do cadastro que depende de permissão do sistema. |
+| 2026-08-21 | B2 (parte 4) | Concluído | **Ajustes de densidade no formulário.** O que é longo de preencher e curto de rever saiu do corpo da tela e virou popup: horários, estoque e lembrete. Na tela fica o resumo — fichinhas cinza com os horários, uma linha com quantidade e local do estoque. Além de encurtar a página, mata um efeito ruim relatado no teste: marcar o checkbox de estoque fazia nascer quatro campos e empurrava a tela debaixo do dedo de quem acabara de tocar nele. **A tabela de horários sugeridos foi removida** — campo pré-preenchido é o que quem está com pressa aceita sem ler, e aí o app lembra da dose na hora errada em silêncio; errar assim é pior que exigir a digitação. O botão "Mais" da quantidade de doses virou o próprio campo, no fim da fileira de opções (`OptionGroup.trailing`), economizando um toque e uma linha. Barra de completude removida. Anexos viraram seção única (caixa + receita). Dose passou a ser uma frase só — "QUANTOS COMPRIMIDOS DE CADA VEZ", já em 1 — em vez de um campo vazio ao lado de uma caixa "UNIDADE" pedindo o que a forma já respondeu. |
+| 2026-08-21 | B2 (parte 5) | Concluído | **Conciliação prazo × estoque, e erro que não some.** Novo use-case `summarize-treatment`: o tratamento com prazo passou a ser dito em **doses**, não em dias de calendário, porque "por 2 dias" começando hoje termina amanhã e isso só faz sentido depois de ver que hoje conta — e conta parcialmente, já que as doses de hoje que passaram não entram. A tela mostra "da próxima dose de hoje até 22/08 — 3 doses", e avisa quando o prazo não alcança dose nenhuma (cadastrar "por 1 dia" às 23h), caso em que antes a linha simplesmente sumia e o silêncio lia como acerto. Verificado contra 8 cenários rodando o arquivo compilado em Node. Com isso, **estoque e prazo passam a conversar**: se o que a pessoa tem cobre menos doses do que o tratamento pede, o card de estoque avisa — em cor de atenção e não de erro, porque comprar no meio do tratamento é normal e o app não sabe o que já está a caminho. A comparação só acontece com unidades iguais; gota se toma em gota e se guarda em ml, e converter exigiria a concentração do frasco. **Máscara de horário passou a recusar o impossível na digitação** (`50:00` não entra mais), em vez de aceitar e reclamar no submit, quando a pessoa já saiu do campo. E o rodapé passou a dizer **o que** falta, por extenso — botão cinza sem explicação faz varrer a tela atrás do campo esquecido, e isso piora justamente porque a tela encolheu em resumos e popups. |
+| 2026-08-21 | B2 (parte 6) | Concluído | **Lembrete ganhou "os dois" e explicação de permissão.** `ReminderMode` passou a aceitar `both` — os dois canais fazem coisas diferentes (o alarme interrompe na hora, a notificação **fica** na barra depois de dispensado) e quem precisava das duas estava tendo que escolher uma. Coluna é TEXT, então não houve migration. O popup passou a avisar, antes de salvar, que o aviso depende de permissão do sistema e que o app não tem como contornar a recusa — sem isso a pessoa culpa o Mapill por um lembrete que o Android bloqueou. Junto veio um `Accordion` "Como funcionam os lembretes" dentro do próprio popup (nada de modal aninhado), pronto pra receber prints depois. **Resumo do estoque virou bloco rotulado** (QUANTIDADE / LOCAL / AVISO): "50 comprimidos · em cima da geladeira" numa linha só obrigava a decifrar o que era o quê pelo conteúdo. Aviso de estoque insuficiente ganhou fundo de atenção, e a explicação do intervalo ganhou fundo azul claro. |
+| 2026-08-21 | B2 (parte 7) | Concluído | **Duração em dias, semanas ou meses.** "Por 90 dias" não é como ninguém pensa um tratamento de três meses, e mês não tem tamanho fixo — converter pra dias na entrada erraria a conta. `lastDayOfTreatment` passou a receber a unidade e a somar meses de verdade, grudando no fim do mês quando o dia não existe (31/01 + 1 mês = 28/02). O inverso (`treatmentDuration`) reconhece a unidade ao reabrir um cadastro, preferindo dias abaixo de duas semanas pra quem escreveu "7 dias" não reencontrar "1 semana". Verificado contra 9 casos em Node, incluindo mês curto e virada de ano. O checkbox caseiro do estoque (quadrado que só pintava de azul) foi eliminado em favor do `Checkbox` do kit, que tem o "certinho" — agora existe um único checkbox no app. |
+| 2026-08-21 | B2 (parte 8) | Concluído | **Nenhum campo vem escolhido de fábrica.** Mesma razão que tirou os horários sugeridos, levada até o fim: um seletor já marcado é indistinguível de uma resposta dada, e a pessoa passa por ele sem tocar — o cadastro sai com uma posologia que o app inventou. Passaram a começar vazios: forma farmacêutica, quantidade da dose, unidade (nas formas ambíguas), frequência, quantas vezes por dia, intervalo, duração e sua unidade, modo de lembrete e antecedência do alerta de estoque. A unidade derivada da forma continua sendo preenchida sozinha — isso não é chute, é consequência. Como efeito colateral bom, o essencial virou cascata: a dose só aparece depois da forma (sem ela o app não sabe se pergunta "quantos comprimidos" ou "quantos ml"), os horários só depois da quantidade de doses, o primeiro horário só depois do intervalo. Trocar de frequência zera o que era da anterior. Cuidado de borda: `every` de lista vazia é `true`, então "nenhum horário" passaria por "todos preenchidos" — daí o teste explícito de `timeInputs.length > 0`. E o alerta de estoque só é gravado ligado se a antecedência foi escolhida, senão ficaria "ativo" sem nunca disparar. |
