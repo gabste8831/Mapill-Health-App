@@ -6,8 +6,13 @@ import { styles } from "./OptionGroup.styles";
 export type OptionGroupOption<TValue extends string> = {
   value: TValue;
   label: string;
-  /** Linha de apoio. Só faz sentido em `layout="coluna"`, onde há largura pra ela. */
+  /** Linha de apoio. Não cabe em `layout="linha"`, onde a opção tem a largura do texto. */
   hint?: string;
+  /**
+   * Ícone acima do rótulo, em `grade` e `coluna`. Serve pra escolha que se faz de relance depois
+   * da primeira vez — a forma do sino é reconhecida antes de a palavra ser lida.
+   */
+  icon?: ReactNode;
 };
 
 export type OptionGroupProps<TValue extends string> = {
@@ -21,6 +26,8 @@ export type OptionGroupProps<TValue extends string> = {
    * virar quatro linhas empilhadas; `coluna` empilha e dá espaço pro `hint`.
    */
   layout?: "linha" | "grade" | "coluna";
+  /** Deixa a grade crescer em altura pra caber ícone e apoio, em vez de duas fichas rasas. */
+  alto?: boolean;
   /**
    * Entra no fim da fileira, junto das opções. Existe pro caso "as opções cobrem o comum, e o
    * resto se digita" — a alternativa era um botão "Mais" que revela um campo em outra linha, e
@@ -53,6 +60,7 @@ export function OptionGroup<TValue extends string>({
   options,
   onChange,
   layout = "linha",
+  alto = false,
   trailing,
 }: OptionGroupProps<TValue>) {
   return (
@@ -67,15 +75,17 @@ export function OptionGroup<TValue extends string>({
               style={[
                 styles.option,
                 styles[OPTION_STYLE[layout]],
+                alto && styles.optionAlto,
                 isSelected && styles.optionSelected,
               ]}
               onPress={() => onChange(option.value)}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}>
+              {option.icon}
               <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
                 {option.label}
               </Text>
-              {option.hint && layout === "coluna" ? (
+              {option.hint && layout !== "linha" ? (
                 <Text style={[styles.optionHint, isSelected && styles.optionHintSelected]}>
                   {option.hint}
                 </Text>
@@ -83,6 +93,11 @@ export function OptionGroup<TValue extends string>({
             </Pressable>
           );
         })}
+        {/* Sem ele, uma grade com número ímpar de opções esticaria a última na largura toda,
+            que lê como defeito e não como grade. */}
+        {layout === "grade" && options.length % 2 === 1 ? (
+          <View style={styles.espacoDaGrade} />
+        ) : null}
         {trailing}
       </View>
     </View>

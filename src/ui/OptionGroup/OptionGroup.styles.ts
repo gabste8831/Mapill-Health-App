@@ -15,6 +15,12 @@ export const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: spacing.sm,
   },
+  /**
+   * Duas colunas com o mesmo respiro na horizontal e na vertical: um `gap` só, e as opções
+   * crescendo para ocupar o que sobra da divisão. Empurrar as colunas para as bordas
+   * (`space-between`) também alinharia, mas engordaria só o vão do meio, e vão maior no meio que
+   * embaixo lê como desalinho.
+   */
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -42,16 +48,34 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   /**
-   * Duas colunas fixas, sem crescer. Deixar crescer é o que produz a última linha desalinhada —
-   * três em cima e uma esticada na largura toda embaixo, que lê como defeito e não como grade.
+   * Base estreita o suficiente para caberem duas por linha e larga o suficiente para não caberem
+   * três. Crescem juntas para fechar a linha inteira; quem impede a última linha ímpar de esticar
+   * na largura toda é o preenchedor invisível (`espacoDaGrade`), e não um `flexGrow: 0` que
+   * deixaria uma folga permanente na direita.
    */
   optionGrid: {
-    flexBasis: "48%",
-    flexGrow: 0,
+    flexBasis: "40%",
+    flexGrow: 1,
     minHeight: 52,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     alignItems: "center",
+  },
+  /** Ocupa a coluna que sobrou, sem desenhar nada. */
+  espacoDaGrade: {
+    flexBasis: "40%",
+    flexGrow: 1,
+  },
+  /**
+   * Cartão da grade quando ela carrega ícone e apoio: alinhado à esquerda como texto se lê, e
+   * com altura livre. Centralizar viraria quatro blocos decorativos difíceis de comparar.
+   */
+  optionAlto: {
+    minHeight: 108,
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
   },
   optionStacked: {
     gap: spacing.xs,

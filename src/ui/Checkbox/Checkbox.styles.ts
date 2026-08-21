@@ -9,17 +9,18 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   box: {
-    width: 24,
-    height: 24,
+    // Do tamanho exato da linha do label. Com isso, alinhar pelo topo já sai opticamente
+    // centrado no texto quando o label cabe numa linha, e continua grudado na primeira linha
+    // quando ele quebra — que é o comportamento das duas plataformas. Quadrado maior que a
+    // linha (24 contra 22) descia visivelmente, e era o desalinhamento que incomodava.
+    // O alvo de toque não depende desse tamanho: a área clicável é a row inteira (Checkbox.tsx).
+    width: typography.bodyMd.lineHeight,
+    height: typography.bodyMd.lineHeight,
     borderRadius: radius.sm,
     borderWidth: 1.5,
     borderColor: colors.outline,
     alignItems: "center",
     justifyContent: "center",
-    // Alinha o topo do quadrado com a primeira linha do texto ao lado, mesmo quando o label
-    // quebra em várias linhas (accessibility: alvo de toque de 24 é pequeno demais sozinho,
-    // por isso a área de toque real é a row inteira, não só o box — ver Checkbox.tsx).
-    marginTop: 2,
   },
   boxChecked: {
     backgroundColor: colors.primary,

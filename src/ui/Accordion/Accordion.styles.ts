@@ -3,10 +3,15 @@ import { StyleSheet } from "react-native";
 import { colors, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
+  /**
+   * Cinza claro, e não branco. O acordeão costuma morar dentro de um `Card` branco, e branco
+   * sobre branco deixava só a sombra fininha dizendo que ali tem algo clicável, o que some
+   * dependendo da tela.
+   */
   section: {
     borderRadius: radius.lg,
     overflow: "hidden",
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: colors.surfaceContainerLow,
     boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
   },
   header: {

@@ -16,3 +16,4 @@ export * from "./OptionGroup/OptionGroup";
 export * from "./SelectField/SelectField";
 export * from "./SplashOverlay/SplashOverlay";
 export * from "./TextField/TextField";
+export * from "./ToggleChips/ToggleChips";
