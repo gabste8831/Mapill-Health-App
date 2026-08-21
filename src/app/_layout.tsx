@@ -52,7 +52,7 @@ export default function RootLayout() {
       if (result === 'not-configured') {
         Alert.alert(
           'Login indisponível',
-          'O login com Google ainda não foi configurado neste app. Você pode continuar sem login por enquanto — isso não afeta o uso local do Mapill.',
+          'O login com Google ainda não foi configurado neste app. Você pode continuar sem login por enquanto. Isso não afeta o uso local do Mapill.',
         );
       }
     } catch (error) {

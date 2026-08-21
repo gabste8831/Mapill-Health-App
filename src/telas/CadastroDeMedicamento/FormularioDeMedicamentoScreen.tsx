@@ -10,22 +10,33 @@ import type {
   PrescriptionRequirement,
 } from "@/domain/entities/medication";
 import {
+  allowsFractionalDose,
   defaultUnitForMedicationForm,
   needsUnitChoice,
   stockUnitForMedicationForm,
   unitsForMedicationForm,
 } from "@/domain/entities/medication";
 import type {
+  IntakeInstruction,
   PosologySchedule,
+  PrescriptionAttachmentKind,
   ReminderMode,
   TimeOfDay,
   Weekday,
 } from "@/domain/entities/prescription";
-import { COMMON_DOSES_PER_DAY, MAX_DOSES_PER_DAY } from "@/domain/entities/prescription";
+import {
+  COMMON_DOSES_PER_DAY,
+  dosesOfSchedule,
+  INTAKE_INSTRUCTIONS,
+  MAX_DOSES_PER_DAY,
+} from "@/domain/entities/prescription";
+import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { summarizeTreatment } from "@/domain/use-cases/summarize-treatment";
+import { ACCEPTED_DOCUMENT_LABEL, useDocumentPicker } from "@/hooks/use-document-picker";
 import { usePhotoPicker } from "@/hooks/use-photo-picker";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import {
+  cycleTurningPoints,
   formatDateInput,
   lastDayOfTreatment,
   parseDateInput,
@@ -34,23 +45,31 @@ import {
   treatmentDuration,
   type DurationUnit,
 } from "@/shared/date-input";
-import { parseTimeInput } from "@/shared/time-input";
+import {
+  formatDecimalInput,
+  formatIntegerInput,
+  parseDecimalInput,
+} from "@/shared/number-input";
 import { colors, withOpacity } from "@/shared/theme";
+import { parseTimeInput } from "@/shared/time-input";
 import {
   Button,
   Card,
+  Checkbox,
   Header,
   KeyboardAwareScrollView,
   OptionGroup,
   SelectField,
   TextField,
+  ToggleChips,
   type OptionGroupOption,
   type SelectOption,
+  type ToggleChipOption,
 } from "@/ui";
+import { styles } from "./CadastroDeMedicamento.styles";
 import { ConfiguracaoDeEstoque } from "./ConfiguracaoDeEstoque";
 import { ConfiguracaoDeLembrete } from "./ConfiguracaoDeLembrete";
-import { SeletorDeHorarios } from "./SeletorDeHorarios";
-import { styles } from "./CadastroDeMedicamento.styles";
+import { entradasVazias, SeletorDeHorarios, type EntradaDeDose } from "./SeletorDeHorarios";
 
 const FORM_OPTIONS: SelectOption<MedicationForm>[] = [
   { value: "tablet", label: "Comprimido ou cápsula" },
@@ -65,18 +84,19 @@ const FORM_OPTIONS: SelectOption<MedicationForm>[] = [
   { value: "other", label: "Outra" },
 ];
 
+/** Curto de propósito: é rótulo de ficha, lido em fileira e comparado com os vizinhos. */
 const UNIT_LABELS: Record<PosologyUnit, string> = {
-  tablet: "comprimido(s)",
-  capsule: "cápsula(s)",
-  drop: "gota(s)",
+  tablet: "comprimido",
+  capsule: "cápsula",
+  drop: "gota",
   ml: "ml",
   mg: "mg",
   g: "g",
-  IU: "UI (unidades)",
-  application: "aplicação(ões)",
-  puff: "jato(s)",
-  patch: "adesivo(s)",
-  sachet: "sachê(s)",
+  IU: "UI",
+  application: "aplicação",
+  puff: "jato",
+  patch: "adesivo",
+  sachet: "sachê",
 };
 
 /** Como a unidade aparece no meio de uma frase ("Quantos comprimidos você tem?"). */
@@ -94,27 +114,54 @@ const UNIT_NOUNS: Record<PosologyUnit, string> = {
   sachet: "sachês",
 };
 
+/** Gênero do substantivo acima — sem isso a pergunta sai "quantos gotas". */
+const UNIDADES_FEMININAS: readonly PosologyUnit[] = ["capsule", "drop", "IU", "application"];
+
+function quantosDe(unit: PosologyUnit): string {
+  return UNIDADES_FEMININAS.includes(unit) ? "QUANTAS" : "QUANTOS";
+}
+
+/**
+ * Onde ler a unidade no próprio remédio. Não é orientação de dose — é dizer onde está escrito,
+ * pra quem tem a caneta ou o frasco na mão copiar em vez de adivinhar.
+ */
+const DICA_DA_UNIDADE: Partial<Record<MedicationForm, string>> = {
+  injection: "Caneta de insulina marca em UI; ampola e seringa costumam vir em ml.",
+  liquid: "O copinho ou a seringa que vem na caixa marcam em ml.",
+};
+
 type FrequencyKind = PosologySchedule["kind"];
 
 const FREQUENCY_OPTIONS: OptionGroupOption<FrequencyKind>[] = [
   { value: "daily", label: "Todo dia" },
   { value: "weekly", label: "Dias da semana" },
-  { value: "interval", label: "A cada X horas" },
+  { value: "cycle", label: "A cada X dias" },
   { value: "asNeeded", label: "Só quando precisar" },
 ];
 
-const INTERVAL_OPTIONS: SelectOption<string>[] = [
-  { value: "240", label: "A cada 4 horas" },
-  { value: "360", label: "A cada 6 horas" },
-  { value: "480", label: "A cada 8 horas" },
-  { value: "720", label: "A cada 12 horas" },
-  { value: "1440", label: "A cada 24 horas" },
+
+/** De onde o ciclo conta. Perguntar isso é o que impede a pausa de cair no dia errado. */
+type CycleStartKind = "today" | "earlier";
+
+const CYCLE_START_OPTIONS: OptionGroupOption<CycleStartKind>[] = [
+  { value: "today", label: "Começa hoje" },
+  { value: "earlier", label: "Já comecei antes" },
 ];
 
 type DurationKind = "continuous" | "fixed";
 
 const DURATION_OPTIONS: OptionGroupOption<DurationKind>[] = [
   { value: "continuous", label: "Uso contínuo" },
+  { value: "fixed", label: "Tem prazo" },
+];
+
+/**
+ * "Uso contínuo" descreve quem toma todo dia sem previsão de parar. Não descreve o Dorflex que
+ * mora na mochila — esse não é contínuo, é permanente e sem agenda. Mesma pergunta, palavra que
+ * corresponde ao caso.
+ */
+const DURATION_OPTIONS_SEM_AGENDA: OptionGroupOption<DurationKind>[] = [
+  { value: "continuous", label: "Sempre disponível" },
   { value: "fixed", label: "Tem prazo" },
 ];
 
@@ -139,6 +186,41 @@ const WEEKDAYS: { value: Weekday; label: string }[] = [
   { value: 6, label: "Sáb" },
 ];
 
+const INTAKE_INSTRUCTION_LABELS: Record<IntakeInstruction, string> = {
+  fasting: "Em jejum",
+  withMeal: "Junto da refeição",
+  afterMeal: "Depois de comer",
+  plentyOfWater: "Com bastante água",
+  stayUpright: "Não deitar depois",
+  avoidAlcohol: "Evitar álcool",
+};
+
+/**
+ * A ficha que abre o campo livre. Fica na mesma fileira das outras porque, pra quem está
+ * escolhendo, "outra" é mais uma resposta possível — separá-la num campo sempre visível fazia a
+ * seção parecer que cobrava um texto de todo mundo.
+ */
+const OUTRA_ORIENTACAO = "other";
+type OrientacaoChip = IntakeInstruction | typeof OUTRA_ORIENTACAO;
+
+const INTAKE_INSTRUCTION_OPTIONS: ToggleChipOption<OrientacaoChip>[] = [
+  ...INTAKE_INSTRUCTIONS.map((instruction) => ({
+    value: instruction as OrientacaoChip,
+    label: INTAKE_INSTRUCTION_LABELS[instruction],
+  })),
+  { value: OUTRA_ORIENTACAO, label: "Outra orientação" },
+];
+
+/**
+ * Conseguir consulta e passar na farmácia leva tempo — por isso a menor opção é uma semana, e
+ * não um dia. Antecedência que não dá pra agir com ela é só um susto.
+ */
+const RENEWAL_LEAD_OPTIONS: OptionGroupOption<string>[] = [
+  { value: "7", label: "7 dias" },
+  { value: "15", label: "15 dias" },
+  { value: "30", label: "30 dias" },
+];
+
 const REMINDER_LABELS: Record<ReminderMode, string> = {
   alarm: "Alarme, toca mesmo no silencioso",
   notification: "Notificação comum",
@@ -159,6 +241,8 @@ export type MedicamentoDraft = {
   endDate: string | null;
   photoUri: string | null;
   reminderMode: ReminderMode;
+  intakeInstructions: IntakeInstruction[];
+  intakeNote: string | null;
   notes: string | null;
   stockQuantity: number | null;
   /** Nem sempre igual a `doseUnit`: gota se toma em gota mas se compra em ml. */
@@ -167,7 +251,9 @@ export type MedicamentoDraft = {
   lowStockAlertLeadDays: number | null;
   storageLocation: string | null;
   attachmentUri: string | null;
+  attachmentKind: PrescriptionAttachmentKind | null;
   attachmentValidUntil: string | null;
+  renewalReminderLeadDays: number | null;
 };
 
 /**
@@ -180,13 +266,17 @@ function semLimpar<TValue extends string>(set: (value: TValue) => void) {
   };
 }
 
-/**
- * N campos vazios. A frequência decide *quantos*; o conteúdo é sempre do paciente — sugerir
- * horário é convidar quem está com pressa a aceitar sem ler, e aí o app lembra a dose na hora
- * errada em silêncio.
- */
-function horariosVazios(doses: number): string[] {
-  return Array.from({ length: doses }, () => "");
+/** ISO `YYYY-MM-DD` menos N dias, também em ISO. */
+function diasAntes(isoDate: string, days: number): string {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  const alvo = new Date(year, month - 1, day - days);
+  const p = (value: number) => String(value).padStart(2, "0");
+  return `${alvo.getFullYear()}-${p(alvo.getMonth() + 1)}-${p(alvo.getDate())}`;
+}
+
+/** Frequências que agendam horários fixos ao longo do dia — as que pedem a lista de horários. */
+function temHorariosFixos(frequency: FrequencyKind | null): boolean {
+  return frequency !== null && frequency !== "asNeeded";
 }
 
 /** "o nome, a dose e os horários" — lista em português, com "e" antes do último. */
@@ -196,13 +286,13 @@ function emLista(itens: string[]): string {
 }
 
 /** Índices que repetem um horário já usado antes na lista. */
-function indicesDuplicados(times: string[]): number[] {
+function indicesDuplicados(doses: EntradaDeDose[]): number[] {
   const vistos = new Set<string>();
   const repetidos: number[] = [];
-  times.forEach((time, index) => {
-    if (parseTimeInput(time) === null) return;
-    if (vistos.has(time)) repetidos.push(index);
-    vistos.add(time);
+  doses.forEach((dose, index) => {
+    if (parseTimeInput(dose.at) === null) return;
+    if (vistos.has(dose.at)) repetidos.push(index);
+    vistos.add(dose.at);
   });
   return repetidos;
 }
@@ -235,6 +325,7 @@ export function FormularioDeMedicamentoScreen({
   const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
   const boxPhoto = usePhotoPicker("medicamento-caixa.jpg");
   const prescriptionPhoto = usePhotoPicker("medicamento-receita.jpg");
+  const prescriptionFile = useDocumentPicker("medicamento-receita");
 
   /**
    * Tudo que descreve a posologia começa **vazio**, sem valor de fábrica. Um seletor já marcado
@@ -250,26 +341,41 @@ export function FormularioDeMedicamentoScreen({
   const [doseUnit, setDoseUnit] = useState<PosologyUnit | null>(initialValue?.doseUnit ?? null);
 
   const initialSchedule = initialValue?.schedule;
+  const initialDoses = initialSchedule === undefined ? [] : dosesOfSchedule(initialSchedule);
   const [frequency, setFrequency] = useState<FrequencyKind | null>(initialSchedule?.kind ?? null);
-  const [timeInputs, setTimeInputs] = useState<string[]>(
-    initialSchedule?.kind === "daily" || initialSchedule?.kind === "weekly"
-      ? initialSchedule.times
-      : [],
+  const [doseInputs, setDoseInputs] = useState<EntradaDeDose[]>(() =>
+    initialDoses.map((dose) => ({
+      at: dose.at,
+      amount: dose.amount === null ? "" : String(dose.amount),
+    })),
   );
-  const [intervalMinutes, setIntervalMinutes] = useState<string | null>(
-    initialSchedule?.kind === "interval" ? String(initialSchedule.everyMinutes) : null,
-  );
-  const [firstTimeInput, setFirstTimeInput] = useState(
-    initialSchedule?.kind === "interval" ? initialSchedule.firstTime : "",
+  // Reaberto já ligado se algum horário tem dose própria — senão os números gravados sumiriam
+  // da tela enquanto continuariam valendo no agendamento.
+  const [dosesVariam, setDosesVariam] = useState(() =>
+    initialDoses.some((dose) => dose.amount !== null),
   );
   const [weekdays, setWeekdays] = useState<Weekday[]>(
     initialSchedule?.kind === "weekly" ? initialSchedule.weekdays : [],
   );
+  const [cycleLengthInput, setCycleLengthInput] = useState(
+    initialSchedule?.kind === "cycle" ? String(initialSchedule.cycleLengthDays) : "",
+  );
+  const [activeDaysInput, setActiveDaysInput] = useState(
+    initialSchedule?.kind === "cycle" ? String(initialSchedule.activeDays) : "",
+  );
+  // Onde o ciclo atual começou. `null` = ainda não respondido; "hoje" é resposta, não padrão.
+  const [cycleStart, setCycleStart] = useState<CycleStartKind | null>(
+    initialSchedule?.kind !== "cycle"
+      ? null
+      : initialSchedule.cycleStartDate === todayIsoDate()
+        ? "today"
+        : "earlier",
+  );
+  const [cycleStartInput, setCycleStartInput] = useState(
+    initialSchedule?.kind === "cycle" ? toDateInput(initialSchedule.cycleStartDate) : "",
+  );
   const [customDosesInput, setCustomDosesInput] = useState(() =>
-    (initialSchedule?.kind === "daily" || initialSchedule?.kind === "weekly") &&
-    initialSchedule.times.length > COMMON_DOSES_PER_DAY
-      ? String(initialSchedule.times.length)
-      : "",
+    initialDoses.length > COMMON_DOSES_PER_DAY ? String(initialDoses.length) : "",
   );
 
   /**
@@ -303,6 +409,18 @@ export function FormularioDeMedicamentoScreen({
   const [attachmentUri, setAttachmentUri] = useState<string | null>(
     initialValue?.attachmentUri ?? null,
   );
+  const [attachmentKind, setAttachmentKind] = useState<PrescriptionAttachmentKind | null>(
+    initialValue?.attachmentKind ?? null,
+  );
+  const [attachmentName, setAttachmentName] = useState("");
+  const [wantsRenewalReminder, setWantsRenewalReminder] = useState(
+    initialValue?.renewalReminderLeadDays != null,
+  );
+  const [renewalLeadDays, setRenewalLeadDays] = useState<string | null>(
+    initialValue?.renewalReminderLeadDays == null
+      ? null
+      : String(initialValue.renewalReminderLeadDays),
+  );
   const [validUntilInput, setValidUntilInput] = useState(
     toDateInput(initialValue?.attachmentValidUntil ?? ""),
   );
@@ -323,10 +441,28 @@ export function FormularioDeMedicamentoScreen({
   const [storageLocation, setStorageLocation] = useState(initialValue?.storageLocation ?? "");
 
   const [activeIngredient, setActiveIngredient] = useState(initialValue?.activeIngredient ?? "");
+  const [intakeInstructions, setIntakeInstructions] = useState<IntakeInstruction[]>(
+    initialValue?.intakeInstructions ?? [],
+  );
+  const [intakeNote, setIntakeNote] = useState(initialValue?.intakeNote ?? "");
+  const [mostraOutraOrientacao, setMostraOutraOrientacao] = useState(
+    (initialValue?.intakeNote ?? "").length > 0,
+  );
+
+  /**
+   * A ficha "outra orientação" não é um valor do domínio: ela só abre o campo. Desmarcar apaga o
+   * texto junto, senão a anotação seguiria valendo escondida.
+   */
+  function handleOrientacoesChange(values: OrientacaoChip[]) {
+    const querOutra = values.includes(OUTRA_ORIENTACAO);
+    setMostraOutraOrientacao(querOutra);
+    if (!querOutra) setIntakeNote("");
+    setIntakeInstructions(values.filter((v): v is IntakeInstruction => v !== OUTRA_ORIENTACAO));
+  }
   const [notes, setNotes] = useState(initialValue?.notes ?? "");
 
   const showsUnitChoice = form !== null && needsUnitChoice(form);
-  const unitOptions: SelectOption<PosologyUnit>[] = useMemo(
+  const unitOptions: OptionGroupOption<PosologyUnit>[] = useMemo(
     () =>
       form === null
         ? []
@@ -349,24 +485,49 @@ export function FormularioDeMedicamentoScreen({
   /** Mudar a quantidade de doses recomeça a lista: os horários antigos eram de outra posologia. */
   function handleDosesPerDayChange(value: string) {
     setCustomDosesInput("");
-    setTimeInputs(horariosVazios(Number(value)));
+    setDoseInputs(entradasVazias(Number(value)));
   }
 
   /** Trocar de frequência zera o que era da anterior, senão sobra horário de outra posologia. */
   function handleFrequencyChange(nextFrequency: FrequencyKind) {
     setFrequency(nextFrequency);
-    setTimeInputs([]);
+    setDoseInputs([]);
+    setDosesVariam(false);
     setCustomDosesInput("");
-    setFirstTimeInput("");
-    setIntervalMinutes(null);
     setWeekdays([]);
+    setCycleLengthInput("");
+    setActiveDaysInput("");
+    setCycleStart(null);
+    setCycleStartInput("");
   }
 
   function handleCustomDosesChange(raw: string) {
     const digits = raw.replace(/\D/g, "").slice(0, 2);
     setCustomDosesInput(digits);
     const doses = Number(digits);
-    if (doses >= 1 && doses <= MAX_DOSES_PER_DAY) setTimeInputs(horariosVazios(doses));
+    if (doses >= 1 && doses <= MAX_DOSES_PER_DAY) setDoseInputs(entradasVazias(doses));
+  }
+
+  function apenasDigitos(raw: string, setter: (value: string) => void) {
+    setter(formatIntegerInput(raw, 3));
+  }
+
+  /**
+   * Quando cada horário tem a sua dose, o número de cima deixa de ser usado. Ele continua na
+   * tela porque é ele que volta a valer se a variação for desmarcada, e é dele que a conta de
+   * estoque parte enquanto a lista de horários não existe. O que muda é a tela **dizer isso**,
+   * em vez de deixar dois números se contradizendo em silêncio.
+   */
+  const todosHorariosComDose =
+    dosesVariam &&
+    doseInputs.length > 0 &&
+    doseInputs.every((dose) => dose.amount.trim().length > 0);
+
+  /** Fração só onde ela existe: meio comprimido sim, meia gota não. */
+  const doseAceitaFracao = doseUnit !== null && allowsFractionalDose(doseUnit);
+
+  function handleDoseAmountChange(raw: string) {
+    setDoseAmount(doseAceitaFracao ? formatDecimalInput(raw) : formatIntegerInput(raw));
   }
 
   const isCustomDoses = customDosesInput.length > 0;
@@ -376,16 +537,56 @@ export function FormularioDeMedicamentoScreen({
       ? `Entre 1 e ${MAX_DOSES_PER_DAY} vezes por dia. Mais que isso é "a cada X horas".`
       : undefined;
 
-  const parsedDoseAmount = Number(doseAmount.replace(",", "."));
+  const parsedDoseAmount = parseDecimalInput(doseAmount);
   const hasDoseAmountError =
     doseAmount.length > 0 && (!Number.isFinite(parsedDoseAmount) || parsedDoseAmount <= 0);
 
-  const duplicateTimeIndexes = indicesDuplicados(timeInputs);
-  const parsedTimes = timeInputs.map(parseTimeInput);
+  const duplicateTimeIndexes = indicesDuplicados(doseInputs);
+  const parsedTimes = doseInputs.map((dose) => parseTimeInput(dose.at));
   const areTimesComplete =
     parsedTimes.every((time): time is TimeOfDay => time !== null) &&
     duplicateTimeIndexes.length === 0;
-  const parsedFirstTime = parseTimeInput(firstTimeInput);
+
+  const parsedCycleLength = Number(cycleLengthInput);
+  // Ciclo de um dia é "todo dia", que já tem opção própria — daí o mínimo de 2.
+  const cycleLengthDefinido = parsedCycleLength >= 2;
+  // Um dia seguido é o caso comum ("de 30 em 30 dias"), mas continua sendo resposta e não padrão:
+  // o campo só some quando não há o que perguntar, e aí a resposta é 1 por construção.
+  const parsedActiveDays = activeDaysInput.length === 0 ? 1 : Number(activeDaysInput);
+  const activeDaysError =
+    cycleLengthDefinido && activeDaysInput.length > 0 &&
+    (parsedActiveDays < 1 || parsedActiveDays >= parsedCycleLength)
+      ? `Entre 1 e ${parsedCycleLength - 1}. Tomar todos os dias do ciclo é "todo dia".`
+      : undefined;
+
+  // Memoizado porque o `schedule` depende dele, e o `schedule` alimenta a geração de doses —
+  // recriar a data a cada tecla faria o tratamento inteiro ser regerado sem nada ter mudado.
+  const cycleStartIso = useMemo(
+    () =>
+      cycleStart === "today"
+        ? startDate
+        : cycleStart === "earlier"
+          ? parseDateInput(cycleStartInput)
+          : null,
+    [cycleStart, cycleStartInput, startDate],
+  );
+  const cycleStartError =
+    cycleStart === "earlier" && cycleStartInput.length === 10 && cycleStartIso === null
+      ? "Data inválida."
+      : cycleStartIso !== null && cycleStartIso > startDate
+        ? "O ciclo não pode começar depois de hoje."
+        : undefined;
+
+  // Sem saber onde o ciclo começou, o app agendaria a pausa no lugar errado — então isto é
+  // bloqueio, e não aviso. Mesma severidade dos horários: erra em silêncio se passar.
+  const cicloCompleto =
+    cycleLengthDefinido &&
+    activeDaysError === undefined &&
+    cycleStartIso !== null &&
+    cycleStartError === undefined;
+  const viradasDoCiclo = cicloCompleto
+    ? cycleTurningPoints(startDate, cycleStartIso, parsedCycleLength, parsedActiveDays)
+    : null;
 
   const parsedDurationAmount = Number(durationAmount);
   const hasDurationError =
@@ -401,26 +602,63 @@ export function FormularioDeMedicamentoScreen({
   const validUntilError =
     validUntilInput.length === 10 && validUntilIso === null ? "Data inválida." : undefined;
 
+  /**
+   * A data em que o aviso chega, e não "15 dias antes". O número sozinho não deixa ninguém
+   * conferir se dá tempo de conseguir consulta — a data deixa.
+   */
+  const avisoDeRenovacao =
+    validUntilIso !== null && wantsRenewalReminder && renewalLeadDays !== null
+      ? `Você será avisado em ${toDateInput(diasAntes(validUntilIso, Number(renewalLeadDays)))}, com ${renewalLeadDays} dias pra renovar.`
+      : null;
+
   /** `null` enquanto a frequência não foi escolhida — não existe posologia padrão. */
   const schedule = useMemo<PosologySchedule | null>(() => {
     if (frequency === null) return null;
     if (frequency === "asNeeded") return { kind: "asNeeded" };
-    if (frequency === "interval") {
-      if (intervalMinutes === null) return null;
-      return { kind: "interval", everyMinutes: Number(intervalMinutes), firstTime: firstTimeInput };
-    }
-    const times = [...timeInputs].sort();
-    if (frequency === "weekly") return { kind: "weekly", weekdays, times };
-    return { kind: "daily", times };
-  }, [frequency, intervalMinutes, firstTimeInput, weekdays, timeInputs]);
 
+    /**
+     * A dose por horário só é gravada quando a variação está ligada — desmarcar tem que apagar
+     * de fato, senão o número continuaria valendo no agendamento sem aparecer em lugar nenhum.
+     */
+    const doses = [...doseInputs]
+      .sort((a, b) => a.at.localeCompare(b.at))
+      .map((dose) => ({
+        at: dose.at,
+        amount:
+          dosesVariam && dose.amount.trim().length > 0
+            ? Number(dose.amount.replace(",", "."))
+            : null,
+      }));
+    if (frequency === "weekly") return { kind: "weekly", weekdays, doses };
+    if (frequency === "cycle") {
+      if (cycleStartIso === null) return null;
+      return {
+        kind: "cycle",
+        cycleLengthDays: parsedCycleLength,
+        activeDays: parsedActiveDays,
+        cycleStartDate: cycleStartIso,
+        doses,
+      };
+    }
+    return { kind: "daily", doses };
+  }, [
+    frequency,
+    weekdays,
+    doseInputs,
+    dosesVariam,
+    parsedCycleLength,
+    parsedActiveDays,
+    cycleStartIso,
+  ]);
+
+  // `doseInputs` vazio significa que a quantidade de doses ainda não foi escolhida, e `every`
+  // de lista vazia é `true` — sem este teste, "nada respondido" passaria por completo.
+  const horariosCompletos = doseInputs.length > 0 && areTimesComplete;
   const isScheduleComplete =
     frequency === "asNeeded" ||
-    (frequency === "interval" && intervalMinutes !== null && parsedFirstTime !== null) ||
-    // `timeInputs` vazio significa que a quantidade de doses ainda não foi escolhida, e
-    // `every` de lista vazia é `true` — sem este teste, "nada respondido" passaria por completo.
-    (frequency === "daily" && timeInputs.length > 0 && areTimesComplete) ||
-    (frequency === "weekly" && timeInputs.length > 0 && areTimesComplete && weekdays.length > 0);
+    (frequency === "daily" && horariosCompletos) ||
+    (frequency === "weekly" && horariosCompletos && weekdays.length > 0) ||
+    (frequency === "cycle" && horariosCompletos && cicloCompleto);
 
   /**
    * O essencial completo é o que dispara a revelação do resto e destrava o botão. Não inclui
@@ -452,16 +690,14 @@ export function FormularioDeMedicamentoScreen({
     form === null ? "como você toma" : null,
     form !== null && !doseCompleta ? "a dose" : null,
     frequency === null ? "a frequência" : null,
-    frequency === "interval" && intervalMinutes === null ? "o intervalo" : null,
     frequency === "weekly" && weekdays.length === 0 ? "os dias da semana" : null,
-    (frequency === "daily" || frequency === "weekly") && timeInputs.length === 0
-      ? "quantas vezes por dia"
+    frequency === "cycle" && !cycleLengthDefinido ? "de quantos em quantos dias" : null,
+    frequency === "cycle" && cycleLengthDefinido && !cicloCompleto
+      ? "quando o ciclo começou"
       : null,
-    (frequency === "daily" || frequency === "weekly") && timeInputs.length > 0 && !areTimesComplete
+    temHorariosFixos(frequency) && doseInputs.length === 0 ? "quantas vezes por dia" : null,
+    temHorariosFixos(frequency) && doseInputs.length > 0 && !areTimesComplete
       ? "os horários"
-      : null,
-    frequency === "interval" && intervalMinutes !== null && parsedFirstTime === null
-      ? "o horário da primeira dose"
       : null,
     duration === null ? "por quanto tempo" : null,
     duration === "fixed" && !duracaoCompleta ? "a duração do tratamento" : null,
@@ -472,8 +708,11 @@ export function FormularioDeMedicamentoScreen({
     () =>
       schedule === null
         ? null
-        : summarizeTreatment({ id: "", schedule, startDate, endDate }, new Date()),
-    [schedule, startDate, endDate],
+        : summarizeTreatment(
+            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount },
+            new Date(),
+          ),
+    [schedule, startDate, endDate, parsedDoseAmount],
   );
 
   const prazoSemDose =
@@ -484,15 +723,51 @@ export function FormularioDeMedicamentoScreen({
    * exigiria a concentração do frasco — que o app não tem e não deve chutar num aviso sobre
    * remédio acabar.
    */
-  const parsedStock = Number(stockQuantity.replace(",", "."));
-  const dosesQueOEstoqueCobre =
-    tracksStock && stockUnit === doseUnit && parsedStock > 0 && parsedDoseAmount > 0
-      ? Math.floor(parsedStock / parsedDoseAmount)
-      : null;
+  const parsedStock = parseDecimalInput(stockQuantity);
+  /**
+   * Compara quantidade com quantidade, e não estoque com número de doses: com dose variando de
+   * um horário para outro, "quantas doses o estoque cobre" deixou de ser uma divisão — 10 UI de
+   * manhã e 8 à noite consomem 18 por dia, não 2 × a dose padrão.
+   */
+  const consumoDoTratamento =
+    tracksStock && stockUnit === doseUnit ? (resumoDoTratamento?.totalAmount ?? null) : null;
   const estoqueInsuficiente =
-    resumoDoTratamento !== null &&
-    dosesQueOEstoqueCobre !== null &&
-    dosesQueOEstoqueCobre < resumoDoTratamento.totalDoses;
+    consumoDoTratamento !== null && parsedStock > 0 && parsedStock < consumoDoTratamento;
+
+  /**
+   * Quantos dias o que ele tem hoje ainda dá. Só faz sentido quando estoque e dose são contados
+   * na mesma unidade: gota se toma em gota e se guarda em ml, e converter exigiria a
+   * concentração do frasco, que o app não tem.
+   */
+  const esgotamento = useMemo(
+    () =>
+      schedule === null || stockUnit !== doseUnit || !tracksStock
+        ? null
+        : estimateStockDepletion(
+            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount },
+            parsedStock,
+            new Date(),
+          ),
+    [schedule, startDate, endDate, parsedDoseAmount, parsedStock, stockUnit, doseUnit, tracksStock],
+  );
+
+  /**
+   * Antecedência maior que a duração do estoque é aviso que já nasceu vencido: pedir "me avise 30
+   * dias antes" com cinco dias de comprimido na gaveta significa que o momento de avisar já
+   * passou. O app aceita mesmo assim, porque comprar mais é o que resolve e ninguém deve ser
+   * impedido de configurar por causa do estoque de hoje. Mas cala seria pior: a pessoa sairia
+   * achando que tem um mês de folga.
+   */
+  const avisoDeAntecedencia =
+    esgotamento === null
+      ? null
+      : wantsLowStockAlert && leadDays !== null && Number(leadDays) >= esgotamento.daysRemaining
+        ? `Seu estoque atual dura cerca de ${esgotamento.daysRemaining} ${esgotamento.daysRemaining === 1 ? "dia" : "dias"}, portanto um aviso de ${leadDays} dias de antecedência não é possível.`
+        : `No ritmo desta posologia, seu estoque suporta até o dia ${toDateInput(esgotamento.lastDay)}, cerca de ${esgotamento.daysRemaining} ${esgotamento.daysRemaining === 1 ? "dia" : "dias"}.`;
+
+  const antecedenciaConflita =
+    esgotamento !== null && wantsLowStockAlert && leadDays !== null &&
+    Number(leadDays) >= esgotamento.daysRemaining;
 
   /** Só o que foi preenchido — linha com "—" é ruído, e o popup é quem cobra o que falta. */
   const linhasDoEstoque = [
@@ -539,6 +814,37 @@ export function FormularioDeMedicamentoScreen({
     );
   }
 
+  function guardarFoto(uri: string) {
+    setAttachmentUri(uri);
+    setAttachmentKind("image");
+    setAttachmentName("");
+  }
+
+  async function escolherArquivoDaReceita() {
+    const result = await prescriptionFile.pickDocument();
+    if (result.status === "picked") {
+      setAttachmentUri(result.uri);
+      setAttachmentKind(result.isPdf ? "document" : "image");
+      setAttachmentName(result.name);
+      return;
+    }
+    if (result.reason === "cancelled") return;
+    Alert.alert(
+      "Não foi possível usar o arquivo",
+      `Escolha um arquivo em ${ACCEPTED_DOCUMENT_LABEL}.`,
+    );
+  }
+
+  /** Tirar a receita leva junto o que só existia por causa dela — validade e aviso. */
+  function removerReceita() {
+    setAttachmentUri(null);
+    setAttachmentKind(null);
+    setAttachmentName("");
+    setValidUntilInput("");
+    setWantsRenewalReminder(false);
+    setRenewalLeadDays(null);
+  }
+
   function handleSubmit() {
     // Os três `null` são impossíveis com `canSubmit` verdadeiro; o teste está aqui pro
     // compilador, e pra que uma mudança futura em `essencialCompleto` quebre alto e não calado.
@@ -559,6 +865,8 @@ export function FormularioDeMedicamentoScreen({
       photoUri,
       // Não configurado grava "none": o app não decide sozinho que vai te acordar.
       reminderMode: frequency === "asNeeded" || reminderMode === null ? "none" : reminderMode,
+      intakeInstructions,
+      intakeNote: intakeNote.trim().length > 0 ? intakeNote.trim() : null,
       notes: notes.trim().length > 0 ? notes.trim() : null,
       stockQuantity:
         tracksStock && Number.isFinite(parsedStock) && parsedStock > 0 ? parsedStock : null,
@@ -570,7 +878,15 @@ export function FormularioDeMedicamentoScreen({
       storageLocation:
         tracksStock && storageLocation.trim().length > 0 ? storageLocation.trim() : null,
       attachmentUri,
+      attachmentKind: attachmentUri === null ? null : attachmentKind,
       attachmentValidUntil: attachmentUri === null ? null : validUntilIso,
+      // Aviso sem validade não tem de quando contar, e sem antecedência escolhida não dispara —
+      // nos dois casos gravar "ligado" seria mentir sobre um lembrete que nunca chega.
+      renewalReminderLeadDays:
+        attachmentUri !== null && validUntilIso !== null && wantsRenewalReminder &&
+        renewalLeadDays !== null
+          ? Number(renewalLeadDays)
+          : null,
     });
   }
 
@@ -593,7 +909,7 @@ export function FormularioDeMedicamentoScreen({
           </View>
 
           <TextField
-            label="NOME"
+            label="NOME DA MEDICAÇÃO"
             required
             placeholder="Ex: Losartana 50mg"
             value={name}
@@ -608,50 +924,51 @@ export function FormularioDeMedicamentoScreen({
             onChange={semLimpar(handleFormChange)}
           />
 
-          {/* Sem seletor de unidade, o rótulo carrega a unidade e a pergunta vira uma frase só:
-              "quantos comprimidos de cada vez". Dois campos lado a lado, um deles pedindo algo
-              que a forma já respondeu, era o que fazia a dose parecer duas perguntas. */}
-          {/* Só depois da forma: sem ela o app não sabe se a pergunta é "quantos comprimidos" ou
-              "quantos ml", e perguntar a quantidade de uma unidade indefinida não significa nada. */}
+          {/* Nas formas ambíguas a unidade vem **antes** da quantidade, e não ao lado dela.
+              "Quanto de cada vez" com uma caixa vazia chamada UNIDADE ao lado são duas perguntas
+              fingindo ser uma — e a primeira não tem resposta enquanto a segunda está em branco.
+              Respondida a unidade, a pergunta seguinte vira a mesma frase única das outras formas.
+              Fichas e não select: são três opções, e escolher entre elas *é* comparar as três. */}
           {showsUnitChoice ? (
-            <View style={styles.doseRow}>
-              <TextField
-                label="QUANTO DE CADA VEZ"
-                required
-                containerStyle={styles.doseAmountField}
-                placeholder="Ex: 10"
-                value={doseAmount}
-                onChangeText={setDoseAmount}
-                onFocus={scrollToFocusedInput}
-                keyboardType="decimal-pad"
-                maxLength={8}
-                error={hasDoseAmountError ? "Informe um número maior que zero." : undefined}
+            <>
+              <OptionGroup
+                label="COMO A DOSE É MEDIDA?"
+                value={doseUnit}
+                options={unitOptions}
+                onChange={(unit: PosologyUnit) => setDoseUnit(unit)}
               />
-              <View style={styles.doseUnitField}>
-                <SelectField
-                  label="UNIDADE"
-                  value={doseUnit}
-                  options={unitOptions}
-                  onChange={semLimpar((unit: PosologyUnit) => setDoseUnit(unit))}
-                />
-              </View>
-            </View>
-          ) : doseUnit !== null ? (
+              {form !== null && DICA_DA_UNIDADE[form] ? (
+                <Text style={styles.sectionHint}>{DICA_DA_UNIDADE[form]}</Text>
+              ) : null}
+            </>
+          ) : null}
+
+          {/* Só depois da unidade resolvida — perguntar a quantidade de uma unidade indefinida
+              não significa nada, e é o que fazia "1 injeção ué" parecer a resposta certa. */}
+          {doseUnit !== null ? (
             <TextField
-              label={`QUANTOS ${UNIT_NOUNS[doseUnit].toUpperCase()} DE CADA VEZ`}
+              label={`${quantosDe(doseUnit)} ${UNIT_NOUNS[doseUnit].toUpperCase()} DE CADA VEZ`}
               required
               placeholder="Ex: 1"
               value={doseAmount}
-              onChangeText={setDoseAmount}
+              onChangeText={handleDoseAmountChange}
               onFocus={scrollToFocusedInput}
-              keyboardType="decimal-pad"
+              keyboardType={doseAceitaFracao ? "decimal-pad" : "number-pad"}
               maxLength={8}
               error={hasDoseAmountError ? "Informe um número maior que zero." : undefined}
             />
           ) : null}
 
+          {dosesVariam ? (
+            <Text style={styles.sectionHint}>
+              {todosHorariosComDose
+                ? "Cada horário tem a sua dose, então este valor não é usado."
+                : "Vale nos horários em que você não informou uma dose diferente."}
+            </Text>
+          ) : null}
+
           <OptionGroup
-            label="COM QUE FREQUÊNCIA?"
+            label="QUAL A FREQUÊNCIA?"
             layout="grade"
             value={frequency}
             options={FREQUENCY_OPTIONS}
@@ -681,11 +998,83 @@ export function FormularioDeMedicamentoScreen({
             </View>
           ) : null}
 
-          {frequency === "daily" || frequency === "weekly" ? (
+          {/* Um mecanismo para três coisas que as pessoas dizem de jeitos diferentes: cartela
+              de anticoncepcional, dia sim dia não e injeção "de 30 em 30 dias". Antes eram duas
+              opções (ciclo e intervalo) que produziam o mesmo agendamento por caminhos
+              diferentes — e escolher entre elas era dúvida, não decisão. */}
+          {frequency === "cycle" ? (
+            <>
+              <TextField
+                label="A CADA QUANTOS DIAS?"
+                required
+                placeholder="Ex: 28 na cartela, 30 na injeção mensal"
+                value={cycleLengthInput}
+                onChangeText={(raw) => apenasDigitos(raw, setCycleLengthInput)}
+                onFocus={scrollToFocusedInput}
+                keyboardType="number-pad"
+                maxLength={3}
+              />
+
+              {/* Só depois do tamanho do ciclo: "por quantos dias seguidos" não tem escala nem
+                  limite antes dele. Em branco vale 1, que é o caso de quem pensa "de 30 em 30". */}
+              {cycleLengthDefinido ? (
+                <TextField
+                  label="POR QUANTOS DIAS SEGUIDOS?"
+                  placeholder="1 dia, se for dose única"
+                  value={activeDaysInput}
+                  onChangeText={(raw) => apenasDigitos(raw, setActiveDaysInput)}
+                  onFocus={scrollToFocusedInput}
+                  keyboardType="number-pad"
+                  maxLength={3}
+                  error={activeDaysError}
+                />
+              ) : null}
+
+              {/* A pergunta que faltava. Sem ela o app assume que o ciclo começa hoje, e quem
+                  cadastra no meio da cartela recebe a pausa deslocada — em silêncio. */}
+              {cycleLengthDefinido && activeDaysError === undefined ? (
+                <OptionGroup
+                  label="ESTE CICLO COMEÇOU QUANDO?"
+                  value={cycleStart}
+                  options={CYCLE_START_OPTIONS}
+                  onChange={setCycleStart}
+                />
+              ) : null}
+
+              {cycleStart === "earlier" ? (
+                <TextField
+                  label="PRIMEIRO DIA DESTE CICLO"
+                  placeholder="DD/MM/AAAA"
+                  value={cycleStartInput}
+                  onChangeText={(value) =>
+                    setCycleStartInput(formatDateInput(value, cycleStartInput))
+                  }
+                  onFocus={scrollToFocusedInput}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                  error={cycleStartError}
+                />
+              ) : null}
+
+              {/* Datas, não a regra: "28 e 21" é o que a pessoa acabou de digitar, e repetir não
+                  confirma nada. O que ela reconhece é o dia em que a cartela dela acaba. */}
+              {viradasDoCiclo !== null ? (
+                <Text style={styles.sectionHintDestaque}>
+                  {viradasDoCiclo.emPausa
+                    ? `Você está na pausa. Volta a tomar em ${toDateInput(viradasDoCiclo.resumesOn)}.`
+                    : parsedActiveDays === 1
+                      ? `A próxima é em ${toDateInput(viradasDoCiclo.resumesOn)}.`
+                      : `Você toma até ${toDateInput(viradasDoCiclo.lastDay)}, faz a pausa, e recomeça em ${toDateInput(viradasDoCiclo.resumesOn)}.`}
+                </Text>
+              ) : null}
+            </>
+          ) : null}
+
+          {temHorariosFixos(frequency) ? (
             <>
               <OptionGroup
                 label={frequency === "daily" ? "QUANTAS VEZES POR DIA?" : "QUANTAS VEZES NO DIA?"}
-                value={isCustomDoses ? null : String(timeInputs.length)}
+                value={isCustomDoses ? null : String(doseInputs.length)}
                 options={DOSES_PER_DAY_OPTIONS}
                 onChange={handleDosesPerDayChange}
                 trailing={
@@ -706,36 +1095,26 @@ export function FormularioDeMedicamentoScreen({
                 <Text style={styles.fieldErrorText}>{customDosesError}</Text>
               ) : null}
               {/* Sem quantidade escolhida não há quantos campos abrir — a pergunta ainda não existe. */}
-              {timeInputs.length > 0 ? (
+              {doseInputs.length > 0 ? (
                 <SeletorDeHorarios
                   label="EM QUE HORÁRIOS?"
-                  values={timeInputs}
-                  onChange={setTimeInputs}
+                  values={doseInputs}
+                  onChange={setDoseInputs}
                   duplicateIndexes={duplicateTimeIndexes}
+                  // Dose por horário só é oferecida depois que a dose geral existe: ela é o valor
+                  // que cada horário herda, e sem ela os campos abririam sem referência nenhuma.
+                  variacao={
+                    doseUnit !== null && parsedDoseAmount > 0
+                      ? {
+                          ativa: dosesVariam,
+                          onChange: setDosesVariam,
+                          unitNoun: UNIT_NOUNS[doseUnit],
+                          defaultAmount: doseAmount,
+                          aceitaFracao: doseAceitaFracao,
+                        }
+                      : undefined
+                  }
                 />
-              ) : null}
-            </>
-          ) : null}
-
-          {frequency === "interval" ? (
-            <>
-              <SelectField
-                label="DE QUANTO EM QUANTO TEMPO?"
-                value={intervalMinutes}
-                options={INTERVAL_OPTIONS}
-                onChange={semLimpar((minutes: string) => setIntervalMinutes(minutes))}
-              />
-              {intervalMinutes !== null ? (
-                <>
-                  <SeletorDeHorarios
-                    label="PRIMEIRA DOSE DO DIA"
-                    values={[firstTimeInput]}
-                    onChange={(values) => setFirstTimeInput(values[0])}
-                  />
-                  <Text style={styles.sectionHintDestaque}>
-                    As doses seguintes saem daí, somando o intervalo.
-                  </Text>
-                </>
               ) : null}
             </>
           ) : null}
@@ -747,9 +1126,9 @@ export function FormularioDeMedicamentoScreen({
           ) : null}
 
           <OptionGroup
-            label="POR QUANTO TEMPO?"
+            label="QUAL O TEMPO DO TRATAMENTO?"
             value={duration}
-            options={DURATION_OPTIONS}
+            options={frequency === "asNeeded" ? DURATION_OPTIONS_SEM_AGENDA : DURATION_OPTIONS}
             onChange={setDuration}
           />
 
@@ -762,7 +1141,7 @@ export function FormularioDeMedicamentoScreen({
                 label="QUANTO TEMPO DURA"
                 placeholder="Ex: 7"
                 value={durationAmount}
-                onChangeText={setDurationAmount}
+                onChangeText={(raw) => setDurationAmount(formatIntegerInput(raw, 3))}
                 onFocus={scrollToFocusedInput}
                 keyboardType="number-pad"
                 maxLength={3}
@@ -783,7 +1162,7 @@ export function FormularioDeMedicamentoScreen({
               {resumoDoTratamento.firstDay === todayIsoDate()
                 ? "Da próxima dose de hoje"
                 : `De ${toDateInput(resumoDoTratamento.firstDay)}`}{" "}
-              até {toDateInput(resumoDoTratamento.lastDay)} —{" "}
+              até {toDateInput(resumoDoTratamento.lastDay)}, num total de{" "}
               {resumoDoTratamento.totalDoses === 1
                 ? "1 dose"
                 : `${resumoDoTratamento.totalDoses} doses`}
@@ -816,7 +1195,7 @@ export function FormularioDeMedicamentoScreen({
               {tracksStock ? (
                 <>
                   <Pressable
-                    style={styles.rowValue}
+                    style={[styles.rowValue, styles.rowValueAtivo]}
                     onPress={() => setStockSheetOpen(true)}
                     accessibilityRole="button">
                     <Text style={styles.rowValueText}>
@@ -838,8 +1217,9 @@ export function FormularioDeMedicamentoScreen({
                       tem como saber o que já está a caminho da farmácia. */}
                   {estoqueInsuficiente ? (
                     <Text style={styles.avisoDeConflito}>
-                      O tratamento pede {resumoDoTratamento?.totalDoses} doses e o que você tem dá
-                      pra {dosesQueOEstoqueCobre}. Vale comprar antes de acabar.
+                      O tratamento inteiro consome {consumoDoTratamento}{" "}
+                      {stockUnit === null ? "" : UNIT_NOUNS[stockUnit]} e você tem {parsedStock}.
+                      Vale comprar antes de acabar.
                     </Text>
                   ) : null}
                 </>
@@ -890,32 +1270,49 @@ export function FormularioDeMedicamentoScreen({
                 </View>
               </View>
 
+              {/* Duas portas de entrada porque são duas realidades: quem tem o papel na mão
+                  fotografa, e quem recebeu a receita digital já tem o PDF salvo. Uma só forçaria
+                  metade das pessoas a fotografar a tela do próprio celular. */}
               <View style={styles.photoRow}>
-                <Pressable
-                  style={attachmentUri ? styles.photoFrame : styles.photoPlaceholder}
-                  onPress={() => pick(prescriptionPhoto, setAttachmentUri)}
-                  disabled={prescriptionPhoto.isPicking}
-                  accessibilityRole="button"
-                  accessibilityLabel="Foto da receita">
-                  {attachmentUri ? (
+                <View style={attachmentUri ? styles.photoFrame : styles.photoPlaceholder}>
+                  {attachmentUri !== null && attachmentKind === "image" ? (
                     <Image source={{ uri: attachmentUri }} style={styles.photo} contentFit="cover" />
                   ) : (
                     <MaterialCommunityIcons
-                      name="file-document-outline"
+                      name={attachmentUri === null ? "file-document-outline" : "file-pdf-box"}
                       size={24}
-                      color={colors.onSurfaceVariant}
+                      color={attachmentUri === null ? colors.onSurfaceVariant : colors.primary}
                     />
                   )}
-                </Pressable>
+                </View>
                 <View style={styles.photoTextGroup}>
-                  <Pressable
-                    onPress={() => pick(prescriptionPhoto, setAttachmentUri)}
-                    accessibilityRole="button">
-                    <Text style={styles.photoAddLabel}>
-                      {attachmentUri ? "Trocar foto da receita" : "Anexar receita"}
-                    </Text>
-                  </Pressable>
-                  <Text style={styles.photoHint}>Fica só no aparelho, não sobe pra nuvem.</Text>
+                  {attachmentUri === null ? (
+                    <View style={styles.acoesDeAnexo}>
+                      <Pressable
+                        onPress={() => pick(prescriptionPhoto, guardarFoto)}
+                        disabled={prescriptionPhoto.isPicking}
+                        accessibilityRole="button">
+                        <Text style={styles.photoAddLabel}>Tirar da galeria</Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={escolherArquivoDaReceita}
+                        disabled={prescriptionFile.isPicking}
+                        accessibilityRole="button">
+                        <Text style={styles.photoAddLabel}>Escolher arquivo</Text>
+                      </Pressable>
+                    </View>
+                  ) : (
+                    <Pressable onPress={removerReceita} accessibilityRole="button">
+                      <Text style={styles.photoAddLabel}>
+                        {attachmentKind === "document" ? "Remover receita" : "Remover foto"}
+                      </Text>
+                    </Pressable>
+                  )}
+                  <Text style={styles.photoHint}>
+                    {attachmentUri !== null && attachmentName.length > 0
+                      ? attachmentName
+                      : `Aceita ${ACCEPTED_DOCUMENT_LABEL}. Fica só no aparelho, não sobe pra nuvem.`}
+                  </Text>
                 </View>
               </View>
 
@@ -934,6 +1331,30 @@ export function FormularioDeMedicamentoScreen({
                   error={validUntilError}
                 />
               ) : null}
+
+              {/* E só depois da validade: sem data, o aviso não tem de quando contar. Perguntar
+                  antes seria oferecer um lembrete que o app não teria como disparar. */}
+              {attachmentUri !== null && validUntilIso !== null ? (
+                <>
+                  <Checkbox
+                    checked={wantsRenewalReminder}
+                    onChange={setWantsRenewalReminder}
+                    label="Me avisar antes de a receita vencer"
+                    accessibilityLabel="Me avisar antes de a receita vencer"
+                  />
+                  {wantsRenewalReminder ? (
+                    <OptionGroup
+                      label="COM QUANTA ANTECEDÊNCIA"
+                      value={renewalLeadDays}
+                      options={RENEWAL_LEAD_OPTIONS}
+                      onChange={setRenewalLeadDays}
+                    />
+                  ) : null}
+                  {avisoDeRenovacao !== null ? (
+                    <Text style={styles.sectionHintDestaque}>{avisoDeRenovacao}</Text>
+                  ) : null}
+                </>
+              ) : null}
             </Card>
 
             {frequency !== "asNeeded" ? (
@@ -941,7 +1362,7 @@ export function FormularioDeMedicamentoScreen({
                 <Text style={styles.sectionTitle}>LEMBRETE</Text>
                 {reminderMode !== null ? (
                   <Pressable
-                    style={styles.rowValue}
+                    style={[styles.rowValue, styles.rowValueAtivo]}
                     onPress={() => setReminderSheetOpen(true)}
                     accessibilityRole="button">
                     <Text style={styles.rowValueText}>{REMINDER_LABELS[reminderMode]}</Text>
@@ -962,8 +1383,38 @@ export function FormularioDeMedicamentoScreen({
               </Card>
             ) : null}
 
+            {/* Nada aqui muda horário, dose ou lembrete — é a anotação que o paciente quer ter à
+                mão na hora de tomar. Por isso vem por último e não cobra nada. */}
             <Card>
-              <Text style={styles.sectionTitle}>COMPLEMENTO</Text>
+              <Text style={styles.sectionTitle}>INFORMAÇÕES ADICIONAIS</Text>
+              <Text style={styles.sectionHint}>
+                Só anotação, pra você lembrar depois. Nada aqui altera os horários.
+              </Text>
+
+              {/* Chips no lugar de um terceiro campo de texto: a lista das recomendações comuns é
+                  curta e conhecida, e reconhecer custa um toque enquanto escrever custa uma frase. */}
+              <ToggleChips
+                label="COMO TOMAR"
+                values={
+                  mostraOutraOrientacao
+                    ? [...intakeInstructions, OUTRA_ORIENTACAO]
+                    : intakeInstructions
+                }
+                options={INTAKE_INSTRUCTION_OPTIONS}
+                onChange={handleOrientacoesChange}
+              />
+
+              {mostraOutraOrientacao ? (
+                <TextField
+                  label="QUAL ORIENTAÇÃO?"
+                  placeholder="Ex: diluir em meio copo d'água"
+                  value={intakeNote}
+                  onChangeText={setIntakeNote}
+                  onFocus={scrollToFocusedInput}
+                  maxLength={300}
+                />
+              ) : null}
+
               <TextField
                 label="PRINCÍPIO ATIVO"
                 placeholder="Ex: Losartana potássica"
@@ -973,8 +1424,8 @@ export function FormularioDeMedicamentoScreen({
                 maxLength={120}
               />
               <TextField
-                label="OBSERVAÇÕES"
-                placeholder="Ex: tomar em jejum"
+                label="OBSERVAÇÃO GERAL"
+                placeholder="Ex: o azul é o da manhã"
                 value={notes}
                 onChangeText={setNotes}
                 onFocus={scrollToFocusedInput}
@@ -1001,7 +1452,14 @@ export function FormularioDeMedicamentoScreen({
         visible={isStockSheetOpen}
         onClose={() => setStockSheetOpen(false)}
         onDisable={handleStockDisable}
-        unitNoun={stockUnit === null ? "unidades" : UNIT_NOUNS[stockUnit]}
+        aceitaFracao={stockUnit !== null && allowsFractionalDose(stockUnit)}
+        aviso={avisoDeAntecedencia}
+        avisoEhConflito={antecedenciaConflita}
+        quantityLabel={
+          stockUnit === null
+            ? "QUANTAS UNIDADES VOCÊ TEM"
+            : `${quantosDe(stockUnit)} ${UNIT_NOUNS[stockUnit].toUpperCase()} VOCÊ TEM`
+        }
         quantity={stockQuantity}
         onQuantityChange={setStockQuantity}
         alertEnabled={wantsLowStockAlert}

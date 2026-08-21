@@ -3,20 +3,45 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme";
+import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
 import { formatTimeInput, parseTimeInput } from "@/shared/time-input";
-import { BottomSheet, Button, TextField } from "@/ui";
+import { BottomSheet, Button, Checkbox, TextField } from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
 
 /** "1ª dose", "2ª dose"… — dentro do popup há largura pra escrever por extenso. */
 const ORDINALS = ["1ª", "2ª", "3ª", "4ª", "5ª", "6ª", "7ª", "8ª", "9ª", "10ª", "11ª", "12ª"];
 
+/** Uma linha do popup: o horário mascarado e, opcionalmente, a dose só dele. */
+export type EntradaDeDose = {
+  at: string;
+  /** Vazio = herda a dose geral do tratamento. */
+  amount: string;
+};
+
+export function entradasVazias(quantidade: number): EntradaDeDose[] {
+  return Array.from({ length: quantidade }, () => ({ at: "", amount: "" }));
+}
+
+type VariacaoDeDose = {
+  ativa: boolean;
+  onChange: (ativa: boolean) => void;
+  /** Substantivo da unidade, já flexionado ("comprimidos", "unidades (UI)"). */
+  unitNoun: string;
+  /** A dose geral já respondida — é o que cada horário vale enquanto ninguém mexe nele. */
+  defaultAmount: string;
+  /** Meio comprimido existe, meia gota não. Vem da unidade, não do campo. */
+  aceitaFracao: boolean;
+};
+
 type SeletorDeHorariosProps = {
   label: string;
-  /** Texto mascarado de cada dose. O tamanho da lista é a quantidade de doses — vem de fora. */
-  values: string[];
-  onChange: (values: string[]) => void;
+  /** O tamanho da lista é a quantidade de doses — vem de fora, decidido pela frequência. */
+  values: EntradaDeDose[];
+  onChange: (values: EntradaDeDose[]) => void;
   /** Índices em conflito (mesmo horário duas vezes), marcados sem mensagem individual. */
   duplicateIndexes?: number[];
+  /** Ausente onde dose por horário não faz sentido — no intervalo só existe uma dose. */
+  variacao?: VariacaoDeDose;
 };
 
 /**
@@ -33,13 +58,50 @@ export function SeletorDeHorarios({
   values,
   onChange,
   duplicateIndexes = [],
+  variacao,
 }: SeletorDeHorariosProps) {
   const [isSheetOpen, setSheetOpen] = useState(false);
-  const isEmpty = values.every((value) => value.length === 0);
-  const pendentes = values.filter((value) => parseTimeInput(value) === null).length;
+  const isEmpty = values.every((value) => value.at.length === 0);
+  const pendentes = values.filter((value) => parseTimeInput(value.at) === null).length;
 
   function updateAt(index: number, raw: string) {
-    onChange(values.map((current, i) => (i === index ? formatTimeInput(raw, current) : current)));
+    onChange(
+      values.map((current, i) =>
+        i === index ? { ...current, at: formatTimeInput(raw, current.at) } : current,
+      ),
+    );
+  }
+
+  function updateAmount(index: number, raw: string) {
+    const amount = variacao?.aceitaFracao === true ? formatDecimalInput(raw) : formatIntegerInput(raw);
+    onChange(values.map((current, i) => (i === index ? { ...current, amount } : current)));
+  }
+
+  /**
+   * Os horários são de um mesmo dia, então "1ª" e "2ª" não são escolha de quem preenche: quem
+   * decide a ordem é o relógio. Digitar 04:00 na primeira linha e 02:00 na segunda descreve o
+   * mesmo dia que a ordem inversa — e era isso que acontecia calado, porque a posologia já era
+   * ordenada na hora de salvar enquanto a tela continuava mostrando a ordem digitada.
+   *
+   * Ordenar ao fechar deixa o reordenamento **visível**: a pessoa fecha o popup e vê as fichinhas
+   * na ordem em que o dia vai acontecer. A dose de cada horário viaja junto, senão trocar a ordem
+   * trocaria em silêncio quanto se toma de manhã e à noite — que é o erro que este campo existe
+   * pra evitar. Horário pela metade vai pro fim, pra linha em branco não pular debaixo do dedo.
+   */
+  function handleClose() {
+    const preenchidos = values
+      .filter((value) => parseTimeInput(value.at) !== null)
+      .sort((a, b) => a.at.localeCompare(b.at));
+    const pendentesVazios = values.filter((value) => parseTimeInput(value.at) === null);
+    onChange([...preenchidos, ...pendentesVazios]);
+    setSheetOpen(false);
+  }
+
+  /** O que a ficha mostra: "08:00" ou "08:00 · 10", quando aquele horário tem dose própria. */
+  function textoDaFicha(value: EntradaDeDose): string {
+    if (parseTimeInput(value.at) === null) return "--:--";
+    if (variacao?.ativa !== true || value.amount.trim().length === 0) return value.at;
+    return `${value.at} · ${value.amount}`;
   }
 
   return (
@@ -57,11 +119,11 @@ export function SeletorDeHorarios({
           style={styles.timeChipRow}
           onPress={() => setSheetOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel={`Editar horários: ${values.join(", ")}`}>
+          accessibilityLabel={`Editar horários: ${values.map((value) => value.at).join(", ")}`}>
           {values.map((value, index) => {
             // Meio horário digitado não pode virar ficha preenchida: quem bate o olho leria
             // "1" como uma hora resolvida e sairia da tela achando que terminou.
-            const isPending = parseTimeInput(value) === null;
+            const isPending = parseTimeInput(value.at) === null;
             return (
               <View
                 // Índice como chave: os campos são posicionais e nenhum é inserido no meio.
@@ -71,7 +133,7 @@ export function SeletorDeHorarios({
                   isPending && styles.timeChipVazio,
                   duplicateIndexes.includes(index) && styles.timeChipErro,
                 ]}>
-                <Text style={styles.timeChipText}>{isPending ? "--:--" : value}</Text>
+                <Text style={styles.timeChipText}>{textoDaFicha(value)}</Text>
               </View>
             );
           })}
@@ -84,20 +146,45 @@ export function SeletorDeHorarios({
         </Text>
       ) : null}
 
-      <BottomSheet visible={isSheetOpen} onClose={() => setSheetOpen(false)} title={label}>
+      <BottomSheet visible={isSheetOpen} onClose={handleClose} title={label}>
         <View style={styles.sheetBody}>
           {values.map((value, index) => (
-            <TextField
-              key={index}
-              label={values.length > 1 ? `${ORDINALS[index]} DOSE` : ""}
-              placeholder="HH:MM"
-              value={value}
-              onChangeText={(raw) => updateAt(index, raw)}
-              keyboardType="number-pad"
-              maxLength={5}
-              error={duplicateIndexes.includes(index) || parseTimeInput(value) === null}
-            />
+            <View key={index} style={variacao?.ativa === true ? styles.linhaDeDose : undefined}>
+              <TextField
+                label={values.length > 1 ? `${ORDINALS[index]} DOSE` : ""}
+                containerStyle={variacao?.ativa === true ? styles.campoDeHorario : undefined}
+                placeholder="HH:MM"
+                value={value.at}
+                onChangeText={(raw) => updateAt(index, raw)}
+                keyboardType="number-pad"
+                maxLength={5}
+                error={duplicateIndexes.includes(index) || parseTimeInput(value.at) === null}
+              />
+              {variacao?.ativa === true ? (
+                <TextField
+                  label={variacao.unitNoun.toUpperCase()}
+                  containerStyle={styles.campoDeQuantidade}
+                  // Placeholder e não valor: mostra o que vale hoje sem fingir que foi digitado,
+                  // então deixar em branco continua significando "o mesmo de sempre".
+                  placeholder={variacao.defaultAmount}
+                  value={value.amount}
+                  onChangeText={(raw) => updateAmount(index, raw)}
+                  keyboardType={variacao.aceitaFracao ? "decimal-pad" : "number-pad"}
+                  maxLength={8}
+                />
+              ) : null}
+            </View>
           ))}
+
+          {variacao !== undefined && values.length > 1 ? (
+            <Checkbox
+              checked={variacao.ativa}
+              onChange={variacao.onChange}
+              label="A dose muda de um horário para o outro"
+              accessibilityLabel="A dose muda de um horário para o outro"
+            />
+          ) : null}
+
           {/* O popup fecha mesmo incompleto — prender a pessoa aqui é pior que deixá-la voltar
               depois. Quem cobra o que falta é o resumo lá fora e o rodapé da tela. */}
           {pendentes > 0 ? (
@@ -107,7 +194,7 @@ export function SeletorDeHorarios({
                 : `Faltam preencher ${pendentes} horários.`}
             </Text>
           ) : null}
-          <Button label="Pronto" onPress={() => setSheetOpen(false)} />
+          <Button label="Pronto" onPress={handleClose} />
         </View>
       </BottomSheet>
     </View>

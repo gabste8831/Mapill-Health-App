@@ -45,7 +45,7 @@ export function TermosScreen({ acceptedVersion, acceptedAt, onBack }: TermosScre
               <View style={styles.statusRow}>
                 <Text style={styles.statusLabel}>Aceito em</Text>
                 <Text style={styles.statusValue}>
-                  {acceptedAt ? toDisplayDate(acceptedAt) : "—"}
+                  {acceptedAt ? toDisplayDate(acceptedAt) : "não registrado"}
                 </Text>
               </View>
               <View style={styles.statusRow}>

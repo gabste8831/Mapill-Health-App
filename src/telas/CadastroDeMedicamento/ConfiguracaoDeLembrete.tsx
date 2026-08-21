@@ -1,31 +1,61 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
 import type { ReminderMode } from "@/domain/entities/prescription";
+import { colors } from "@/shared/theme";
 import { Accordion, BottomSheet, Button, OptionGroup, type OptionGroupOption } from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
 
-const MODE_OPTIONS: OptionGroupOption<ReminderMode>[] = [
-  {
-    value: "alarm",
-    label: "Alarme",
-    hint: "Toca como despertador, mesmo com o telefone no silencioso. Para dose que não pode passar.",
-  },
-  {
-    value: "notification",
-    label: "Notificação",
-    hint: "Aparece na barra, discreta, e respeita o silencioso do aparelho.",
-  },
-  {
-    value: "both",
-    label: "Os dois",
-    hint: "O alarme te interrompe na hora; a notificação fica na barra depois, caso você desligue e esqueça.",
-  },
-  {
-    value: "none",
-    label: "Nenhum aviso",
-    hint: "A dose continua na sua lista do dia, mas o Mapill não te procura.",
-  },
-];
+/** Um sino que toca, um que avisa, um que faz os dois e um cortado. A família se lê de relance. */
+const MODE_ICONS: Record<ReminderMode, keyof typeof MaterialCommunityIcons.glyphMap> = {
+  alarm: "alarm",
+  notification: "bell",
+  both: "bell-ring",
+  none: "bell-off",
+};
+
+function iconeDoModo(mode: ReminderMode, isSelected: boolean) {
+  return (
+    <MaterialCommunityIcons
+      name={MODE_ICONS[mode]}
+      size={22}
+      color={isSelected ? colors.onPrimary : colors.primary}
+    />
+  );
+}
+
+/**
+ * Uma linha por modo, e nem uma a mais. O que cada um faz cabe numa frase; o resto mora no "como
+ * funcionam", que fica logo abaixo e não cobra nada de quem só quer escolher e sair.
+ */
+function opcoesDeModo(value: ReminderMode | null): OptionGroupOption<ReminderMode>[] {
+  return [
+    {
+      value: "alarm",
+      label: "Alarme",
+      hint: "Toca como despertador, mesmo no silencioso.",
+      icon: iconeDoModo("alarm", value === "alarm"),
+    },
+    {
+      value: "notification",
+      label: "Notificação",
+      hint: "Aparece na barra e respeita o silencioso.",
+      icon: iconeDoModo("notification", value === "notification"),
+    },
+    {
+      value: "both",
+      label: "Os dois",
+      hint: "O alarme na hora, a notificação depois.",
+      icon: iconeDoModo("both", value === "both"),
+    },
+    {
+      value: "none",
+      label: "Nenhum aviso",
+      hint: "A dose fica na lista do dia, sem alerta.",
+      icon: iconeDoModo("none", value === "none"),
+    },
+  ];
+}
 
 type ConfiguracaoDeLembreteProps = {
   visible: boolean;
@@ -36,10 +66,15 @@ type ConfiguracaoDeLembreteProps = {
 };
 
 /**
- * Escolha do lembrete em popup, e não no corpo do formulário. É a única decisão do cadastro que
+ * Escolha do alerta em popup, e não no corpo do formulário. É a única decisão do cadastro que
  * depende de permissão do sistema e que muda como o aparelho se comporta fora do app — dar a ela
  * uma tela própria é o que permite explicar cada modo antes de escolher, em vez de oferecer três
  * palavras num select.
+ *
+ * É também onde a pessoa é **apresentada** ao assunto: o que o app faz na hora da dose, o que ele
+ * precisa do aparelho e o que ele não faz. Apresentação, não manual; a versão completa continua
+ * nos termos de uso, e o texto daqui usa as mesmas palavras da seção 3 de lá, porque duas versões
+ * da mesma promessa é como uma delas vira mentira.
  */
 export function ConfiguracaoDeLembrete({
   visible,
@@ -47,38 +82,82 @@ export function ConfiguracaoDeLembrete({
   onChange,
   onClose,
 }: ConfiguracaoDeLembreteProps) {
-  const dependeDePermissao = value !== null && value !== "none";
+  const dependeDoAparelho = value !== null && value !== "none";
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Como quer ser lembrado?">
+    <BottomSheet visible={visible} onClose={onClose} title="Como quer ser avisado?">
       <View style={styles.sheetBody}>
-        <OptionGroup layout="coluna" value={value} options={MODE_OPTIONS} onChange={onChange} />
+        {/* Antes das opções, e não depois: o que o alerta é (e o que não é) muda o que se espera
+            dele, e ler isso depois de escolher já é tarde. */}
+        <Text style={styles.sectionHint}>
+          O alerta organiza a rotina. Ele avisa, e quem toma é você.
+        </Text>
 
-        {/* A permissão é do sistema, não do app: dizer isso antes evita que a pessoa culpe o
-            Mapill por um aviso que nunca chegou porque o Android recusou. */}
-        {dependeDePermissao ? (
+        <OptionGroup
+          layout="grade"
+          alto
+          value={value}
+          options={opcoesDeModo(value)}
+          onChange={onChange}
+        />
+
+        {/* Condição, não ressalva. Dizer o que precisa estar em ordem dá o que fazer; dizer que
+            "não garantimos" só transfere a insegurança sem dar saída. */}
+        {dependeDoAparelho ? (
           <View style={styles.avisoDePermissao}>
-            <Text style={styles.avisoDePermissaoTitulo}>Precisa da sua permissão</Text>
+            <Text style={styles.avisoDePermissaoTitulo}>Depende do seu aparelho</Text>
             <Text style={styles.avisoDePermissaoTexto}>
-              Ao salvar, o aparelho vai pedir autorização para enviar avisos. Se você recusar — ou
-              se depois desativar nas configurações do celular — nenhum lembrete chega, e o Mapill
-              não tem como contornar isso. A dose continua registrada aqui dentro, só não te
-              procura.
+              Com a permissão de avisos ativa, volume ligado e o Mapill fora da economia de
+              bateria, os alertas chegam na hora marcada.
             </Text>
           </View>
         ) : null}
 
-        <Accordion title="Como funcionam os lembretes" toggleLabel>
-          <View style={styles.sheetBody}>
-            <Text style={styles.sectionHint}>
-              Na hora marcada, o Mapill mostra a dose com os botões de confirmar, adiar 5 minutos
-              ou pular. Enquanto você não responde, ela continua pendente na sua lista do dia —
-              nenhuma dose some sozinha.
-            </Text>
-            <Text style={styles.sectionHint}>
-              O alarme insiste com som mesmo no silencioso; a notificação respeita o modo do
-              aparelho. Nos dois casos, adiar reagenda uma única vez, para o app não virar
-              despertador infinito.
+        <Accordion title="Como funcionam os alertas" toggleLabel>
+          <View style={styles.blocoDeAjuda}>
+            <View style={styles.assuntoDeAjuda}>
+              <Text style={styles.assuntoDeAjudaTitulo}>Na hora da dose</Text>
+              <Text style={styles.assuntoDeAjudaTexto}>
+                O alerta mostra o horário, o remédio, a quantidade daquele horário e a orientação
+                de como tomar, se você tiver anotado alguma.
+              </Text>
+            </View>
+
+            <View style={styles.assuntoDeAjuda}>
+              <Text style={styles.assuntoDeAjudaTitulo}>Confirmar, adiar ou ignorar</Text>
+              <Text style={styles.assuntoDeAjudaTexto}>
+                Você responde dali mesmo, sem abrir o app, e a resposta define o status da dose.
+                Confirmou: o estoque desconta, se você estiver controlando. Ignorou: fica
+                registrado que a dose não foi tomada. Os dois entram no seu histórico.
+              </Text>
+            </View>
+
+            <View style={styles.assuntoDeAjuda}>
+              <Text style={styles.assuntoDeAjudaTitulo}>Se você adiar</Text>
+              <Text style={styles.assuntoDeAjudaTexto}>
+                O alerta volta em 5 minutos, uma vez só, para o app não virar despertador
+                infinito. Se você não responder nessa segunda vez, a dose fica registrada como não
+                tomada e continua na sua lista do dia até você dizer o contrário.
+              </Text>
+            </View>
+
+            <View style={styles.assuntoDeAjuda}>
+              <Text style={styles.assuntoDeAjudaTitulo}>O que o Mapill não faz</Text>
+              <Text style={styles.assuntoDeAjudaTexto}>
+                • Não confirma dose sozinho. Quem responde é você, sempre.
+              </Text>
+              <Text style={styles.assuntoDeAjudaTexto}>
+                • Não decide sua posologia nem substitui quem receitou. Ele auxilia o tratamento,
+                não conduz.
+              </Text>
+              <Text style={styles.assuntoDeAjudaTexto}>
+                • Não controla as regras do seu celular. Com permissão, volume e bateria em ordem,
+                o Mapill trabalha para manter os alertas íntegros; fora disso, o sistema decide.
+              </Text>
+            </View>
+
+            <Text style={styles.assuntoDeAjudaTexto}>
+              A versão completa está nos Termos de Uso, na aba Perfil.
             </Text>
           </View>
         </Accordion>

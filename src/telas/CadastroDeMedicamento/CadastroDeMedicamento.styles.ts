@@ -76,6 +76,11 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  /** As duas maneiras de anexar a receita, lado a lado — são alternativas, não sequência. */
+  acoesDeAnexo: {
+    flexDirection: "row",
+    gap: spacing.md,
+  },
   photoTextGroup: {
     flex: 1,
     gap: spacing.xs,
@@ -89,18 +94,25 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
 
-  /** Quantidade e unidade lado a lado: são uma informação só, lida em conjunto ("1 comprimido"). */
-  doseRow: {
+  /**
+   * Dois campos que se leem juntos numa frase — "08:00, 10 unidades", "21 dias tomando, 7 de
+   * pausa". Separá-los em linhas faria cada metade parecer uma pergunta independente.
+   */
+  linhaDeDose: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: spacing.sm,
   },
-  doseAmountField: {
+  campoDeHorario: {
     flex: 1,
   },
-  doseUnitField: {
-    flex: 1.4,
+  campoDeQuantidade: {
+    flex: 1,
   },
+  campoDeCiclo: {
+    flex: 1,
+  },
+
   /** Linha "valor atual + ação" — o resumo de uma escolha que se resolve em outro lugar. */
   rowValue: {
     minHeight: 52,
@@ -108,6 +120,15 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: spacing.md,
+  },
+  /**
+   * A mesma linha, quando o que ela resume já está ligado. Fundo só pra separar "isto está
+   * ativo" de "isto é um campo" — a linha nua se confundia com o rótulo da seção logo acima.
+   */
+  rowValueAtivo: {
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: withOpacity(colors.secondaryContainer, 0.5),
   },
   rowValueText: {
     ...typography.bodyLg,
@@ -200,13 +221,17 @@ export const styles = StyleSheet.create({
     color: colors.error,
   },
   /**
-   * Duas informações que o paciente deu e que não fecham entre si (estoque menor que o
-   * tratamento). Cor de atenção e não de erro: nada aqui está inválido, só vale olhar.
+   * Duas informações que o paciente deu e que não fecham entre si: estoque menor que o
+   * tratamento, prazo que não alcança dose nenhuma, antecedência maior que o estoque.
+   *
+   * Vermelho, e não o laranja de atenção que estava aqui antes. Não porque o campo seja
+   * inválido, mas porque a combinação não funciona do jeito que foi pedida, e laranja no meio de
+   * texto cinza lia como enfeite. O app continua deixando salvar; quem decide é o paciente.
    */
   avisoDeConflito: {
     ...typography.bodyMd,
-    color: colors.tertiary,
-    backgroundColor: withOpacity(colors.tertiary, 0.08),
+    color: colors.error,
+    backgroundColor: withOpacity(colors.error, 0.08),
     padding: spacing.md,
     borderRadius: radius.md,
   },
@@ -220,15 +245,47 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
 
+  /**
+   * O conteúdo do "como funcionam" inteiro, num fundo azul claro. É explicação, não campo nem
+   * alerta: o fundo separa esse registro do resto do popup sem usar a cor de atenção, que
+   * gritaria por uma leitura tranquila.
+   */
+  blocoDeAjuda: {
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
+  },
+  /**
+   * Um assunto, com título curto e o texto. Título e não lista corrida: quem abre o acordeão
+   * está procurando uma resposta específica, e o título é o que deixa varrer sem ler tudo.
+   */
+  assuntoDeAjuda: {
+    gap: spacing.xs,
+  },
+  assuntoDeAjudaTitulo: {
+    ...typography.label,
+    color: colors.onSecondaryContainer,
+  },
+  assuntoDeAjudaTexto: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+  },
+
+  /**
+   * Azul junto do resto da explicação, e não a cor de conflito: depois que o texto virou
+   * condição ("com permissão e volume, os alertas chegam"), pintá-lo de alerta contradiria o
+   * que ele diz. Vermelho fica reservado para o que realmente não fecha.
+   */
   avisoDePermissao: {
     gap: spacing.xs,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: withOpacity(colors.tertiary, 0.08),
+    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
   },
   avisoDePermissaoTitulo: {
     ...typography.label,
-    color: colors.tertiary,
+    color: colors.onSecondaryContainer,
   },
   avisoDePermissaoTexto: {
     ...typography.bodyMd,

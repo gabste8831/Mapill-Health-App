@@ -1,6 +1,7 @@
-import { File, Paths } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useState } from "react";
+
+import { persistPickedFile } from "@/shared/persist-picked-file";
 
 /** Motivo pelo qual a escolha não resultou numa foto. A tela decide o que dizer em cada caso. */
 export type PhotoPickFailure = "permission-denied" | "cancelled" | "failed";
@@ -8,18 +9,6 @@ export type PhotoPickFailure = "permission-denied" | "cancelled" | "failed";
 export type PhotoPick =
   | { status: "picked"; uri: string }
   | { status: "failed"; reason: PhotoPickFailure };
-
-/**
- * O picker devolve um arquivo em cache, que o sistema pode limpar a qualquer momento — guardar
- * essa URI deixaria a ficha com uma foto que some sozinha. Por isso o arquivo é copiado pro
- * diretório de documentos do app, que persiste entre aberturas.
- * */
-function persistPickedPhoto(pickedUri: string, fileName: string): string {
-  const destination = new File(Paths.document, fileName);
-  if (destination.exists) destination.delete();
-  new File(pickedUri).copy(destination);
-  return destination.uri;
-}
 
 /**
  * @param fileName nome fixo do arquivo no diretório de documentos. Fixo de propósito: cada dono
@@ -44,7 +33,7 @@ export function usePhotoPicker(fileName: string) {
       });
       if (result.canceled || !result.assets[0]) return { status: "failed", reason: "cancelled" };
 
-      return { status: "picked", uri: persistPickedPhoto(result.assets[0].uri, fileName) };
+      return { status: "picked", uri: persistPickedFile(result.assets[0].uri, fileName) };
     } catch {
       return { status: "failed", reason: "failed" };
     } finally {

@@ -8,6 +8,7 @@ import {
   TextField,
   type OptionGroupOption,
 } from "@/ui";
+import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
 import { styles } from "./CadastroDeMedicamento.styles";
 
 const LEAD_DAYS_OPTIONS: OptionGroupOption<string>[] = [
@@ -18,8 +19,14 @@ const LEAD_DAYS_OPTIONS: OptionGroupOption<string>[] = [
 ];
 
 export type EstoqueForm = {
-  /** Substantivo da unidade da embalagem, já flexionado ("comprimidos", "ml"). */
-  unitNoun: string;
+  /** Embalagem de gota se conta em ml (fracionável); cartela, em comprimidos inteiros. */
+  aceitaFracao: boolean;
+  /** Quanto tempo o estoque dura, já em texto. `null` quando não há como estimar. */
+  aviso: string | null;
+  /** Cor de atenção em vez de apoio: a antecedência escolhida não cabe no estoque de hoje. */
+  avisoEhConflito: boolean;
+  /** Pergunta pronta ("QUANTOS ML VOCÊ TEM") — a concordância é da tela, que conhece a unidade. */
+  quantityLabel: string;
   quantity: string;
   onQuantityChange: (value: string) => void;
   alertEnabled: boolean;
@@ -47,7 +54,10 @@ export function ConfiguracaoDeEstoque({
   visible,
   onClose,
   onDisable,
-  unitNoun,
+  aceitaFracao,
+  aviso,
+  avisoEhConflito,
+  quantityLabel,
   quantity,
   onQuantityChange,
   alertEnabled,
@@ -63,11 +73,13 @@ export function ConfiguracaoDeEstoque({
         {/* Contado na unidade da embalagem, não na da dose: é o que está impresso no frasco, e é
             o que faz a conta de "quantos dias ainda dá" fechar. */}
         <TextField
-          label={`QUANTOS ${unitNoun.toUpperCase()} VOCÊ TEM`}
+          label={quantityLabel}
           placeholder="Ex: 30"
           value={quantity}
-          onChangeText={onQuantityChange}
-          keyboardType="decimal-pad"
+          onChangeText={(raw) =>
+            onQuantityChange(aceitaFracao ? formatDecimalInput(raw) : formatIntegerInput(raw))
+          }
+          keyboardType={aceitaFracao ? "decimal-pad" : "number-pad"}
           maxLength={8}
         />
 
@@ -94,6 +106,14 @@ export function ConfiguracaoDeEstoque({
             options={LEAD_DAYS_OPTIONS}
             onChange={onLeadDaysChange}
           />
+        ) : null}
+
+        {/* A consequência do que foi digitado, em dias e data. Sem isto, "30 dias de
+            antecedência" com cinco dias de estoque é aceito calado. */}
+        {aviso !== null ? (
+          <Text style={avisoEhConflito ? styles.avisoDeConflito : styles.sectionHintDestaque}>
+            {aviso}
+          </Text>
         ) : null}
 
         <Button label="Pronto" onPress={onClose} />
