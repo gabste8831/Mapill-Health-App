@@ -4,11 +4,25 @@ import type { SyncableEntity } from "./syncable";
 /**
  * Livre por prescrição, não global — cada tratamento tem sua própria criticidade
  * (ex: insulina pede alarme, suplemento de rotina pode ser só notificação ou nada).
+ *
+ * `both` existe porque os dois canais fazem coisas diferentes: o alarme interrompe a pessoa na
+ * hora, e a notificação **fica** na barra depois de dispensado. Quem precisa das duas coisas
+ * estava tendo que escolher uma.
  */
-export type ReminderMode = "alarm" | "notification" | "none";
+export type ReminderMode = "alarm" | "notification" | "both" | "none";
 
 /** Horário do dia em `HH:MM`, 24h. */
 export type TimeOfDay = string;
+
+/**
+ * Uma dose a cada duas horas já é o limite do que uma pessoa acordada consegue cumprir. Acima
+ * disso não é mais "X vezes por dia", é intervalo curto — que o app expressa melhor pela
+ * frequência "a cada X horas".
+ */
+export const MAX_DOSES_PER_DAY = 12;
+
+/** Até aqui o cadastro oferece botão pronto; além disso o paciente digita a quantidade. */
+export const COMMON_DOSES_PER_DAY = 4;
 
 /** 0 = domingo … 6 = sábado, igual ao `Date.getDay()`. */
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;

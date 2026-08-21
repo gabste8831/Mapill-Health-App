@@ -51,6 +51,50 @@ export function unitsForMedicationForm(form: MedicationForm): PosologyUnit[] {
   return UNITS_BY_FORM[form];
 }
 
+/** A unidade mais provável da forma — a primeira da lista. */
+export function defaultUnitForMedicationForm(form: MedicationForm): PosologyUnit {
+  return UNITS_BY_FORM[form][0];
+}
+
+/**
+ * Formas em que a unidade da dose é genuinamente ambígua: líquido pode ser medido em ml ou mg,
+ * injeção em ml, UI ou mg. Nas demais a unidade é consequência da forma, e perguntar seria pedir
+ * pro paciente confirmar o óbvio — quem marcou adesivo toma adesivo.
+ */
+const FORMS_WITH_AMBIGUOUS_UNIT: readonly MedicationForm[] = ["liquid", "injection", "other"];
+
+export function needsUnitChoice(form: MedicationForm): boolean {
+  return FORMS_WITH_AMBIGUOUS_UNIT.includes(form);
+}
+
+/**
+ * Unidade em que o estoque é contado — nem sempre a da dose. Gota se toma em gota mas se compra
+ * em ml, e é o ml que está impresso no frasco. `null` = a forma é livre demais pra supor, então
+ * segue a dose.
+ *
+ * Contar na unidade errada quebra a única conta que o estoque existe pra fazer: quantos dias
+ * ainda dá.
+ */
+const STOCK_UNIT_BY_FORM: Record<MedicationForm, PosologyUnit | null> = {
+  tablet: "tablet",
+  liquid: null,
+  drops: "ml",
+  injection: null,
+  ointment: "g",
+  sublingual: "tablet",
+  inhaler: "puff",
+  patch: "patch",
+  sachet: "sachet",
+  other: null,
+};
+
+export function stockUnitForMedicationForm(
+  form: MedicationForm,
+  doseUnit: PosologyUnit,
+): PosologyUnit {
+  return STOCK_UNIT_BY_FORM[form] ?? doseUnit;
+}
+
 /**
  * Tarja / exigência de receita. Comanda quais campos de receita o cadastro mostra: quem cadastra
  * dipirona não deveria nem ver "validade da receita".

@@ -48,6 +48,78 @@ export function toDateInput(isoDate: string): string {
   return `${day}/${month}/${year}`;
 }
 
+/**
+ * Em que unidade a duração de um tratamento é dita. Existe porque "por 90 dias" não é como
+ * ninguém pensa um tratamento de três meses — e porque mês não tem tamanho fixo, então converter
+ * pra dias na entrada erraria a conta.
+ */
+export type DurationUnit = "days" | "weeks" | "months";
+
+function toIsoDate(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/** Soma meses preservando o dia, e grudando no fim do mês quando ele não existe (31/01 + 1 = 28/02). */
+function addMonths(date: Date, months: number): Date {
+  const target = new Date(date.getFullYear(), date.getMonth() + months, 1);
+  const lastDayOfTargetMonth = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(date.getDate(), lastDayOfTargetMonth));
+  return target;
+}
+
+/**
+ * Último dia de um tratamento que dura `amount` unidades a partir de `startIso`. O primeiro dia
+ * conta, então "por 7 dias" a partir de hoje termina no sexto dia seguinte, não no sétimo — e
+ * "por 3 meses" a partir de 21/08 termina em 20/11, não em 21/11.
+ */
+export function lastDayOfTreatment(
+  startIso: string,
+  amount: number,
+  unit: DurationUnit,
+): string | null {
+  const match = startIso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match || !Number.isInteger(amount) || amount < 1) return null;
+
+  const [, year, month, day] = match;
+  const start = new Date(Number(year), Number(month) - 1, Number(day));
+  const afterEnd = unit === "months" ? addMonths(start, amount) : new Date(start);
+  if (unit === "days") afterEnd.setDate(start.getDate() + amount);
+  if (unit === "weeks") afterEnd.setDate(start.getDate() + amount * 7);
+
+  afterEnd.setDate(afterEnd.getDate() - 1);
+  return toIsoDate(afterEnd);
+}
+
+/**
+ * Inverso de `lastDayOfTreatment` — usado ao abrir um cadastro que já tem data de fim gravada.
+ * Tenta meses e semanas antes de cair em dias, senão um tratamento cadastrado como "3 meses"
+ * reabriria como "91 dias", que está certo e não é o que a pessoa escreveu.
+ */
+export function treatmentDuration(
+  startIso: string,
+  endIso: string,
+): { amount: number; unit: DurationUnit } | null {
+  const start = parseDateInput(toDateInput(startIso));
+  const end = parseDateInput(toDateInput(endIso));
+  if (start === null || end === null) return null;
+
+  const days = Math.round((Date.parse(end) - Date.parse(start)) / 86_400_000) + 1;
+  if (days < 1) return null;
+
+  // Abaixo de duas semanas, dia é a unidade natural — quem escreveu "7 dias" não quer reabrir
+  // vendo "1 semana", ainda que seja o mesmo tratamento.
+  if (days < 14) return { amount: days, unit: "days" };
+
+  // Até 5 anos: além disso "tem prazo" deixou de descrever o caso, e dias serve.
+  for (let months = 1; months <= 60; months += 1) {
+    if (lastDayOfTreatment(startIso, months, "months") === end) return { amount: months, unit: "months" };
+  }
+  if (days % 7 === 0) return { amount: days / 7, unit: "weeks" };
+  return { amount: days, unit: "days" };
+}
+
 /** Hoje em ISO `YYYY-MM-DD`, no fuso local — `toISOString()` devolveria UTC e erraria o dia. */
 export function todayIsoDate(): string {
   const now = new Date();

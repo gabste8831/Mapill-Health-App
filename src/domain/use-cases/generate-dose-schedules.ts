@@ -5,8 +5,14 @@ import type { SyncableEntity } from "../entities/syncable";
 /** Horário a agendar. `id` e metadados de sincronização são da camada de dados, não da regra. */
 export type DoseScheduleDraft = Omit<DoseSchedule, keyof SyncableEntity>;
 
+/** Só o que a regra realmente lê. Deixa a prescrição inteira passar, e um rascunho também. */
+export type SchedulablePrescription = Pick<
+  Prescription,
+  "id" | "schedule" | "startDate" | "endDate"
+>;
+
 export type GenerateDoseSchedulesInput = {
-  prescription: Prescription;
+  prescription: SchedulablePrescription;
   /** Início da janela a gerar, inclusivo. */
   from: Date;
   /** Fim da janela, exclusivo. Agendar até o infinito não cabe em banco nem em alarme do OS. */

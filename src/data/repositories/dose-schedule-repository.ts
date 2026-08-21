@@ -69,6 +69,18 @@ export class DoseScheduleRepository
     return rows.map((row) => this.toEntity(row));
   }
 
+  /**
+   * Hard delete de propósito: um horário futuro que deixou de existir porque a posologia mudou
+   * não é histórico, é ruído. O soft delete existe pra preservar o que aconteceu — e nada
+   * aconteceu nesses.
+   */
+  async deleteUpcoming(prescriptionId: string, fromTimestamp: string): Promise<void> {
+    await this.database.runAsync(
+      `DELETE FROM ${this.tableName} WHERE prescription_id = ? AND scheduled_for >= ?`,
+      [prescriptionId, fromTimestamp],
+    );
+  }
+
   async incrementSnoozeCount(doseScheduleId: string): Promise<void> {
     await this.database.runAsync(
       `UPDATE ${this.tableName}
