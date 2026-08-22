@@ -1,0 +1,57 @@
+# Este arquivo substitui o .gitignore no upload pro EAS Build — por isso repete o
+# conteúdo dele, mais o que é específico do build remoto.
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files (nunca commitar credenciais reais — ver .env.example)
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android
+
+# --- Específico do EAS Build ---
+# Sem lockfile no upload, o EAS roda `npm install` em vez de `npm ci`, resolvendo as
+# dependências direto no Linux dele.
+#
+# Motivo: o npm rodando no Windows grava o lockfile sem as dependências transitivas dos
+# pacotes opcionais que não se aplicam a Windows — no nosso caso, @emnapi/core e
+# @emnapi/runtime, puxados por @unrs/resolver-binding-wasm32-wasi (eslint-config-expo →
+# eslint-import-resolver-typescript → unrs-resolver). No Linux o npm resolve versões
+# diferentes das gravadas, e `npm ci` aborta com EUSAGE ("lock file out of sync").
+# `overrides` não resolve: o problema é a gravação do lockfile, não a resolução.
+package-lock.json
