@@ -9,34 +9,25 @@ export const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
-    gap: spacing.sm,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  /** Alvo de toque de 44px sem empurrar o título — o recuo compensa o padding interno. */
-  backButton: {
-    width: 44,
-    height: 44,
-    marginLeft: -spacing.sm,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    ...typography.headlineLg,
-    color: colors.onSurface,
   },
   subtitle: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
   },
+  busca: {
+    marginTop: spacing.md,
+  },
+  /**
+   * O respiro fica na contagem, e não no `gap` do cabeçalho: ela é um rótulo curto logo abaixo de
+   * um parágrafo, e coladas as duas linhas se leem como uma só. `gutter` afasta o suficiente pra
+   * virar informação separada.
+   */
   contagem: {
     ...typography.label,
     color: colors.onSurfaceVariant,
+    marginTop: spacing.md,
   },
   listContent: {
     padding: spacing.md,
@@ -50,35 +41,24 @@ export const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
+    // Mesma sombra do `Card` do kit, pra lista e formulário terem a mesma superfície.
+    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
     padding: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   itemHeader: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: spacing.md,
+    alignItems: "center",
+    gap: spacing.sm,
   },
   photo: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.md,
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm,
     backgroundColor: colors.surfaceContainer,
-  },
-  photoFallback: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.md,
-    backgroundColor: colors.secondaryContainer,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  photoFallbackText: {
-    ...typography.headlineSm,
-    color: colors.onSecondaryContainer,
   },
   itemHeaderText: {
     flex: 1,
-    gap: spacing.xs,
   },
   acoes: {
     flexDirection: "row",
@@ -127,6 +107,7 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.outlineVariant,
     paddingTop: spacing.sm,
+    marginTop: spacing.xs,
   },
   stock: {
     ...typography.bodyMd,

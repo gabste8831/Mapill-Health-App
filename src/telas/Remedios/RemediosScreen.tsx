@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,13 +15,8 @@ import {
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
-import { CenteredLoader } from "@/ui";
+import { CenteredLoader, Header, TextField } from "@/ui";
 import { styles } from "./RemediosScreen.styles";
-
-/** Iniciais do nome, pra quando não há foto da embalagem. */
-function iniciais(name: string): string {
-  return name.trim().slice(0, 2).toUpperCase();
-}
 
 type ItemDeRemedioProps = {
   item: ItemDaListaDeRemedios;
@@ -36,13 +32,11 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
   return (
     <View style={styles.item}>
       <View style={styles.itemHeader}>
+        {/* Sem foto não entra nada no lugar: um quadrado com iniciais ocupa o mesmo espaço de uma
+            foto pra dizer o que o nome ao lado já diz. */}
         {medication.photoUri !== null ? (
           <Image source={{ uri: medication.photoUri }} style={styles.photo} contentFit="cover" />
-        ) : (
-          <View style={styles.photoFallback}>
-            <Text style={styles.photoFallbackText}>{iniciais(medication.name)}</Text>
-          </View>
-        )}
+        ) : null}
 
         <View style={styles.itemHeaderText}>
           <Text style={styles.name}>{medication.name}</Text>
@@ -112,9 +106,33 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
   );
 }
 
+/**
+ * Minúsculas e sem acento, pra "acido folico" achar "Ácido fólico". Quem procura um remédio
+ * digita apressado e no teclado do celular, onde o acento custa dois toques.
+ */
+function normalizar(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
 export function RemediosScreen() {
   const router = useRouter();
   const { items, isLoading, error, reload } = useMedicationList();
+  const [busca, setBusca] = useState("");
+
+  const termo = normalizar(busca.trim());
+  // O princípio ativo entra na busca junto do nome: quem tem a caixa na mão às vezes lembra do
+  // "losartana" e não do nome comercial.
+  const visiveis =
+    termo.length === 0
+      ? items
+      : items.filter(
+          (item) =>
+            normalizar(item.medication.name).includes(termo) ||
+            normalizar(item.medication.activeIngredient).includes(termo),
+        );
 
   function confirmarExclusao(item: ItemDaListaDeRemedios) {
     Alert.alert(
@@ -150,27 +168,37 @@ export function RemediosScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Pressable
-            style={styles.backButton}
-            onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
-            accessibilityRole="button"
-            accessibilityLabel="Voltar">
-            <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
-          </Pressable>
-          <Text style={styles.title}>Medicações</Text>
-        </View>
+      <Header
+        title="Medicações"
+        onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+      />
 
+      <View style={styles.header}>
         <Text style={styles.subtitle}>
           Abaixo, suas medicações cadastradas em nosso sistema. Toque no lápis para ver mais
           informações ou editar o cadastro, e na lixeira caso deseje excluir a medicação.
         </Text>
 
         {items.length > 0 ? (
-          <Text style={styles.contagem}>
-            {items.length} {items.length === 1 ? "medicação cadastrada" : "medicações cadastradas"}
-          </Text>
+          <>
+            <TextField
+              label=""
+              placeholder="Buscar por nome ou princípio ativo"
+              value={busca}
+              onChangeText={setBusca}
+              autoCorrect={false}
+              containerStyle={styles.busca}
+              // `search` troca o "enter" do teclado por uma lupa, e o X limpa o campo sem apagar
+              // caractere por caractere (só iOS; no Android o teclado já oferece o gesto).
+              returnKeyType="search"
+              clearButtonMode="while-editing"
+            />
+            <Text style={styles.contagem}>
+              {termo.length > 0
+                ? `${visiveis.length} de ${items.length} ${items.length === 1 ? "medicação" : "medicações"}`
+                : `${items.length} ${items.length === 1 ? "medicação cadastrada" : "medicações cadastradas"}`}
+            </Text>
+          </>
         ) : null}
       </View>
 
@@ -180,7 +208,7 @@ export function RemediosScreen() {
         </View>
       ) : (
         <FlatList
-          data={items}
+          data={visiveis}
           keyExtractor={(item) => item.medication.id}
           renderItem={({ item }) => (
             <ItemDeRemedio
@@ -200,12 +228,24 @@ export function RemediosScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <View style={styles.centered}>
-              <Text style={styles.emptyTitle}>Nenhum remédio por aqui ainda</Text>
-              <Text style={styles.emptyDescription}>
-                Use o botão + na tela inicial para cadastrar seu primeiro medicamento.
-              </Text>
-            </View>
+            // Busca sem resultado e lista vazia pedem respostas diferentes: uma se resolve
+            // mudando o que foi digitado, a outra cadastrando algo.
+            termo.length > 0 ? (
+              <View style={styles.centered}>
+                <Text style={styles.emptyTitle}>Nenhuma medicação encontrada</Text>
+                <Text style={styles.emptyDescription}>
+                  Nada por aqui combina com “{busca.trim()}”. Confira a escrita ou busque pelo
+                  princípio ativo.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.centered}>
+                <Text style={styles.emptyTitle}>Nenhum remédio por aqui ainda</Text>
+                <Text style={styles.emptyDescription}>
+                  Use o botão + na tela inicial para cadastrar seu primeiro medicamento.
+                </Text>
+              </View>
+            )
           }
         />
       )}
