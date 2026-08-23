@@ -34,11 +34,7 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
   const horarios = prescription === null ? [] : horariosDaPosologia(prescription.schedule);
 
   return (
-    <Pressable
-      style={styles.item}
-      onPress={onEdit}
-      accessibilityRole={onEdit ? "button" : undefined}
-      accessibilityLabel={onEdit ? `Editar ${medication.name}` : undefined}>
+    <View style={styles.item}>
       <View style={styles.itemHeader}>
         {medication.photoUri !== null ? (
           <Image source={{ uri: medication.photoUri }} style={styles.photo} contentFit="cover" />
@@ -55,15 +51,28 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
           ) : null}
         </View>
 
-        {/* Excluir fica fora do toque principal do card: destrutivo não se aciona sem querer. */}
-        <Pressable
-          style={styles.deleteButton}
-          onPress={onDelete}
-          accessibilityRole="button"
-          accessibilityLabel={`Excluir ${medication.name}`}
-          hitSlop={8}>
-          <Ionicons name="trash-outline" size={20} color={colors.outline} />
-        </Pressable>
+        {/* Duas ações explícitas em vez do card inteiro clicável: "abre alguma coisa" não diz o
+            que vai acontecer, e ao lado de um botão de excluir isso pesa. */}
+        <View style={styles.acoes}>
+          {onEdit ? (
+            <Pressable
+              style={styles.acaoBotao}
+              onPress={onEdit}
+              accessibilityRole="button"
+              accessibilityLabel={`Ver ou editar ${medication.name}`}
+              hitSlop={6}>
+              <Ionicons name="pencil-outline" size={20} color={colors.primary} />
+            </Pressable>
+          ) : null}
+          <Pressable
+            style={styles.acaoBotao}
+            onPress={onDelete}
+            accessibilityRole="button"
+            accessibilityLabel={`Excluir ${medication.name}`}
+            hitSlop={6}>
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
+          </Pressable>
+        </View>
       </View>
 
       {prescription !== null ? (
@@ -99,7 +108,7 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
           ) : null}
         </View>
       ) : null}
-    </Pressable>
+    </View>
   );
 }
 
@@ -142,12 +151,27 @@ export function RemediosScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Remédios</Text>
+        <View style={styles.headerTop}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar">
+            <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
+          </Pressable>
+          <Text style={styles.title}>Medicações</Text>
+        </View>
+
         <Text style={styles.subtitle}>
-          {items.length === 0
-            ? "Nenhum medicamento cadastrado"
-            : `${items.length} ${items.length === 1 ? "medicamento cadastrado" : "medicamentos cadastrados"}`}
+          Abaixo, suas medicações cadastradas em nosso sistema. Toque no lápis para ver mais
+          informações ou editar o cadastro, e na lixeira caso deseje excluir a medicação.
         </Text>
+
+        {items.length > 0 ? (
+          <Text style={styles.contagem}>
+            {items.length} {items.length === 1 ? "medicação cadastrada" : "medicações cadastradas"}
+          </Text>
+        ) : null}
       </View>
 
       {error !== null ? (

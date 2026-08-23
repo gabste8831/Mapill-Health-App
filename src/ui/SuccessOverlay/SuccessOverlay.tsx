@@ -12,8 +12,11 @@ import Animated, {
 import { colors } from "@/shared/theme";
 import { styles } from "./SuccessOverlay.styles";
 
-/** Quanto o aviso fica na tela antes de começar a sair. */
-const VISIBLE_MS = 1800;
+/**
+ * Quanto o aviso fica na tela antes de começar a sair. Tempo de ler a frase inteira sem pressa —
+ * mais curto que isso o aviso vira um susto, e a pessoa fica sem saber o que apareceu.
+ */
+const VISIBLE_MS = 2800;
 const FADE_OUT_MS = 200;
 
 export type SuccessOverlayProps = {

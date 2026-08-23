@@ -11,7 +11,20 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
-    gap: spacing.xs,
+    gap: spacing.sm,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  /** Alvo de toque de 44px sem empurrar o título — o recuo compensa o padding interno. */
+  backButton: {
+    width: 44,
+    height: 44,
+    marginLeft: -spacing.sm,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     ...typography.headlineLg,
@@ -19,6 +32,10 @@ export const styles = StyleSheet.create({
   },
   subtitle: {
     ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+  },
+  contagem: {
+    ...typography.label,
     color: colors.onSurfaceVariant,
   },
   listContent: {
@@ -63,7 +80,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
   },
-  deleteButton: {
+  acoes: {
+    flexDirection: "row",
+    gap: spacing.xs,
+  },
+  acaoBotao: {
     padding: spacing.xs,
   },
   name: {

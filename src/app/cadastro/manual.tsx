@@ -17,8 +17,13 @@ export default function CadastroManualScreen() {
       <SuccessOverlay
         title="Cadastro concluído"
         description="O medicamento já está na sua lista, com os horários agendados."
-        // Fecha o fluxo inteiro, não volta pra escolha "como cadastrar" — o cadastro terminou.
-        onDone={() => router.dismissAll()}
+        onDone={() => {
+          // Fecha o fluxo inteiro (não volta pra escolha "como cadastrar" — o cadastro terminou)
+          // e leva pra lista, onde o que acabou de ser criado está visível. Voltar pra Home
+          // devolveria a pessoa ao ponto de partida sem mostrar o resultado do que ela fez.
+          router.dismissAll();
+          router.replace("/remedios");
+        }}
       />
     );
   }
