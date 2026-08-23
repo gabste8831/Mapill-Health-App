@@ -15,7 +15,7 @@ import {
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
-import { CenteredLoader, Header, TextField } from "@/ui";
+import { CenteredLoader, Header, SearchField } from "@/ui";
 import { styles } from "./RemediosScreen.styles";
 
 type ItemDeRemedioProps = {
@@ -181,17 +181,11 @@ export function RemediosScreen() {
 
         {items.length > 0 ? (
           <>
-            <TextField
-              label=""
-              placeholder="Buscar por nome ou princípio ativo"
+            <SearchField
               value={busca}
               onChangeText={setBusca}
-              autoCorrect={false}
-              containerStyle={styles.busca}
-              // `search` troca o "enter" do teclado por uma lupa, e o X limpa o campo sem apagar
-              // caractere por caractere (só iOS; no Android o teclado já oferece o gesto).
-              returnKeyType="search"
-              clearButtonMode="while-editing"
+              placeholder="Buscar por nome ou princípio ativo"
+              style={styles.busca}
             />
             <Text style={styles.contagem}>
               {termo.length > 0
