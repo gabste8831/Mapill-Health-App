@@ -14,6 +14,7 @@ export type AjustesScreenProps = {
   photoUri: string | null;
   /** E-mail da conta Google, ou `null` quando o app está sendo usado sem conta. */
   accountEmail: string | null;
+  onBack: () => void;
   onEditProfile: () => void;
   onOpenTerms: () => void;
   onSignIn: () => void;
@@ -52,6 +53,7 @@ export function AjustesScreen({
   patientName,
   photoUri,
   accountEmail,
+  onBack,
   onEditProfile,
   onOpenTerms,
   onSignIn,
@@ -66,7 +68,18 @@ export function AjustesScreen({
         {/* O bloco de identidade é o próprio atalho pra ficha: numa tela sobre o paciente, o
             retrato dele é o ponto de entrada mais óbvio que existe. */}
         <View style={styles.hero}>
-          <Text style={styles.heroTitle}>Ajustes</Text>
+          <View style={styles.heroHeader}>
+            {/* Ajustes é aba, mas também é destino do atalho de conta da Home — quem chegou por
+                lá espera poder voltar de onde veio, e não caçar a aba anterior na barra. */}
+            <Pressable
+              style={styles.backButton}
+              onPress={onBack}
+              accessibilityRole="button"
+              accessibilityLabel="Voltar">
+              <Ionicons name="arrow-back" size={24} color={colors.onPrimary} />
+            </Pressable>
+            <Text style={styles.heroTitle}>Ajustes</Text>
+          </View>
 
           <Pressable style={styles.identity} onPress={onEditProfile} accessibilityRole="button">
             <View style={styles.avatar}>

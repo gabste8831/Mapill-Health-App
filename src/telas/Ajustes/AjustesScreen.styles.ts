@@ -26,6 +26,19 @@ export const styles = StyleSheet.create({
     borderBottomRightRadius: radius.lg * 2,
     gap: spacing.gutter,
   },
+  heroHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  /** Alvo de toque de 44px (mínimo recomendado) sem empurrar o título com padding visível. */
+  backButton: {
+    width: 44,
+    height: 44,
+    marginLeft: -spacing.sm,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   heroTitle: {
     ...typography.headlineMd,
     color: colors.onPrimary,

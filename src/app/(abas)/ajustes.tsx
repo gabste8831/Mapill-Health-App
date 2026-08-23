@@ -47,6 +47,9 @@ export default function AjustesRoute() {
       patientName={patientName}
       photoUri={draft?.photoUri ?? null}
       accountEmail={accountEmail}
+      // Ajustes é aba: quem chegou pelo atalho da Home tem histórico pra voltar, quem tocou na
+      // aba não tem — aí o destino é a Home, que é de onde o atalho existe.
+      onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
       onEditProfile={() => router.push("/ficha")}
       onOpenTerms={() => router.push("/termos")}
       onSignIn={handleSignIn}

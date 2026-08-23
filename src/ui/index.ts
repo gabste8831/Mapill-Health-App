@@ -4,6 +4,7 @@
 export * from "./BottomSheet/BottomSheet";
 export * from "./Button/Button";
 export * from "./Card/Card";
+export * from "./CenteredLoader/CenteredLoader";
 export * from "./Checkbox/Checkbox";
 export * from "./Chip/Chip";
 export * from "./GoogleLogo/GoogleLogo";
@@ -15,5 +16,6 @@ export * from "./LegalAccordion/LegalAccordion";
 export * from "./OptionGroup/OptionGroup";
 export * from "./SelectField/SelectField";
 export * from "./SplashOverlay/SplashOverlay";
+export * from "./SuccessOverlay/SuccessOverlay";
 export * from "./TextField/TextField";
 export * from "./ToggleChips/ToggleChips";

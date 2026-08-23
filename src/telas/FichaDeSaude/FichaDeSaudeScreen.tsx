@@ -14,6 +14,7 @@ import type {
 import { usePhotoPicker } from "@/hooks/use-photo-picker";
 import { formatDateInput, parseDateInput, toDateInput } from "@/shared/date-input";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
+import { deletePersistedFile } from "@/shared/persist-picked-file";
 import { colors } from "@/shared/theme";
 import {
   BottomSheet,
@@ -227,7 +228,7 @@ export function FichaDeSaudeScreen({
     useScrollToFocusedInput();
   const [fullName, setFullName] = useState(initialValue?.fullName ?? "");
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
-  const { isPicking, pickPhoto } = usePhotoPicker("ficha-foto.jpg");
+  const { isPicking, pickPhoto } = usePhotoPicker("ficha-foto");
   const [dateOfBirthInput, setDateOfBirthInput] = useState(
     toDateInput(initialValue?.dateOfBirth ?? ""),
   );
@@ -261,7 +262,7 @@ export function FichaDeSaudeScreen({
 
   // Texto de UI fica aqui (camada de apresentação) — o hook só devolve o motivo da falha.
   async function handlePickPhoto() {
-    const result = await pickPhoto();
+    const result = await pickPhoto(photoUri);
     if (result.status === "picked") {
       setPhotoUri(result.uri);
       return;
@@ -356,7 +357,12 @@ export function FichaDeSaudeScreen({
             <Text style={styles.photoAddLabel}>{photoUri ? "Trocar foto" : "Adicionar foto"}</Text>
           </Pressable>
           {photoUri ? (
-            <Pressable onPress={() => setPhotoUri(null)} accessibilityRole="button">
+            <Pressable
+              onPress={() => {
+                deletePersistedFile(photoUri);
+                setPhotoUri(null);
+              }}
+              accessibilityRole="button">
               <Text style={styles.photoRemoveLabel}>Remover</Text>
             </Pressable>
           ) : null}
