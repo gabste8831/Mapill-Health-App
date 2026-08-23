@@ -11,35 +11,42 @@ export type PhotoPick =
   | { status: "failed"; reason: PhotoPickFailure };
 
 /**
- * @param fileName nome fixo do arquivo no diretório de documentos. Fixo de propósito: cada dono
- * (a ficha, um medicamento) tem uma foto só, e sobrescrever evita acumular imagens órfãs.
+ * @param prefix identifica a origem da foto no diretório de documentos ("ficha-foto",
+ * "medicamento-caixa"). O nome final leva um sufixo único — ver `persistPickedFile`.
  */
-export function usePhotoPicker(fileName: string) {
+export function usePhotoPicker(prefix: string) {
   const [isPicking, setPicking] = useState(false);
 
-  const pickPhoto = useCallback(async (): Promise<PhotoPick> => {
-    setPicking(true);
-    try {
-      // Só galeria: o app ainda não tira foto, e pedir permissão de câmera sem usar contraria
-      // o princípio de minimização (ver cameraPermission: false no app.json).
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) return { status: "failed", reason: "permission-denied" };
+  /** @param replacing foto atual, apagada quando a nova entra no lugar. */
+  const pickPhoto = useCallback(
+    async (replacing?: string | null): Promise<PhotoPick> => {
+      setPicking(true);
+      try {
+        // Só galeria: o app ainda não tira foto, e pedir permissão de câmera sem usar contraria
+        // o princípio de minimização (ver cameraPermission: false no app.json).
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) return { status: "failed", reason: "permission-denied" };
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-      if (result.canceled || !result.assets[0]) return { status: "failed", reason: "cancelled" };
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: "images",
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.8,
+        });
+        if (result.canceled || !result.assets[0]) return { status: "failed", reason: "cancelled" };
 
-      return { status: "picked", uri: persistPickedFile(result.assets[0].uri, fileName) };
-    } catch {
-      return { status: "failed", reason: "failed" };
-    } finally {
-      setPicking(false);
-    }
-  }, [fileName]);
+        return {
+          status: "picked",
+          uri: persistPickedFile(result.assets[0].uri, prefix, "jpg", replacing),
+        };
+      } catch {
+        return { status: "failed", reason: "failed" };
+      } finally {
+        setPicking(false);
+      }
+    },
+    [prefix],
+  );
 
   return { isPicking, pickPhoto };
 }

@@ -9,14 +9,42 @@ import { Platform } from "react-native";
  * No navegador não existe diretório de documentos, e a URI que o picker devolve já é exibível e
  * vive enquanto a aba viver — copiar ali falharia e derrubaria a escolha inteira.
  *
- * @param fileName nome fixo no diretório de documentos. Fixo de propósito: cada dono (a ficha, um
- * medicamento) tem um arquivo só, e sobrescrever evita acumular órfãos.
+ * O nome é único por escolha, e não fixo por dono. Nome fixo quebrava de duas formas: a foto do
+ * segundo medicamento sobrescrevia a do primeiro (todo cadastro gravava em `medicamento-caixa.jpg`),
+ * e como a URI não mudava, o `expo-image` continuava servindo a imagem antiga do cache — a foto
+ * recém-escolhida simplesmente não aparecia. O preço do nome único é ter que apagar o anterior,
+ * que é o que `replacing` faz.
+ *
+ * @param prefix identifica a origem no diretório ("ficha-foto", "medicamento-caixa").
+ * @param extension sem o ponto. PDF gravado como `.jpg` não abre depois.
+ * @param replacing URI devolvida por uma chamada anterior, a ser apagada. Só arquivos do próprio
+ * diretório de documentos são removidos — uma URI de cache ou de galeria não é nossa pra apagar.
  */
-export function persistPickedFile(pickedUri: string, fileName: string): string {
+export function persistPickedFile(
+  pickedUri: string,
+  prefix: string,
+  extension: string,
+  replacing?: string | null,
+): string {
   if (Platform.OS === "web") return pickedUri;
 
-  const destination = new File(Paths.document, fileName);
-  if (destination.exists) destination.delete();
+  const destination = new File(Paths.document, `${prefix}-${Date.now()}.${extension}`);
   new File(pickedUri).copy(destination);
+  if (replacing) deletePersistedFile(replacing);
   return destination.uri;
+}
+
+/**
+ * Apaga um arquivo que `persistPickedFile` criou. Ignora o que não está no diretório de documentos
+ * do app e o que já não existe — remover a foto duas vezes não é erro, é a mesma intenção repetida.
+ */
+export function deletePersistedFile(uri: string | null): void {
+  if (Platform.OS === "web" || !uri) return;
+  if (!uri.startsWith(Paths.document.uri)) return;
+  try {
+    const file = new File(uri);
+    if (file.exists) file.delete();
+  } catch {
+    // Arquivo já removido ou inacessível: não há o que fazer, e falhar aqui derrubaria a tela.
+  }
 }
