@@ -167,10 +167,38 @@ export function cycleTurningPoints(
     : { lastDay: somarDias(activeDays - 1 - dayInCycle), resumesOn, emPausa };
 }
 
-/** Hoje em ISO `YYYY-MM-DD`, no fuso local — `toISOString()` devolveria UTC e erraria o dia. */
+/**
+ * O dia **local** de um instante, em ISO `YYYY-MM-DD`.
+ *
+ * `toISOString().slice(0, 10)` daria o dia em UTC, que é outro dia por várias horas todo dia: às
+ * 22:00 em Brasília já é o dia seguinte em Londres. Como toda data que o app mostra ou compara é
+ * a do calendário de quem está segurando o aparelho, a conversão passa por aqui.
+ */
+export function toLocalIsoDay(date: Date): string {
+  const p = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+}
+
+/** Hoje em ISO `YYYY-MM-DD`, no fuso local. */
 export function todayIsoDate(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${now.getFullYear()}-${month}-${day}`;
+  return toLocalIsoDay(new Date());
+}
+
+/**
+ * O intervalo de instantes **UTC** que corresponde a um dia local, pra consultar horários
+ * gravados com `toISOString()`.
+ *
+ * Existe porque comparar as datas direto erra o dia: uma dose das 22:00 em Brasília (UTC−3) é
+ * gravada como `01:00Z do dia seguinte`, então `date(scheduled_for)` no SQLite devolve amanhã e a
+ * dose some da agenda de hoje. Filtrar por faixa é exato em qualquer fuso, não depende de o
+ * SQLite saber o fuso do aparelho, e ainda aproveita o índice de `scheduled_for`.
+ *
+ * O fim é **exclusivo**: é a meia-noite do dia seguinte, não 23:59:59.
+ */
+export function localDayRangeUtc(isoDate: string): { start: string; end: string } {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return {
+    start: new Date(year, month - 1, day).toISOString(),
+    end: new Date(year, month - 1, day + 1).toISOString(),
+  };
 }
