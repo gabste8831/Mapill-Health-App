@@ -1,7 +1,14 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, Text } from "react-native";
+import { Modal, Pressable, ScrollView, Text, useWindowDimensions } from "react-native";
 
+import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
 import { styles } from "./BottomSheet.styles";
+
+/** Quanto da tela o popup pode ocupar, com o teclado fechado. O resto fica de respiro no topo. */
+const ALTURA_MAXIMA = 0.85;
+
+/** Piso pro caso de teclado alto em tela pequena: abaixo disso o popup deixa de ser usável. */
+const ALTURA_MINIMA = 220;
 
 export type BottomSheetProps = {
   visible: boolean;
@@ -13,19 +20,39 @@ export type BottomSheetProps = {
 /**
  * Popup padrão do app pra qualquer decisão pontual (escolher uma opção, preencher um mini
  * formulário) sem sair da tela — sobe do rodapé, com fundo escurecido que fecha ao tocar fora.
- * Usado hoje pelo `SelectField` e por listas com "Adicionar" (ex: contatos de emergência).
+ *
+ * Ele mesmo se ajusta ao teclado: `KeyboardAvoidingView` não resolveria aqui porque o `Modal`
+ * abre em outra janela no Android, que não recebe o redimensionamento da activity — o campo
+ * ficava embaixo do teclado e a pessoa digitava sem ver o que escrevia. A altura real do teclado
+ * empurra o popup pra cima, e o conteúdo rola dentro do que sobrou.
  */
 export function BottomSheet({ visible, onClose, title, children }: BottomSheetProps) {
+  const keyboardHeight = useKeyboardHeight();
+  const { height: alturaDaTela } = useWindowDimensions();
+  const alturaDisponivel = Math.max(
+    ALTURA_MINIMA,
+    alturaDaTela * ALTURA_MAXIMA - keyboardHeight,
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <Pressable style={[styles.overlay, { paddingBottom: keyboardHeight }]} onPress={onClose}>
         {/* Pressable próprio (em vez de View) + stopPropagation: sem isso, um toque em
             qualquer área do sheet que não seja ela mesma interativa (ex: entre o label e o
             input de um TextField) borbulha pro Pressable do fundo e fecha o popup — foi
             exatamente o que quebrava o campo "Nome" do contato de emergência. */}
-        <Pressable style={styles.sheet} onPress={(event) => event.stopPropagation()}>
+        <Pressable
+          style={[styles.sheet, { maxHeight: alturaDisponivel }]}
+          onPress={(event) => event.stopPropagation()}>
           <Text style={styles.title}>{title}</Text>
-          {children}
+          {/* `handled` deixa o primeiro toque num botão valer mesmo com o teclado aberto; sem
+              isso ele só fecharia o teclado e a pessoa teria que tocar de novo. */}
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}>
+            {children}
+          </ScrollView>
         </Pressable>
       </Pressable>
     </Modal>

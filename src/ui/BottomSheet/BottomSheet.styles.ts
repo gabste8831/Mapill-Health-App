@@ -12,11 +12,19 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainerLowest,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
-    padding: spacing.md,
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.md,
     gap: spacing.md,
   },
   title: {
     ...typography.headlineSm,
     color: colors.onSurface,
+  },
+  /**
+   * O respiro de baixo fica aqui, e não no `sheet`: com o padding no container, o conteúdo
+   * rolado encostaria na borda do popup em vez de terminar antes dela.
+   */
+  scrollContent: {
+    paddingBottom: spacing.md,
   },
 });
