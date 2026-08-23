@@ -18,7 +18,26 @@ export default function AppTabsLayout() {
 // Ícone preenchido só na aba ativa.
 function AbasNativas() {
   return (
-    <NativeTabs>
+    <NativeTabs
+      /**
+       * Um tom acima do branco, e não branco como o `Header`. A barra nativa não aceita borda
+       * (a API expõe cor de fundo, indicador e ripple, e `shadowColor` só no iOS), então card ou
+       * botão branco encostando nela se fundiam num bloco só. O degrau de cor faz a separação
+       * que a borda faria. O azul fica reservado à aba ativa: é o único destaque, então ele
+       * aponta.
+       */
+      backgroundColor={colors.surfaceContainerLow}
+      tintColor={colors.primary}
+      iconColor={{ default: colors.outline, selected: colors.primary }}
+      labelStyle={{
+        default: { color: colors.outline },
+        selected: { color: colors.primary },
+      }}
+      // Sem isto o Android pinta a pílula da aba ativa com a cor dinâmica do Material You, que
+      // vem do papel de parede do aparelho — no teste ela saiu verde. A cor da marca não pode
+      // depender de qual foto a pessoa colocou no celular.
+      indicatorColor={colors.secondaryContainer}
+      rippleColor={colors.secondaryContainer}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md={{ default: "home", selected: "home_filled" }} />
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
