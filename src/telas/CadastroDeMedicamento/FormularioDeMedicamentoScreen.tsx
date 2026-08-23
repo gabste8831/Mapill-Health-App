@@ -50,6 +50,8 @@ import {
   formatIntegerInput,
   parseDecimalInput,
 } from "@/shared/number-input";
+import { deletePersistedFile } from "@/shared/persist-picked-file";
+import { MEDICATION_FORM_LABELS, UNIT_LABELS } from "@/shared/rotulos-de-medicamento";
 import { colors, withOpacity } from "@/shared/theme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
@@ -71,33 +73,10 @@ import { ConfiguracaoDeEstoque } from "./ConfiguracaoDeEstoque";
 import { ConfiguracaoDeLembrete } from "./ConfiguracaoDeLembrete";
 import { entradasVazias, SeletorDeHorarios, type EntradaDeDose } from "./SeletorDeHorarios";
 
-const FORM_OPTIONS: SelectOption<MedicationForm>[] = [
-  { value: "tablet", label: "Comprimido ou cápsula" },
-  { value: "liquid", label: "Líquido (xarope, solução)" },
-  { value: "drops", label: "Gotas" },
-  { value: "injection", label: "Injeção" },
-  { value: "ointment", label: "Pomada ou creme" },
-  { value: "sublingual", label: "Sublingual" },
-  { value: "inhaler", label: "Inalador ou spray" },
-  { value: "patch", label: "Adesivo" },
-  { value: "sachet", label: "Sachê ou pó" },
-  { value: "other", label: "Outra" },
-];
-
-/** Curto de propósito: é rótulo de ficha, lido em fileira e comparado com os vizinhos. */
-const UNIT_LABELS: Record<PosologyUnit, string> = {
-  tablet: "comprimido",
-  capsule: "cápsula",
-  drop: "gota",
-  ml: "ml",
-  mg: "mg",
-  g: "g",
-  IU: "UI",
-  application: "aplicação",
-  puff: "jato",
-  patch: "adesivo",
-  sachet: "sachê",
-};
+/** A ordem em que as formas aparecem: da mais comum pra menos, com "Outra" no fim. */
+const FORM_OPTIONS: SelectOption<MedicationForm>[] = (
+  Object.keys(MEDICATION_FORM_LABELS) as MedicationForm[]
+).map((form) => ({ value: form, label: MEDICATION_FORM_LABELS[form] }));
 
 /** Como a unidade aparece no meio de uma frase ("Quantos comprimidos você tem?"). */
 const UNIT_NOUNS: Record<PosologyUnit, string> = {
@@ -323,8 +302,8 @@ export function FormularioDeMedicamentoScreen({
   onBack,
 }: FormularioDeMedicamentoScreenProps) {
   const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
-  const boxPhoto = usePhotoPicker("medicamento-caixa.jpg");
-  const prescriptionPhoto = usePhotoPicker("medicamento-receita.jpg");
+  const boxPhoto = usePhotoPicker("medicamento-caixa");
+  const prescriptionPhoto = usePhotoPicker("medicamento-receita");
   const prescriptionFile = useDocumentPicker("medicamento-receita");
 
   /**
@@ -799,8 +778,12 @@ export function FormularioDeMedicamentoScreen({
     setLeadDays(null);
   }
 
-  async function pick(picker: ReturnType<typeof usePhotoPicker>, apply: (uri: string) => void) {
-    const result = await picker.pickPhoto();
+  async function pick(
+    picker: ReturnType<typeof usePhotoPicker>,
+    apply: (uri: string) => void,
+    replacing: string | null,
+  ) {
+    const result = await picker.pickPhoto(replacing);
     if (result.status === "picked") {
       apply(result.uri);
       return;
@@ -821,7 +804,7 @@ export function FormularioDeMedicamentoScreen({
   }
 
   async function escolherArquivoDaReceita() {
-    const result = await prescriptionFile.pickDocument();
+    const result = await prescriptionFile.pickDocument(attachmentUri);
     if (result.status === "picked") {
       setAttachmentUri(result.uri);
       setAttachmentKind(result.isPdf ? "document" : "image");
@@ -837,6 +820,7 @@ export function FormularioDeMedicamentoScreen({
 
   /** Tirar a receita leva junto o que só existia por causa dela — validade e aviso. */
   function removerReceita() {
+    deletePersistedFile(attachmentUri);
     setAttachmentUri(null);
     setAttachmentKind(null);
     setAttachmentName("");
@@ -1246,7 +1230,7 @@ export function FormularioDeMedicamentoScreen({
               <View style={styles.photoRow}>
                 <Pressable
                   style={photoUri ? styles.photoFrame : styles.photoPlaceholder}
-                  onPress={() => pick(boxPhoto, setPhotoUri)}
+                  onPress={() => pick(boxPhoto, setPhotoUri, photoUri)}
                   disabled={boxPhoto.isPicking}
                   accessibilityRole="button"
                   accessibilityLabel="Foto da embalagem">
@@ -1261,7 +1245,9 @@ export function FormularioDeMedicamentoScreen({
                   )}
                 </Pressable>
                 <View style={styles.photoTextGroup}>
-                  <Pressable onPress={() => pick(boxPhoto, setPhotoUri)} accessibilityRole="button">
+                  <Pressable
+                    onPress={() => pick(boxPhoto, setPhotoUri, photoUri)}
+                    accessibilityRole="button">
                     <Text style={styles.photoAddLabel}>
                       {photoUri ? "Trocar foto da caixa" : "Adicionar foto da caixa"}
                     </Text>
@@ -1289,7 +1275,7 @@ export function FormularioDeMedicamentoScreen({
                   {attachmentUri === null ? (
                     <View style={styles.acoesDeAnexo}>
                       <Pressable
-                        onPress={() => pick(prescriptionPhoto, guardarFoto)}
+                        onPress={() => pick(prescriptionPhoto, guardarFoto, attachmentUri)}
                         disabled={prescriptionPhoto.isPicking}
                         accessibilityRole="button">
                         <Text style={styles.photoAddLabel}>Tirar da galeria</Text>

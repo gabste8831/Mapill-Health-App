@@ -23,6 +23,17 @@ export type MedicamentoIds = {
   prescriptionId: string;
 };
 
+/**
+ * O que a exclusão precisa saber. `prescriptionId` é opcional porque um medicamento pode ter
+ * ficado sem prescrição (cadastro interrompido, ou dado inconsistente vindo de uma sincronização
+ * futura) — e nesse caso ele ainda tem que poder sair da lista, senão vira um item que a pessoa
+ * vê e não consegue remover.
+ */
+export type MedicamentoAExcluir = {
+  medicationId: string;
+  prescriptionId: string | null;
+};
+
 function syncFields() {
   return { updatedAt: new Date().toISOString(), syncedAt: null, deletedAt: null };
 }
@@ -114,4 +125,86 @@ export async function salvarMedicamento(
   }
 
   return { medicationId, prescriptionId };
+}
+
+/**
+ * Remonta o formulário a partir do que está gravado. É o inverso exato de `salvarMedicamento` —
+ * as duas funções precisam andar juntas, e é por isso que moram no mesmo arquivo.
+ *
+ * `null` quando o medicamento não existe mais (excluído noutra tela, por exemplo).
+ */
+export async function carregarMedicamento(
+  medicationId: string,
+): Promise<{ draft: MedicamentoDraft; ids: MedicamentoIds } | null> {
+  if (!persistsLocally) return null;
+
+  const medication = await new MedicationRepository().findById(medicationId);
+  if (medication === null) return null;
+
+  const prescriptions = await new PrescriptionRepository().findByMedication(medicationId);
+  // A mais recente: é a que a listagem mostra, e portanto a que a pessoa tocou pra editar.
+  const prescription = prescriptions
+    .slice()
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+  if (prescription === undefined) return null;
+
+  const inventory = await new InventoryRepository().findByMedication(medicationId);
+
+  return {
+    ids: { medicationId, prescriptionId: prescription.id },
+    draft: {
+      name: medication.name,
+      activeIngredient: medication.activeIngredient,
+      form: medication.form,
+      prescriptionRequirement: medication.prescriptionRequirement,
+      photoUri: medication.photoUri,
+      doseAmount: prescription.doseAmount,
+      doseUnit: prescription.doseUnit,
+      schedule: prescription.schedule,
+      startDate: prescription.startDate,
+      endDate: prescription.endDate,
+      reminderMode: prescription.reminderMode,
+      intakeInstructions: prescription.intakeInstructions,
+      intakeNote: prescription.intakeNote,
+      notes: prescription.notes,
+      attachmentUri: prescription.attachmentUri,
+      attachmentKind: prescription.attachmentKind,
+      attachmentValidUntil: prescription.attachmentValidUntil,
+      renewalReminderLeadDays: prescription.renewalReminderLeadDays,
+      stockQuantity: inventory?.quantity ?? null,
+      // Sem estoque cadastrado não há unidade gravada; a da dose é o palpite honesto, e é o mesmo
+      // padrão que o formulário usaria num cadastro novo.
+      stockUnit: (inventory?.unit as MedicamentoDraft["stockUnit"]) ?? prescription.doseUnit,
+      lowStockAlertEnabled: inventory?.lowStockAlertEnabled ?? false,
+      lowStockAlertLeadDays: inventory?.lowStockAlertLeadDays ?? null,
+      storageLocation: inventory?.storageLocation ?? null,
+    },
+  };
+}
+
+/**
+ * Exclui um cadastro inteiro — medicamento, tratamento e estoque.
+ *
+ * Exclusão **lógica** (`deletedAt`), nunca física, por dois motivos que se somam: o registro de
+ * ingestão já gravado aponta pra essa prescrição e viraria órfão, e a sincronização (bloco D1)
+ * precisa da linha marcada pra contar ao servidor que ela morreu — linha apagada some sem deixar
+ * recado, e voltaria do servidor na sincronização seguinte.
+ *
+ * A exceção são os horários futuros, apagados de vez pelo mesmo motivo que já valia na edição:
+ * dose que nunca chegou a acontecer não é histórico (ver `deleteUpcoming`). Os passados ficam —
+ * são a memória de quando a dose era pra ter sido tomada, que é o que o histórico referencia.
+ */
+export async function excluirMedicamento(ids: MedicamentoAExcluir): Promise<void> {
+  if (!persistsLocally) return;
+
+  if (ids.prescriptionId !== null) {
+    await new DoseScheduleRepository().deleteUpcoming(ids.prescriptionId, new Date().toISOString());
+    await new PrescriptionRepository().softDelete(ids.prescriptionId);
+  }
+
+  const inventoryRepository = new InventoryRepository();
+  const inventory = await inventoryRepository.findByMedication(ids.medicationId);
+  if (inventory !== null) await inventoryRepository.softDelete(inventory.id);
+
+  await new MedicationRepository().softDelete(ids.medicationId);
 }
