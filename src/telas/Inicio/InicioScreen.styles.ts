@@ -57,35 +57,6 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     opacity: 0.7,
   },
-  weekSelector: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surfaceContainerLowest,
-  },
-  weekDay: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    alignItems: "center",
-    gap: spacing.unit,
-    borderRightWidth: 1,
-    borderRightColor: colors.outlineVariant,
-  },
-  weekDayActive: {
-    backgroundColor: colors.primary,
-  },
-  weekDayLabel: {
-    ...typography.label,
-    fontSize: 10,
-    color: colors.onSurfaceVariant,
-  },
-  weekDayNumber: {
-    ...typography.bodyLg,
-    color: colors.onSurface,
-  },
-  weekDayLabelActive: {
-    color: colors.onPrimary,
-  },
   doseList: {
     gap: spacing.sm,
   },
@@ -93,15 +64,30 @@ export const styles = StyleSheet.create({
     ...typography.label,
     color: colors.onSurfaceVariant,
   },
-  manageStockButton: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.sm,
-    paddingVertical: spacing.sm,
+  emptyState: {
     alignItems: "center",
+    gap: spacing.sm,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surfaceContainerLowest,
   },
-  manageStockButtonText: {
-    ...typography.label,
-    color: colors.onPrimary,
+  emptyTitle: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+    textAlign: "center",
+  },
+  emptyDescription: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    textAlign: "center",
+    maxWidth: 320,
+  },
+  errorText: {
+    ...typography.bodyMd,
+    color: colors.error,
   },
   fab: {
     position: "absolute",

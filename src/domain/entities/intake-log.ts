@@ -6,6 +6,15 @@ import type { SyncableEntity } from "./syncable";
  */
 export type IntakeStatus = "confirmed" | "skipped" | "deferred";
 
+/**
+ * Se este status encerra a dose. `deferred` é a exceção que justifica a função existir: ele
+ * registra que a pessoa viu e escolheu decidir depois, então a dose continua pendente e volta a
+ * aparecer. `null` = ninguém tocou nela ainda.
+ */
+export function resolvesDose(status: IntakeStatus | null): boolean {
+  return status === "confirmed" || status === "skipped";
+}
+
 /** Append-only: correção de um log errado é um novo registro, nunca um update. */
 export type IntakeLog = SyncableEntity & {
   doseScheduleId: string;

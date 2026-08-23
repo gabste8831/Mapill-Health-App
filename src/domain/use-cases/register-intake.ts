@@ -11,6 +11,13 @@ type RegisterIntakeInput = {
   medicationId: string;
   status: IntakeStatus;
   occurredAt: string;
+  /**
+   * Quanto esta dose consome, na unidade do estoque — vem de `DoseSchedule.amount`, e não de um
+   * "1" implícito. Desde que a dose passou a variar por horário (migration 012), descontar uma
+   * unidade fixa erraria o estoque em todo tratamento que não seja de um comprimido por vez:
+   * confirmar 10 UI de insulina baixaria 1.
+   */
+  amount: number;
 };
 
 /** Confirma (ou marca como pulada) uma dose e, se confirmada, decrementa o estoque. */
@@ -42,7 +49,7 @@ export class RegisterIntake {
     const adjustment: InventoryAdjustment = {
       id: Crypto.randomUUID(),
       inventoryItemId: item.id,
-      delta: -1,
+      delta: -input.amount,
       reason: "intake_consumption",
       updatedAt: input.occurredAt,
       syncedAt: null,

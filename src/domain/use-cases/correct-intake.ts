@@ -11,11 +11,13 @@ type CorrectIntakeInput = {
   medicationId: string;
   newStatus: IntakeStatus;
   occurredAt: string;
+  /** Quanto a dose consome — mesma razão de `RegisterIntake`: a dose varia por horário. */
+  amount: number;
 };
 
-/** delta que o consumo de UMA dose representa no estoque, por status. */
-function consumptionDelta(status: IntakeStatus): number {
-  return status === "confirmed" ? -1 : 0;
+/** Quanto este status consome do estoque. Só o confirmado consome. */
+function consumptionDelta(status: IntakeStatus, amount: number): number {
+  return status === "confirmed" ? -amount : 0;
 }
 
 /**
@@ -44,7 +46,9 @@ export class CorrectIntake {
 
     await this.intakeLogRepository.save(correctedLog);
 
-    const delta = consumptionDelta(input.newStatus) - consumptionDelta(input.previousLog.status);
+    const delta =
+      consumptionDelta(input.newStatus, input.amount) -
+      consumptionDelta(input.previousLog.status, input.amount);
     if (delta === 0) return; // ex: só corrigiu o horário, consumo efetivo não mudou
 
     const item = await this.inventoryRepository.findByMedication(input.medicationId);

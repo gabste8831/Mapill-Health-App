@@ -41,6 +41,12 @@ export const styles = StyleSheet.create({
   barToday: {
     opacity: 1,
   },
+  /** Traço fino de "não havia dose", visualmente distinto de uma barra curta. */
+  barVazia: {
+    height: 2,
+    backgroundColor: colors.outlineVariant,
+    borderRadius: 2,
+  },
   labelsRow: {
     flexDirection: "row",
   },
