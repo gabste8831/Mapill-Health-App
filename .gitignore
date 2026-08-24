@@ -42,3 +42,16 @@ example
 # generated native folders
 /ios
 /android
+
+# skills de ferramenta instaladas localmente (npx skills add) — ferramenta de quem desenvolve,
+# não código do app, e cada máquina instala as suas
+.agents/
+skills-lock.json
+.claude/skills/cavecrew/
+.claude/skills/caveman*/
+.claude/skills/investigate-first/
+.claude/skills/lean-build/
+.claude/skills/migration/
+.claude/skills/safe-refactor/
+.claude/skills/surgical-patch/
+.claude/skills/verify-and-stop/
