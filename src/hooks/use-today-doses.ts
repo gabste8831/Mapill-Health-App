@@ -223,6 +223,46 @@ function estoquesQueVaoAcabar(
 }
 
 /**
+ * Grava o desfecho de uma dose. Quando já existe log — inclusive um "adiar" —, grava uma
+ * **correção** em vez de um registro solto: assim o estoque é ajustado pela diferença e o
+ * registro anterior continua consultável, que é o que torna o histórico auditável.
+ *
+ * `occurredAt` é agora, e não o horário agendado, mesmo numa dose atrasada: o que o app tem para
+ * registrar é o instante em que a pessoa respondeu. Carimbar o horário previsto seria inventar
+ * um dado clínico que ninguém observou (§2.3.3 — o valor do eMEM está justamente no timestamp
+ * ser do evento real).
+ */
+async function gravarDesfecho(dose: DoseDoDia, status: IntakeStatus): Promise<void> {
+  const intakeLogRepository = new IntakeLogRepository();
+  const inventoryRepository = new InventoryRepository();
+  const occurredAt = new Date().toISOString();
+
+  const anterior =
+    dose.latestLogId === null ? null : await intakeLogRepository.findById(dose.latestLogId);
+
+  if (anterior === null) {
+    await new RegisterIntake(intakeLogRepository, inventoryRepository).execute({
+      id: Crypto.randomUUID(),
+      doseScheduleId: dose.doseScheduleId,
+      medicationId: dose.medicationId,
+      status,
+      occurredAt,
+      amount: dose.amount,
+    });
+    return;
+  }
+
+  await new CorrectIntake(intakeLogRepository, inventoryRepository).execute({
+    id: Crypto.randomUUID(),
+    previousLog: anterior,
+    medicationId: dose.medicationId,
+    newStatus: status,
+    occurredAt,
+    amount: dose.amount,
+  });
+}
+
+/**
  * A agenda de hoje, recarregada quando a tela volta ao foco — é o que faz um cadastro feito agora
  * já aparecer, e o que sincroniza a Home com o que foi confirmado na tela de dose.
  */
@@ -249,46 +289,45 @@ export function useTodayDoses() {
     }, [reload]),
   );
 
-  /**
-   * Registra o desfecho de uma dose. Quando já existe log — inclusive um "adiar" —, grava uma
-   * **correção** em vez de um registro solto: assim o estoque é ajustado pela diferença e o
-   * registro anterior continua consultável, que é o que torna o histórico auditável.
-   */
   const registrarDose = useCallback(
     async (dose: DoseDoDia, status: IntakeStatus) => {
       if (!persistsLocally) return;
-
-      const intakeLogRepository = new IntakeLogRepository();
-      const inventoryRepository = new InventoryRepository();
-      const occurredAt = new Date().toISOString();
-
-      const anterior =
-        dose.latestLogId === null ? null : await intakeLogRepository.findById(dose.latestLogId);
-
-      if (anterior === null) {
-        await new RegisterIntake(intakeLogRepository, inventoryRepository).execute({
-          id: Crypto.randomUUID(),
-          doseScheduleId: dose.doseScheduleId,
-          medicationId: dose.medicationId,
-          status,
-          occurredAt,
-          amount: dose.amount,
-        });
-      } else {
-        await new CorrectIntake(intakeLogRepository, inventoryRepository).execute({
-          id: Crypto.randomUUID(),
-          previousLog: anterior,
-          medicationId: dose.medicationId,
-          newStatus: status,
-          occurredAt,
-          amount: dose.amount,
-        });
-      }
-
+      await gravarDesfecho(dose, status);
       await reload();
     },
     [reload],
   );
 
-  return { agenda, isLoading, error, reload, registrarDose };
+  /**
+   * Várias doses de uma vez, para quem só voltou ao celular depois — o caso que este atalho existe
+   * pra resolver é o das doses atrasadas, não o das futuras.
+   *
+   * Uma a uma e em sequência, pelo mesmo caminho de `registrarDose`: cada baixa de estoque é um
+   * evento somado ao anterior, então gravar em paralelo faria as escritas disputarem a mesma linha
+   * de estoque. Recarrega **uma vez** no fim, senão a lista se redesenharia a cada dose e sumiria
+   * debaixo do dedo.
+   *
+   * Devolve os nomes do que não deu certo em vez de abortar no primeiro erro: com metade gravada,
+   * parar calado deixaria a pessoa sem saber onde o lote parou.
+   */
+  const registrarDoses = useCallback(
+    async (doses: DoseDoDia[], status: IntakeStatus): Promise<string[]> => {
+      if (!persistsLocally) return [];
+
+      const falhas: string[] = [];
+      for (const dose of doses) {
+        try {
+          await gravarDesfecho(dose, status);
+        } catch {
+          falhas.push(dose.medicationName);
+        }
+      }
+
+      await reload();
+      return falhas;
+    },
+    [reload],
+  );
+
+  return { agenda, isLoading, error, reload, registrarDose, registrarDoses };
 }

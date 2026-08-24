@@ -64,6 +64,22 @@ export const styles = StyleSheet.create({
     ...typography.label,
     color: colors.onSurfaceVariant,
   },
+  /** O rótulo da seção e a ação que vale para ela inteira, na mesma linha. */
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  /**
+   * Ação de lote, em texto e não em botão cheio: ela vale para a seção toda, e um botão sólido
+   * ali competiria com os de cada dose — que continuam sendo o caminho normal.
+   */
+  bulkAction: {
+    ...typography.label,
+    color: colors.primary,
+    paddingVertical: spacing.xs,
+  },
   emptyState: {
     alignItems: "center",
     gap: spacing.sm,

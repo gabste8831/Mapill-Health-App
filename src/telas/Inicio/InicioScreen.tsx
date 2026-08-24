@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { usePatientProfile } from "@/hooks/use-patient-profile";
+import { spacing } from "@/shared/theme";
 import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-today-doses";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { CenteredLoader, Header } from "@/ui";
@@ -11,6 +12,13 @@ import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/Ca
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
 import { ItemDeDose } from "@/telas/Inicio/componentes/ItemDeDose/ItemDeDose";
 import { styles } from "./InicioScreen.styles";
+
+/**
+ * Quantas doses o diálogo do lote nomeia antes de resumir o resto. Além disso o texto vira uma
+ * parede que ninguém lê — e um alerta que não é lido deixa de prevenir o erro que ele existe pra
+ * prevenir.
+ */
+const MAXIMO_LISTADO_NO_LOTE = 6;
 
 const DIAS_DA_SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
@@ -49,7 +57,7 @@ function resumoDaSemana(semana: DiaDaSemana[]): string {
 export function InicioScreen() {
   const router = useRouter();
   const { draft } = usePatientProfile();
-  const { agenda, isLoading, error, registrarDose } = useTodayDoses();
+  const { agenda, isLoading, error, registrarDose, registrarDoses } = useTodayDoses();
 
   const hoje = new Date();
   const nome = primeiroNome(draft?.fullName ?? "");
@@ -100,6 +108,44 @@ export function InicioScreen() {
           ? { text: "Não tomei", onPress: () => void executar(dose, "skipped") }
           : { text: "Na verdade tomei", onPress: () => void executar(dose, "confirmed") },
       ],
+    );
+  }
+
+  /**
+   * Confirmar as atrasadas de uma vez, para quem ficou longe do celular e só foi olhar mais tarde.
+   *
+   * Só existe para as **atrasadas**: são as doses cujo horário já passou, ou seja, as únicas em
+   * que "tomei" descreve algo que de fato aconteceu. Estender o lote às futuras transformaria o
+   * histórico num registro de intenção — o mesmo motivo que já mantém o botão de confirmar fora
+   * das doses do fim do dia.
+   *
+   * A confirmação lista o que vai ser gravado, nome por nome. Uma ação que escreve vários
+   * registros clínicos de um toque precisa mostrar o que são, senão a prevenção de erro do
+   * diálogo individual se perde justamente onde o estrago é maior.
+   */
+  function confirmarAtrasadas() {
+    const listadas = atrasadas.slice(0, MAXIMO_LISTADO_NO_LOTE);
+    const restantes = atrasadas.length - listadas.length;
+    const lista = listadas
+      .map((dose) => `• ${dose.medicationName} — ${descricaoDaDose(dose)}, das ${dose.time}`)
+      .join("\n");
+
+    Alert.alert(
+      `Confirmar ${atrasadas.length} doses atrasadas?`,
+      `${lista}${restantes > 0 ? `\n• e mais ${restantes}` : ""}\n\nTodas ficam registradas como tomadas agora, e o estoque de cada uma é descontado.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Confirmar todas", onPress: () => void executarLote() },
+      ],
+    );
+  }
+
+  async function executarLote() {
+    const falhas = await registrarDoses(atrasadas, "confirmed");
+    if (falhas.length === 0) return;
+    Alert.alert(
+      "Nem todas foram registradas",
+      `Ficaram de fora: ${falhas.join(", ")}. As demais foram confirmadas — tente estas de novo pela lista.`,
     );
   }
 
@@ -157,9 +203,24 @@ export function InicioScreen() {
             justamente por estarem na posição de horário já vencido, no alto da lista. */}
         {atrasadas.length > 0 ? (
           <View style={styles.doseList}>
-            <Text style={styles.sectionLabel}>
-              {atrasadas.length === 1 ? "Dose atrasada" : `${atrasadas.length} doses atrasadas`}
-            </Text>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionLabel}>
+                {atrasadas.length === 1 ? "Dose atrasada" : `${atrasadas.length} doses atrasadas`}
+              </Text>
+              {/* Com uma só, o lote não economiza toque nenhum e ainda oferece dois caminhos
+                  para a mesma coisa. */}
+              {atrasadas.length > 1 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Confirmar as ${atrasadas.length} doses atrasadas`}
+                  // O texto é curto e o alvo real precisa ser de dedo, não de letra — o público
+                  // do app inclui quem já não acerta um toque pequeno.
+                  hitSlop={spacing.sm}
+                  onPress={confirmarAtrasadas}>
+                  <Text style={styles.bulkAction}>Confirmar todas</Text>
+                </Pressable>
+              ) : null}
+            </View>
             {atrasadas.map((dose) => (
               <ItemDeDose
                 key={dose.doseScheduleId}
