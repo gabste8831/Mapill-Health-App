@@ -71,8 +71,14 @@ export class DoseScheduleRepository
     return rows.map((row) => this.toEntity(row));
   }
 
-  async findForDay(referenceDate: string): Promise<DoseScheduleWithStatus[]> {
-    const dia = localDayRangeUtc(referenceDate);
+  /**
+   * As doses de uma faixa de instantes, com o desfecho de cada uma.
+   *
+   * Faixa de instantes, e não comparação de datas: `scheduled_for` é gravado em UTC e o dia que a
+   * tela pergunta é local, então `date(scheduled_for) = date(?)` erra o tamanho do fuso — em
+   * Brasília, a dose das 22:00 caía no dia seguinte.
+   */
+  async findBetween(startTimestamp: string, endTimestamp: string): Promise<DoseScheduleWithStatus[]> {
     // O log mais recente é o que vale: uma correção retroativa grava um registro novo em vez de
     // sobrescrever o antigo, então "o desfecho atual" é sempre o último por `updated_at`.
     const rows = await this.database.getAllAsync<DoseScheduleRow & LatestLogColumns>(
@@ -86,7 +92,7 @@ export class DoseScheduleRepository
        FROM dose_schedules ds
        WHERE ds.deleted_at IS NULL AND ds.scheduled_for >= ? AND ds.scheduled_for < ?
        ORDER BY ds.scheduled_for ASC`,
-      [dia.start, dia.end],
+      [startTimestamp, endTimestamp],
     );
 
     return rows.map((row) => ({
@@ -94,6 +100,11 @@ export class DoseScheduleRepository
       latestStatus: row.latest_status,
       latestLogId: row.latest_log_id,
     }));
+  }
+
+  async findForDay(referenceDate: string): Promise<DoseScheduleWithStatus[]> {
+    const dia = localDayRangeUtc(referenceDate);
+    return this.findBetween(dia.start, dia.end);
   }
 
   async findDailyAdherence(fromDate: string, toDate: string): Promise<DailyAdherence[]> {

@@ -34,6 +34,11 @@ export interface DoseScheduleRepository extends Repository<DoseSchedule> {
    */
   findForDay(referenceDate: string): Promise<DoseScheduleWithStatus[]>;
   /**
+   * O mesmo, para uma faixa de instantes — a agenda do calendário, que mostra muitos dias de uma
+   * vez. Uma consulta por dia faria a tela ficar mais lenta a cada dia visível.
+   */
+  findBetween(startTimestamp: string, endTimestamp: string): Promise<DoseScheduleWithStatus[]>;
+  /**
    * Doses agendadas e confirmadas por dia, no intervalo (ISO `YYYY-MM-DD`, ambos inclusive).
    * Dias sem dose nenhuma simplesmente não aparecem — quem chama decide se isso é "100%" ou
    * "nada a mostrar", porque a resposta muda conforme o gráfico.

@@ -232,7 +232,23 @@ function estoquesQueVaoAcabar(
  * um dado clínico que ninguém observou (§2.3.3 — o valor do eMEM está justamente no timestamp
  * ser do evento real).
  */
-async function gravarDesfecho(dose: DoseDoDia, status: IntakeStatus): Promise<void> {
+/**
+ * O mínimo para registrar um desfecho. Existe como tipo próprio para que o calendário possa
+ * registrar pelo mesmo caminho da Home sem carregar tudo que a linha da Home precisa desenhar —
+ * duas implementações de registro clínico é o que este tipo existe para evitar.
+ */
+export type DoseParaRegistrar = {
+  doseScheduleId: string;
+  medicationId: string;
+  amount: number;
+  /** Log que registrou o desfecho atual, quando já existe um. */
+  latestLogId: string | null;
+};
+
+export async function gravarDesfecho(
+  dose: DoseParaRegistrar,
+  status: IntakeStatus,
+): Promise<void> {
   const intakeLogRepository = new IntakeLogRepository();
   const inventoryRepository = new InventoryRepository();
   const occurredAt = new Date().toISOString();
