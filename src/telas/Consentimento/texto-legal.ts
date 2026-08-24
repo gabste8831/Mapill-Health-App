@@ -19,7 +19,7 @@ import type { ComponentProps } from "react";
 import type { LegalSection } from "@/ui";
 
 /** Bump ao editar TERMS_OF_USE_SECTIONS ou PRIVACY_POLICY_SECTIONS - força re-consentimento. */
-export const CURRENT_TERMS_VERSION = "1.0.1";
+export const CURRENT_TERMS_VERSION = "1.1.0";
 
 export const APP_PURPOSE_TEXT =
   "O Mapill existe para ajudar você a manter sua rotina de medicamentos, estoque e " +
@@ -50,10 +50,11 @@ export const DATA_PRACTICE_HIGHLIGHTS: DataPracticeHighlight[] = [
   },
   {
     icon: "cloud-outline",
-    title: "Backup opcional de dados",
+    title: "Cópia em nuvem, opcional e ainda indisponível",
     description:
-      "Login com Google habilita backup dos seus dados em nuvem. É opcional. Seu aplicativo funcionará " +
-      "independente dessa etapa, embora seja interessante para não perder dados caso troque de aparelho ou desinstale o app.",
+      "Hoje seus dados ficam só no seu aparelho, com ou sem conta vinculada. A cópia em nuvem " +
+      "está prevista e será opcional: quando existir, será o login com Google que a habilita, e " +
+      "este texto será atualizado antes disso acontecer.",
   },
   {
     icon: "key-outline",
@@ -115,7 +116,8 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "1. Quais dados coletamos",
     paragraphs: [
       "Dados de conta (se você optar por login): nome, e-mail e foto associados à sua conta " +
-        "Google, usados apenas para autenticação e backup.",
+        "Google, usados hoje apenas para autenticação e, quando a cópia em nuvem existir, para " +
+        "identificar de quem ela é.",
       "Dados de saúde inseridos por você: ficha de saúde (nome, data de nascimento, sexo " +
         "biológico, tipo sanguíneo, alergias, contatos de emergência, observações livres), " +
         "medicamentos, posologia, horários, registros de ingestão, estoque e compromissos " +
@@ -136,13 +138,16 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
   {
     title: "3. Onde seus dados ficam armazenados",
     paragraphs: [
-      "Por padrão, todos os dados ficam apenas no seu aparelho, num banco de dados local " +
-        "(SQLite) - é a fonte de verdade principal, funciona sem internet.",
-      "Se você fizer login, uma cópia pode ser sincronizada de forma assíncrona com o " +
-        "Supabase (nosso provedor de backend), atuando como operador dos dados nos termos " +
-        "da LGPD, apenas para fins de backup e recuperação em outro aparelho. Fotos e " +
-        "anexos (ex: foto de receita) têm envio à nuvem opt-out por item - se você não " +
-        "quiser aquele anexo específico na nuvem, ele não sobe.",
+      "Todos os dados ficam no seu aparelho, num banco de dados local (SQLite) - é a fonte de " +
+        "verdade principal e funciona sem internet.",
+      "Nesta versão do app, seus dados de saúde não saem do aparelho: mesmo com a conta do " +
+        "Google vinculada, nada é enviado para a nuvem. A conta serve por ora só para " +
+        "autenticar você.",
+      "A cópia em nuvem está prevista para uma versão futura. Quando existir, ela será " +
+        "assíncrona, com o Supabase (nosso provedor de backend) atuando como operador dos dados " +
+        "nos termos da LGPD, apenas para fins de backup e recuperação em outro aparelho; fotos e " +
+        "anexos (ex: foto de receita) terão envio opt-out por item, e você será consultado " +
+        "novamente antes de qualquer envio começar.",
     ],
   },
   {
@@ -157,10 +162,15 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
   {
     title: "5. Retenção e exclusão",
     paragraphs: [
-      "Seus dados ficam armazenados enquanto você usar o app. Você pode excluir sua conta e " +
-        "todos os seus dados a qualquer momento, em Configurações - a exclusão é real " +
-        "(remoção definitiva no Supabase, quando aplicável, e purge local), não apenas " +
-        "ocultação da tela.",
+      "Seus dados ficam armazenados enquanto você usar o app. Em Ajustes, na seção Meus dados, " +
+        "você pode apagar a qualquer momento só os dados de saúde (mantendo sua ficha) ou tudo, " +
+        "incluindo ficha, consentimento, fotos e receitas anexadas.",
+      "A exclusão é real: os registros são removidos do banco do aparelho e os arquivos " +
+        "apagados, não apenas ocultados da tela. Apagar tudo também desvincula a sua conta do " +
+        "Google e devolve o app ao estado de recém-instalado. A conta do Google em si não é " +
+        "excluída - ela apenas deixa de estar ligada ao Mapill.",
+      "Quando a cópia em nuvem existir, a exclusão passará a alcançar também os dados " +
+        "guardados no Supabase, com remoção definitiva.",
     ],
   },
   {
