@@ -996,6 +996,10 @@ iOS é hipótese. Não prometer iOS na defesa; citar como trabalho futuro.
 Tudo que já está escrito e nunca foi executado em device. **Marcar aqui ao testar** — é esta
 lista que o "verificado em device" dos blocos consulta.
 
+➡️ O passo a passo operacional (onde tocar, o que preencher, o que precisa acontecer) está em
+**[`ROTEIRO-DE-TESTE-EM-APARELHO.md`](./ROTEIRO-DE-TESTE-EM-APARELHO.md)**. A tabela abaixo é o
+placar; o roteiro é como se joga.
+
 | # | O que testar | Como saber que passou | Origem |
 |---|---|---|---|
 | 1 | Listagem, busca, edição e exclusão na aba Remédios | Busca acha ignorando acento; lápis abre o cadastro preenchido; lixeira pede confirmação e o item some da lista | B2 (14), 23/08 |
