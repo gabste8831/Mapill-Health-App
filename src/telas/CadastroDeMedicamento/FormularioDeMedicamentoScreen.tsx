@@ -122,10 +122,16 @@ const FREQUENCY_OPTIONS: OptionGroupOption<FrequencyKind>[] = [
 /** De onde o ciclo conta. Perguntar isso é o que impede a pausa de cair no dia errado. */
 type CycleStartKind = "today" | "earlier";
 
-const CYCLE_START_OPTIONS: OptionGroupOption<CycleStartKind>[] = [
-  { value: "today", label: "Começa hoje" },
-  { value: "earlier", label: "Já comecei antes" },
-];
+/**
+ * "Hoje" só serve quando o tratamento começa hoje. Marcado para começar adiante, a primeira opção
+ * passa a ser o dia do início — dizer "hoje" ali descreveria um ciclo que ainda nem existe.
+ */
+function opcoesDeInicioDoCiclo(comecaDepoisDeHoje: boolean): OptionGroupOption<CycleStartKind>[] {
+  return [
+    { value: "today", label: comecaDepoisDeHoje ? "Começa junto com o tratamento" : "Começa hoje" },
+    { value: "earlier", label: "Já comecei antes" },
+  ];
+}
 
 type DurationKind = "continuous" | "fixed";
 
@@ -358,11 +364,35 @@ export function FormularioDeMedicamentoScreen({
   );
 
   /**
-   * Data de início não é campo: em uso contínuo ela é inútil, e para tratamento com prazo o que
-   * a pessoa sabe é a duração ("tome por 7 dias"), não a data final. Ela existe porque a geração
-   * de horários parte dela, e volta a ser editável quando os tratamentos virarem tela própria.
+   * Quando o tratamento começa. Vale hoje, que é o dia em que se está cadastrando — mas a data
+   * fica **dita na tela**, com um atalho pra alterar. Antes ela era fixa e invisível, e quem
+   * cadastrava a cartela que só começa domingo, ou o antibiótico que vai comprar amanhã, saía com
+   * a data errada sem nada denunciar: os horários nasciam a partir de hoje e o prazo terminava
+   * cedo demais.
+   *
+   * Diferente do resto do formulário, aqui "hoje" pode vir preenchido. A regra de não trazer nada
+   * de fábrica existe pra impedir o app de **inventar posologia** — e o dia de hoje não é
+   * invenção, é o único fato que ele realmente sabe. Cobrar um toque de todo mundo por um caso
+   * raro seria pagar caro pela coerência.
    */
-  const [startDate] = useState(() => initialValue?.startDate ?? todayIsoDate());
+  const [startDateInput, setStartDateInput] = useState(() =>
+    toDateInput(initialValue?.startDate ?? todayIsoDate()),
+  );
+  const [alteraInicio, setAlteraInicio] = useState(
+    () => (initialValue?.startDate ?? todayIsoDate()) !== todayIsoDate(),
+  );
+  const inicioEscolhido = alteraInicio ? parseDateInput(startDateInput) : todayIsoDate();
+  /**
+   * Data pela metade não pode virar "hoje" por omissão: o cadastro sairia com um início que
+   * ninguém escreveu. Enquanto ela não fecha, o botão fica travado e o rodapé diz o que falta.
+   */
+  const inicioIncompleto = inicioEscolhido === null;
+  const startDateError =
+    alteraInicio && startDateInput.length === 10 && inicioEscolhido === null
+      ? "Data inválida."
+      : undefined;
+  const startDate = inicioEscolhido ?? todayIsoDate();
+  const comecaDepoisDeHoje = startDate > todayIsoDate();
   // Numa edição o `endDate` gravado já é a resposta; num cadastro novo ninguém respondeu ainda,
   // e "contínuo" pré-marcado seria o app decidindo que o tratamento não acaba.
   const [duration, setDuration] = useState<DurationKind | null>(
@@ -513,7 +543,7 @@ export function FormularioDeMedicamentoScreen({
   const parsedCustomDoses = Number(customDosesInput);
   const customDosesError =
     isCustomDoses && (parsedCustomDoses < 1 || parsedCustomDoses > MAX_DOSES_PER_DAY)
-      ? `Entre 1 e ${MAX_DOSES_PER_DAY} vezes por dia. Mais que isso é "a cada X horas".`
+      ? `Entre 1 e ${MAX_DOSES_PER_DAY} vezes por dia — de duas em duas horas já é o limite do que se cumpre acordado.`
       : undefined;
 
   const parsedDoseAmount = parseDecimalInput(doseAmount);
@@ -553,7 +583,7 @@ export function FormularioDeMedicamentoScreen({
     cycleStart === "earlier" && cycleStartInput.length === 10 && cycleStartIso === null
       ? "Data inválida."
       : cycleStartIso !== null && cycleStartIso > startDate
-        ? "O ciclo não pode começar depois de hoje."
+        ? "O ciclo não pode começar depois do início do tratamento."
         : undefined;
 
   // Sem saber onde o ciclo começou, o app agendaria a pausa no lugar errado — então isto é
@@ -655,6 +685,7 @@ export function FormularioDeMedicamentoScreen({
     duracaoCompleta;
   const canSubmit =
     essencialCompleto &&
+    !inicioIncompleto &&
     !hasDurationError &&
     customDosesError === undefined &&
     validUntilError === undefined;
@@ -678,6 +709,7 @@ export function FormularioDeMedicamentoScreen({
     temHorariosFixos(frequency) && doseInputs.length > 0 && !areTimesComplete
       ? "os horários"
       : null,
+    inicioIncompleto ? "a data de início" : null,
     duration === null ? "por quanto tempo" : null,
     duration === "fixed" && !duracaoCompleta ? "a duração do tratamento" : null,
   ].filter((pendencia): pendencia is string => pendencia !== null);
@@ -1020,7 +1052,7 @@ export function FormularioDeMedicamentoScreen({
                 <OptionGroup
                   label="ESTE CICLO COMEÇOU QUANDO?"
                   value={cycleStart}
-                  options={CYCLE_START_OPTIONS}
+                  options={opcoesDeInicioDoCiclo(comecaDepoisDeHoje)}
                   onChange={setCycleStart}
                 />
               ) : null}
@@ -1107,6 +1139,35 @@ export function FormularioDeMedicamentoScreen({
             <Text style={styles.sectionHint}>
               Nenhum horário será agendado. Você registra a dose quando tomar.
             </Text>
+          ) : null}
+
+          {/* Só onde existe agenda: em "só quando precisar" não há dia de começar, e o campo ali
+              cobraria uma resposta que não muda nada. */}
+          {frequency !== null && frequency !== "asNeeded" ? (
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>QUANDO COMEÇA</Text>
+              {alteraInicio ? (
+                <TextField
+                  label=""
+                  placeholder="DD/MM/AAAA"
+                  value={startDateInput}
+                  onChangeText={(raw) => setStartDateInput(formatDateInput(raw, startDateInput))}
+                  onFocus={scrollToFocusedInput}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                  error={startDateError}
+                />
+              ) : (
+                <Pressable
+                  style={styles.rowValue}
+                  onPress={() => setAlteraInicio(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Alterar a data de início do tratamento">
+                  <Text style={styles.rowValueText}>Hoje</Text>
+                  <Text style={styles.rowValueAction}>Alterar</Text>
+                </Pressable>
+              )}
+            </View>
           ) : null}
 
           <OptionGroup

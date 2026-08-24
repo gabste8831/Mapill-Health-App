@@ -15,9 +15,12 @@ export type ReminderMode = "alarm" | "notification" | "both" | "none";
 export type TimeOfDay = string;
 
 /**
- * Uma dose a cada duas horas já é o limite do que uma pessoa acordada consegue cumprir. Acima
- * disso não é mais "X vezes por dia", é intervalo curto — que o app expressa melhor pela
- * frequência "a cada X horas".
+ * Uma dose a cada duas horas já é o limite do que uma pessoa acordada consegue cumprir — acima
+ * disso o cadastro descreveria uma rotina que ninguém executa.
+ *
+ * Quem pensa a posologia por intervalo ("de 8 em 8 horas") continua atendido: o seletor de
+ * horários converte o intervalo nos horários equivalentes, sem que exista uma frequência separada
+ * levando ao mesmo agendamento.
  */
 export const MAX_DOSES_PER_DAY = 12;
 

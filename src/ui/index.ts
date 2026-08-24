@@ -19,4 +19,5 @@ export * from "./SelectField/SelectField";
 export * from "./SplashOverlay/SplashOverlay";
 export * from "./SuccessOverlay/SuccessOverlay";
 export * from "./TextField/TextField";
+export * from "./TimePicker/TimePicker";
 export * from "./ToggleChips/ToggleChips";

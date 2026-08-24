@@ -169,6 +169,41 @@ export const styles = StyleSheet.create({
   },
 
   /**
+   * Dentro do popup, o lugar de cada horário. Tem a mesma altura e a mesma borda de um campo de
+   * texto de propósito: é ali que a resposta aparece, e trocar a caixa por um botão de aparência
+   * diferente faria parecer que o horário mora em outro lugar.
+   */
+  botaoDeHorario: {
+    height: 52,
+    paddingHorizontal: spacing.md,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceContainerLowest,
+  },
+  botaoDeHorarioErro: {
+    borderColor: colors.error,
+  },
+  botaoDeHorarioTexto: {
+    ...typography.bodyLg,
+    color: colors.onSurface,
+  },
+  /** "--:--" é lacuna, não valor: fica no cinza de placeholder pra não ser lido como resposta. */
+  botaoDeHorarioVazio: {
+    color: colors.outline,
+  },
+
+  /** Cancelar e confirmar lado a lado, dividindo a largura em partes iguais. */
+  linhaDeAcoes: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  acaoDaLinha: {
+    flex: 1,
+  },
+
+  /**
    * O último lugar da fileira de "quantas vezes por dia": as opções cobrem o comum e este campo
    * cobre o resto, sem gastar um segundo toque nem uma segunda linha.
    */
