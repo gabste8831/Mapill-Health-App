@@ -19,6 +19,10 @@ export type AjustesScreenProps = {
   onOpenTerms: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
+  /** Apaga medicamentos, tratamentos, histórico e estoque. Ficha e consentimento ficam. */
+  onEraseHealthData: () => void;
+  /** Apaga tudo, desvincula a conta e devolve o app à primeira execução. */
+  onEraseEverything: () => void;
 };
 
 type LinhaProps = {
@@ -26,15 +30,17 @@ type LinhaProps = {
   hint?: string;
   /** Nó em vez de nome de ícone: a linha do Google usa a marca real, não um ícone genérico. */
   icon: ReactNode;
+  /** Pinta o rótulo na cor de erro. Para o que apaga dado, não para o que só navega. */
+  destrutiva?: boolean;
   onPress: () => void;
 };
 
-function Linha({ label, hint, icon, onPress }: LinhaProps) {
+function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
   return (
     <Pressable style={styles.row} onPress={onPress} accessibilityRole="button">
       <View style={styles.rowIcon}>{icon}</View>
       <View style={styles.rowText}>
-        <Text style={styles.rowLabel}>{label}</Text>
+        <Text style={[styles.rowLabel, destrutiva && styles.rowLabelDestrutiva]}>{label}</Text>
         {hint ? <Text style={styles.rowHint}>{hint}</Text> : null}
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.outline} />
@@ -58,6 +64,8 @@ export function AjustesScreen({
   onOpenTerms,
   onSignIn,
   onSignOut,
+  onEraseHealthData,
+  onEraseEverything,
 }: AjustesScreenProps) {
   const isSignedIn = accountEmail !== null;
   const hasProfile = patientName.trim().length > 0;
@@ -108,20 +116,28 @@ export function AjustesScreen({
           <Card>
             {isSignedIn ? (
               <Linha
-                icon={<Ionicons name="log-out-outline" size={22} color={colors.onSurfaceVariant} />}
-                label="Sair da conta"
-                hint={accountEmail}
+                icon={<Ionicons name="link-outline" size={22} color={colors.onSurfaceVariant} />}
+                label="Desvincular esta conta"
+                hint={accountEmail ?? undefined}
                 onPress={onSignOut}
               />
             ) : (
               <Linha
                 icon={<GoogleLogo size={22} />}
-                label="Entrar com o Google"
-                hint="Habilita o backup dos seus dados. Nada do que já está salvo é perdido."
+                label="Vincular uma conta do Google"
+                // O texto anterior dizia "habilita o backup dos seus dados", e não habilitava:
+                // não existe sincronização ainda. Prometer backup num app de saúde faz alguém
+                // trocar de celular confiando e perder o histórico.
+                hint="Nada do que já está salvo é perdido. A cópia na nuvem ainda não está disponível."
                 onPress={onSignIn}
               />
             )}
           </Card>
+          <Text style={styles.sectionFooter}>
+            {isSignedIn
+              ? "Seus dados ficam neste aparelho. Desvincular não apaga nada."
+              : "Seus dados ficam neste aparelho, com ou sem conta vinculada."}
+          </Text>
         </View>
 
         <View style={styles.section}>
@@ -134,6 +150,31 @@ export function AjustesScreen({
               onPress={onOpenTerms}
             />
           </Card>
+        </View>
+
+        {/* Separado da conta de propósito: apagar dado e desvincular conta são coisas diferentes,
+            e juntá-las na mesma seção sugeriria que uma implica a outra. */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>MEUS DADOS</Text>
+          <Card>
+            <Linha
+              icon={<Ionicons name="trash-outline" size={22} color={colors.error} />}
+              label="Apagar meus dados de saúde"
+              hint="Medicamentos, tratamentos, horários, histórico e estoque. Sua ficha continua."
+              destrutiva
+              onPress={onEraseHealthData}
+            />
+            <Linha
+              icon={<Ionicons name="nuclear-outline" size={22} color={colors.error} />}
+              label="Apagar tudo e recomeçar"
+              hint="Inclui a ficha e o consentimento. O app volta como recém-instalado."
+              destrutiva
+              onPress={onEraseEverything}
+            />
+          </Card>
+          <Text style={styles.sectionFooter}>
+            O apagamento é definitivo e acontece neste aparelho. Não há como desfazer.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

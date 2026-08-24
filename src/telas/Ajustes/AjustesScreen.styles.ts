@@ -116,6 +116,19 @@ export const styles = StyleSheet.create({
     ...typography.bodyLg,
     color: colors.onSurface,
   },
+  /** Só o rótulo em vermelho, não a dica: a dica é o que explica a consequência e precisa ser lida. */
+  rowLabelDestrutiva: {
+    color: colors.error,
+  },
+  /**
+   * Nota abaixo de um cartão, sobre a seção inteira. É onde o app diz onde os dados moram — dentro
+   * de uma linha essa frase pareceria a descrição de um botão, e ela não é.
+   */
+  sectionFooter: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    paddingHorizontal: spacing.xs,
+  },
   rowHint: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,

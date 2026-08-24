@@ -31,6 +31,25 @@ export type FirstRunGate = {
   canGoBack: boolean;
 };
 
+/**
+ * Assinatura viva do gate, para quem está longe dele na árvore poder mandá-lo recomeçar.
+ *
+ * Existe por causa do apagamento de dados: quem apaga a ficha e o consentimento pela tela de
+ * Ajustes deixa o app num estado que nenhuma tela sabe desenhar — a aba Home abriria consultando
+ * um paciente que não existe mais, e pior, o app seguiria em uso **sem consentimento registrado**,
+ * que é exatamente o que a LGPD não admite.
+ *
+ * Um ouvinte só, e não uma lista: o gate é único no app, montado no layout raiz. Uma lista
+ * sugeriria que pode haver dois, e dois gates discordando sobre a etapa atual seria pior que o
+ * problema que ela resolveria.
+ */
+let restartListener: (() => void) | null = null;
+
+/** Devolve o app à primeira execução. Chamar **depois** que o dado local já foi apagado. */
+export function restartFirstRun(): void {
+  restartListener?.();
+}
+
 /** Etapa anterior de cada passo — `null` quando não há retorno possível. */
 const PREVIOUS_STEP: Record<FirstRunStep, FirstRunStep | null> = {
   login: null,
@@ -129,6 +148,15 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   const saveProfile = useCallback(async (draft: PatientProfileDraft) => {
     await savePatientProfileDraft(draft);
     setStep("app");
+  }, []);
+
+  // Volta pro login, e não direto pro consentimento: sem ficha nem consentimento o app está no
+  // mesmo estado de uma instalação nova, e a escolha de entrar ou seguir sem conta faz parte dele.
+  useEffect(() => {
+    restartListener = () => setStep("login");
+    return () => {
+      restartListener = null;
+    };
   }, []);
 
   const canGoBack = PREVIOUS_STEP[step] !== null;
