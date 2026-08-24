@@ -5,7 +5,7 @@
 > Ao terminar, basta reportar **número do passo + passou/falhou**, e o que apareceu quando falhou.
 >
 > Feito para ser percorrido **na ordem**: os cadastros do começo alimentam os testes do meio, e o
-> apagamento do fim destrói tudo.
+> apagamento do fim destrói tudo. Ordem dos blocos: **A, B, C, D, E, F, H, G**.
 
 ## Antes de começar
 
@@ -264,6 +264,11 @@ minúsculas**.
 
 > ✅ A Vitamina D some da lista, e o contador cai para 2.
 
+**E.9** 🔴 Conferir o botão **+** no canto inferior direito desta aba.
+
+> ✅ Ele deve existir, e tocar nele deve abrir **direto** "Escanear código de barras | Cadastro
+> manual" — sem passar pela pergunta "medicação ou compromisso?".
+
 ---
 
 ## Roteiro F — Home, doses atrasadas e estoque
@@ -317,6 +322,139 @@ por exemplo, se ainda não passou).
 > quantidade ao estoque.
 
 **F.12** *(opcional)* Confirmar a correção e conferir em Remédios que o estoque **subiu 2**.
+
+---
+
+## Roteiro H — Compromissos (novo em 24/08)
+
+Aba Calendário e cadastro de compromisso. **Faça antes do Roteiro G**, que apaga tudo.
+
+**H.1** Ir na aba **Calendário** e tocar no **+** do canto inferior direito.
+
+> ✅ 🔴 O botão deve existir nesta aba, e abrir a escolha completa: **"Cadastrar uma medicação"** e
+> **"Cadastrar um compromisso"** — aqui cabem os dois.
+
+Tocar em **"Cadastrar um compromisso"**.
+
+**H.2** Em **DESCRIÇÃO DO COMPROMISSO**, digitar: `Consulta com cardiologista`
+
+> ✅ É campo de texto livre, não lista de opções.
+
+**H.3** Em **DATA**, digitar uma data **3 dias à frente**. Em **HORÁRIO**, tocar no campo.
+
+> ✅ Deve abrir a mesma roda de relógio do cadastro de medicamento, e "Confirmar" só acende depois
+> de girar.
+
+**H.4** Escolher **14:30** e confirmar.
+
+> ✅ Deve aparecer, abaixo dos campos, a confirmação por extenso com o **dia da semana**:
+> "Sexta-feira, 27 de agosto, às 14:30" (ou o dia que for).
+
+**H.5** 🔴 **Testar a data que já passou.** Voltar no campo DATA e digitar uma data de ontem.
+
+> ✅ Deve dar erro **"Essa data já passou."** e travar o botão de salvar.
+
+**H.6** Voltar a data para 3 dias à frente. Preencher **LOCAL DE ATENDIMENTO**:
+`Clínica São José, sala 12` e **NOME DO PROFISSIONAL**: `Dra. Ana Martins, cardiologista`. Em
+**ORIENTAÇÕES E PREPARO**: `levar exames antigos`.
+
+**H.7** Em **DESEJA SER LEMBRADO DESTE COMPROMISSO?**, tocar em **"Não"**.
+
+> ✅ 🔴 A opção "Não" deve **ficar marcada**. Se voltar ao cinza de não respondida, o seletor
+> perdeu a resposta.
+> ✅ As perguntas de baixo não devem aparecer.
+
+**H.8** Tocar em **"Sim"**.
+
+> ✅ Devem aparecer **duas** perguntas: "LEMBRAR NO DIA DO COMPROMISSO?" e "LEMBRAR COM
+> ANTECEDÊNCIA?".
+
+**H.9** 🔴 Responder **"Não"** para as duas.
+
+> ✅ O botão de salvar deve travar, e o rodapé dizer que falta **"ao menos um dos dois lembretes"** —
+> dizer não para os dois é o mesmo que não querer aviso.
+
+**H.10** Responder **"Sim"** para "LEMBRAR NO DIA" e **"Sim"** para "COM ANTECEDÊNCIA".
+Escolher **7 dias antes**.
+
+> ✅ 🔴 Deve avisar em cor de atenção que **essa antecedência já passou** — a consulta é em 3 dias,
+> e o aviso de 7 dias antes cairia numa data anterior a hoje.
+
+**H.11** Trocar para **1 dia antes**.
+
+> ✅ Deve mostrar a **data em que o aviso chega**, por extenso.
+> ✅ Abaixo, deve dizer que a escolha fica salva mas que os lembretes ainda estão sendo
+> desenvolvidos. *(Intencional: o disparo depende do C1.)*
+
+**H.12** 🔴 **Testar a antecedência livre.** No campo **"Outro"**, no fim da fileira, digitar `15`.
+
+> ✅ O atalho selecionado deve desmarcar, e o campo livre ficar destacado.
+> ✅ Deve voltar a avisar que a antecedência já passou (15 dias > 3 dias).
+> ✅ Digitar `0` ou `999` deve dar erro pedindo entre 1 e 180 dias.
+
+**H.13** Voltar para **1 dia antes** e salvar.
+
+> ✅ Confirmação de tela cheia e, depois, a aba **Calendário** com o compromisso lá.
+
+**H.14** Conferir o card na agenda.
+
+> ✅ Agrupado sob o dia (ex: "Sexta-feira, 27 de agosto"), com a hora à esquerda, a descrição que
+> você digitou, o nome da profissional, o local, o preparo, e no rodapé **"Lembrar 1 dia antes e
+> no dia"**.
+
+**H.15** 🔴 **Conferir as doses no calendário.** Rolar a agenda até "Hoje" e os próximos dias.
+
+> ✅ Os horários dos remédios cadastrados nos roteiros B e C devem aparecer **no mesmo dia** dos
+> compromissos, num bloco com hora, nome e quantidade.
+> ✅ Rolar até um dia **além de 30 dias à frente**: as doses devem continuar aparecendo (são
+> projetadas). Se sumirem, a projeção falhou.
+
+**H.16** 🔴 Numa dose de **hoje** que ainda não foi respondida, tocar no **✓**.
+
+> ✅ Deve confirmar na hora e a linha ficar mais apagada, com o ✓ verde/azul.
+> ✅ Conferir na **Home** que a mesma dose aparece confirmada — é o mesmo registro.
+
+**H.17** Conferir uma dose de um dia **futuro**.
+
+> ✅ 🔴 Ela **não** pode ter botões de ✓ e ✗. Só hoje e dias passados aceitam resposta.
+
+**H.18** Cadastrar um segundo compromisso para **hoje, num horário que já passou** (ex: 08:00 se
+já for noite), descrição `Coleta de sangue`.
+
+> ✅ Deve aparecer agrupado sob **"Hoje"**, junto das doses do dia.
+
+**H.19** 🔴 Nesse compromisso que já passou, conferir a pergunta **"Você foi?"** com os botões
+**Fui** e **Não fui**.
+
+> ✅ O compromisso **futuro** não pode ter essa pergunta.
+
+**H.20** Tocar em **"Fui"**.
+
+> ✅ Deve gravar na hora, sem diálogo, e a linha virar **"Compareceu"** em azul com um ✓ e um
+> lapisinho à direita.
+
+**H.21** Tocar nessa linha.
+
+> ✅ Deve abrir a folha "O que aconteceu?" com "Fui" já marcado.
+
+**H.22** Escrever em **ANOTAÇÃO**: `médico pediu hemograma, retorno em 3 meses`. Salvar.
+
+> ✅ A anotação deve aparecer no card, num bloco cinza claro.
+
+**H.23** Tocar na linha de novo, tocar em **"Apagar esta resposta"** e salvar.
+
+> ✅ 🔴 O card deve voltar a perguntar **"Você foi?"** — estado "sem resposta", que é diferente de
+> "não fui". A anotação deve sumir junto.
+
+**H.24** Marcar **"Fui"** de novo, escrever uma anotação, e então abrir o **lápis** desse mesmo
+compromisso, mudar o local e salvar.
+
+> ✅ 🔴 O desfecho e a anotação **não podem sumir** ao editar. Editar o compromisso não pode apagar
+> o registro de que ele aconteceu.
+
+**H.25** Tocar na **lixeira** de um deles.
+
+> ✅ Deve pedir confirmação dizendo a data por extenso e que o aviso deixa de existir.
 
 ---
 

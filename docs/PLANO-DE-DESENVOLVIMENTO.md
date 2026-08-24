@@ -49,6 +49,7 @@ Nenhum bloco fecha sem estes seis itens:
 | Home | Agenda do dia, progresso, confirmação/pulo com correção retroativa, adesão semanal e alerta de estoque — **tudo vindo dos repositórios**, sem mock |
 | Navegação | Abas reais (Home/Calendário/Remédios/Ajustes) — nativas no aparelho, barra em JS no preview web; grupo `cadastro` como stack modal; rotas `/ficha` e `/termos`; `_layout.tsx` sem lógica de estado — **verificado em device (22/08)** |
 | Cadastro de medicamento | Formulário manual completo, gravando medicamento + prescrição + estoque + horários no SQLite — **verificado em device (22/08)**. Horário escolhido no relógio nativo do Android, com preenchimento "de X em X horas", e data de início editável |
+| Compromissos | Cadastro de consulta, retorno, exame e renovação de receita, com local, profissional, observação e antecedência do aviso. Aba Calendário lista próximos e passados, com editar, excluir e o registro de "você foi?" mais a anotação do que aconteceu. Só o **disparo** do aviso depende do C1 |
 | Medicações | Lista dos cadastros com dose, frequência, horários e estoque, com busca por nome ou princípio ativo; lápis abre a edição no mesmo formulário e lixeira faz exclusão lógica com confirmação |
 | Build em aparelho | Dev build pelo **EAS** (o build local não fecha nesta máquina — ver log de 22/08) |
 
@@ -57,7 +58,7 @@ Nenhum bloco fecha sem estes seis itens:
 - **Notificações**: `expo-notifications` instalado, mas `src/notifications/` não existe. Zero alarmes.
 - **Sync**: login autentica, mas nada sobe/desce. Sem tabelas no Supabase, sem RLS.
 - **CMED**: nenhum script de ingestão, nenhum seed embarcado.
-- **Estoque / Agenda / Histórico**: repositórios existem, telas não.
+- **Estoque / Histórico**: repositórios existem, telas não.
 - **Direitos LGPD — parcial**: apagar os dados locais (clínicos ou tudo) e revogar consentimento
   já existem em Ajustes → MEUS DADOS, com apagamento físico. Faltam **exportar** e o lado
   servidor da exclusão, que depende do D1 existir.
@@ -641,12 +642,70 @@ mecanismo do C1. Anexos salvos localmente primeiro, nuvem opt-out por registro (
 
 Local de guarda e anexo de receita **saíram daqui** em 2026-08-20 — foram para o B2, onde o
 paciente já está descrevendo o medicamento. O que fica no C3 é a receita como **compromisso**
-(validade, renovação, lembrete), não como anexo do remédio.
+(a ida ao médico para renovar), não como anexo do remédio.
+
+**Cadastro e agenda entregues em 2026-08-24**, antecipados enquanto a validação em aparelho do
+B2/B4 não voltava. Só a parte que **dispara** o aviso depende do C1; cadastrar, listar, editar e
+excluir não dependem de nada pendente.
+
+**Contexto de uso** (definido pelo Gabriel em 24/08): retorno ao médico, exames e coleta de
+sangue, consultas de psicólogo e terapeuta. "Praticamente igual à agenda do Google" — um ponto no
+tempo com lembrete, sem regra que se repete.
+
+**Descrição em texto livre, não lista de tipos** (decisão de 24/08, substitui os quatro tipos
+fechados da primeira versão). A lista real não fecha — consulta, retorno, exame, coleta de sangue,
+sessão de terapia, fisioterapia —, e cada opção que falta obriga quem cadastra a escolher a menos
+errada e explicar o resto na observação. O nome que a pessoa dá é o nome pelo qual ela vai
+reconhecer o compromisso na agenda depois.
+
+**Aviso**: só notificação, nunca alarme (decisão de 24/08). Interromper como despertador se
+justifica na dose, que tem hora exata e consequência clínica imediata; para uma consulta na semana
+que vem seria só barulho.
+
+São **dois canais independentes**, porque são pedidos diferentes: antecedência (para se organizar
+— remarcar o trabalho, arrumar carona) e lembrete no próprio dia (para não esquecer o que já
+estava planejado). Quem marca consulta costuma querer os dois, e um campo só obrigaria a escolher.
+A antecedência é em dias, com atalhos para 1, 3 e 7 e campo livre para o resto, no mesmo padrão do
+"quantas vezes por dia" do B2. As escolhas são gravadas desde já (migration 014) e a tela diz, sem
+rodeio, que os avisos ainda não chegam.
+
+**Calendário unificado** (decisão de 24/08): a aba mostra **compromissos e horários de dose no
+mesmo dia**, porque é assim que o dia acontece — quem tem consulta às 14h e dose às 14h30 precisa
+ver isso junto, e não em duas telas que nunca se cruzam. Agrupado por dia, com as doses num bloco
+compacto em vez de um cartão cada (três doses por dia em trinta dias seriam noventa cartões, e o
+compromisso do dia 27 se perderia no meio). Além dos 30 dias que o app grava de fato
+(`SCHEDULE_HORIZON_DAYS`), os horários são **projetados na hora** a partir da posologia, com a
+mesma função pura que gera os reais — sem isso a agenda apareceria vazia a partir do dia 31, o que
+leria como "não tenho remédio em outubro". Dose projetada não se confirma: não existe registro
+para apontar. Confirmar e pular também funcionam aqui, pelo mesmo caminho da Home
+(`gravarDesfecho`), e só em hoje e nos dias passados.
+
+**FAB em toda aba que lista algo** (decisão de 24/08): quem está olhando a lista de remédios e
+quer cadastrar outro não deveria voltar à Home para achar o botão. O destino muda por tela —
+Remédios vai direto para "escanear ou manual", porque estar ali já responde que é remédio;
+Calendário e Home abrem a escolha completa.
 
 **Pronto quando**
-- [ ] Compromisso gera lembrete que dispara como o de dose.
+- [x] Cadastrar, listar, editar e excluir compromissos funciona 100% offline. — aba Calendário
+      agrupada por dia, exclusão lógica, e a mesma tela criando e editando.
+      **Pendente de device.**
+- [x] O calendário mostra compromissos **e** doses no mesmo dia, com projeção além dos 30 dias
+      gravados. **Pendente de device.**
+- [x] Toda aba que lista algo tem o botão de cadastrar. **Pendente de device.**
+- [x] O compromisso confirma com a **data por extenso e o dia da semana** antes de salvar — "dia
+      27" não denuncia nada, mas "sábado" denuncia na hora quem quis marcar na sexta.
+- [x] Antecedência que não cabe é avisada em vez de gravada em silêncio — "7 dias antes" numa
+      consulta que é depois de amanhã descreve um aviso que já passou.
+- [x] **Registro do que aconteceu**: compromisso passado pergunta "você foi?" e aceita
+      compareceu / não compareceu, mais uma anotação livre do que saiu dali ("médico pediu
+      hemograma"). É o histórico de acompanhamento a longo prazo, e a anotação de depois é campo
+      separado da observação de preparo escrita antes ("jejum de 12h") — tempos e utilidades
+      diferentes. **Nunca vira "faltou" sozinho por decurso de prazo**, mesma regra da dose não
+      resolvida (decisão nº11.5): ausência de resposta não é desfecho.
+- [ ] Compromisso gera lembrete que dispara como o de dose. — **depende do C1**.
 - [ ] Receita vencendo aparece com destaque antes de vencer.
-- [ ] Anexo marcado como "não subir pra nuvem" é respeitado pelo sync do D1.
+- [ ] Grade de calendário mensal — fora do escopo desta rodada, a lista responde "qual é o
+      próximo e quando" sem obrigar a navegar entre meses.
 
 ---
 
@@ -1012,6 +1071,10 @@ placar; o roteiro é como se joga.
 | 8 | Fotos e receitas apagadas junto | Depois do apagamento total, cadastrar de novo e conferir que nenhuma imagem antiga reaparece | D3, 24/08 |
 | 9 | Reconsentimento por bump de versão | `CURRENT_TERMS_VERSION` foi para `1.1.0` em 24/08 — a próxima abertura **deve** pedir o aceite de novo | Texto legal, 24/08 |
 | 10 | Baixa de estoque contra a caixa física | Confirmar N doses e conferir que o estoque caiu exatamente a soma das doses, não N unidades | B4, 22/08 |
+| 11 | Cadastro de compromisso | Descrição é texto livre; data passada é recusada; a confirmação mostra o dia da semana; "Não" fica marcado nos seletores; recusar os dois lembretes trava o salvar; antecedência maior que o prazo avisa | C3, 24/08 |
+| 12 | Desfecho do compromisso | "Você foi?" só aparece nos passados; "Fui" grava sem diálogo; "Apagar esta resposta" volta ao estado sem resposta; **editar o compromisso não apaga o desfecho** | C3, 24/08 |
+| 13 | Calendário unificado | Doses e compromissos no mesmo dia; doses continuam aparecendo além de 30 dias (projeção); ✓/✗ só em hoje e passados; confirmar aqui reflete na Home | C3, 24/08 |
+| 14 | FAB em todas as abas | Remédios abre direto "escanear ou manual"; Calendário e Home abrem a escolha completa | UI, 24/08 |
 
 ### 6.3 Offline-first
 
@@ -1084,6 +1147,12 @@ a partir do D1 é o que impede isso.
 | 2026-08-24 | B2 (parte 15) | Concluído | **"De X em X horas" virou preenchimento, não frequência.** É assim que o médico fala, e o formulário só entende horários — traduzir "de 3 em 3 horas" em oito horários exigia uma conta de cabeça na frente da tela, e somar errado ali cai direto no lembrete. Dentro do popup, um botão pergunta o intervalo e o primeiro horário e preenche as linhas. **Não é sugestão**: os dois números são de quem preenche, e a lista aparece inteira antes de valer, o que deixa visível justamente a virada da madrugada (23:00 + 3h = 02:00) que a conta mental erra. Continua existindo **uma** frequência só — a parte 10 tirou "a cada X horas" por ser um segundo caminho pro mesmo agendamento, e um preenchedor não é um caminho, é uma calculadora. `serieCabeNoDia` barra o que daria a volta no relógio (4 doses de 8 em 8 horas fariam a quarta cair sobre a primeira), que é o mesmo conflito que o seletor já barra na escolha manual. 10 casos verificados em Node. Junto saíram duas menções órfãs à frequência removida, uma na mensagem de erro de "quantas vezes por dia" e outra no comentário de `MAX_DOSES_PER_DAY` — as duas mandavam a pessoa para uma opção que não existe mais. |
 | 2026-08-24 | B2 (parte 15) | Concluído | **Tratamento pode começar em data futura.** A data de início era fixa em hoje e invisível, então quem cadastrava a cartela que começa domingo ou o antibiótico que vai comprar amanhã saía com a data errada sem nada denunciar: os horários nasciam a partir de hoje e o prazo terminava cedo demais. Virou a linha "QUANDO COMEÇA", que vale hoje e **diz isso na tela**, com atalho pra alterar. Aqui "hoje" pode vir preenchido sem ferir a regra da parte 8: ela existe pra impedir o app de inventar posologia, e o dia de hoje não é invenção, é o único fato que ele sabe — cobrar um toque de todo mundo por um caso raro seria pagar caro pela coerência. Data pela metade trava o botão em vez de virar "hoje" por omissão. O domínio já estava certo (`generateDoseSchedules` recorta a janela pelo `startDate`), então a mudança é toda de tela; o que mudou junto foi o que assumia "início = hoje": a mensagem do ciclo passou a falar em "início do tratamento" e a opção "Começa hoje" vira "Começa junto com o tratamento" quando ele começa adiante. 12 casos verificados em Node, incluindo cartela 28/21 ancorada no futuro e início no passado. |
 | 2026-08-24 | D3 (parcial) / A2 | Concluído | **Gerenciamento de conta e de dados nos Ajustes, e três promessas de backup que eram falsas.** A regra combinada é "o dado sempre persiste no aparelho e **pode** ir pra nuvem se houver conta", mas a segunda metade não existe: o login autentica e nada sobe. A tela dizia o contrário em três lugares — "Habilita o backup dos seus dados" nos Ajustes, "Login habilita backup e sincronização entre dispositivos" no login, e o comentário do `handleSignIn`. Num app de medicação isso não é exagero de marketing: é o que faz alguém trocar de aparelho confiando e perder o histórico, e é a mesma falha de correspondência com o mundo real que o plano já proíbe no C1. Os textos passaram a descrever o que existe ("seus dados ficam neste aparelho", "a cópia na nuvem ainda não está disponível"). Entrou a seção **MEUS DADOS** com dois apagamentos de alcance diferente: o clínico (medicamentos, tratamentos, horários, histórico, estoque) preservando ficha e consentimento, e o total, que leva junto ficha, consentimento, fotos e receitas e devolve o app ao estado de recém-instalado. É **hard delete** e não `deleted_at` — a exclusão lógica existe pra que o histórico não fique órfão e pra que o D1 saiba contar ao servidor que a linha morreu; aqui a intenção é oposta, o dado sensível não pode continuar no aparelho, e manter a linha escondida seria o que a lei chama de tratamento. Numa transação só, porque apagar metade deixa estado que nenhuma tela sabe desenhar. Os arquivos são apagados **fora** da transação e por prefixo: o sistema de arquivos não participa dela, arquivo órfão é recuperável e banco meio apagado não, e apagar o diretório inteiro levaria junto o próprio banco do `expo-sqlite`. Novo `restartFirstRun()` no `use-first-run-gate` — um ouvinte só, porque o gate é único e dois discordando sobre a etapa atual seria pior que o problema —, já que seguir em uso sem consentimento registrado é o que a LGPD não admite. Desvincular ganhou confirmação e explicação de que nada é apagado; o apagamento total tem duas etapas, e a segunda repete o que some em vez de só perguntar "tem certeza?". |
+| 2026-08-24 | C3 (parte 1) | Concluído | **Cadastro e agenda de compromissos.** Antecipado enquanto a validação em aparelho não voltava, e possível porque só o **disparo** do aviso depende do C1 — cadastrar, listar, editar e excluir não dependem de nada pendente. As duas telas eram placeholder `EmConstrucao`; o domínio já existia desde a migration 001. Migration 014 acrescenta local, profissional e antecedência do aviso, e **remove** os três campos de receita: o papel já mora no medicamento desde o B2, e uma segunda cópia aqui criaria duas verdades sobre o mesmo documento, livres para divergir. `retorno` entrou como tipo próprio e não como variação de consulta, porque no Brasil ele é outra coisa na prática — volta ao mesmo profissional dentro de um prazo, e perdê-lo custa a consulta inteira. `exame` não se subdivide por procedimento: o que muda entre sangue e imagem é o preparo, e isso mora na observação. O formulário é curto de propósito: compromisso é um ponto no tempo, não uma regra que se repete, então não há a revelação em dois estados que o B2 usa para conter um formulário que seria longo demais. Confirma com a **data por extenso e o dia da semana** antes de salvar, porque "dia 27" não denuncia nada e "sábado" denuncia na hora quem errou o número. Novo `TimeField` no kit para o caso de um horário só, separado do `SeletorDeHorarios` (que segue intocado, sob teste no roteiro de aparelho); as tabelas de mês e dia da semana saíram da Home para `shared/datas-por-extenso`, já que agora duas telas dizem a mesma data. |
+| 2026-08-24 | C3 (parte 1) | Concluído | **Aviso de compromisso: notificação, nunca alarme.** Decisão do Gabriel em 24/08. Interromper como despertador se justifica na dose, que tem hora exata e consequência clínica imediata; para uma consulta na semana que vem seria só barulho. A antecedência é **em dias** (no dia, 1, 3 ou 7 antes) e não um horário, porque o que a pessoa precisa é de tempo para remarcar o trabalho ou arrumar carona. A escolha é gravada desde já, antes do mecanismo que a consome existir, para que quem cadastrar agora não tenha que voltar em cada compromisso depois — e a tela **diz** que os avisos ainda não chegam, em vez de deixar a promessa implícita. O seletor tem três estados e não dois: "não quero ser avisado" é resposta e precisa ficar marcada, senão quem toca em "Não" vê a opção voltar ao cinza de não respondida e não sabe se o toque valeu. |
+| 2026-08-24 | C3 (parte 1) | Concluído | **Registro do que aconteceu, a pedido.** Compromisso passado pergunta "você foi?" e aceita compareceu / não compareceu, com anotação livre do que saiu dali. É registro de acompanhamento a longo prazo, não controle de presença: por isso a anotação de depois ("médico pediu hemograma") é campo separado da observação de preparo escrita antes ("jejum de 12h") — mesma razão que separa `intakeNote` de `notes` na prescrição. **Nunca vira "faltou" por decurso de prazo**: ausência de resposta não é desfecho, e registrar uma falta que ninguém confirmou sujaria justamente o histórico que o campo existe para manter confiável. É atualização do próprio registro, e não evento novo como o `IntakeLog` da dose — a ingestão exige auditoria porque dela sai a adesão que o TCC mede; do compromisso o que interessa é o estado final, e quem marca "faltei" por engano quer que fique corrigido, não que fique rastro de dois desfechos. "Fui"/"Não fui" gravam sem diálogo de confirmação, ao contrário da dose: aqui o toque não move estoque nem entra em cálculo nenhum, e é desfeito num toque na linha de baixo — cobrar confirmação por algo tão reversível faria a pessoa parar de responder. |
+| 2026-08-24 | C3 (parte 2) | Concluído | **Revisão do formulário a pedido, e o calendário virou agenda de tudo.** Quatro mudanças. (a) Os **tipos fechados caíram**: a lista real não fecha — consulta, retorno, exame, coleta de sangue, terapia, fisioterapia — e cada opção que falta obriga a escolher a menos errada e explicar o resto na observação. Virou texto livre (`type` renomeado para `title` na migration 014, ainda não publicada). (b) **Rótulos mais formais**: "O QUE É?" virou "DESCRIÇÃO DO COMPROMISSO", "COM QUEM" virou "NOME DO PROFISSIONAL", "ONDE" virou "LOCAL DE ATENDIMENTO", "OBSERVAÇÃO" virou "ORIENTAÇÕES E PREPARO". (c) O **aviso virou cascata de dois canais independentes** — lembrar no dia e lembrar com antecedência são pedidos diferentes, e quem marca consulta costuma querer os dois; um campo só obrigava a escolher. A antecedência ganhou campo livre ao lado dos atalhos, no mesmo padrão do "quantas vezes por dia" do B2, porque 15 ou 30 dias são pedidos legítimos. Responder "não" para os dois é barrado: seria o mesmo que não querer aviso, e não descreve nada. (d) O **calendário passou a mostrar as doses junto dos compromissos**, agrupado por dia. |
+| 2026-08-24 | C3 (parte 2) | Concluído | **Projeção de doses além do horizonte gravado.** O app grava horários para 30 dias (`SCHEDULE_HORIZON_DAYS`), então uma agenda que fosse até 90 apareceria vazia a partir do dia 31 — e vazio, ali, leria como "não tenho remédio em outubro", que é exatamente o modo de falha silenciosa que este projeto evita. Além do último horário gravado de cada prescrição, o calendário **calcula** as ocorrências na hora, com a mesma função pura já verificada que gera as reais, sem gravar nada. Projetada não se confirma: não há registro para apontar, e por construção ela nunca aparece com botão de ação. Confirmar e pular no calendário passam pelo **mesmo** `gravarDesfecho` da Home — registro clínico com duas implementações divergiria, e a auditoria do histórico é o que o TCC mede. Ação só em hoje e nos dias passados, mesma regra que já governa a Home. |
+| 2026-08-24 | UI | Concluído | **FAB em toda aba que lista algo.** Estava só na Home, então quem estava na lista de remédios e queria cadastrar outro tinha que voltar — o lugar de criar é onde se está vendo o que já existe. Extraído para `ui/Fab` em vez de copiado em três telas. O destino muda por tela e por isso não mora no componente: Remédios vai direto para "escanear ou manual", porque estar ali já responde que o que vem é um remédio; Calendário e Home abrem a escolha completa, já que ali cabem os dois. |
 | 2026-08-24 | Texto legal | Concluído | **A política de privacidade dizia que o login habilita backup em nuvem, e não habilita.** Era a terceira e última cópia da promessa falsa — as outras duas, nos Ajustes e no login, caíram antes. Aqui o peso é outro: é o documento que o titular aceita, e descrever um tratamento de dado sensível que não acontece corrói o valor do consentimento, que é justamente a base legal do app (art. 7º, I e art. 11, I). O texto passou a separar o que é de hoje do que é previsto: "nesta versão do app, seus dados de saúde não saem do aparelho, mesmo com a conta vinculada", e a cópia em nuvem descrita como futura, com nova consulta ao titular antes de qualquer envio começar. A seção de retenção foi reescrita pra descrever os dois apagamentos que agora existem de verdade, e para dizer que a conta do Google não é excluída, só desvinculada. `CURRENT_TERMS_VERSION` foi de `1.0.1` para `1.1.0` — mudou o que o titular consente, então o aceite antigo não pode valer, e a próxima abertura pede reconsentimento. |
 | 2026-08-24 | Docs | Concluído | **§6.2, fila de validação em aparelho.** Dez itens escritos e nunca executados, cada um com o critério de "passou" ao lado. Existe porque a lista vinha sendo reconstruída de memória a cada retomada, e item que ninguém lembra de testar acaba entrando na defesa como se estivesse verificado. |
 | 2026-08-24 | Docs | Concluído | **Nova §6, "Status de plataforma e de paradigma".** A pergunta "roda no iPhone?" e "isso continua offline-first?" estavam sendo respondidas por auditoria de código a cada vez. Agora são duas tabelas mantidas ao fim de cada bloco. A varredura achou um import que só funciona no Android (`@expo/ui/jetpack-compose` no `TimePicker`, criado horas antes) e confirmou que o offline-first está intacto — inclusive o ponto que mais poderia tê-lo violado, a sessão na abertura, que usa `getSession()` e lê do AsyncStorage sem rede. Registrado também que o mérito é menor do que parece: o app é offline-*only*, e o paradigma só será posto à prova no D1. |
