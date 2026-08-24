@@ -3,10 +3,11 @@ import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { usePatientProfile } from "@/hooks/use-patient-profile";
+import { dataPorExtenso } from "@/shared/datas-por-extenso";
 import { spacing } from "@/shared/theme";
 import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-today-doses";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
-import { CenteredLoader, Header } from "@/ui";
+import { CenteredLoader, Fab, Header } from "@/ui";
 import { CardAdesaoSemanal } from "@/telas/Inicio/componentes/CardAdesaoSemanal/CardAdesaoSemanal";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
@@ -19,15 +20,6 @@ import { styles } from "./InicioScreen.styles";
  * prevenir.
  */
 const MAXIMO_LISTADO_NO_LOTE = 6;
-
-const DIAS_DA_SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
-const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-
-/** "Segunda-feira, 12 de maio" — com a inicial maiúscula, que é como um título se escreve. */
-function dataPorExtenso(date: Date): string {
-  const dia = DIAS_DA_SEMANA[date.getDay()];
-  return `${dia[0].toUpperCase()}${dia.slice(1)}, ${date.getDate()} de ${MESES[date.getMonth()]}`;
-}
 
 /** O primeiro nome, que é como uma saudação fala. Vazio quando a ficha não tem nome. */
 function primeiroNome(fullName: string): string {
@@ -289,13 +281,10 @@ export function InicioScreen() {
         ))}
       </ScrollView>
 
-      <Pressable
-        style={styles.fab}
-        accessibilityRole="button"
+      <Fab
         accessibilityLabel="Cadastrar medicação ou compromisso"
-        onPress={() => router.push("/cadastro/escolha")}>
-        <Text style={styles.fabIcon}>+</Text>
-      </Pressable>
+        onPress={() => router.push("/cadastro/escolha")}
+      />
     </SafeAreaView>
   );
 }

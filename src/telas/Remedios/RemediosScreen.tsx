@@ -15,7 +15,7 @@ import {
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
-import { CenteredLoader, Header, SearchField } from "@/ui";
+import { CenteredLoader, Fab, Header, SearchField } from "@/ui";
 import { styles } from "./RemediosScreen.styles";
 
 type ItemDeRemedioProps = {
@@ -236,13 +236,21 @@ export function RemediosScreen() {
               <View style={styles.centered}>
                 <Text style={styles.emptyTitle}>Nenhum remédio por aqui ainda</Text>
                 <Text style={styles.emptyDescription}>
-                  Use o botão + na tela inicial para cadastrar seu primeiro medicamento.
+                  Toque no + para cadastrar seu primeiro medicamento.
                 </Text>
               </View>
             )
           }
         />
       )}
+
+      {/* Vai direto para "escanear ou manual": quem está na lista de remédios já respondeu, ao
+          estar aqui, que o que vai cadastrar é um remédio — passar pela pergunta "medicação ou
+          compromisso?" seria pedir de novo o que a tela já diz. */}
+      <Fab
+        accessibilityLabel="Cadastrar medicação"
+        onPress={() => router.push("/cadastro/medicamento")}
+      />
     </SafeAreaView>
   );
 }
