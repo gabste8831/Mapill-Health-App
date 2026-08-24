@@ -32,7 +32,7 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 1. Estado atual (atualizado em 2026-08-23)
+## 1. Estado atual (atualizado em 2026-08-24)
 
 ### Já pronto ✅
 
@@ -45,10 +45,10 @@ Nenhum bloco fecha sem estes seis itens:
 | Login | Tela + Google via Supabase Auth (`SupabaseAuthGateway`), sessão persistida, "continuar sem login" |
 | Onboarding LGPD | `ConsentimentoScreen` + `consent_records` versionado por `CURRENT_TERMS_VERSION`; bump força reconsentimento |
 | Ficha de saúde | `FichaDeSaudeScreen` — nome completo obrigatório, demais campos opcionais, foto (galeria), contatos de emergência em lista. Serve à primeira execução **e** à edição |
-| Ajustes | Edição da ficha, estado da conta (entrar depois sem perder dado local) e consulta dos termos com data/versão do aceite |
+| Ajustes | Edição da ficha, vincular/desvincular conta Google, consulta dos termos com data/versão do aceite, e **MEUS DADOS**: apagar o clínico ou apagar tudo (apagamento físico, duas etapas, volta à primeira execução) |
 | Home | Agenda do dia, progresso, confirmação/pulo com correção retroativa, adesão semanal e alerta de estoque — **tudo vindo dos repositórios**, sem mock |
 | Navegação | Abas reais (Home/Calendário/Remédios/Ajustes) — nativas no aparelho, barra em JS no preview web; grupo `cadastro` como stack modal; rotas `/ficha` e `/termos`; `_layout.tsx` sem lógica de estado — **verificado em device (22/08)** |
-| Cadastro de medicamento | Formulário manual completo, gravando medicamento + prescrição + estoque + horários no SQLite — **verificado em device (22/08)** |
+| Cadastro de medicamento | Formulário manual completo, gravando medicamento + prescrição + estoque + horários no SQLite — **verificado em device (22/08)**. Horário escolhido no relógio nativo do Android, com preenchimento "de X em X horas", e data de início editável |
 | Medicações | Lista dos cadastros com dose, frequência, horários e estoque, com busca por nome ou princípio ativo; lápis abre a edição no mesmo formulário e lixeira faz exclusão lógica com confirmação |
 | Build em aparelho | Dev build pelo **EAS** (o build local não fecha nesta máquina — ver log de 22/08) |
 
@@ -58,12 +58,14 @@ Nenhum bloco fecha sem estes seis itens:
 - **Sync**: login autentica, mas nada sobe/desce. Sem tabelas no Supabase, sem RLS.
 - **CMED**: nenhum script de ingestão, nenhum seed embarcado.
 - **Estoque / Agenda / Histórico**: repositórios existem, telas não.
-- **Direitos LGPD**: exportar, excluir e revogar consentimento ainda não existem (bloco D3).
+- **Direitos LGPD — parcial**: apagar os dados locais (clínicos ou tudo) e revogar consentimento
+  já existem em Ajustes → MEUS DADOS, com apagamento físico. Faltam **exportar** e o lado
+  servidor da exclusão, que depende do D1 existir.
 - **Verificação em aparelho — parcial**: login Google, consentimento, ficha, navegação e cadastro
   foram validados em device (22/08), e a partir daí saíram três bugs que só apareciam ali (foto se
-  sobrescrevendo, teclado cobrindo o campo, pílula das abas herdando cor do sistema). Ainda **não**
-  verificados: a Home com dados reais (B4), listagem/busca/edição/exclusão, a correção do fuso na
-  agenda, o botão físico de voltar nos modais e o seletor nativo de horário.
+  sobrescrevendo, teclado cobrindo o campo, pílula das abas herdando cor do sistema). Em 24/08
+  entraram a Home com dados reais (B4), a correção do fuso na agenda e o botão físico de voltar
+  nos modais. Ainda **não** verificados: **listagem, busca, edição e exclusão** na aba Remédios.
 
 ---
 
@@ -127,9 +129,9 @@ nova vira gambiarra no `_layout.tsx`.
 - [x] O FAB abre "O que deseja cadastrar? → Medicação | Compromisso" e daí "Como? → Escanear |
       Manual" (ordem já decidida em `screens-and-flows.md` §2). — **verificado em device
       (2026-08-22)**, incluindo o cadastro completando e persistindo.
-- [ ] Botão físico de voltar (Android) se comporta corretamente em todos os modais. — **só
-      verificável em device** (ver §5). Não tem equivalente no web — item permanentemente
-      dependente do dev build.
+- [x] Botão físico de voltar (Android) se comporta corretamente em todos os modais. —
+      **verificado em device (2026-08-24)**. Não tem equivalente no web — item permanentemente
+      dependente do dev build (ver §5).
 - [x] `_layout.tsx` não contém mais lógica de decisão de fluxo. — `useFirstRunGate`/`useDatabaseReady` ligados; `_layout.tsx` só decide o que renderizar pro `step` atual.
 - [x] Preview web do shell funciona (pré-requisito pra trabalhar layout sem aparelho, §5.1).
 
@@ -304,9 +306,9 @@ seu caso — campo fora de contexto gera dúvida, não completude.
 - [x] As formas farmacêuticas cobrem comprimido, líquido, gota, injeção, pomada, sublingual,
       inalador, adesivo e sachê — e a unidade de dose oferecida acompanha a forma escolhida.
 - [x] Editar e excluir (soft delete) uma prescrição existente funciona. — aba Remédios lista os
-      cadastros; tocar no card abre `cadastro/editar/[id]` com o formulário preenchido, e salvar
-      regera os horários futuros. Exclusão é lógica (`deletedAt`) em medicamento, prescrição e
-      estoque. **Pendente de device.**
+      cadastros; o lápis abre `cadastro/editar/[id]` com o formulário preenchido, e salvar regera
+      os horários futuros. Exclusão é lógica (`deletedAt`) em medicamento, prescrição e estoque.
+      **Pendente de device** — não entrou na leva de 24/08, é a última pendência de validação.
 - [x] Excluir pede confirmação explícita e explica a consequência ("os registros de ingestão serão
       mantidos no histórico"). — o alerta diz o que some (horários futuros) e o que fica
       (histórico), porque é o receio de perder o histórico que trava a decisão.
@@ -325,9 +327,14 @@ seu caso — campo fora de contexto gera dúvida, não completude.
       tela (PDF, JPG ou PNG) em vez de descobertos no erro.
 - [x] Aviso prévio de vencimento da receita, pra renovar sem interromper o tratamento — 7, 15 ou
       30 dias, e a tela mostra a data em que o aviso chega, não a antecedência.
-- [ ] Seletor nativo de horário (roda de hora/minuto) no popup de horários, no lugar do campo
-      mascarado. Componente só de aparelho, invisível na prévia web — **entra na leva de
-      validação em device**, junto do login Google e da persistência (§5.1).
+- [x] Seletor nativo de horário (roda de hora/minuto) no popup de horários, no lugar do campo
+      mascarado. — `TimePicker` do kit, sobre o `DateTimePicker` do `@expo/ui/jetpack-compose`, com
+      irmão `.web.tsx` mantendo o campo mascarado no preview. **Pendente de device**: é componente
+      Compose dentro de um `Modal`, e só o aparelho diz se ele desenha ali.
+- [x] Intervalo em horas deixou de exigir conta de cabeça: o popup preenche "de X em X horas" a
+      partir do primeiro horário, mostrando a lista inteira antes de aplicar.
+- [x] Tratamento pode começar em data futura — "QUANDO COMEÇA" vale hoje e fica dito na tela, com
+      atalho para alterar.
 - [ ] Seção de lembrete a ser retrabalhada em conversa própria (2026-08-21). O que existe hoje —
       quatro modos, aviso de permissão e o acordeão "como funcionam" — fica como está até lá.
 
@@ -365,7 +372,9 @@ revisa e confirma antes de salvar.
 **Pronto quando**
 - [x] Confirmar dose desconta estoque; pular não desconta. — e desconta **a dose**, não uma
       unidade: `RegisterIntake`/`CorrectIntake` recebem `DoseSchedule.amount` (ver log de 22/08).
-      **Pendente de device.**
+      A agenda do dia vindo dos repositórios foi **verificada em device (2026-08-24)**; a
+      conferência da baixa de estoque contra a caixa física fica para o B5, que é a tela onde o
+      número aparece.
 - [x] Confirmar dose pede confirmação visual explícita antes de gravar. — diálogo com o
       medicamento, a dose e o horário; pular tem o seu, dizendo que o estoque não é descontado.
 - [x] Correção retroativa gera log novo (o antigo continua consultável) e ajusta estoque por delta.
@@ -376,8 +385,10 @@ revisa e confirma antes de salvar.
 - [x] Home sem nenhum medicamento cadastrado mostra estado vazio útil (não uma tela quebrada). —
       e separa "app vazio" (nunca cadastrou) de "dia vazio" (tem tratamento, sem dose hoje), que
       pedem ações diferentes.
-- [ ] **Confirmar em lote** ("tomei todas as da manhã") — fora do escopo desta parte, anotado
-      porque apareceu na revisão: hoje cada dose é confirmada individualmente.
+- [x] **Confirmar em lote** ("tomei todas as da manhã") — "Confirmar todas" no bloco de atrasadas,
+      com o diálogo nomeando cada dose que vai ser gravada. Só nas **atrasadas**: são as únicas em
+      que "tomei" descreve algo que já aconteceu, e estender às futuras transformaria o histórico
+      em registro de intenção. **Pendente de device.**
 
 **Rastreabilidade**: §2.3.3 (eMEM — monitoramento eletrônico com timestamp auditável); §2.9.3.
 
@@ -687,11 +698,28 @@ apagar. Vira uma ação só, "Revogar consentimento e apagar meus dados".
 A ficha de saúde, o status de conta e a consulta dos termos já foram entregues no A2 —
 a aba Ajustes existe, este bloco só acrescenta seções a ela.
 
+**Metade local entregue em 2026-08-24**, antes do bloco, porque ela não depende do D1 e porque
+sem ela não há como testar o app sem desinstalar. Ajustes ganhou a seção MEUS DADOS com
+"Apagar meus dados de saúde" e "Apagar tudo e recomeçar", ambos com apagamento **físico**
+(`LocalDataRepository`), inclusive das fotos e receitas no diretório de documentos.
+
 **Pronto quando**
 - [ ] Exportação gera arquivo legível com todos os dados do titular.
-- [ ] Exclusão apaga de verdade nos dois lados — verificado no painel do Supabase.
-- [ ] Exclusão tem confirmação em duas etapas.
-- [ ] Revogar consentimento apaga os dados e devolve o app ao estado de primeira execução.
+- [ ] Exclusão apaga de verdade nos dois lados — verificado no painel do Supabase. — **o lado
+      local está feito**; o lado servidor depende do D1 existir, e com sincronização ligada o
+      apagamento tem que acontecer **primeiro no servidor**, senão o próximo `pull` traz tudo de
+      volta.
+- [x] Exclusão tem confirmação em duas etapas. — e a segunda repete o que some em vez de só
+      perguntar "tem certeza?", porque é ela que precisa ser lida.
+- [x] Revogar consentimento apaga os dados e devolve o app ao estado de primeira execução. —
+      "Apagar tudo e recomeçar" apaga `consent_records` junto e chama `restartFirstRun()`. Seguir
+      em uso sem consentimento registrado é o que a LGPD não admite, então o retorno ao início não
+      é cortesia de UX, é obrigação. **Pendente de device.**
+- [x] "Excluir conta" significa **apagar os dados e desvincular o titular do ambiente de nuvem** —
+      decisão de escopo confirmada em 2026-08-24. Não significa deletar a linha em `auth.users` do
+      Supabase, que exigiria API de admin com service role (impossível a partir do cliente) e que
+      o titular não pede: a conta do Google é dele, não do Mapill. A tela diz isso com todas as
+      letras — "sua conta do Google não é excluída, só deixa de estar ligada ao Mapill".
 
 **Rastreabilidade**: LGPD art. 18 (direitos do titular), art. 8º §5º (revogação).
 
@@ -920,11 +948,13 @@ resolve pro `scheme` do `app.json`.
       ⚠️ Depois de editar o `.env`, **reiniciar o `expo start`**: variáveis `EXPO_PUBLIC_` são
       embutidas no bundle em build time, não lidas em runtime.
 - [x] Supabase → Redirect URLs contém `mapillapp://`.
-- [ ] Client Secret preenchido no provider Google (conferir).
-- [ ] OAuth client do tipo `Web application` no Google Cloud (conferir).
-- [ ] Dev build instalado no aparelho.
-- [ ] Login com Google conclui e o app avança para consentimento/ficha.
-- [ ] Fechar e reabrir o app **não** pede login de novo (sessão persistida via AsyncStorage).
+- [x] Client Secret preenchido no provider Google — o login completa, o que só acontece com ele.
+- [x] OAuth client do tipo `Web application` no Google Cloud — idem: o callback do Supabase só
+      fecha com esse tipo.
+- [x] Dev build instalado no aparelho (EAS, 22/08).
+- [x] Login com Google conclui e o app avança para consentimento/ficha. **Verificado em device
+      (2026-08-22)**, reconfirmado em 24/08.
+- [x] Fechar e reabrir o app **não** pede login de novo (sessão persistida via AsyncStorage).
 
 Como o perfil `development` do `eas.json` usa `developmentClient: true`, o JS vem do Metro da
 máquina local em runtime — então o `.env` local **é** lido normalmente no dev build. A pegadinha
@@ -933,7 +963,73 @@ gerado no servidor do EAS.
 
 ---
 
-## 6. Log de progresso
+## 6. Status de plataforma e de paradigma
+
+> Esta seção existe para que "roda no iPhone?", "isso continua offline-first?" e "o que falta
+> testar no aparelho?" se respondam **lendo**, e não auditando o código de novo a cada vez.
+> Atualizar ao fechar cada bloco. Última varredura: **2026-08-24**.
+
+### 6.1 Plataformas
+
+**Android é a plataforma alvo.** iOS é mantido *compilável*, não verificado: escrever o irmão
+`.ios.tsx` quando uma API é de plataforma custa minutos, enquanto descobrir o import quebrado no
+primeiro build de iOS custa uma tarde — mas nada disso vira promessa até existir um build.
+
+| Área | Android | iOS | Web (preview) |
+|---|---|---|---|
+| Navegação (`NativeTabs`) | ✅ verificado em device | ⚙️ código pronto (`sf=` declarado ao lado do `md=`) | ✅ barra em JS |
+| SQLite + repositórios | ✅ verificado | ⚙️ código pronto | ⛔ desligado por design (`useDatabaseReady`) |
+| Login Google (OAuth) | ✅ verificado | ⚙️ código pronto (redirect sai do `scheme`) | ⛔ não persiste |
+| Foto / anexo de receita | ✅ verificado | ⚙️ `photosPermission` vira `NSPhotoLibraryUsageDescription` | ⛔ sem gravação em disco |
+| Relógio de horário (`TimePicker`) | ✅ Jetpack Compose | ⚙️ SwiftUI, irmão `.ios.tsx` | ✅ campo mascarado |
+| Teclado / rolagem | ✅ | ⚙️ ramo `ios` em `use-keyboard-height` | ✅ |
+| Notificações (C1) | ⛔ não iniciado | ⛔ não iniciado, **e com assimetria conhecida**: `DAILY`/`WEEKLY` são Android, `CALENDAR` é iOS-only (ver C1.2) | ⛔ fora de escopo |
+
+Legenda: ✅ verificado em aparelho · ⚙️ escrito, nunca executado · ⛔ não se aplica ou não existe.
+
+**Bloqueio prático do iOS**: o app nunca foi buildado para iPhone, e buildar exige Mac ou EAS com
+**conta Apple Developer paga (US$ 99/ano)**. Enquanto isso não acontecer, toda linha ⚙️ da coluna
+iOS é hipótese. Não prometer iOS na defesa; citar como trabalho futuro.
+
+### 6.2 Fila de validação em aparelho
+
+Tudo que já está escrito e nunca foi executado em device. **Marcar aqui ao testar** — é esta
+lista que o "verificado em device" dos blocos consulta.
+
+| # | O que testar | Como saber que passou | Origem |
+|---|---|---|---|
+| 1 | Listagem, busca, edição e exclusão na aba Remédios | Busca acha ignorando acento; lápis abre o cadastro preenchido; lixeira pede confirmação e o item some da lista | B2 (14), 23/08 |
+| 2 | Relógio nativo no popup de horários | A roda **aparece** (é Compose dentro de um `Modal`, que abre em outra janela no Android); "Confirmar" só acende depois de girar | B2 (15), 24/08 |
+| 3 | Preencher "de X em X horas" | 8 doses de 3 em 3 a partir das 08:00 produz a lista com 02:00 e 05:00; 4 doses de 8 em 8 é recusado | B2 (15), 24/08 |
+| 4 | Data de início futura | Cadastrar começando em 3 dias: a Home **não** mostra dose hoje, e a primeira aparece no dia marcado | B2 (15), 24/08 |
+| 5 | Confirmar em lote | Com 2+ atrasadas, "Confirmar todas" lista os nomes e grava todas; o estoque de cada uma desconta a dose certa | B4, 24/08 |
+| 6 | Apagar dados de saúde | Medicamentos e histórico somem; a ficha e o consentimento **continuam** (não volta pro onboarding) | D3, 24/08 |
+| 7 | Apagar tudo e recomeçar | Volta pra tela de login; a conta é desvinculada; reabrir o app não traz nada de volta | D3, 24/08 |
+| 8 | Fotos e receitas apagadas junto | Depois do apagamento total, cadastrar de novo e conferir que nenhuma imagem antiga reaparece | D3, 24/08 |
+| 9 | Reconsentimento por bump de versão | `CURRENT_TERMS_VERSION` foi para `1.1.0` em 24/08 — a próxima abertura **deve** pedir o aceite de novo | Texto legal, 24/08 |
+| 10 | Baixa de estoque contra a caixa física | Confirmar N doses e conferir que o estoque caiu exatamente a soma das doses, não N unidades | B4, 22/08 |
+
+### 6.3 Offline-first
+
+**Nenhuma exceção até aqui.** Toda escrita clínica vai para o SQLite local e nada espera rede.
+
+| Operação | Toca a rede? |
+|---|---|
+| Cadastro, edição e exclusão de medicamento | Não |
+| Agenda do dia, confirmação/pulo/correção de dose | Não |
+| Baixa e alerta de estoque | Não |
+| Ficha de saúde e consentimento | Não |
+| Sessão na abertura do app | **Não** — `getCurrentUser()` usa `getSession()`, que lê do AsyncStorage ([supabase-auth-gateway.ts](../src/data/remote/supabase-auth-gateway.ts)). Sem isso, abrir o app sem sinal travaria a primeira execução |
+| Login com Google | Sim — é a natureza do OAuth. **Opcional**: "continuar sem login" mantém o app inteiro utilizável |
+
+⚠️ **O mérito é menor do que parece: não existe nuvem ainda.** O app é offline-*only*, não
+offline-*first* posto à prova. A propriedade só será realmente testada no D1, quando houver o que
+sincronizar — e é lá que o paradigma pode ser violado sem ninguém notar. Manter esta tabela viva
+a partir do D1 é o que impede isso.
+
+---
+
+## 7. Log de progresso
 | Data | Bloco | Status | Observação |
 |---|---|---|---|
 | 2026-08-19 | — | — | Plano criado a partir da auditoria do repositório |
@@ -961,7 +1057,7 @@ gerado no servidor do EAS.
 | 2026-08-21 | B2 (parte 7) | Concluído | **Duração em dias, semanas ou meses.** "Por 90 dias" não é como ninguém pensa um tratamento de três meses, e mês não tem tamanho fixo — converter pra dias na entrada erraria a conta. `lastDayOfTreatment` passou a receber a unidade e a somar meses de verdade, grudando no fim do mês quando o dia não existe (31/01 + 1 mês = 28/02). O inverso (`treatmentDuration`) reconhece a unidade ao reabrir um cadastro, preferindo dias abaixo de duas semanas pra quem escreveu "7 dias" não reencontrar "1 semana". Verificado contra 9 casos em Node, incluindo mês curto e virada de ano. O checkbox caseiro do estoque (quadrado que só pintava de azul) foi eliminado em favor do `Checkbox` do kit, que tem o "certinho" — agora existe um único checkbox no app. |
 | 2026-08-21 | B2 (parte 8) | Concluído | **Nenhum campo vem escolhido de fábrica.** Mesma razão que tirou os horários sugeridos, levada até o fim: um seletor já marcado é indistinguível de uma resposta dada, e a pessoa passa por ele sem tocar — o cadastro sai com uma posologia que o app inventou. Passaram a começar vazios: forma farmacêutica, quantidade da dose, unidade (nas formas ambíguas), frequência, quantas vezes por dia, intervalo, duração e sua unidade, modo de lembrete e antecedência do alerta de estoque. A unidade derivada da forma continua sendo preenchida sozinha — isso não é chute, é consequência. Como efeito colateral bom, o essencial virou cascata: a dose só aparece depois da forma (sem ela o app não sabe se pergunta "quantos comprimidos" ou "quantos ml"), os horários só depois da quantidade de doses, o primeiro horário só depois do intervalo. Trocar de frequência zera o que era da anterior. Cuidado de borda: `every` de lista vazia é `true`, então "nenhum horário" passaria por "todos preenchidos" — daí o teste explícito de `timeInputs.length > 0`. E o alerta de estoque só é gravado ligado se a antecedência foi escolhida, senão ficaria "ativo" sem nunca disparar. |
 | 2026-08-21 | B2 (parte 9) | Concluído | **Auditoria de cobertura, e os três buracos que ela achou.** Doze cadastros reais foram passados pelas regras do formulário; oito atravessavam inteiros e três falhavam **em silêncio**, que é o modo de falha que este bloco existe pra evitar. (a) **Dose diferente no mesmo tratamento** — insulina 10 UI de manhã e 8 à noite, varfarina por dia da semana, desmame de corticoide: `doseAmount` era um número por prescrição, então a saída era cadastrar o mesmo remédio duas vezes e quebrar o estoque. Os horários viraram `ScheduledDose { at, amount }`, com `amount: null` significando "o mesmo de sempre" — a dose uniforme continua morando num lugar só, e o número por horário só existe quando alguém o escreveu. `DoseSchedule` passou a gravar a dose já resolvida (migration 012), porque editar a posologia amanhã não pode reescrever o que estava agendado ontem. (b) **Cartela com pausa** — anticoncepcional 21/7 cadastrado como "todo dia" cobrava dose nos sete dias de pausa. Nova frequência `cyclic { daysOn, daysOff }`, ancorada no início do tratamento e não na janela de geração, senão o ciclo escorregaria a cada reabastecimento. Ela também é como "dias alternados" se expressa (1 e 1). (c) **A cada 48 horas** passou a ser oferecido — e só depois que o intervalo virou ancorado no início, pelo mesmo motivo. Efeito colateral: o aviso de estoque insuficiente passou a comparar **quantidade com quantidade** (`TreatmentSummary.totalAmount`) em vez de dividir estoque por dose, conta que deixou de existir quando a dose passou a variar. O JSON antigo (`times: string[]`) é convertido na leitura do repositório, e não numa migration: reescrever JSON dentro do SQLite não é verificável fora do aparelho, e a função é. 16 casos verificados rodando o domínio compilado em Node — cartela, pausa, regeração, dose por horário, herança da dose geral, 48h ancorado, virada de meia-noite, soma do tratamento e ciclo inválido. |
-| 2026-08-21 | B2 (parte 9) | Cobertura conhecida | Ainda **não** cabe no cadastro: tratamento que começa em data futura (a data de início segue fixa em hoje, esperando a tela de tratamentos) e intervalo livre em horas — a lista oferece 4/6/8/12/24/48, e "de 3 em 3 horas" se resolve como 8 horários no dia. Caneta de insulina se conta em doses e não em ml, então o estoque dela fica aproximado. |
+| 2026-08-21 | B2 (parte 9) | Cobertura conhecida | Ainda **não** cabe no cadastro: tratamento que começa em data futura (a data de início segue fixa em hoje, esperando a tela de tratamentos) e intervalo livre em horas — a lista oferece 4/6/8/12/24/48, e "de 3 em 3 horas" se resolve como 8 horários no dia. Caneta de insulina se conta em doses e não em ml, então o estoque dela fica aproximado. **Superado em 24/08** nos dois primeiros itens; o terceiro virou limitação assumida (ver 24/08). |
 | 2026-08-21 | B2 (parte 10) | Concluído | **Frequência: cinco opções viraram quatro, e sumiu a que tinha dois caminhos.** "A cada X horas" saiu. Ela era a única opção que misturava os dois eixos da pergunta — *em quais dias* e *em que horários* —, e como todo intervalo oferecido dividia o dia por igual (4, 6, 8, 12, 24), produzia exatamente o mesmo agendamento que "todo dia" com os horários equivalentes: mesmo destino por duas estradas, o que é dúvida na hora de escolher e nada além disso. O que ela tinha de legítimo era o modelo mental de quem ouve "de 8 em 8 horas", e isso se resolve preenchendo os horários, não criando uma frequência. `cyclic` (dias tomando/dias de pausa) virou `cycle` (**a cada N dias, tomando nos M primeiros**), a pedido — a formulação genérica engole três coisas que as pessoas dizem de jeitos diferentes: cartela 28/21, dia sim dia não 2/1 e injeção "de 30 em 30 dias" 30/1. Com isso não é preciso uma frequência mensal separada; o preço, assumido, é que o ciclo escorrega no calendário (a cada 30 dias desde 25/01 cai em 24/02). A âncora deixou de ser um número ("que dia do ciclo é hoje") e virou **a data do primeiro dia do ciclo atual**, perguntada como "começa hoje" ou "já comecei antes" — pra injeção de 30 em 30, "que dia do ciclo é hoje" era pergunta que ninguém sabe responder. A tela confirma com **datas** e não com a regra: "a próxima é em 24/02", "você toma até 17/01 e recomeça em 25/01". E o "só quando precisar" trocou "uso contínuo" por **"sempre disponível"** — o Dorflex da mochila não é um tratamento contínuo, é um remédio sem agenda, e a palavra errada ali fazia a pergunta não encaixar em nada. As gravações antigas são convertidas na leitura do repositório: intervalo que divide o dia vira os horários equivalentes (conversão exata, não aproximação), 48h vira ciclo de dois dias, e o `cyclic` antigo vira `cycle` com a data reconstruída. 24 casos verificados em Node. |
 | 2026-08-21 | B2 (parte 11) | Concluído | **Receita ganhou PDF e aviso de vencimento; "como tomar" ganhou saída de emergência.** As fichas de como tomar cobrem o comum, mas lista fechada sempre deixa alguém de fora — entrou um campo livre ao lado delas (`intake_note`, migration 013), separado da observação geral porque tem destino diferente: acompanha a **dose** na hora de tomar ("diluir em meio copo"), não o tratamento. O anexo de receita passou a aceitar **PDF** (`expo-document-picker` 57.0.1), com duas portas de entrada — galeria pra quem tem o papel na mão, arquivo pra quem recebeu a receita digital —, e os formatos aceitos escritos na tela em vez de descobertos no erro. `attachmentKind` deixou de ser gravado fixo como `image`. O **aviso de vencimento** entrou em cascata: anexo → validade → "me avisar antes de vencer" → 7, 15 ou 30 dias. A menor opção é uma semana porque antecedência que não dá tempo de conseguir consulta é só um susto; e a confirmação mostra a **data** em que o aviso chega, não a antecedência, que é o único jeito de conferir se dá tempo. Remover a receita leva junto validade e aviso — sozinhos eles não descrevem nada. A persistência do arquivo escolhido saiu de `usePhotoPicker` e virou `shared/persist-picked-file`, usada pelos dois seletores; o de documento guarda a extensão real, senão um PDF gravado como `.jpg` não abriria. |
 | 2026-08-21 | B2 (parte 12) | Concluído | **Validação por tipo de campo, e a seção de alertas.** Número quebrado passava onde não existe: "1,5 gotas" era aceito e viraria estoque descontado com número impossível e um aviso que ninguém cumpre. `allowsFractionalDose` fixa isso na unidade e não no campo, porque é o mundo físico que decide: meio comprimido é rotina e o sulco está lá pra isso; cápsula não se parte sem derramar, gota, adesivo, sachê e jato não se dividem; ml, mg, g e UI são contínuos. A regra vale nos três lugares onde se digita quantidade (dose, dose por horário, estoque), e as máscaras de `shared/number-input` filtram na entrada, porque o teclado decimal do sistema é sugestão e não trava. Duração passou a aceitar só inteiro. **A dose por horário ficou visível**: a regra sempre foi override (horário preenchido manda, em branco herda), mas a tela não contava, e dois números apareciam se contradizendo. Agora, com a variação ligada, uma linha diz se o valor de cima ainda vale ou se todos os horários já têm o seu. O campo de orientação livre virou a ficha **"Outra orientação"** dentro de COMO TOMAR, que abre o campo — como campo fixo, ele parecia cobrar um texto de todo mundo. Na seção de alertas: os quatro modos viraram grade 2×2 com ícone (`OptionGroup` ganhou `icon` e `alto`), o aviso do aparelho virou **condição e não ressalva** ("com permissão, volume e o app fora da economia de bateria, os alertas chegam"), porque dizer "não garantimos" transfere a insegurança sem dar saída; o "como funcionam" ganhou fundo azul claro e passou a descrever o fluxo real: o que o alerta mostra, o que confirmar/adiar/ignorar faz com o status e com o estoque, a soneca de 5 minutos uma vez só, e três tópicos de o que o Mapill não faz. "Lembrete" virou **alerta** no texto de tela. Travessão removido de todo texto visível ao usuário. |
@@ -979,3 +1075,13 @@ gerado no servidor do EAS.
 | 2026-08-23 | Medicações | Concluído | **A listagem virou tela de verdade, a pedido do teste em aparelho.** Header próprio deu lugar ao `Header` do kit (o mesmo dos Termos). Entrou **busca por nome ou princípio ativo**, ignorando acento e maiúscula — quem procura um remédio digita apressado e no teclado do celular, onde o acento custa dois toques; o princípio ativo entra junto porque quem tem a caixa na mão às vezes lembra do "losartana" e não do nome comercial. A contagem vira "2 de 5" durante a busca, e o estado vazio separa "não achou com esse termo" de "não tem nada cadastrado", que pedem ações diferentes. O card inteiro clicável deu lugar a **dois botões explícitos** (lápis e lixeira): ao lado de uma ação destrutiva, "toca e abre alguma coisa" não diz o que vai acontecer. O card encolheu (foto de 56 pra 40px, espaços internos menores) e **perdeu o quadrado de iniciais** — sem foto não entra nada no lugar, porque ele ocupava o espaço de uma foto pra dizer o que o nome ao lado já diz. Novo `SearchField` no kit, em formato de pílula com lupa: separado do `TextField` porque buscar não é preencher (sem label, sem erro, nada é salvo), e já pensando na busca do dicionário CMED do B1. |
 | 2026-08-23 | Abas | Concluído | **A barra de abas deixou de herdar cor do sistema.** A pílula da aba ativa vinha do Material You, que tira a cor do papel de parede do aparelho — no teste saiu verde. A cor da marca não pode depender de qual foto a pessoa colocou no celular, então `indicatorColor` e `rippleColor` passaram a ser fixados. Ícones e rótulos em cinza, azul só na aba ativa. A barra ficou **um tom acima do branco** (`surfaceContainerLow`) em vez de branca como o `Header`: a API da barra nativa não aceita borda — expõe cor de fundo, indicador e ripple, e `shadowColor` só no iOS —, então card ou botão branco encostando nela se fundiam num bloco só, e o degrau de cor faz a separação que a borda faria. Props conferidos na doc versionada do SDK 57 antes de escrever, já que `NativeTabs` ainda é API instável. |
 | 2026-08-23 | Cadastro | Concluído | **Fim do cadastro leva à lista.** O `SuccessOverlay` passou de 1,8s pra 2,8s — tempo de ler a frase inteira sem pressa — e passou a levar pra lista de medicações em vez de voltar pra Home: a pessoa vê o que acabou de criar, em vez de voltar ao ponto de partida. Setas de voltar completadas em Medicações e Calendário; as telas empilhadas já tinham, faltavam as abas, que também são destino de atalho de outras telas. |
+| 2026-08-24 | A1 | **Fechado** | **Segunda leva de validação em aparelho.** O botão físico de voltar se comporta corretamente nos modais de cadastro — era o único item que ainda segurava o A1, e ele fecha aqui. Também confirmados: a Home puxando dados reais dos repositórios (B4) e a correção do fuso na agenda, com as doses da noite aparecendo no dia certo. **Não** entrou no teste: listagem, busca, edição e exclusão na aba Remédios, que continua sendo a única pendência de validação em device. O checklist de login da §5.4 foi marcado por consequência — o login completa e a sessão persiste, o que só acontece com o Client Secret preenchido e o OAuth client do tipo `Web application`. |
+| 2026-08-24 | B2 (parte 15) | Concluído | **Relógio nativo no lugar do campo mascarado.** Novo `TimePicker` no kit, sobre o `DateTimePicker` do `@expo/ui/jetpack-compose` — que já estava no `package.json` desde o primeiro commit, então o dev build de 22/08 o contém e nada precisa ser rebuildado. Digitar "08:00" num teclado numérico custa quatro toques, e um deles é o dois-pontos que a máscara insere sozinha e que a pessoa tenta digitar mesmo assim; a roda é o gesto que quem usa Android já conhece de despertador, e o próprio componente oferece o botão nativo de alternar pra digitação, então quem prefere teclado não perde nada. O relógio ocupa o **mesmo** popup, trocando o conteúdo, em vez de abrir outro por cima: modal dentro de modal empilha dois fundos escurecidos e tira do botão físico de voltar um destino óbvio. **"Confirmar" nasce desabilitado e só acende quando alguém gira** — a posição em que o relógio abre é ponto de partida, não resposta, e aceitá-la com um toque seria reintroduzir pela porta dos fundos o horário sugerido que a parte 8 removeu. O irmão `.web.tsx` mantém o campo mascarado no preview (§5.1: o que se perde no navegador é o gesto, não a informação). |
+| 2026-08-24 | B2 (parte 15) | Concluído | **"De X em X horas" virou preenchimento, não frequência.** É assim que o médico fala, e o formulário só entende horários — traduzir "de 3 em 3 horas" em oito horários exigia uma conta de cabeça na frente da tela, e somar errado ali cai direto no lembrete. Dentro do popup, um botão pergunta o intervalo e o primeiro horário e preenche as linhas. **Não é sugestão**: os dois números são de quem preenche, e a lista aparece inteira antes de valer, o que deixa visível justamente a virada da madrugada (23:00 + 3h = 02:00) que a conta mental erra. Continua existindo **uma** frequência só — a parte 10 tirou "a cada X horas" por ser um segundo caminho pro mesmo agendamento, e um preenchedor não é um caminho, é uma calculadora. `serieCabeNoDia` barra o que daria a volta no relógio (4 doses de 8 em 8 horas fariam a quarta cair sobre a primeira), que é o mesmo conflito que o seletor já barra na escolha manual. 10 casos verificados em Node. Junto saíram duas menções órfãs à frequência removida, uma na mensagem de erro de "quantas vezes por dia" e outra no comentário de `MAX_DOSES_PER_DAY` — as duas mandavam a pessoa para uma opção que não existe mais. |
+| 2026-08-24 | B2 (parte 15) | Concluído | **Tratamento pode começar em data futura.** A data de início era fixa em hoje e invisível, então quem cadastrava a cartela que começa domingo ou o antibiótico que vai comprar amanhã saía com a data errada sem nada denunciar: os horários nasciam a partir de hoje e o prazo terminava cedo demais. Virou a linha "QUANDO COMEÇA", que vale hoje e **diz isso na tela**, com atalho pra alterar. Aqui "hoje" pode vir preenchido sem ferir a regra da parte 8: ela existe pra impedir o app de inventar posologia, e o dia de hoje não é invenção, é o único fato que ele sabe — cobrar um toque de todo mundo por um caso raro seria pagar caro pela coerência. Data pela metade trava o botão em vez de virar "hoje" por omissão. O domínio já estava certo (`generateDoseSchedules` recorta a janela pelo `startDate`), então a mudança é toda de tela; o que mudou junto foi o que assumia "início = hoje": a mensagem do ciclo passou a falar em "início do tratamento" e a opção "Começa hoje" vira "Começa junto com o tratamento" quando ele começa adiante. 12 casos verificados em Node, incluindo cartela 28/21 ancorada no futuro e início no passado. |
+| 2026-08-24 | D3 (parcial) / A2 | Concluído | **Gerenciamento de conta e de dados nos Ajustes, e três promessas de backup que eram falsas.** A regra combinada é "o dado sempre persiste no aparelho e **pode** ir pra nuvem se houver conta", mas a segunda metade não existe: o login autentica e nada sobe. A tela dizia o contrário em três lugares — "Habilita o backup dos seus dados" nos Ajustes, "Login habilita backup e sincronização entre dispositivos" no login, e o comentário do `handleSignIn`. Num app de medicação isso não é exagero de marketing: é o que faz alguém trocar de aparelho confiando e perder o histórico, e é a mesma falha de correspondência com o mundo real que o plano já proíbe no C1. Os textos passaram a descrever o que existe ("seus dados ficam neste aparelho", "a cópia na nuvem ainda não está disponível"). Entrou a seção **MEUS DADOS** com dois apagamentos de alcance diferente: o clínico (medicamentos, tratamentos, horários, histórico, estoque) preservando ficha e consentimento, e o total, que leva junto ficha, consentimento, fotos e receitas e devolve o app ao estado de recém-instalado. É **hard delete** e não `deleted_at` — a exclusão lógica existe pra que o histórico não fique órfão e pra que o D1 saiba contar ao servidor que a linha morreu; aqui a intenção é oposta, o dado sensível não pode continuar no aparelho, e manter a linha escondida seria o que a lei chama de tratamento. Numa transação só, porque apagar metade deixa estado que nenhuma tela sabe desenhar. Os arquivos são apagados **fora** da transação e por prefixo: o sistema de arquivos não participa dela, arquivo órfão é recuperável e banco meio apagado não, e apagar o diretório inteiro levaria junto o próprio banco do `expo-sqlite`. Novo `restartFirstRun()` no `use-first-run-gate` — um ouvinte só, porque o gate é único e dois discordando sobre a etapa atual seria pior que o problema —, já que seguir em uso sem consentimento registrado é o que a LGPD não admite. Desvincular ganhou confirmação e explicação de que nada é apagado; o apagamento total tem duas etapas, e a segunda repete o que some em vez de só perguntar "tem certeza?". |
+| 2026-08-24 | Texto legal | Concluído | **A política de privacidade dizia que o login habilita backup em nuvem, e não habilita.** Era a terceira e última cópia da promessa falsa — as outras duas, nos Ajustes e no login, caíram antes. Aqui o peso é outro: é o documento que o titular aceita, e descrever um tratamento de dado sensível que não acontece corrói o valor do consentimento, que é justamente a base legal do app (art. 7º, I e art. 11, I). O texto passou a separar o que é de hoje do que é previsto: "nesta versão do app, seus dados de saúde não saem do aparelho, mesmo com a conta vinculada", e a cópia em nuvem descrita como futura, com nova consulta ao titular antes de qualquer envio começar. A seção de retenção foi reescrita pra descrever os dois apagamentos que agora existem de verdade, e para dizer que a conta do Google não é excluída, só desvinculada. `CURRENT_TERMS_VERSION` foi de `1.0.1` para `1.1.0` — mudou o que o titular consente, então o aceite antigo não pode valer, e a próxima abertura pede reconsentimento. |
+| 2026-08-24 | Docs | Concluído | **§6.2, fila de validação em aparelho.** Dez itens escritos e nunca executados, cada um com o critério de "passou" ao lado. Existe porque a lista vinha sendo reconstruída de memória a cada retomada, e item que ninguém lembra de testar acaba entrando na defesa como se estivesse verificado. |
+| 2026-08-24 | Docs | Concluído | **Nova §6, "Status de plataforma e de paradigma".** A pergunta "roda no iPhone?" e "isso continua offline-first?" estavam sendo respondidas por auditoria de código a cada vez. Agora são duas tabelas mantidas ao fim de cada bloco. A varredura achou um import que só funciona no Android (`@expo/ui/jetpack-compose` no `TimePicker`, criado horas antes) e confirmou que o offline-first está intacto — inclusive o ponto que mais poderia tê-lo violado, a sessão na abertura, que usa `getSession()` e lê do AsyncStorage sem rede. Registrado também que o mérito é menor do que parece: o app é offline-*only*, e o paradigma só será posto à prova no D1. |
+| 2026-08-24 | iOS | Concluído | **`TimePicker.ios.tsx` com SwiftUI.** Android segue sendo a plataforma alvo, mas deixar um import que quebra em outra plataforma é dívida que não avisa — ela aparece no primeiro build de iOS, longe de quem a criou. As duas APIs não se parecem: o Android recebe `initialDate` em ISO, o iOS recebe `selection` como `Date` controlada e devolve por `onDateChange`. iOS continua **compilável, não verificado**: buildar exige Mac ou conta Apple Developer paga, e nada disso vira promessa até existir um build. |
+| 2026-08-24 | B2 | Limitação assumida | **Estoque continua contado na unidade derivada da forma.** A ideia de contar por embalagem ("2 canetas de 300 UI") foi avaliada e descartada a pedido do Gabriel: ela conflita com a dose que varia por horário, que é justamente o que o mesmo medicamento faz quando se toma 10 UI de manhã e 8 à noite, e resolver os dois juntos criaria duas conversões se olhando. Fica registrado como limitação do TCC: caneta de insulina se compra em ml e se toma em UI, então o estoque dela é aproximado. |
