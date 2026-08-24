@@ -1,14 +1,17 @@
-import type { Appointment, AppointmentType } from "../../domain/entities/appointment";
+import type { Appointment, AppointmentOutcome } from "../../domain/entities/appointment";
 import type { AppointmentRepository as AppointmentRepositoryPort } from "../../domain/ports/appointment-repository";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
 type AppointmentRow = SyncableRow & {
-  type: string;
+  title: string;
   scheduled_for: string;
+  location: string | null;
+  professional: string | null;
   notes: string | null;
-  prescription_photo_uri: string | null;
-  prescription_valid_until: string | null;
-  photo_sync_opt_out: number;
+  reminder_lead_days: number | null;
+  reminder_on_day: number;
+  outcome: string | null;
+  outcome_notes: string | null;
 };
 
 export class AppointmentRepository
@@ -20,12 +23,15 @@ export class AppointmentRepository
   protected toEntity(row: AppointmentRow): Appointment {
     return {
       id: row.id,
-      type: row.type as AppointmentType,
+      title: row.title,
       scheduledFor: row.scheduled_for,
+      location: row.location,
+      professional: row.professional,
       notes: row.notes,
-      prescriptionPhotoUri: row.prescription_photo_uri,
-      prescriptionValidUntil: row.prescription_valid_until,
-      photoSyncOptOut: row.photo_sync_opt_out === 1,
+      reminderLeadDays: row.reminder_lead_days,
+      reminderOnDay: row.reminder_on_day === 1,
+      outcome: row.outcome === null ? null : (row.outcome as AppointmentOutcome),
+      outcomeNotes: row.outcome_notes,
       updatedAt: row.updated_at,
       syncedAt: row.synced_at,
       deletedAt: row.deleted_at,
@@ -35,16 +41,28 @@ export class AppointmentRepository
   protected toRow(entity: Appointment): AppointmentRow {
     return {
       id: entity.id,
-      type: entity.type,
+      title: entity.title,
       scheduled_for: entity.scheduledFor,
+      location: entity.location,
+      professional: entity.professional,
       notes: entity.notes,
-      prescription_photo_uri: entity.prescriptionPhotoUri,
-      prescription_valid_until: entity.prescriptionValidUntil,
-      photo_sync_opt_out: entity.photoSyncOptOut ? 1 : 0,
+      reminder_lead_days: entity.reminderLeadDays,
+      reminder_on_day: entity.reminderOnDay ? 1 : 0,
+      outcome: entity.outcome,
+      outcome_notes: entity.outcomeNotes,
       updated_at: entity.updatedAt,
       synced_at: entity.syncedAt,
       deleted_at: entity.deletedAt,
     };
+  }
+
+  async findAllOrderedByDate(): Promise<Appointment[]> {
+    const rows = await this.database.getAllAsync<AppointmentRow>(
+      `SELECT * FROM ${this.tableName}
+       WHERE deleted_at IS NULL
+       ORDER BY scheduled_for ASC`,
+    );
+    return rows.map((row) => this.toEntity(row));
   }
 
   async findUpcoming(referenceDate: string): Promise<Appointment[]> {
