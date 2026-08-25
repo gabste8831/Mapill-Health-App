@@ -254,6 +254,7 @@ export function CalendarioScreen() {
   // Congelado na abertura: reler o relógio a cada render torna a tela impura e faria "Hoje"
   // escorregar sozinho enquanto alguém está com a lista aberta.
   const [agora] = useState(() => new Date());
+  const agoraIso = agora.toISOString();
   const hoje = toLocalIsoDay(agora);
   const amanha = toLocalIsoDay(new Date(agora.getTime() + 24 * 60 * 60_000));
   const ontem = toLocalIsoDay(new Date(agora.getTime() - 24 * 60 * 60_000));
@@ -394,7 +395,10 @@ export function CalendarioScreen() {
                 <ItemDeCompromisso
                   key={appointment.id}
                   appointment={appointment}
-                  passado={dia.isoDay < hoje}
+                  // Comparado por instante, e não pelo dia: a consulta das 8h de hoje já aconteceu
+                  // às 9h, e é justamente aí — saindo do consultório — que a pessoa tem o que
+                  // responder. Pelo dia, "Você foi?" só apareceria amanhã.
+                  passado={appointment.scheduledFor < agoraIso}
                   onEdit={() =>
                     router.push({
                       pathname: "/cadastro/editar-compromisso/[id]",
