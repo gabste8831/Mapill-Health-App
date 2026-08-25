@@ -17,26 +17,22 @@ npx expo start --dev-client
 
 Abrir o **Mapill (dev)** no aparelho. Tempo total estimado: 25 a 35 minutos.
 
-### ⚠️ Qual build você está usando muda dois passos
+### De onde vem o login com Google
 
-O `.env` **não sobe para o EAS** (está no `.easignore`), e o `eas.json` não declara variável
-nenhuma. Consequência:
+O `.env` **não sobe para o EAS** (está no `.easignore`), então até 25/08 qualquer build
+`preview`/`production` saía com as credenciais do Supabase vazias e o login nascia indisponível —
+foi o que aconteceu na build de 25/08. Resolvido cadastrando as variáveis no **servidor do EAS**,
+que é onde credencial de build mora; no repositório, nunca.
 
-| Build | De onde vem o JS | Login com Google |
+| Build | De onde vem o JS | De onde vêm as credenciais |
 |---|---|---|
-| `development` + `npx expo start --dev-client` | Metro da sua máquina | ✅ funciona |
-| `preview` / `production` | bundle gerado no servidor do EAS | ❌ indisponível |
+| `development` + `npx expo start --dev-client` | Metro da sua máquina | `.env` local |
+| `preview` / `production` | bundle gerado no servidor do EAS | variáveis de ambiente do EAS |
 
-Num build `preview`/`production`, o botão "Continuar com Google" nasce apagado dizendo que esta
-versão saiu sem a configuração — é comportamento correto, não bug. Só os passos **A.4** e **G.10**
-ficam parcialmente sem resposta; todo o resto do roteiro é local e roda igual.
-
-Para habilitar o login num build EAS, as credenciais precisam viver no servidor, nunca no repositório:
-
-```bash
-eas env:create --name EXPO_PUBLIC_SUPABASE_URL --value "<url>" --environment preview
-eas env:create --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "<anon key>" --environment preview
-```
+Cadastradas em 25/08 nos três ambientes (`development`, `preview` e `production`):
+`EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY`. Conferir com
+`eas env:list --environment preview`. Se um dia o login voltar a dizer "indisponível nesta versão",
+é aqui que se olha primeiro.
 
 ⚠️ **Se o passo 2.4 falhar (o relógio não aparecer), pare e avise.** Os roteiros B, C e D dependem
 todos do mesmo popup, e não adianta percorrê-los.
@@ -74,9 +70,10 @@ e abrir de novo.
 
 **A.4** Ir na aba **Ajustes** (última da barra) e olhar a seção **CONTA**.
 
-> ✅ Se estiver logado: deve dizer "Desvincular esta conta". Se não: "Vincular uma conta do Google",
-> com a frase "A cópia na nuvem ainda não está disponível" — ou, num build sem configuração, a
-> ressalva de que o login está indisponível nesta versão.
+> ✅ Se estiver logado: deve dizer "Desvincular esta conta" com o seu e-mail. Se não: "Vincular uma
+> conta do Google", com a frase "A cópia na nuvem ainda não está disponível".
+> ❌ Se disser que o login está indisponível nesta versão, o build saiu sem as credenciais — ver
+> "Antes de começar".
 > ✅ Abaixo do cartão: "Seus dados ficam neste aparelho".
 
 **A.5** Ainda em Ajustes, conferir que existe a seção **MEUS DADOS**, com dois itens em vermelho:
@@ -625,15 +622,15 @@ da galeria. Salvar.
 **G.9** Entrar (com Google ou "continuar sem login").
 
 > ✅ Deve pedir o **consentimento** de novo, e depois a **ficha de saúde** em branco.
-> ℹ️ Num build `preview`/`production`, "Continuar com Google" está apagado por falta de
-> configuração (ver "Antes de começar"). Use "continuar sem login" — o resto do passo vale igual.
+> ✅ 🔴 Entre **com o Google** aqui: é o teste de que a conta volta a funcionar depois do
+> apagamento total, que foi exatamente onde ela falhou em 25/08.
 
 **G.10** Preencher só o nome e continuar. Ir em **Ajustes** → **CONTA**.
 
-> ✅ Se você tinha entrado com o Google antes do apagamento, a conta deve aparecer como
-> **desvinculada** (oferecendo "Vincular uma conta do Google").
-> ℹ️ Sem a configuração do Supabase no build, o cartão sempre mostra "Vincular uma conta do
-> Google" com a ressalva de indisponibilidade — este passo não conclui, e não é falha do app.
+> ✅ Se você entrou com o Google no G.9, a conta deve aparecer vinculada, com o seu e-mail e a
+> opção "Desvincular esta conta".
+> ✅ Se entrou sem login, deve oferecer "Vincular uma conta do Google" — e vincular ali deve
+> funcionar, sem a ressalva de indisponibilidade.
 
 **G.11** Fechar o app completamente (tirar dos recentes) e abrir de novo.
 
