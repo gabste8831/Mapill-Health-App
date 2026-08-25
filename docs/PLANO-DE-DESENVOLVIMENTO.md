@@ -32,7 +32,7 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 1. Estado atual (atualizado em 2026-08-24)
+## 1. Estado atual (atualizado em 2026-08-25)
 
 ### Já pronto ✅
 
@@ -40,7 +40,7 @@ Nenhum bloco fecha sem estes seis itens:
 |---|---|
 | Domínio | Entidades (`medication`, `prescription`, `dose-schedule`, `intake-log`, `inventory-item`, `appointment`, `patient-profile`, `consent`, `auth-user`) + ports fechados |
 | Use-cases | `register-intake`, `correct-intake`, `snooze-dose-alarm` |
-| SQLite | `database.ts` + migrations 001→013 + 9 repositórios |
+| SQLite | `database.ts` + migrations 001→014 + 10 repositórios |
 | Design system | `src/ui/` (Button, Card, TextField, SelectField, Checkbox, Chip, IconButton, BottomSheet, Header, LegalAccordion, …) + `shared/theme` com paleta M3 real |
 | Login | Tela + Google via Supabase Auth (`SupabaseAuthGateway`), sessão persistida, "continuar sem login" |
 | Onboarding LGPD | `ConsentimentoScreen` + `consent_records` versionado por `CURRENT_TERMS_VERSION`; bump força reconsentimento |
@@ -51,6 +51,7 @@ Nenhum bloco fecha sem estes seis itens:
 | Cadastro de medicamento | Formulário manual completo, gravando medicamento + prescrição + estoque + horários no SQLite — **verificado em device (22/08)**. Horário escolhido no relógio nativo do Android, com preenchimento "de X em X horas", e data de início editável |
 | Compromissos | Cadastro de consulta, retorno, exame e renovação de receita, com local, profissional, observação e antecedência do aviso. Aba Calendário lista próximos e passados, com editar, excluir e o registro de "você foi?" mais a anotação do que aconteceu. Só o **disparo** do aviso depende do C1 |
 | Medicações | Lista dos cadastros com dose, frequência, horários e estoque, com busca por nome ou princípio ativo; lápis abre a edição no mesmo formulário e lixeira faz exclusão lógica com confirmação |
+| Estoque | Tela própria (`/estoque`, pelo ícone no topo de Medicações e pelo card de estoque baixo da Home): quanto resta, quando acaba, recontagem física e reposição. Toda mudança grava um evento (`manual_recount` / `restock`), nunca sobrescreve o número |
 | Build em aparelho | Dev build pelo **EAS** (o build local não fecha nesta máquina — ver log de 22/08) |
 
 ### Buracos conhecidos ❌
@@ -58,7 +59,8 @@ Nenhum bloco fecha sem estes seis itens:
 - **Notificações**: `expo-notifications` instalado, mas `src/notifications/` não existe. Zero alarmes.
 - **Sync**: login autentica, mas nada sobe/desce. Sem tabelas no Supabase, sem RLS.
 - **CMED**: nenhum script de ingestão, nenhum seed embarcado.
-- **Estoque / Histórico**: repositórios existem, telas não.
+- **Histórico**: os `intake_logs` são gravados e alimentam a adesão da semana na Home, mas não há
+  tela de histórico nem relatório por período (D2).
 - **Direitos LGPD — parcial**: apagar os dados locais (clínicos ou tudo) e revogar consentimento
   já existem em Ajustes → MEUS DADOS, com apagamento físico. Faltam **exportar** e o lado
   servidor da exclusão, que depende do D1 existir.
@@ -401,9 +403,38 @@ revisa e confirma antes de salvar.
 posologia), recontagem manual (gera `InventoryAdjustment` com motivo próprio), reabastecimento,
 e o lembrete periódico "seu estoque físico está alinhado com o app?" (decisão nº6, não obrigatório).
 
+**Entregue em 2026-08-25.** O miolo já existia desde o B2/B4 e não tinha superfície: `estimateStockDepletion`
+calculava a data, `applyAdjustment` gravava o evento com clamp em zero, e o único jeito de mexer no
+número era reeditando o cadastro inteiro do remédio — que é errado, porque **repor não é reeditar um
+tratamento**.
+
+**Duas ações, não uma** (decisão de 25/08). Recontar e repor são acontecimentos diferentes no mundo:
+uma é abrir o armário e contar o que está lá; a outra é somar o que acabou de chegar da farmácia.
+Um único campo "corrigir" obrigaria a fazer a conta de cabeça em toda compra. O popup mostra a
+prévia do resultado antes de confirmar, porque a diferença gravada é justamente o que não se vê
+acontecer.
+
+**Onde mora** (decisão de 25/08): rota `/estoque`, alcançada pelo ícone no topo da aba Medicações e
+pelo card de estoque baixo da Home. Não virou quinta aba — estoque não é algo que se olha todo dia,
+e a barra inferior é o espaço mais caro do app.
+
+**Quem não aparece na lista** (decisão de 25/08): remédio sem controle de estoque ativado **não é
+listado** — misturar o que tem número com o que não tem quebraria a única coisa que a tela faz, que
+é comparar números. No lugar disso, um rodapé fixo explica que o controle é opcional e leva de volta
+à lista de medicações, pra ativar no cadastro do remédio desejado.
+
 **Pronto quando**
-- [ ] Recontagem manual e correção de ingestão compõem corretamente (eventos somados, nunca recálculo do zero).
-- [ ] Previsão de esgotamento respeita o limiar configurado pelo usuário no B2.
+- [x] Recontagem manual e correção de ingestão compõem corretamente (eventos somados, nunca
+      recálculo do zero). — `adjust-stock` grava **diferença**, nunca valor absoluto; verificado em
+      Node contra 12 casos, incluindo a composição dose → recontagem → reposição → correção
+      retroativa.
+- [x] Previsão de esgotamento respeita o limiar configurado pelo usuário no B2. — a tela usa o mesmo
+      `estimateStockDepletion` que alimenta o alerta da Home, e o limiar continua sendo o
+      `lowStockAlertLeadDays` escolhido no cadastro.
+- [x] A quantidade nunca vai a negativo, nem por recontagem nem por dose confirmada — clamp em zero
+      dentro da mesma transação que grava o evento.
+- [ ] Lembrete periódico "seu estoque está alinhado com a caixa?" (decisão nº6) — **depende do C1**,
+      porque é notificação. Fica anotado aqui e não em aberto na tela.
 
 ---
 
@@ -1075,6 +1106,9 @@ placar; o roteiro é como se joga.
 | 12 | Desfecho do compromisso | "Você foi?" só aparece nos passados; "Fui" grava sem diálogo; "Apagar esta resposta" volta ao estado sem resposta; **editar o compromisso não apaga o desfecho** | C3, 24/08 |
 | 13 | Calendário unificado | Doses e compromissos no mesmo dia; doses continuam aparecendo além de 30 dias (projeção); ✓/✗ só em hoje e passados; confirmar aqui reflete na Home | C3, 24/08 |
 | 14 | FAB em todas as abas | Remédios abre direto "escanear ou manual"; Calendário e Home abrem a escolha completa | UI, 24/08 |
+| 15 | Tela de estoque | O ícone no topo de Medicações abre `/estoque`; a lista traz o que acaba primeiro em cima; "Acaba em N dias" bate com a posologia | B5, 25/08 |
+| 16 | Recontagem e reposição | Recontar 25 tendo 28 baixa 3 (não grava 25); repor 30 soma; confirmar uma dose depois disso desconta a partir do novo saldo | B5, 25/08 |
+| 17 | Card de estoque baixo da Home | "Abrir estoque" leva pra tela nova, e não mais pro cadastro do remédio | B5, 25/08 |
 
 ### 6.3 Offline-first
 
@@ -1084,7 +1118,7 @@ placar; o roteiro é como se joga.
 |---|---|
 | Cadastro, edição e exclusão de medicamento | Não |
 | Agenda do dia, confirmação/pulo/correção de dose | Não |
-| Baixa e alerta de estoque | Não |
+| Baixa, alerta, recontagem e reposição de estoque | Não |
 | Ficha de saúde e consentimento | Não |
 | Sessão na abertura do app | **Não** — `getCurrentUser()` usa `getSession()`, que lê do AsyncStorage ([supabase-auth-gateway.ts](../src/data/remote/supabase-auth-gateway.ts)). Sem isso, abrir o app sem sinal travaria a primeira execução |
 | Login com Google | Sim — é a natureza do OAuth. **Opcional**: "continuar sem login" mantém o app inteiro utilizável |
@@ -1158,3 +1192,6 @@ a partir do D1 é o que impede isso.
 | 2026-08-24 | Docs | Concluído | **Nova §6, "Status de plataforma e de paradigma".** A pergunta "roda no iPhone?" e "isso continua offline-first?" estavam sendo respondidas por auditoria de código a cada vez. Agora são duas tabelas mantidas ao fim de cada bloco. A varredura achou um import que só funciona no Android (`@expo/ui/jetpack-compose` no `TimePicker`, criado horas antes) e confirmou que o offline-first está intacto — inclusive o ponto que mais poderia tê-lo violado, a sessão na abertura, que usa `getSession()` e lê do AsyncStorage sem rede. Registrado também que o mérito é menor do que parece: o app é offline-*only*, e o paradigma só será posto à prova no D1. |
 | 2026-08-24 | iOS | Concluído | **`TimePicker.ios.tsx` com SwiftUI.** Android segue sendo a plataforma alvo, mas deixar um import que quebra em outra plataforma é dívida que não avisa — ela aparece no primeiro build de iOS, longe de quem a criou. As duas APIs não se parecem: o Android recebe `initialDate` em ISO, o iOS recebe `selection` como `Date` controlada e devolve por `onDateChange`. iOS continua **compilável, não verificado**: buildar exige Mac ou conta Apple Developer paga, e nada disso vira promessa até existir um build. |
 | 2026-08-24 | B2 | Limitação assumida | **Estoque continua contado na unidade derivada da forma.** A ideia de contar por embalagem ("2 canetas de 300 UI") foi avaliada e descartada a pedido do Gabriel: ela conflita com a dose que varia por horário, que é justamente o que o mesmo medicamento faz quando se toma 10 UI de manhã e 8 à noite, e resolver os dois juntos criaria duas conversões se olhando. Fica registrado como limitação do TCC: caneta de insulina se compra em ml e se toma em UI, então o estoque dela é aproximado. |
+| 2026-08-25 | B5 | Concluído | **Estoque ganhou tela — e com ela, superfície pro que já existia.** O bloco parecia grande e era pequeno: `estimateStockDepletion` (previsão percorrendo dose a dose, não divisão), `applyAdjustment` (evento + clamp em zero, em transação) e a baixa automática a cada dose confirmada estavam prontos desde o B2/B4 e não tinham onde aparecer. O número era produzido e descartado: só se via ele no card do remédio, e só se mexia nele reeditando o cadastro inteiro — que é errado, porque **repor não é reeditar um tratamento**. A tela nova (`/estoque`) mostra quanto resta, quando acaba e por que, ordenada pelo que acaba primeiro, e oferece as duas ações que são duas coisas diferentes no mundo: **recontar** (abri o armário e contei) e **repor** (voltei da farmácia). Um campo só, "corrigir", obrigaria a fazer a conta de cabeça em toda compra. |
+| 2026-08-25 | B5 | Concluído | **A recontagem grava a diferença, nunca o número contado** (`domain/use-cases/adjust-stock.ts`). O estoque do Mapill é a soma dos seus eventos — é isso que faz a correção retroativa de uma dose compor com o resto em vez de brigar com ele. Gravar o valor absoluto quebraria a soma: uma dose confirmada entre a contagem e a confirmação seria sobrescrita em silêncio. Verificado em Node contra 12 casos, incluindo a cadeia dose → recontagem → reposição → correção retroativa, que fecha no mesmo saldo pelos dois caminhos. Contar o mesmo número que já estava lá não gera evento: recontar e confirmar o que já se sabia não é um acontecimento. O popup mostra a prévia do resultado antes de confirmar, porque a diferença gravada é justamente o que não se vê acontecer. |
+| 2026-08-25 | UI | Concluído | **Slot de ação no `Header`, e o "Ignorar lembrete" que não ignorava nada.** O topo já tinha um espaço à direita ocupado só na Home (ícone de conta); virou `action`, e é por ele que Medicações chega ao estoque — sem gastar a quinta aba, que é o espaço mais caro do app, com algo que não se olha todo dia. No mesmo caminho caiu um botão falso: o card de estoque baixo da Home oferecia "Ignorar lembrete" sem nada que guardasse a dispensa, então o card voltava igual na abertura seguinte. Botão que não faz o que diz é pior que botão ausente. O primário virou "Abrir estoque" e leva pra tela nova, no lugar do cadastro do remédio. |

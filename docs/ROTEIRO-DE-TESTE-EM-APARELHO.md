@@ -1,11 +1,11 @@
-# Roteiro de teste em aparelho — 2026-08-24
+# Roteiro de teste em aparelho — 2026-08-25
 
 > Guia operacional passo a passo: onde tocar, o que preencher, o que precisa acontecer.
 > É a forma executável da fila de validação (§6.2 do `PLANO-DE-DESENVOLVIMENTO.md`).
 > Ao terminar, basta reportar **número do passo + passou/falhou**, e o que apareceu quando falhou.
 >
 > Feito para ser percorrido **na ordem**: os cadastros do começo alimentam os testes do meio, e o
-> apagamento do fim destrói tudo. Ordem dos blocos: **A, B, C, D, E, F, H, G**.
+> apagamento do fim destrói tudo. Ordem dos blocos: **A, B, C, D, E, F, I, H, G**.
 
 ## Antes de começar
 
@@ -322,6 +322,86 @@ por exemplo, se ainda não passou).
 > quantidade ao estoque.
 
 **F.12** *(opcional)* Confirmar a correção e conferir em Remédios que o estoque **subiu 2**.
+
+---
+
+## Roteiro I — Estoque (novo em 25/08)
+
+Cobre os itens 15, 16 e 17 da §6.2. **Depende do Roteiro F**, que deixou o `Teste Atrasadas` com
+estoque em 14.
+
+**I.1** Ir na aba **Remédios** e tocar no **ícone de caixa** no canto superior direito, ao lado do
+título "Medicações".
+
+> ✅ 🔴 Abre a tela **Estoque**. Se o ícone não estiver lá, o resto do roteiro não roda.
+
+**I.2** Olhar a lista.
+
+> ✅ Só aparecem os remédios em que você ativou "Controlar meu estoque" — `Teste Atrasadas`,
+> `Losartana` e `Amoxicilina`, conforme o que você preencheu nos roteiros B, C e F.
+> ✅ O que acaba primeiro está **em cima**.
+> ✅ Cada cartão traz a quantidade à direita e, abaixo, **"Acaba em N dias · 12 de set"**.
+
+**I.3** 🔴 Conferir a previsão da **Amoxicilina** (a de 8 em 8 horas, do Roteiro C).
+
+> ✅ São 3 doses por dia. Com o estoque que você cadastrou, a conta de "N dias" tem que bater com
+> `estoque ÷ 3`, arredondado pra baixo. Se der um número muito maior, o app está dividindo pela
+> dose errada.
+
+**I.4** No `Teste Atrasadas`, tocar em **"Recontar"**.
+
+> ✅ O popup diz **"Hoje o app conta 14 comprimidos"**, e o campo **QUANTO VOCÊ TEM AGORA** está
+> **vazio** — nunca pré-preenchido.
+> ✅ O botão **Confirmar** está **apagado** enquanto nada foi digitado.
+
+**I.5** Digitar `11` e olhar a frase acima do botão, **sem confirmar ainda**.
+
+> ✅ 🔴 Deve dizer **"Diferença de 3 a menos, registrada como recontagem"** — e não "o estoque passa
+> a ser 11". É a diferença que é gravada, e a tela precisa dizer isso.
+
+**I.6** Apagar e digitar `14` (o mesmo número que já estava).
+
+> ✅ A frase vira **"É exatamente o que o app já conta — nada muda"**, e o **Confirmar apaga de
+> novo**. Recontar e achar o mesmo número não é um acontecimento.
+
+**I.7** Voltar para `11` e **Confirmar**.
+
+> ✅ O popup fecha e o cartão passa a mostrar **11 comprimidos**.
+
+**I.8** Tocar em **"Repor"** no mesmo remédio. Digitar `30`.
+
+> ✅ A frase diz **"O estoque passa para 41 comprimidos"** — soma, não substitui.
+
+**I.9** Confirmar.
+
+> ✅ O cartão mostra **41**, e a previsão de "acaba em N dias" **aumentou**.
+
+**I.10** 🔴 Voltar para a **Home** e confirmar **uma dose** do `Teste Atrasadas` (se não houver
+nenhuma disponível, pule para I.11).
+
+> ✅ Voltando ao estoque, o número é **39** (41 − 2 comprimidos por dose). A dose desconta a partir
+> do saldo novo, não do antigo.
+
+**I.11** Voltar ao **Estoque** e testar o teclado: no popup de recontagem de um remédio contado em
+**comprimidos**, tentar digitar uma vírgula.
+
+> ✅ A vírgula **não entra** — comprimido não se conta pela metade neste campo.
+
+**I.12** Descer até o fim da lista.
+
+> ✅ Existe um bloco cinza **"Falta alguma medicação nesta lista?"** explicando que o controle é
+> opcional, com o botão **"Ver minhas medicações"**.
+
+**I.13** Tocar em **"Ver minhas medicações"**.
+
+> ✅ Volta para a aba Remédios.
+
+**I.14** Ir na aba **Home** e procurar o card **"Alerta de estoque"** (aparece se algum remédio
+estiver perto de acabar; se não houver nenhum, pule).
+
+> ✅ Só existe **um** botão, **"Abrir estoque"** — o antigo "Ignorar lembrete" saiu, porque não
+> ignorava nada.
+> ✅ Tocar nele leva para a tela de Estoque, e **não** para o cadastro do remédio.
 
 ---
 
