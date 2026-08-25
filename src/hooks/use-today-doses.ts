@@ -210,9 +210,14 @@ function estoquesQueVaoAcabar(
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
     if (prescription === undefined) continue;
 
-    const depletion = estimateStockDepletion(prescription, inventory.quantity, agora);
-    // `null` = não dá pra estimar (sem horário) ou dura além do horizonte: nos dois casos não há
-    // o que avisar, e inventar um aviso seria pior que ficar calado.
+    const depletion = estimateStockDepletion(
+      prescription,
+      { amount: inventory.quantity, unit: inventory.unit as PosologyUnit },
+      agora,
+    );
+    // `null` = não dá pra estimar (sem horário), dura além do horizonte, ou estoque e dose estão
+    // em unidades diferentes. Nos três casos não há o que avisar, e inventar um aviso seria pior
+    // que ficar calado.
     if (depletion === null) continue;
     if (depletion.daysRemaining > inventory.lowStockAlertLeadDays) continue;
 

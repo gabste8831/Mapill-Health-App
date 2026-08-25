@@ -100,10 +100,16 @@ async function carregarItens(): Promise<ItemDeEstoque[]> {
     itens.push({
       inventory,
       medication,
+      // A unidade vai junto: com gota tomada em gota e comprada em ml, a previsão precisa se
+      // recusar a existir em vez de sair errada (ver `estimateStockDepletion`).
       depletion:
         prescription === null
           ? null
-          : estimateStockDepletion(prescription, inventory.quantity, agora),
+          : estimateStockDepletion(
+              prescription,
+              { amount: inventory.quantity, unit: inventory.unit as PosologyUnit },
+              agora,
+            ),
       aceitaFracao: unidadeAceitaFracao(inventory.unit),
     });
   }

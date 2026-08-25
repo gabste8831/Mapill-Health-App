@@ -717,13 +717,13 @@ export function FormularioDeMedicamentoScreen({
   /** O tratamento com prazo, dito em doses. Ver `summarizeTreatment` pra por que em doses. */
   const resumoDoTratamento = useMemo(
     () =>
-      schedule === null
+      schedule === null || doseUnit === null
         ? null
         : summarizeTreatment(
-            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount },
+            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount, doseUnit },
             new Date(),
           ),
-    [schedule, startDate, endDate, parsedDoseAmount],
+    [schedule, startDate, endDate, parsedDoseAmount, doseUnit],
   );
 
   const prazoSemDose =
@@ -752,11 +752,11 @@ export function FormularioDeMedicamentoScreen({
    */
   const esgotamento = useMemo(
     () =>
-      schedule === null || stockUnit !== doseUnit || !tracksStock
+      schedule === null || stockUnit === null || doseUnit === null || !tracksStock
         ? null
         : estimateStockDepletion(
-            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount },
-            parsedStock,
+            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount, doseUnit },
+            { amount: parsedStock, unit: stockUnit },
             new Date(),
           ),
     [schedule, startDate, endDate, parsedDoseAmount, parsedStock, stockUnit, doseUnit, tracksStock],

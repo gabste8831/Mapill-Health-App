@@ -1,4 +1,11 @@
+import type { PosologyUnit } from "../entities/medication";
 import { generateDoseSchedules, type SchedulablePrescription } from "./generate-dose-schedules";
+
+/** O estoque como ele é contado: a quantidade e a unidade em que ela foi gravada. */
+export type StockOnHand = {
+  amount: number;
+  unit: PosologyUnit;
+};
 
 /** Até onde vale a pena procurar. Estoque que passa disso não é o que o alerta existe pra pegar. */
 const HORIZON_DAYS = 730;
@@ -31,12 +38,20 @@ function atMidnight(date: Date): Date {
  *
  * `null` quando não há o que estimar: sem horário agendado ("só quando precisar"), sem estoque,
  * ou quando ele dura mais que o horizonte de busca.
+ *
+ * **Também `null` quando estoque e dose não são contados na mesma unidade.** Gota se toma em gota
+ * e se compra em ml, e converter exigiria a concentração do frasco, que o app não tem. Subtrair
+ * "3 gotas" de "20 ml" produz um número que parece uma previsão e não é nenhuma. A unidade entra
+ * na assinatura por isso: a checagem já existia no formulário, e as duas outras telas que passaram
+ * a chamar esta função esqueceram dela — regra que dá para esquecer é regra que vai ser esquecida.
  */
 export function estimateStockDepletion(
   prescription: SchedulablePrescription,
-  stockAmount: number,
+  stock: StockOnHand,
   from: Date,
 ): StockDepletion | null {
+  if (stock.unit !== prescription.doseUnit) return null;
+  const stockAmount = stock.amount;
   if (!Number.isFinite(stockAmount) || stockAmount <= 0) return null;
 
   const until = new Date(from.getTime() + HORIZON_DAYS * 24 * 60 * 60_000);

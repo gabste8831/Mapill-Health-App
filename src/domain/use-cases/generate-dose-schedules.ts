@@ -10,10 +10,15 @@ import type { SyncableEntity } from "../entities/syncable";
 /** Horário a agendar. `id` e metadados de sincronização são da camada de dados, não da regra. */
 export type DoseScheduleDraft = Omit<DoseSchedule, keyof SyncableEntity>;
 
-/** Só o que a regra realmente lê. Deixa a prescrição inteira passar, e um rascunho também. */
+/**
+ * Só o que a regra realmente lê. Deixa a prescrição inteira passar, e um rascunho também.
+ *
+ * `doseUnit` não é usado aqui — entra porque `estimateStockDepletion` percorre estas mesmas doses
+ * e precisa recusar a conta quando o estoque está em outra unidade.
+ */
 export type SchedulablePrescription = Pick<
   Prescription,
-  "id" | "schedule" | "startDate" | "endDate" | "doseAmount"
+  "id" | "schedule" | "startDate" | "endDate" | "doseAmount" | "doseUnit"
 >;
 
 export type GenerateDoseSchedulesInput = {
