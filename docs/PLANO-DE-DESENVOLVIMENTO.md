@@ -1086,32 +1086,50 @@ iOS é hipótese. Não prometer iOS na defesa; citar como trabalho futuro.
 Tudo que já está escrito e nunca foi executado em device. **Marcar aqui ao testar** — é esta
 lista que o "verificado em device" dos blocos consulta.
 
-➡️ O passo a passo operacional (onde tocar, o que preencher, o que precisa acontecer) está em
-**[`ROTEIRO-DE-TESTE-EM-APARELHO.md`](./ROTEIRO-DE-TESTE-EM-APARELHO.md)**. A tabela abaixo é o
-placar; o roteiro é como se joga.
+➡️ O passo a passo operacional está em
+**[`ROTEIRO-DE-TESTE-EM-APARELHO.md`](./ROTEIRO-DE-TESTE-EM-APARELHO.md)**, reescrito em 25/08
+para partir do zero, como usuário que nunca abriu o app: 22 blocos em 4 sessões. A tabela abaixo é
+o placar; o roteiro é como se joga, e a coluna **Onde** aponta o bloco.
 
-| # | O que testar | Como saber que passou | Origem |
+| # | O que validar | Onde | Origem |
 |---|---|---|---|
-| 1 | Listagem, busca, edição e exclusão na aba Remédios | Busca acha ignorando acento; lápis abre o cadastro preenchido; lixeira pede confirmação e o item some da lista | B2 (14), 23/08 |
-| 2 | Relógio nativo no popup de horários | A roda **aparece** (é Compose dentro de um `Modal`, que abre em outra janela no Android); "Confirmar" só acende depois de girar | B2 (15), 24/08 |
-| 3 | Preencher "de X em X horas" | 8 doses de 3 em 3 a partir das 08:00 produz a lista com 02:00 e 05:00; 4 doses de 8 em 8 é recusado | B2 (15), 24/08 |
-| 4 | Data de início futura | Cadastrar começando em 3 dias: a Home **não** mostra dose hoje, e a primeira aparece no dia marcado | B2 (15), 24/08 |
-| 5 | Confirmar em lote | Com 2+ atrasadas, "Confirmar todas" lista os nomes e grava todas; o estoque de cada uma desconta a dose certa | B4, 24/08 |
-| 6 | Apagar dados de saúde | Medicamentos e histórico somem; a ficha e o consentimento **continuam** (não volta pro onboarding) | D3, 24/08 |
-| 7 | Apagar tudo e recomeçar | Volta pra tela de login; a conta é desvinculada; reabrir o app não traz nada de volta | D3, 24/08 |
-| 8 | Fotos e receitas apagadas junto | Depois do apagamento total, cadastrar de novo e conferir que nenhuma imagem antiga reaparece | D3, 24/08 |
-| 9 | Reconsentimento por bump de versão | `CURRENT_TERMS_VERSION` foi para `1.1.0` em 24/08 — a próxima abertura **deve** pedir o aceite de novo | Texto legal, 24/08 |
-| 10 | Baixa de estoque contra a caixa física | Confirmar N doses e conferir que o estoque caiu exatamente a soma das doses, não N unidades | B4, 22/08 |
-| 11 | Cadastro de compromisso | Descrição é texto livre; data passada é recusada; a confirmação mostra o dia da semana; "Não" fica marcado nos seletores; recusar os dois lembretes trava o salvar; antecedência maior que o prazo avisa | C3, 24/08 |
-| 12 | Desfecho do compromisso | "Você foi?" só aparece nos passados; "Fui" grava sem diálogo; "Apagar esta resposta" volta ao estado sem resposta; **editar o compromisso não apaga o desfecho** | C3, 24/08 |
-| 13 | Calendário unificado | Doses e compromissos no mesmo dia; doses continuam aparecendo além de 30 dias (projeção); ✓/✗ só em hoje e passados; confirmar aqui reflete na Home | C3, 24/08 |
-| 14 | FAB em todas as abas | Remédios abre direto "escanear ou manual"; Calendário e Home abrem a escolha completa | UI, 24/08 |
-| 15 | Tela de estoque | O ícone no topo de Medicações abre `/estoque`; a lista traz o que acaba primeiro em cima; "Acaba em N dias" bate com a posologia | B5, 25/08 |
-| 16 | Recontagem e reposição | Recontar 25 tendo 28 baixa 3 (não grava 25); repor 30 soma; confirmar uma dose depois disso desconta a partir do novo saldo | B5, 25/08 |
-| 17 | Card de estoque baixo da Home | "Abrir estoque" leva pra tela nova, e não mais pro cadastro do remédio | B5, 25/08 |
-| 18 | Abertura sem conta | Fechar o app e reabrir cai **direto na Home** — sem tela de login. Era o bug de o gate só pular a primeira execução com sessão do Google | A2, 25/08 |
-| 19 | Desfecho no mesmo dia | Compromisso de **hoje** cujo horário já passou pergunta "Você foi?" na hora, sem esperar a virada do dia | C3, 25/08 |
-| 20 | Login indisponível dito na cara | Em build sem credenciais, "Continuar com Google" nasce apagado com o motivo escrito, e Ajustes diz o mesmo — em vez de avisar só depois do toque | Build, 25/08 |
+| 1 | Onboarding sem conta, com volta entre as etapas | 2 | A2 |
+| 2 | Onboarding com Google, incluindo login cancelado | 3 | A2 |
+| 3 | Abrir o app sem conta e cair direto na Home | 4.9, 20.6 | A2, 25/08 |
+| 4 | Ficha completa: contatos de emergência, edição, persistência | 4 | A2 |
+| 5 | Termos: versão aceita igual à vigente, texto sem promessa de nuvem | 5 | LGPD |
+| 6 | FAB nas três abas, com destino certo em cada uma | 6 | UI, 24/08 |
+| 7 | Relógio nativo dentro do `Modal` — **o de maior risco** | 7.5 | B2, 24/08 |
+| 8 | Horário duplicado barrado na digitação | 7.9 | B2 |
+| 9 | Revelação do opcional e rodapé dizendo o que falta | 7.12, 7.13 | B2 |
+| 10 | Antecedência de estoque maior que a duração dele | 7.16 | B2 |
+| 11 | Unidade ambígua: pergunta antes da quantidade (líquido, injeção) | 8.2 | B2 |
+| 12 | Fração aceita em ml e recusada em gota | 8.4, 9.3 | B2 |
+| 13 | "Só quando precisar": sem horário, sem início, e "Sempre disponível" | 9.4, 9.5 | B2 |
+| 14 | Estoque em unidade diferente da dose: pergunta em ml, e **sem previsão** | 9.6, 9.7, 18.4 | B4/B5, 25/08 |
+| 15 | Dose que varia por horário, e a previsão somando as doses reais | 10.5 a 10.8, 18.5 | B2 |
+| 16 | Dias da semana | 11 | B2 |
+| 17 | Ciclo: cadastrar no meio da cartela, pausa e erro de dias seguidos | 12 | B2 |
+| 18 | Preencher "de X em X horas" e o bloqueio de série que não cabe no dia | 13.3 a 13.8 | B2, 24/08 |
+| 19 | Data de início futura, e data pela metade travando o salvar | 14 | B2, 24/08 |
+| 20 | Anexos: foto, PDF, validade e aviso de renovação em cascata | 15.2 a 15.6 | B2 |
+| 21 | Popup de lembrete abre, escolhe e fecha (seção congelada) | 15.7 a 15.9 | B2 |
+| 22 | Listagem, busca sem acento, edição preenchida e exclusão lógica | 16 | B2, 23/08 |
+| 23 | Botão físico de voltar fechando o formulário | 16.8 | A1 |
+| 24 | Confirmar em lote, com os nomes listados no diálogo | 17.3 | B4, 24/08 |
+| 25 | Baixa de estoque pela dose, e correção retroativa devolvendo | 17.5, 17.8 | B4, 22/08 |
+| 26 | Tela de estoque: ordem por urgência e previsão correta | 18.1 a 18.5 | B5, 25/08 |
+| 27 | Recontagem grava diferença, reposição soma | 18.6 a 18.12 | B5, 25/08 |
+| 28 | Card de estoque baixo da Home leva pra tela nova | 18.15 | B5, 25/08 |
+| 29 | Cadastro de compromisso: texto livre, data passada, cascata de avisos | 19.2 a 19.13 | C3, 24/08 |
+| 30 | Calendário unificado: doses junto dos compromissos, projeção além de 30 dias | 19.15, 19.16 | C3, 24/08 |
+| 31 | Ação de dose só em hoje e passados, e nunca na projetada | 19.17 a 19.19 | C3, 24/08 |
+| 32 | Desfecho no mesmo dia do compromisso | 19.21 | C3, 25/08 |
+| 33 | Desfecho: apagar resposta, e editar sem perder o registro | 19.25, 19.26 | C3, 24/08 |
+| 34 | Vincular e desvincular conta sem perder dado | 20 | D3, 24/08 |
+| 35 | Apagar dados de saúde mantendo ficha e consentimento | 21 | D3, 24/08 |
+| 36 | Apagar tudo, voltar ao login e entrar com Google de novo | 22.1 a 22.7 | D3, 25/08 |
+| 37 | Nada volta depois de fechar e reabrir, e as fotos sumiram junto | 22.8, 22.9 | D3, 24/08 |
 
 ### 6.3 Offline-first
 
@@ -1205,3 +1223,4 @@ a partir do D1 é o que impede isso.
 | 2026-08-25 | Docs | Concluído | **Quatro passos do roteiro reescritos por estarem errados**, dois deles criados no dia anterior. `A.1` afirmava que o app abre pedindo os termos, quando abria pedindo login (e ganhou o `A.1b`, que fecha e reabre o app — o único jeito de flagrar o bug do gate). `I.3` mandava conferir `estoque ÷ 3` na Amoxicilina, ignorando que cada dose são 2 comprimidos: a conta certa é ÷ 6, e o número errado teria "passado" exatamente no caso que o passo existe pra pegar. `I.11` mandava conferir que comprimido recusa vírgula, e ele aceita de propósito desde o B2 — meio comprimido existe; quem recusa fração é gota, adesivo e sachê. `I.10` dependia de uma dose que o Roteiro F já tinha consumido. Somam-se as ressalvas de build em `A.4`, `G.9` e `G.10`. |
 | 2026-08-25 | Build | Resolvido | **Credenciais do Supabase cadastradas no EAS**, nos três ambientes (`development`, `preview` e `production`), com `eas env:create`. É o lado que faltava do diagnóstico da manhã: o app já admitia a falta, mas quem tinha que deixar de faltar era o build. Ficam no servidor e não no repositório — a regra do projeto continua valendo, e a `anon key` do Supabase é pública por design, ela viaja dentro de qualquer app cliente. O roteiro deixou de ter ressalva de "login indisponível" em A.4, G.9 e G.10: agora os três cobram o login funcionando, e o G.9 virou o teste de que a conta volta depois do apagamento total, que é onde ela falhou. |
 | 2026-08-25 | B4/B5 | Corrigido | **A previsão de esgotamento não checava se estoque e dose estavam na mesma unidade.** Gota se toma em gota e se compra em ml; insulina se toma em UI e vem num frasco de ml. Subtrair "3 gotas" de "20 ml" produz um número que parece previsão e não é nenhuma — e a Home mostrava esse número desde o B4, com o alerta de estoque baixo disparando em cima dele. A tela de estoque de ontem herdou o mesmo esquecimento. O formulário era o único lugar que checava, porque lá a regra foi escrita junto com o campo. A correção foi mover a checagem para dentro de `estimateStockDepletion`, que agora recebe a unidade do estoque e recusa a conta quando ela difere da dose: regra que dá para esquecer é regra que vai ser esquecida, e duas das três telas já tinham esquecido. `SchedulablePrescription` ganhou `doseUnit` por isso, e o compilador apontou os quatro pontos de chamada. Verificado em Node contra 7 casos, incluindo gota/ml e UI/ml. |
+| 2026-08-25 | Docs | Concluído | **Roteiro de teste reescrito do zero, para quem nunca abriu o app.** O anterior partia do meio: assumia dados já cadastrados, um único caminho de login e uma única forma farmacêutica — comprimido, todo dia. Passava a impressão de cobertura sem ter. O novo tem **22 blocos em 4 sessões**, começa apagando tudo para chegar ao estado de instalação nova, e termina apagando de novo, agora como teste do direito de exclusão. Cobre **os dois caminhos de entrada** (sem conta e com Google, incluindo o login cancelado no meio do OAuth, que nunca tinha sido exercitado), **todas as frequências** (todo dia, dias da semana, ciclo com pausa, só quando precisar) e **as formas que mudam o formulário**: líquido e injeção, onde a unidade é pergunta e não consequência; gotas, onde estoque e dose são contados em unidades diferentes; dose que varia de um horário para o outro. Também os anexos em cascata (foto, PDF, validade, aviso de renovação), o popup de lembrete e as anotações. A §6.2 virou placar de 37 linhas apontando o bloco de cada uma. |
