@@ -17,6 +17,27 @@ npx expo start --dev-client
 
 Abrir o **Mapill (dev)** no aparelho. Tempo total estimado: 25 a 35 minutos.
 
+### ⚠️ Qual build você está usando muda dois passos
+
+O `.env` **não sobe para o EAS** (está no `.easignore`), e o `eas.json` não declara variável
+nenhuma. Consequência:
+
+| Build | De onde vem o JS | Login com Google |
+|---|---|---|
+| `development` + `npx expo start --dev-client` | Metro da sua máquina | ✅ funciona |
+| `preview` / `production` | bundle gerado no servidor do EAS | ❌ indisponível |
+
+Num build `preview`/`production`, o botão "Continuar com Google" nasce apagado dizendo que esta
+versão saiu sem a configuração — é comportamento correto, não bug. Só os passos **A.4** e **G.10**
+ficam parcialmente sem resposta; todo o resto do roteiro é local e roda igual.
+
+Para habilitar o login num build EAS, as credenciais precisam viver no servidor, nunca no repositório:
+
+```bash
+eas env:create --name EXPO_PUBLIC_SUPABASE_URL --value "<url>" --environment preview
+eas env:create --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "<anon key>" --environment preview
+```
+
 ⚠️ **Se o passo 2.4 falhar (o relógio não aparecer), pare e avise.** Os roteiros B, C e D dependem
 todos do mesmo popup, e não adianta percorrê-los.
 
@@ -28,9 +49,18 @@ Cobre os itens 9 e 2 da §6.2.
 
 **A.1** Abrir o app.
 
-> ✅ **Deve pedir o aceite dos termos de novo**, mesmo você já tendo aceitado antes. Isso é o bump
-> de `CURRENT_TERMS_VERSION` para `1.1.0` funcionando.
-> ❌ Se entrar direto no app, o reconsentimento não está pegando.
+> ✅ **Deve ir direto para o aceite dos termos**, sem passar pela tela de login — você já tem ficha
+> preenchida, e a primeira execução não recomeça por causa disso. O aceite aparece porque
+> `CURRENT_TERMS_VERSION` subiu para `1.1.0`.
+> ❌ Se pedir login antes, a correção de 25/08 não pegou.
+> ❌ Se entrar direto no app sem pedir o aceite, o reconsentimento não está pegando.
+
+**A.1b** 🔴 Depois de aceitar e chegar no app, **fechar o app completamente** (tirar dos recentes)
+e abrir de novo.
+
+> ✅ Deve abrir **direto na Home**. Sem tela de login, sem termos, sem ficha.
+> ❌ Se voltar para o login, é o bug que estava lá antes de 25/08: o app só pulava a primeira
+> execução quando havia sessão do Google, então quem seguia sem conta revia essa tela todo dia.
 
 **A.2** Ainda na tela de consentimento, ler o destaque com o ícone de nuvem.
 
@@ -45,7 +75,8 @@ Cobre os itens 9 e 2 da §6.2.
 **A.4** Ir na aba **Ajustes** (última da barra) e olhar a seção **CONTA**.
 
 > ✅ Se estiver logado: deve dizer "Desvincular esta conta". Se não: "Vincular uma conta do Google",
-> com a frase "A cópia na nuvem ainda não está disponível".
+> com a frase "A cópia na nuvem ainda não está disponível" — ou, num build sem configuração, a
+> ressalva de que o login está indisponível nesta versão.
 > ✅ Abaixo do cartão: "Seus dados ficam neste aparelho".
 
 **A.5** Ainda em Ajustes, conferir que existe a seção **MEUS DADOS**, com dois itens em vermelho:
@@ -344,9 +375,10 @@ título "Medicações".
 
 **I.3** 🔴 Conferir a previsão da **Amoxicilina** (a de 8 em 8 horas, do Roteiro C).
 
-> ✅ São 3 doses por dia. Com o estoque que você cadastrou, a conta de "N dias" tem que bater com
-> `estoque ÷ 3`, arredondado pra baixo. Se der um número muito maior, o app está dividindo pela
-> dose errada.
+> ✅ Deve dizer **"Acaba em 3 dias"**.
+> *(20 comprimidos, 3 doses por dia de 2 comprimidos cada = 6 por dia. O quarto dia começa e o
+> estoque termina nele.)*
+> ❌ Se disser 6 ou 7 dias, o app está contando 1 comprimido por dose em vez da dose cadastrada.
 
 **I.4** No `Teste Atrasadas`, tocar em **"Recontar"**.
 
@@ -376,16 +408,23 @@ título "Medicações".
 
 > ✅ O cartão mostra **41**, e a previsão de "acaba em N dias" **aumentou**.
 
-**I.10** 🔴 Voltar para a **Home** e confirmar **uma dose** do `Teste Atrasadas` (se não houver
-nenhuma disponível, pule para I.11).
+**I.10** 🔴 Voltar para a **Home** e confirmar **qualquer dose ainda pendente** (a Losartana das
+20:00 serve, se já passou). Anote de qual remédio foi.
 
-> ✅ Voltando ao estoque, o número é **39** (41 − 2 comprimidos por dose). A dose desconta a partir
-> do saldo novo, não do antigo.
+> ✅ Voltando ao **Estoque**, a quantidade daquele remédio caiu **pela dose cadastrada**, não por 1.
+> ✅ Se foi o `Teste Atrasadas` (2 por dose), ele sai de 41 para **39** — o desconto parte do saldo
+> novo, e não do que existia antes da recontagem.
+> *(Depois do Roteiro F as três doses do `Teste Atrasadas` já foram confirmadas. Se não sobrar
+> nenhuma pendente hoje, pule este passo.)*
 
-**I.11** Voltar ao **Estoque** e testar o teclado: no popup de recontagem de um remédio contado em
-**comprimidos**, tentar digitar uma vírgula.
+**I.11** Voltar ao **Estoque**, abrir **"Recontar"** no `Teste Atrasadas` e digitar um número com
+vírgula, como `20,5`.
 
-> ✅ A vírgula **não entra** — comprimido não se conta pela metade neste campo.
+> ✅ A vírgula **entra** — meio comprimido existe, e o estoque tem que conseguir descrevê-lo.
+> ✅ A prévia mostra a diferença **com a casa decimal**, e não arredondada.
+> *(O bloqueio de fração vale para gota, adesivo e sachê, que não se partem ao meio. Comprimido,
+> ml, mg, g e UI aceitam.)*
+> Fechar o popup **sem confirmar**.
 
 **I.12** Descer até o fim da lista.
 
@@ -506,6 +545,10 @@ já for noite), descrição `Coleta de sangue`.
 **H.19** 🔴 Nesse compromisso que já passou, conferir a pergunta **"Você foi?"** com os botões
 **Fui** e **Não fui**.
 
+> ✅ Ela precisa aparecer **hoje mesmo**, algumas horas depois do horário — é saindo do consultório
+> que a pessoa tem o que responder.
+> ❌ Se só aparecer amanhã, é o bug corrigido em 25/08: o card comparava o **dia**, e não o
+> instante, então nada de hoje contava como passado.
 > ✅ O compromisso **futuro** não pode ter essa pergunta.
 
 **H.20** Tocar em **"Fui"**.
@@ -582,11 +625,15 @@ da galeria. Salvar.
 **G.9** Entrar (com Google ou "continuar sem login").
 
 > ✅ Deve pedir o **consentimento** de novo, e depois a **ficha de saúde** em branco.
+> ℹ️ Num build `preview`/`production`, "Continuar com Google" está apagado por falta de
+> configuração (ver "Antes de começar"). Use "continuar sem login" — o resto do passo vale igual.
 
 **G.10** Preencher só o nome e continuar. Ir em **Ajustes** → **CONTA**.
 
 > ✅ Se você tinha entrado com o Google antes do apagamento, a conta deve aparecer como
 > **desvinculada** (oferecendo "Vincular uma conta do Google").
+> ℹ️ Sem a configuração do Supabase no build, o cartão sempre mostra "Vincular uma conta do
+> Google" com a ressalva de indisponibilidade — este passo não conclui, e não é falha do app.
 
 **G.11** Fechar o app completamente (tirar dos recentes) e abrir de novo.
 
