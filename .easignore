@@ -4,6 +4,13 @@
 # dependencies
 node_modules/
 
+# Ferramentas de desenvolvimento local (skills do Claude Code). Ficam de fora do upload por dois
+# motivos: não entram no app, e o `.agents/` guarda symlinks que o Windows não consegue recriar
+# no diretório temporário do EAS — o upload falha com EPERM antes mesmo de começar o build.
+.agents/
+.claude/
+skills-lock.json
+
 # Expo
 .expo/
 dist/
