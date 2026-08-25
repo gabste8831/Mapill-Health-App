@@ -274,9 +274,9 @@ export function InicioScreen() {
             key={inventory.id}
             medicationName={medication.name}
             daysRemaining={daysRemaining}
-            onUpdateMedication={() =>
-              router.push({ pathname: "/cadastro/editar/[id]", params: { id: medication.id } })
-            }
+            // Vai pro estoque, não pro cadastro: quem viu "acaba em 3 dias" quer repor, e repor
+            // pelo formulário do remédio obrigaria a reeditar um tratamento que não mudou.
+            onAbrirEstoque={() => router.push("/estoque")}
           />
         ))}
       </ScrollView>

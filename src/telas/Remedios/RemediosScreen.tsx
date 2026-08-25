@@ -171,6 +171,11 @@ export function RemediosScreen() {
       <Header
         title="Medicações"
         onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+        action={{
+          icon: "cube-outline",
+          label: "Abrir o estoque das suas medicações",
+          onPress: () => router.push("/estoque"),
+        }}
       />
 
       <View style={styles.header}>
