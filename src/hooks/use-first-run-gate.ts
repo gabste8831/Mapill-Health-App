@@ -103,14 +103,38 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     setStep((await hasCompletedProfile()) ? "app" : "profile");
   }, []);
 
+  /**
+   * O que decide pular a primeira execução é o **onboarding cumprido**, não a sessão.
+   *
+   * Antes só a sessão do Supabase avançava o gate, e isso fazia a tela de login reaparecer a cada
+   * abertura para todo mundo que escolheu "continuar sem login" — uma escolha que o app oferece e
+   * depois esquecia. Pior, num build sem as credenciais do Supabase ela reaparecia sempre, para
+   * todos, sem que houvesse botão que resolvesse: o de entrar não funciona, e o de seguir sem
+   * conta precisava ser tocado de novo todo dia.
+   *
+   * Consentimento válido mais ficha preenchida só existem porque alguém passou por aqui e
+   * respondeu. É prova melhor do que a sessão, que pode nunca ter existido por decisão do próprio
+   * paciente. A sessão continua sendo lida, mas só para cobrir quem entrou com o Google antes de
+   * chegar ao consentimento.
+   */
   useEffect(() => {
-    // A sessão do Supabase persiste sozinha entre aberturas (AsyncStorage, ver
-    // supabase-client.ts). Sem isso o usuário logaria de novo toda vez, mesmo autenticado.
-    if (!isDatabaseReady || !isSupabaseConfigured) return;
-    const authGateway = new SupabaseAuthGateway();
-    authGateway.getCurrentUser().then((user) => {
-      if (user) continueAfterLogin();
-    });
+    if (!isDatabaseReady) return;
+    let ativo = true;
+    void (async () => {
+      if (await hasCompletedProfile()) {
+        // Reconsentimento por bump de versão ainda passa pelo `continueAfterLogin`, que checa a
+        // versão aceita antes de liberar o app.
+        if (ativo) await continueAfterLogin();
+        return;
+      }
+      if (!isSupabaseConfigured) return;
+      // A sessão persiste sozinha entre aberturas (AsyncStorage, ver supabase-client.ts).
+      const user = await new SupabaseAuthGateway().getCurrentUser();
+      if (user && ativo) await continueAfterLogin();
+    })();
+    return () => {
+      ativo = false;
+    };
   }, [isDatabaseReady, continueAfterLogin]);
 
   const signInWithGoogle = useCallback(async (): Promise<GoogleSignInResult> => {

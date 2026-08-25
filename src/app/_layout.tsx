@@ -15,6 +15,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { Alert, useColorScheme } from 'react-native';
 
+import { isSupabaseConfigured } from '@/data/remote/supabase-client';
 import { useDatabaseReady } from '@/hooks/use-database-ready';
 import { useFirstRunGate } from '@/hooks/use-first-run-gate';
 import { ConsentimentoScreen } from '@/telas/Consentimento/ConsentimentoScreen';
@@ -64,7 +65,11 @@ export default function RootLayout() {
     return (
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <SplashOverlay />
-        <LoginScreen onAuthenticated={handleGoogleSignIn} onContinueWithoutLogin={gate.continueWithoutLogin} />
+        <LoginScreen
+          onAuthenticated={handleGoogleSignIn}
+          onContinueWithoutLogin={gate.continueWithoutLogin}
+          googleDisponivel={isSupabaseConfigured}
+        />
       </ThemeProvider>
     );
   }

@@ -6,17 +6,17 @@ import { Button, GoogleLogo } from "@/ui";
 import { styles } from "./LoginScreen.styles";
 
 type LoginScreenProps = {
-  /**
-   * Chamado após login com Google bem-sucedido. Hoje é um stub — a autenticação real
-   * (Supabase Auth + Google OAuth) ainda não está implementada.
-   */
   onAuthenticated: () => void;
   /**
-   * Chamado quando o paciente opta por não fazer login. Semanticamente diferente de
-   * `onAuthenticated` mesmo que hoje leve ao mesmo lugar: sem login não há backup/sync,
-   * só uso local.
+   * Semanticamente diferente de `onAuthenticated` mesmo levando ao mesmo lugar: entrar prepara a
+   * cópia na nuvem do D1, seguir sem conta não.
    */
   onContinueWithoutLogin: () => void;
+  /**
+   * `false` quando o build saiu sem as credenciais do Supabase. Descobrir isso só depois de tocar
+   * é o pior dos dois mundos: a pessoa acha que errou alguma coisa, e tenta de novo.
+   */
+  googleDisponivel: boolean;
 };
 
 // Só existe um único caminho de conta (Google), então não faz sentido pedir e-mail/senha
@@ -24,6 +24,7 @@ type LoginScreenProps = {
 export function LoginScreen({
   onAuthenticated,
   onContinueWithoutLogin,
+  googleDisponivel,
 }: LoginScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -49,8 +50,15 @@ export function LoginScreen({
             label="Continuar com Google"
             icon={<GoogleLogo size={20} />}
             onPress={onAuthenticated}
+            disabled={!googleDisponivel}
             style={styles.actionButtonWidth}
           />
+          {googleDisponivel ? null : (
+            <Text style={styles.footerCaption}>
+              Esta versão do app saiu sem a configuração do login com Google. Siga sem conta — nada
+              do Mapill depende dela.
+            </Text>
+          )}
           <Button
             variant="outline"
             label="Continuar sem login"

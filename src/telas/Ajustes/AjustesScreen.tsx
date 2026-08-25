@@ -14,6 +14,8 @@ export type AjustesScreenProps = {
   photoUri: string | null;
   /** E-mail da conta Google, ou `null` quando o app está sendo usado sem conta. */
   accountEmail: string | null;
+  /** `false` num build que saiu sem as credenciais do Supabase — ver `LoginScreen`. */
+  googleDisponivel: boolean;
   onBack: () => void;
   onEditProfile: () => void;
   onOpenTerms: () => void;
@@ -59,6 +61,7 @@ export function AjustesScreen({
   patientName,
   photoUri,
   accountEmail,
+  googleDisponivel,
   onBack,
   onEditProfile,
   onOpenTerms,
@@ -128,7 +131,11 @@ export function AjustesScreen({
                 // O texto anterior dizia "habilita o backup dos seus dados", e não habilitava:
                 // não existe sincronização ainda. Prometer backup num app de saúde faz alguém
                 // trocar de celular confiando e perder o histórico.
-                hint="Nada do que já está salvo é perdido. A cópia na nuvem ainda não está disponível."
+                hint={
+                  googleDisponivel
+                    ? "Nada do que já está salvo é perdido. A cópia na nuvem ainda não está disponível."
+                    : "Indisponível nesta versão do app, que saiu sem a configuração do login."
+                }
                 onPress={onSignIn}
               />
             )}
