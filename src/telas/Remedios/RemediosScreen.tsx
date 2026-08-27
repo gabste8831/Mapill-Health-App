@@ -6,7 +6,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { excluirMedicamento } from "@/hooks/use-medication-registration";
 import type { ItemDaListaDeRemedios } from "@/hooks/use-medication-list";
-import { useMedicationList } from "@/hooks/use-medication-list";
+import {
+  ordenarRemedios,
+  useMedicationList,
+  type OrdemDeRemedios,
+} from "@/hooks/use-medication-list";
 import {
   formatarQuantidadeLivre,
   horariosComDose,
@@ -14,8 +18,24 @@ import {
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
-import { Button, CenteredLoader, Fab, FotoLocal, Header, SearchField } from "@/ui";
+import {
+  Button,
+  CenteredLoader,
+  Fab,
+  FotoLocal,
+  Header,
+  SearchField,
+  SeletorDeOrdem,
+  type OpcaoDeOrdem,
+} from "@/ui";
 import { styles } from "./RemediosScreen.styles";
+
+/** Alfabética primeiro por ser a que não muda sozinha: a lista fica onde a pessoa deixou. */
+const ORDENS_DE_REMEDIO: OpcaoDeOrdem<OrdemDeRemedios>[] = [
+  { value: "alfabetica", label: "A–Z", icon: "text-outline" },
+  { value: "cadastro", label: "Mais recentes", icon: "time-outline" },
+  { value: "estoque", label: "Acabando", icon: "cube-outline" },
+];
 
 type ItemDeRemedioProps = {
   item: ItemDaListaDeRemedios;
@@ -125,6 +145,7 @@ export function RemediosScreen() {
   const router = useRouter();
   const { items, isLoading, error, reload } = useMedicationList();
   const [busca, setBusca] = useState("");
+  const [ordem, setOrdem] = useState<OrdemDeRemedios>("alfabetica");
 
   // Sobre `items`, e não sobre `visiveis`: o acesso ao estoque não pode sumir porque a busca em
   // curso não casou com nenhum remédio controlado.
@@ -133,7 +154,7 @@ export function RemediosScreen() {
   const termo = normalizar(busca.trim());
   // O princípio ativo entra na busca junto do nome: quem tem a caixa na mão às vezes lembra do
   // "losartana" e não do nome comercial.
-  const visiveis =
+  const encontrados =
     termo.length === 0
       ? items
       : items.filter(
@@ -141,6 +162,7 @@ export function RemediosScreen() {
             normalizar(item.medication.name).includes(termo) ||
             normalizar(item.medication.activeIngredient).includes(termo),
         );
+  const visiveis = ordenarRemedios(encontrados, ordem);
 
   function confirmarExclusao(item: ItemDaListaDeRemedios) {
     Alert.alert(
@@ -197,6 +219,15 @@ export function RemediosScreen() {
                 ? `${visiveis.length} de ${items.length} ${items.length === 1 ? "medicação" : "medicações"}`
                 : `${items.length} ${items.length === 1 ? "medicação cadastrada" : "medicações cadastradas"}`}
             </Text>
+
+            {/* Só com mais de um: ordenar uma lista de um item é oferecer uma escolha sem efeito. */}
+            {items.length > 1 ? (
+              <SeletorDeOrdem
+                value={ordem}
+                onChange={setOrdem}
+                options={ORDENS_DE_REMEDIO}
+              />
+            ) : null}
           </>
         ) : null}
       </View>

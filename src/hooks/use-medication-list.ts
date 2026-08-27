@@ -55,15 +55,47 @@ async function carregarItens(): Promise<ItemDaListaDeRemedios[]> {
     porMedicamento.set(prescription.medicationId, lista);
   }
 
-  return medications
-    .map((medication) => ({
-      medication,
-      prescription: prescricaoVigente(porMedicamento.get(medication.id) ?? [], hoje),
-      inventory: inventories.find((item) => item.medicationId === medication.id) ?? null,
-    }))
-    .sort((a, b) =>
-      a.medication.name.localeCompare(b.medication.name, "pt-BR", { sensitivity: "base" }),
-    );
+  // Sem ordenar aqui: quem escolhe a ordem é a tela (E3), e ordenar duas vezes só faria a
+  // primeira ser jogada fora.
+  return medications.map((medication) => ({
+    medication,
+    prescription: prescricaoVigente(porMedicamento.get(medication.id) ?? [], hoje),
+    inventory: inventories.find((item) => item.medicationId === medication.id) ?? null,
+  }));
+}
+
+/** Como a lista de medicações pode ser ordenada. */
+export type OrdemDeRemedios = "alfabetica" | "cadastro" | "estoque";
+
+/**
+ * Ordena a lista já carregada.
+ *
+ * Fora do hook porque a ordem é escolha de quem está olhando, não propriedade do dado — e
+ * reordenar em memória custa nada perto de reconsultar o SQLite a cada toque na fileira.
+ *
+ * `estoque` põe na frente o que está acabando, e **empurra para o fim quem não controla estoque**:
+ * sem número, não há urgência a comparar, e deixar esses no meio faria a ordem parecer aleatória.
+ */
+export function ordenarRemedios(
+  items: ItemDaListaDeRemedios[],
+  ordem: OrdemDeRemedios,
+): ItemDaListaDeRemedios[] {
+  const porNome = (a: ItemDaListaDeRemedios, b: ItemDaListaDeRemedios) =>
+    a.medication.name.localeCompare(b.medication.name, "pt-BR", { sensitivity: "base" });
+
+  if (ordem === "alfabetica") return items.slice().sort(porNome);
+
+  // Mais recente primeiro: quem acabou de cadastrar quer ver o que cadastrou.
+  if (ordem === "cadastro") {
+    return items.slice().sort((a, b) => b.medication.updatedAt.localeCompare(a.medication.updatedAt));
+  }
+
+  return items.slice().sort((a, b) => {
+    const quantidade = (item: ItemDaListaDeRemedios) =>
+      item.inventory === null ? Number.MAX_SAFE_INTEGER : item.inventory.quantity;
+    const diferenca = quantidade(a) - quantidade(b);
+    return diferenca !== 0 ? diferenca : porNome(a, b);
+  });
 }
 
 /**

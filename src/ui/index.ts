@@ -21,6 +21,7 @@ export * from "./KeyboardAwareScrollView/KeyboardAwareScrollView";
 export * from "./LegalAccordion/LegalAccordion";
 export * from "./OptionGroup/OptionGroup";
 export * from "./SearchField/SearchField";
+export * from "./SeletorDeOrdem/SeletorDeOrdem";
 export * from "./SelectField/SelectField";
 export * from "./SplashOverlay/SplashOverlay";
 export * from "./SuccessOverlay/SuccessOverlay";

@@ -117,6 +117,33 @@ async function carregarItens(): Promise<ItemDeEstoque[]> {
   return itens.sort(porUrgencia);
 }
 
+/** Como a tela de estoque pode ser ordenada. */
+export type OrdemDeEstoque = "urgencia" | "alfabetica" | "quantidade";
+
+/**
+ * Ordena a lista já carregada. Fora do carregamento pelo mesmo motivo da lista de medicações: a
+ * ordem é escolha de quem olha, e reordenar em memória não custa uma consulta nova.
+ */
+export function ordenarEstoques(
+  items: ItemDeEstoque[],
+  ordem: OrdemDeEstoque,
+): ItemDeEstoque[] {
+  const porNome = (a: ItemDeEstoque, b: ItemDeEstoque) =>
+    a.medication.name.localeCompare(b.medication.name, "pt-BR", { sensitivity: "base" });
+
+  if (ordem === "alfabetica") return items.slice().sort(porNome);
+  // Quantidade crua, e não dias restantes: é a pergunta "o que tem menos na caixa", que é
+  // diferente de "o que acaba primeiro" — dois comprimidos de um remédio de uso diário acabam
+  // antes de vinte de um que se toma uma vez por semana.
+  if (ordem === "quantidade") {
+    return items.slice().sort((a, b) => {
+      const diferenca = a.inventory.quantity - b.inventory.quantity;
+      return diferenca !== 0 ? diferenca : porNome(a, b);
+    });
+  }
+  return items.slice().sort(porUrgencia);
+}
+
 /** Grava o evento e deixa o repositório recalcular a quantidade (com clamp em zero). */
 export async function aplicarMudancaDeEstoque(
   inventoryItemId: string,

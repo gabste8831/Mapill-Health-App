@@ -6,12 +6,25 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { recountChange, restockChange } from "@/domain/use-cases/adjust-stock";
 import type { StockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
-import { aplicarMudancaDeEstoque, useInventoryList } from "@/hooks/use-inventory-list";
+import {
+  aplicarMudancaDeEstoque,
+  ordenarEstoques,
+  useInventoryList,
+  type OrdemDeEstoque,
+} from "@/hooks/use-inventory-list";
 import type { ItemDeEstoque } from "@/hooks/use-inventory-list";
 import { formatDecimalInput, formatIntegerInput, parseDecimalInput } from "@/shared/number-input";
 import { formatarNumero, formatarQuantidadeLivre } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
-import { BottomSheet, Button, CenteredLoader, Header, TextField } from "@/ui";
+import {
+  BottomSheet,
+  Button,
+  CenteredLoader,
+  Header,
+  SeletorDeOrdem,
+  TextField,
+  type OpcaoDeOrdem,
+} from "@/ui";
 import { styles } from "./EstoqueScreen.styles";
 
 const MESES_CURTOS = [
@@ -51,6 +64,13 @@ function resumirPrevisao(quantity: number, depletion: StockDepletion | null): st
 function previsaoEhCritica(quantity: number, depletion: StockDepletion | null): boolean {
   return quantity === 0 || (depletion !== null && depletion.daysRemaining <= 0);
 }
+
+/** Urgência primeiro: é a pergunta que traz a pessoa a esta tela. */
+const ORDENS_DE_ESTOQUE: OpcaoDeOrdem<OrdemDeEstoque>[] = [
+  { value: "urgencia", label: "Acaba primeiro", icon: "alarm-outline" },
+  { value: "quantidade", label: "Menos na caixa", icon: "cube-outline" },
+  { value: "alfabetica", label: "A–Z", icon: "text-outline" },
+];
 
 type ItemDeEstoqueProps = {
   item: ItemDeEstoque;
@@ -113,6 +133,9 @@ export function EstoqueScreen() {
   const { items, isLoading, error, reload } = useInventoryList();
   const [edicao, setEdicao] = useState<Edicao | null>(null);
   const [valor, setValor] = useState("");
+  const [ordem, setOrdem] = useState<OrdemDeEstoque>("urgencia");
+
+  const visiveis = ordenarEstoques(items, ordem);
 
   function abrir(item: ItemDeEstoque, modo: Edicao["modo"]) {
     setEdicao({ item, modo });
@@ -163,6 +186,10 @@ export function EstoqueScreen() {
           Quanto ainda resta de cada medicação e quando ela deve acabar, no ritmo do seu tratamento.
           A quantidade cai sozinha a cada dose confirmada.
         </Text>
+
+        {items.length > 1 ? (
+          <SeletorDeOrdem value={ordem} onChange={setOrdem} options={ORDENS_DE_ESTOQUE} />
+        ) : null}
       </View>
 
       {error !== null ? (
@@ -171,7 +198,7 @@ export function EstoqueScreen() {
         </View>
       ) : (
         <FlatList
-          data={items}
+          data={visiveis}
           keyExtractor={(item) => item.inventory.id}
           renderItem={({ item }) => (
             <CartaoDeEstoque
