@@ -1108,10 +1108,27 @@ compromisso, mudar o local e salvar.
 > ✅ Abaixo do cartão: **"Seus dados ficam neste aparelho"**.
 > ✅ A seta de voltar retorna para Ajustes.
 
-**20.2** Se estiver **sem** conta, tocar em **"Vincular uma conta do Google"** e entrar.
+**20.2** 🔧 *Reescrito em 27/08 (P2).* Se estiver **sem** conta, tocar em
+**"Vincular uma conta do Google"**.
+
+> ✅ 🔴 **Antes de abrir o Google**, aparece um diálogo dizendo que vincular confirma os termos
+> (com o número da versão) e que o aceite fica registrado com a data de hoje.
+> ✅ Ele repete que os dados de saúde continuam só no aparelho.
+> ✅ Há três opções: **Cancelar**, **Ler os termos** e **Vincular**.
+
+**20.2b** Tocar em **"Ler os termos"**.
+
+> ✅ Abre a tela de termos. Confirmar não pode ser assinar às cegas.
+
+**20.2c** Voltar, tocar em **"Vincular"** e entrar com o Google.
 
 > ✅ 🔴 Volta com a conta vinculada, e **nenhum medicamento é perdido**. Entrar depois não toca no
 > banco local.
+
+**20.2d** 🔴 Ir em **Conta e dados** → **"Termos e privacidade"**.
+
+> ✅ A data de **"Aceito em"** é de **agora** — o aceite da vinculação foi registrado.
+> ❌ Se continuar mostrando a data do onboarding, o registro não gravou.
 
 **20.3** Tocar em **"Desvincular esta conta"**.
 

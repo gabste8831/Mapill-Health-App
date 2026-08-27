@@ -1,12 +1,15 @@
+import * as Crypto from "expo-crypto";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 
+import { ConsentRepository } from "@/data/repositories/consent-repository";
 import { LocalDataRepository } from "@/data/repositories/local-data-repository";
 import { SupabaseAuthGateway } from "@/data/remote/supabase-auth-gateway";
 import { isSupabaseConfigured } from "@/data/remote/supabase-client";
 import { restartFirstRun } from "@/hooks/use-first-run-gate";
 import { ContaScreen } from "@/telas/Conta/ContaScreen";
+import { CURRENT_TERMS_VERSION } from "@/telas/Consentimento/texto-legal";
 
 export default function ContaRoute() {
   const router = useRouter();
@@ -17,7 +20,12 @@ export default function ContaRoute() {
     new SupabaseAuthGateway().getCurrentUser().then((user) => setAccountEmail(user?.email ?? null));
   }, []);
 
-  async function handleSignIn() {
+  /**
+   * Vincular conta reapresenta os termos antes de entrar (P2). Não é burocracia repetida: é o
+   * momento em que a pessoa manifesta intenção de usar a nuvem, e o aceite fica registrado com a
+   * data — o "Ler os termos" ao lado existe para que confirmar não seja assinar às cegas.
+   */
+  function handleSignIn() {
     if (!isSupabaseConfigured) {
       Alert.alert(
         "Login indisponível",
@@ -25,13 +33,56 @@ export default function ContaRoute() {
       );
       return;
     }
+    Alert.alert(
+      "Vincular conta do Google",
+      `Ao vincular, você confirma os Termos de Uso e a Política de Privacidade (versão ${CURRENT_TERMS_VERSION}), e o aceite fica registrado com a data de hoje.\n\nSeus dados de saúde continuam apenas neste aparelho — a cópia na nuvem ainda não está disponível.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Ler os termos", onPress: () => router.push("/termos") },
+        { text: "Vincular", onPress: () => void entrarComGoogle() },
+      ],
+    );
+  }
+
+  async function entrarComGoogle() {
     try {
       // Entrar depois não toca no SQLite: os dados locais continuam onde estão, e a conta só
       // passa a ser o destino da cópia na nuvem quando ela existir (D1).
       const user = await new SupabaseAuthGateway().signInWithGoogle();
+      await registrarAceiteDaVinculacao();
       setAccountEmail(user.email);
     } catch (error) {
       Alert.alert("Não foi possível entrar", error instanceof Error ? error.message : "Tente novamente.");
+    }
+  }
+
+  /**
+   * Grava um novo registro de consentimento a cada vinculação de conta (decisão P2, de 26/08).
+   *
+   * O login por si só não muda a base legal — o texto vigente diz que os dados não saem do
+   * aparelho, e isso continua verdade. O registro existe pelo **rastro**: vincular conta é o
+   * momento em que a pessoa manifesta intenção de usar a nuvem, e ter a data disso guardada é o
+   * que permite provar depois desde quando ela consentiu com o quê.
+   *
+   * Registro novo, e não atualização do anterior: consentimento é evento, não estado. Sobrescrever
+   * apagaria justamente a linha do tempo que ele existe para preservar.
+   *
+   * Falhar aqui não desfaz o login — a conta já está vinculada, e derrubar a tela deixaria a
+   * pessoa sem saber em que pé ficou.
+   */
+  async function registrarAceiteDaVinculacao() {
+    try {
+      const now = new Date().toISOString();
+      await new ConsentRepository().save({
+        id: Crypto.randomUUID(),
+        termsVersion: CURRENT_TERMS_VERSION,
+        acceptedAt: now,
+        updatedAt: now,
+        syncedAt: null,
+        deletedAt: null,
+      });
+    } catch {
+      // Sem alerta: o rastro é do app, não uma pendência que a pessoa possa resolver.
     }
   }
 
