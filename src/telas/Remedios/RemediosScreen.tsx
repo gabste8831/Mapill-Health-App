@@ -5,10 +5,10 @@ import { Alert, FlatList, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { excluirMedicamento } from "@/hooks/use-medication-registration";
-import type { ItemDaListaDeRemedios } from "@/hooks/use-medication-list";
 import {
   ordenarRemedios,
   useMedicationList,
+  type ItemDaListaDeRemedios,
   type OrdemDeRemedios,
 } from "@/hooks/use-medication-list";
 import {

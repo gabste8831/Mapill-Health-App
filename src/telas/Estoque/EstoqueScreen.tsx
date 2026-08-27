@@ -10,9 +10,9 @@ import {
   aplicarMudancaDeEstoque,
   ordenarEstoques,
   useInventoryList,
+  type ItemDeEstoque,
   type OrdemDeEstoque,
 } from "@/hooks/use-inventory-list";
-import type { ItemDeEstoque } from "@/hooks/use-inventory-list";
 import { formatDecimalInput, formatIntegerInput, parseDecimalInput } from "@/shared/number-input";
 import { formatarNumero, formatarQuantidadeLivre } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
