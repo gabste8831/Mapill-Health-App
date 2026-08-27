@@ -13,17 +13,10 @@ export type AjustesScreenProps = {
   photoUri: string | null;
   /** E-mail da conta Google, ou `null` quando o app está sendo usado sem conta. */
   accountEmail: string | null;
-  /** `false` num build que saiu sem as credenciais do Supabase — ver `LoginScreen`. */
-  googleDisponivel: boolean;
   onBack: () => void;
   onEditProfile: () => void;
-  onOpenTerms: () => void;
-  onSignIn: () => void;
-  onSignOut: () => void;
-  /** Apaga medicamentos, tratamentos, histórico e estoque. Ficha e consentimento ficam. */
-  onEraseHealthData: () => void;
-  /** Apaga tudo, desvincula a conta e devolve o app à primeira execução. */
-  onEraseEverything: () => void;
+  /** Abre a tela de conta e dados, onde moram vincular, termos e apagamento (E4). */
+  onOpenAccount: () => void;
 };
 
 type LinhaProps = {
@@ -60,14 +53,9 @@ export function AjustesScreen({
   patientName,
   photoUri,
   accountEmail,
-  googleDisponivel,
   onBack,
   onEditProfile,
-  onOpenTerms,
-  onSignIn,
-  onSignOut,
-  onEraseHealthData,
-  onEraseEverything,
+  onOpenAccount,
 }: AjustesScreenProps) {
   const isSignedIn = accountEmail !== null;
   const hasProfile = patientName.trim().length > 0;
@@ -113,73 +101,31 @@ export function AjustesScreen({
           </Pressable>
         </View>
 
+        {/* Uma linha só, e não três seções: conta, consentimento e apagamento saíram para tela
+            própria (E4). São as decisões das quais não se volta, e tê-las no caminho de quem só
+            queria editar a ficha convidava ao toque acidental. */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONTA</Text>
-          <Card>
-            {isSignedIn ? (
-              <Linha
-                icon={<Ionicons name="link-outline" size={22} color={colors.onSurfaceVariant} />}
-                label="Desvincular esta conta"
-                hint={accountEmail ?? undefined}
-                onPress={onSignOut}
-              />
-            ) : (
-              <Linha
-                icon={<GoogleLogo size={22} />}
-                label="Vincular uma conta do Google"
-                // O texto anterior dizia "habilita o backup dos seus dados", e não habilitava:
-                // não existe sincronização ainda. Prometer backup num app de saúde faz alguém
-                // trocar de celular confiando e perder o histórico.
-                hint={
-                  googleDisponivel
-                    ? "Nada do que já está salvo é perdido. A cópia na nuvem ainda não está disponível."
-                    : "Indisponível nesta versão do app, que saiu sem a configuração do login."
-                }
-                onPress={onSignIn}
-              />
-            )}
-          </Card>
-          <Text style={styles.sectionFooter}>
-            {isSignedIn
-              ? "Seus dados ficam neste aparelho. Desvincular não apaga nada."
-              : "Seus dados ficam neste aparelho, com ou sem conta vinculada."}
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PRIVACIDADE</Text>
+          <Text style={styles.sectionTitle}>CONTA E DADOS</Text>
           <Card>
             <Linha
-              icon={<Ionicons name="document-text-outline" size={22} color={colors.onSurfaceVariant} />}
-              label="Termos e privacidade"
-              hint="Ler os termos aceitos e ver a data do seu aceite"
-              onPress={onOpenTerms}
-            />
-          </Card>
-        </View>
-
-        {/* Separado da conta de propósito: apagar dado e desvincular conta são coisas diferentes,
-            e juntá-las na mesma seção sugeriria que uma implica a outra. */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>MEUS DADOS</Text>
-          <Card>
-            <Linha
-              icon={<Ionicons name="trash-outline" size={22} color={colors.error} />}
-              label="Apagar meus dados de saúde"
-              hint="Medicamentos, tratamentos, horários, histórico e estoque. Sua ficha continua."
-              destrutiva
-              onPress={onEraseHealthData}
-            />
-            <Linha
-              icon={<Ionicons name="nuclear-outline" size={22} color={colors.error} />}
-              label="Apagar tudo e recomeçar"
-              hint="Inclui a ficha e o consentimento. O app volta como recém-instalado."
-              destrutiva
-              onPress={onEraseEverything}
+              icon={
+                isSignedIn ? (
+                  <GoogleLogo size={22} />
+                ) : (
+                  <Ionicons name="person-circle-outline" size={22} color={colors.onSurfaceVariant} />
+                )
+              }
+              label="Conta e dados"
+              hint={
+                isSignedIn
+                  ? accountEmail ?? undefined
+                  : "Vincular conta, ler os termos e apagar seus dados"
+              }
+              onPress={onOpenAccount}
             />
           </Card>
           <Text style={styles.sectionFooter}>
-            O apagamento é definitivo e acontece neste aparelho. Não há como desfazer.
+            Seus dados ficam neste aparelho, com ou sem conta vinculada.
           </Text>
         </View>
       </ScrollView>
