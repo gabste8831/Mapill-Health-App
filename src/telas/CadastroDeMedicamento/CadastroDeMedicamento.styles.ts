@@ -271,6 +271,14 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
 
+  /**
+   * Aviso que vem com uma ação junto (a diferença de doses do prazo, e o botão de estender).
+   * O `gap` mantém o botão colado no texto que o explica, em vez de solto na seção.
+   */
+  avisoDePrazo: {
+    gap: spacing.sm,
+  },
+
   /** Explicação que não é campo nem erro — texto de apoio que merece peso, tipo regra do sistema. */
   sectionHintDestaque: {
     ...typography.bodyMd,

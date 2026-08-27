@@ -30,6 +30,8 @@ import {
   INTAKE_INSTRUCTIONS,
   MAX_DOSES_PER_DAY,
 } from "@/domain/entities/prescription";
+import { doseFaltanteDoPrazo } from "@/domain/use-cases/dose-faltante-do-prazo";
+import { dosesDeHojeJaPassadas } from "@/domain/use-cases/doses-de-hoje-ja-passadas";
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { summarizeTreatment } from "@/domain/use-cases/summarize-treatment";
 import { ACCEPTED_DOCUMENT_LABEL, useDocumentPicker } from "@/hooks/use-document-picker";
@@ -608,17 +610,35 @@ export function FormularioDeMedicamentoScreen({
       : lastDayOfTreatment(startDate, parsedDurationAmount, durationUnit);
 
   const validUntilIso = validUntilInput.length === 0 ? null : parseDateInput(validUntilInput);
+  /**
+   * Receita vencida é recusada, e não só sinalizada. Aceitar traz dois problemas de uma vez: o
+   * aviso de renovação seria agendado para uma data que já passou (nunca dispara), e a pessoa sai
+   * da tela achando que está coberta por um documento que não vale mais. Quem já perdeu a
+   * validade precisa renovar, não registrar.
+   */
+  const receitaVencida = validUntilIso !== null && validUntilIso < todayIsoDate();
   const validUntilError =
-    validUntilInput.length === 10 && validUntilIso === null ? "Data inválida." : undefined;
+    validUntilInput.length === 10 && validUntilIso === null
+      ? "Data inválida."
+      : receitaVencida
+        ? "Essa receita já venceu. Anexe uma receita dentro da validade."
+        : undefined;
 
   /**
    * A data em que o aviso chega, e não "15 dias antes". O número sozinho não deixa ninguém
    * conferir se dá tempo de conseguir consulta — a data deixa.
    */
-  const avisoDeRenovacao =
-    validUntilIso !== null && wantsRenewalReminder && renewalLeadDays !== null
-      ? `Você será avisado em ${toDateInput(diasAntes(validUntilIso, Number(renewalLeadDays)))}, com ${renewalLeadDays} dias pra renovar.`
-      : null;
+  const avisoDeRenovacao = (() => {
+    if (validUntilIso === null || receitaVencida || !wantsRenewalReminder) return null;
+    if (renewalLeadDays === null) return null;
+
+    const chegaEm = diasAntes(validUntilIso, Number(renewalLeadDays));
+    // Antecedência que cai antes de hoje é aviso que já passou: prometer a data seria mentira, e
+    // o silêncio da versão anterior fazia a pessoa contar com um lembrete que nunca viria.
+    return chegaEm < todayIsoDate()
+      ? `Com ${renewalLeadDays} dias de antecedência o aviso já teria passado. Escolha um prazo menor para ser avisado a tempo.`
+      : `Você será avisado em ${toDateInput(chegaEm)}, com ${renewalLeadDays} dias pra renovar.`;
+  })();
 
   /** `null` enquanto a frequência não foi escolhida — não existe posologia padrão. */
   const schedule = useMemo<PosologySchedule | null>(() => {
@@ -728,6 +748,38 @@ export function FormularioDeMedicamentoScreen({
 
   const prazoSemDose =
     endDate !== null && frequency !== "asNeeded" && isScheduleComplete && resumoDoTratamento === null;
+
+  /**
+   * Horários de hoje que o cadastro vai descartar por já terem passado. A regra é intencional
+   * (dose vencida não vira compromisso), mas descartar calado faz a pessoa sair achando que
+   * agendou o dia inteiro — daí o aviso.
+   */
+  /**
+   * "3x ao dia por 7 dias" é uma prescrição de 21 doses; cadastrar às 15h entrega 19 e encerra na
+   * mesma data. Em vitamina não muda nada, em antibiótico é ciclo interrompido. A tela mostra a
+   * diferença e oferece estender — decidir sozinha sobrescreveria a data que a pessoa digitou.
+   */
+  const faltaDeDose = useMemo(
+    () =>
+      schedule === null || doseUnit === null || endDate === null || !isScheduleComplete
+        ? null
+        : doseFaltanteDoPrazo(
+            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount, doseUnit },
+            new Date(),
+          ),
+    [schedule, doseUnit, endDate, isScheduleComplete, startDate, parsedDoseAmount],
+  );
+
+  const horariosDeHojeDescartados = useMemo(
+    () =>
+      schedule === null || doseUnit === null || !isScheduleComplete
+        ? []
+        : dosesDeHojeJaPassadas(
+            { id: "", schedule, startDate, endDate, doseAmount: parsedDoseAmount, doseUnit },
+            new Date(),
+          ),
+    [schedule, doseUnit, isScheduleComplete, startDate, endDate, parsedDoseAmount],
+  );
 
   /**
    * Só compara quando as unidades batem. Gota se toma em gota e se guarda em ml, e converter
@@ -1221,6 +1273,42 @@ export function FormularioDeMedicamentoScreen({
             <Text style={styles.avisoDeConflito}>
               Nesse prazo não sobra nenhuma dose — os horários de hoje já passaram. Aumente os
               dias ou revise os horários.
+            </Text>
+          ) : null}
+
+          {/* Prescrição é contada em doses, não em dias de calendário. Se o prazo não entrega o
+              tratamento inteiro por ter sido cadastrado com o dia em curso, a tela mostra a
+              diferença e oferece a data que completa — em vez de corrigir por conta própria. */}
+          {faltaDeDose !== null ? (
+            <View style={styles.avisoDePrazo}>
+              <Text style={styles.sectionHintDestaque}>
+                Esse prazo entrega {faltaDeDose.planejadas} das {faltaDeDose.nominais} doses do
+                tratamento, porque os horários de hoje que já passaram não entram.
+              </Text>
+              <Button
+                label={`Estender até ${toDateInput(faltaDeDose.fimQueCompleta)} e completar as ${faltaDeDose.nominais} doses`}
+                variant="outline"
+                onPress={() => {
+                  const nova = treatmentDuration(startDate, faltaDeDose.fimQueCompleta);
+                  // `null` só sairia com data inválida, e a data veio do próprio domínio —
+                  // mas ignorar em silêncio deixaria o botão sem efeito nenhum.
+                  if (nova === null) return;
+                  setDurationUnit(nova.unit);
+                  setDurationAmount(String(nova.amount));
+                }}
+              />
+            </View>
+          ) : null}
+
+          {/* O app não agenda dose que já passou (o controle começa agora, e amanhã o ciclo é
+              normal), mas descartar em silêncio faria a pessoa sair achando que agendou o dia
+              inteiro. Diz quais horários e a partir de quando o acompanhamento vale. */}
+          {horariosDeHojeDescartados.length > 0 && !prazoSemDose ? (
+            <Text style={styles.sectionHintDestaque}>
+              {horariosDeHojeDescartados.length === 1
+                ? `O horário de hoje às ${horariosDeHojeDescartados[0]} já passou e não será agendado.`
+                : `Os horários de hoje às ${emLista(horariosDeHojeDescartados)} já passaram e não serão agendados.`}{" "}
+              O acompanhamento começa na próxima dose, e amanhã o dia inteiro entra normalmente.
             </Text>
           ) : null}
         </Card>
