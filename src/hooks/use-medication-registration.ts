@@ -2,10 +2,13 @@ import * as Crypto from "expo-crypto";
 import { Platform } from "react-native";
 
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
+import { IntakeLogRepository } from "@/data/repositories/intake-log-repository";
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
+import type { Prescription } from "@/domain/entities/prescription";
 import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
+import { RegisterIntake } from "@/domain/use-cases/register-intake";
 import type { MedicamentoDraft } from "@/telas/CadastroDeMedicamento/FormularioDeMedicamentoScreen";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`). */
@@ -124,7 +127,63 @@ export async function salvarMedicamento(
     await doseScheduleRepository.save({ id: Crypto.randomUUID(), ...doseSchedule, ...syncFields() });
   }
 
+  await registrarDosesJaTomadas(draft, prescription, medicationId, from);
+
   return { medicationId, prescriptionId };
+}
+
+/**
+ * Grava as doses de hoje que o paciente disse já ter tomado antes de cadastrar (E10).
+ *
+ * O horário já passou, então `generateDoseSchedules` não o produz para o futuro — o agendamento é
+ * recriado aqui, para o dia inteiro, e só os horários marcados são aproveitados. Cada um vira um
+ * `DoseSchedule` **mais** um `IntakeLog` confirmado, exatamente como uma dose confirmada pela
+ * Home: sem o agendamento, o registro de ingestão apontaria para nada, e o histórico deixaria de
+ * fechar com a agenda.
+ *
+ * `occurredAt` é o horário **agendado**, e não agora: aqui o instante da ingestão é justamente o
+ * que se está reconstituindo. É diferente da confirmação pela Home, onde o que o app observou foi
+ * a resposta e carimbar o horário previsto inventaria dado (§2.3.3). Aqui a pessoa está dizendo
+ * "tomei às 8", e é isso que fica gravado.
+ *
+ * Passa pelo `RegisterIntake` e não por escrita direta para que o desconto de estoque seja o mesmo
+ * — é essa a razão de o E10 existir: sem ele o estoque nasce desalinhado da caixa.
+ */
+async function registrarDosesJaTomadas(
+  draft: MedicamentoDraft,
+  prescription: Prescription,
+  medicationId: string,
+  agora: Date,
+): Promise<void> {
+  if (draft.dosesJaTomadasHoje.length === 0) return;
+
+  const inicioDeHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+  const inicioDeAmanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
+  const marcados = new Set(draft.dosesJaTomadasHoje);
+
+  const doseScheduleRepository = new DoseScheduleRepository();
+  const registerIntake = new RegisterIntake(new IntakeLogRepository(), new InventoryRepository());
+
+  for (const doseSchedule of generateDoseSchedules({
+    prescription,
+    from: inicioDeHoje,
+    until: inicioDeAmanha,
+  })) {
+    const at = new Date(doseSchedule.scheduledFor);
+    const p = (value: number) => String(value).padStart(2, "0");
+    if (!marcados.has(`${p(at.getHours())}:${p(at.getMinutes())}`)) continue;
+
+    const doseScheduleId = Crypto.randomUUID();
+    await doseScheduleRepository.save({ id: doseScheduleId, ...doseSchedule, ...syncFields() });
+    await registerIntake.execute({
+      id: Crypto.randomUUID(),
+      doseScheduleId,
+      medicationId,
+      status: "confirmed",
+      occurredAt: doseSchedule.scheduledFor,
+      amount: doseSchedule.amount,
+    });
+  }
 }
 
 /**
@@ -178,6 +237,9 @@ export async function carregarMedicamento(
       lowStockAlertEnabled: inventory?.lowStockAlertEnabled ?? false,
       lowStockAlertLeadDays: inventory?.lowStockAlertLeadDays ?? null,
       storageLocation: inventory?.storageLocation ?? null,
+      // Sempre vazio na edição: registrar ingestão retroativa é coisa do cadastro novo, e trazer
+      // o que foi marcado uma vez faria a mesma dose ser gravada de novo a cada alteração.
+      dosesJaTomadasHoje: [],
     },
   };
 }

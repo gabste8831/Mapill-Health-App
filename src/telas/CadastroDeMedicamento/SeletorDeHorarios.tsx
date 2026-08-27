@@ -10,7 +10,7 @@ import {
   parseTimeInput,
   serieCabeNoDia,
 } from "@/shared/time-input";
-import { BottomSheet, Button, Checkbox, TextField, TimePicker } from "@/ui";
+import { BottomSheet, Button, TextField, TimePicker } from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
 
 /** "1ª dose", "2ª dose"… — dentro do popup há largura pra escrever por extenso. */
@@ -401,14 +401,9 @@ export function SeletorDeHorarios({
               </View>
             ))}
 
-            {variacao !== undefined && values.length > 1 ? (
-              <Checkbox
-                checked={variacao.ativa}
-                onChange={variacao.onChange}
-                label="A dose muda de um horário para o outro"
-                accessibilityLabel="A dose muda de um horário para o outro"
-              />
-            ) : null}
+            {/* O checkbox de dose variável saiu daqui e foi para junto do campo de dose (E7): é
+                sobre a dose que ele pergunta, e respondê-lo aqui obrigava a preencher o número
+                duas vezes — uma achando que era único, outra por horário. */}
 
             {/* "De 8 em 8 horas" é como o médico fala, e o formulário só entende horários. Fazer
                 a conta pela pessoa não é sugerir: os dois números são dela, e a lista aparece

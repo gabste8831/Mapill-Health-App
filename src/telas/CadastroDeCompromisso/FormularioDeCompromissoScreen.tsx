@@ -147,12 +147,19 @@ export function FormularioDeCompromissoScreen({
     usaLeadLivre && (leadEscolhido === null || leadEscolhido < 1 || leadEscolhido > MAX_ANTECEDENCIA_EM_DIAS);
 
   const dateIso = parseDateInput(dateInput);
-  const dateError =
-    dateInput.length === 10 && dateIso === null
-      ? "Data inválida."
-      : dateIso !== null && dateIso < todayIsoDate()
-        ? "Essa data já passou."
-        : undefined;
+  const dateError = dateInput.length === 10 && dateIso === null ? "Data inválida." : undefined;
+
+  /**
+   * Data no passado **avisa, não bloqueia** (E8).
+   *
+   * Antes era erro e travava o salvar, o que impedia o caso legítimo de registrar a consulta que
+   * já aconteceu — e esse é justamente o uso que o desfecho ("você foi?" e a anotação do que o
+   * médico disse) existe para servir. Agenda que só aceita o futuro não é histórico clínico.
+   *
+   * O aviso continua porque a data passada também é o erro de digitação mais comum, o ano trocado.
+   * Dizer sem impedir deixa quem errou perceber e quem quis registrar seguir.
+   */
+  const dataNoPassado = dateIso !== null && dateIso < todayIsoDate();
 
   const time = parseTimeInput(timeInput);
   const instante =
@@ -172,7 +179,15 @@ export function FormularioDeCompromissoScreen({
       : new Date(instante.getTime() - leadEscolhido * 24 * 60 * 60_000);
   const avisoJaPassou = avisoChegaEm !== null && avisoChegaEm < agora;
 
+  /**
+   * Compromisso que já aconteceu não tem lembrete a dar, então a seção inteira sai da tela e para
+   * de ser cobrada. Perguntar "deseja ser lembrado?" de uma consulta da semana passada seria pedir
+   * uma resposta que o app não tem como honrar.
+   */
+  const aceitaLembrete = !dataNoPassado;
+
   const avisoRespondido =
+    !aceitaLembrete ||
     querAviso === "nao" ||
     (querAviso === "sim" &&
       avisoNoDia !== null &&
@@ -189,11 +204,14 @@ export function FormularioDeCompromissoScreen({
     title.trim().length === 0 ? "a descrição" : null,
     dateIso === null || dateError !== undefined ? "a data" : null,
     time === null ? "o horário" : null,
-    querAviso === null ? "se deseja ser lembrado" : null,
-    querAviso === "sim" && avisoNoDia === null ? "o lembrete no dia" : null,
-    querAviso === "sim" && avisoAntes === null ? "o lembrete antecipado" : null,
-    querAntecedencia && (leadEscolhido === null || leadInvalido) ? "a antecedência" : null,
-    querAviso === "sim" && avisoNoDia === "nao" && avisoAntes === "nao"
+    // Nada de lembrete é cobrado num compromisso já passado — a seção nem aparece.
+    aceitaLembrete && querAviso === null ? "se deseja ser lembrado" : null,
+    aceitaLembrete && querAviso === "sim" && avisoNoDia === null ? "o lembrete no dia" : null,
+    aceitaLembrete && querAviso === "sim" && avisoAntes === null ? "o lembrete antecipado" : null,
+    aceitaLembrete && querAntecedencia && (leadEscolhido === null || leadInvalido)
+      ? "a antecedência"
+      : null,
+    aceitaLembrete && querAviso === "sim" && avisoNoDia === "nao" && avisoAntes === "nao"
       ? "ao menos um dos dois lembretes"
       : null,
   ].filter((pendencia): pendencia is string => pendencia !== null);
@@ -208,8 +226,11 @@ export function FormularioDeCompromissoScreen({
       location: location.trim().length > 0 ? location.trim() : null,
       professional: professional.trim().length > 0 ? professional.trim() : null,
       notes: notes.trim().length > 0 ? notes.trim() : null,
-      reminderLeadDays: querAntecedencia && leadEscolhido !== null ? leadEscolhido : null,
-      reminderOnDay: querAviso === "sim" && avisoNoDia === "sim",
+      // No passado nada de aviso é gravado, mesmo que a seção tenha sido preenchida antes de a
+      // data mudar: lembrete de algo que já aconteceu nunca chegaria.
+      reminderLeadDays:
+        aceitaLembrete && querAntecedencia && leadEscolhido !== null ? leadEscolhido : null,
+      reminderOnDay: aceitaLembrete && querAviso === "sim" && avisoNoDia === "sim",
     });
   }
 
@@ -247,8 +268,8 @@ export function FormularioDeCompromissoScreen({
               em linhas faria parecer que uma pode existir sem a outra. */}
           <View style={styles.linhaDeQuando}>
             <View style={styles.campoDeQuando}>
-              {/* Compromisso não se marca no passado, e o calendário já nasce sem esses dias —
-                  a mensagem "Essa data já passou" continua valendo para quem digita. */}
+              {/* Sem `minimo`: o passado é escolhível de propósito (E8), para registrar a consulta
+                  que já aconteceu. Quem avisa é a frase abaixo, não o bloqueio. */}
               <DateField
                 label="DATA"
                 required
@@ -256,7 +277,6 @@ export function FormularioDeCompromissoScreen({
                 onChangeText={setDateInput}
                 onFocus={scrollToFocusedInput}
                 error={dateError}
-                minimo={agora}
               />
             </View>
             <View style={styles.campoDeQuando}>
@@ -268,6 +288,16 @@ export function FormularioDeCompromissoScreen({
               "sábado" denuncia na hora quem quis marcar na sexta e errou o número. */}
           {instante !== null ? (
             <Text style={styles.confirmacao}>{dataEHoraPorExtenso(instante)}</Text>
+          ) : null}
+
+          {/* Avisa sem impedir: registrar a consulta que já aconteceu é uso legítimo — é para isso
+              que existe o "você foi?" —, mas data passada também é o erro de digitação mais comum,
+              o ano trocado. Dizer deixa quem errou perceber e quem quis registrar seguir. */}
+          {dataNoPassado ? (
+            <Text style={styles.aviso}>
+              Esse compromisso já passou. Ele entra na agenda como registro, e não haverá lembrete
+              — você poderá anotar o que aconteceu.
+            </Text>
           ) : null}
         </Card>
 
@@ -303,6 +333,9 @@ export function FormularioDeCompromissoScreen({
           />
         </Card>
 
+        {/* A seção inteira some no passado: não há aviso a dar sobre o que já aconteceu, e
+            perguntar seria cobrar resposta que o app não tem como honrar. */}
+        {aceitaLembrete ? (
         <Card>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>LEMBRETES</Text>
@@ -410,6 +443,7 @@ export function FormularioDeCompromissoScreen({
             </>
           ) : null}
         </Card>
+        ) : null}
       </KeyboardAwareScrollView>
 
       <SafeAreaView style={styles.footer} edges={["bottom"]}>

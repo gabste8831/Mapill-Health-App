@@ -241,6 +241,12 @@ export type MedicamentoDraft = {
   storageLocation: string | null;
   attachmentUri: string | null;
   attachmentKind: PrescriptionAttachmentKind | null;
+  /**
+   * Horários de hoje (`HH:MM`) que o paciente diz já ter tomado antes de cadastrar (E10). Viram
+   * `IntakeLog` confirmado no ato do salvamento, e descontam estoque como qualquer dose. Vazio na
+   * edição — registrar ingestão não é o que aquela tela faz.
+   */
+  dosesJaTomadasHoje: string[];
   attachmentValidUntil: string | null;
   renewalReminderLeadDays: number | null;
 };
@@ -773,6 +779,12 @@ export function FormularioDeMedicamentoScreen({
     [schedule, doseUnit, endDate, isScheduleComplete, startDate, parsedDoseAmount],
   );
 
+  /**
+   * Quais dos horários já vencidos de hoje o paciente diz ter tomado (E10). Só existe no cadastro
+   * novo: editar um tratamento antigo não é o momento de registrar ingestão.
+   */
+  const [horariosJaTomados, setHorariosJaTomados] = useState<string[]>([]);
+
   const horariosDeHojeDescartados = useMemo(
     () =>
       schedule === null || doseUnit === null || !isScheduleComplete
@@ -782,6 +794,15 @@ export function FormularioDeMedicamentoScreen({
             new Date(),
           ),
     [schedule, doseUnit, isScheduleComplete, startDate, endDate, parsedDoseAmount],
+  );
+
+  /**
+   * Mudar os horários pode tirar da lista um que estava marcado como tomado. Derivar em vez de
+   * guardar impede o caso silencioso: marcar 06:00, trocar para 18:00 e gravar uma ingestão de um
+   * horário que não existe mais no tratamento.
+   */
+  const jaTomadosValidos = horariosJaTomados.filter((horario) =>
+    horariosDeHojeDescartados.includes(horario),
   );
 
   /**
@@ -950,6 +971,8 @@ export function FormularioDeMedicamentoScreen({
         tracksStock && storageLocation.trim().length > 0 ? storageLocation.trim() : null,
       attachmentUri,
       attachmentKind: attachmentUri === null ? null : attachmentKind,
+      // Só no cadastro novo: `initialValue` presente significa edição, e ali a pergunta nem aparece.
+      dosesJaTomadasHoje: initialValue === undefined ? jaTomadosValidos : [],
       attachmentValidUntil: attachmentUri === null ? null : validUntilIso,
       // Aviso sem validade não tem de quando contar, e sem antecedência escolhida não dispara —
       // nos dois casos gravar "ligado" seria mentir sobre um lembrete que nunca chega.
@@ -1027,6 +1050,19 @@ export function FormularioDeMedicamentoScreen({
               keyboardType={doseAceitaFracao ? "decimal-pad" : "number-pad"}
               maxLength={8}
               error={hasDoseAmountError ? "Informe um número maior que zero." : undefined}
+            />
+          ) : null}
+
+          {/* A pergunta nasce aqui, ao lado da dose, e não escondida dentro do popup de horários:
+              é sobre a dose que ela fala. Quem respondia lá dentro já tinha preenchido o número
+              uma vez achando que era o único, e voltava para refazer. Só aparece com mais de um
+              horário — com um só não há "de um para o outro". */}
+          {doseUnit !== null && parsedDoseAmount > 0 && doseInputs.length > 1 ? (
+            <Checkbox
+              checked={dosesVariam}
+              onChange={setDosesVariam}
+              label="A dose muda de um horário para o outro"
+              accessibilityLabel="A dose muda de um horário para o outro"
             />
           ) : null}
 
@@ -1302,13 +1338,36 @@ export function FormularioDeMedicamentoScreen({
           {/* O app não agenda dose que já passou (o controle começa agora, e amanhã o ciclo é
               normal), mas descartar em silêncio faria a pessoa sair achando que agendou o dia
               inteiro. Diz quais horários e a partir de quando o acompanhamento vale. */}
-          {horariosDeHojeDescartados.length > 0 && !prazoSemDose ? (
-            <Text style={styles.sectionHintDestaque}>
-              {horariosDeHojeDescartados.length === 1
-                ? `O horário de hoje às ${horariosDeHojeDescartados[0]} já passou e não será agendado.`
-                : `Os horários de hoje às ${emLista(horariosDeHojeDescartados)} já passaram e não serão agendados.`}{" "}
-              O acompanhamento começa na próxima dose, e amanhã o dia inteiro entra normalmente.
-            </Text>
+          {horariosDeHojeDescartados.length > 0 && !prazoSemDose && initialValue === undefined ? (
+            <>
+              <Text style={styles.sectionHintDestaque}>
+                {horariosDeHojeDescartados.length === 1
+                  ? `O horário de hoje às ${horariosDeHojeDescartados[0]} já passou e não será agendado.`
+                  : `Os horários de hoje às ${emLista(horariosDeHojeDescartados)} já passaram e não serão agendados.`}{" "}
+                O acompanhamento começa na próxima dose, e amanhã o dia inteiro entra normalmente.
+              </Text>
+
+              {/* Avisar que a dose sumiu resolve a mentira; perguntar se ela foi tomada resolve a
+                  lacuna. Sem isto o estoque nasce desalinhado da caixa já no primeiro dia, e a
+                  adesão de hoje nasce incompleta por um motivo que é do app, não do paciente.
+                  Nada vem marcado: o app não sabe, e marcar por ele seria inventar registro
+                  clínico — que é exatamente o que o histórico não pode ter. */}
+              <Text style={styles.fieldLabel}>VOCÊ JÁ TOMOU ALGUMA DELAS HOJE?</Text>
+              <ToggleChips
+                label=""
+                values={jaTomadosValidos}
+                options={horariosDeHojeDescartados.map((horario) => ({
+                  value: horario,
+                  label: horario,
+                }))}
+                onChange={setHorariosJaTomados}
+              />
+              <Text style={styles.sectionHint}>
+                {jaTomadosValidos.length === 0
+                  ? "Marque só o que você realmente tomou. Deixar em branco não registra nada."
+                  : `${jaTomadosValidos.length === 1 ? "1 dose será registrada" : `${jaTomadosValidos.length} doses serão registradas`} como tomadas, e o estoque desconta.`}
+              </Text>
+            </>
           ) : null}
         </Card>
 
