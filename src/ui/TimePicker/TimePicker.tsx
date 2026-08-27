@@ -32,13 +32,16 @@ function paraHorario(data: Date): string {
 }
 
 /**
- * Relógio nativo do Android (Material 3) para escolher hora e minuto.
+ * Seletor nativo do Android (Material 3) para escolher hora e minuto.
  *
- * Substitui o campo mascarado por dois motivos que só aparecem no aparelho: digitar "08:00" num
- * teclado numérico custa quatro toques e um deles é o dois-pontos que a máscara insere sozinha
- * (e que a pessoa tenta digitar mesmo assim), e o relógio já é o gesto que quem usa Android
- * conhece de despertador. O próprio componente oferece o botão de alternar para digitação, então
- * quem prefere teclado não perde nada.
+ * Abre em **`variant="input"`**, os dois campos numéricos, e não no mostrador analógico. A roda
+ * funcionava, mas a revisão em aparelho de 26/08 mostrou o custo dela: girar não é gesto óbvio, e
+ * o mostrador esconde a distinção entre manhã e noite — que é exatamente onde o erro é caro, tomar
+ * às 20:00 o que era das 08:00. Em modo digitação com `is24Hour`, "20" é 20 e não há AM/PM a
+ * interpretar.
+ *
+ * `showVariantToggle` fica ligado: o botão de alternar para o relógio continua ali, então quem
+ * prefere girar não perde nada — a mudança é só qual dos dois **abre primeiro**.
  *
  * É componente do Jetpack Compose, ou seja, **Android**. O irmão `.web.tsx` mantém o preview do
  * navegador funcionando com o campo mascarado de sempre (§5.1 do plano: web é vitrine).
@@ -49,9 +52,28 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
       <Host matchContents={{ vertical: true }} style={styles.host}>
         <DateTimePicker
           displayedComponents="hourAndMinute"
-          variant="picker"
+          variant="input"
+          showVariantToggle
           is24Hour
           color={colors.primary}
+          // `color` sozinho pinta só parte dos elementos, e o resto herdava o acento do tema do
+          // sistema — o verde que apareceu no aparelho, mesmo caso da pílula das abas resolvido em
+          // 23/08. Aqui cada peça é dita explicitamente, então o seletor é do app e não do celular.
+          elementColors={{
+            containerColor: colors.surfaceContainerLowest,
+            clockDialColor: colors.surfaceContainerLow,
+            selectorColor: colors.primary,
+            clockDialSelectedContentColor: colors.onPrimary,
+            clockDialUnselectedContentColor: colors.onSurface,
+            timeSelectorSelectedContainerColor: colors.primary,
+            timeSelectorSelectedContentColor: colors.onPrimary,
+            timeSelectorUnselectedContainerColor: colors.surfaceContainerLow,
+            timeSelectorUnselectedContentColor: colors.onSurface,
+            periodSelectorBorderColor: colors.outlineVariant,
+            periodSelectorSelectedContainerColor: colors.primary,
+            periodSelectorSelectedContentColor: colors.onPrimary,
+            periodSelectorUnselectedContentColor: colors.onSurfaceVariant,
+          }}
           initialDate={paraData(initialValue ?? HORARIO_NEUTRO).toISOString()}
           onDateSelected={(data) => onChange(paraHorario(data))}
         />

@@ -5,13 +5,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { APPOINTMENT_REMINDER_LEAD_DAYS } from "@/domain/entities/appointment";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { dataEHoraPorExtenso, dataPorExtenso } from "@/shared/datas-por-extenso";
-import { formatDateInput, parseDateInput, todayIsoDate } from "@/shared/date-input";
+import { parseDateInput, todayIsoDate } from "@/shared/date-input";
 import { formatIntegerInput } from "@/shared/number-input";
 import { rotuloDeAntecedencia } from "@/shared/rotulos-de-compromisso";
 import { parseTimeInput } from "@/shared/time-input";
 import {
   Button,
   Card,
+  DateField,
   Header,
   KeyboardAwareScrollView,
   OptionGroup,
@@ -245,18 +246,19 @@ export function FormularioDeCompromissoScreen({
           {/* Data e horário lado a lado: são a mesma resposta partida em dois campos, e separá-las
               em linhas faria parecer que uma pode existir sem a outra. */}
           <View style={styles.linhaDeQuando}>
-            <TextField
-              label="DATA"
-              required
-              containerStyle={styles.campoDeQuando}
-              placeholder="DD/MM/AAAA"
-              value={dateInput}
-              onChangeText={(raw) => setDateInput(formatDateInput(raw, dateInput))}
-              onFocus={scrollToFocusedInput}
-              keyboardType="number-pad"
-              maxLength={10}
-              error={dateError}
-            />
+            <View style={styles.campoDeQuando}>
+              {/* Compromisso não se marca no passado, e o calendário já nasce sem esses dias —
+                  a mensagem "Essa data já passou" continua valendo para quem digita. */}
+              <DateField
+                label="DATA"
+                required
+                value={dateInput}
+                onChangeText={setDateInput}
+                onFocus={scrollToFocusedInput}
+                error={dateError}
+                minimo={agora}
+              />
+            </View>
             <View style={styles.campoDeQuando}>
               <TimeField label="HORÁRIO" required value={timeInput} onChange={setTimeInput} />
             </View>

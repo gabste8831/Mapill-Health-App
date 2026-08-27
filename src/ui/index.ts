@@ -7,6 +7,8 @@ export * from "./Card/Card";
 export * from "./CenteredLoader/CenteredLoader";
 export * from "./Checkbox/Checkbox";
 export * from "./Chip/Chip";
+export * from "./DateField/DateField";
+export * from "./DatePicker/DatePicker";
 export * from "./Dica/Dica";
 export * from "./Fab/Fab";
 export * from "./FotoLocal/FotoLocal";

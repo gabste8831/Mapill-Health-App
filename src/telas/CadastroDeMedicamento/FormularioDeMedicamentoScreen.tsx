@@ -39,7 +39,6 @@ import { usePhotoPicker } from "@/hooks/use-photo-picker";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import {
   cycleTurningPoints,
-  formatDateInput,
   lastDayOfTreatment,
   parseDateInput,
   toDateInput,
@@ -60,6 +59,7 @@ import {
   Button,
   Card,
   Checkbox,
+  DateField,
   Dica,
   FotoLocal,
   Header,
@@ -1113,17 +1113,14 @@ export function FormularioDeMedicamentoScreen({
               ) : null}
 
               {cycleStart === "earlier" ? (
-                <TextField
+                // "Já comecei antes" é sempre uma data passada — o calendário não oferece o futuro.
+                <DateField
                   label="PRIMEIRO DIA DESTE CICLO"
-                  placeholder="DD/MM/AAAA"
                   value={cycleStartInput}
-                  onChangeText={(value) =>
-                    setCycleStartInput(formatDateInput(value, cycleStartInput))
-                  }
+                  onChangeText={setCycleStartInput}
                   onFocus={scrollToFocusedInput}
-                  keyboardType="number-pad"
-                  maxLength={10}
                   error={cycleStartError}
+                  maximo={new Date()}
                 />
               ) : null}
 
@@ -1202,14 +1199,13 @@ export function FormularioDeMedicamentoScreen({
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>QUANDO COMEÇA</Text>
               {alteraInicio ? (
-                <TextField
+                // Sem limite: começar hoje, amanhã ou retomar um tratamento antigo são todos
+                // casos legítimos, e o rótulo já vive fora do campo nesta seção.
+                <DateField
                   label=""
-                  placeholder="DD/MM/AAAA"
                   value={startDateInput}
-                  onChangeText={(raw) => setStartDateInput(formatDateInput(raw, startDateInput))}
+                  onChangeText={setStartDateInput}
                   onFocus={scrollToFocusedInput}
-                  keyboardType="number-pad"
-                  maxLength={10}
                   error={startDateError}
                 />
               ) : (
@@ -1476,17 +1472,15 @@ export function FormularioDeMedicamentoScreen({
 
               {/* Validade só depois do anexo: sem receita guardada, não há o que vencer. */}
               {attachmentUri !== null ? (
-                <TextField
+                // Receita vencida deixou de ser aceita em 26/08 (F2), e o calendário passa a dizer
+                // o mesmo antes do toque: os dias já passados nem aparecem para escolher.
+                <DateField
                   label="RECEITA VÁLIDA ATÉ"
-                  placeholder="DD/MM/AAAA"
                   value={validUntilInput}
-                  onChangeText={(value) =>
-                    setValidUntilInput(formatDateInput(value, validUntilInput))
-                  }
+                  onChangeText={setValidUntilInput}
                   onFocus={scrollToFocusedInput}
-                  keyboardType="number-pad"
-                  maxLength={10}
                   error={validUntilError}
+                  minimo={new Date()}
                 />
               ) : null}
 

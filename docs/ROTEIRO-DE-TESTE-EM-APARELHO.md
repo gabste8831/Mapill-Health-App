@@ -161,37 +161,52 @@ dois toques.
 
 > ✅ A primeira diz **OBRIGATÓRIO**, a segunda **OPCIONAL**.
 
-**4.3** Preencher **DATA DE NASCIMENTO** com uma data válida, escolher **SEXO BIOLÓGICO** e
-**TIPO SANGUÍNEO**.
+**4.3** 🔧 *Reescrito em 27/08 (X7) — todo campo de data ganhou calendário.* Em
+**DATA DE NASCIMENTO**, conferir que há um **ícone de calendário** à direita do campo.
 
-**4.4** No campo de alergias (placeholder `Ex: Dipirona, látex...`), digitar `Dipirona`.
+> ✅ 🔴 Dá para **digitar** normalmente, como antes — o campo não foi substituído.
+> ✅ Tocar no ícone abre o **calendário nativo**, com "Cancelar" e "Confirmar".
+> ✅ "Confirmar" nasce **apagado** até você tocar num dia: a data em que ele abre é ponto de
+> partida, não resposta.
+> ✅ 🔴 Datas **no futuro** não podem ser escolhidas — ninguém nasceu amanhã.
+> ✅ Escolher um dia preenche o campo no formato `DD/MM/AAAA`.
 
-**4.5** Em **OBSERVAÇÕES**, digitar `hipertenso, acompanhamento no posto`.
+**4.3b** 🔴 **O teste que motivou o X7.** Digitar `29/02/2025` à mão (2025 não é bissexto).
 
-**4.6** Tocar em **"Adicionar contato"**. Preencher **NOME** `Maria`, **TELEFONE**
+> ✅ O campo acusa data inválida.
+> ✅ Abrindo o calendário em fevereiro de 2025, o dia **29 não existe** para ser tocado — é o
+> problema resolvido na origem, e não uma mensagem depois do erro.
+
+**4.4** Escolher **SEXO BIOLÓGICO** e **TIPO SANGUÍNEO**.
+
+**4.5** No campo de alergias (placeholder `Ex: Dipirona, látex...`), digitar `Dipirona`.
+
+**4.6** Em **OBSERVAÇÕES**, digitar `hipertenso, acompanhamento no posto`.
+
+**4.7** Tocar em **"Adicionar contato"**. Preencher **NOME** `Maria`, **TELEFONE**
 `(47) 99999-0000`, **VÍNCULO** `Mãe`. Tocar em **"Salvar contato"**.
 
 > ✅ O contato aparece na lista, com nome e vínculo.
 
-**4.7** Adicionar um **segundo** contato: `João`, `(47) 98888-0000`, `Irmão`.
+**4.8** Adicionar um **segundo** contato: `João`, `(47) 98888-0000`, `Irmão`.
 
 > ✅ Os dois convivem na lista.
 
-**4.8** Tocar em **"Salvar e continuar"**.
+**4.9** Tocar em **"Salvar e continuar"**.
 
 > ✅ Entra no app, na Home.
 
-**4.9** 🔴 **Fechar o app completamente** (tirar dos recentes) e abrir de novo.
+**4.10** 🔴 **Fechar o app completamente** (tirar dos recentes) e abrir de novo.
 
 > ✅ Abre **direto na Home**. Sem login, sem termos, sem ficha.
 > ❌ Se voltar para o login, é o bug corrigido em 25/08: o app só pulava a primeira execução
 > quando havia sessão do Google.
 
-**4.10** **Ajustes** → tocar no bloco azul do topo (sua ficha).
+**4.11** **Ajustes** → tocar no bloco azul do topo (sua ficha).
 
 > ✅ Tudo que você preencheu está lá, incluindo os dois contatos.
 
-**4.11** Mudar as observações para `hipertenso, acompanhamento no posto — trocou de médico` e
+**4.12** Mudar as observações para `hipertenso, acompanhamento no posto — trocou de médico` e
 salvar. Voltar e abrir de novo.
 
 > ✅ A alteração persistiu.
@@ -259,23 +274,29 @@ salvar. Voltar e abrir de novo.
 
 **7.4** **QUAL A FREQUÊNCIA?** → **"Todo dia"**. Depois **QUANTAS VEZES POR DIA?** → **2×**.
 
-**7.5** Em **EM QUE HORÁRIOS?**, tocar em **"Definir horários"**, e no popup tocar na caixa da
-**1ª DOSE** (mostra `--:--`).
+**7.5** 🔧 *Reescrito em 27/08 (X1) — o relógio agora abre em modo digitação.* Em
+**EM QUE HORÁRIOS?**, tocar em **"Definir horários"**, e no popup tocar na caixa da **1ª DOSE**
+(mostra `--:--`).
 
-> ✅ 🔴 **O TESTE CRÍTICO**: a **roda do relógio** aparece no lugar da lista.
+> ✅ 🔴 Abrem **dois campos numéricos grandes** — hora e minuto —, e **não** o mostrador
+> analógico. Era o mostrador que escondia a distinção entre manhã e noite.
+> ✅ 🔴 É **24 horas**: digitar `20` dá 20:00, e não existe AM/PM para interpretar errado.
+> ✅ As cores são as do app (azul), **não** o verde do tema do sistema.
+> ✅ Há um ícone de **relógio** no canto que alterna para o mostrador analógico, para quem
+> preferir girar — a mudança é só qual dos dois abre primeiro.
 > ❌ Se não aparecer nada, ou aparecer espaço em branco: **pare e me avise**. É componente Compose
-> dentro de um `Modal`, que no Android abre em outra janela — é o risco que este passo mede.
+> dentro de um `Modal`, que no Android abre em outra janela.
 
-**7.6** Sem girar nada, olhar o botão **"Confirmar"**.
+**7.6** Sem digitar nada, olhar o botão **"Confirmar"**.
 
-> ✅ Está **apagado**. A posição em que a roda abriu é ponto de partida, não resposta.
+> ✅ Está **apagado**. O valor em que o campo abriu é ponto de partida, não resposta.
 
-**7.7** Girar até **08:00** e tocar em **Confirmar**. Repetir na **2ª DOSE** com **20:00**.
+**7.7** Digitar **08:00** e tocar em **Confirmar**. Repetir na **2ª DOSE** com **20:00**.
 
-**7.8** *(opcional)* Abrir um horário de novo e tocar no ícone de **teclado** que o próprio relógio
-oferece, no canto.
+**7.8** 🔧 *Novo em 27/08 (X1).* Abrir um horário de novo e tocar no ícone de **relógio** no canto.
 
-> ✅ Alterna para digitação nativa e volta.
+> ✅ Alterna para o mostrador analógico e volta para a digitação. Os dois modos continuam
+> disponíveis — nenhum foi removido.
 
 **7.9** 🔴 **Testar o horário duplicado.** Abrir a 2ª dose e mudar para **08:00** também.
 
@@ -475,7 +496,8 @@ dose `1`.
 > **"Já comecei antes"**.
 
 **12.5** 🔴 Tocar em **"Já comecei antes"** e, em **PRIMEIRO DIA DESTE CICLO**, digitar uma data de
-**25 dias atrás**.
+**25 dias atrás**. 🔧 *Novo em 27/08 (X7):* este campo também tem calendário, e nele os dias **no
+futuro** estão apagados — "já comecei antes" é sempre passado.
 
 > ✅ 🔴 Aparece uma frase dizendo **"Você está na pausa. Volta a tomar em DD/MM/AAAA."**
 > *(25 dias de um ciclo 28/21: os 21 dias de tomada acabaram no dia 21, então hoje é pausa.)*
@@ -547,6 +569,8 @@ Tocar em **"Cancelar"** e depois em **"Pronto"**.
 **14.2** Em **QUANDO COMEÇA**, tocar em **"Alterar"**.
 
 > ✅ A linha "Hoje" vira um campo de data vazio, com placeholder `DD/MM/AAAA`.
+> ✅ 🔧 *Novo em 27/08 (X7):* com **ícone de calendário** ao lado. Aqui **não há limite** — começar
+> hoje, amanhã ou retomar um tratamento antigo são todos casos legítimos.
 
 **14.3** 🔴 **Testar a data pela metade.** Digitar só `27/0` e olhar o rodapé.
 
@@ -589,6 +613,9 @@ galeria.
 **15.5** Preencher a validade com uma data **60 dias à frente**.
 
 > ✅ 🔴 Só agora aparece o checkbox **"Me avisar antes de a receita vencer"**.
+> ✅ 🔧 *Novo em 27/08 (X7):* abrindo o **calendário** deste campo, os dias **já passados** estão
+> apagados — receita vencida deixou de ser aceita em 26/08, e o calendário passa a dizer o mesmo
+> antes do toque.
 
 **15.6** Marcar o checkbox e escolher **30 dias**.
 
@@ -856,6 +883,11 @@ existem quando há estoque cadastrado. Conferir as duas:
 **19.5** 🔴 Voltar no campo DATA e digitar uma data **de ontem**.
 
 > ✅ Erro **"Essa data já passou."** e o botão de salvar trava.
+
+**19.5b** 🔧 *Novo em 27/08 (X7).* Tocar no **ícone de calendário** ao lado do campo DATA.
+
+> ✅ 🔴 Os dias **anteriores a hoje** aparecem apagados e não podem ser tocados — compromisso não
+> se marca no passado, e agora o calendário diz isso antes do erro.
 
 **19.6** Voltar para 3 dias à frente. Preencher **LOCAL DE ATENDIMENTO**
 `Clínica São José, sala 12`, **NOME DO PROFISSIONAL** `Dra. Ana Martins, cardiologista` e

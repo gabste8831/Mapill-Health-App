@@ -11,7 +11,7 @@ import type {
   PatientProfileDraft,
 } from "@/domain/entities/patient-profile";
 import { usePhotoPicker } from "@/hooks/use-photo-picker";
-import { formatDateInput, parseDateInput, toDateInput } from "@/shared/date-input";
+import { parseDateInput, toDateInput } from "@/shared/date-input";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { deletePersistedFile } from "@/shared/persist-picked-file";
 import { colors } from "@/shared/theme";
@@ -19,7 +19,7 @@ import {
   BottomSheet,
   Button,
   Card,
-  Chip, FotoLocal, Header, IconButton, KeyboardAwareScrollView, SelectField,
+  Chip, DateField, FotoLocal, Header, IconButton, KeyboardAwareScrollView, SelectField,
   TextField,
   type SelectOption
 } from "@/ui";
@@ -399,19 +399,16 @@ export function FichaDeSaudeScreen({
               médicas e ter acesso facilitado a elas no seu cotidiano.
             </Text>
           </View>
-          <TextField
+          {/* Os mesmos limites que `parseDateOfBirth` já cobrava, agora também no calendário: dia
+              fora da faixa nasce apagado em vez de virar erro depois do preenchimento. */}
+          <DateField
             label="DATA DE NASCIMENTO"
-            placeholder="DD/MM/AAAA"
             value={dateOfBirthInput}
-            onChangeText={(value) =>
-              setDateOfBirthInput(
-                formatDateInput(value, dateOfBirthInput),
-              )
-            }
+            onChangeText={setDateOfBirthInput}
             onFocus={scrollToFocusedInput}
-            keyboardType="number-pad"
-            maxLength={10}
             error={dateOfBirthError}
+            minimo={new Date(1900, 0, 1)}
+            maximo={new Date()}
           />
           <SelectField
             label="SEXO BIOLÓGICO"
