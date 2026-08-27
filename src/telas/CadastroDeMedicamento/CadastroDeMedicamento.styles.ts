@@ -28,6 +28,12 @@ export const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
   },
+  /** Sublinhado além da cor: cor sozinha não diz "clicável" para quem não distingue bem matiz. */
+  linkParaTermos: {
+    ...typography.bodyMd,
+    color: colors.primary,
+    textDecorationLine: "underline",
+  },
   selo: {
     ...typography.label,
     fontSize: 10,

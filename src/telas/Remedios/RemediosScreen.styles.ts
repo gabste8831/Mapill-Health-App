@@ -29,6 +29,11 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     marginTop: spacing.md,
   },
+  /** O que rola junto com a lista: o texto de apoio e o acesso ao estoque. */
+  listHeader: {
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
   listContent: {
     padding: spacing.md,
     gap: spacing.md,

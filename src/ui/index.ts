@@ -7,6 +7,7 @@ export * from "./Card/Card";
 export * from "./CenteredLoader/CenteredLoader";
 export * from "./Checkbox/Checkbox";
 export * from "./Chip/Chip";
+export * from "./Dica/Dica";
 export * from "./Fab/Fab";
 export * from "./GoogleLogo/GoogleLogo";
 export * from "./Header/Header";

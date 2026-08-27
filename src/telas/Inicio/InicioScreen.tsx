@@ -9,6 +9,7 @@ import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-tod
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { CenteredLoader, Fab, Header } from "@/ui";
 import { CardAdesaoSemanal } from "@/telas/Inicio/componentes/CardAdesaoSemanal/CardAdesaoSemanal";
+import { CardEstoque } from "@/telas/Inicio/componentes/CardEstoque/CardEstoque";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
 import { ItemDeDose } from "@/telas/Inicio/componentes/ItemDeDose/ItemDeDose";
@@ -267,6 +268,16 @@ export function InicioScreen() {
         {/* Só com algum dia medido: um gráfico de sete traços vazios não informa nada. */}
         {agenda.semana.some((dia) => dia.ratio !== null) ? (
           <CardAdesaoSemanal days={agenda.semana} summary={resumoDaSemana(agenda.semana)} />
+        ) : null}
+
+        {/* Acesso permanente ao estoque, e não só quando algo está acabando: o ícone no topo da
+            aba Medicações passou despercebido no teste em aparelho. Some quando não há estoque
+            controlado — aí a tela do outro lado abriria vazia. */}
+        {agenda.estoquesControlados > 0 ? (
+          <CardEstoque
+            quantidade={agenda.estoquesControlados}
+            onPress={() => router.push("/estoque")}
+          />
         ) : null}
 
         {agenda.estoquesBaixos.map(({ medication, inventory, daysRemaining }) => (

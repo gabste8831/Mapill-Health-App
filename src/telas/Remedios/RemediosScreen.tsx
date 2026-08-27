@@ -15,7 +15,7 @@ import {
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
-import { CenteredLoader, Fab, Header, SearchField } from "@/ui";
+import { Button, CenteredLoader, Fab, Header, SearchField } from "@/ui";
 import { styles } from "./RemediosScreen.styles";
 
 type ItemDeRemedioProps = {
@@ -122,6 +122,10 @@ export function RemediosScreen() {
   const { items, isLoading, error, reload } = useMedicationList();
   const [busca, setBusca] = useState("");
 
+  // Sobre `items`, e não sobre `visiveis`: o acesso ao estoque não pode sumir porque a busca em
+  // curso não casou com nenhum remédio controlado.
+  const temEstoque = items.some((item) => item.inventory !== null);
+
   const termo = normalizar(busca.trim());
   // O princípio ativo entra na busca junto do nome: quem tem a caixa na mão às vezes lembra do
   // "losartana" e não do nome comercial.
@@ -168,22 +172,14 @@ export function RemediosScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      {/* O ícone de estoque saiu daqui: no teste em aparelho ele passou despercebido, e atalho que
+          ninguém encontra não é atalho. Virou botão no corpo da tela, logo abaixo. */}
       <Header
         title="Medicações"
         onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
-        action={{
-          icon: "cube-outline",
-          label: "Abrir o estoque das suas medicações",
-          onPress: () => router.push("/estoque"),
-        }}
       />
 
       <View style={styles.header}>
-        <Text style={styles.subtitle}>
-          Abaixo, suas medicações cadastradas em nosso sistema. Toque no lápis para ver mais
-          informações ou editar o cadastro, e na lixeira caso deseje excluir a medicação.
-        </Text>
-
         {items.length > 0 ? (
           <>
             <SearchField
@@ -226,6 +222,27 @@ export function RemediosScreen() {
           )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          // O texto explicativo rola junto com a lista, e só a busca fica fixa: parado no topo ele
+          // custava três linhas de altura em toda rolagem, para dizer algo que se lê uma vez.
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <Text style={styles.subtitle}>
+                Abaixo, suas medicações cadastradas em nosso sistema. Toque no lápis para ver mais
+                informações ou editar o cadastro, e na lixeira caso deseje excluir a medicação.
+              </Text>
+
+              {/* Só existe quando há estoque cadastrado: o botão leva a uma tela que, sem isso,
+                  abriria vazia — e oferecer caminho para o vazio é pior que não oferecer. */}
+              {temEstoque ? (
+                <Button
+                  label="Gerenciar estoques dos medicamentos"
+                  variant="outline"
+                  icon={<Ionicons name="cube-outline" size={20} color={colors.primary} />}
+                  onPress={() => router.push("/estoque")}
+                />
+              ) : null}
+            </View>
+          }
           ListEmptyComponent={
             // Busca sem resultado e lista vazia pedem respostas diferentes: uma se resolve
             // mudando o que foi digitado, a outra cadastrando algo.

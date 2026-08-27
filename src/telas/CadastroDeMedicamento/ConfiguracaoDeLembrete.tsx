@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import type { ReminderMode } from "@/domain/entities/prescription";
 import { colors } from "@/shared/theme";
@@ -63,6 +63,8 @@ type ConfiguracaoDeLembreteProps = {
   value: ReminderMode | null;
   onChange: (mode: ReminderMode) => void;
   onClose: () => void;
+  /** Abre os Termos de Uso. Quem navega é a tela — este popup não conhece rota. */
+  onAbrirTermos: () => void;
 };
 
 /**
@@ -81,6 +83,7 @@ export function ConfiguracaoDeLembrete({
   value,
   onChange,
   onClose,
+  onAbrirTermos,
 }: ConfiguracaoDeLembreteProps) {
   const dependeDoAparelho = value !== null && value !== "none";
 
@@ -156,9 +159,12 @@ export function ConfiguracaoDeLembrete({
               </Text>
             </View>
 
-            <Text style={styles.assuntoDeAjudaTexto}>
-              A versão completa está nos Termos de Uso, na aba Perfil.
-            </Text>
+            {/* Link, e não instrução de navegação: o texto anterior mandava procurar numa "aba
+                Perfil" que nem existe com esse nome, e quem está no meio de um cadastro não vai
+                sair caçando. Abre os termos e volta pra cá com o cadastro intacto. */}
+            <Pressable onPress={onAbrirTermos} accessibilityRole="link">
+              <Text style={styles.linkParaTermos}>Ler os Termos de Uso completos</Text>
+            </Pressable>
           </View>
         </Accordion>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { APPOINTMENT_REMINDER_LEAD_DAYS } from "@/domain/entities/appointment";
@@ -8,7 +8,6 @@ import { dataEHoraPorExtenso, dataPorExtenso } from "@/shared/datas-por-extenso"
 import { formatDateInput, parseDateInput, todayIsoDate } from "@/shared/date-input";
 import { formatIntegerInput } from "@/shared/number-input";
 import { rotuloDeAntecedencia } from "@/shared/rotulos-de-compromisso";
-import { colors, withOpacity } from "@/shared/theme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
   Button,
@@ -357,29 +356,29 @@ export function FormularioDeCompromissoScreen({
                       "quantas vezes por dia" do cadastro de medicamento: a lista cobre a maioria
                       sem fechar a porta para quem quer 15 ou 30 dias. */}
                   <OptionGroup
-                    label="COM QUANTA ANTECEDÊNCIA"
+                    label="COM QUANTOS DIAS DE ANTECEDÊNCIA"
                     value={usaLeadLivre ? null : leadDays}
                     options={LEAD_OPTIONS}
                     onChange={(value) => {
                       setLeadDaysLivre("");
                       setLeadDays(value);
                     }}
-                    trailing={
-                      <TextInput
-                        style={[styles.campoLivre, usaLeadLivre && styles.campoLivreAtivo]}
-                        value={leadDaysLivre}
-                        onChangeText={(raw) => {
-                          setLeadDaysLivre(formatIntegerInput(raw, 3));
-                          setLeadDays(null);
-                        }}
-                        onFocus={scrollToFocusedInput}
-                        placeholder="Outro"
-                        placeholderTextColor={withOpacity(colors.outline, 0.8)}
-                        keyboardType="number-pad"
-                        maxLength={3}
-                        accessibilityLabel="Outra antecedência, em dias"
-                      />
-                    }
+                  />
+
+                  {/* O campo livre saiu de dentro da fileira de atalhos e ganhou linha própria.
+                      Espremido ao lado deles, ele disputava a largura com três fichas e ficava
+                      pequeno demais para o dedo — e é onde se digita 15, 30 ou 45 dias. */}
+                  <TextField
+                    label="OUTRO PRAZO, EM DIAS"
+                    placeholder="Ex: 15"
+                    value={leadDaysLivre}
+                    onChangeText={(raw) => {
+                      setLeadDaysLivre(formatIntegerInput(raw, 3));
+                      setLeadDays(null);
+                    }}
+                    onFocus={scrollToFocusedInput}
+                    keyboardType="number-pad"
+                    maxLength={3}
                   />
 
                   {leadInvalido ? (

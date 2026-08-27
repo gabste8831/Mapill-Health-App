@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -60,6 +61,7 @@ import {
   Button,
   Card,
   Checkbox,
+  Dica,
   Header,
   KeyboardAwareScrollView,
   OptionGroup,
@@ -309,6 +311,7 @@ export function FormularioDeMedicamentoScreen({
   onSubmit,
   onBack,
 }: FormularioDeMedicamentoScreenProps) {
+  const router = useRouter();
   const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
   const boxPhoto = usePhotoPicker("medicamento-caixa");
   const prescriptionPhoto = usePhotoPicker("medicamento-receita");
@@ -1006,7 +1009,7 @@ export function FormularioDeMedicamentoScreen({
                 onChange={(unit: PosologyUnit) => setDoseUnit(unit)}
               />
               {form !== null && DICA_DA_UNIDADE[form] ? (
-                <Text style={styles.sectionHint}>{DICA_DA_UNIDADE[form]}</Text>
+                <Dica>{DICA_DA_UNIDADE[form] as string}</Dica>
               ) : null}
             </>
           ) : null}
@@ -1610,6 +1613,12 @@ export function FormularioDeMedicamentoScreen({
         value={reminderMode}
         onChange={setReminderMode}
         onClose={() => setReminderSheetOpen(false)}
+        // Fecha o popup antes de navegar: deixá-lo aberto por baixo dos termos faria ele
+        // reaparecer sozinho na volta, sobre um cadastro que a pessoa já tinha deixado de lado.
+        onAbrirTermos={() => {
+          setReminderSheetOpen(false);
+          router.push("/termos");
+        }}
       />
     </SafeAreaView>
   );

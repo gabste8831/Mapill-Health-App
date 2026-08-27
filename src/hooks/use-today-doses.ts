@@ -67,6 +67,12 @@ export type AgendaDoDia = {
   semana: DiaDaSemana[];
   /** Medicamentos cujo estoque acaba dentro da antecedência que o paciente pediu. */
   estoquesBaixos: EstoqueBaixo[];
+  /**
+   * Quantos remédios têm estoque controlado. Separado de `estoquesBaixos` porque responde outra
+   * pergunta: aquele diz o que está acabando, este diz se a tela de estoque tem o que mostrar —
+   * e zero é o que faz o acesso a ela desaparecer da Home.
+   */
+  estoquesControlados: number;
   /** Se existe pelo menos um medicamento cadastrado — separa "dia vazio" de "app vazio". */
   temMedicamentos: boolean;
 };
@@ -76,6 +82,7 @@ const AGENDA_VAZIA: AgendaDoDia = {
   resolvidas: 0,
   semana: [],
   estoquesBaixos: [],
+  estoquesControlados: 0,
   temMedicamentos: false,
 };
 
@@ -173,6 +180,11 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
     doses,
     semana,
     estoquesBaixos: estoquesQueVaoAcabar(inventories, prescriptions, medicamentoPorId, agora),
+    // Só os de medicamento que ainda existe: excluído o remédio, o estoque dele fica no banco mas
+    // não conta, senão a Home prometeria uma linha que a tela de estoque não mostra.
+    estoquesControlados: inventories.filter(
+      (inventory) => medicamentoPorId.get(inventory.medicationId) !== undefined,
+    ).length,
     resolvidas: doses.filter((dose) => resolvesDose(dose.latestStatus)).length,
     temMedicamentos: medications.length > 0,
   };

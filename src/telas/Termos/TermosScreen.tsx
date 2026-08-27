@@ -17,11 +17,18 @@ export type TermosScreenProps = {
   onBack: () => void;
 };
 
-/** `2026-08-20T12:00:00.000Z` → `20/08/2026`. */
+/**
+ * `2026-08-20T12:00:00.000Z` → `20/08/2026 às 09:00`.
+ *
+ * A hora entra junto da data porque isto é prova de consentimento: o que ela precisa identificar é
+ * o **ato**, e duas versões aceitas no mesmo dia — o que acontece a cada bump de termos — ficariam
+ * indistinguíveis só pelo dia.
+ */
 function toDisplayDate(isoTimestamp: string): string {
   const date = new Date(isoTimestamp);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("pt-BR");
+  const hora = date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${date.toLocaleDateString("pt-BR")} às ${hora}`;
 }
 
 /**
