@@ -1,4 +1,10 @@
-# Roteiro de teste em aparelho — 2026-08-25
+# Roteiro de teste em aparelho — 2026-08-27
+
+> 🔧 **Atualizado em 27/08** com os 15 itens fechados da revisão de 26/08. Os passos marcados com
+> 🔧 mudaram ou nasceram nessa leva — são os que valem conferir primeiro.
+>
+> ⚠️ **A câmera (passo 15.2) exige build nova**, porque mexe no `app.json`. Todo o resto carrega
+> recarregando o Metro.
 
 > Guia operacional passo a passo: onde tocar, o que preencher, o que precisa acontecer.
 > É a forma executável da fila de validação (§6.2 do `PLANO-DE-DESENVOLVIMENTO.md`).
@@ -429,9 +435,14 @@ alterar agora.
 
 **10.4** **QUAL A FREQUÊNCIA?** → **"Todo dia"** → **2×** → **"Definir horários"**.
 
-**10.5** 🔴 No popup, marcar **"A dose muda de um horário para o outro"**.
+**10.5** 🔧 *Reescrito em 27/08 (E7) — o checkbox mudou de lugar.* Logo **abaixo do campo de dose**,
+marcar **"A dose muda de um horário para o outro"**.
 
-> ✅ Aparece um campo de quantidade em **cada** horário, com `10` como placeholder.
+> ✅ 🔴 Ele está ali, junto da dose — e **não** mais escondido dentro do popup de horários.
+> Respondê-lo lá dentro obrigava a preencher o número duas vezes.
+> ✅ Só aparece com **mais de um horário** definido: com um só não há "de um para o outro".
+> ✅ Abrindo o popup de horários, há um campo de quantidade em **cada** horário, com `10` como
+> placeholder.
 
 **10.6** Definir `08:00` com dose `10` e `22:00` com dose `8`. Tocar em **"Pronto"**.
 
@@ -593,15 +604,26 @@ Tocar em **"Cancelar"** e depois em **"Pronto"**.
 **15.1** Novo cadastro manual. **NOME**: `Teste Anexos` · **"Comprimido ou cápsula"** · dose `1` ·
 **"Todo dia"** · **1×** · **10:00** · **"Uso contínuo"**.
 
-**15.2** Na seção **ANEXOS**, tocar no quadrado com o ícone de câmera e escolher uma imagem da
-galeria.
+**15.2** 🔧 *Reescrito em 27/08 (E2 e F3).* Na seção **ANEXOS**, tocar no quadrado com o ícone de
+câmera.
 
-> ✅ A foto aparece no quadrado, e o texto vira **"Trocar foto da caixa"**.
+> ✅ 🔴 Abre um popup perguntando **de onde vem a foto**: "Tirar foto agora" e "Escolher da
+> galeria". Antes só havia galeria.
+> ✅ Escolher **"Tirar foto agora"** pede permissão de câmera na primeira vez e abre a câmera.
+> ✅ 🔴 A foto escolhida **aparece na hora** no quadrado — era o F3, causado por cache de imagem.
+> ✅ O texto vira **"Trocar foto da caixa"**.
 
-**15.3** Na linha de baixo (receita), conferir as duas portas de entrada.
+**15.2b** 🔴 Trocar a foto por outra, duas vezes seguidas.
 
-> ✅ 🔴 Existem **duas** opções: **"Tirar da galeria"** e **"Escolher arquivo"**. Uma só forçaria
-> metade das pessoas a fotografar a tela do próprio celular.
+> ✅ A miniatura muda **toda vez**. Se ficar presa na primeira, o cache voltou.
+
+**15.3** 🔧 *Reescrito em 27/08 (X2).* Na linha de baixo, conferir a seção da receita.
+
+> ✅ 🔴 Existe o rótulo **RECEITA MÉDICA** acima dela — antes o campo não dizia para que servia.
+> ✅ Duas opções: **"Escolher da galeria"** e **"Escolher arquivo"**. O texto era "Tirar da
+> galeria", que prometia abrir a câmera.
+> ✅ 🔴 Os dois rótulos cabem lado a lado **sem quebrar no meio da palavra** — era a quebra de
+> layout relatada.
 > ✅ O texto abaixo diz quais formatos são aceitos e que o arquivo **fica só no aparelho**.
 
 **15.4** Tocar em **"Escolher arquivo"** e escolher um **PDF** (qualquer um).
@@ -609,6 +631,9 @@ galeria.
 > ✅ Aparece um ícone de PDF e o **nome do arquivo** embaixo.
 > ✅ 🔴 Só agora aparece o campo **"RECEITA VÁLIDA ATÉ"** — sem receita guardada, não há o que
 > vencer.
+> ✅ 🔧 *Novo em 27/08 (X2):* com o anexo escolhido, existem **duas** ações — **"Alterar anexo"** e
+> **"Remover"** (esta em vermelho). Antes só havia remover, e trocar exigia apagar — o que levava
+> junto a validade e o aviso já preenchidos.
 
 **15.5** Preencher a validade com uma data **60 dias à frente**.
 
@@ -622,11 +647,16 @@ galeria.
 > ✅ 🔴 A frase diz **a data em que o aviso chega**, não a antecedência — é o que dá para conferir
 > contra a agenda.
 
-**15.7** Na seção **LEMBRETE**, tocar em **"Configurar lembrete"**.
+**15.7** 🔧 *Reescrito em 27/08 (X3).* Na seção **LEMBRETE**, tocar em **"Configurar lembrete"**.
 
-> ✅ Abre o popup **"Como quer ser avisado?"** com quatro opções: alarme, notificação, os dois, e
-> sem aviso.
+> ✅ 🔴 Abre o popup **"Como quer ser avisado?"** com **três** opções: alarme, notificação e os
+> dois. **"Nenhum aviso" não existe mais** — ele obrigava a entrar na configuração para dizer que
+> não se quer configurar nada.
 > ✅ Existe um aviso **"Depende do seu aparelho"** e um acordeão **"Como funcionam os alertas"**.
+
+**15.7b** 🔴 Fechar o popup **sem escolher nada** e salvar o medicamento.
+
+> ✅ Salva normalmente. Não configurar já é recusar — é o que substitui o "nenhum aviso".
 
 **15.8** Abrir o acordeão e ler.
 
@@ -680,6 +710,13 @@ galeria.
 
 > ✅ Frequência **"Só quando precisar"** e **nenhuma** fichinha de horário.
 
+**16.3c** 🔧 *Novo em 27/08 (E3).* Conferir a fileira de ordenação abaixo da busca.
+
+> ✅ Três fichas: **A–Z**, **Mais recentes** e **Acabando**. Uma sempre marcada.
+> ✅ 🔴 "Acabando" põe na frente quem tem menos estoque, e **empurra para o fim** quem não controla
+> estoque — sem número não há urgência a comparar.
+> ✅ "Mais recentes" traz o `Teste Anexos` para o topo, que foi o último cadastrado.
+
 **16.3b** 🔧 *Novo em 27/08 (X6).* Rolar a lista para baixo.
 
 > ✅ O texto **"Abaixo, suas medicações cadastradas..."** e o botão de estoque **rolam junto** e
@@ -730,6 +767,25 @@ galeria.
 **"Comprimido ou cápsula"** · **QUANTOS COMPRIMIDOS DE CADA VEZ** `2` · **"Todo dia"** · **3×** ·
 horários **que já passaram hoje** (`06:00`, `07:00`, `08:00`) · **"Uso contínuo"** ·
 **ESTOQUE** `20`. Salvar.
+
+**17.1b** 🔧 *Novo em 27/08 (F1 e E10).* Ainda no cadastro, **antes de salvar**, olhar abaixo dos
+horários.
+
+> ✅ 🔴 O app **avisa** quais horários de hoje já passaram e não serão agendados, e diz que amanhã
+> o dia entra normal.
+> ✅ 🔴 Abaixo, a pergunta **"VOCÊ JÁ TOMOU ALGUMA DELAS HOJE?"**, com uma ficha por horário.
+> ✅ Nada vem marcado — o app não sabe, e marcar por ele inventaria registro clínico.
+
+**17.1c** 🔴 Marcar **um** dos horários e ler a frase abaixo.
+
+> ✅ Diz que **1 dose entra no histórico de hoje** e que **o estoque não muda** — porque o número
+> que você informou já é o que tem na caixa agora.
+> ❌ Se disser que o estoque desconta, é a versão antiga.
+
+**17.1d** Salvar e conferir o resultado.
+
+> ✅ Em **Remédios**, o estoque do `Teste Atrasadas` está em **20** — o que você digitou, intacto.
+> ✅ Na **Home**, a dose marcada aparece como **já confirmada** hoje.
 
 **17.2** Ir na aba **Home**.
 
@@ -798,6 +854,9 @@ existem quando há estoque cadastrado. Conferir as duas:
 > ✅ Só aparecem os remédios com controle de estoque ativado.
 > ✅ O que acaba primeiro está **em cima**.
 > ✅ Cada cartão traz a quantidade à direita e, abaixo, "Acaba em N dias · 12 de set".
+> ✅ 🔧 *Novo em 27/08 (E3):* fileira de ordenação com **Acaba primeiro**, **Menos na caixa** e
+> **A–Z**. As duas primeiras são perguntas diferentes — dois comprimidos de uso diário acabam
+> antes de vinte de um remédio semanal.
 
 **18.3** 🔴 Conferir a **Amoxicilina**.
 
@@ -880,14 +939,18 @@ existem quando há estoque cadastrado. Conferir as duas:
 > ✅ 🔴 Abaixo dos campos, a confirmação por extenso **com o dia da semana**:
 > "Sexta-feira, 27 de agosto, às 14:30". É o dia da semana que denuncia quem errou o número.
 
-**19.5** 🔴 Voltar no campo DATA e digitar uma data **de ontem**.
+**19.5** 🔧 *Reescrito em 27/08 (E8) — o passado deixou de ser bloqueado.* Voltar no campo DATA e
+digitar uma data **de ontem**.
 
-> ✅ Erro **"Essa data já passou."** e o botão de salvar trava.
+> ✅ 🔴 **Não** trava mais. Aparece o aviso: *"Esse compromisso já passou. Ele entra na agenda como
+> registro, e não haverá lembrete — você poderá anotar o que aconteceu."*
+> ✅ 🔴 A seção **LEMBRETES some por completo** — não há aviso a dar sobre o que já aconteceu.
+> ✅ O botão de salvar **acende**: registrar a consulta que já foi é uso legítimo, e é para isso
+> que existe o "você foi?".
 
 **19.5b** 🔧 *Novo em 27/08 (X7).* Tocar no **ícone de calendário** ao lado do campo DATA.
 
-> ✅ 🔴 Os dias **anteriores a hoje** aparecem apagados e não podem ser tocados — compromisso não
-> se marca no passado, e agora o calendário diz isso antes do erro.
+> ✅ Dias passados **podem** ser escolhidos — o bloqueio saiu junto com o E8.
 
 **19.6** Voltar para 3 dias à frente. Preencher **LOCAL DE ATENDIMENTO**
 `Clínica São José, sala 12`, **NOME DO PROFISSIONAL** `Dra. Ana Martins, cardiologista` e
@@ -936,15 +999,42 @@ atalhos há agora um campo próprio, **"OUTRO PRAZO, EM DIAS"**. Digitar `15` ne
 > ✅ Agrupado sob o dia, com a hora à esquerda, a descrição, o nome da profissional, o local, o
 > preparo, e no rodapé **"Lembrar 1 dia antes e no dia"**.
 
-**19.15** 🔴 **Conferir as doses no calendário.** Rolar até "Hoje" e os próximos dias.
+**19.15** 🔧 *Reescrito em 27/08 (E1) — a aba virou calendário de verdade.* Ir na aba
+**Calendário**.
 
-> ✅ Os horários dos remédios aparecem **no mesmo dia** dos compromissos, num bloco com hora, nome
-> e quantidade.
-> ✅ A **Dipirona gotas** ("só quando precisar") **não** aparece — ela não tem horário agendado.
+> ✅ 🔴 No topo, uma **grade do mês** azul, com os dias da semana e os números.
+> ✅ **Hoje** tem contorno branco; o **dia selecionado** tem círculo branco preenchido.
+> ✅ Dias com algo marcado têm **pontinhos** embaixo do número: branco cheio para compromisso,
+> mais apagado para dose.
+> ✅ Abaixo da grade, a fileira de filtros: **Tudo**, **Compromissos**, **Remédios**.
+> ✅ Abaixo dela, o que existe **no dia selecionado** — com hora, nome e quantidade nas doses.
+> ✅ A **Dipirona gotas** ("só quando precisar") **não** aparece em dia nenhum — ela não tem
+> horário agendado.
 
-**19.16** 🔴 Rolar até um dia **além de 30 dias à frente**.
+**19.15b** 🔴 Tocar num dia que tem pontinho.
 
-> ✅ As doses **continuam aparecendo** (são projetadas na hora). Se sumirem, a projeção falhou.
+> ✅ O círculo branco se move para ele, e a lista abaixo troca para o conteúdo daquele dia.
+
+**19.15c** 🔴 Tocar num dia **vazio**.
+
+> ✅ Diz **"Nada marcado para este dia."** — não fica com a lista do dia anterior.
+
+**19.15d** 🔴 Testar os filtros.
+
+> ✅ **"Compromissos"**: os pontinhos de dose **somem da grade** e a lista mostra só consultas.
+> ✅ **"Remédios"**: o inverso.
+> ✅ 🔴 Grade e lista mudam **juntas** — mês pintado de dose com lista só de compromisso seriam
+> duas respostas para a mesma pergunta.
+> ✅ Num dia sem nada do tipo filtrado, a frase vira "Nenhum compromisso neste dia." ou "Nenhuma
+> dose neste dia.".
+
+**19.16** 🔴 Tocar na **seta de próximo mês**, duas vezes.
+
+> ✅ A grade avança e a seleção vai para o **dia 1º** do mês visitado — a lista nunca mostra um dia
+> que não está na grade.
+> ✅ As doses **continuam aparecendo** dois meses à frente (são projetadas na hora, além dos 30
+> dias gravados). Se sumirem, a projeção falhou.
+> ✅ Voltando ao mês corrente, a seleção retorna para **hoje**, e não para o dia 1º.
 
 **19.17** 🔴 Numa dose de **hoje** ainda não respondida, tocar no **✓**.
 
@@ -1003,12 +1093,20 @@ compromisso, mudar o local e salvar.
 
 ## Bloco 20 — Vincular e desvincular a conta
 
-**20.1** **Ajustes** → seção **CONTA**.
+**20.1** 🔧 *Reescrito em 27/08 (E4) — conta e dados viraram tela própria.* Ir em **Ajustes**.
 
+> ✅ 🔴 A tela agora tem **duas** coisas: o bloco azul da ficha e uma linha **"Conta e dados"**.
+> As seções CONTA, PRIVACIDADE e MEUS DADOS **não estão mais soltas ali**.
+
+**20.1b** Tocar em **"Conta e dados"**.
+
+> ✅ Abre a tela **"Conta e dados"**, com as três seções: **CONTA**, **PRIVACIDADE** e
+> **MEUS DADOS**.
 > ✅ Se você entrou com o Google no Bloco 3: diz **"Desvincular esta conta"** com o seu e-mail.
 > ✅ Se entrou sem conta: diz **"Vincular uma conta do Google"**, com a frase de que a cópia na
 > nuvem ainda não está disponível.
 > ✅ Abaixo do cartão: **"Seus dados ficam neste aparelho"**.
+> ✅ A seta de voltar retorna para Ajustes.
 
 **20.2** Se estiver **sem** conta, tocar em **"Vincular uma conta do Google"** e entrar.
 
