@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
@@ -15,7 +14,7 @@ import {
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
-import { Button, CenteredLoader, Fab, Header, SearchField } from "@/ui";
+import { Button, CenteredLoader, Fab, FotoLocal, Header, SearchField } from "@/ui";
 import { styles } from "./RemediosScreen.styles";
 
 type ItemDeRemedioProps = {
@@ -35,7 +34,7 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
         {/* Sem foto não entra nada no lugar: um quadrado com iniciais ocupa o mesmo espaço de uma
             foto pra dizer o que o nome ao lado já diz. */}
         {medication.photoUri !== null ? (
-          <Image source={{ uri: medication.photoUri }} style={styles.photo} contentFit="cover" />
+          <FotoLocal uri={medication.photoUri} style={styles.photo} />
         ) : null}
 
         <View style={styles.itemHeaderText}>

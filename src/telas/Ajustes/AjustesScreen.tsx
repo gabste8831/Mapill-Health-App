@@ -1,11 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "@/shared/theme";
-import { Card, GoogleLogo } from "@/ui";
+import { Card, FotoLocal, GoogleLogo } from "@/ui";
 import { styles } from "./AjustesScreen.styles";
 
 export type AjustesScreenProps = {
@@ -95,7 +94,7 @@ export function AjustesScreen({
           <Pressable style={styles.identity} onPress={onEditProfile} accessibilityRole="button">
             <View style={styles.avatar}>
               {photoUri ? (
-                <Image source={{ uri: photoUri }} style={styles.avatarImage} contentFit="cover" />
+                <FotoLocal uri={photoUri} style={styles.avatarImage} />
               ) : (
                 <Iniciais name={patientName} />
               )}

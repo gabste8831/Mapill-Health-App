@@ -1,5 +1,4 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
@@ -62,6 +61,7 @@ import {
   Card,
   Checkbox,
   Dica,
+  FotoLocal,
   Header,
   KeyboardAwareScrollView,
   OptionGroup,
@@ -1387,7 +1387,7 @@ export function FormularioDeMedicamentoScreen({
                   accessibilityRole="button"
                   accessibilityLabel="Foto da embalagem">
                   {photoUri ? (
-                    <Image source={{ uri: photoUri }} style={styles.photo} contentFit="cover" />
+                    <FotoLocal uri={photoUri} style={styles.photo} />
                   ) : (
                     <MaterialCommunityIcons
                       name="camera-plus"
@@ -1408,13 +1408,17 @@ export function FormularioDeMedicamentoScreen({
                 </View>
               </View>
 
+              {/* O campo não dizia para que servia: mostrava só as duas formas de escolher, e
+                  quem chegava nele não sabia se era outra foto do remédio ou outra coisa. */}
+              <Text style={styles.fieldLabel}>RECEITA MÉDICA</Text>
+
               {/* Duas portas de entrada porque são duas realidades: quem tem o papel na mão
                   fotografa, e quem recebeu a receita digital já tem o PDF salvo. Uma só forçaria
                   metade das pessoas a fotografar a tela do próprio celular. */}
               <View style={styles.photoRow}>
                 <View style={attachmentUri ? styles.photoFrame : styles.photoPlaceholder}>
                   {attachmentUri !== null && attachmentKind === "image" ? (
-                    <Image source={{ uri: attachmentUri }} style={styles.photo} contentFit="cover" />
+                    <FotoLocal uri={attachmentUri} style={styles.photo} />
                   ) : (
                     <MaterialCommunityIcons
                       name={attachmentUri === null ? "file-document-outline" : "file-pdf-box"}
@@ -1430,7 +1434,9 @@ export function FormularioDeMedicamentoScreen({
                         onPress={() => pick(prescriptionPhoto, guardarFoto, attachmentUri)}
                         disabled={prescriptionPhoto.isPicking}
                         accessibilityRole="button">
-                        <Text style={styles.photoAddLabel}>Tirar da galeria</Text>
+                        {/* "Tirar da galeria" lia como "tirar foto" e prometia abrir a câmera,
+                            que não é o que acontece — o seletor é o da galeria. */}
+                        <Text style={styles.photoAddLabel}>Escolher da galeria</Text>
                       </Pressable>
                       <Pressable
                         onPress={escolherArquivoDaReceita}
@@ -1440,11 +1446,25 @@ export function FormularioDeMedicamentoScreen({
                       </Pressable>
                     </View>
                   ) : (
-                    <Pressable onPress={removerReceita} accessibilityRole="button">
-                      <Text style={styles.photoAddLabel}>
-                        {attachmentKind === "document" ? "Remover receita" : "Remover foto"}
-                      </Text>
-                    </Pressable>
+                    // Anexado, as ações são **trocar** e remover. Antes só havia remover: quem
+                    // anexou o arquivo errado precisava apagar para poder escolher de novo, e no
+                    // meio disso perdia a validade e o aviso de renovação já preenchidos.
+                    <View style={styles.acoesDeAnexo}>
+                      <Pressable
+                        onPress={() =>
+                          attachmentKind === "document"
+                            ? escolherArquivoDaReceita()
+                            : pick(prescriptionPhoto, guardarFoto, attachmentUri)
+                        }
+                        accessibilityRole="button">
+                        <Text style={styles.photoAddLabel}>Alterar anexo</Text>
+                      </Pressable>
+                      <Pressable onPress={removerReceita} accessibilityRole="button">
+                        <Text style={styles.photoRemoveLabel}>
+                          {attachmentKind === "document" ? "Remover receita" : "Remover foto"}
+                        </Text>
+                      </Pressable>
+                    </View>
                   )}
                   <Text style={styles.photoHint}>
                     {attachmentUri !== null && attachmentName.length > 0

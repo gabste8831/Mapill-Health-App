@@ -204,7 +204,8 @@ salvar. Voltar e abrir de novo.
 
 **5.2** Conferir o bloco **SEU CONSENTIMENTO**.
 
-> ✅ Mostra **"Aceito em"** com a data de hoje, **"Versão aceita"** e **"Versão atual"**.
+> ✅ Mostra **"Aceito em"** com a data de hoje **e o horário** (`27/08/2026 às 14:32`), **"Versão
+> aceita"** e **"Versão atual"**. 🔧 *Corrigido em 27/08 (X13) — só conferir.*
 > ✅ 🔴 As duas versões precisam ser **iguais** (`1.1.0`). Diferentes significaria que o app está
 > em uso com um aceite vencido.
 
@@ -328,6 +329,11 @@ alterar agora.
 > ✅ Abaixo, a dica: *"O copinho ou a seringa que vem na caixa marcam em ml."*
 > ✅ A pergunta de quantidade **ainda não existe**: perguntar "quanto de cada vez" de uma unidade
 > indefinida não significa nada.
+
+**8.2b** 🔧 *Novo em 27/08 (X4).* Olhar a dica sobre o copinho.
+
+> ✅ Ela vem num **bloco próprio**, com ícone de **`?`** à esquerda e fundo alaranjado tênue — não
+> mais um texto cinza igual ao resto.
 
 **8.3** Escolher **ml**.
 
@@ -516,8 +522,9 @@ dos três campos).
 
 > ✅ Volta para a lista com os três horários preenchidos.
 
-**13.8** 🔴 Abrir "Preencher de X em X horas" de novo e tocar em **"Cancelar"**. Depois em
-**"Pronto"**.
+**13.8** 🔴 Abrir "Preencher de X em X horas" de novo. 🔧 *Conferir também (X9):* o botão
+**"Cancelar"** tem **contorno visível**, e não é mais um texto solto ao lado do "Preencher".
+Tocar em **"Cancelar"** e depois em **"Pronto"**.
 
 > ✅ Os horários `06:00`, `14:00`, `22:00` continuam lá — cancelar não desfez o que já valia.
 
@@ -597,6 +604,10 @@ galeria.
 **15.8** Abrir o acordeão e ler.
 
 > ✅ Abre e fecha. Precisa ter um trecho dizendo **o que o Mapill não faz**.
+> ✅ 🔧 *Novo em 27/08 (X15):* no fim dele há o link **"Ler os Termos de Uso completos"**,
+> sublinhado. Tocar nele **abre os termos** — antes era só uma frase mandando procurar numa "aba
+> Perfil" que nem existe com esse nome.
+> ✅ Voltar dos termos devolve ao cadastro **com tudo preenchido**.
 > ℹ️ Esta seção está congelada a pedido, esperando uma conversa própria com o C1. Só confira que
 > ela abre, escolhe e fecha sem erro.
 
@@ -641,6 +652,12 @@ galeria.
 **16.3** Conferir o card da **Dipirona gotas**.
 
 > ✅ Frequência **"Só quando precisar"** e **nenhuma** fichinha de horário.
+
+**16.3b** 🔧 *Novo em 27/08 (X6).* Rolar a lista para baixo.
+
+> ✅ O texto **"Abaixo, suas medicações cadastradas..."** e o botão de estoque **rolam junto** e
+> saem da tela.
+> ✅ 🔴 A **busca continua fixa** no topo — é ela que precisa estar sempre à mão.
 
 **16.4** Na busca, digitar `losart` — **sem acento e em minúsculas**.
 
@@ -739,10 +756,15 @@ horários **que já passaram hoje** (`06:00`, `07:00`, `08:00`) · **"Uso contí
 
 ## Bloco 18 — Estoque
 
-**18.1** Na aba **Remédios**, tocar no **ícone de caixa** no canto superior direito, ao lado do
-título "Medicações".
+**18.1** 🔧 *Reescrito em 27/08 (X5) — o ícone no topo saiu.* Agora há **duas** portas, e ambas só
+existem quando há estoque cadastrado. Conferir as duas:
 
-> ✅ 🔴 Abre a tela **Estoque**. Se o ícone não estiver lá, o resto do bloco não roda.
+- Na **Home**, um card **"Estoque"** dizendo quantas medicações são controladas.
+- Na aba **Remédios**, um botão **"Gerenciar estoques dos medicamentos"** logo abaixo do texto de
+  apoio.
+
+> ✅ 🔴 Qualquer uma abre a tela **Estoque**.
+> ✅ 🔴 **Não** pode haver ícone de caixa no cabeçalho de Medicações — ele foi removido.
 
 **18.2** Olhar a lista.
 
@@ -864,11 +886,14 @@ título "Medicações".
 > ✅ Abaixo, diz que a escolha fica salva mas que os lembretes ainda estão sendo desenvolvidos.
 > *(Intencional: o disparo depende do C1.)*
 
-**19.12** 🔴 No campo **"Outro"**, no fim da fileira, digitar `15`.
+**19.12** 🔧 *Reescrito em 27/08 (X8) — o campo livre saiu de dentro da fileira.* Abaixo dos
+atalhos há agora um campo próprio, **"OUTRO PRAZO, EM DIAS"**. Digitar `15` nele.
 
-> ✅ O atalho selecionado **desmarca** e o campo livre fica destacado.
+> ✅ O campo tem largura de verdade, não espremido ao lado das fichas.
+> ✅ O atalho selecionado **desmarca** sozinho.
 > ✅ Volta a avisar que a antecedência já passou.
 > ✅ Digitar `0` ou `999` dá erro pedindo **entre 1 e 180 dias**.
+> ✅ O rótulo da fileira agora é **"COM QUANTOS DIAS DE ANTECEDÊNCIA"**.
 
 **19.13** Voltar para **1 dia antes** e salvar.
 
@@ -994,9 +1019,10 @@ compromisso, mudar o local e salvar.
 > ✅ Home no estado vazio de "nenhum remédio cadastrado".
 > ✅ Calendário vazio — os compromissos também são dado clínico.
 
-**21.4** Ir em **Remédios** → ícone de caixa.
+**21.4** 🔧 *Reescrito em 27/08 (X5).* Procurar o acesso ao estoque na **Home** e em **Remédios**.
 
-> ✅ Estoque vazio, com o texto explicando que o controle é opcional.
+> ✅ 🔴 Os **dois somem**: sem estoque cadastrado, o card da Home e o botão de Medicações deixam de
+> existir. É o comportamento correto — eles levariam a uma tela vazia.
 
 **21.5** **Ajustes** → tocar no bloco azul do topo.
 

@@ -9,6 +9,7 @@ export * from "./Checkbox/Checkbox";
 export * from "./Chip/Chip";
 export * from "./Dica/Dica";
 export * from "./Fab/Fab";
+export * from "./FotoLocal/FotoLocal";
 export * from "./GoogleLogo/GoogleLogo";
 export * from "./Header/Header";
 export * from "./IconButton/IconButton";

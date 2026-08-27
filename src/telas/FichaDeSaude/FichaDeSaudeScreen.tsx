@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useMemo, useState } from "react";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 import { Alert, Pressable, Text, View } from "react-native";
@@ -20,7 +19,7 @@ import {
   BottomSheet,
   Button,
   Card,
-  Chip, Header, IconButton, KeyboardAwareScrollView, SelectField,
+  Chip, FotoLocal, Header, IconButton, KeyboardAwareScrollView, SelectField,
   TextField,
   type SelectOption
 } from "@/ui";
@@ -348,7 +347,7 @@ export function FichaDeSaudeScreen({
             accessibilityLabel={photoUri ? "Trocar foto da ficha" : "Adicionar foto à ficha"}
           >
             {photoUri ? (
-              <Image source={{ uri: photoUri }} style={styles.photo} contentFit="cover" />
+              <FotoLocal uri={photoUri} style={styles.photo} />
             ) : (
               <Ionicons name="camera-outline" size={24} color={colors.onSurfaceVariant} />
             )}

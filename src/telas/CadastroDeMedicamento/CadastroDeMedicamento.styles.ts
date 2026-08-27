@@ -82,10 +82,17 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  /** As duas maneiras de anexar a receita, lado a lado — são alternativas, não sequência. */
+  /**
+   * As duas maneiras de anexar a receita, lado a lado — são alternativas, não sequência.
+   *
+   * `flexWrap` porque em tela estreita os dois rótulos não cabem na largura que sobra ao lado da
+   * miniatura de 72px: sem ele, o segundo era espremido até quebrar no meio da palavra.
+   */
   acoesDeAnexo: {
     flexDirection: "row",
-    gap: spacing.md,
+    flexWrap: "wrap",
+    columnGap: spacing.md,
+    rowGap: spacing.xs,
   },
   photoTextGroup: {
     flex: 1,
@@ -94,6 +101,11 @@ export const styles = StyleSheet.create({
   photoAddLabel: {
     ...typography.label,
     color: colors.primary,
+  },
+  /** Remover fica em vermelho ao lado de "Alterar": são ações de peso muito diferente. */
+  photoRemoveLabel: {
+    ...typography.label,
+    color: colors.error,
   },
   photoHint: {
     ...typography.bodyMd,

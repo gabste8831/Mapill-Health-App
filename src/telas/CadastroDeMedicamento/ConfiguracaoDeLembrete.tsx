@@ -27,6 +27,11 @@ function iconeDoModo(mode: ReminderMode, isSelected: boolean) {
 /**
  * Uma linha por modo, e nem uma a mais. O que cada um faz cabe numa frase; o resto mora no "como
  * funcionam", que fica logo abaixo e não cobra nada de quem só quer escolher e sair.
+ *
+ * **"Nenhum aviso" não está aqui de propósito.** Ele obrigava a entrar na configuração para dizer
+ * que não se quer configurar nada — e recusar já é o que acontece sozinho ao não abrir este popup:
+ * `reminderMode` fica em `none` e o cadastro salva igual. A dose continua na Home e no calendário
+ * de qualquer forma, então não há nada que a escolha explícita preservasse.
  */
 function opcoesDeModo(value: ReminderMode | null): OptionGroupOption<ReminderMode>[] {
   return [
@@ -47,12 +52,6 @@ function opcoesDeModo(value: ReminderMode | null): OptionGroupOption<ReminderMod
       label: "Os dois",
       hint: "O alarme na hora, a notificação depois.",
       icon: iconeDoModo("both", value === "both"),
-    },
-    {
-      value: "none",
-      label: "Nenhum aviso",
-      hint: "A dose fica na lista do dia, sem alerta.",
-      icon: iconeDoModo("none", value === "none"),
     },
   ];
 }
