@@ -753,12 +753,28 @@ Calendário e Home abrem a escolha completa.
 - Supabase Storage para anexos que não estejam marcados como opt-out.
 - Indicador de status de sync na UI (última sincronização, pendências).
 
+**Anexos entram no backup (E9, confirmado em 2026-08-27).** Era "talvez" na revisão de 26/08 e
+virou requisito: *"vamos ter que implementar"*. Foto da ficha, foto da caixa e receita passam a
+subir. Três coisas mudam por causa disso, e nenhuma é técnica:
+
+1. A **decisão nº10** (anexo é local, por minimização) ganha exceção explícita — deixa de ser
+   regra e vira padrão com opt-out de verdade.
+2. `attachmentSyncOptOut` deixa de ser sempre `false` e passa a ser escolha do paciente, com a
+   pergunta em algum lugar do cadastro.
+3. O **texto legal precisa mudar antes do primeiro upload**. Hoje ele afirma que os dados de saúde
+   não saem do aparelho — e receita é o dado mais sensível que o app guarda. Subir antes de o
+   texto descrever isso seria repetir exatamente o problema corrigido em 24/08, quando três telas
+   prometiam backup inexistente. Bump de `CURRENT_TERMS_VERSION` obrigatório.
+
 **Pronto quando**
 - [ ] Dado criado offline sobe sozinho ao voltar a conexão.
 - [ ] Instalar em segundo device com a mesma conta restaura os dados.
 - [ ] Editar o mesmo registro nos dois devices resolve por LWW, de forma determinística.
 - [ ] RLS testado: token de um usuário não lê linha de outro.
 - [ ] Anexo opt-out permanece só no device.
+- [ ] **Anexos sobem e voltam** no segundo device: foto da ficha, foto da caixa e receita (E9).
+- [ ] **O texto legal descreve o envio de anexos antes de o primeiro upload existir**, com bump de
+      versão e reconsentimento.
 
 **Rastreabilidade**: §2.9 (consistência eventual — Vogels, 2008), §2.9.3 (LWW — Kleppmann, 2017).
 
@@ -1249,3 +1265,5 @@ a partir do D1 é o que impede isso.
 | 2026-08-27 | E6 | Recusado | **Série de compromissos fica de fora do escopo.** O detalhamento de 27/08 ("todo dia 5 de cada mês, e em dezembro muda para o dia 6 porque o 5 é domingo") mostrou que não é cadastro em lote: é a **estrutura de posologia aplicada a compromissos** — uma regra que gera ocorrências mais exceções individuais que não podem quebrar a regra. Exige migration, recorrência mensal com o caso do dia 31 em meses de 30, edição de uma ocorrência sem afetar as outras, e a pergunta "só esta ou todas as futuras" na exclusão, sem a qual apagar a série apaga o histórico das sessões já ocorridas. Em esforço, comparável ao B2 inteiro. Decisão do Gabriel com o custo na mesa: *"não prometíamos isso antes... deixamos de lado"*. O que pesou foi o C1 estar no caminho crítico e não ter começado — o app promete lembrete em três telas e não dispara nenhum, e é essa a lacuna que a banca vê. Fica como trabalho futuro. |
 | 2026-08-27 | Revisão | Concluída | **A revisão de 26/08 fechou: 15 dos 16 itens entregues, 1 recusado com motivo.** Todos os `F`, todos os `X` e sete dos oito `E` atacáveis. O roteiro ganhou os passos de cada mudança, marcados com 🔧, e a §6.2 subiu de 20 para 30 itens. Duas coisas ficaram documentadas e **não** feitas, ambas por decisão anterior do Gabriel: a seção de lembrete do cadastro segue congelada desde 21/08 esperando conversa dedicada — e ela é **pré-requisito do C1**, porque não dá para implementar notificação sem decidir o que o cadastro promete —, e o X14 (cor da tela de estoque) segue adiado por ser estilização. Próximo bloco: C1, começando obrigatoriamente pelo spike C1.0 em aparelho físico. |
 | 2026-08-27 | P2 | Concluído | **Vincular conta passou a reapresentar os termos e registrar o aceite.** Era decisão do Gabriel de 26/08 que tinha ficado só no papel — a varredura de fechamento da revisão achou. O login por si só não muda a base legal (o texto vigente diz que os dados não saem do aparelho, e continua verdade), mas vincular é o momento em que a pessoa manifesta intenção de usar a nuvem, e ter a data disso guardada é o que permite provar depois desde quando ela consentiu com o quê. **Registro novo, não atualização do anterior**: consentimento é evento, não estado — sobrescrever apagaria a linha do tempo que ele existe para preservar. O diálogo tem "Ler os termos" ao lado de "Vincular", porque confirmar não pode ser assinar às cegas, e falhar ao gravar o rastro não desfaz o login: a conta já está vinculada, e derrubar a tela deixaria a pessoa sem saber em que pé ficou. |
+| 2026-08-27 | E9 | Confirmado | **Anexos vão para a nuvem — requisito do D1, não mais "talvez".** Registrado no próprio D1, e não só na revisão, porque é lá que será executado e um documento de revisão não é lido de novo meses depois. O que a confirmação implica não é técnico: a decisão nº10 ganha exceção, `attachmentSyncOptOut` vira escolha real do paciente, e o **texto legal precisa mudar antes do primeiro upload** — hoje ele afirma que os dados de saúde não saem do aparelho, e receita é o dado mais sensível que o app guarda. Subir antes disso repetiria o problema corrigido em 24/08, quando três telas prometiam backup inexistente; aqui seria o inverso e pior, o app fazendo em silêncio o que o texto nega. |
+| 2026-08-27 | Front-end | Adiado a pedido | **O alinhamento visual fica para o fim do processo.** O X14 (cor da tela de estoque) era o único item de estilização na fila, e o Gabriel decidiu tratá-lo junto com o resto do acabamento numa passada própria, depois que a funcionalidade fechar. Registrado para que o "adiado" não vire "esquecido". |
