@@ -32,43 +32,56 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 1. Estado atual (atualizado em 2026-08-25)
+## 1. Estado atual (atualizado em 2026-08-27)
 
-### Já pronto ✅
+### Já pronto
 
 | Área | Situação |
 |---|---|
 | Domínio | Entidades (`medication`, `prescription`, `dose-schedule`, `intake-log`, `inventory-item`, `appointment`, `patient-profile`, `consent`, `auth-user`) + ports fechados |
-| Use-cases | `register-intake`, `correct-intake`, `snooze-dose-alarm` |
+| Use-cases | `register-intake`, `correct-intake`, `generate-dose-schedules`, `summarize-treatment`, `estimate-stock-depletion`, `adjust-stock`, `doses-de-hoje-ja-passadas`, `dose-faltante-do-prazo`, `snooze-dose-alarm` (este último órfão, fundação do C1) |
 | SQLite | `database.ts` + migrations 001→014 + 10 repositórios |
-| Design system | `src/ui/` (Button, Card, TextField, SelectField, Checkbox, Chip, IconButton, BottomSheet, Header, LegalAccordion, …) + `shared/theme` com paleta M3 real |
-| Login | Tela + Google via Supabase Auth (`SupabaseAuthGateway`), sessão persistida, "continuar sem login" |
-| Onboarding LGPD | `ConsentimentoScreen` + `consent_records` versionado por `CURRENT_TERMS_VERSION`; bump força reconsentimento |
-| Ficha de saúde | `FichaDeSaudeScreen` — nome completo obrigatório, demais campos opcionais, foto (galeria), contatos de emergência em lista. Serve à primeira execução **e** à edição |
-| Ajustes | Edição da ficha, vincular/desvincular conta Google, consulta dos termos com data/versão do aceite, e **MEUS DADOS**: apagar o clínico ou apagar tudo (apagamento físico, duas etapas, volta à primeira execução) |
-| Home | Agenda do dia, progresso, confirmação/pulo com correção retroativa, adesão semanal e alerta de estoque — **tudo vindo dos repositórios**, sem mock |
-| Navegação | Abas reais (Home/Calendário/Remédios/Ajustes) — nativas no aparelho, barra em JS no preview web; grupo `cadastro` como stack modal; rotas `/ficha` e `/termos`; `_layout.tsx` sem lógica de estado — **verificado em device (22/08)** |
-| Cadastro de medicamento | Formulário manual completo, gravando medicamento + prescrição + estoque + horários no SQLite — **verificado em device (22/08)**. Horário escolhido no relógio nativo do Android, com preenchimento "de X em X horas", e data de início editável |
-| Compromissos | Cadastro de consulta, retorno, exame e renovação de receita, com local, profissional, observação e antecedência do aviso. Aba Calendário lista próximos e passados, com editar, excluir e o registro de "você foi?" mais a anotação do que aconteceu. Só o **disparo** do aviso depende do C1 |
-| Medicações | Lista dos cadastros com dose, frequência, horários e estoque, com busca por nome ou princípio ativo; lápis abre a edição no mesmo formulário e lixeira faz exclusão lógica com confirmação |
-| Estoque | Tela própria (`/estoque`, pelo ícone no topo de Medicações e pelo card de estoque baixo da Home): quanto resta, quando acaba, recontagem física e reposição. Toda mudança grava um evento (`manual_recount` / `restock`), nunca sobrescreve o número |
-| Build em aparelho | Dev build pelo **EAS** (o build local não fecha nesta máquina — ver log de 22/08) |
+| Design system | `src/ui/` — Button, Card, TextField, SelectField, DateField, DatePicker, TimeField, TimePicker, Checkbox, Chip, ToggleChips, OptionGroup, SeletorDeOrdem, IconButton, Fab, BottomSheet, Header, Dica, FotoLocal, GradeDeMes, EscolhaDeOrigemDaFoto, SearchField, Accordion, LegalAccordion, SplashOverlay, SuccessOverlay, CenteredLoader, KeyboardAwareScrollView + `shared/theme` com paleta M3 real |
+| Login | Tela + Google via Supabase Auth, sessão persistida, "continuar sem login" lembrado entre aberturas. Build sem credenciais **diz isso na tela**, em vez de recusar depois do toque |
+| Onboarding LGPD | `ConsentimentoScreen` + `consent_records` versionado; bump força reconsentimento. Vincular conta **reapresenta os termos e registra novo aceite** com a data |
+| Ficha de saúde | Nome obrigatório, demais opcionais, foto (câmera **ou** galeria), data com calendário, contatos de emergência em lista. Serve à primeira execução e à edição |
+| Ajustes | Ficha + uma linha para **Conta e dados** |
+| Conta e dados (`/conta`) | Vincular/desvincular Google, consulta dos termos com data e versão do aceite, e **MEUS DADOS**: apagar o clínico ou apagar tudo (apagamento físico, duas etapas, volta à primeira execução) |
+| Home | Agenda do dia, progresso, confirmação/pulo com correção retroativa, adesão semanal, alerta de estoque e card de acesso ao estoque — tudo vindo dos repositórios, sem mock |
+| Navegação | Abas reais (Home/Calendário/Remédios/Ajustes); grupo `cadastro` como stack modal; rotas `/ficha`, `/termos`, `/estoque`, `/conta`; `_layout.tsx` sem lógica de estado |
+| Cadastro de medicamento | Todas as formas farmacêuticas, todas as frequências (todo dia, dias da semana, ciclo com pausa, só quando precisar), dose variável por horário, preenchimento "de X em X horas", data de início editável, anexos (foto e PDF) com validade e aviso de renovação, estoque e informações adicionais. Avisa quais horários de hoje já passaram e **pergunta se foram tomados** |
+| Compromissos | Descrição em texto livre, local, profissional, orientações e cascata de lembretes. Aceita data no passado com aviso, para registro retroativo |
+| Calendário | **Grade mensal** com pontinhos por tipo, filtros (tudo / compromissos / remédios), lista do dia selecionado, doses projetadas além dos 30 dias gravados e registro de "você foi?" com anotação |
+| Medicações | Lista com dose, frequência, horários e estoque, busca por nome ou princípio ativo, **ordenação** (A–Z, recentes, acabando), edição e exclusão lógica |
+| Estoque | Tela própria com previsão de término, recontagem e reposição por evento, e **ordenação**. Recusa a previsão quando estoque e dose usam unidades diferentes |
+| Build em aparelho | Dev build pelo EAS, com as credenciais do Supabase nas variáveis de ambiente dos três perfis |
 
-### Buracos conhecidos ❌
+### Buracos conhecidos
 
-- **Notificações**: `expo-notifications` instalado, mas `src/notifications/` não existe. Zero alarmes.
-- **Sync**: login autentica, mas nada sobe/desce. Sem tabelas no Supabase, sem RLS.
+- **Notificações**: `expo-notifications` instalado, mas `src/notifications/` não existe. **Zero
+  alarmes** — e o app promete lembrete em três telas. É o próximo bloco (C1) e a maior dívida.
+- **Seção de lembrete do cadastro**: congelada desde 21/08 a pedido, esperando conversa dedicada.
+  É **pré-requisito do C1** — não dá para implementar o disparo sem decidir o que o cadastro promete.
+- **Sync**: login autentica, mas nada sobe nem desce. Sem tabelas no Supabase, sem RLS.
 - **CMED**: nenhum script de ingestão, nenhum seed embarcado.
-- **Histórico**: os `intake_logs` são gravados e alimentam a adesão da semana na Home, mas não há
-  tela de histórico nem relatório por período (D2).
-- **Direitos LGPD — parcial**: apagar os dados locais (clínicos ou tudo) e revogar consentimento
-  já existem em Ajustes → MEUS DADOS, com apagamento físico. Faltam **exportar** e o lado
-  servidor da exclusão, que depende do D1 existir.
-- **Verificação em aparelho — parcial**: login Google, consentimento, ficha, navegação e cadastro
-  foram validados em device (22/08), e a partir daí saíram três bugs que só apareciam ali (foto se
-  sobrescrevendo, teclado cobrindo o campo, pílula das abas herdando cor do sistema). Em 24/08
-  entraram a Home com dados reais (B4), a correção do fuso na agenda e o botão físico de voltar
-  nos modais. Ainda **não** verificados: **listagem, busca, edição e exclusão** na aba Remédios.
+- **Histórico**: os `intake_logs` alimentam a adesão da semana na Home, mas não há tela de
+  histórico nem relatório por período (D2).
+- **Direitos LGPD — parcial**: apagar local e revogar consentimento existem, com apagamento
+  físico. Faltam **exportar** e o lado servidor da exclusão, que dependem do D1.
+- **iOS**: compilável, nunca buildado. Toda linha ⚙️ da §6.1 é hipótese.
+
+### Validação em aparelho
+
+| Rodada | O que aconteceu |
+|---|---|
+| **22/08** | Login, consentimento, ficha, navegação e cadastro validados. Saíram três bugs que só apareciam ali: foto se sobrescrevendo, teclado cobrindo o campo, pílula das abas herdando cor do sistema |
+| **24/08** | Home com dados reais, correção do fuso na agenda, botão físico de voltar nos modais |
+| **26/08** | **Primeira execução completa do roteiro.** Gerou `REVISAO-2026-08-26.md` com 37 achados codificados |
+| **27/08** | **36 dos 37 fechados**, 1 recusado (E6). Pendente de nova validação em aparelho |
+
+**Bloqueado até a próxima rodada**: os itens 24, 25 e 28 da fila §6.2 falharam em 26/08 por causa
+do F1, já corrigido. O item 25 exige método novo — cadastrar para dali a minutos e esperar o
+horário virar, porque horário passado nunca mais gera dose atrasada.
 
 ---
 
@@ -1110,6 +1123,11 @@ lista que o "verificado em device" dos blocos consulta.
 > e o item 25 exige o método novo (cadastrar para dali a minutos e esperar o horário virar, em vez
 > de cadastrar horário passado).
 
+➡️ **Rodada de 27/08**: o roteiro focado do que mudou está em
+**[`ROTEIRO-DE-TESTE-2026-08-27.md`](./ROTEIRO-DE-TESTE-2026-08-27.md)** — 13 blocos, 35 a 45
+minutos, cobrindo os 36 achados fechados. O roteiro completo abaixo continua valendo para a
+validação final antes da defesa.
+
 ➡️ O passo a passo operacional está em
 **[`ROTEIRO-DE-TESTE-EM-APARELHO.md`](./ROTEIRO-DE-TESTE-EM-APARELHO.md)**, reescrito em 25/08
 para partir do zero, como usuário que nunca abriu o app: 22 blocos em 4 sessões. A tabela abaixo é
@@ -1267,3 +1285,4 @@ a partir do D1 é o que impede isso.
 | 2026-08-27 | P2 | Concluído | **Vincular conta passou a reapresentar os termos e registrar o aceite.** Era decisão do Gabriel de 26/08 que tinha ficado só no papel — a varredura de fechamento da revisão achou. O login por si só não muda a base legal (o texto vigente diz que os dados não saem do aparelho, e continua verdade), mas vincular é o momento em que a pessoa manifesta intenção de usar a nuvem, e ter a data disso guardada é o que permite provar depois desde quando ela consentiu com o quê. **Registro novo, não atualização do anterior**: consentimento é evento, não estado — sobrescrever apagaria a linha do tempo que ele existe para preservar. O diálogo tem "Ler os termos" ao lado de "Vincular", porque confirmar não pode ser assinar às cegas, e falhar ao gravar o rastro não desfaz o login: a conta já está vinculada, e derrubar a tela deixaria a pessoa sem saber em que pé ficou. |
 | 2026-08-27 | E9 | Confirmado | **Anexos vão para a nuvem — requisito do D1, não mais "talvez".** Registrado no próprio D1, e não só na revisão, porque é lá que será executado e um documento de revisão não é lido de novo meses depois. O que a confirmação implica não é técnico: a decisão nº10 ganha exceção, `attachmentSyncOptOut` vira escolha real do paciente, e o **texto legal precisa mudar antes do primeiro upload** — hoje ele afirma que os dados de saúde não saem do aparelho, e receita é o dado mais sensível que o app guarda. Subir antes disso repetiria o problema corrigido em 24/08, quando três telas prometiam backup inexistente; aqui seria o inverso e pior, o app fazendo em silêncio o que o texto nega. |
 | 2026-08-27 | Front-end | Adiado a pedido | **O alinhamento visual fica para o fim do processo.** O X14 (cor da tela de estoque) era o único item de estilização na fila, e o Gabriel decidiu tratá-lo junto com o resto do acabamento numa passada própria, depois que a funcionalidade fechar. Registrado para que o "adiado" não vire "esquecido". |
+| 2026-08-27 | Docs | Concluído | **§1 reescrita e roteiro focado criado.** A §1 ainda descrevia o app de 25/08 — sem calendário em grade, sem tela de conta, sem ordenação, e listando "buracos" que já tinham sido fechados. Um plano que descreve um estado que não existe mais é pior que plano nenhum, porque ninguém confere. Agora ela tem três partes: o que está pronto (com os componentes reais do design system), os buracos de verdade, e o histórico de validação em aparelho rodada a rodada. Junto nasceu o `ROTEIRO-DE-TESTE-2026-08-27.md`, com 13 blocos cobrindo só os 36 achados fechados — o roteiro completo de 22 blocos continua existindo para a validação final, mas repetir duas horas de teste para conferir mudanças pontuais desperdiçaria o tempo que o Gabriel tem. |
