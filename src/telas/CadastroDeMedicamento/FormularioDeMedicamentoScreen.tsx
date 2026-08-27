@@ -1367,9 +1367,11 @@ export function FormularioDeMedicamentoScreen({
                 O acompanhamento começa na próxima dose, e amanhã o dia inteiro entra normalmente.
               </Text>
 
-              {/* Avisar que a dose sumiu resolve a mentira; perguntar se ela foi tomada resolve a
-                  lacuna. Sem isto o estoque nasce desalinhado da caixa já no primeiro dia, e a
-                  adesão de hoje nasce incompleta por um motivo que é do app, não do paciente.
+              {/* A pergunta vale por dois motivos, e o segundo é o maior: ela completa a adesão do
+                  primeiro dia, que nasceria incompleta por decisão do app e não do paciente — e,
+                  antes disso, faz quem cadastra às 12h um remédio das 08h **perceber** que tinha
+                  uma dose hoje. Inclusive quem ainda não tomou.
+
                   Nada vem marcado: o app não sabe, e marcar por ele seria inventar registro
                   clínico — que é exatamente o que o histórico não pode ter. */}
               <Text style={styles.fieldLabel}>VOCÊ JÁ TOMOU ALGUMA DELAS HOJE?</Text>
@@ -1385,7 +1387,7 @@ export function FormularioDeMedicamentoScreen({
               <Text style={styles.sectionHint}>
                 {jaTomadosValidos.length === 0
                   ? "Marque só o que você realmente tomou. Deixar em branco não registra nada."
-                  : `${jaTomadosValidos.length === 1 ? "1 dose será registrada" : `${jaTomadosValidos.length} doses serão registradas`} como tomadas, e o estoque desconta.`}
+                  : `${jaTomadosValidos.length === 1 ? "1 dose entra" : `${jaTomadosValidos.length} doses entram`} no seu histórico de hoje. O estoque não muda — o que você informou acima já é o que tem na caixa agora.`}
               </Text>
             </>
           ) : null}

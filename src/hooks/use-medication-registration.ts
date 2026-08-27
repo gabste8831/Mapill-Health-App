@@ -8,7 +8,6 @@ import { MedicationRepository } from "@/data/repositories/medication-repository"
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import type { Prescription } from "@/domain/entities/prescription";
 import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
-import { RegisterIntake } from "@/domain/use-cases/register-intake";
 import type { MedicamentoDraft } from "@/telas/CadastroDeMedicamento/FormularioDeMedicamentoScreen";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`). */
@@ -127,7 +126,7 @@ export async function salvarMedicamento(
     await doseScheduleRepository.save({ id: Crypto.randomUUID(), ...doseSchedule, ...syncFields() });
   }
 
-  await registrarDosesJaTomadas(draft, prescription, medicationId, from);
+  await registrarDosesJaTomadas(draft, prescription, from);
 
   return { medicationId, prescriptionId };
 }
@@ -146,13 +145,19 @@ export async function salvarMedicamento(
  * a resposta e carimbar o horário previsto inventaria dado (§2.3.3). Aqui a pessoa está dizendo
  * "tomei às 8", e é isso que fica gravado.
  *
- * Passa pelo `RegisterIntake` e não por escrita direta para que o desconto de estoque seja o mesmo
- * — é essa a razão de o E10 existir: sem ele o estoque nasce desalinhado da caixa.
+ * **O estoque não é descontado, de propósito.** Quem cadastra conta a caixa no momento do cadastro,
+ * então o número informado já reflete a dose que foi tomada de manhã — descontar de novo tiraria
+ * duas de uma. Por isso escreve o `IntakeLog` direto em vez de passar pelo `RegisterIntake`: o que
+ * o E10 preenche é a lacuna de **adesão e histórico** do primeiro dia, não a de estoque, que já
+ * nasce certa.
+ *
+ * O ganho maior nem é o registro: é a pergunta existir. Quem cadastra às 12h um remédio das 08h e
+ * vê "você já tomou a dose das 08:00?" descobre ali que tinha uma dose hoje — inclusive quem ainda
+ * não tomou (decisão de 27/08).
  */
 async function registrarDosesJaTomadas(
   draft: MedicamentoDraft,
   prescription: Prescription,
-  medicationId: string,
   agora: Date,
 ): Promise<void> {
   if (draft.dosesJaTomadasHoje.length === 0) return;
@@ -162,7 +167,7 @@ async function registrarDosesJaTomadas(
   const marcados = new Set(draft.dosesJaTomadasHoje);
 
   const doseScheduleRepository = new DoseScheduleRepository();
-  const registerIntake = new RegisterIntake(new IntakeLogRepository(), new InventoryRepository());
+  const intakeLogRepository = new IntakeLogRepository();
 
   for (const doseSchedule of generateDoseSchedules({
     prescription,
@@ -175,13 +180,13 @@ async function registrarDosesJaTomadas(
 
     const doseScheduleId = Crypto.randomUUID();
     await doseScheduleRepository.save({ id: doseScheduleId, ...doseSchedule, ...syncFields() });
-    await registerIntake.execute({
+    await intakeLogRepository.save({
       id: Crypto.randomUUID(),
       doseScheduleId,
-      medicationId,
       status: "confirmed",
       occurredAt: doseSchedule.scheduledFor,
-      amount: doseSchedule.amount,
+      correctsLogId: null,
+      ...syncFields(),
     });
   }
 }
