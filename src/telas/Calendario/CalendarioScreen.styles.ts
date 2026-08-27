@@ -16,6 +16,11 @@ export const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
   },
+  /** Entre a grade e a lista: o filtro governa as duas, então fica entre elas. */
+  filtros: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+  },
   listContent: {
     padding: spacing.md,
     gap: spacing.md,

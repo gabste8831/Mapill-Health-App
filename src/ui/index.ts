@@ -14,6 +14,7 @@ export * from "./EscolhaDeOrigemDaFoto/EscolhaDeOrigemDaFoto";
 export * from "./Fab/Fab";
 export * from "./FotoLocal/FotoLocal";
 export * from "./GoogleLogo/GoogleLogo";
+export * from "./GradeDeMes/GradeDeMes";
 export * from "./Header/Header";
 export * from "./IconButton/IconButton";
 export * from "./Accordion/Accordion";

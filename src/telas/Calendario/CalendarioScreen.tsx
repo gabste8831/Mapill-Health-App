@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, FlatList, Pressable, Text, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import type { Appointment, AppointmentOutcome } from "@/domain/entities/appointment";
@@ -22,9 +22,13 @@ import {
   Button,
   CenteredLoader,
   Fab,
+  GradeDeMes,
   Header,
   OptionGroup,
+  SeletorDeOrdem,
   TextField,
+  type MarcasDoDia,
+  type OpcaoDeOrdem,
 } from "@/ui";
 import { styles } from "./CalendarioScreen.styles";
 
@@ -228,6 +232,15 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
   );
 }
 
+/** O que a agenda mostra. Uso contínuo pinta o mês inteiro, e aí "só compromissos" salva a leitura. */
+type FiltroDaAgenda = "tudo" | "compromissos" | "remedios";
+
+const FILTROS_DA_AGENDA: OpcaoDeOrdem<FiltroDaAgenda>[] = [
+  { value: "tudo", label: "Tudo", icon: "apps-outline" },
+  { value: "compromissos", label: "Compromissos", icon: "calendar-outline" },
+  { value: "remedios", label: "Remédios", icon: "medkit-outline" },
+];
+
 /** `2026-08-27` → data local à meia-noite, sem o deslocamento de fuso do `new Date("...")`. */
 function dataDoDia(isoDay: string): Date {
   const [ano, mes, dia] = isoDay.split("-").map(Number);
@@ -259,7 +272,56 @@ export function CalendarioScreen() {
   const amanha = toLocalIsoDay(new Date(agora.getTime() + 24 * 60 * 60_000));
   const ontem = toLocalIsoDay(new Date(agora.getTime() - 24 * 60 * 60_000));
 
-  const total = dias.length;
+  const [diaSelecionado, setDiaSelecionado] = useState(hoje);
+  const [mesVisivel, setMesVisivel] = useState(
+    () => new Date(agora.getFullYear(), agora.getMonth(), 1),
+  );
+  const [filtro, setFiltro] = useState<FiltroDaAgenda>("tudo");
+
+  const mostraCompromissos = filtro !== "remedios";
+  const mostraDoses = filtro !== "compromissos";
+
+  /**
+   * Os pontinhos do mês. Respeita o filtro porque a grade e a lista falam da mesma agenda — um mês
+   * pintado de doses com a lista mostrando só compromissos seria duas respostas para a mesma
+   * pergunta.
+   */
+  const marcas = useMemo(() => {
+    const mapa = new Map<string, MarcasDoDia>();
+    for (const dia of dias) {
+      const temCompromisso = mostraCompromissos && dia.compromissos.length > 0;
+      const temDose = mostraDoses && dia.doses.length > 0;
+      if (temCompromisso || temDose) mapa.set(dia.isoDay, { temCompromisso, temDose });
+    }
+    return mapa;
+  }, [dias, mostraCompromissos, mostraDoses]);
+
+  /** O dia aberto embaixo da grade. Vazio quando não há nada — e não `undefined`, que quebraria. */
+  const diaEncontrado = dias.find((item) => item.isoDay === diaSelecionado);
+  const dia = {
+    isoDay: diaSelecionado,
+    compromissos: mostraCompromissos ? (diaEncontrado?.compromissos ?? []) : [],
+    doses: mostraDoses ? (diaEncontrado?.doses ?? []) : [],
+  };
+  const vazioNoDia = dia.compromissos.length === 0 && dia.doses.length === 0;
+
+  /**
+   * Trocar de mês leva a seleção junto, para o dia 1º do mês visitado. Sem isso a lista embaixo
+   * continuaria mostrando um dia que não está mais na grade — a tela diria duas coisas.
+   */
+  function mudarMes(passo: -1 | 1) {
+    const novo = new Date(mesVisivel.getFullYear(), mesVisivel.getMonth() + passo, 1);
+    setMesVisivel(novo);
+    const p = (valor: number) => String(valor).padStart(2, "0");
+    const primeiroDoMes = `${novo.getFullYear()}-${p(novo.getMonth() + 1)}-01`;
+    // Voltando ao mês corrente, o destino natural é hoje, e não o dia 1º.
+    setDiaSelecionado(
+      novo.getFullYear() === agora.getFullYear() && novo.getMonth() === agora.getMonth()
+        ? hoje
+        : primeiroDoMes,
+    );
+  }
+
 
   /**
    * Registrar dose direto do calendário, e só onde "tomei" descreve algo que já aconteceu: hoje e
@@ -357,39 +419,48 @@ export function CalendarioScreen() {
         onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
       />
 
-      <View style={styles.header}>
-        <Text style={styles.subtitle}>
-          Sua agenda de saúde: compromissos e horários de medicação, dia a dia.
-        </Text>
-      </View>
-
+      {/* O subtítulo saiu: a grade explica sozinha o que a tela é, e a frase custava altura numa
+          tela onde o calendário e a lista já disputam espaço. */}
       {error !== null ? (
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
-      ) : total === 0 ? (
-        <View style={styles.centered}>
-          <Text style={styles.emptyTitle}>Sua agenda está vazia</Text>
-          <Text style={styles.emptyDescription}>
-            Toque no + para agendar um compromisso ou cadastrar um medicamento — os horários das
-            doses aparecem aqui junto das consultas.
-          </Text>
-        </View>
       ) : (
-        <FlatList
-          data={dias}
-          keyExtractor={(dia) => dia.isoDay}
-          renderItem={({ item: dia }) => (
+        <>
+          <GradeDeMes
+            mes={mesVisivel}
+            selecionado={diaSelecionado}
+            hoje={hoje}
+            marcas={marcas}
+            onSelecionar={setDiaSelecionado}
+            onMudarMes={mudarMes}
+          />
+
+          {/* O filtro fica entre a grade e a lista porque governa as duas: muda os pontinhos do
+              mês e o que a lista mostra. Quem tem remédio de uso contínuo pinta o mês inteiro, e
+              "só compromissos" é o que devolve a leitura de relance. */}
+          <View style={styles.filtros}>
+            <SeletorDeOrdem value={filtro} onChange={setFiltro} options={FILTROS_DA_AGENDA} />
+          </View>
+
+          <ScrollView contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
             <View style={styles.dia}>
               <View style={styles.diaHeader}>
-                <Text style={[styles.diaTitulo, dia.isoDay === hoje && styles.diaHoje]}>
-                  {tituloDoDia(dia.isoDay, hoje, amanha, ontem)}
+                <Text style={[styles.diaTitulo, diaSelecionado === hoje && styles.diaHoje]}>
+                  {tituloDoDia(diaSelecionado, hoje, amanha, ontem)}
                 </Text>
-                {/* A data ao lado do "Hoje"/"Amanhã": a palavra situa, o número confere. */}
-                {dia.isoDay === hoje || dia.isoDay === amanha || dia.isoDay === ontem ? (
-                  <Text style={styles.diaData}>{diaEMesCurto(dataDoDia(dia.isoDay))}</Text>
-                ) : null}
+                <Text style={styles.diaData}>{diaEMesCurto(dataDoDia(diaSelecionado))}</Text>
               </View>
+
+              {vazioNoDia ? (
+                <Text style={styles.emptyDescription}>
+                  {filtro === "compromissos"
+                    ? "Nenhum compromisso neste dia."
+                    : filtro === "remedios"
+                      ? "Nenhuma dose neste dia."
+                      : "Nada marcado para este dia."}
+                </Text>
+              ) : null}
 
               {dia.compromissos.map((appointment) => (
                 <ItemDeCompromisso
@@ -432,10 +503,8 @@ export function CalendarioScreen() {
                 </View>
               ) : null}
             </View>
-          )}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+          </ScrollView>
+        </>
       )}
 
       <BottomSheet
