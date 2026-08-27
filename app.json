@@ -43,8 +43,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "O Mapill acessa suas fotos apenas para você escolher a imagem da sua ficha de saúde. A foto fica no aparelho.",
-          "cameraPermission": false,
+          "photosPermission": "O Mapill acessa suas fotos apenas para você escolher a imagem da sua ficha, da caixa do remédio ou da receita. A foto fica no aparelho.",
+          "cameraPermission": "O Mapill abre a câmera apenas quando você escolhe fotografar a caixa do remédio ou a receita. A foto fica no aparelho e não é enviada para lugar nenhum.",
           "microphonePermission": false
         }
       ]

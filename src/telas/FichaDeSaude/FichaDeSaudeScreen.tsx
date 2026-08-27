@@ -10,7 +10,7 @@ import type {
   EmergencyContact,
   PatientProfileDraft,
 } from "@/domain/entities/patient-profile";
-import { usePhotoPicker } from "@/hooks/use-photo-picker";
+import { usePhotoPicker, type PhotoOrigin } from "@/hooks/use-photo-picker";
 import { parseDateInput, toDateInput } from "@/shared/date-input";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { deletePersistedFile } from "@/shared/persist-picked-file";
@@ -19,7 +19,7 @@ import {
   BottomSheet,
   Button,
   Card,
-  Chip, DateField, FotoLocal, Header, IconButton, KeyboardAwareScrollView, SelectField,
+  Chip, DateField, EscolhaDeOrigemDaFoto, FotoLocal, Header, IconButton, KeyboardAwareScrollView, SelectField,
   TextField,
   type SelectOption
 } from "@/ui";
@@ -231,6 +231,8 @@ export function FichaDeSaudeScreen({
     useScrollToFocusedInput();
   const [fullName, setFullName] = useState(initialValue?.fullName ?? "");
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
+  /** Câmera ou galeria — a pergunta só existe depois de decidir que quer uma foto. */
+  const [escolhendoOrigem, setEscolhendoOrigem] = useState(false);
   const { isPicking, pickPhoto } = usePhotoPicker("ficha-foto");
   const [dateOfBirthInput, setDateOfBirthInput] = useState(
     toDateInput(initialValue?.dateOfBirth ?? ""),
@@ -264,18 +266,24 @@ export function FichaDeSaudeScreen({
     fullName.trim().length > 0 && dateOfBirthError === undefined;
 
   // Texto de UI fica aqui (camada de apresentação) — o hook só devolve o motivo da falha.
-  async function handlePickPhoto() {
-    const result = await pickPhoto(photoUri);
+  async function handlePickPhoto(origin: PhotoOrigin) {
+    setEscolhendoOrigem(false);
+    const result = await pickPhoto(origin, photoUri);
     if (result.status === "picked") {
       setPhotoUri(result.uri);
       return;
     }
     // Desistir de escolher é uma ação normal, não um erro digno de alerta.
     if (result.reason === "cancelled") return;
+    const semPermissao = result.reason === "permission-denied";
     Alert.alert(
-      result.reason === "permission-denied" ? "Sem acesso às fotos" : "Não foi possível usar a foto",
-      result.reason === "permission-denied"
-        ? "Para escolher uma imagem, libere o acesso às fotos nas configurações do aparelho."
+      semPermissao
+        ? origin === "camera"
+          ? "Sem acesso à câmera"
+          : "Sem acesso às fotos"
+        : "Não foi possível usar a foto",
+      semPermissao
+        ? `Para ${origin === "camera" ? "tirar uma foto" : "escolher uma imagem"}, libere o acesso nas configurações do aparelho.`
         : "Tente novamente com outra imagem.",
     );
   }
@@ -345,7 +353,7 @@ export function FichaDeSaudeScreen({
         <View style={styles.photoRow}>
           <Pressable
             style={photoUri ? styles.photoFrame : styles.photoPlaceholder}
-            onPress={handlePickPhoto}
+            onPress={() => setEscolhendoOrigem(true)}
             disabled={isPicking}
             accessibilityRole="button"
             accessibilityLabel={photoUri ? "Trocar foto da ficha" : "Adicionar foto à ficha"}
@@ -356,7 +364,7 @@ export function FichaDeSaudeScreen({
               <Ionicons name="camera-outline" size={24} color={colors.onSurfaceVariant} />
             )}
           </Pressable>
-          <Pressable onPress={handlePickPhoto} disabled={isPicking} accessibilityRole="button">
+          <Pressable onPress={() => setEscolhendoOrigem(true)} disabled={isPicking} accessibilityRole="button">
             <Text style={styles.photoAddLabel}>{photoUri ? "Trocar foto" : "Adicionar foto"}</Text>
           </Pressable>
           {photoUri ? (
@@ -494,6 +502,13 @@ export function FichaDeSaudeScreen({
           disabled={!canContinue}
         />
       </KeyboardAwareScrollView>
+
+      <EscolhaDeOrigemDaFoto
+        visible={escolhendoOrigem}
+        title="Foto da ficha"
+        onClose={() => setEscolhendoOrigem(false)}
+        onEscolher={(origin) => void handlePickPhoto(origin)}
+      />
     </SafeAreaView>
   );
 }

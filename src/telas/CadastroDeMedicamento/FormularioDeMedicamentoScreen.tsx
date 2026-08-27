@@ -35,7 +35,7 @@ import { dosesDeHojeJaPassadas } from "@/domain/use-cases/doses-de-hoje-ja-passa
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { summarizeTreatment } from "@/domain/use-cases/summarize-treatment";
 import { ACCEPTED_DOCUMENT_LABEL, useDocumentPicker } from "@/hooks/use-document-picker";
-import { usePhotoPicker } from "@/hooks/use-photo-picker";
+import { usePhotoPicker, type PhotoOrigin } from "@/hooks/use-photo-picker";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import {
   cycleTurningPoints,
@@ -61,6 +61,7 @@ import {
   Checkbox,
   DateField,
   Dica,
+  EscolhaDeOrigemDaFoto,
   FotoLocal,
   Header,
   KeyboardAwareScrollView,
@@ -785,6 +786,19 @@ export function FormularioDeMedicamentoScreen({
    */
   const [horariosJaTomados, setHorariosJaTomados] = useState<string[]>([]);
 
+  /**
+   * Qual foto está esperando a escolha de origem — `null` quando o popup está fechado. Um estado
+   * só para os dois campos: a pergunta é a mesma, e o que muda é onde o resultado é aplicado.
+   */
+  const [origemPendente, setOrigemPendente] = useState<"caixa" | "receita" | null>(null);
+
+  async function escolherOrigem(origin: PhotoOrigin) {
+    const alvo = origemPendente;
+    setOrigemPendente(null);
+    if (alvo === "caixa") await pick(boxPhoto, setPhotoUri, photoUri, origin);
+    else if (alvo === "receita") await pick(prescriptionPhoto, guardarFoto, attachmentUri, origin);
+  }
+
   const horariosDeHojeDescartados = useMemo(
     () =>
       schedule === null || doseUnit === null || !isScheduleComplete
@@ -890,17 +904,23 @@ export function FormularioDeMedicamentoScreen({
     picker: ReturnType<typeof usePhotoPicker>,
     apply: (uri: string) => void,
     replacing: string | null,
+    origin: PhotoOrigin = "galeria",
   ) {
-    const result = await picker.pickPhoto(replacing);
+    const result = await picker.pickPhoto(origin, replacing);
     if (result.status === "picked") {
       apply(result.uri);
       return;
     }
     if (result.reason === "cancelled") return;
+    const semPermissao = result.reason === "permission-denied";
     Alert.alert(
-      result.reason === "permission-denied" ? "Sem acesso às fotos" : "Não foi possível usar a foto",
-      result.reason === "permission-denied"
-        ? "Para escolher uma imagem, libere o acesso às fotos nas configurações do aparelho."
+      semPermissao
+        ? origin === "camera"
+          ? "Sem acesso à câmera"
+          : "Sem acesso às fotos"
+        : "Não foi possível usar a foto",
+      semPermissao
+        ? `Para ${origin === "camera" ? "tirar uma foto" : "escolher uma imagem"}, libere o acesso nas configurações do aparelho.`
         : "Tente novamente com outra imagem.",
     );
   }
@@ -1437,7 +1457,7 @@ export function FormularioDeMedicamentoScreen({
               <View style={styles.photoRow}>
                 <Pressable
                   style={photoUri ? styles.photoFrame : styles.photoPlaceholder}
-                  onPress={() => pick(boxPhoto, setPhotoUri, photoUri)}
+                  onPress={() => setOrigemPendente("caixa")}
                   disabled={boxPhoto.isPicking}
                   accessibilityRole="button"
                   accessibilityLabel="Foto da embalagem">
@@ -1453,7 +1473,7 @@ export function FormularioDeMedicamentoScreen({
                 </Pressable>
                 <View style={styles.photoTextGroup}>
                   <Pressable
-                    onPress={() => pick(boxPhoto, setPhotoUri, photoUri)}
+                    onPress={() => setOrigemPendente("caixa")}
                     accessibilityRole="button">
                     <Text style={styles.photoAddLabel}>
                       {photoUri ? "Trocar foto da caixa" : "Adicionar foto da caixa"}
@@ -1486,7 +1506,7 @@ export function FormularioDeMedicamentoScreen({
                   {attachmentUri === null ? (
                     <View style={styles.acoesDeAnexo}>
                       <Pressable
-                        onPress={() => pick(prescriptionPhoto, guardarFoto, attachmentUri)}
+                        onPress={() => setOrigemPendente("receita")}
                         disabled={prescriptionPhoto.isPicking}
                         accessibilityRole="button">
                         {/* "Tirar da galeria" lia como "tirar foto" e prometia abrir a câmera,
@@ -1509,7 +1529,7 @@ export function FormularioDeMedicamentoScreen({
                         onPress={() =>
                           attachmentKind === "document"
                             ? escolherArquivoDaReceita()
-                            : pick(prescriptionPhoto, guardarFoto, attachmentUri)
+                            : setOrigemPendente("receita")
                         }
                         accessibilityRole="button">
                         <Text style={styles.photoAddLabel}>Alterar anexo</Text>
@@ -1692,6 +1712,13 @@ export function FormularioDeMedicamentoScreen({
           setReminderSheetOpen(false);
           router.push("/termos");
         }}
+      />
+
+      <EscolhaDeOrigemDaFoto
+        visible={origemPendente !== null}
+        title={origemPendente === "receita" ? "Foto da receita" : "Foto da caixa"}
+        onClose={() => setOrigemPendente(null)}
+        onEscolher={(origin) => void escolherOrigem(origin)}
       />
     </SafeAreaView>
   );

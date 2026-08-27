@@ -10,6 +10,7 @@ export * from "./Chip/Chip";
 export * from "./DateField/DateField";
 export * from "./DatePicker/DatePicker";
 export * from "./Dica/Dica";
+export * from "./EscolhaDeOrigemDaFoto/EscolhaDeOrigemDaFoto";
 export * from "./Fab/Fab";
 export * from "./FotoLocal/FotoLocal";
 export * from "./GoogleLogo/GoogleLogo";
