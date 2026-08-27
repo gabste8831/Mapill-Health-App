@@ -9,7 +9,7 @@ import type { ItemDaListaDeRemedios } from "@/hooks/use-medication-list";
 import { useMedicationList } from "@/hooks/use-medication-list";
 import {
   formatarQuantidadeLivre,
-  horariosDaPosologia,
+  horariosComDose,
   resumirDose,
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
@@ -26,7 +26,12 @@ type ItemDeRemedioProps = {
 
 function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
   const { medication, prescription, inventory } = item;
-  const horarios = prescription === null ? [] : horariosDaPosologia(prescription.schedule);
+  // Com a dose junto quando ela varia por horário: é o caso em que a hora sozinha esconde
+  // justamente o que se quer conferir na fichinha.
+  const horarios =
+    prescription === null
+      ? []
+      : horariosComDose(prescription.schedule, prescription.doseAmount, prescription.doseUnit);
 
   return (
     <View style={styles.item}>

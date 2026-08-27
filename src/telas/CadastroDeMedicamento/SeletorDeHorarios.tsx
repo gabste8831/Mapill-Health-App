@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Keyboard, Pressable, Text, View } from "react-native";
 
 import { colors } from "@/shared/theme";
 import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
@@ -153,6 +153,9 @@ export function SeletorDeHorarios({
       .sort((a, b) => a.at.localeCompare(b.at));
     const pendentesVazios = values.filter((value) => parseTimeInput(value.at) === null);
     onChange([...preenchidos, ...pendentesVazios]);
+    // O popup fechava e o teclado ficava, cobrindo metade da tela de trás até alguém tocar em
+    // algum lugar. Fechar o campo é parte de concluir, não uma segunda ação.
+    Keyboard.dismiss();
     setSheetOpen(false);
   }
 
@@ -320,6 +323,17 @@ export function SeletorDeHorarios({
                   ))}
                 </View>
               </View>
+            ) : null}
+
+            {/* A série calcula **horários**, e a dose de cada um é outro eixo — ela é preservada
+                ao aplicar. O que faltava era dizer isso: quem entra pela série nunca vê a lista
+                antes, e saía achando que tinha perdido a dose por horário. */}
+            {variacao !== undefined ? (
+              <Text style={styles.sectionHint}>
+                {variacao.ativa
+                  ? "As doses que você definiu por horário são mantidas — a série só recalcula as horas."
+                  : "Depois de preencher, dá para marcar “A dose muda de um horário para o outro” na lista."}
+              </Text>
             ) : null}
 
             <View style={styles.linhaDeAcoes}>

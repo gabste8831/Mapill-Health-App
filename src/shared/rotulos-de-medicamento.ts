@@ -125,6 +125,31 @@ export function horariosDaPosologia(schedule: PosologySchedule): string[] {
 }
 
 /**
+ * Os horários com a quantidade de cada um — `"08:00 · 10 UI"`.
+ *
+ * Existe separado de `horariosDaPosologia` porque responde outra pergunta: aquele diz **quando**,
+ * este diz **quando e quanto**. Numa lista onde a dose varia de um horário para o outro, a hora
+ * sozinha esconde exatamente a informação que faz a pessoa conferir a fichinha — e onde a dose é
+ * igual em todos, repetir o número em cada ficha seria ruído, então ele só aparece quando muda.
+ */
+export function horariosComDose(
+  schedule: PosologySchedule,
+  doseAmount: number,
+  doseUnit: PosologyUnit,
+): string[] {
+  const doses = dosesOfSchedule(schedule)
+    .slice()
+    .sort((a, b) => a.at.localeCompare(b.at));
+  const variaPorHorario = doses.some(
+    (dose) => dose.amount !== null && dose.amount !== doseAmount,
+  );
+  if (!variaPorHorario) return doses.map((dose) => dose.at);
+  return doses.map(
+    (dose) => `${dose.at} · ${formatarQuantidade(dose.amount ?? doseAmount, doseUnit)}`,
+  );
+}
+
+/**
  * A dose de um tratamento em uma linha. Quando os horários têm quantidades diferentes, o número
  * único seria mentira — então diz que varia, e a tela mostra horário a horário.
  */

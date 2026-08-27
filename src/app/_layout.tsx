@@ -44,7 +44,11 @@ export default function RootLayout() {
 
   // Splash continua visível (ver SplashOverlay) até fonte e migrations estarem prontas —
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
-  if (!fontsLoaded || !isDatabaseReady) return null;
+  //
+  // `indeciso` entra na mesma espera: o gate ainda está lendo ficha e consentimento, e desenhar
+  // qualquer tela aqui seria adivinhar. Sem isso, a de login aparecia por um quadro e sumia, o
+  // que lê como falha do app e não como carregamento.
+  if (!fontsLoaded || !isDatabaseReady || gate.step === 'indeciso') return null;
 
   // Texto de UI e Alert ficam aqui (camada de apresentação) — o hook só devolve o resultado.
   async function handleGoogleSignIn() {

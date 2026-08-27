@@ -10,8 +10,15 @@ import { ConsentRepository } from "@/data/repositories/consent-repository";
 import { PatientProfileRepository } from "@/data/repositories/patient-profile-repository";
 import { savePatientProfileDraft } from "@/hooks/use-patient-profile";
 
-/** Etapas obrigatórias antes do app propriamente dito, na ordem em que acontecem. */
-export type FirstRunStep = "login" | "consent" | "profile" | "app";
+/**
+ * Etapas obrigatórias antes do app propriamente dito, na ordem em que acontecem.
+ *
+ * `indeciso` é o estado antes de o SQLite ter sido lido: ainda não se sabe se há ficha e
+ * consentimento. Existe porque começar em `login` fazia a tela de login **piscar** por um quadro
+ * em toda abertura de quem já tinha passado por ela — o gate corrigia em seguida, mas o susto já
+ * tinha acontecido. Nenhuma tela desenha nesse estado; quem espera é o splash, que já está lá.
+ */
+export type FirstRunStep = "indeciso" | "login" | "consent" | "profile" | "app";
 
 /**
  * Resultado do login com Google. O que mostrar em cada caso é decisão da camada de
@@ -52,6 +59,8 @@ export function restartFirstRun(): void {
 
 /** Etapa anterior de cada passo — `null` quando não há retorno possível. */
 const PREVIOUS_STEP: Record<FirstRunStep, FirstRunStep | null> = {
+  // Ninguém volta para "ainda não sei": é estado de leitura, não etapa do fluxo.
+  indeciso: null,
   login: null,
   consent: "login",
   profile: "consent",
@@ -92,7 +101,7 @@ async function hasValidConsent(): Promise<boolean> {
  * @param isDatabaseReady só consulta o SQLite depois das migrations rodarem.
  */
 export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
-  const [step, setStep] = useState<FirstRunStep>("login");
+  const [step, setStep] = useState<FirstRunStep>("indeciso");
 
   /** Decide o destino depois do login (com ou sem conta), respeitando o que já foi cumprido. */
   const continueAfterLogin = useCallback(async () => {
@@ -127,10 +136,16 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
         if (ativo) await continueAfterLogin();
         return;
       }
-      if (!isSupabaseConfigured) return;
+      if (!isSupabaseConfigured) {
+        // Sai de `indeciso`: sem Supabase não há sessão a consultar, e a resposta já é final.
+        if (ativo) setStep("login");
+        return;
+      }
       // A sessão persiste sozinha entre aberturas (AsyncStorage, ver supabase-client.ts).
       const user = await new SupabaseAuthGateway().getCurrentUser();
-      if (user && ativo) await continueAfterLogin();
+      if (!ativo) return;
+      if (user) await continueAfterLogin();
+      else setStep("login");
     })();
     return () => {
       ativo = false;

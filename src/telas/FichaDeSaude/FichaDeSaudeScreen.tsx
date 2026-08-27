@@ -178,6 +178,9 @@ function EmergencyContactsField({
         onClose={closeAndResetDraft}
         title="Novo contato de emergência"
       >
+        {/* O popup empilha os filhos sem respiro próprio, então os três campos e o botão ficavam
+            colados uns nos outros — o mesmo `gap` que as outras folhas do app já usam. */}
+        <View style={styles.sheetBody}>
         <TextField
           label="NOME"
           placeholder="Nome do contato"
@@ -208,6 +211,7 @@ function EmergencyContactsField({
           onPress={handleSaveContact}
           disabled={!canSaveContact}
         />
+        </View>
       </BottomSheet>
     </View>
   );

@@ -150,6 +150,10 @@ export const styles = StyleSheet.create({
   addContactButton: {
     marginTop: spacing.sm,
   },
+  /** Respiro entre os campos do popup de contato — o BottomSheet não dá espaçamento próprio. */
+  sheetBody: {
+    gap: spacing.md,
+  },
   contactList: {
     gap: spacing.sm,
     marginTop: spacing.sm,
