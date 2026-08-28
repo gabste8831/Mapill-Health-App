@@ -15,18 +15,23 @@ export const styles = StyleSheet.create({
   primary: {
     backgroundColor: colors.primary,
   },
-  /**
-   * Sombra em vez de borda, mesma lógica do Card — mas com um contorno tênue por baixo.
-   *
-   * Só a sombra bastava sobre o fundo da tela; dentro de um `BottomSheet`, que já é uma superfície
-   * clara elevada, ela desaparecia e o botão sumia junto. "Cancelar" ficava um texto solto ao lado
-   * do "Confirmar", que é justamente onde ninguém pode hesitar sobre o que é clicável.
-   */
+  /** Sombra em vez de borda, mesma lógica do Card: lê como superfície, não como contorno. */
   outline: {
     backgroundColor: colors.surfaceContainerLowest,
+    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
+  },
+  /**
+   * O mesmo botão, mas dentro de um `BottomSheet` — onde a sombra desaparece.
+   *
+   * A folha já é uma superfície clara elevada, então uma sombra sutil sobre ela não se vê, e o
+   * botão sumia junto: "Cancelar" virava um texto solto ao lado do "Confirmar", justamente onde
+   * ninguém pode hesitar sobre o que é clicável. O contorno entra **só aqui**, e não no `outline`
+   * inteiro, porque sobre o fundo da tela a sombra funciona e a borda contraria a linguagem
+   * visual do app (sombra no lugar de borda, decisão de 21/08).
+   */
+  outlineEmFolha: {
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
   },
   text: {
     backgroundColor: "transparent",

@@ -70,6 +70,7 @@ export function TimeField({ label, required = false, value, onChange, error }: T
             <Button
               label="Cancelar"
               variant="outline"
+              emFolha
               style={styles.acao}
               onPress={() => setSheetOpen(false)}
             />

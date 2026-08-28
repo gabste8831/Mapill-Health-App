@@ -101,6 +101,7 @@ export function DateField({
             <Button
               label="Cancelar"
               variant="outline"
+              emFolha
               style={styles.acao}
               onPress={() => setSheetOpen(false)}
             />

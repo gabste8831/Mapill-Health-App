@@ -252,6 +252,7 @@ export function SeletorDeHorarios({
               <Button
                 label="Cancelar"
                 variant="outline"
+                emFolha
                 style={styles.acaoDaLinha}
                 onPress={handleRequestClose}
               />
@@ -340,6 +341,7 @@ export function SeletorDeHorarios({
               <Button
                 label="Cancelar"
                 variant="outline"
+                emFolha
                 style={styles.acaoDaLinha}
                 onPress={handleRequestClose}
               />
