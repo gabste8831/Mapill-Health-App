@@ -149,8 +149,14 @@ export function FormularioDeCompromissoScreen({
   const dateIso = parseDateInput(dateInput);
   const dateError = dateInput.length === 10 && dateIso === null ? "Data inválida." : undefined;
 
+  const time = parseTimeInput(timeInput);
+  const instante =
+    dateIso === null || time === null || dateError !== undefined
+      ? null
+      : new Date(paraInstante(dateIso, time));
+
   /**
-   * Data no passado **avisa, não bloqueia** (E8).
+   * Compromisso no passado **avisa, não bloqueia** (E8).
    *
    * Antes era erro e travava o salvar, o que impedia o caso legítimo de registrar a consulta que
    * já aconteceu — e esse é justamente o uso que o desfecho ("você foi?" e a anotação do que o
@@ -158,14 +164,17 @@ export function FormularioDeCompromissoScreen({
    *
    * O aviso continua porque a data passada também é o erro de digitação mais comum, o ano trocado.
    * Dizer sem impedir deixa quem errou perceber e quem quis registrar seguir.
+   *
+   * **É o instante completo, e não o dia.** Comparar só a data deixava passar a consulta de hoje
+   * de manhã marcada à tarde: `dateIso` é o de hoje, a seção de lembretes continuava aberta, e o
+   * app gravava um aviso para um horário que já tinha passado — uma notificação que nunca dispara.
+   * Enquanto o horário não foi preenchido não há o que julgar, e uma **data** anterior a hoje já
+   * basta, porque nenhum horário do dia a salvaria.
    */
-  const dataNoPassado = dateIso !== null && dateIso < todayIsoDate();
-
-  const time = parseTimeInput(timeInput);
-  const instante =
-    dateIso === null || time === null || dateError !== undefined
-      ? null
-      : new Date(paraInstante(dateIso, time));
+  const jaPassou =
+    instante !== null
+      ? instante < agora
+      : dateIso !== null && dateIso < todayIsoDate();
 
   const querAntecedencia = querAviso === "sim" && avisoAntes === "sim";
 
@@ -184,7 +193,15 @@ export function FormularioDeCompromissoScreen({
    * de ser cobrada. Perguntar "deseja ser lembrado?" de uma consulta da semana passada seria pedir
    * uma resposta que o app não tem como honrar.
    */
-  const aceitaLembrete = !dataNoPassado;
+  const aceitaLembrete = !jaPassou;
+
+  /**
+   * A pessoa configurou o lembrete e **depois** mudou a data para trás. As respostas continuam no
+   * estado, mas a seção sumiu — então elas não são mais visíveis nem editáveis, e `handleSubmit` as
+   * descarta. Guardar isso calado é o que o F5 fazia: dizer que o lembrete some é o que separa
+   * "o app decidiu por mim" de "o app me avisou".
+   */
+  const lembreteDescartado = jaPassou && querAviso === "sim";
 
   const avisoRespondido =
     !aceitaLembrete ||
@@ -264,25 +281,24 @@ export function FormularioDeCompromissoScreen({
             onFocus={scrollToFocusedInput}
           />
 
-          {/* Data e horário lado a lado: são a mesma resposta partida em dois campos, e separá-las
-              em linhas faria parecer que uma pode existir sem a outra. */}
-          <View style={styles.linhaDeQuando}>
-            <View style={styles.campoDeQuando}>
-              {/* Sem `minimo`: o passado é escolhível de propósito (E8), para registrar a consulta
-                  que já aconteceu. Quem avisa é a frase abaixo, não o bloqueio. */}
-              <DateField
-                label="DATA"
-                required
-                value={dateInput}
-                onChangeText={setDateInput}
-                onFocus={scrollToFocusedInput}
-                error={dateError}
-              />
-            </View>
-            <View style={styles.campoDeQuando}>
-              <TimeField label="HORÁRIO" required value={timeInput} onChange={setTimeInput} />
-            </View>
-          </View>
+          {/* Cada um na sua linha. Lado a lado eles couberam enquanto a data era só texto; com o
+              ícone de calendário dentro do campo (X7 de 26/08) sobrou metade da tela para um campo
+              que mostra `DD/MM/AAAA` e ainda abre um seletor, e os dois ficaram apertados demais
+              para o dedo. Que são a mesma resposta continua dito pelo bloco: mesmo cartão, uma
+              embaixo da outra, e a frase por extenso confirmando as duas juntas. */}
+
+          {/* Sem `minimo`: o passado é escolhível de propósito (E8), para registrar a consulta
+              que já aconteceu. Quem avisa é a frase abaixo, não o bloqueio. */}
+          <DateField
+            label="DATA"
+            required
+            value={dateInput}
+            onChangeText={setDateInput}
+            onFocus={scrollToFocusedInput}
+            error={dateError}
+          />
+
+          <TimeField label="HORÁRIO" required value={timeInput} onChange={setTimeInput} />
 
           {/* A data por extenso, e não só o que foi digitado: "dia 27" não denuncia nada, mas
               "sábado" denuncia na hora quem quis marcar na sexta e errou o número. */}
@@ -293,11 +309,21 @@ export function FormularioDeCompromissoScreen({
           {/* Avisa sem impedir: registrar a consulta que já aconteceu é uso legítimo — é para isso
               que existe o "você foi?" —, mas data passada também é o erro de digitação mais comum,
               o ano trocado. Dizer deixa quem errou perceber e quem quis registrar seguir. */}
-          {dataNoPassado ? (
-            <Text style={styles.aviso}>
-              Esse compromisso já passou. Ele entra na agenda como registro, e não haverá lembrete
-              — você poderá anotar o que aconteceu.
-            </Text>
+          {jaPassou ? (
+            <>
+              <Text style={styles.aviso}>
+                Esse compromisso já passou. Ele entra na agenda como registro, e não haverá lembrete
+                — você poderá anotar o que aconteceu.
+              </Text>
+              {/* Só quando havia mesmo algo configurado: dizer "o lembrete foi descartado" para
+                  quem nunca configurou um inventa uma perda que não houve. */}
+              {lembreteDescartado ? (
+                <Text style={styles.aviso}>
+                  O lembrete que você tinha configurado foi descartado. Se voltar a data para o
+                  futuro, é só configurar de novo.
+                </Text>
+              ) : null}
+            </>
           ) : null}
         </Card>
 

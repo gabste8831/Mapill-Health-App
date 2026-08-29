@@ -39,14 +39,6 @@ export const styles = StyleSheet.create({
     color: colors.onSecondaryContainer,
     backgroundColor: withOpacity(colors.secondaryContainer, 0.6),
   },
-  /** Data e hora lado a lado: são a mesma resposta partida em dois campos. */
-  linhaDeQuando: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  campoDeQuando: {
-    flex: 1,
-  },
   hint: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
