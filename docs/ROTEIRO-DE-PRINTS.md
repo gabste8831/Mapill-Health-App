@@ -1,10 +1,13 @@
-# Roteiro de prints para apresentação
+# Roteiro de prints
 
-> O que cadastrar, na ordem, para as telas ficarem cheias e realistas nos prints.
-> **~20 minutos de cadastro**, e depois é só fotografar.
+> O que cadastrar, na ordem, para as telas ficarem cheias e realistas nos prints — para o post no
+> LinkedIn e para a apresentação. **~20 minutos de cadastro**, e depois é só fotografar.
 >
-> Não é o roteiro de teste — aqui não há nada a validar. O objetivo é que cada tela conte uma
+> **Não é o roteiro de teste** — aqui não há nada a validar; isso é o
+> [`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md). O objetivo aqui é que cada tela conte uma
 > história: estoque acabando, dose atrasada, consulta marcada, tratamento com prazo.
+>
+> Faça depois de o roteiro de teste passar: print de tela com bug é print que não se usa.
 
 ## Antes
 
@@ -55,7 +58,7 @@ O cadastro mais completo de todos. É o que vai aparecer nos prints de detalhe.
   mais impressiona**, porque mostra o app com dado real
 - Receita: escolha um PDF qualquer → **RECEITA VÁLIDA ATÉ** `30/11/2026` → marque o aviso → `30 dias`
 
-**LEMBRETE** → `Alarme e notificação`
+**LEMBRETE** → `Os dois` *(o alarme na hora, a notificação depois)*
 
 **INFORMAÇÕES ADICIONAIS**
 - **COMO TOMAR**: marque `Em jejum` e `Com bastante água`
@@ -120,8 +123,7 @@ O cadastro mais "avançado" do app. Ótimo para explicar na defesa.
 
 Isso faz o **card de alerta** aparecer na Home, que é um print importante.
 
-**Remédios** → **Gerenciar estoques dos medicamentos** → na **Losartana**, toque em **"Recontar"**
-e digite `6`.
+**Remédios** → **Gerenciar estoques** → na **Losartana**, toque em **"Recontar"** e digite `6`.
 
 > 📸 **Print aqui:** a tela de Estoque, com a Losartana em vermelho no topo.
 
@@ -179,32 +181,63 @@ A Home vazia não diz nada. Ela precisa de movimento.
 
 ---
 
+## 10. A notificação chegando — o print que resume o app
+
+**O mais forte de todos para o LinkedIn.** É a promessa central do Mapill acontecendo: o app avisa
+na hora, com o celular fechado.
+
+**10.1** Cadastre dois remédios com o **mesmo horário**, daqui a **3 minutos**, lembrete **Alarme**:
+`Losartana Potássica 50mg` (dose `1`) e `Metformina 850mg` (dose `2`).
+
+**10.2** 🔴 **Feche o app** (recentes, deslize para fora) e deixe o celular na tela inicial.
+
+**10.3** Quando a notificação chegar, tire o print **antes de tocar nela**.
+
+> 📸 **Print aqui:** a notificação por cima da tela inicial, mostrando `HH:MM — 2 remédios`, os dois
+> nomes com as doses, e os botões **Tomei todas** e **Adiar 5 min**.
+>
+> É o print que explica sozinho o que o app faz — e mostra a decisão de **um aviso por horário**,
+> em vez de duas notificações competindo pela atenção.
+
+**10.4** Agora toque no **corpo** da notificação (não nos botões).
+
+> 📸 **Print aqui:** a tela **"Hora do remédio"**, com os dois remédios listados e Tomei/Pulei em
+> cada um. É onde a resposta parcial cabe — "tomei este, aquele não".
+
+---
+
 ## As telas que valem print
 
 Depois de tudo cadastrado:
 
+Em negrito, os cinco que eu levaria para um post — na ordem em que contam a história.
+
 | # | Tela | O que ela mostra |
 |---|---|---|
-| 1 | **Home** | progresso do dia, próxima dose, atrasadas, adesão da semana, alerta de estoque |
-| 2 | **Cadastro concluído** | a confirmação de tela cheia |
-| 3 | **Remédios** | seis cadastros com foto, dose, frequência e horários |
-| 4 | **Remédios** com busca ativa | digite `losar` — mostra a busca funcionando |
-| 5 | **Estoque** | previsões em dias, um em vermelho |
-| 6 | **Recontar** (popup) | a frase "Diferença de X a menos" |
-| 7 | **Calendário** | grade do mês com pontinhos |
-| 8 | **Calendário** com filtro | toque em "Compromissos" — mês limpo |
-| 9 | **Card do compromisso passado** | com "Compareceu" e a anotação |
-| 10 | **Cadastro de medicamento** | rolado até as seções opcionais reveladas |
-| 11 | **Popup de horários** | com as duas doses da insulina |
-| 12 | **Ajustes** | com sua foto e nome |
-| 13 | **Conta e dados** | as três seções |
-| 14 | **Termos** | com data e versão do aceite |
-| 15 | **Ficha de saúde** | preenchida, com os dois contatos |
+| 1 | **⭐ Notificação chegando** | o app avisando com o celular fechado — a promessa central |
+| 2 | **⭐ Home** | progresso do dia, próxima dose, atrasada em vermelho, dose "É AGORA" em verde, adesão da semana, alerta de estoque |
+| 3 | **⭐ Hora do remédio** | dois remédios do mesmo horário, com Tomei/Pulei em cada |
+| 4 | **⭐ Cadastro de medicamento** | rolado até as seções opcionais reveladas |
+| 5 | **⭐ Estoque** | previsões em dias, um em vermelho |
+| 6 | **Cadastro concluído** | a confirmação de tela cheia |
+| 7 | **Remédios** | seis cadastros com foto, dose, frequência e horários |
+| 8 | **Remédios** com busca ativa | digite `losar` — mostra a busca funcionando |
+| 9 | **Recontar** (popup) | a frase "Diferença de X a menos" |
+| 10 | **Calendário** | grade do mês com pontinhos |
+| 11 | **Calendário** com filtro | toque em "Compromissos" — mês limpo |
+| 12 | **Card do compromisso passado** | com "Compareceu" e a anotação |
+| 13 | **Popup de horários** | os dois campos numéricos, com as duas doses da insulina |
+| 14 | **Configurar lembrete** | as três opções, com "Os dois" ocupando a linha inteira |
+| 15 | **Ajustes** | com sua foto e nome |
+| 16 | **Conta e dados** | as três seções |
+| 17 | **Termos** | com data e versão do aceite |
+| 18 | **Ficha de saúde** | preenchida, com os dois contatos |
 
 ## Dicas para o print ficar bom
 
 - **Modo claro**, sempre. O app foi desenhado para ele.
-- **Silencie as notificações** antes — banner do WhatsApp no meio do print estraga.
+- **Silencie as notificações de outros apps** antes — banner do WhatsApp no meio do print estraga.
+  *(Silencie os outros, não o Mapill: o print nº1 depende da notificação dele aparecer.)*
 - A **barra de status** aparece nos prints: bateria cheia e sinal bom ficam melhores.
 - Para a Home, role até o topo antes de fotografar.
 - No Android: **Volume ↓ + Power** tira o print.

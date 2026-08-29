@@ -1,4 +1,4 @@
-# Plano de Desenvolvimento — Mapill
+﻿# Plano de Desenvolvimento — Mapill
 
 > Documento vivo. É o roteiro único de execução do app até a versão de defesa do TCC.
 > Regra de uso: **nunca começar um bloco novo sem o anterior estar com o "Pronto quando" 100% marcado.**
@@ -1123,13 +1123,7 @@ lista que o "verificado em device" dos blocos consulta.
 > e esperar o horário virar, porque horário passado nunca gera dose atrasada, e isso é o
 > comportamento correto.
 
-➡️ **Rodada de 27/08**: o roteiro focado do que mudou está em
-**[`ROTEIRO-DE-TESTE-2026-08-27.md`](./ROTEIRO-DE-TESTE-2026-08-27.md)** — 13 blocos, 35 a 45
-minutos, cobrindo os 36 achados fechados. O roteiro completo abaixo continua valendo para a
-validação final antes da defesa.
-
-> **Resultado da rodada de 27/08** (revisão completa em
-> [`REVISAO-2026-08-27.md`](./REVISAO-2026-08-27.md)). **Onze dos treze blocos passaram**, e nenhum
+> **Resultado da rodada de 27/08.** **Onze dos treze blocos passaram**, e nenhum
 > achado impede o uso do app — o que valida os itens **24, 25 e 28**, que estavam bloqueados pelo F1
 > desde 26/08. Saíram 22 itens novos: 7 de funcionalidade, 13 de interface e 2 esclarecimentos.
 >
@@ -1151,50 +1145,53 @@ validação final antes da defesa.
 > sem tratamento, travando o app antes de qualquer tela montar. É o achado de maior risco para a
 > defesa: app preso no azul, sem saída a não ser fechar.
 
-➡️ O passo a passo operacional está em
-**[`ROTEIRO-DE-TESTE-EM-APARELHO.md`](./ROTEIRO-DE-TESTE-EM-APARELHO.md)**, reescrito em 25/08
-para partir do zero, como usuário que nunca abriu o app: 22 blocos em 4 sessões. A tabela abaixo é
-o placar; o roteiro é como se joga, e a coluna **Onde** aponta o bloco.
+➡️ **O passo a passo operacional está em [`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md)** — o único
+roteiro do projeto, dividido em duas partes: a **Parte 1** é o que se valida agora (C1,
+notificações); a **Parte 2** é a passada completa antes da defesa, do zero, como quem nunca abriu o
+app. Os roteiros datados das rodadas anteriores foram removidos depois de cumpridos; o que eles
+apuraram está aqui, nesta seção e no log de progresso.
 
-| # | O que validar | Onde | Origem |
-|---|---|---|---|
-| 1 | Onboarding sem conta, com volta entre as etapas | 2 | A2 |
-| 2 | Onboarding com Google, incluindo login cancelado | 3 | A2 |
-| 3 | Abrir o app sem conta e cair direto na Home | 4.9, 20.6 | A2, 25/08 |
-| 4 | Ficha completa: contatos de emergência, edição, persistência | 4 | A2 |
-| 5 | Termos: versão aceita igual à vigente, texto sem promessa de nuvem | 5 | LGPD |
-| 6 | FAB nas três abas, com destino certo em cada uma | 6 | UI, 24/08 |
-| 7 | Relógio nativo dentro do `Modal` — **o de maior risco** | 7.5 | B2, 24/08 |
-| 8 | Horário duplicado barrado na digitação | 7.9 | B2 |
-| 9 | Revelação do opcional e rodapé dizendo o que falta | 7.12, 7.13 | B2 |
-| 10 | Antecedência de estoque maior que a duração dele | 7.16 | B2 |
-| 11 | Unidade ambígua: pergunta antes da quantidade (líquido, injeção) | 8.2 | B2 |
-| 12 | Fração aceita em ml e recusada em gota | 8.4, 9.3 | B2 |
-| 13 | "Só quando precisar": sem horário, sem início, e "Sempre disponível" | 9.4, 9.5 | B2 |
-| 14 | Estoque em unidade diferente da dose: pergunta em ml, e **sem previsão** | 9.6, 9.7, 18.4 | B4/B5, 25/08 |
-| 15 | Dose que varia por horário, e a previsão somando as doses reais | 10.5 a 10.8, 18.5 | B2 |
-| 16 | Dias da semana | 11 | B2 |
-| 17 | Ciclo: cadastrar no meio da cartela, pausa e erro de dias seguidos | 12 | B2 |
-| 18 | Preencher "de X em X horas" e o bloqueio de série que não cabe no dia | 13.3 a 13.8 | B2, 24/08 |
-| 19 | Data de início futura, e data pela metade travando o salvar | 14 | B2, 24/08 |
-| 20 | Anexos: foto, PDF, validade e aviso de renovação em cascata | 15.2 a 15.6 | B2 |
-| 21 | Popup de lembrete abre, escolhe e fecha (seção congelada) | 15.7 a 15.9 | B2 |
-| 22 | Listagem, busca sem acento, edição preenchida e exclusão lógica | 16 | B2, 23/08 |
-| 23 | Botão físico de voltar fechando o formulário | 16.8 | A1 |
-| 24 | Confirmar em lote, com os nomes listados no diálogo | 17.3 | B4, 24/08 |
-| 25 | Baixa de estoque pela dose, e correção retroativa devolvendo | 17.5, 17.8 | B4, 22/08 |
-| 26 | Tela de estoque: ordem por urgência e previsão correta | 18.1 a 18.5 | B5, 25/08 |
-| 27 | Recontagem grava diferença, reposição soma | 18.6 a 18.12 | B5, 25/08 |
-| 28 | Card de estoque baixo da Home leva pra tela nova | 18.15 | B5, 25/08 |
-| 29 | Cadastro de compromisso: texto livre, data passada, cascata de avisos | 19.2 a 19.13 | C3, 24/08 |
-| 30 | Calendário unificado: doses junto dos compromissos, projeção além de 30 dias | 19.15, 19.16 | C3, 24/08 |
-| 31 | Ação de dose só em hoje e passados, e nunca na projetada | 19.17 a 19.19 | C3, 24/08 |
-| 32 | Desfecho no mesmo dia do compromisso | 19.21 | C3, 25/08 |
-| 33 | Desfecho: apagar resposta, e editar sem perder o registro | 19.25, 19.26 | C3, 24/08 |
-| 34 | Vincular e desvincular conta sem perder dado | 20 | D3, 24/08 |
-| 35 | Apagar dados de saúde mantendo ficha e consentimento | 21 | D3, 24/08 |
-| 36 | Apagar tudo, voltar ao login e entrar com Google de novo | 22.1 a 22.7 | D3, 25/08 |
-| 37 | Nada volta depois de fechar e reabrir, e as fotos sumiram junto | 22.8, 22.9 | D3, 24/08 |
+A tabela abaixo é o placar do que já foi validado em aparelho.
+
+| # | O que validar | Origem |
+|---|---|---|
+| 1 | Onboarding sem conta, com volta entre as etapas | A2 |
+| 2 | Onboarding com Google, incluindo login cancelado | A2 |
+| 3 | Abrir o app sem conta e cair direto na Home | A2, 25/08 |
+| 4 | Ficha completa: contatos de emergência, edição, persistência | A2 |
+| 5 | Termos: versão aceita igual à vigente, texto sem promessa de nuvem | LGPD |
+| 6 | FAB nas três abas, com destino certo em cada uma | UI, 24/08 |
+| 7 | Relógio nativo dentro do `Modal` — **o de maior risco** | B2, 24/08 |
+| 8 | Horário duplicado barrado na digitação | B2 |
+| 9 | Revelação do opcional e rodapé dizendo o que falta | B2 |
+| 10 | Antecedência de estoque maior que a duração dele | B2 |
+| 11 | Unidade ambígua: pergunta antes da quantidade (líquido, injeção) | B2 |
+| 12 | Fração aceita em ml e recusada em gota | B2 |
+| 13 | "Só quando precisar": sem horário, sem início, e "Sempre disponível" | B2 |
+| 14 | Estoque em unidade diferente da dose: pergunta em ml, e **sem previsão** | B4/B5, 25/08 |
+| 15 | Dose que varia por horário, e a previsão somando as doses reais | B2 |
+| 16 | Dias da semana | B2 |
+| 17 | Ciclo: cadastrar no meio da cartela, pausa e erro de dias seguidos | B2 |
+| 18 | Preencher "de X em X horas" e o bloqueio de série que não cabe no dia | B2, 24/08 |
+| 19 | Data de início futura, e data pela metade travando o salvar | B2, 24/08 |
+| 20 | Anexos: foto, PDF, validade e aviso de renovação em cascata | B2 |
+| 21 | Popup de lembrete abre, escolhe e fecha (seção congelada) | B2 |
+| 22 | Listagem, busca sem acento, edição preenchida e exclusão lógica | B2, 23/08 |
+| 23 | Botão físico de voltar fechando o formulário | A1 |
+| 24 | Confirmar em lote, com os nomes listados no diálogo | B4, 24/08 |
+| 25 | Baixa de estoque pela dose, e correção retroativa devolvendo | B4, 22/08 |
+| 26 | Tela de estoque: ordem por urgência e previsão correta | B5, 25/08 |
+| 27 | Recontagem grava diferença, reposição soma | B5, 25/08 |
+| 28 | Card de estoque baixo da Home leva pra tela nova | B5, 25/08 |
+| 29 | Cadastro de compromisso: texto livre, data passada, cascata de avisos | C3, 24/08 |
+| 30 | Calendário unificado: doses junto dos compromissos, projeção além de 30 dias | C3, 24/08 |
+| 31 | Ação de dose só em hoje e passados, e nunca na projetada | C3, 24/08 |
+| 32 | Desfecho no mesmo dia do compromisso | C3, 25/08 |
+| 33 | Desfecho: apagar resposta, e editar sem perder o registro | C3, 24/08 |
+| 34 | Vincular e desvincular conta sem perder dado | D3, 24/08 |
+| 35 | Apagar dados de saúde mantendo ficha e consentimento | D3, 24/08 |
+| 36 | Apagar tudo, voltar ao login e entrar com Google de novo | D3, 25/08 |
+| 37 | Nada volta depois de fechar e reabrir, e as fotos sumiram junto | D3, 24/08 |
 
 ### 6.3 Offline-first
 
@@ -1312,7 +1309,7 @@ a partir do D1 é o que impede isso.
 | 2026-08-27 | Docs | Concluído | **`REVISAO-2026-08-26.md` removido.** Era registro de processo — a ponte entre o relato corrido do teste e a lista de tarefas. Cumprida a função (36 dos 37 achados fechados, 1 recusado com motivo), manter o arquivo significaria manter um retrato de um estado que não existe mais. O que sobrevive já está aqui: as decisões no log, o placar da rodada na §6.2 e o motivo da recusa do E6 no seu próprio bloco. As três referências ao arquivo foram substituídas pelo conteúdo que citavam, e não por links quebrados. O roteiro completo de 22 blocos **fica**: é o único que cobre o app inteiro, e a validação final antes da defesa precisa dele. |
 | 2026-08-28 | UI | Corrigido | **A correção do X9 tinha dado borda a todo botão `outline`, e a tela de login perdeu a linguagem visual.** Em 27/08, para resolver o "Cancelar" que sumia dentro do `BottomSheet`, adicionei `borderWidth` ao variant inteiro — e o variant é usado em nove lugares, sete deles sobre o fundo da tela, onde a sombra sempre funcionou. O resultado foi contrariar a decisão de 21/08 (sombra no lugar de borda) justamente na primeira tela que alguém vê. Corrigido na raiz: `outline` volta a ser só sombra, e nasce `emFolha` — uma prop que liga o contorno **apenas** onde a sombra desaparece, que são os quatro "Cancelar" dentro de popup (`SeletorDeHorarios`, `TimeField`, `DateField`). O erro foi tratar um problema de contexto como se fosse do componente. Varredura das demais bordas do design system: as que restam são de campo de entrada e de cartão, e essas delimitam onde se digita — não são superfície elevada, e a regra não se aplica a elas. |
 | 2026-08-28 | Marca | Concluído | **O app deixou de se apresentar como template do Expo.** Até aqui o ícone na gaveta era o "A" azul do `create-expo-app` e o nome embaixo dele era `mapill-app` — o identificador do projeto, não a marca. Splash, favicon e ícone adaptativo do Android também eram os do template. Nada disso exigiu arte nova: os SVGs vetoriais da marca já estavam em `assets/images/brand/` desde o começo, e todos os PNGs saíram deles por `scripts/gerar-icones.js`. O script existe em vez de seis arquivos soltos porque a marca é a fonte — mudou o SVG, roda de novo e tudo acompanha; à mão, os seis divergiriam com o tempo. Duas armadilhas apareceram no caminho e estão comentadas no script: o `resize` direto de um SVG encolhe a tela inteira, margem vazia inclusa, e a pílula saía com metade do tamanho pedido (resolvido com `trim` antes); e o ícone monocromático do Android 13+ precisa ser **silhueta**, porque o sistema pinta a forma com a cor do tema — a arte de duas cores deixaria a divisão da pílula vazada no meio do desenho. `assets/expo.icon/` foi removida por não ter mais referência. |
-| 2026-08-29 | Revisão | Concluído | **Rodada de 27/08 processada: 22 achados, organizados em [`REVISAO-2026-08-27.md`](./REVISAO-2026-08-27.md).** Onze dos treze blocos passaram, o que valida os itens 24, 25 e 28 da §6.2 — bloqueados pelo F1 desde 26/08. Sete achados de funcionalidade, treze de interface, dois esclarecimentos. Nenhum impedia o uso do app, mas os dois graves gravavam dado inválido no banco sem nada aparecer na tela. |
+| 2026-08-29 | Revisão | Concluído | **Rodada de 27/08 processada: 22 achados, organizados em REVISAO-2026-08-27.md (removido depois de cumprido — os achados estão neste log).** Onze dos treze blocos passaram, o que valida os itens 24, 25 e 28 da §6.2 — bloqueados pelo F1 desde 26/08. Sete achados de funcionalidade, treze de interface, dois esclarecimentos. Nenhum impedia o uso do app, mas os dois graves gravavam dado inválido no banco sem nada aparecer na tela. |
 | 2026-08-29 | Compromisso | Corrigido | **F5: "já passou" passou a olhar o instante, e não o dia.** A validação comparava `dateIso < todayIsoDate()`, então a consulta de hoje de manhã cadastrada à tarde não era considerada vencida: a seção LEMBRETES continuava aberta e o app gravava um `appointment_reminder` para um horário que já tinha passado — notificação que nunca dispara, ocupando linha e aparecendo em consultas futuras. Agora a base é o instante completo (data + horário); enquanto o horário não existe, uma data anterior a hoje já basta, porque nenhum horário do dia a salvaria. Junto veio o que faltava dizer: quando a data volta para trás **depois** de o lembrete ter sido configurado, o app avisa que ele foi descartado, em vez de descartar calado. Verificado em Node, 6 casos. |
 | 2026-08-29 | Cadastro | Corrigido | **F6: campo dependente não guarda mais a resposta de quando a pergunta era outra.** Achado do Gabriel na revisão, e é classe de bug, não caso isolado: a máscara do campo de dose escolhe entre inteiro e decimal pela unidade **vigente na digitação**, e só ali. Quem digitava `7,5` ml e trocava a forma para comprimido ficava com o `7,5` na tela sob uma unidade que não aceita fração — e nenhuma validação pegava, porque `hasDoseAmountError` só pergunta se é número maior que zero. O cadastro salvava sete comprimidos e meio. `handleFormChange` e o novo `handleDoseUnitChange` passam pela mesma limpeza (`descartarFracaoSeNaoCabe`), que apaga em vez de converter: `7,5 ml` não tem equivalente em comprimidos, e o único palpite honesto é nenhum. Mapeadas e fechadas as outras duas dependências da mesma família: sair de "prazo definido" apaga prazo e unidade, e desmarcar "a dose muda de um horário para o outro" apaga as doses por horário — nos dois casos o `handleSubmit` já ignorava os valores, então nada errado era salvo; o que se corrigiu foi a tela reexibir como resposta desta vez um número abandonado. |
 | 2026-08-29 | Abertura | Corrigido | **F7: a splash eterna tinha três causas somadas, todas do mesmo tipo — uma espera que podia nunca terminar.** (a) O `SplashOverlay` é quem chama `SplashScreen.hideAsync()`, e ele só existia no ramo `login` do `_layout`; quem já passou pelo onboarding cai direto em `app`, onde ninguém escondia a splash nativa — por isso o bug só aparecia ao **reabrir**, nunca na primeira instalação. (b) `useDatabaseReady` fazia `.then()` sem `.catch()`: uma migration que rejeitasse deixava `isDatabaseReady` em `false` para sempre, e o layout devolvia `null` eternamente. (c) O mesmo em `useFirstRunGate`, que ficaria preso em `indeciso`. As três esperas agora terminam de um jeito ou de outro, o overlay cobre os quatro passos, e o gatilho de `hideAsync` saiu de um `onLayout` (que pode não disparar em árvore restaurada) para um efeito de montagem. Era o achado de maior risco para a defesa: app preso no azul, sem saída a não ser fechar. |
@@ -1329,3 +1326,4 @@ a partir do D1 é o que impede isso.
 | 2026-08-29 | C1 | Concluído | **Permissão pedida no toque que escolhe o modo, nunca no onboarding.** É a única hora em que o diálogo chega com contexto — a pessoa acabou de dizer que quer ser avisada. Importa porque no Android a negativa **não se desfaz** por diálogo: uma recusa cedo demais custaria o recurso central do app para sempre. Negada, o app não insiste (o diálogo não abriria); mostra um bloco de atenção dizendo que a escolha está salva mas os avisos estão bloqueados, com atalho para as configurações do sistema. Reconsultada a cada volta ao primeiro plano, porque ela pode ser revogada fora do app. |
 | 2026-08-29 | C1 | Texto corrigido | **O rótulo do alarme deixou de prometer o que o Android não entrega.** Era "Toca como despertador, mesmo no silencioso"; virou "Toca alto e vibra, mesmo no silencioso". O que existe é canal de importância máxima com `bypassDnd` e vibração longa — não um despertador de tela cheia com som contínuo até desligar. A regra do bloco é inegociável e vale como argumento do Capítulo 4: o texto descreve o nível **entregue**, nunca o pretendido, porque num app de medicação uma promessa de segurança falsa é pior que a ausência do recurso. |
 | 2026-08-29 | C1 | Atenção na build | **Três permissões declaradas à mão no `app.json`.** O plugin do `expo-notifications` adiciona só `RECEIVE_BOOT_COMPLETED`; `POST_NOTIFICATIONS` (Android 13+) e `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM` (Android 12+) precisam ser declaradas. A do alarme exato é a que decide se o aviso chega **no** horário ou com atraso indeterminado — sem ela o C1 existiria mas não cumpriria a promessa. Como `app.json` não aceita comentário, o motivo fica registrado aqui. Mexer no `app.json` **exige build nova**: recarregar o Metro não basta. |
+| 2026-08-29 | Docs | Concluído | **A pasta `docs/` voltou a ter três arquivos.** Havia quatro roteiros de teste convivendo (26/08, 27/08, 29/08 e o completo de 22 blocos) mais a revisão de 27/08, e a pergunta "qual eu sigo agora?" deixou de ter resposta óbvia — que é o único jeito de um roteiro falhar antes de ser executado. Sobraram o plano, um **[`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md)** único em duas partes (Parte 1: o C1, para agora; Parte 2: a passada completa antes da defesa) e o **[`ROTEIRO-DE-PRINTS.md`](./ROTEIRO-DE-PRINTS.md)**, que serve ao post e à apresentação. Os datados foram removidos depois de cumpridos: o que eles apuraram já vive na §6.2 e neste log, e manter o documento seria manter o retrato de um estado que não existe mais. A coluna "Onde" da tabela da §6.2 saiu junto — ela apontava para blocos de um roteiro que deixou de existir, e número que não leva a lugar nenhum é pior que coluna nenhuma. O roteiro de prints ganhou a notificação e a tela do horário, e teve corrigidos dois rótulos que mudaram desde que foi escrito ("Alarme e notificação" → "Os dois"; "Gerenciar estoques dos medicamentos" → "Gerenciar estoques"). |
