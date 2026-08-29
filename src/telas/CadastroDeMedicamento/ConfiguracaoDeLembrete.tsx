@@ -64,6 +64,12 @@ type ConfiguracaoDeLembreteProps = {
   onClose: () => void;
   /** Abre os Termos de Uso. Quem navega é a tela — este popup não conhece rota. */
   onAbrirTermos: () => void;
+  /**
+   * Se a ajuda está aberta. Vive na tela, e não aqui, porque este componente desmonta quando se
+   * navega para os termos — e é justamente daí que a pessoa precisa voltar para o mesmo lugar.
+   */
+  ajudaAberta: boolean;
+  onAjudaToggle: (aberta: boolean) => void;
 };
 
 /**
@@ -83,6 +89,8 @@ export function ConfiguracaoDeLembrete({
   onChange,
   onClose,
   onAbrirTermos,
+  ajudaAberta,
+  onAjudaToggle,
 }: ConfiguracaoDeLembreteProps) {
   const dependeDoAparelho = value !== null && value !== "none";
 
@@ -95,9 +103,12 @@ export function ConfiguracaoDeLembrete({
           O alerta organiza a rotina. Ele avisa, e quem toma é você.
         </Text>
 
+        {/* "Os dois" fecha a grade ocupando a linha inteira: ele é a soma dos dois de cima, e ler
+            na largura toda logo abaixo deles é o que mostra isso sem precisar dizer. */}
         <OptionGroup
           layout="grade"
           alto
+          ultimaOcupaLinha
           value={value}
           options={opcoesDeModo(value)}
           onChange={onChange}
@@ -115,7 +126,11 @@ export function ConfiguracaoDeLembrete({
           </View>
         ) : null}
 
-        <Accordion title="Como funcionam os alertas" toggleLabel>
+        <Accordion
+          title="Como funcionam os alertas"
+          toggleLabel
+          defaultExpanded={ajudaAberta}
+          onToggle={onAjudaToggle}>
           <View style={styles.blocoDeAjuda}>
             <View style={styles.assuntoDeAjuda}>
               <Text style={styles.assuntoDeAjudaTitulo}>Na hora da dose</Text>

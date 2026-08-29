@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
 import { Alert, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -275,6 +275,15 @@ function temHorariosFixos(frequency: FrequencyKind | null): boolean {
   return frequency !== null && frequency !== "asNeeded";
 }
 
+/**
+ * Se o que está escrito tem parte decimal. Serve para decidir o que fazer com uma quantidade já
+ * digitada quando a unidade muda embaixo dela: `2` sobrevive à troca para comprimido, `7,5` não.
+ * Olha o texto cru, e não o número, porque é o texto que continua na tela.
+ */
+function temFracao(valor: string): boolean {
+  return /[.,]/.test(valor);
+}
+
 /** "o nome, a dose e os horários" — lista em português, com "e" antes do último. */
 function emLista(itens: string[]): string {
   if (itens.length <= 1) return itens.join("");
@@ -426,6 +435,27 @@ export function FormularioDeMedicamentoScreen({
   );
   const [isReminderSheetOpen, setReminderSheetOpen] = useState(false);
 
+  /**
+   * O estado do popup de lembrete que precisa **sobreviver à ida aos termos**. Mora aqui, e não
+   * dentro do popup, justamente porque o popup desmonta ao navegar: guardado lá, ele renasceria
+   * fechado e no começo do texto.
+   *
+   * `voltarParaLembrete` é a intenção pendente, consumida no foco seguinte; `ajudaDeAlertasAberta`
+   * é onde a leitura estava.
+   */
+  const [voltarParaLembrete, setVoltarParaLembrete] = useState(false);
+  const [ajudaDeAlertasAberta, setAjudaDeAlertasAberta] = useState(false);
+
+  // A volta dos termos é o retorno do foco. Consome a intenção no mesmo passo em que a atende,
+  // senão o popup reabriria em toda visita posterior à tela.
+  useFocusEffect(
+    useCallback(() => {
+      if (!voltarParaLembrete) return;
+      setVoltarParaLembrete(false);
+      setReminderSheetOpen(true);
+    }, [voltarParaLembrete]),
+  );
+
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
   const [attachmentUri, setAttachmentUri] = useState<string | null>(
     initialValue?.attachmentUri ?? null,
@@ -497,10 +527,72 @@ export function FormularioDeMedicamentoScreen({
    * Trocar a forma reescreve a unidade: "3 jatos de pomada" não é dose, é combinação sem sentido.
    * Onde a forma resolve a unidade sozinha, ela é derivada — isso não é chute, é consequência.
    * Onde há ambiguidade real (líquido, injeção, outra), volta a ficar em branco pra ser escolhida.
+   *
+   * **E reescreve a quantidade junto, quando ela deixa de caber na unidade nova.** A máscara do
+   * campo (`handleDoseAmountChange`) decide entre inteiro e decimal pela unidade **vigente na
+   * digitação**, e só ali: quem digitava `7,5` ml e depois trocava para comprimido ficava com o
+   * `7,5` intacto na tela, agora sob uma unidade que não aceita fração. Nenhuma validação pegava —
+   * `hasDoseAmountError` só pergunta se é número maior que zero — e o cadastro salvava sete
+   * comprimidos e meio. Limpar é a resposta certa, e não converter: `7,5 ml` não tem equivalente em
+   * comprimidos, então o único palpite honesto é nenhum.
    */
   function handleFormChange(nextForm: MedicationForm) {
     setForm(nextForm);
-    setDoseUnit(needsUnitChoice(nextForm) ? null : defaultUnitForMedicationForm(nextForm));
+    const proximaUnidade = needsUnitChoice(nextForm)
+      ? null
+      : defaultUnitForMedicationForm(nextForm);
+    setDoseUnit(proximaUnidade);
+    descartarFracaoSeNaoCabe(proximaUnidade);
+  }
+
+  /**
+   * Escolher a unidade à mão tem o mesmo problema da troca de forma, dentro da mesma forma: em
+   * Líquido, `7,5` ml é válido e `7,5` mg não é. Passa pela mesma limpeza.
+   */
+  function handleDoseUnitChange(unit: PosologyUnit) {
+    setDoseUnit(unit);
+    descartarFracaoSeNaoCabe(unit);
+  }
+
+  /**
+   * Apaga a quantidade quando ela tem fração e a unidade nova não aceita — em cima e nas doses por
+   * horário, que são o mesmo número repetido. Unidade `null` também apaga: sem unidade não há regra
+   * vigente, e deixar o número esperando por uma que talvez o invalide é o que criava o problema.
+   */
+  function descartarFracaoSeNaoCabe(unidade: PosologyUnit | null) {
+    if (unidade !== null && allowsFractionalDose(unidade)) return;
+    setDoseAmount((atual) => (temFracao(atual) ? "" : atual));
+    setDoseInputs((entradas) =>
+      entradas.map((entrada) => (temFracao(entrada.amount) ? { ...entrada, amount: "" } : entrada)),
+    );
+  }
+
+  /**
+   * Desmarcar "a dose muda de um horário para o outro" apaga as doses por horário. Elas só existem
+   * enquanto a variação está ligada — o `schedule` já as descarta com ela desligada —, e mantidas
+   * no estado voltariam preenchidas se a variação fosse remarcada, exibindo como escolha desta vez
+   * números que a pessoa abandonou. Os horários ficam: eles valem nos dois modos.
+   */
+  function handleDosesVariamChange(ativa: boolean) {
+    setDosesVariam(ativa);
+    if (!ativa) {
+      setDoseInputs((entradas) => entradas.map((entrada) => ({ ...entrada, amount: "" })));
+    }
+  }
+
+  /**
+   * Sair de "prazo definido" apaga o prazo. Os dois campos são filhos dessa escolha e só aparecem
+   * com ela; guardados, reapareceriam preenchidos se a pessoa voltasse atrás — mostrando como
+   * resposta desta vez um número que ela digitou antes de mudar de ideia. O `handleSubmit` já
+   * ignorava os valores fora do `fixed`, então nada de errado era salvo; o que se corrige aqui é a
+   * tela afirmar algo que ninguém respondeu.
+   */
+  function handleDurationChange(nextDuration: DurationKind) {
+    setDuration(nextDuration);
+    if (nextDuration !== "fixed") {
+      setDurationAmount("");
+      setDurationUnit(null);
+    }
   }
 
   /** Mudar a quantidade de doses recomeça a lista: os horários antigos eram de outra posologia. */
@@ -1049,7 +1141,7 @@ export function FormularioDeMedicamentoScreen({
                 label="COMO A DOSE É MEDIDA?"
                 value={doseUnit}
                 options={unitOptions}
-                onChange={(unit: PosologyUnit) => setDoseUnit(unit)}
+                onChange={handleDoseUnitChange}
               />
               {form !== null && DICA_DA_UNIDADE[form] ? (
                 <Dica>{DICA_DA_UNIDADE[form] as string}</Dica>
@@ -1080,7 +1172,7 @@ export function FormularioDeMedicamentoScreen({
           {doseUnit !== null && parsedDoseAmount > 0 && doseInputs.length > 1 ? (
             <Checkbox
               checked={dosesVariam}
-              onChange={setDosesVariam}
+              onChange={handleDosesVariamChange}
               label="A dose muda de um horário para o outro"
               accessibilityLabel="A dose muda de um horário para o outro"
             />
@@ -1231,7 +1323,7 @@ export function FormularioDeMedicamentoScreen({
                     doseUnit !== null && parsedDoseAmount > 0
                       ? {
                           ativa: dosesVariam,
-                          onChange: setDosesVariam,
+                          onChange: handleDosesVariamChange,
                           unitNoun: UNIT_NOUNS[doseUnit],
                           defaultAmount: doseAmount,
                           aceitaFracao: doseAceitaFracao,
@@ -1281,7 +1373,7 @@ export function FormularioDeMedicamentoScreen({
             label="QUAL O TEMPO DO TRATAMENTO?"
             value={duration}
             options={frequency === "asNeeded" ? DURATION_OPTIONS_SEM_AGENDA : DURATION_OPTIONS}
-            onChange={setDuration}
+            onChange={handleDurationChange}
           />
 
           {/* Número + unidade porque "por 90 dias" não é como ninguém pensa um tratamento de
@@ -1489,11 +1581,19 @@ export function FormularioDeMedicamentoScreen({
                   quem chegava nele não sabia se era outra foto do remédio ou outra coisa. */}
               <Text style={styles.fieldLabel}>RECEITA MÉDICA</Text>
 
-              {/* Duas portas de entrada porque são duas realidades: quem tem o papel na mão
-                  fotografa, e quem recebeu a receita digital já tem o PDF salvo. Uma só forçaria
-                  metade das pessoas a fotografar a tela do próprio celular. */}
+              {/* Um gesto só, igual ao da foto da caixa logo acima: toca-se no quadrado (ou no
+                  rótulo) e o popup pergunta de onde vem — câmera, galeria ou arquivo. Antes eram
+                  dois links lado a lado que já decidiam a origem antes da pergunta, e as duas
+                  seções da mesma tela pediam a mesma coisa de jeitos diferentes. Aqui a câmera
+                  entra junto: quem tem o papel na mão fotografa, e antes precisava fotografar
+                  primeiro pela galeria. */}
               <View style={styles.photoRow}>
-                <View style={attachmentUri ? styles.photoFrame : styles.photoPlaceholder}>
+                <Pressable
+                  style={attachmentUri ? styles.photoFrame : styles.photoPlaceholder}
+                  onPress={() => setOrigemPendente("receita")}
+                  disabled={prescriptionPhoto.isPicking || prescriptionFile.isPicking}
+                  accessibilityRole="button"
+                  accessibilityLabel="Anexo da receita médica">
                   {attachmentUri !== null && attachmentKind === "image" ? (
                     <FotoLocal uri={attachmentUri} style={styles.photo} />
                   ) : (
@@ -1503,36 +1603,22 @@ export function FormularioDeMedicamentoScreen({
                       color={attachmentUri === null ? colors.onSurfaceVariant : colors.primary}
                     />
                   )}
-                </View>
+                </Pressable>
                 <View style={styles.photoTextGroup}>
                   {attachmentUri === null ? (
-                    <View style={styles.acoesDeAnexo}>
-                      <Pressable
-                        onPress={() => setOrigemPendente("receita")}
-                        disabled={prescriptionPhoto.isPicking}
-                        accessibilityRole="button">
-                        {/* "Tirar da galeria" lia como "tirar foto" e prometia abrir a câmera,
-                            que não é o que acontece — o seletor é o da galeria. */}
-                        <Text style={styles.photoAddLabel}>Escolher da galeria</Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={escolherArquivoDaReceita}
-                        disabled={prescriptionFile.isPicking}
-                        accessibilityRole="button">
-                        <Text style={styles.photoAddLabel}>Escolher arquivo</Text>
-                      </Pressable>
-                    </View>
+                    <Pressable
+                      onPress={() => setOrigemPendente("receita")}
+                      disabled={prescriptionPhoto.isPicking || prescriptionFile.isPicking}
+                      accessibilityRole="button">
+                      <Text style={styles.photoAddLabel}>Adicionar arquivo</Text>
+                    </Pressable>
                   ) : (
                     // Anexado, as ações são **trocar** e remover. Antes só havia remover: quem
                     // anexou o arquivo errado precisava apagar para poder escolher de novo, e no
                     // meio disso perdia a validade e o aviso de renovação já preenchidos.
                     <View style={styles.acoesDeAnexo}>
                       <Pressable
-                        onPress={() =>
-                          attachmentKind === "document"
-                            ? escolherArquivoDaReceita()
-                            : setOrigemPendente("receita")
-                        }
+                        onPress={() => setOrigemPendente("receita")}
                         accessibilityRole="button">
                         <Text style={styles.photoAddLabel}>Alterar anexo</Text>
                       </Pressable>
@@ -1707,20 +1793,40 @@ export function FormularioDeMedicamentoScreen({
         visible={isReminderSheetOpen}
         value={reminderMode}
         onChange={setReminderMode}
-        onClose={() => setReminderSheetOpen(false)}
-        // Fecha o popup antes de navegar: deixá-lo aberto por baixo dos termos faria ele
-        // reaparecer sozinho na volta, sobre um cadastro que a pessoa já tinha deixado de lado.
+        onClose={() => {
+          setReminderSheetOpen(false);
+          setAjudaDeAlertasAberta(false);
+        }}
+        ajudaAberta={ajudaDeAlertasAberta}
+        onAjudaToggle={setAjudaDeAlertasAberta}
+        /* Fecha o popup para navegar — dois modais empilhados no Android é caminho para tela
+           travada —, mas **guarda que ele estava aberto** e reabre na volta, com o acordeão no
+           mesmo estado. Quem toca em "ler os termos" dentro da ajuda está no meio de uma leitura;
+           devolver para o formulário nu perde o lugar e obriga a refazer dois toques para achar
+           onde parou. */
         onAbrirTermos={() => {
           setReminderSheetOpen(false);
+          setVoltarParaLembrete(true);
           router.push("/termos");
         }}
       />
 
+      {/* "Anexo da receita" e não "Foto da receita": desde que o arquivo virou uma das origens, o
+          título prometia menos do que o popup oferece. */}
       <EscolhaDeOrigemDaFoto
         visible={origemPendente !== null}
-        title={origemPendente === "receita" ? "Foto da receita" : "Foto da caixa"}
+        title={origemPendente === "receita" ? "Anexo da receita" : "Foto da caixa"}
         onClose={() => setOrigemPendente(null)}
         onEscolher={(origin) => void escolherOrigem(origin)}
+        // Só a receita aceita arquivo: PDF da caixa do remédio não existe.
+        onEscolherArquivo={
+          origemPendente === "receita"
+            ? () => {
+                setOrigemPendente(null);
+                void escolherArquivoDaReceita();
+              }
+            : undefined
+        }
       />
     </SafeAreaView>
   );
