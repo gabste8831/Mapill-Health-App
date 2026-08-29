@@ -1,0 +1,73 @@
+/**
+ * O que o app precisa do sistema operacional para avisar na hora da dose.
+ *
+ * O domínio define o contrato e a infraestrutura o cumpre (§2.6.1 — inversão de dependência).
+ * Nenhum use-case importa `expo-notifications`; quem o importa é `src/notifications/`, e só.
+ *
+ * Existe também para deixar o app testável fora do aparelho: a regra de *quando* avisar é
+ * aritmética de datas, e verificá-la não pode depender de ter um Android na mesa.
+ */
+
+/** Resposta do sistema ao pedido de permissão. */
+export type NotificationPermission =
+  | "concedida"
+  /** Ainda não foi pedida — dá para perguntar. */
+  | "naoPedida"
+  /**
+   * Negada. No Android **o diálogo não aparece de novo** depois da primeira recusa, então este
+   * estado é definitivo pela via normal: só as configurações do sistema revertem. Insistir num
+   * diálogo que nunca mais abre seria fingir que há saída.
+   */
+  | "negada";
+
+/**
+ * Um aviso a ser entregue num instante futuro.
+ *
+ * É **por horário**, e não por dose: quem toma quatro remédios às 08:00 receberia quatro avisos
+ * idênticos em sequência, e o quarto ensina a ignorar o primeiro. O aviso lista o que há para
+ * tomar naquele horário, e as ações rápidas se ajustam à quantidade.
+ */
+export type AvisoDeDose = {
+  /**
+   * Identifica o horário, não a dose. Deriva do instante agendado, então reagendar o mesmo
+   * horário produz o mesmo id — o que torna o cancelamento idempotente.
+   */
+  chave: string;
+  /** Quando tocar. */
+  quando: Date;
+  titulo: string;
+  corpo: string;
+  /** Ids das doses cobertas por este aviso — é o que a tela do horário abre. */
+  doseScheduleIds: string[];
+  /**
+   * `alarm` toca alto e atravessa o Não Perturbe; `notification` respeita o silencioso. Os dois
+   * são heads-up: a diferença está no canal do Android, e ela é real (ver `canais.ts`).
+   */
+  modo: "alarm" | "notification";
+  /** Já foi adiado uma vez? Governa se o botão de adiar aparece (trava de 1 por horário). */
+  jaAdiado: boolean;
+};
+
+export interface NotificationGateway {
+  /** Estado atual, sem pedir nada. Usado para decidir se o app mostra aviso de permissão. */
+  consultarPermissao(): Promise<NotificationPermission>;
+  /**
+   * Pede a permissão. Chamado **no momento em que o paciente ativa** um lembrete, nunca no
+   * onboarding: pedido sem contexto é pedido negado, e no Android a negativa não se desfaz.
+   */
+  pedirPermissao(): Promise<NotificationPermission>;
+  /** Abre as configurações do app no sistema — a única saída depois de uma negativa. */
+  abrirConfiguracoesDoSistema(): Promise<void>;
+
+  agendar(aviso: AvisoDeDose): Promise<void>;
+  /**
+   * Apaga **tudo** que o app agendou e reagenda do zero.
+   *
+   * Parece grosseiro e é deliberado: o pior defeito possível aqui é o alarme órfão — lembrete de
+   * um remédio que a pessoa já parou de tomar. Cancelar tudo e reagendar é idempotente, e
+   * idempotência é a única forma barata de garantir que nenhum sobreviva a uma edição.
+   */
+  cancelarTudo(): Promise<void>;
+  /** Quantos avisos estão pendentes no sistema. Serve ao diagnóstico, não à regra. */
+  contarPendentes(): Promise<number>;
+}
