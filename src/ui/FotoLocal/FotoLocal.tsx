@@ -1,6 +1,8 @@
 import { Image } from "expo-image";
 import type { StyleProp, ImageStyle } from "react-native";
 
+import { colors } from "@/shared/theme";
+
 export type FotoLocalProps = {
   /** Caminho no diretório de documentos do app, vindo de `persistPickedFile`. */
   uri: string;
@@ -26,10 +28,20 @@ export function FotoLocal({ uri, style }: FotoLocalProps) {
   return (
     <Image
       source={{ uri }}
-      style={style}
+      // O cinza vem antes do `style` de quem chama, que pode sobrescrevê-lo — é só o piso para o
+      // quadrado nunca ficar transparente enquanto a imagem carrega.
+      style={[{ backgroundColor: colors.surfaceContainer }, style]}
       contentFit="cover"
       cachePolicy="none"
       recyclingKey={uri}
+      /**
+       * O quadrado fica cinza enquanto a imagem não chega, em vez de vazio. Entre escolher a foto e
+       * ela aparecer há a cópia do arquivo para o diretório do app, e nesse intervalo o quadrado em
+       * branco lê como "não funcionou" — foi o que fez a miniatura parecer quebrada numa vez e
+       * funcionar na outra, conforme a cópia terminasse antes ou depois do render.
+       */
+      placeholderContentFit="cover"
+      transition={150}
     />
   );
 }

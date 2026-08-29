@@ -16,6 +16,13 @@ export type AccordionProps = {
   tone?: AccordionTone;
   /** Rótulo ao lado da seta. Sem ele fica só a seta, pra blocos cuja função já é óbvia. */
   toggleLabel?: boolean;
+  /**
+   * Estado inicial. Existe para quem sai da tela e volta: sem isso o bloco renasce fechado, e quem
+   * foi ler os termos no meio de um texto longo volta para o começo dele.
+   */
+  defaultExpanded?: boolean;
+  /** Avisa a cada abre/fecha, para o pai lembrar onde a pessoa estava. */
+  onToggle?: (isExpanded: boolean) => void;
 };
 
 const TIMING = { duration: 260, easing: Easing.out(Easing.cubic) };
@@ -24,8 +31,15 @@ const TIMING = { duration: 260, easing: Easing.out(Easing.cubic) };
  * Título sempre visível, conteúdo sob demanda. Recolhido por padrão: o título é o que precisa
  * ser lido de relance; o texto inteiro é para quem quiser se aprofundar.
  */
-export function Accordion({ title, children, tone = "claro", toggleLabel = false }: AccordionProps) {
-  const [isExpanded, setExpanded] = useState(false);
+export function Accordion({
+  title,
+  children,
+  tone = "claro",
+  toggleLabel = false,
+  defaultExpanded = false,
+  onToggle,
+}: AccordionProps) {
+  const [isExpanded, setExpanded] = useState(defaultExpanded);
   const isBlue = tone === "azul";
   const foreground = isBlue ? colors.onPrimary : colors.primary;
 
@@ -33,11 +47,15 @@ export function Accordion({ title, children, tone = "claro", toggleLabel = false
    * Animar a altura de 0 até a real é o que faz o bloco "descer". Antes o conteúdo entrava com
    * fade: a altura saltava de uma vez e só a opacidade animava, o que lê como pulo. O conteúdo
    * fica sempre montado e é recortado por `overflow: hidden`.
+   *
+   * Enquanto a medida não chega, `null` — e aí o clipe não impõe altura nenhuma, deixando o
+   * conteúdo se medir sozinho. Fixar `0` antes da primeira medição faria o bloco abrir vazio no
+   * primeiro toque, que é o que acontecia quando o conteúdo montava depois do layout.
    */
-  const [contentHeight, setContentHeight] = useState(0);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
 
   const bodyStyle = useAnimatedStyle(() => ({
-    height: withTiming(isExpanded ? contentHeight : 0, TIMING),
+    height: contentHeight === null ? undefined : withTiming(isExpanded ? contentHeight : 0, TIMING),
     opacity: withTiming(isExpanded ? 1 : 0, TIMING),
   }));
 
@@ -54,6 +72,7 @@ export function Accordion({ title, children, tone = "claro", toggleLabel = false
   function toggle() {
     const next = !isExpanded;
     setExpanded(next);
+    onToggle?.(next);
   }
 
   return (
@@ -79,9 +98,13 @@ export function Accordion({ title, children, tone = "claro", toggleLabel = false
         )}
       </Pressable>
 
-      <Animated.View style={[styles.bodyClip, bodyStyle]}>
-        {/* Absoluto pra medir a altura natural: dentro de um pai com altura 0 o conteúdo seria
-            comprimido e a medida sairia errada. */}
+      {/* O clipe recebe a altura animada; o conteúdo mede a si mesmo em posição absoluta, para que
+          um pai de altura 0 não o comprima e estrague a medida.
+
+          `collapsable={false}` é o que faz o `ScrollView` pai enxergar a mudança: sem ele o Android
+          funde a árvore e o `contentSize` do scroll não é recalculado quando o bloco cresce — a
+          rolagem descia mas não subia mais, que era o travamento em "Como funcionam os alertas". */}
+      <Animated.View style={[styles.bodyClip, bodyStyle]} collapsable={false}>
         <View style={styles.bodyMeasure} onLayout={measureContent}>
           {children}
         </View>
