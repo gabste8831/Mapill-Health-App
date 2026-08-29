@@ -642,13 +642,23 @@ para quem já instalou.
 ---
 
 **C1 está pronto quando**
-- [ ] Resultado do spike documentado e nível (A/B/C) escolhido explicitamente.
+- [x] Resultado do spike documentado e nível (A/B/C) escolhido explicitamente. — **nível B**, com o
+      A descartado por restrição de plataforma (`USE_FULL_SCREEN_INTENT`, Android 14+).
 - [ ] Notificação dispara com o app **fechado**, em device Android físico (não só emulador).
-- [ ] Os 10 gatilhos de reagendamento (C1.4) testados um a um, sem alarme órfão.
-- [ ] Checklist de borda (C1.8) percorrido.
-- [ ] Permissão revogada gera aviso visível na Home.
-- [ ] Nenhum `import` de `expo-notifications` fora de `src/notifications/`.
-- [ ] Texto da UI condiz com o nível realmente entregue.
+      — ⚠️ **falhou em 29/08**: o alarme não tocou (canal sem `sound` e sem categoria de
+      despertador). Corrigido; aguarda reteste.
+- [x] Os 10 gatilhos de reagendamento (C1.4) testados um a um, sem alarme órfão. — o bloco 5 do
+      roteiro passou: excluir, mudar horário e desligar o lembrete, os três com o app fechado.
+- [ ] Checklist de borda (C1.8) percorrido. — não testado ainda (bloco 9 do roteiro).
+- [ ] Permissão revogada gera aviso visível na Home. — o aviso existe **no cadastro**; na Home
+      ainda não.
+- [x] Nenhum `import` de `expo-notifications` fora de `src/notifications/`. — verificado por
+      varredura.
+- [x] Texto da UI condiz com o nível realmente entregue. — "toca alto e vibra", e não "como
+      despertador"; o que depende de permissão à parte é dito e ensinado.
+
+> **O que falta, em uma frase:** o alarme tocar de verdade em aparelho, e as duas perguntas do
+> spike que só o tempo responde — sobreviver ao reboot e à economia de bateria do fabricante.
 
 **Rastreabilidade**: §2.8 (agendamento nativo, independente do app estar aberto — é o argumento
 central do artigo sobre confiabilidade do lembrete).
@@ -1114,6 +1124,50 @@ iOS é hipótese. Não prometer iOS na defesa; citar como trabalho futuro.
 
 Tudo que já está escrito e nunca foi executado em device. **Marcar aqui ao testar** — é esta
 lista que o "verificado em device" dos blocos consulta.
+
+---
+
+#### ⏳ Em aberto agora: reteste do C1 (rodada de 29/08)
+
+A primeira execução da Parte 1 do [`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md) rendeu sete
+correções, três delas de defeito real que só o aparelho revelaria. **O bloco não fecha até o
+reteste**, e ele é curto: só o que mudou.
+
+| Bloco | Status | O que refazer |
+|---|---|---|
+| **1 — Permissão** | ⚠️ refazer | O bloco amarelo passou a trazer o passo a passo de como religar. Conferir se o caminho descrito bate com o que o aparelho mostra. |
+| **2 — App fechado** | 🔴 refazer | Falhou por completo: o alarme não tocou. Faltava `sound` no canal e a categoria de despertador (`usage: ALARM`). É o item que decide se o C1 existe. |
+| **3 — Mesmo horário** | ✅ passou | Não mexi na lógica. Só o visual dos botões da tela do horário mudou. |
+| **4 — Botões** | 🔴 refazer | Toque repetido repetia a resposta inteira. Refazer com atenção ao 4.3 (adiar **uma** vez só gera **um** lembrete). |
+| **5 — Alarme órfão** | ✅ passou | Intocado. |
+| **6 — App aberto** | ✅ passou | Intocado. |
+| **7 — Alarme × Notificação** | 🔴 refazer | O alarme não tocava. Agora existe também o pedido de acesso ao Não Perturbe, que é permissão à parte. |
+| **8 — Sobrevivência** 🔬 | ⏸️ não testado | Depende do alarme funcionar. É o que fecha o spike: reboot, economia de bateria e dimensionamento da janela. |
+| **9 — Casos de borda** | ⏸️ não testado | Fuso da madrugada, dose confirmada antes do horário, atraso na Home. |
+
+**Fora do roteiro, também vale conferir** — são correções que nasceram da mesma revisão:
+
+- A miniatura do anexo aparece **na hora**, e não branca (era `copy()` sem `await`).
+- O teclado fecha ao tocar fora do campo e ao arrastar a lista, em qualquer formulário.
+- Definir horário virou **uma etapa**: campo digitável com ícone de relógio ao lado.
+- Na Home, a dose vira **ATRASADA** sozinha 30 minutos depois do horário, com a tela aberta.
+
+⚠️ **Exige build nova e desinstalar a anterior**: os canais de notificação subiram para `v2`, e
+canal já criado fica congelado no aparelho — som e importância não mudam por atualização.
+
+**Falta implementar, e não só testar** — item do "pronto quando" do C1 que segue aberto:
+
+- **Aviso de permissão revogada na Home.** Hoje ele existe só no popup de lembrete, ou seja, só
+  aparece para quem entra no cadastro. Quem revogou a permissão nas configurações e não volta lá
+  continua achando que será avisado — que é exatamente o silêncio que a decisão nº11.5 proíbe. O
+  card precisa nascer na Home enquanto houver prescrição que dependa da permissão.
+
+**Adiado com decisão registrada:** o botão `+` no centro da barra de navegação (as abas usam
+`NativeTabs`, e trocar por barra própria devolveria o risco do Material You resolvido em 23/08) e o
+sininho de pendentes com contagem — os dois são melhoria, não defeito, e entram depois de o C1
+fechar.
+
+---
 
 > **Rodada de 26/08.** Primeira execução completa. Passaram os itens **1 a 13, 16, 17, 19 a 22 e
 > 29 a 37**; o **7** (relógio nativo, o de maior risco técnico do projeto) abre e funciona, com

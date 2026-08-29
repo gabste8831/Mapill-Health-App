@@ -36,13 +36,23 @@ delas **mesmo quando passarem**: elas fecham formalmente o C1 no plano.
 O bloco de **maior risco técnico do projeto**, e a promessa central do Mapill: o app que avisa na
 hora, mesmo fechado.
 
+> 🔁 **Reteste de 29/08.** A primeira execução rendeu sete correções. **Refaça só os blocos 1, 2, 4
+> e 7** — os blocos 3, 5 e 6 passaram e a lógica deles não mudou. Os blocos 8 e 9 seguem por fazer,
+> e o 8 depende do alarme funcionar.
+>
+> Além dos blocos, confira de passagem: a miniatura do anexo aparece **na hora** (não branca), o
+> teclado fecha ao tocar fora do campo, definir horário virou **uma etapa** (campo digitável com
+> relógio ao lado), e na Home a dose vira **ATRASADA** sozinha 30 min depois do horário.
+
 ## Antes de começar
 
 ⚠️ **Build nova é obrigatória.** O `app.json` ganhou três permissões (`POST_NOTIFICATIONS`,
 `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`), e permissão não entra por recarga do Metro.
 
-⚠️ **Desinstale o Mapill anterior antes de instalar.** As permissões são concedidas na instalação,
-e o Android guarda decisões antigas.
+⚠️ **Desinstale o Mapill anterior antes de instalar.** Dois motivos que se somam: as permissões são
+concedidas na instalação e o Android guarda decisões antigas; e os canais de notificação subiram
+para `v2` — um canal já criado fica **congelado** no aparelho, e som e importância não mudam por
+atualização. Instalar por cima manteria o alarme mudo mesmo com a correção.
 
 ⚠️ **Precisa de aparelho físico.** Emulador não serve para os blocos 2, 5 e 8: o que está em jogo é
 o comportamento do sistema com o app fechado e sob economia de bateria.
