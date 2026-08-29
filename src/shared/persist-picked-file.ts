@@ -29,7 +29,20 @@ export function persistPickedFile(
   if (Platform.OS === "web") return pickedUri;
 
   const destination = new File(Paths.document, `${prefix}-${Date.now()}.${extension}`);
-  new File(pickedUri).copy(destination);
+  /**
+   * `copySync`, e não `copy`.
+   *
+   * `copy()` devolve uma `Promise`, e esta função é síncrona: sem `await`, ela retornava a URI de
+   * um arquivo que ainda estava sendo escrito. Quem recebia a URI mandava exibir na hora e o
+   * `expo-image` lia um arquivo vazio — a miniatura aparecia **branca**. Salvando e voltando à
+   * tela, a cópia já tinha terminado e a mesma URI mostrava a foto, o que fazia o defeito parecer
+   * de cache quando era de corrida.
+   *
+   * A versão síncrona é a correta aqui: a chamada já acontece depois do picker, fora de qualquer
+   * caminho crítico de rolagem, e o arquivo é de dezenas de KB — o custo é imperceptível, e em
+   * troca quem recebe a URI recebe um arquivo pronto para ler.
+   */
+  new File(pickedUri).copySync(destination);
   if (replacing) deletePersistedFile(replacing);
   return destination.uri;
 }
