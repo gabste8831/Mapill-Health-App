@@ -5,6 +5,7 @@ import { IntakeLogRepository } from "@/data/repositories/intake-log-repository";
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
+import { resolvesDose } from "@/domain/entities/intake-log";
 import { RegisterIntake } from "@/domain/use-cases/register-intake";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { ACAO_ADIAR, ACAO_TOMEI, MINUTOS_DE_ADIAMENTO } from "./acoes";
@@ -29,13 +30,30 @@ import { reagendarAvisosDeDose } from "./reagendar-avisos";
 export async function confirmarDosesDoAviso(doseScheduleIds: string[]): Promise<void> {
   const doseScheduleRepository = new DoseScheduleRepository();
   const prescriptionRepository = new PrescriptionRepository();
-  const registerIntake = new RegisterIntake(new IntakeLogRepository(), new InventoryRepository());
+  const intakeLogRepository = new IntakeLogRepository();
+  const registerIntake = new RegisterIntake(intakeLogRepository, new InventoryRepository());
 
   const agora = new Date().toISOString();
 
   for (const doseScheduleId of doseScheduleIds) {
     const doseSchedule = await doseScheduleRepository.findById(doseScheduleId);
     if (doseSchedule === null) continue;
+
+    /**
+     * **Já respondida não é confirmada de novo.**
+     *
+     * No Android a notificação não some sozinha ao tocar num botão de ação: ela fica na bandeja, e
+     * cada toque dispara esta função outra vez. Sem esta guarda, cinco toques em "Tomei" gravavam
+     * cinco ingestões e descontavam cinco doses do estoque — um remédio "consumido" cinco vezes
+     * por um dedo insistente. É o defeito mais caro possível num app que existe para manter o
+     * estoque fiel.
+     *
+     * A notificação passou a ser dispensada no primeiro toque (ver `tratarRespostaAoAviso`), mas a
+     * guarda fica: quem protege o dado é a regra, não a interface.
+     */
+    const logs = await intakeLogRepository.findByDoseSchedule(doseScheduleId);
+    const ultimo = logs.at(-1);
+    if (ultimo !== undefined && resolvesDose(ultimo.status)) continue;
 
     const prescription = await prescriptionRepository.findById(doseSchedule.prescriptionId);
     if (prescription === null) continue;
@@ -74,11 +92,24 @@ export async function confirmarDosesDoAviso(doseScheduleIds: string[]): Promise<
  */
 export async function adiarAviso(doseScheduleIds: string[]): Promise<void> {
   const doseScheduleRepository = new DoseScheduleRepository();
+
+  /**
+   * Só segue se **alguma** dose ainda tinha adiamento a gastar.
+   *
+   * O `UPDATE` já recusava o segundo adiamento, mas caladamente: o lembrete era agendado de
+   * qualquer forma, e cinco toques em "Adiar" produziam cinco lembretes com um `snooze_count` que
+   * nunca passou de 1. Agora a trava do banco governa o comportamento — quem não gastou nada não
+   * agenda nada.
+   */
+  let alguemAdiou = false;
   for (const doseScheduleId of doseScheduleIds) {
-    // O repositório recusa passar de 1 — a trava mora nele, e não aqui, pra valer também quando o
-    // adiamento vier da tela em vez da notificação.
-    await doseScheduleRepository.incrementSnoozeCount(doseScheduleId).catch(() => {});
+    const adiou = await doseScheduleRepository
+      .incrementSnoozeCount(doseScheduleId)
+      .catch(() => false);
+    if (adiou) alguemAdiou = true;
   }
+
+  if (!alguemAdiou) return;
 
   await reagendarAvisosDeDose();
   await agendarLembreteAdiado(doseScheduleIds);
@@ -137,11 +168,22 @@ export type RespostaAoAviso =
  *
  * Os botões resolvem sem abrir o app (`opensAppToForeground: false`); o toque no **corpo** leva à
  * tela do horário, que é onde a resposta parcial cabe.
+ *
+ * **A notificação é dispensada antes de qualquer escrita.** No Android ela não sai da bandeja ao
+ * receber toque num botão de ação, e enquanto estiver lá cada toque repete a resposta inteira —
+ * foi assim que cinco toques em "Adiar" viraram cinco lembretes. Tirar do caminho primeiro fecha a
+ * janela entre o dedo e o banco; a guarda de idempotência em `confirmarDosesDoAviso` cobre o
+ * resto, porque quem protege o dado é a regra, não a interface.
  */
 export async function tratarRespostaAoAviso(
   actionIdentifier: string,
   dados: DadosDoAviso,
 ): Promise<RespostaAoAviso> {
+  const respondeuPorBotao = actionIdentifier === ACAO_TOMEI || actionIdentifier === ACAO_ADIAR;
+  if (respondeuPorBotao && dados.chave.length > 0) {
+    await new ExpoNotificationGateway().dispensar(dados.chave);
+  }
+
   if (actionIdentifier === ACAO_TOMEI) {
     await confirmarDosesDoAviso(dados.doseScheduleIds);
     return { tipo: "resolvida" };

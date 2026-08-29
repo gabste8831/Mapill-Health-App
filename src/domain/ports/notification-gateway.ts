@@ -70,4 +70,11 @@ export interface NotificationGateway {
   cancelarTudo(): Promise<void>;
   /** Quantos avisos estão pendentes no sistema. Serve ao diagnóstico, não à regra. */
   contarPendentes(): Promise<number>;
+  /**
+   * Tira da bandeja um aviso **já exibido**, depois de respondido.
+   *
+   * Diferente de `cancelarTudo`, que mexe no que ainda vai tocar. No Android um aviso não some ao
+   * receber toque num botão de ação, e enquanto ele estiver lá cada toque repete a resposta.
+   */
+  dispensar(chave: string): Promise<void>;
 }

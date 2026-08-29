@@ -77,6 +77,26 @@ export class ExpoNotificationGateway implements NotificationGateway {
     await Linking.openSettings();
   }
 
+  /**
+   * Abre a tela do Android onde se concede **acesso à política do Não Perturbe**.
+   *
+   * É uma permissão especial: o `bypassDnd` do canal só passa a valer depois que ela é concedida, e
+   * o Android **nunca a pede sozinho** — não há diálogo, só esta tela. Sem ela o alarme toca
+   * normalmente, mas fica mudo com o Não Perturbe ligado, que é justamente quando ele mais
+   * importaria.
+   *
+   * O caminho tem que ser este, e não `openSettings()`: as configurações do app não mostram essa
+   * permissão. Ela vive numa lista do sistema, junto de todos os apps que a pedem.
+   */
+  async abrirAcessoAoNaoPerturbe(): Promise<void> {
+    if (Platform.OS !== "android") return;
+    await Linking.sendIntent("android.settings.NOTIFICATION_POLICY_ACCESS_SETTINGS").catch(
+      // Fabricante que não exponha a tela: cair nas configurações do app é melhor que não abrir
+      // nada e deixar a pessoa achando que o botão está quebrado.
+      () => Linking.openSettings(),
+    );
+  }
+
   async agendar(aviso: AvisoDeDose): Promise<void> {
     await prepararSistema();
 
@@ -131,5 +151,19 @@ export class ExpoNotificationGateway implements NotificationGateway {
   async contarPendentes(): Promise<number> {
     const pendentes = await Notifications.getAllScheduledNotificationsAsync();
     return pendentes.length;
+  }
+
+  /**
+   * Tira a notificação da bandeja depois de respondida.
+   *
+   * **No Android ela não sai sozinha** ao tocar num botão de ação — fica lá, e cada toque dispara o
+   * handler outra vez. Foi assim que cinco toques em "Adiar" geraram cinco lembretes, e o mesmo
+   * teria acontecido com "Tomei": cinco ingestões gravadas e cinco doses descontadas do estoque.
+   *
+   * Dispensar é o primeiro passo da resposta, antes de qualquer escrita: o dedo é mais rápido que
+   * o banco, e a janela entre tocar e gravar é justamente onde o toque repetido cabe.
+   */
+  async dispensar(chave: string): Promise<void> {
+    await Notifications.dismissNotificationAsync(chave).catch(() => {});
   }
 }

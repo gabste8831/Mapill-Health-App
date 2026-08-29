@@ -50,8 +50,14 @@ export interface DoseScheduleRepository extends Repository<DoseSchedule> {
    * de dose: dose que disparou o alarme/notificação + demais pendentes do dia.
    */
   findPendingForDay(referenceDate: string): Promise<DoseSchedule[]>;
-  /** Marca o único adiamento permitido (`snoozeCount` 0 → 1) — rejeitar se já estiver em 1. */
-  incrementSnoozeCount(doseScheduleId: string): Promise<void>;
+  /**
+   * Marca o único adiamento permitido (`snoozeCount` 0 → 1). Devolve `true` só quando **este**
+   * chamador gastou o adiamento; `false` quando ele já tinha sido gasto.
+   *
+   * O retorno importa: sem ele a recusa acontecia calada no banco e quem chamava seguia agendando
+   * o lembrete assim mesmo — cinco toques em "Adiar" viravam cinco lembretes.
+   */
+  incrementSnoozeCount(doseScheduleId: string): Promise<boolean>;
   /**
    * Remove os horários **futuros** de uma prescrição, para regerar depois de a posologia mudar.
    * Só os futuros: apagar os passados destruiria o histórico de quando a dose deveria ter

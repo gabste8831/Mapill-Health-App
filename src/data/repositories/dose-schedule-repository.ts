@@ -159,12 +159,22 @@ export class DoseScheduleRepository
     );
   }
 
-  async incrementSnoozeCount(doseScheduleId: string): Promise<void> {
-    await this.database.runAsync(
+  /**
+   * Marca o único adiamento permitido. Devolve `true` só quando **este** chamador foi quem o
+   * gastou.
+   *
+   * O `WHERE snooze_count = 0` já impedia o segundo adiamento no banco, mas em silêncio: quem
+   * chamava não sabia se tinha conseguido, e seguia agendando o lembrete assim mesmo. Cinco toques
+   * em "Adiar" viravam cinco lembretes com um `snooze_count` que nunca passou de 1. Devolver o
+   * resultado é o que transforma a trava do banco em trava de comportamento.
+   */
+  async incrementSnoozeCount(doseScheduleId: string): Promise<boolean> {
+    const resultado = await this.database.runAsync(
       `UPDATE ${this.tableName}
        SET snooze_count = 1, updated_at = ?
        WHERE id = ? AND snooze_count = 0`,
       [new Date().toISOString(), doseScheduleId],
     );
+    return resultado.changes > 0;
   }
 }
