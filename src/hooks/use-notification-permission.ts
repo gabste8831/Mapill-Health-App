@@ -68,5 +68,13 @@ export function useNotificationPermission() {
     await gateway.abrirConfiguracoesDoSistema();
   }, []);
 
-  return { permissao, pedir, abrirConfiguracoes, consultar };
+  /**
+   * Leva à tela do sistema que concede acesso à política do Não Perturbe — a permissão que faz o
+   * alarme atravessar o DND. O Android não a pede sozinho, então o app precisa apontar o caminho.
+   */
+  const abrirAcessoAoNaoPerturbe = useCallback(async () => {
+    await gateway.abrirAcessoAoNaoPerturbe();
+  }, []);
+
+  return { permissao, pedir, abrirConfiguracoes, abrirAcessoAoNaoPerturbe, consultar };
 }

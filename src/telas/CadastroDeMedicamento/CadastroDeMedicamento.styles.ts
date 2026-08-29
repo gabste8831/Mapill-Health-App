@@ -368,6 +368,30 @@ export const styles = StyleSheet.create({
   },
 
   /**
+   * A autorização do Não Perturbe é **oferta**, não problema: o alarme já funciona sem ela. Por
+   * isso azul, e não amarelo — pintar de atenção o que está em ordem gasta o amarelo à toa, e
+   * depois ele não é mais lido quando algo realmente falha.
+   */
+  avisoDeAlarme: {
+    gap: spacing.xs,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
+  },
+
+  /** O passo a passo. Entrelinha maior porque são instruções que se seguem com o celular na mão. */
+  avisoDePermissaoPasso: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    lineHeight: 22,
+  },
+  /** O nome exato do que procurar na tela do Android — é o que a pessoa vai caçar lá. */
+  avisoDePermissaoDestaque: {
+    color: colors.onSurface,
+    fontWeight: "600",
+  },
+
+  /**
    * Resumo de uma configuração feita em popup. Rótulo e valor em colunas, porque "50 comprimidos
    * · em cima da geladeira" numa linha só obriga a decifrar o que é o quê pelo conteúdo.
    */

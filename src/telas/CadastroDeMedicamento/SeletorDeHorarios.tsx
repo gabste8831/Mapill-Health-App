@@ -10,7 +10,7 @@ import {
   parseTimeInput,
   serieCabeNoDia,
 } from "@/shared/time-input";
-import { BottomSheet, Button, TextField, TimePicker } from "@/ui";
+import { BottomSheet, Button, TextField, TimeField, TimePicker } from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
 
 /** "1ª dose", "2ª dose"… — dentro do popup há largura pra escrever por extenso. */
@@ -39,14 +39,13 @@ type VariacaoDeDose = {
 };
 
 /**
- * Os conteúdos que o popup pode estar mostrando. `relogioDaSerie` é o mesmo relógio, mas voltando
- * para a série em vez de para a lista — o destino do "voltar" muda com de onde ele foi aberto.
+ * Os conteúdos que o popup pode estar mostrando.
+ *
+ * O relógio de **cada horário** saiu daqui: cada linha virou um `TimeField`, que já traz digitação
+ * e relógio juntos — três etapas viraram uma. `relogioDaSerie` fica, porque ali o relógio é de uma
+ * pergunta diferente ("a partir de que horas?") e precisa voltar para a série, não para a lista.
  */
-type ModoDoPopup =
-  | { tipo: "lista" }
-  | { tipo: "relogio"; index: number }
-  | { tipo: "serie" }
-  | { tipo: "relogioDaSerie" };
+type ModoDoPopup = { tipo: "lista" } | { tipo: "serie" } | { tipo: "relogioDaSerie" };
 
 type SeletorDeHorariosProps = {
   label: string;
@@ -96,18 +95,6 @@ export function SeletorDeHorarios({
 
   const isEmpty = values.every((value) => value.at.length === 0);
   const pendentes = values.filter((value) => parseTimeInput(value.at) === null).length;
-
-  function abrirRelogio(index: number) {
-    setRascunho(null);
-    setModo({ tipo: "relogio", index });
-  }
-
-  function confirmarRelogio(index: number) {
-    if (rascunho === null) return;
-    onChange(values.map((current, i) => (i === index ? { ...current, at: rascunho } : current)));
-    setRascunho(null);
-    setModo({ tipo: "lista" });
-  }
 
   const intervalo = Number(intervaloInput);
   const intervaloValido =
@@ -165,7 +152,7 @@ export function SeletorDeHorarios({
    * já tinha escolhido nas outras linhas.
    */
   function handleRequestClose() {
-    if (modo.tipo === "relogio" || modo.tipo === "serie") {
+    if (modo.tipo === "serie") {
       setRascunho(null);
       setModo({ tipo: "lista" });
       return;
@@ -188,9 +175,6 @@ export function SeletorDeHorarios({
   function tituloDoPopup(): string {
     if (modo.tipo === "serie") return "De quantas em quantas horas";
     if (modo.tipo === "relogioDaSerie") return "Primeiro horário";
-    if (modo.tipo === "relogio") {
-      return values.length > 1 ? `${ORDINALS[modo.index]} dose` : label;
-    }
     return label;
   }
 
@@ -237,17 +221,9 @@ export function SeletorDeHorarios({
       ) : null}
 
       <BottomSheet visible={isSheetOpen} onClose={handleRequestClose} title={tituloDoPopup()}>
-        {modo.tipo === "relogio" || modo.tipo === "relogioDaSerie" ? (
+        {modo.tipo === "relogioDaSerie" ? (
           <View style={styles.sheetBody}>
-            <TimePicker
-              // A roda é remontada a cada destino: sem a chave, ela reaproveitaria a posição da
-              // linha anterior e abriria no horário do vizinho.
-              key={modo.tipo === "relogio" ? modo.index : "serie"}
-              initialValue={
-                modo.tipo === "relogio" ? parseTimeInput(values[modo.index].at) : primeiroDaSerie
-              }
-              onChange={setRascunho}
-            />
+            <TimePicker initialValue={primeiroDaSerie} onChange={setRascunho} />
             <View style={styles.linhaDeAcoes}>
               <Button
                 label="Cancelar"
@@ -256,18 +232,14 @@ export function SeletorDeHorarios({
                 style={styles.acaoDaLinha}
                 onPress={handleRequestClose}
               />
-              {/* Desabilitado enquanto ninguém girar: a posição em que o relógio abre é ponto de
-                  partida, não resposta, e confirmá-la sem tocar seria o mesmo horário sugerido
-                  que este formulário recusa desde o começo. */}
+              {/* Desabilitado enquanto ninguém escolher: o horário em que o relógio abre é ponto de
+                  partida, não resposta, e confirmá-lo sem tocar seria o mesmo horário sugerido que
+                  este formulário recusa desde o começo. */}
               <Button
                 label="Confirmar"
                 style={styles.acaoDaLinha}
                 disabled={rascunho === null}
                 onPress={() => {
-                  if (modo.tipo === "relogio") {
-                    confirmarRelogio(modo.index);
-                    return;
-                  }
                   setPrimeiroDaSerie(rascunho);
                   setRascunho(null);
                   setModo({ tipo: "serie" });
@@ -365,27 +337,24 @@ export function SeletorDeHorarios({
                   {values.length > 1 ? (
                     <Text style={styles.fieldLabel}>{`${ORDINALS[index]} DOSE`}</Text>
                   ) : null}
-                  <Pressable
-                    style={[
-                      styles.botaoDeHorario,
-                      (duplicateIndexes.includes(index) || parseTimeInput(value.at) === null) &&
-                        styles.botaoDeHorarioErro,
-                    ]}
-                    onPress={() => abrirRelogio(index)}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      parseTimeInput(value.at) === null
-                        ? "Escolher horário"
-                        : `Alterar horário ${value.at}`
-                    }>
-                    <Text
-                      style={[
-                        styles.botaoDeHorarioTexto,
-                        parseTimeInput(value.at) === null && styles.botaoDeHorarioVazio,
-                      ]}>
-                      {parseTimeInput(value.at) ?? "--:--"}
-                    </Text>
-                  </Pressable>
+                  {/* Campo digitável com o relógio ao lado, e não um botão que abre outro popup.
+                      Antes eram três etapas para um horário — tocar em "Definir horários", tocar
+                      na linha da dose, e só então escolher — e a revisão em aparelho apontou que
+                      isso ficou mais trabalhoso que o mostrador que ele veio substituir. Agora
+                      digita-se direto na linha; o relógio continua ali para quem preferir. */}
+                  <TimeField
+                    label={`${ORDINALS[index]} dose`}
+                    semRotulo
+                    value={value.at}
+                    onChange={(horario) =>
+                      onChange(
+                        values.map((current, i) =>
+                          i === index ? { ...current, at: horario } : current,
+                        ),
+                      )
+                    }
+                    error={duplicateIndexes.includes(index)}
+                  />
                 </View>
                 {variacao?.ativa === true ? (
                   <TextField

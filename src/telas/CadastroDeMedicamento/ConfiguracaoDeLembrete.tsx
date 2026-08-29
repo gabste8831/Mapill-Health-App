@@ -100,7 +100,9 @@ export function ConfiguracaoDeLembrete({
   onAjudaToggle,
 }: ConfiguracaoDeLembreteProps) {
   const dependeDoAparelho = value !== null && value !== "none";
-  const { permissao, pedir, abrirConfiguracoes } = useNotificationPermission();
+  const { permissao, pedir, abrirConfiguracoes, abrirAcessoAoNaoPerturbe } =
+    useNotificationPermission();
+  const escolheuAlarme = value === "alarm" || value === "both";
 
   /**
    * A permissão é pedida **aqui**, no toque que escolhe o modo — e não no onboarding.
@@ -145,11 +147,53 @@ export function ConfiguracaoDeLembrete({
           <View style={styles.avisoDePermissaoNegada}>
             <Text style={styles.avisoDePermissaoTitulo}>Os avisos estão bloqueados</Text>
             <Text style={styles.avisoDePermissaoTexto}>
-              Sua escolha fica salva, mas o Mapill não consegue avisar enquanto a permissão de
-              notificações estiver desligada nas configurações do Android.
+              Sua escolha fica salva, mas o Mapill não consegue avisar enquanto a permissão estiver
+              desligada. O Android não deixa o app pedir de novo por aqui — quem religa é você, nas
+              configurações:
+            </Text>
+            {/* O caminho escrito, e não só o botão. Quem chega nas configurações do Android sem
+                saber o que procurar desiste na primeira tela — e a permissão fica desligada por
+                falta de instrução, não por decisão. */}
+            <Text style={styles.avisoDePermissaoPasso}>
+              1. Toque no botão abaixo{"\n"}
+              2. Entre em <Text style={styles.avisoDePermissaoDestaque}>Notificações</Text>
+              {"\n"}
+              3. Ligue{" "}
+              <Text style={styles.avisoDePermissaoDestaque}>Permitir notificações</Text>
+              {"\n"}
+              4. Volte para o Mapill
             </Text>
             <Pressable onPress={() => void abrirConfiguracoes()} accessibilityRole="button">
-              <Text style={styles.linkParaTermos}>Abrir as configurações do app</Text>
+              <Text style={styles.linkParaTermos}>Abrir as configurações do Mapill</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {/**
+          * O alarme precisa de uma **segunda** permissão para atravessar o Não Perturbe, e o
+          * Android nunca a pede sozinho — não existe diálogo para ela, só uma tela do sistema. Sem
+          * isso o alarme toca no dia a dia mas fica mudo no DND, que é justamente quando ele mais
+          * importaria.
+          *
+          * Aparece como oferta, não como erro: o alarme já funciona sem ela. O que muda é atravessar
+          * o silencioso, e quem decide se quer isso é a pessoa.
+          */}
+        {escolheuAlarme && !permissaoNegada ? (
+          <View style={styles.avisoDeAlarme}>
+            <Text style={styles.avisoDePermissaoTitulo}>Para tocar no “Não perturbe”</Text>
+            <Text style={styles.avisoDePermissaoTexto}>
+              O alarme já toca alto e vibra. Para ele tocar também com o “Não perturbe” ligado, o
+              Android pede uma autorização à parte:
+            </Text>
+            <Text style={styles.avisoDePermissaoPasso}>
+              1. Toque no botão abaixo{"\n"}
+              2. Procure o <Text style={styles.avisoDePermissaoDestaque}>Mapill</Text> na lista
+              {"\n"}
+              3. Ligue a autorização{"\n"}
+              4. Volte para o Mapill
+            </Text>
+            <Pressable onPress={() => void abrirAcessoAoNaoPerturbe()} accessibilityRole="button">
+              <Text style={styles.linkParaTermos}>Autorizar o alarme no “Não perturbe”</Text>
             </Pressable>
           </View>
         ) : null}

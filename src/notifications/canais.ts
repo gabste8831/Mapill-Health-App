@@ -11,8 +11,8 @@ import { colors } from "@/shared/theme";
  * correção nossa simplesmente não apareceria para essas pessoas. Subir o sufixo cria um canal novo
  * e a mudança passa a valer. A regra: mexeu em som ou importância, sobe a versão.
  */
-export const CANAL_ALARME = "dose-alarm-v1";
-export const CANAL_LEMBRETE = "dose-reminder-v1";
+export const CANAL_ALARME = "dose-alarm-v2";
+export const CANAL_LEMBRETE = "dose-reminder-v2";
 
 /**
  * Cria os canais. Idempotente — chamar de novo com o mesmo id não faz nada.
@@ -36,6 +36,35 @@ export async function registrarCanais(): Promise<void> {
     // Longo e espaçado: o padrão curto do sistema se confunde com mensagem, e a diferença entre
     // "chegou um WhatsApp" e "está na hora do remédio" precisa ser sentida sem olhar a tela.
     vibrationPattern: [0, 500, 250, 500],
+    /**
+     * **Explícito, e não pelo padrão.** Sem este campo o canal nasce com o som que o sistema
+     * escolher — e no teste em aparelho ele nasceu mudo: a notificação chegava e nada tocava, num
+     * canal chamado "alarme".
+     */
+    sound: "default",
+    /**
+     * `usage: "alarm"` é o que faz o Android **tratar isto como despertador**, e não como aviso.
+     *
+     * Muda três coisas de uma vez: o som sai pelo volume de *alarme* (que a pessoa costuma manter
+     * alto mesmo com o de notificação baixo), atravessa o silencioso, e é o que o sistema espera de
+     * algo que precisa acordar alguém. É a peça que faltava para o rótulo "Alarme" significar algo
+     * diferente de "Notificação".
+     *
+     * `enforceAudibility` completa: pede ao sistema que não abafe o som por conta de outras regras.
+     */
+    audioAttributes: {
+      usage: Notifications.AndroidAudioUsage.ALARM,
+      contentType: Notifications.AndroidAudioContentType.SONIFICATION,
+      flags: { enforceAudibility: true, requestHardwareAudioVideoSynchronization: false },
+    },
+    /**
+     * Atravessar o Não Perturbe **depende de uma permissão que o Android não pede sozinho**
+     * (acesso à política do Não Perturbe). Sem ela, esta flag é ignorada em silêncio — o canal é
+     * criado, não dá erro, e o alarme simplesmente não fura o DND.
+     *
+     * Continua declarada porque, concedida a permissão, ela passa a valer sem recriar o canal. Quem
+     * conduz a pessoa até lá é a tela de lembrete (ver `useNotificationPermission`).
+     */
     bypassDnd: true,
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     lightColor: colors.primary,
@@ -47,6 +76,13 @@ export async function registrarCanais(): Promise<void> {
     description: "Aparece na barra de avisos e respeita o modo silencioso.",
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250],
+    sound: "default",
+    // Aqui o uso é de notificação mesmo: sai pelo volume de avisos e respeita o silencioso, que é
+    // exatamente o que separa esta opção da de cima no cadastro.
+    audioAttributes: {
+      usage: Notifications.AndroidAudioUsage.NOTIFICATION,
+      contentType: Notifications.AndroidAudioContentType.SONIFICATION,
+    },
     bypassDnd: false,
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PRIVATE,
     lightColor: colors.primary,
