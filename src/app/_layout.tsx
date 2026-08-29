@@ -17,6 +17,7 @@ import { Alert, useColorScheme } from 'react-native';
 
 import { isSupabaseConfigured } from '@/data/remote/supabase-client';
 import { useDatabaseReady } from '@/hooks/use-database-ready';
+import { useDoseNotifications } from '@/hooks/use-dose-notifications';
 import { useFirstRunGate } from '@/hooks/use-first-run-gate';
 import { ConsentimentoScreen } from '@/telas/Consentimento/ConsentimentoScreen';
 import { FichaDeSaudeScreen } from '@/telas/FichaDeSaude/FichaDeSaudeScreen';
@@ -24,6 +25,17 @@ import { LoginScreen } from '@/telas/Login/LoginScreen';
 import { SplashOverlay } from '@/ui';
 
 SplashScreen.preventAutoHideAsync();
+
+/**
+ * Mantém a janela de avisos de dose abastecida e trata o toque na notificação.
+ *
+ * Componente em vez de chamada direta do hook no layout: o hook precisa rodar **só** no passo
+ * `app`, e chamá-lo condicionalmente ali quebraria a regra dos hooks. Não desenha nada.
+ */
+function AvisosDeDose() {
+  useDoseNotifications();
+  return null;
+}
 
 // A máquina de estados da primeira execução (login → consentimento → ficha → app) vive em
 // useFirstRunGate. Aqui só se decide o que renderizar pro step atual.
@@ -99,14 +111,20 @@ export default function RootLayout() {
 
     // step === 'app': daqui pra frente quem manda na navegação é o expo-router.
     return (
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(abas)" />
-        <Stack.Screen name="ficha" />
-        <Stack.Screen name="termos" />
-        <Stack.Screen name="estoque" />
-        <Stack.Screen name="conta" />
-        <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
-      </Stack>
+      <>
+        {/* Só a partir daqui: antes do passo `app` não há rota para a tela do horário abrir, e o
+            onboarding não tem dose nenhuma a agendar. */}
+        <AvisosDeDose />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(abas)" />
+          <Stack.Screen name="ficha" />
+          <Stack.Screen name="termos" />
+          <Stack.Screen name="estoque" />
+          <Stack.Screen name="conta" />
+          <Stack.Screen name="horario/[instante]" />
+          <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
+        </Stack>
+      </>
     );
   }
 

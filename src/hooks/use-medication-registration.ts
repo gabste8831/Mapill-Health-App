@@ -8,6 +8,7 @@ import { MedicationRepository } from "@/data/repositories/medication-repository"
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import type { Prescription } from "@/domain/entities/prescription";
 import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
+import { reagendarAvisosDeDose } from "@/notifications/reagendar-avisos";
 import type { MedicamentoDraft } from "@/telas/CadastroDeMedicamento/FormularioDeMedicamentoScreen";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`). */
@@ -127,6 +128,10 @@ export async function salvarMedicamento(
   }
 
   await registrarDosesJaTomadas(draft, prescription, from);
+
+  // A posologia mudou, então a janela de avisos inteira é refeita — é o gatilho nº1 e nº3 do ciclo
+  // de vida do C1. Refazer tudo, e não corrigir o que mudou, é o que garante zero alarme órfão.
+  await reagendarAvisosDeDose();
 
   return { medicationId, prescriptionId };
 }
@@ -274,4 +279,8 @@ export async function excluirMedicamento(ids: MedicamentoAExcluir): Promise<void
   if (inventory !== null) await inventoryRepository.softDelete(inventory.id);
 
   await new MedicationRepository().softDelete(ids.medicationId);
+
+  // O alarme órfão nasce exatamente aqui: sem isto, o aviso de um remédio excluído continuaria
+  // tocando até a próxima abertura do app.
+  await reagendarAvisosDeDose();
 }

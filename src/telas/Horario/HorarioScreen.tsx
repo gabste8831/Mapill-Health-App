@@ -1,0 +1,135 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useDosesDoHorario, type DoseDoHorario } from "@/hooks/use-doses-do-horario";
+import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
+import { colors } from "@/shared/theme";
+import { Button, CenteredLoader, Header } from "@/ui";
+import { styles } from "./HorarioScreen.styles";
+
+type ItemProps = {
+  dose: DoseDoHorario;
+  onConfirmar: () => void;
+  onPular: () => void;
+};
+
+function ItemDeDose({ dose, onConfirmar, onPular }: ItemProps) {
+  const confirmada = dose.latestStatus === "confirmed";
+
+  return (
+    <View style={[styles.card, dose.resolvida && styles.cardResolvido]}>
+      <View style={styles.cardTopo}>
+        <View style={styles.cardTexto}>
+          <Text style={styles.nome}>{dose.medicationName}</Text>
+          <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
+          {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
+            <Text style={styles.orientacao}>{dose.intakeNote}</Text>
+          ) : null}
+        </View>
+
+        {/* Resolvida, o selo substitui os botões: o que aconteceu já é a resposta, e reoferecer as
+            duas ações faria parecer que nada foi registrado. */}
+        {dose.resolvida ? (
+          <View style={styles.selo}>
+            <Ionicons
+              name={confirmada ? "checkmark-circle" : "close-circle"}
+              size={22}
+              color={confirmada ? colors.success : colors.onSurfaceVariant}
+            />
+            <Text style={styles.seloTexto}>{confirmada ? "Tomada" : "Pulada"}</Text>
+          </View>
+        ) : null}
+      </View>
+
+      {dose.resolvida ? (
+        // Corrigir continua possível — é o que torna aceitável confirmar direto pela notificação,
+        // sem passar por uma tela. Nada aqui é irreversível.
+        <Text style={styles.corrigirDica}>
+          Registrou errado? Toque em {confirmada ? "“Pulei”" : "“Tomei”"} para corrigir.
+        </Text>
+      ) : null}
+
+      <View style={styles.acoes}>
+        <Button
+          label="Tomei"
+          onPress={onConfirmar}
+          variant={confirmada ? "outline" : "primary"}
+          style={styles.acao}
+        />
+        <Button label="Pulei" onPress={onPular} variant="outline" style={styles.acao} />
+      </View>
+    </View>
+  );
+}
+
+/**
+ * As doses de um horário — o destino do toque na notificação.
+ *
+ * Existe porque o aviso é **por horário** e não por dose: com dois remédios às 08:00, o botão
+ * "Tomei todas" da notificação resolve o caso comum, mas quem tomou um e não o outro não tem como
+ * dizer isso num botão. Esta tela é onde a resposta parcial cabe — uma linha por remédio, com
+ * Tomei e Pulei em cada.
+ *
+ * Ela também abre pela agenda, sem notificação nenhuma, e aí é a mesma tela: quem chegou por um
+ * caminho reconhece o outro.
+ */
+export function HorarioScreen() {
+  const router = useRouter();
+  const { instante } = useLocalSearchParams<{ instante: string }>();
+  const { doses, isLoading, error, registrar } = useDosesDoHorario(instante ?? "");
+
+  const pendentes = doses.filter((dose) => !dose.resolvida).length;
+
+  function voltar() {
+    if (router.canGoBack()) router.back();
+    else router.replace("/");
+  }
+
+  if (isLoading) return <CenteredLoader />;
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <Header title="Hora do remédio" onBack={voltar} />
+
+      <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
+        {instante !== undefined && instante.length > 0 ? (
+          <Text style={styles.quando}>{dataEHoraPorExtenso(new Date(instante))}</Text>
+        ) : null}
+
+        {error !== null ? (
+          <Text style={styles.erro}>{error}</Text>
+        ) : doses.length === 0 ? (
+          <View style={styles.vazio}>
+            <Text style={styles.vazioTitulo}>Nada para tomar neste horário</Text>
+            <Text style={styles.vazioTexto}>
+              O tratamento pode ter mudado depois que o aviso foi agendado.
+            </Text>
+          </View>
+        ) : (
+          <>
+            {/* A contagem responde "acabou?" sem obrigar a percorrer a lista de novo — que é a
+                pergunta de quem abriu a tela para resolver as doses. */}
+            <Text style={styles.resumo}>
+              {pendentes === 0
+                ? "Tudo respondido por aqui."
+                : pendentes === 1
+                  ? "1 dose esperando resposta."
+                  : `${pendentes} doses esperando resposta.`}
+            </Text>
+
+            {doses.map((dose) => (
+              <ItemDeDose
+                key={dose.doseScheduleId}
+                dose={dose}
+                onConfirmar={() => void registrar(dose, "confirmed")}
+                onPular={() => void registrar(dose, "skipped")}
+              />
+            ))}
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

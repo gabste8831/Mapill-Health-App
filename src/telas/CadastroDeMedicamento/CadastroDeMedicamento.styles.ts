@@ -354,6 +354,20 @@ export const styles = StyleSheet.create({
   },
 
   /**
+   * Este **é** o caso em que algo não fecha: a pessoa pediu para ser avisada e o sistema não deixa.
+   * Por isso vai no amarelo de atenção, e não no azul do bloco acima — e com a barra lateral, o
+   * mesmo tratamento da `Dica`, para dizer "leia isto" sem gritar mais que um erro de verdade.
+   */
+  avisoDePermissaoNegada: {
+    gap: spacing.xs,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.warningSurface,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.warning,
+  },
+
+  /**
    * Resumo de uma configuração feita em popup. Rótulo e valor em colunas, porque "50 comprimidos
    * · em cima da geladeira" numa linha só obriga a decifrar o que é o quê pelo conteúdo.
    */

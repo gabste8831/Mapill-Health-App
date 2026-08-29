@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import type { ReminderMode } from "@/domain/entities/prescription";
+import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { colors } from "@/shared/theme";
 import { Accordion, BottomSheet, Button, OptionGroup, type OptionGroupOption } from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
@@ -37,8 +38,14 @@ function opcoesDeModo(value: ReminderMode | null): OptionGroupOption<ReminderMod
   return [
     {
       value: "alarm",
+      // "Toca alto", e não "toca como despertador". O que o app entrega é uma notificação de
+      // prioridade máxima que atravessa o Não Perturbe e vibra num padrão longo — não um
+      // despertador de tela cheia com som contínuo até desligar, que exige `USE_FULL_SCREEN_INTENT`
+      // (restrita pelo Android 14+ a apps de alarme e chamada) e nem é exposta pelo
+      // `expo-notifications`. Descrever o que existe é obrigação num app de medicação: prometer
+      // despertador e entregar um "pling" é promessa de segurança falsa.
       label: "Alarme",
-      hint: "Toca como despertador, mesmo no silencioso.",
+      hint: "Toca alto e vibra, mesmo no silencioso.",
       icon: iconeDoModo("alarm", value === "alarm"),
     },
     {
@@ -93,6 +100,22 @@ export function ConfiguracaoDeLembrete({
   onAjudaToggle,
 }: ConfiguracaoDeLembreteProps) {
   const dependeDoAparelho = value !== null && value !== "none";
+  const { permissao, pedir, abrirConfiguracoes } = useNotificationPermission();
+
+  /**
+   * A permissão é pedida **aqui**, no toque que escolhe o modo — e não no onboarding.
+   *
+   * É a única hora em que o diálogo do sistema chega com contexto: a pessoa acabou de dizer que
+   * quer ser avisada. Pedir antes, numa tela de boas-vindas, é pedir sem motivo aparente — e no
+   * Android a negativa **não se desfaz** por diálogo, então uma recusa cedo demais custaria o
+   * recurso central do app para sempre.
+   */
+  function escolherModo(modo: ReminderMode) {
+    onChange(modo);
+    if (modo !== "none" && permissao === "naoPedida") void pedir();
+  }
+
+  const permissaoNegada = dependeDoAparelho && permissao === "negada";
 
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Como quer ser avisado?">
@@ -111,12 +134,32 @@ export function ConfiguracaoDeLembrete({
           ultimaOcupaLinha
           value={value}
           options={opcoesDeModo(value)}
-          onChange={onChange}
+          onChange={escolherModo}
         />
 
+        {/* Negada, o app **não insiste**: no Android o diálogo não abre de novo, e um botão que
+            promete pedir outra vez não faria nada. O caminho real é as configurações do sistema, e
+            é isso que a tela oferece — em vez de deixar a pessoa achando que o lembrete está
+            configurado quando ele nunca vai chegar. */}
+        {permissaoNegada ? (
+          <View style={styles.avisoDePermissaoNegada}>
+            <Text style={styles.avisoDePermissaoTitulo}>Os avisos estão bloqueados</Text>
+            <Text style={styles.avisoDePermissaoTexto}>
+              Sua escolha fica salva, mas o Mapill não consegue avisar enquanto a permissão de
+              notificações estiver desligada nas configurações do Android.
+            </Text>
+            <Pressable onPress={() => void abrirConfiguracoes()} accessibilityRole="button">
+              <Text style={styles.linkParaTermos}>Abrir as configurações do app</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
         {/* Condição, não ressalva. Dizer o que precisa estar em ordem dá o que fazer; dizer que
-            "não garantimos" só transfere a insegurança sem dar saída. */}
-        {dependeDoAparelho ? (
+            "não garantimos" só transfere a insegurança sem dar saída.
+
+            Some quando a permissão está negada: ali o bloco acima já diz o que fazer, e os dois
+            juntos dariam dois conselhos diferentes para o mesmo problema. */}
+        {dependeDoAparelho && !permissaoNegada ? (
           <View style={styles.avisoDePermissao}>
             <Text style={styles.avisoDePermissaoTitulo}>Depende do seu aparelho</Text>
             <Text style={styles.avisoDePermissaoTexto}>
