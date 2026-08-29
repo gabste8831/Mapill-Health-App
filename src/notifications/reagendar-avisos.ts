@@ -30,6 +30,19 @@ const JANELA_DE_AVISOS_EM_DIAS = 7;
 const gateway = new ExpoNotificationGateway();
 
 /**
+ * A execução em curso, quando há uma.
+ *
+ * Reagendar é "cancela tudo, depois agenda tudo", e duas execuções sobrepostas se atropelam: a
+ * segunda cancelaria justo o que a primeira acabou de agendar, e o que sobra depende de qual
+ * terminou por último. Não é hipotético — salvar um cadastro e voltar ao primeiro plano disparam
+ * os dois gatilhos quase juntos.
+ *
+ * A fila resolve serializando: quem chega enquanto outra roda espera a vez. Como a operação é
+ * idempotente, esperar nunca custa correção — só tempo.
+ */
+let emAndamento: Promise<void> = Promise.resolve();
+
+/**
  * Refaz **toda** a janela de avisos: cancela o que estiver agendado e reagenda a partir do banco.
  *
  * A operação é grosseira de propósito, e essa é a decisão central do bloco. O pior defeito
@@ -49,6 +62,12 @@ const gateway = new ExpoNotificationGateway();
 export async function reagendarAvisosDeDose(): Promise<void> {
   if (!persistsLocally) return;
 
+  // Entra na fila: `catch` no encadeamento para que uma falha anterior não trave as seguintes.
+  emAndamento = emAndamento.catch(() => {}).then(() => executarReagendamento());
+  return emAndamento;
+}
+
+async function executarReagendamento(): Promise<void> {
   try {
     // Sem permissão não há aviso a agendar, e pedir aqui seria pedir fora de contexto — quem pede
     // é a tela, no momento em que a pessoa liga o lembrete.
