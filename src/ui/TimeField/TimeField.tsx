@@ -1,34 +1,49 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 
-import { parseTimeInput } from "@/shared/time-input";
+import { formatTimeInput, parseTimeInput } from "@/shared/time-input";
+import { colors } from "@/shared/theme";
 import { BottomSheet } from "../BottomSheet/BottomSheet";
 import { Button } from "../Button/Button";
+import { TextField } from "../TextField/TextField";
 import { TimePicker } from "../TimePicker/TimePicker";
 import { styles } from "./TimeField.styles";
 
 export type TimeFieldProps = {
   label: string;
   required?: boolean;
-  /** `HH:MM` escolhido, ou vazio enquanto não há resposta. */
+  /** `HH:MM` como está digitado — a tela continua dona do texto, com máscara e tudo. */
   value: string;
   onChange: (value: string) => void;
-  error?: string;
+  error?: string | boolean;
+  onFocus?: (event: NativeSyntheticEvent<TargetedEvent>) => void;
+  /** Sem o rótulo acima, para quando quem chama já escreveu um. */
+  semRotulo?: boolean;
 };
 
 /**
- * Um horário só, escolhido no relógio do sistema.
+ * Horário com as duas entradas: digitação e relógio — o mesmo padrão do `DateField`.
  *
- * Existe separado do `SeletorDeHorarios` do cadastro de medicamento porque as duas perguntas são
- * diferentes: lá são N horários de uma mesma posologia, que se comparam entre si e precisam ser
- * revistos em conjunto; aqui é **o** horário de um compromisso. Forçar o mesmo componente nos dois
- * lugares faria o de lá carregar um caso de uso que ele não tem, ou o daqui abrir uma lista de um
- * item só.
+ * **A digitação é o caminho principal.** Quem sabe que a dose é às 8 da manhã digita `0800` em dois
+ * segundos; no relógio precisa abrir um popup, girar (ou preencher) e confirmar. A revisão em
+ * aparelho apontou isso duas vezes, de ângulos opostos: primeiro que o mostrador analógico era
+ * confuso, depois que o campo de digitação sozinho tinha virado etapas demais — tocar no campo para
+ * abrir um popup que abre outro popup.
  *
- * O que é igual, e de propósito: o relógio nasce sem resposta e "Confirmar" só acende depois que
- * alguém gira. Horário pré-escolhido é o que quem tem pressa aceita sem ler.
+ * O relógio fica no ícone ao lado, para quem preferir. É a mesma decisão do calendário no campo de
+ * data: as duas entradas convivem, e quem escolhe é quem está com o celular na mão.
  */
-export function TimeField({ label, required = false, value, onChange, error }: TimeFieldProps) {
+export function TimeField({
+  label,
+  required = false,
+  value,
+  onChange,
+  error,
+  onFocus,
+  semRotulo = false,
+}: TimeFieldProps) {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [rascunho, setRascunho] = useState<string | null>(null);
 
@@ -46,22 +61,30 @@ export function TimeField({ label, required = false, value, onChange, error }: T
   }
 
   return (
-    <View style={styles.fieldGroup}>
-      <Text style={styles.fieldLabel}>
-        {label} {required ? <Text style={styles.requiredMark}>*</Text> : null}
-      </Text>
+    <View style={styles.container}>
+      <TextField
+        label={semRotulo ? "" : label}
+        required={required}
+        placeholder="HH:MM"
+        value={value}
+        // A máscara recusa o impossível na digitação: `50:00` não chega a entrar no campo.
+        onChangeText={(bruto) => onChange(formatTimeInput(bruto, value))}
+        onFocus={onFocus}
+        keyboardType="number-pad"
+        maxLength={5}
+        error={error}
+        containerStyle={styles.campo}
+      />
 
+      {/* Ao lado do campo, e não no lugar dele. O alvo tem a altura do input inteiro porque um
+          ícone pequeno ao lado de um campo alto é o toque que erra. */}
       <Pressable
-        style={[styles.botao, error !== undefined && styles.botaoErro]}
+        style={[styles.botaoDeRelogio, semRotulo && styles.botaoDeRelogioSemRotulo]}
         onPress={abrir}
         accessibilityRole="button"
-        accessibilityLabel={escolhido === null ? `Escolher ${label}` : `Alterar ${label}, ${escolhido}`}>
-        <Text style={[styles.texto, escolhido === null && styles.textoVazio]}>
-          {escolhido ?? "--:--"}
-        </Text>
+        accessibilityLabel={`Escolher ${label} no relógio`}>
+        <Ionicons name="time-outline" size={22} color={colors.primary} />
       </Pressable>
-
-      {error !== undefined ? <Text style={styles.erro}>{error}</Text> : null}
 
       <BottomSheet visible={isSheetOpen} onClose={() => setSheetOpen(false)} title={label}>
         <View style={styles.sheetBody}>
@@ -74,6 +97,8 @@ export function TimeField({ label, required = false, value, onChange, error }: T
               style={styles.acao}
               onPress={() => setSheetOpen(false)}
             />
+            {/* O horário em que o relógio abre é ponto de partida, não resposta: confirmar sem
+                tocar em nada gravaria 08:00 sem ninguém ter escolhido. */}
             <Button
               label="Confirmar"
               style={styles.acao}

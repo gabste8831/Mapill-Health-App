@@ -51,14 +51,27 @@ function ItemDeDose({ dose, onConfirmar, onPular }: ItemProps) {
         </Text>
       ) : null}
 
+      {/* O botão escolhido fica azul cheio; o outro, contornado. Enquanto nada foi respondido os
+          dois são contornados — nenhuma das duas respostas pode parecer a sugerida, porque o
+          registro só vale se for o que de fato aconteceu. */}
+      {/* `emFolha` porque o cartão da dose é branco como o botão: sem o contorno, o `outline` some
+          no fundo e sobra um texto solto — o mesmo motivo pelo qual a prop existe para o
+          `BottomSheet`. */}
       <View style={styles.acoes}>
         <Button
           label="Tomei"
           onPress={onConfirmar}
-          variant={confirmada ? "outline" : "primary"}
+          variant={confirmada ? "primary" : "outline"}
+          emFolha
           style={styles.acao}
         />
-        <Button label="Pulei" onPress={onPular} variant="outline" style={styles.acao} />
+        <Button
+          label="Pulei"
+          onPress={onPular}
+          variant={dose.latestStatus === "skipped" ? "primary" : "outline"}
+          emFolha
+          style={styles.acao}
+        />
       </View>
     </View>
   );
@@ -127,6 +140,17 @@ export function HorarioScreen() {
                 onPular={() => void registrar(dose, "skipped")}
               />
             ))}
+
+            {/* Saída explícita para a Home, além da seta do topo. Quem chegou pela notificação
+                entrou direto nesta tela, sem passar pelo app: a seta leva "para trás" numa pilha
+                que pode não ter nada atrás. E depois de responder as doses deste horário, o passo
+                seguinte natural é ver o dia inteiro. */}
+            <Button
+              label={pendentes === 0 ? "Ver meu dia" : "Ir para a Home"}
+              variant="outline"
+              onPress={() => router.replace("/")}
+              style={styles.irParaHome}
+            />
           </>
         )}
       </ScrollView>

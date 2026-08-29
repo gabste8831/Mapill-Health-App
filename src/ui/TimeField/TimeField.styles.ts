@@ -1,39 +1,35 @@
 import { StyleSheet } from "react-native";
 
-import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
-  fieldGroup: {
-    gap: fieldLabelGap,
+  container: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.sm,
   },
-  fieldLabel: {
-    ...typography.label,
-    color: colors.onSurfaceVariant,
+  campo: {
+    flex: 1,
   },
-  requiredMark: {
-    color: colors.error,
-  },
-  /** Mesma altura e borda de um TextField: é onde a resposta aparece, e trocar a caixa por um
-   *  botão de aparência diferente faria parecer que o horário mora em outro lugar. */
-  botao: {
+  /**
+   * `marginTop` alinha o botão com o input, e não com o rótulo acima dele: sem isso ele sobe e fica
+   * na altura do texto "HORÁRIO", longe do campo que abre. Mesma medida do `DateField`, para os
+   * dois campos ficarem alinhados quando aparecem um sob o outro.
+   */
+  botaoDeRelogio: {
+    marginTop: 22,
+    width: 52,
     height: 52,
-    paddingHorizontal: spacing.md,
+    alignItems: "center",
     justifyContent: "center",
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    borderRadius: radius.md,
     backgroundColor: colors.surfaceContainerLowest,
   },
-  botaoErro: {
-    borderColor: colors.error,
-  },
-  texto: {
-    ...typography.bodyLg,
-    color: colors.onSurface,
-  },
-  /** "--:--" é lacuna, não valor: fica no cinza de placeholder pra não ser lido como resposta. */
-  textoVazio: {
-    color: colors.outline,
+  /** Sem o rótulo acima não há o que compensar: o botão alinha direto com o topo do campo. */
+  botaoDeRelogioSemRotulo: {
+    marginTop: 0,
   },
   sheetBody: {
     gap: spacing.md,
@@ -44,10 +40,5 @@ export const styles = StyleSheet.create({
   },
   acao: {
     flex: 1,
-  },
-  erro: {
-    ...typography.bodyMd,
-    fontSize: 12,
-    color: colors.error,
   },
 });

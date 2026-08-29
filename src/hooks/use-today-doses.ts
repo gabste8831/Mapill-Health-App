@@ -342,9 +342,22 @@ export function useTodayDoses() {
     }
   }, []);
 
+  /**
+   * Recarrega ao ganhar foco **e a cada minuto enquanto a tela está aberta**.
+   *
+   * O status da dose depende da hora que é agora: às 18:15 ela é "É AGORA", às 18:46 é "ATRASADA".
+   * Só com `useFocusEffect`, o `agora` congelava no instante em que a tela abriu — quem deixava a
+   * Home aberta via a dose presa em verde muito depois de o horário passar, que é justamente a cor
+   * que não pode mentir num app de medicação.
+   *
+   * Um minuto é a menor unidade que a tela mostra, então checar mais que isso não mudaria nada na
+   * tela. O intervalo morre junto com o foco: fora dela não há o que redesenhar.
+   */
   useFocusEffect(
     useCallback(() => {
       void reload();
+      const intervalo = setInterval(() => void reload(), 60_000);
+      return () => clearInterval(intervalo);
     }, [reload]),
   );
 

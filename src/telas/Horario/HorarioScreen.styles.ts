@@ -85,6 +85,11 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
 
+  /** Afastado da lista: é saída da tela, não mais uma ação de dose. */
+  irParaHome: {
+    marginTop: spacing.md,
+  },
+
   // --- Estados ---
   vazio: {
     alignItems: "center",

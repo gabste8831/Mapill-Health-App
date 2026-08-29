@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, ScrollView, Text, useWindowDimensions } from "react-native";
+import { Keyboard, Modal, Pressable, ScrollView, Text, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
@@ -58,12 +58,26 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
             exatamente o que quebrava o campo "Nome" do contato de emergência. */}
         <Pressable
           style={[styles.sheet, { maxHeight: alturaDisponivel }]}
-          onPress={(event) => event.stopPropagation()}>
+          onPress={(event) => {
+            event.stopPropagation();
+            /**
+             * Tocar numa área vazia do popup **fecha o teclado**.
+             *
+             * O `stopPropagation` sozinho fazia o toque morrer aqui: ele não fechava o popup (certo)
+             * mas também não dispensava o teclado (errado). O resultado era um teclado grudado,
+             * ocupando metade da tela, sem lugar nenhum onde tocar para dispensá-lo — nem fora do
+             * popup, que fecha tudo, nem dentro, que não fazia nada.
+             */
+            Keyboard.dismiss();
+          }}>
           <Text style={styles.title}>{title}</Text>
           {/* `handled` deixa o primeiro toque num botão valer mesmo com o teclado aberto; sem
               isso ele só fecharia o teclado e a pessoa teria que tocar de novo. */}
           <ScrollView
             keyboardShouldPersistTaps="handled"
+            // Arrastar a lista fecha o teclado, que é o gesto que a pessoa faz quando quer ver o
+            // que está embaixo dele.
+            keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={[styles.scrollContent, { paddingBottom: respiroInferior }]}>
             {children}
