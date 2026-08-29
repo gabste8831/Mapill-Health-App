@@ -26,8 +26,23 @@ const persistsLocally = Platform.OS !== "web";
  * `late` é estado próprio, e não uma variação de `pending`, porque é o único que pede ação agora —
  * e a decisão nº11.5 é explícita: dose atrasada nunca vira "pulada" sozinha, ela fica devendo
  * resposta até alguém dar uma.
+ *
+ * `now` é a dose **na hora**: dentro da janela de tolerância em torno do horário marcado. Sem ele,
+ * a dose das 08:00 virava "atrasada" às 08:01 — e chamar de atraso o que está rigorosamente em dia
+ * ensina a ignorar o vermelho, que é justamente o oposto do que ele existe para fazer.
  */
-export type DoseVisualStatus = "confirmed" | "skipped" | "late" | "next" | "upcoming";
+export type DoseVisualStatus = "confirmed" | "skipped" | "late" | "now" | "next" | "upcoming";
+
+/**
+ * A janela do "na hora", em minutos: **15 antes e 30 depois** do horário marcado.
+ *
+ * Assimétrica de propósito. Antes da hora a dose ainda não é para ser tomada, então a folga é curta
+ * — só o bastante para quem viu o alerta e foi buscar o copo d'água. Depois, o que se está medindo é
+ * a vida real: meia hora cobre o almoço que atrasou ou a reunião que passou do fim, sem esticar
+ * tanto a ponto de "no horário" deixar de significar alguma coisa.
+ */
+const TOLERANCIA_ANTES_EM_MINUTOS = 15;
+const TOLERANCIA_DEPOIS_EM_MINUTOS = 30;
 
 export type DoseDoDia = {
   doseScheduleId: string;
@@ -159,17 +174,27 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
     });
   }
 
-  // A primeira pendente é "a próxima"; as pendentes cujo horário já passou estão atrasadas. As
-  // duas coisas se decidem olhando a lista inteira, por isso não saem do laço acima.
-  const agoraIso = agora.toISOString();
+  // A primeira pendente é "a próxima"; as pendentes dentro da janela estão "na hora", e as que
+  // passaram dela estão atrasadas. As três coisas se decidem olhando a lista inteira, por isso não
+  // saem do laço acima.
+  const inicioDaJanela = new Date(agora.getTime() + TOLERANCIA_ANTES_EM_MINUTOS * 60_000).toISOString();
+  const fimDaJanela = new Date(agora.getTime() - TOLERANCIA_DEPOIS_EM_MINUTOS * 60_000).toISOString();
   let proximaMarcada = false;
   for (const dose of doses) {
     if (resolvesDose(dose.latestStatus)) {
       dose.status = dose.latestStatus === "confirmed" ? "confirmed" : "skipped";
       continue;
     }
-    if (dose.scheduledFor < agoraIso) {
+    // Passou da tolerância: é atraso de verdade.
+    if (dose.scheduledFor < fimDaJanela) {
       dose.status = "late";
+      continue;
+    }
+    // Dentro da janela, dos dois lados do horário. Vem antes de "próxima" porque uma dose na hora
+    // **é** a próxima a tomar, e o que ela precisa dizer é que a hora chegou.
+    if (dose.scheduledFor <= inicioDaJanela) {
+      dose.status = "now";
+      proximaMarcada = true;
       continue;
     }
     dose.status = proximaMarcada ? "upcoming" : "next";

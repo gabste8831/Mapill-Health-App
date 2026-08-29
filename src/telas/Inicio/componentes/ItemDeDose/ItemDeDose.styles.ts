@@ -26,6 +26,16 @@ export const styles = StyleSheet.create({
     borderColor: colors.error,
     backgroundColor: colors.errorContainer,
   },
+  /**
+   * "É agora" ganha o mesmo peso de borda da atrasada, e não o da próxima: as duas pedem ação
+   * imediata, e é essa diferença — pede agora × está na fila — que a espessura precisa carregar.
+   * O que separa uma da outra é a cor, verde contra vermelho, que é o que você pediu no 12.1.
+   */
+  now: {
+    borderWidth: 2,
+    borderColor: colors.success,
+    backgroundColor: colors.successContainer,
+  },
   done: {
     opacity: 0.5,
   },
@@ -46,6 +56,9 @@ export const styles = StyleSheet.create({
   statusLabelUpcoming: {
     color: colors.onSurfaceVariant,
     opacity: 0.7,
+  },
+  statusLabelNow: {
+    color: colors.onSuccessContainer,
   },
   statusLabelLate: {
     color: colors.onErrorContainer,

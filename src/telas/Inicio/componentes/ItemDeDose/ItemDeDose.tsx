@@ -19,6 +19,7 @@ const STATUS_LABEL: Record<DoseVisualStatus, string> = {
   confirmed: "TOMADA",
   skipped: "PULADA",
   late: "ATRASADA",
+  now: "É AGORA",
   next: "PRÓXIMA DOSE",
   upcoming: "A SEGUIR",
 };
@@ -40,13 +41,15 @@ export function ItemDeDose({
   onCorrect,
 }: ItemDeDoseProps) {
   const resolvida = status === "confirmed" || status === "skipped";
-  const acionavel = status === "next" || status === "late";
+  // "Na hora" é o caso mais acionável de todos: é literalmente agora.
+  const acionavel = status === "next" || status === "now" || status === "late";
 
   return (
     <Pressable
       style={[
         styles.base,
         status === "next" && styles.highlighted,
+        status === "now" && styles.now,
         status === "late" && styles.late,
         resolvida && styles.done,
       ]}
@@ -59,6 +62,7 @@ export function ItemDeDose({
           style={[
             styles.statusLabel,
             status === "upcoming" && styles.statusLabelUpcoming,
+            status === "now" && styles.statusLabelNow,
             status === "late" && styles.statusLabelLate,
           ]}>
           {STATUS_LABEL[status]}
