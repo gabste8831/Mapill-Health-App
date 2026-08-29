@@ -29,7 +29,7 @@ SplashScreen.preventAutoHideAsync();
 // useFirstRunGate. Aqui só se decide o que renderizar pro step atual.
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_300Light,
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
@@ -48,7 +48,14 @@ export default function RootLayout() {
   // `indeciso` entra na mesma espera: o gate ainda está lendo ficha e consentimento, e desenhar
   // qualquer tela aqui seria adivinhar. Sem isso, a de login aparecia por um quadro e sumia, o
   // que lê como falha do app e não como carregamento.
-  if (!fontsLoaded || !isDatabaseReady || gate.step === 'indeciso') return null;
+  //
+  // Cada uma das três esperas tem que terminar de um jeito ou de outro: enquanto isto devolve
+  // `null` nenhuma tela monta, ninguém chama `SplashScreen.hideAsync()`, e o app fica preso no
+  // fundo azul da splash sem saída — era o F7 na reabertura. Por isso a fonte que **falhou** conta
+  // como resolvida: seguir com a fonte do sistema é feio, ficar na splash para sempre é quebrado.
+  // As outras duas se garantem nos próprios hooks (`useDatabaseReady`, `useFirstRunGate`).
+  const fontesResolvidas = fontsLoaded || fontError !== null;
+  if (!fontesResolvidas || !isDatabaseReady || gate.step === 'indeciso') return null;
 
   // Texto de UI e Alert ficam aqui (camada de apresentação) — o hook só devolve o resultado.
   async function handleGoogleSignIn() {
@@ -65,42 +72,33 @@ export default function RootLayout() {
     }
   }
 
-  if (gate.step === 'login') {
-    return (
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <SplashOverlay />
+  function conteudoDoPasso() {
+    if (gate.step === 'login') {
+      return (
         <LoginScreen
           onAuthenticated={handleGoogleSignIn}
           onContinueWithoutLogin={gate.continueWithoutLogin}
           googleDisponivel={isSupabaseConfigured}
         />
-      </ThemeProvider>
-    );
-  }
+      );
+    }
 
-  if (gate.step === 'consent') {
-    return (
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <ConsentimentoScreen onAccept={gate.acceptConsent} onBack={gate.canGoBack ? gate.goBack : undefined} />
-      </ThemeProvider>
-    );
-  }
+    if (gate.step === 'consent') {
+      return <ConsentimentoScreen onAccept={gate.acceptConsent} onBack={gate.canGoBack ? gate.goBack : undefined} />;
+    }
 
-  if (gate.step === 'profile') {
-    return (
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    if (gate.step === 'profile') {
+      return (
         <FichaDeSaudeScreen
           onContinue={gate.saveProfile}
           onBack={gate.canGoBack ? gate.goBack : undefined}
           footerHint="Você poderá voltar aqui e modificar qualquer informação da ficha quando quiser, acessando aba de ajustes."
         />
-      </ThemeProvider>
-    );
-  }
+      );
+    }
 
-  // step === 'app': daqui pra frente quem manda na navegação é o expo-router.
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    // step === 'app': daqui pra frente quem manda na navegação é o expo-router.
+    return (
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(abas)" />
         <Stack.Screen name="ficha" />
@@ -109,6 +107,23 @@ export default function RootLayout() {
         <Stack.Screen name="conta" />
         <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
       </Stack>
+    );
+  }
+
+  /**
+   * O `SplashOverlay` fica **fora do passo**, e não dentro de um ramo só.
+   *
+   * Ele morava apenas no ramo `login`, e é ele quem chama `SplashScreen.hideAsync()`. Quem já tinha
+   * passado pelo onboarding caía direto em `app` — onde o overlay não existia —, ninguém escondia a
+   * splash nativa, e o app abria travado no fundo azul. Por ser a primeira abertura que passa por
+   * `login`, o problema só aparecia ao **reabrir**, que é exatamente como você o encontrou.
+   *
+   * Aqui ele cobre os quatro passos: qualquer que seja a tela decidida, a splash sai.
+   */
+  return (
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <SplashOverlay />
+      {conteudoDoPasso()}
     </ThemeProvider>
   );
 }

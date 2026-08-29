@@ -130,22 +130,37 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     if (!isDatabaseReady) return;
     let ativo = true;
     void (async () => {
-      if (await hasCompletedProfile()) {
-        // Reconsentimento por bump de versão ainda passa pelo `continueAfterLogin`, que checa a
-        // versão aceita antes de liberar o app.
-        if (ativo) await continueAfterLogin();
-        return;
-      }
-      if (!isSupabaseConfigured) {
-        // Sai de `indeciso`: sem Supabase não há sessão a consultar, e a resposta já é final.
+      try {
+        if (await hasCompletedProfile()) {
+          // Reconsentimento por bump de versão ainda passa pelo `continueAfterLogin`, que checa a
+          // versão aceita antes de liberar o app.
+          if (ativo) await continueAfterLogin();
+          return;
+        }
+        if (!isSupabaseConfigured) {
+          // Sai de `indeciso`: sem Supabase não há sessão a consultar, e a resposta já é final.
+          if (ativo) setStep("login");
+          return;
+        }
+        // A sessão persiste sozinha entre aberturas (AsyncStorage, ver supabase-client.ts).
+        const user = await new SupabaseAuthGateway().getCurrentUser();
+        if (!ativo) return;
+        if (user) await continueAfterLogin();
+        else setStep("login");
+      } catch (cause) {
+        /**
+         * Qualquer falha aqui **precisa sair de `indeciso`**. Nenhuma tela desenha nesse estado, e
+         * o layout devolve `null` enquanto ele durar — então uma promessa rejeitada deixava o app
+         * parado na splash azul para sempre, sem erro visível e sem saída. Foi o que travava a
+         * reabertura depois de tirar dos recentes.
+         *
+         * O destino é `login`, o mesmo de quem abre o app pela primeira vez: se não deu para ler
+         * ficha nem sessão, tratar como instalação nova é a suposição mais conservadora — pede de
+         * novo o que já foi respondido, mas nunca libera o app pulando o consentimento.
+         */
+        console.error("Falha ao decidir a etapa inicial:", cause);
         if (ativo) setStep("login");
-        return;
       }
-      // A sessão persiste sozinha entre aberturas (AsyncStorage, ver supabase-client.ts).
-      const user = await new SupabaseAuthGateway().getCurrentUser();
-      if (!ativo) return;
-      if (user) await continueAfterLogin();
-      else setStep("login");
     })();
     return () => {
       ativo = false;

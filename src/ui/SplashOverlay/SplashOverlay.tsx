@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import * as SplashScreen from "expo-splash-screen";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { Easing, Keyframe } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
@@ -15,6 +15,30 @@ const DURATION = 600;
 export function SplashOverlay() {
   const [animate, setAnimate] = useState(false);
   const [visible, setVisible] = useState(true);
+
+  /**
+   * Esconder a splash nativa é feito **na montagem**, e não num `onLayout`.
+   *
+   * O `onLayout` só dispara quando a view é medida, e ao voltar de morte fria — fechar o app, tirar
+   * dos recentes e abrir de novo — o Android pode restaurar a árvore sem uma nova passada de
+   * layout nesta view. Aí `hideAsync` nunca era chamado e o app ficava preso no fundo azul, sem
+   * saída a não ser fechar tudo outra vez. Um efeito de montagem não depende de medição: se este
+   * componente existe, a splash tem que sair.
+   *
+   * `hideAsync` é idempotente e rejeita quando já não há splash — daí o `catch` vazio: chamar duas
+   * vezes é normal, e não é erro que precise ser tratado.
+   */
+  useEffect(() => {
+    let cancelado = false;
+    SplashScreen.hideAsync()
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelado) setAnimate(true);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   if (!visible) return null;
 
@@ -39,15 +63,9 @@ export function SplashOverlay() {
       {image}
     </Animated.View>
   ) : (
-    <View
-      onLayout={() => {
-        SplashScreen.hideAsync().finally(() => {
-          setAnimate(true);
-        });
-      }}
-      style={styles.splashOverlay}>
-      {image}
-    </View>
+    // Estático enquanto o efeito acima não libera a animação: cobre a troca entre a splash nativa
+    // e a primeira tela sem depender de nenhum evento de layout.
+    <View style={styles.splashOverlay}>{image}</View>
   );
 }
 

@@ -21,7 +21,21 @@ export function useDatabaseReady(): boolean {
 
   useEffect(() => {
     if (Platform.OS === "web") return;
-    initializeDatabase().then(() => setIsDatabaseReady(true));
+    initializeDatabase()
+      .catch((cause: unknown) => {
+        /**
+         * Falhar aqui **também libera a UI**, e não é indiferença ao erro: enquanto isto ficava
+         * `false`, o `_layout` devolvia `null`, nenhuma tela montava, ninguém chamava
+         * `SplashScreen.hideAsync()` e o app ficava preso no fundo azul da splash — sem saída a não
+         * ser fechar e abrir de novo. Era o que acontecia ao reabrir depois de tirar dos recentes.
+         *
+         * Uma tela que abre e mostra o erro ao ler os dados é recuperável; uma splash eterna não é.
+         * Os repositórios já falham alto por conta própria se as tabelas não existirem, então o
+         * erro continua visível — só deixa de ser fatal para o app inteiro.
+         */
+        console.error("Falha ao inicializar o banco local:", cause);
+      })
+      .finally(() => setIsDatabaseReady(true));
   }, []);
 
   return isDatabaseReady;
