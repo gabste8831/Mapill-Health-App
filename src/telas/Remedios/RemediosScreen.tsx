@@ -270,7 +270,7 @@ export function RemediosScreen() {
                   abriria vazia — e oferecer caminho para o vazio é pior que não oferecer. */}
               {temEstoque ? (
                 <Button
-                  label="Gerenciar estoques dos medicamentos"
+                  label="Gerenciar estoques"
                   variant="outline"
                   icon={<Ionicons name="cube-outline" size={20} color={colors.primary} />}
                   onPress={() => router.push("/estoque")}

@@ -4,7 +4,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "@/shared/theme";
-import { Card, FotoLocal, GoogleLogo } from "@/ui";
+import { Card, FotoLocal } from "@/ui";
 import { styles } from "./AjustesScreen.styles";
 
 export type AjustesScreenProps = {
@@ -57,7 +57,6 @@ export function AjustesScreen({
   onEditProfile,
   onOpenAccount,
 }: AjustesScreenProps) {
-  const isSignedIn = accountEmail !== null;
   const hasProfile = patientName.trim().length > 0;
 
   return (
@@ -107,20 +106,16 @@ export function AjustesScreen({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>CONTA E DADOS</Text>
           <Card>
+            {/* Ícone de conta nos dois casos, e não o logo do Google quando vinculado: a linha leva
+                a conta, dados e termos, e o logo prometia que ela era sobre login. O e-mail, quando
+                existe, continua sendo o melhor subtítulo possível — dizer *qual* conta está
+                vinculada é mais útil que descrever a tela que vem depois. */}
             <Linha
               icon={
-                isSignedIn ? (
-                  <GoogleLogo size={22} />
-                ) : (
-                  <Ionicons name="person-circle-outline" size={22} color={colors.onSurfaceVariant} />
-                )
+                <Ionicons name="person-circle-outline" size={22} color={colors.onSurfaceVariant} />
               }
               label="Conta e dados"
-              hint={
-                isSignedIn
-                  ? accountEmail ?? undefined
-                  : "Vincular conta, ler os termos e apagar seus dados"
-              }
+              hint={accountEmail ?? "Gerencie aqui sua conta, dados e sincronizações"}
               onPress={onOpenAccount}
             />
           </Card>

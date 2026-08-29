@@ -427,23 +427,33 @@ export function CalendarioScreen() {
         </View>
       ) : (
         <>
-          <GradeDeMes
-            mes={mesVisivel}
-            selecionado={diaSelecionado}
-            hoje={hoje}
-            marcas={marcas}
-            onSelecionar={setDiaSelecionado}
-            onMudarMes={mudarMes}
-          />
+          {/* A grade rola junto com a lista, e só o filtro gruda no topo (`stickyHeaderIndices`).
+              Fixa, ela custava mais de um terço da tela em toda rolagem — e quem já escolheu o dia
+              está lendo o que tem nele, não procurando outro. O filtro fica porque governa as duas
+              coisas ao mesmo tempo: os pontinhos do mês e o que a lista mostra. */}
+          <ScrollView
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            stickyHeaderIndices={[1]}>
+            {/* Margem negativa para anular o `paddingHorizontal` do scroll: a faixa azul é desenhada
+                de borda a borda, e recuada ela deixaria duas listras do fundo nas laterais. */}
+            <View style={styles.gradeNoScroll}>
+              <GradeDeMes
+                mes={mesVisivel}
+                selecionado={diaSelecionado}
+                hoje={hoje}
+                marcas={marcas}
+                onSelecionar={setDiaSelecionado}
+                onMudarMes={mudarMes}
+              />
+            </View>
 
-          {/* O filtro fica entre a grade e a lista porque governa as duas: muda os pontinhos do
-              mês e o que a lista mostra. Quem tem remédio de uso contínuo pinta o mês inteiro, e
-              "só compromissos" é o que devolve a leitura de relance. */}
-          <View style={styles.filtros}>
-            <SeletorDeOrdem value={filtro} onChange={setFiltro} options={FILTROS_DA_AGENDA} />
-          </View>
+            {/* Fundo opaco é obrigação do cabeçalho grudado: sem ele a lista passa por baixo e as
+                duas se sobrepõem enquanto rola. */}
+            <View style={styles.filtros}>
+              <SeletorDeOrdem value={filtro} onChange={setFiltro} options={FILTROS_DA_AGENDA} />
+            </View>
 
-          <ScrollView contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
             <View style={styles.dia}>
               <View style={styles.diaHeader}>
                 <Text style={[styles.diaTitulo, diaSelecionado === hoje && styles.diaHoje]}>
@@ -453,7 +463,7 @@ export function CalendarioScreen() {
               </View>
 
               {vazioNoDia ? (
-                <Text style={styles.emptyDescription}>
+                <Text style={styles.vazioDoDia}>
                   {filtro === "compromissos"
                     ? "Nenhum compromisso neste dia."
                     : filtro === "remedios"

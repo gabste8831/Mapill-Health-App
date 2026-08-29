@@ -19,7 +19,8 @@ export type DicaProps = {
 export function Dica({ children }: DicaProps) {
   return (
     <View style={styles.container}>
-      <Ionicons name="help-circle" size={18} color={colors.tertiary} style={styles.icone} />
+      {/* O `?` no tom escuro do amarelo, e não no amarelo vivo: sobre o fundo claro o vivo some. */}
+      <Ionicons name="help-circle" size={18} color={colors.onWarningSurface} style={styles.icone} />
       <Text style={styles.texto}>{children}</Text>
     </View>
   );

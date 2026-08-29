@@ -33,10 +33,12 @@ export function CardEstoque({ quantidade, onPress }: CardEstoqueProps) {
 
       <View style={styles.texto}>
         <Text style={styles.titulo}>Estoque</Text>
+        {/* O convite entra no fim da frase: a contagem sozinha diz o que existe, mas não que o card
+            leva a algum lugar — e a seta da direita é a única outra pista disso. */}
         <Text style={styles.descricao}>
           {quantidade === 1
-            ? "1 medicação com estoque controlado"
-            : `${quantidade} medicações com estoque controlado`}
+            ? "1 medicação com estoque controlado, toque para gerenciar"
+            : `${quantidade} medicações com estoque controlado, toque para gerenciar`}
         </Text>
       </View>
 

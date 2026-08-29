@@ -67,6 +67,14 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
   },
   /**
+   * A opção que fecha a grade ocupando a linha toda (`ultimaOcupaLinha`). `flexBasis: "100%"` é o
+   * que força a quebra: com 40% ela subiria para o lado da anterior, e é justamente por baixo
+   * delas que ela precisa ficar — "Os dois" só faz sentido lido depois das duas que ele soma.
+   */
+  optionLinhaInteira: {
+    flexBasis: "100%",
+  },
+  /**
    * Cartão da grade quando ela carrega ícone e apoio: alinhado à esquerda como texto se lê, e
    * com altura livre. Centralizar viraria quatro blocos decorativos difíceis de comparar.
    */

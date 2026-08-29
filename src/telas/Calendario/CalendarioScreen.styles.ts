@@ -16,14 +16,36 @@ export const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
   },
-  /** Entre a grade e a lista: o filtro governa as duas, então fica entre elas. */
+  /**
+   * A grade dentro do scroll precisa desfazer o `paddingHorizontal` dele: a faixa azul vai de borda
+   * a borda, e recuada deixaria o fundo aparecendo dos dois lados. O `paddingTop` do scroll também
+   * é anulado — a faixa encosta no cabeçalho, como quando ela era fixa.
+   */
+  gradeNoScroll: {
+    marginHorizontal: -spacing.md,
+    marginTop: -spacing.sm,
+  },
+
+  /**
+   * Entre a grade e a lista: o filtro governa as duas, então fica entre elas — e é o único que
+   * gruda no topo quando a página rola. Fundo opaco e não transparente por causa disso: grudado
+   * sem fundo, a lista passaria por baixo dele.
+   */
   filtros: {
+    // Sangra até as bordas e devolve o recuo por dentro: grudado, o fundo precisa cobrir a largura
+    // inteira, senão a lista aparece passando pelas laterais.
+    marginHorizontal: -spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.background,
+  },
+  /**
+   * Sem `gap`: a grade, o filtro grudado e a lista precisam de respiros diferentes, e um espaço
+   * uniforme obrigava o filtro a flutuar longe do que ele filtra. Cada bloco declara o seu.
+   */
+  listContent: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
-  },
-  listContent: {
-    padding: spacing.md,
-    gap: spacing.md,
     paddingBottom: bottomTabInset + spacing.xxl,
   },
   sectionLabel: {
@@ -174,6 +196,21 @@ export const styles = StyleSheet.create({
   /** Um dia inteiro da agenda: o cabeçalho, os compromissos e o bloco de doses. */
   dia: {
     gap: spacing.sm,
+    // Separa do filtro grudado logo acima, agora que o `listContent` não tem mais `gap` uniforme.
+    marginTop: spacing.sm,
+  },
+
+  /**
+   * O "nada marcado" tem respiro próprio, e maior que o `gap` do dia. Ele não é mais um item da
+   * lista: é a ausência dela, e colado no cabeçalho do dia parecia legenda do título. O ar em
+   * volta é o que faz a frase ler como resposta à pergunta "o que tem hoje?".
+   */
+  vazioDoDia: {
+    ...typography.bodyMd,
+    color: colors.onSurfaceVariant,
+    textAlign: "center",
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.md,
   },
 
   // --- Cabeçalho de dia ---

@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { Modal, Pressable, ScrollView, Text, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
+import { spacing } from "@/shared/theme";
 import { styles } from "./BottomSheet.styles";
 
 /** Quanto da tela o popup pode ocupar, com o teclado fechado. O resto fica de respiro no topo. */
@@ -29,10 +31,23 @@ export type BottomSheetProps = {
 export function BottomSheet({ visible, onClose, title, children }: BottomSheetProps) {
   const keyboardHeight = useKeyboardHeight();
   const { height: alturaDaTela } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const alturaDisponivel = Math.max(
     ALTURA_MINIMA,
     alturaDaTela * ALTURA_MAXIMA - keyboardHeight,
   );
+
+  /**
+   * O respiro do fim do conteúdo. O popup encosta na base da tela, onde ainda ficam a barra de
+   * gestos e o queixo do aparelho — e o último elemento costuma ser justamente o botão que confirma
+   * a decisão. Com só um `padding` fixo ele ficava rente à borda, difícil de acertar e fácil de
+   * confundir com o gesto de voltar do sistema.
+   *
+   * Com o teclado aberto o inset não se aplica: a barra de gestos fica atrás do teclado, e somá-la
+   * empurraria o conteúdo para longe do dedo sem motivo.
+   */
+  const respiroInferior =
+    spacing.md + (keyboardHeight > 0 ? 0 : Math.max(insets.bottom, spacing.sm));
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -50,7 +65,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
           <ScrollView
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}>
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: respiroInferior }]}>
             {children}
           </ScrollView>
         </Pressable>

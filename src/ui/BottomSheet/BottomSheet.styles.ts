@@ -21,8 +21,9 @@ export const styles = StyleSheet.create({
     color: colors.onSurface,
   },
   /**
-   * O respiro de baixo fica aqui, e não no `sheet`: com o padding no container, o conteúdo
-   * rolado encostaria na borda do popup em vez de terminar antes dela.
+   * O respiro de baixo fica aqui, e não no `sheet`: com o padding no container, o conteúdo rolado
+   * encostaria na borda do popup em vez de terminar antes dela. O valor vem do componente, que soma
+   * a safe area do aparelho — ver `respiroInferior`.
    */
   scrollContent: {
     paddingBottom: spacing.md,
