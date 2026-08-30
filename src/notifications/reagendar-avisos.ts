@@ -1,9 +1,11 @@
 import { Platform } from "react-native";
 
+import { AppointmentRepository } from "@/data/repositories/appointment-repository";
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose } from "@/domain/entities/intake-log";
+import { planejarAvisosDeCompromisso } from "@/domain/use-cases/planejar-avisos-de-compromisso";
 import {
   planejarAvisosDeDose,
   type DoseAAvisar,
@@ -59,7 +61,7 @@ let emAndamento: Promise<void> = Promise.resolve();
  * Nunca lança: falhar em reagendar não pode derrubar o cadastro que acabou de ser salvo. O erro é
  * registrado e a próxima abertura do app corrige, porque a operação é idempotente.
  */
-export async function reagendarAvisosDeDose(): Promise<void> {
+export async function reagendarTodosOsAvisos(): Promise<void> {
   if (!persistsLocally) return;
 
   // Entra na fila: `catch` no encadeamento para que uma falha anterior não trave as seguintes.
@@ -107,7 +109,43 @@ async function executarReagendamento(): Promise<void> {
       });
     }
 
-    const avisos = planejarAvisosDeDose({ doses, agora, ate });
+    /**
+     * Compromissos e receitas entram na **mesma** reconstrução, e não numa função paralela.
+     *
+     * São a mesma operação: cancelar tudo e reagendar a partir do banco. Separá-las criaria duas
+     * funções que se cancelam mutuamente — a segunda apagaria o que a primeira acabou de agendar,
+     * porque `cancelarTudo` não sabe distinguir de quem é cada aviso pendente.
+     */
+    const appointments = await new AppointmentRepository().findAll();
+    const avisosDeCompromisso = planejarAvisosDeCompromisso({
+      compromissos: appointments.map((appointment) => ({
+        appointmentId: appointment.id,
+        scheduledFor: appointment.scheduledFor,
+        titulo: appointment.title,
+        reminderLeadDays: appointment.reminderLeadDays,
+        reminderOnDay: appointment.reminderOnDay,
+        jaRespondido: appointment.outcome !== null,
+      })),
+      // A receita mora na prescrição, e só entra quando tem validade **e** pedido de aviso. O
+      // medicamento excluído fica de fora pelo mesmo motivo das doses: não há o que renovar.
+      receitas: prescriptions.flatMap((prescription) => {
+        const medication = medicamentoPorId.get(prescription.medicationId);
+        if (medication === undefined) return [];
+        if (prescription.attachmentValidUntil === null) return [];
+        return [
+          {
+            prescriptionId: prescription.id,
+            medicationName: medication.name,
+            validUntil: prescription.attachmentValidUntil,
+            renewalReminderLeadDays: prescription.renewalReminderLeadDays,
+          },
+        ];
+      }),
+      agora,
+      ate,
+    });
+
+    const avisos = [...planejarAvisosDeDose({ doses, agora, ate }), ...avisosDeCompromisso];
 
     await gateway.cancelarTudo();
     for (const aviso of avisos) await gateway.agendar(aviso);

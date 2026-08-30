@@ -460,11 +460,12 @@ export function FormularioDeCompromissoScreen({
                 </>
               ) : null}
 
-              {/* Dizer que o aviso ainda não chega é obrigação, não ressalva: a escolha é guardada,
-                  o que falta é o mecanismo. */}
+              {/* Diz **quando** e **como** o aviso chega, agora que ele chega de verdade. A hora
+                  fixa importa: quem pede "3 dias antes" precisa saber que o aviso é de manhã, e não
+                  no mesmo horário da consulta — senão parece atrasado. */}
               <Text style={styles.hint}>
-                Sua escolha fica salva. Os lembretes do Mapill ainda estão sendo desenvolvidos e
-                passam a chegar quando ficarem prontos, por notificação.
+                Os avisos chegam por notificação, às 8 da manhã do dia marcado. Compromisso não toca
+                alarme: só a dose faz isso.
               </Text>
             </>
           ) : null}

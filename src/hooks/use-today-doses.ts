@@ -15,7 +15,7 @@ import type { Prescription } from "@/domain/entities/prescription";
 import { CorrectIntake } from "@/domain/use-cases/correct-intake";
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { RegisterIntake } from "@/domain/use-cases/register-intake";
-import { reagendarAvisosDeDose } from "@/notifications/reagendar-avisos";
+import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import { toLocalIsoDay, todayIsoDate } from "@/shared/date-input";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`). */
@@ -384,7 +384,7 @@ export function useTodayDoses() {
       await reload();
       // Gatilho nº5 do ciclo de vida: confirmar uma dose antes do horário tem que cancelar o aviso
       // dela, senão o app lembra de um remédio que a pessoa acabou de tomar.
-      await reagendarAvisosDeDose();
+      await reagendarTodosOsAvisos();
     },
     [reload],
   );
@@ -415,7 +415,7 @@ export function useTodayDoses() {
       }
 
       await reload();
-      await reagendarAvisosDeDose();
+      await reagendarTodosOsAvisos();
       return falhas;
     },
     [reload],

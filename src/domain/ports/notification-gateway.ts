@@ -29,23 +29,38 @@ export type NotificationPermission =
  */
 export type AvisoDeDose = {
   /**
-   * Identifica o horário, não a dose. Deriva do instante agendado, então reagendar o mesmo
-   * horário produz o mesmo id — o que torna o cancelamento idempotente.
+   * Identifica o aviso. Deriva do que ele avisa (o instante da dose, o id do compromisso), então
+   * recalcular o mesmo aviso produz a mesma chave — o que torna o cancelamento idempotente.
    */
   chave: string;
   /** Quando tocar. */
   quando: Date;
   titulo: string;
   corpo: string;
-  /** Ids das doses cobertas por este aviso — é o que a tela do horário abre. */
+  /**
+   * Ids das doses cobertas por este aviso — é o que a tela do horário abre.
+   *
+   * **Vazio** nos avisos que não são de dose (compromisso, receita vencendo): eles não apontam
+   * para dose nenhuma, e é isso que faz o toque abrir o app em vez da tela de horário.
+   */
   doseScheduleIds: string[];
   /**
    * `alarm` toca alto e atravessa o Não Perturbe; `notification` respeita o silencioso. Os dois
    * são heads-up: a diferença está no canal do Android, e ela é real (ver `canais.ts`).
+   *
+   * Compromisso e receita são **sempre** `notification` (decisão de 24/08): interromper como
+   * despertador se justifica na dose, que tem hora exata e consequência clínica imediata; para uma
+   * consulta na semana que vem seria só barulho.
    */
   modo: "alarm" | "notification";
-  /** Já foi adiado uma vez? Governa se o botão de adiar aparece (trava de 1 por horário). */
-  jaAdiado: boolean;
+  /**
+   * Se este aviso **não** deve oferecer as ações rápidas de dose (Tomei / Adiar).
+   *
+   * Duas situações o ligam, e as duas pelo mesmo motivo — não há o que oferecer: a dose já gastou
+   * seu único adiamento, ou o aviso nem é de dose (compromisso, receita). Botão que aparece e não
+   * funciona é pior que botão nenhum.
+   */
+  semAcoesRapidas: boolean;
 };
 
 export interface NotificationGateway {

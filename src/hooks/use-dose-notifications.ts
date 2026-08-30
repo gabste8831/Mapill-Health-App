@@ -7,7 +7,7 @@ import {
   escutarRespostas,
 } from "@/notifications/escutar-respostas";
 import type { DadosDoAviso } from "@/notifications/expo-notification-gateway";
-import { reagendarAvisosDeDose } from "@/notifications/reagendar-avisos";
+import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 
 /**
  * Liga os avisos de dose ao ciclo de vida do app.
@@ -38,10 +38,10 @@ export function useDoseNotifications(): void {
       });
     }
 
-    void reagendarAvisosDeDose();
+    void reagendarTodosOsAvisos();
 
     const assinaturaDoEstado = AppState.addEventListener("change", (estado) => {
-      if (estado === "active") void reagendarAvisosDeDose();
+      if (estado === "active") void reagendarTodosOsAvisos();
     });
     const pararDeEscutar = escutarRespostas(abrirHorario);
 

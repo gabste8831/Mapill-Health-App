@@ -143,7 +143,7 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
       modo,
       // Basta uma dose já adiada para o horário ter gasto seu adiamento: a trava é do aviso, que
       // é o que a pessoa adiou, e não de cada dose que ele carrega.
-      jaAdiado: ordenadas.some((dose) => dose.jaAdiada),
+      semAcoesRapidas: ordenadas.some((dose) => dose.jaAdiada),
     });
   }
 

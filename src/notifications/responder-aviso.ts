@@ -14,7 +14,7 @@ import {
   PREFIXO_ADIADO,
   type DadosDoAviso,
 } from "./expo-notification-gateway";
-import { reagendarAvisosDeDose } from "./reagendar-avisos";
+import { reagendarTodosOsAvisos } from "./reagendar-avisos";
 
 /**
  * "Tomei" — confirma **todas** as doses do horário e desconta o estoque de cada uma.
@@ -71,7 +71,7 @@ export async function confirmarDosesDoAviso(doseScheduleIds: string[]): Promise<
   }
 
   // As doses confirmadas deixam de gerar aviso, e o horário reagendado some da fila.
-  await reagendarAvisosDeDose();
+  await reagendarTodosOsAvisos();
 }
 
 /**
@@ -111,14 +111,14 @@ export async function adiarAviso(doseScheduleIds: string[]): Promise<void> {
 
   if (!alguemAdiou) return;
 
-  await reagendarAvisosDeDose();
+  await reagendarTodosOsAvisos();
   await agendarLembreteAdiado(doseScheduleIds);
 }
 
 /**
  * O aviso adiado propriamente dito.
  *
- * Fica separado de `reagendarAvisosDeDose` porque não pertence à janela: aquela função reconstrói
+ * Fica separado de `reagendarTodosOsAvisos` porque não pertence à janela: aquela função reconstrói
  * o que está **agendado por horário**, e o adiamento é um aviso extra, fora da grade, que existe
  * só até tocar. Colocá-lo na janela faria a próxima reconstrução apagá-lo.
  */
@@ -159,7 +159,7 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
     doseScheduleIds,
     modo: "alarm",
     // Já foi adiado: o aviso que volta não oferece adiar de novo.
-    jaAdiado: true,
+    semAcoesRapidas: true,
   });
 }
 

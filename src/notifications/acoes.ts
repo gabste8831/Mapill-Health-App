@@ -65,10 +65,20 @@ export async function registrarCategorias(): Promise<void> {
   ]);
 }
 
-/** Qual categoria usar, dadas a quantidade de doses e a trava de adiamento. */
-export function categoriaDoAviso(quantidadeDeDoses: number, jaAdiado: boolean): string {
+/**
+ * Qual categoria usar, dadas a quantidade de doses e se as ações rápidas cabem.
+ *
+ * `undefined` quando não há ação nenhuma a oferecer — o aviso sai só com o corpo, e tocar nele abre
+ * o app. É o caso dos avisos de compromisso e de receita vencendo: "Tomei" não significa nada numa
+ * consulta, e um botão que não faz sentido ensina a desconfiar dos que fazem.
+ */
+export function categoriaDoAviso(
+  quantidadeDeDoses: number,
+  semAcoesRapidas: boolean,
+): string | undefined {
+  if (quantidadeDeDoses === 0) return undefined;
   if (quantidadeDeDoses === 1) {
-    return jaAdiado ? CATEGORIA_UMA_DOSE_SEM_ADIAR : CATEGORIA_UMA_DOSE;
+    return semAcoesRapidas ? CATEGORIA_UMA_DOSE_SEM_ADIAR : CATEGORIA_UMA_DOSE;
   }
-  return jaAdiado ? CATEGORIA_VARIAS_SEM_ADIAR : CATEGORIA_VARIAS_DOSES;
+  return semAcoesRapidas ? CATEGORIA_VARIAS_SEM_ADIAR : CATEGORIA_VARIAS_DOSES;
 }

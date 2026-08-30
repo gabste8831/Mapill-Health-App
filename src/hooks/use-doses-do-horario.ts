@@ -6,7 +6,7 @@ import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-reposi
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
-import { reagendarAvisosDeDose } from "@/notifications/reagendar-avisos";
+import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { gravarDesfecho } from "./use-today-doses";
 
@@ -100,7 +100,7 @@ export function useDosesDoHorario(instanteIso: string) {
       await gravarDesfecho(dose, status);
       await reload();
       // Resolvida, a dose deixa de gerar aviso — e o horário some da fila se não sobrar nenhuma.
-      await reagendarAvisosDeDose();
+      await reagendarTodosOsAvisos();
     },
     [reload],
   );

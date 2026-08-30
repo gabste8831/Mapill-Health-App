@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 
 import { AppointmentRepository } from "@/data/repositories/appointment-repository";
 import type { AppointmentOutcome } from "@/domain/entities/appointment";
+import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import type { CompromissoDraft } from "@/telas/CadastroDeCompromisso/FormularioDeCompromissoScreen";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`). */
@@ -43,6 +44,10 @@ export function useAppointmentRegistration() {
       syncedAt: null,
       deletedAt: null,
     });
+
+    // A data, o horário ou os canais de aviso podem ter mudado — e "editar" um aviso agendado é
+    // justamente o caminho que gera órfão. Refaz a janela inteira, que é idempotente.
+    await reagendarTodosOsAvisos();
   }, []);
 
   /** O inverso exato de `salvarCompromisso` — por isso os dois moram no mesmo arquivo. */
@@ -91,6 +96,10 @@ export function useAppointmentRegistration() {
         updatedAt: new Date().toISOString(),
         syncedAt: null,
       });
+
+      // Respondido não avisa mais, e desfazer a resposta traz o aviso de volta — nos dois sentidos
+      // é a mesma reconstrução.
+      await reagendarTodosOsAvisos();
     },
     [],
   );
@@ -103,6 +112,8 @@ export function useAppointmentRegistration() {
   const excluirCompromisso = useCallback(async (id: string) => {
     if (!persistsLocally) return;
     await new AppointmentRepository().softDelete(id);
+    // Sem isto, o lembrete de uma consulta cancelada continuaria chegando — o alarme órfão do C3.
+    await reagendarTodosOsAvisos();
   }, []);
 
   return { salvarCompromisso, carregarCompromisso, registrarDesfecho, excluirCompromisso };

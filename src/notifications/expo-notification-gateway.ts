@@ -26,13 +26,14 @@ export type DadosDoAviso = {
 };
 
 /**
- * Prefixo das chaves da **grade de horários** — as que `reagendarAvisosDeDose` reconstrói.
+ * O lembrete adiado — o único aviso que **sobrevive** a um reagendamento.
  *
- * Existe para separá-las do lembrete adiado (`PREFIXO_ADIADO`), que sobrevive ao reagendamento.
- * Precisa casar com o prefixo que `planejarAvisosDeDose` gera; a duplicação é o preço de o domínio
- * não conhecer esta camada, e está travada pelo teste em Node que verifica o formato da chave.
+ * A regra é por exclusão, e não por inclusão: `cancelarTudo` apaga tudo que **não** começa com
+ * este prefixo. É deliberado. Listar o que apagar exigiria lembrar de acrescentar cada tipo novo
+ * de aviso (dose, compromisso, receita…), e o preço de esquecer um é o pior defeito deste bloco: o
+ * alarme órfão, que continua tocando para algo que não existe mais. Esquecer de **preservar** algo
+ * custa, no máximo, um lembrete adiado que não volta — recuperável, e visível na hora.
  */
-export const PREFIXO_DA_GRADE = "dose-";
 export const PREFIXO_ADIADO = "adiado-";
 
 /** Só o que já foi preparado uma vez nesta execução do app. */
@@ -121,7 +122,7 @@ export class ExpoNotificationGateway implements NotificationGateway {
         title: aviso.titulo,
         body: aviso.corpo,
         data: dados,
-        categoryIdentifier: categoriaDoAviso(aviso.doseScheduleIds.length, aviso.jaAdiado),
+        categoryIdentifier: categoriaDoAviso(aviso.doseScheduleIds.length, aviso.semAcoesRapidas),
         // Booleano, e não o nome de um arquivo — quem decide o som no Android 8+ é o canal. Serve
         // ao iOS, onde não há canal e o som é decidido por notificação.
         sound: true,
@@ -137,24 +138,24 @@ export class ExpoNotificationGateway implements NotificationGateway {
   }
 
   /**
-   * Cancela os avisos **da grade de horários**, preservando os adiados.
+   * Cancela **tudo que será reconstruído** — doses, compromissos e receitas —, preservando só o
+   * lembrete adiado.
    *
    * A parte grosseira é deliberada: o pior defeito possível aqui é o **alarme órfão** — o lembrete
-   * de um remédio que a pessoa já parou de tomar —, e ele nasce justamente de tentar editar
-   * cirurgicamente o que já está agendado. Apagar e refazer é idempotente, e idempotência é a única
-   * garantia barata de que nenhum sobreviva a uma edição.
+   * de um remédio que a pessoa já parou de tomar, ou de uma consulta que ela cancelou —, e ele
+   * nasce justamente de tentar editar cirurgicamente o que já está agendado. Apagar e refazer é
+   * idempotente, e idempotência é a única garantia barata de que nenhum sobreviva a uma edição.
    *
    * O que **não** pode ser apagado é o lembrete adiado. Ele não pertence à grade: nasce de um toque
    * em "Adiar", vive cinco minutos e morre ao tocar. Um `cancelAllScheduledNotificationsAsync()`
    * levaria ele junto sempre que qualquer coisa reagendasse a janela — e é justamente nesses cinco
    * minutos que a pessoa costuma abrir o app, o que apagaria em silêncio o aviso que ela pediu.
-   * Por isso o filtro por prefixo de identificador, em vez do cancelamento cego.
    */
   async cancelarTudo(): Promise<void> {
     const pendentes = await Notifications.getAllScheduledNotificationsAsync();
     await Promise.all(
       pendentes
-        .filter((pendente) => pendente.identifier.startsWith(PREFIXO_DA_GRADE))
+        .filter((pendente) => !pendente.identifier.startsWith(PREFIXO_ADIADO))
         .map((pendente) => Notifications.cancelScheduledNotificationAsync(pendente.identifier)),
     );
   }
