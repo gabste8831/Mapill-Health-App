@@ -7,7 +7,12 @@ import type {
   NotificationPermission,
 } from "@/domain/ports/notification-gateway";
 import { categoriaDoAviso, registrarCategorias } from "./acoes";
-import { CANAL_ALARME, CANAL_LEMBRETE, registrarCanais } from "./canais";
+import {
+  CANAL_ALARME,
+  CANAL_LEMBRETE,
+  diagnosticarCanalDeAlarme,
+  registrarCanais,
+} from "./canais";
 
 /**
  * O que viaja junto da notificação e volta quando ela é tocada. Sem isso não há como saber qual
@@ -42,6 +47,10 @@ async function prepararSistema(): Promise<void> {
   await registrarCanais();
   await registrarCategorias();
   jaPreparado = true;
+
+  // Só em desenvolvimento: diz no console o que o **sistema** guardou sobre o canal, e não o que
+  // pedimos. Duas rodadas de teste se perderam com o canal nascendo mudo sem nenhum sinal disso.
+  if (__DEV__) console.log("[Mapill] canal de alarme →", await diagnosticarCanalDeAlarme());
 }
 
 function traduzirPermissao(status: Notifications.NotificationPermissionsStatus): NotificationPermission {
@@ -113,6 +122,8 @@ export class ExpoNotificationGateway implements NotificationGateway {
         body: aviso.corpo,
         data: dados,
         categoryIdentifier: categoriaDoAviso(aviso.doseScheduleIds.length, aviso.jaAdiado),
+        // Booleano, e não o nome de um arquivo — quem decide o som no Android 8+ é o canal. Serve
+        // ao iOS, onde não há canal e o som é decidido por notificação.
         sound: true,
         ...(Platform.OS === "android"
           ? { channelId: aviso.modo === "alarm" ? CANAL_ALARME : CANAL_LEMBRETE }

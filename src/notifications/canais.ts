@@ -11,8 +11,8 @@ import { colors } from "@/shared/theme";
  * correção nossa simplesmente não apareceria para essas pessoas. Subir o sufixo cria um canal novo
  * e a mudança passa a valer. A regra: mexeu em som ou importância, sobe a versão.
  */
-export const CANAL_ALARME = "dose-alarm-v2";
-export const CANAL_LEMBRETE = "dose-reminder-v2";
+export const CANAL_ALARME = "dose-alarm-v3";
+export const CANAL_LEMBRETE = "dose-reminder-v3";
 
 /**
  * Cria os canais. Idempotente — chamar de novo com o mesmo id não faz nada.
@@ -37,11 +37,18 @@ export async function registrarCanais(): Promise<void> {
     // "chegou um WhatsApp" e "está na hora do remédio" precisa ser sentida sem olhar a tela.
     vibrationPattern: [0, 500, 250, 500],
     /**
-     * **Explícito, e não pelo padrão.** Sem este campo o canal nasce com o som que o sistema
-     * escolher — e no teste em aparelho ele nasceu mudo: a notificação chegava e nada tocava, num
-     * canal chamado "alarme".
+     * **`sound` é omitido de propósito — é o que dá o som padrão do sistema.**
+     *
+     * A tipagem sugere `'default' | 'custom' | null`, mas o nativo não lê assim. Em
+     * `AndroidXNotificationsChannelManager.createSoundUriFromArguments`: campo **ausente** →
+     * `DEFAULT_NOTIFICATION_URI`; `null` → sem som; **qualquer string** → nome de arquivo a
+     * resolver. Passar `"default"` fazia o Android procurar um arquivo chamado `default`, não
+     * achar, e criar o canal **mudo** — com o erro "Custom sound 'default' not found in native
+     * app" no console.
+     *
+     * Foi a causa de o alarme não tocar depois da primeira correção. Se um dia um som próprio
+     * entrar aqui, ele precisa estar no array `sounds` do plugin no `app.json`.
      */
-    sound: "default",
     /**
      * `usage: "alarm"` é o que faz o Android **tratar isto como despertador**, e não como aviso.
      *
@@ -76,7 +83,7 @@ export async function registrarCanais(): Promise<void> {
     description: "Aparece na barra de avisos e respeita o modo silencioso.",
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250],
-    sound: "default",
+    // `sound` omitido pelo mesmo motivo do canal acima: ausente é o que significa "som padrão".
     // Aqui o uso é de notificação mesmo: sai pelo volume de avisos e respeita o silencioso, que é
     // exatamente o que separa esta opção da de cima no cadastro.
     audioAttributes: {
@@ -88,4 +95,28 @@ export async function registrarCanais(): Promise<void> {
     lightColor: colors.primary,
     enableVibrate: true,
   });
+}
+
+/**
+ * O que o **sistema** guardou sobre o canal do alarme, e não o que pedimos.
+ *
+ * Existe porque este bloco já falhou duas vezes em silêncio: o canal era criado, nenhum erro
+ * aparecia, e só o teste em aparelho revelava que ele tinha nascido mudo. Um canal congela na
+ * primeira criação — som e importância deixam de aceitar mudança — então ler de volta é a única
+ * forma de saber o que está valendo de verdade no aparelho de quem testa.
+ *
+ * `soundUri` nulo significa canal **mudo**. `importance` abaixo de MAX (5) significa que ele não
+ * vai interromper. Nos dois casos a saída é subir a versão do id, nunca "corrigir" o canal atual.
+ */
+export async function diagnosticarCanalDeAlarme(): Promise<string> {
+  if (Platform.OS !== "android") return "iOS/web: sem canais.";
+  const canal = await Notifications.getNotificationChannelAsync(CANAL_ALARME);
+  if (canal === null) return `Canal ${CANAL_ALARME} não existe.`;
+  return [
+    `id: ${canal.id}`,
+    `importance: ${canal.importance}`,
+    `som: ${canal.sound ?? "NENHUM (mudo)"}`,
+    `bypassDnd: ${canal.bypassDnd}`,
+    `audioAttributes.usage: ${canal.audioAttributes?.usage ?? "-"}`,
+  ].join(" · ");
 }
