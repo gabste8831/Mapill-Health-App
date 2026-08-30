@@ -53,11 +53,6 @@ function chaveDoHorario(scheduledFor: string): string {
   return `dose-${scheduledFor}`;
 }
 
-/** "08:00" a partir do instante, no fuso do aparelho — que é onde a pessoa lê a hora. */
-function horaLocal(instante: Date): string {
-  const p = (valor: number) => String(valor).padStart(2, "0");
-  return `${p(instante.getHours())}:${p(instante.getMinutes())}`;
-}
 
 /**
  * O aviso é do **horário**, e o modo é o mais exigente entre as doses dele.
@@ -111,24 +106,38 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
     if (modo === null) continue;
 
     const quando = new Date(scheduledFor);
-    const hora = horaLocal(quando);
     // Ordem estável dentro do aviso: o mesmo horário sempre lista os remédios na mesma sequência,
     // e uma lista que se reordena sozinha entre um dia e outro obriga a reler o que já se sabia.
     const ordenadas = [...doses].sort((a, b) => a.medicationName.localeCompare(b.medicationName));
 
-    const linhas = ordenadas.map(
-      (dose) => `${dose.medicationName} — ${dose.quantidadeFormatada}`,
-    );
+    /**
+     * Uma linha por remédio, com dois pontos separando o nome da quantidade.
+     *
+     * Travessão saiu: em fonte pequena, na barra de notificação, ele se confunde com hífen de
+     * palavra composta e some no meio do texto. Dois pontos leem como "isto, nesta quantidade",
+     * que é exatamente a relação entre as duas partes.
+     */
+    const linhas = ordenadas.map((dose) => `${dose.medicationName}: ${dose.quantidadeFormatada}`);
 
     avisos.push({
       chave: chaveDoHorario(scheduledFor),
       quando,
-      // Com um remédio o nome vai no título, porque é a informação que resolve o aviso sem abri-lo.
-      // Com vários não cabe, e a contagem é o que orienta: ela diz quantas respostas faltam.
+      /**
+       * O título diz **o que é**, e o corpo diz **o que tomar**.
+       *
+       * Antes o título era `08:00 — Losartana`, o que repetia duas informações que o sistema já
+       * mostra: a hora aparece no canto da própria notificação, e o nome do remédio reaparecia na
+       * linha de baixo. Sobrava um aviso que dizia três vezes a mesma coisa e nenhuma vez o que
+       * ele queria de quem estava lendo.
+       *
+       * "Hora do seu remédio" é a frase que faz alguém entender o aviso sem abri-lo, mesmo de
+       * relance na tela bloqueada. Com mais de um remédio a contagem entra, porque aí ela é o que
+       * orienta: diz quantas respostas faltam antes de a pessoa tocar.
+       */
       titulo:
         ordenadas.length === 1
-          ? `${hora} — ${ordenadas[0].medicationName}`
-          : `${hora} — ${ordenadas.length} remédios`,
+          ? "Hora do seu remédio"
+          : `Hora dos seus remédios (${ordenadas.length})`,
       corpo: linhas.join("\n"),
       doseScheduleIds: ordenadas.map((dose) => dose.doseScheduleId),
       modo,

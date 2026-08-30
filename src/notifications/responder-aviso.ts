@@ -135,8 +135,9 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
     if (prescription === null) continue;
     const medication = await medicationRepository.findById(prescription.medicationId);
     if (medication === null) continue;
+    // Dois pontos, e não travessão: o mesmo formato do aviso da grade (ver `planejarAvisosDeDose`).
     linhas.push(
-      `${medication.name} — ${formatarQuantidade(doseSchedule.amount, prescription.doseUnit)}`,
+      `${medication.name}: ${formatarQuantidade(doseSchedule.amount, prescription.doseUnit)}`,
     );
   }
 
@@ -148,7 +149,12 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
     // à janela de horários, e sim ao toque em "Adiar" que acabou de acontecer.
     chave: `${PREFIXO_ADIADO}${quando.toISOString()}`,
     quando,
-    titulo: linhas.length === 1 ? "Lembrete adiado" : `Lembrete adiado — ${linhas.length} remédios`,
+    // "de novo" porque é a segunda vez que este aviso aparece, e dizer isso evita que ele pareça
+    // um horário novo que a pessoa esqueceu.
+    titulo:
+      linhas.length === 1
+        ? "Hora do seu remédio, de novo"
+        : `Hora dos seus remédios, de novo (${linhas.length})`,
     corpo: linhas.join("\n"),
     doseScheduleIds,
     modo: "alarm",
