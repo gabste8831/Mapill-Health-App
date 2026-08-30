@@ -91,6 +91,14 @@ export type AgendaDoDia = {
   estoquesControlados: number;
   /** Se existe pelo menos um medicamento cadastrado — separa "dia vazio" de "app vazio". */
   temMedicamentos: boolean;
+  /**
+   * Quantos tratamentos ativos pediram para ser avisados (`reminderMode` diferente de `none`).
+   *
+   * Existe para a Home saber se vale avisar que a permissão de notificações está desligada. Sem
+   * isso, o aviso apareceria para quem nunca pediu lembrete nenhum — cobrando uma permissão que
+   * não muda nada na vida dessa pessoa, que é o jeito mais rápido de ensinar a ignorar avisos.
+   */
+  tratamentosComLembrete: number;
 };
 
 const AGENDA_VAZIA: AgendaDoDia = {
@@ -100,6 +108,7 @@ const AGENDA_VAZIA: AgendaDoDia = {
   estoquesBaixos: [],
   estoquesControlados: 0,
   temMedicamentos: false,
+  tratamentosComLembrete: 0,
 };
 
 /** Iniciais dos dias, indexadas por `Date.getDay()`. */
@@ -213,6 +222,13 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
     ).length,
     resolvidas: doses.filter((dose) => resolvesDose(dose.latestStatus)).length,
     temMedicamentos: medications.length > 0,
+    // Só os de medicamento que ainda existe, pelo mesmo motivo do estoque: a prescrição de um
+    // remédio excluído continua no banco como histórico, mas não espera aviso nenhum.
+    tratamentosComLembrete: prescriptions.filter(
+      (prescription) =>
+        prescription.reminderMode !== "none" &&
+        medicamentoPorId.get(prescription.medicationId) !== undefined,
+    ).length,
   };
 }
 
