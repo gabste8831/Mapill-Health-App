@@ -1,5 +1,7 @@
-import { Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, Text, View } from "react-native";
 
+import { colors } from "@/shared/theme";
 import { barRowHeight, styles } from "./CardAdesaoSemanal.styles";
 
 type DiaDeAdesao = {
@@ -12,14 +14,30 @@ type DiaDeAdesao = {
 type CardAdesaoSemanalProps = {
   days: DiaDeAdesao[];
   summary: string;
+  /** Abre o relatório completo. Ausente deixa o card só informativo, como era antes. */
+  onAbrirRelatorio?: () => void;
 };
 
-/** Mini-gráfico de barras sem lib externa — só Views com altura proporcional. */
-export function CardAdesaoSemanal({ days, summary }: CardAdesaoSemanalProps) {
+/**
+ * Mini-gráfico de barras sem lib externa — só Views com altura proporcional.
+ *
+ * Virou porta de entrada do relatório de adesão: sete barras respondem "como foi a semana", e quem
+ * quer saber mais já está olhando exatamente para o lugar certo. Sem isso, o relatório precisaria
+ * de um item novo em algum menu — e a pergunta que ele responde nasce aqui.
+ */
+export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesaoSemanalProps) {
   return (
-    <View style={styles.container}>
+    <Pressable
+      style={styles.container}
+      onPress={onAbrirRelatorio}
+      disabled={onAbrirRelatorio === undefined}
+      accessibilityRole={onAbrirRelatorio ? "button" : undefined}
+      accessibilityLabel={onAbrirRelatorio ? "Ver meu relatório de adesão" : undefined}>
       <View style={styles.header}>
         <Text style={styles.title}>Acompanhamento semanal</Text>
+        {onAbrirRelatorio ? (
+          <Ionicons name="chevron-forward" size={18} color={colors.onSurfaceVariant} />
+        ) : null}
       </View>
       <View style={styles.barsRow}>
         {days.map((day, index) => (
@@ -48,6 +66,6 @@ export function CardAdesaoSemanal({ days, summary }: CardAdesaoSemanalProps) {
         ))}
       </View>
       <Text style={styles.summary}>{summary}</Text>
-    </View>
+    </Pressable>
   );
 }

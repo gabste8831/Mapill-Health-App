@@ -287,7 +287,11 @@ export function InicioScreen() {
 
         {/* Só com algum dia medido: um gráfico de sete traços vazios não informa nada. */}
         {agenda.semana.some((dia) => dia.ratio !== null) ? (
-          <CardAdesaoSemanal days={agenda.semana} summary={resumoDaSemana(agenda.semana)} />
+          <CardAdesaoSemanal
+            days={agenda.semana}
+            summary={resumoDaSemana(agenda.semana)}
+            onAbrirRelatorio={() => router.push("/adesao")}
+          />
         ) : null}
 
         {/* Acesso permanente ao estoque, e não só quando algo está acabando: o ícone no topo da

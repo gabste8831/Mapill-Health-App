@@ -122,6 +122,7 @@ export default function RootLayout() {
           <Stack.Screen name="estoque" />
           <Stack.Screen name="conta" />
           <Stack.Screen name="horario/[instante]" />
+          <Stack.Screen name="adesao" />
           <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
         </Stack>
       </>
