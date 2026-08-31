@@ -183,9 +183,13 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
         "apagados, não apenas ocultados da tela. Apagar tudo também desvincula a sua conta do " +
         "Google e devolve o app ao estado de recém-instalado. A conta do Google em si não é " +
         "excluída - ela apenas deixa de estar ligada ao Mapill.",
-      "Para apagar também a cópia na nuvem, é preciso estar com a conta vinculada - é ela que " +
-        "prova que os dados são seus. Enquanto a exclusão na nuvem não estiver disponível no app, " +
-        "você pode solicitá-la pelo contato no fim deste documento, e ela é feita em até 15 dias.",
+      "Com a conta vinculada, apagar pelo app alcança também a cópia na nuvem, na mesma ação - a " +
+        "conta é o que prova que os dados são seus. Se você desvincular a conta antes de apagar, a " +
+        "cópia na nuvem permanece, e para removê-la basta vincular de novo e apagar, ou pedir pelo " +
+        "contato no fim deste documento.",
+      "Você também pode baixar uma cópia completa dos seus dados a qualquer momento, em Ajustes > " +
+        "Conta e dados > Baixar uma cópia dos meus dados. O arquivo sai em formato aberto (JSON), " +
+        "para você guardar onde quiser ou levar para outro serviço.",
     ],
   },
   {

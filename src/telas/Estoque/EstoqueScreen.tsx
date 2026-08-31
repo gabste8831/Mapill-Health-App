@@ -130,7 +130,7 @@ type Edicao = { item: ItemDeEstoque; modo: "recontagem" | "reposicao" };
 
 export function EstoqueScreen() {
   const router = useRouter();
-  const { items, isLoading, error, reload } = useInventoryList();
+  const { items, aRecontar, isLoading, error, reload } = useInventoryList();
   const [edicao, setEdicao] = useState<Edicao | null>(null);
   const [valor, setValor] = useState("");
   const [ordem, setOrdem] = useState<OrdemDeEstoque>("urgencia");
@@ -209,6 +209,29 @@ export function EstoqueScreen() {
           )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          /**
+           * O lembrete de conferência, quando há algum estoque parado há mais de um mês.
+           *
+           * **Aqui e não na Home**, e sem notificação: conferir uma caixa é tarefa que se faz de
+           * pé na frente do armário, não algo que justifique interromper o dia. Quem abre esta
+           * tela já está pensando em estoque — é o único momento em que a pergunta chega na hora
+           * certa. Some sozinho quando não há nada a perguntar, que é o caso comum.
+           */
+          ListHeaderComponent={
+            aRecontar.length > 0 ? (
+              <View style={styles.lembrete}>
+                <View style={styles.lembreteTopo}>
+                  <Ionicons name="help-circle" size={20} color={colors.onWarningSurface} />
+                  <Text style={styles.lembreteTitulo}>Vale conferir a caixa</Text>
+                </View>
+                <Text style={styles.lembreteTexto}>
+                  {aRecontar.length === 1
+                    ? `${aRecontar[0].medicationName} está há ${aRecontar[0].diasSemConferir} dias sem conferência. O número aqui é uma estimativa — abrir a caixa e recontar deixa a previsão de término confiável.`
+                    : `${aRecontar.length} medicações estão há mais de um mês sem conferência. O número aqui é uma estimativa — recontar deixa a previsão de término confiável.`}
+                </Text>
+              </View>
+            ) : null
+          }
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text style={styles.emptyTitle}>Nenhum estoque controlado</Text>

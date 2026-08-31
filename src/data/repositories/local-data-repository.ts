@@ -2,6 +2,7 @@ import { Directory, File, Paths } from "expo-file-system";
 import { Platform } from "react-native";
 
 import { getDatabase } from "../local/database";
+import { apagarNaNuvem, SQL_LIMPAR_MARCA_DAGUA } from "../remote/apagar-na-nuvem";
 
 /**
  * Tabelas com dado clínico, na ordem em que precisam morrer: filhas antes das mães. As chaves
@@ -44,15 +45,27 @@ const PREFIXOS_DE_ARQUIVO = ["ficha-foto", "medicamento-caixa", "medicamento-rec
  * dois lados, e o de lá primeiro. Ver o D3.
  */
 export class LocalDataRepository {
-  /** Medicamentos, tratamentos, horários, histórico, estoque e compromissos. Ficha e consentimento ficam. */
+  /**
+   * Medicamentos, tratamentos, horários, histórico, estoque e compromissos. Ficha e consentimento
+   * ficam.
+   *
+   * **A nuvem é apagada primeiro, e a ordem não é detalhe.** Com o D1 ligado, apagar só o local
+   * faria o próximo `pull` trazer tudo de volta — e a pessoa veria os dados que mandou apagar
+   * reaparecerem sozinhos, que é a pior coisa que um botão de exclusão pode fazer. Apagando lá
+   * primeiro, mesmo que o app feche no meio, o que sobra localmente sobe como exclusão na próxima
+   * sincronização.
+   */
   async eraseHealthData(): Promise<void> {
+    await apagarNaNuvem(TABELAS_CLINICAS);
     await this.eraseTables(TABELAS_CLINICAS);
     this.eraseFiles(["medicamento-caixa", "medicamento-receita"]);
   }
 
   /** Tudo: o clínico, a ficha, o consentimento e os arquivos. O app volta à primeira execução. */
   async eraseEverything(): Promise<void> {
-    await this.eraseTables([...TABELAS_CLINICAS, ...TABELAS_DE_IDENTIDADE]);
+    const tabelas = [...TABELAS_CLINICAS, ...TABELAS_DE_IDENTIDADE];
+    await apagarNaNuvem(tabelas);
+    await this.eraseTables(tabelas);
     this.eraseFiles(PREFIXOS_DE_ARQUIVO);
   }
 
@@ -66,6 +79,17 @@ export class LocalDataRepository {
       for (const tabela of tabelas) {
         await database.runAsync(`DELETE FROM ${tabela}`);
       }
+      /**
+       * A marca d'água da sincronização vai junto.
+       *
+       * Ela diz "já baixei tudo até tal instante". Mantida depois de esvaziar o banco, o próximo
+       * pull pularia exatamente as linhas mais antigas que ela — e o app ficaria com metade dos
+       * dados se algum dia eles voltassem. `IF EXISTS` porque a tabela só nasce na primeira
+       * sincronização, e quem nunca vinculou conta não a tem.
+       */
+      await database
+        .runAsync(SQL_LIMPAR_MARCA_DAGUA)
+        .catch(() => {});
     });
   }
 

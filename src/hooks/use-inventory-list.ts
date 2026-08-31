@@ -15,6 +15,10 @@ import {
 import type { Prescription } from "@/domain/entities/prescription";
 import type { StockChange } from "@/domain/use-cases/adjust-stock";
 import {
+  estoquesARecontar,
+  type EstoqueARecontar,
+} from "@/domain/use-cases/estoques-a-recontar";
+import {
   estimateStockDepletion,
   type StockDepletion,
 } from "@/domain/use-cases/estimate-stock-depletion";
@@ -167,15 +171,53 @@ export async function aplicarMudancaDeEstoque(
  * Os estoques controlados, recarregados a cada volta ao foco — é o que faz a quantidade já estar
  * certa depois de uma dose confirmada em outra tela.
  */
+/**
+ * Quais estoques estão há muito tempo sem conferência.
+ *
+ * Lê a última recontagem manual de cada um e entrega ao use-case puro, que decide o corte. Vazio
+ * quando não há o que perguntar — e vazio é o caso comum, porque a pergunta é mensal.
+ */
+async function carregarARecontar(agora: Date): Promise<EstoqueARecontar[]> {
+  const inventoryRepository = new InventoryRepository();
+  const [inventories, medications, ultimaRecontagemPorItem] = await Promise.all([
+    inventoryRepository.findAll(),
+    new MedicationRepository().findAll(),
+    inventoryRepository.findLastRecountByItem(),
+  ]);
+
+  const medicamentoPorId = new Map(medications.map((m) => [m.id, m]));
+
+  return estoquesARecontar({
+    estoques: inventories.flatMap((inventory) => {
+      const medication = medicamentoPorId.get(inventory.medicationId);
+      // Mesmo motivo da lista: estoque de remédio excluído não aparece em lugar nenhum.
+      if (medication === undefined) return [];
+      return [
+        {
+          inventoryItemId: inventory.id,
+          medicationId: inventory.medicationId,
+          medicationName: medication.name,
+          ultimaRecontagem: ultimaRecontagemPorItem.get(inventory.id) ?? null,
+          referencia: inventory.updatedAt,
+        },
+      ];
+    }),
+    agora,
+  });
+}
+
 export function useInventoryList() {
   const [items, setItems] = useState<ItemDeEstoque[]>([]);
+  const [aRecontar, setARecontar] = useState<EstoqueARecontar[]>([]);
   const [isLoading, setIsLoading] = useState(persistsLocally);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     if (!persistsLocally) return;
     try {
+      const agora = new Date();
       setItems(await carregarItens());
+      setARecontar(await carregarARecontar(agora));
       setError(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Não foi possível carregar seu estoque.");
@@ -190,5 +232,5 @@ export function useInventoryList() {
     }, [reload]),
   );
 
-  return { items, isLoading, error, reload };
+  return { items, aRecontar, isLoading, error, reload };
 }

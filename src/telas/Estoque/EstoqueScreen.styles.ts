@@ -111,6 +111,34 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
 
+  /**
+   * O lembrete de conferência. Amarelo com barra lateral, a mesma linguagem da `Dica` — porque é
+   * exatamente isso: apoio, não cobrança. O plano registra a recontagem como **não obrigatória**
+   * (decisão nº6), e o app funciona igual se ninguém nunca conferir.
+   */
+  lembrete: {
+    backgroundColor: colors.warningSurface,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.warning,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  lembreteTopo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  lembreteTitulo: {
+    ...typography.label,
+    color: colors.onWarningSurface,
+  },
+  lembreteTexto: {
+    ...typography.bodyMd,
+    color: colors.onSurface,
+  },
+
   // --- Popup de recontagem / reposição ---
   sheetBody: {
     gap: spacing.md,

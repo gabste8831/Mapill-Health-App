@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import type { ReactNode } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import * as Sharing from "expo-sharing";
+import { useState, type ReactNode } from "react";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { exportarDados } from "@/data/repositories/exportar-dados";
 import { useSync } from "@/hooks/use-sync";
 import { colors } from "@/shared/theme";
 import { Card, GoogleLogo, Header, IndicadorDeSync } from "@/ui";
@@ -69,6 +71,42 @@ export function ContaScreen({
 }: ContaScreenProps) {
   const isSignedIn = accountEmail !== null;
   const sync = useSync();
+  const [exportando, setExportando] = useState(false);
+
+  /**
+   * Gera o arquivo e abre a folha de compartilhamento do sistema.
+   *
+   * **Compartilhar, e não "salvar em Downloads".** O app não escolhe o destino: quem escolhe é a
+   * pessoa, no menu do Android — Drive, e-mail para si mesma, WhatsApp, arquivos locais. Escolher
+   * por ela criaria um arquivo com dado de saúde num lugar que ela talvez não esperasse.
+   */
+  async function exportar() {
+    if (exportando) return;
+    setExportando(true);
+    try {
+      const resultado = await exportarDados();
+
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert(
+          "Arquivo gerado",
+          `Seus dados foram salvos em ${resultado.nome}, mas este aparelho não oferece a tela de compartilhamento.`,
+        );
+        return;
+      }
+
+      await Sharing.shareAsync(resultado.uri, {
+        mimeType: "application/json",
+        dialogTitle: "Salvar meus dados do Mapill",
+      });
+    } catch (cause) {
+      Alert.alert(
+        "Não foi possível exportar",
+        cause instanceof Error ? cause.message : "Tente novamente em instantes.",
+      );
+    } finally {
+      setExportando(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -136,6 +174,17 @@ export function ContaScreen({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>MEUS DADOS</Text>
           <Card>
+            {/* Exportar vem **antes** de apagar, e não é ordem arbitrária: é a última chance de
+                levar os dados embora, e quem chega nesta seção decidido a apagar tudo precisa
+                passar o olho por ela primeiro. */}
+            <Linha
+              icon={
+                <Ionicons name="download-outline" size={22} color={colors.onSurfaceVariant} />
+              }
+              label={exportando ? "Preparando o arquivo…" : "Baixar uma cópia dos meus dados"}
+              hint="Um arquivo com tudo que o app guarda sobre você, para salvar onde quiser."
+              onPress={() => void exportar()}
+            />
             <Linha
               icon={<Ionicons name="trash-outline" size={22} color={colors.error} />}
               label="Apagar meus dados de saúde"
@@ -151,8 +200,12 @@ export function ContaScreen({
               onPress={onEraseEverything}
             />
           </Card>
+          {/* O texto mudou junto com o D1: dizer que o apagamento acontece "neste aparelho" deixou
+              de ser a história completa no instante em que passou a existir uma cópia na nuvem. */}
           <Text style={styles.sectionFooter}>
-            O apagamento é definitivo e acontece neste aparelho. Não há como desfazer.
+            {isSignedIn
+              ? "O apagamento é definitivo, e alcança também a cópia na sua conta. Não há como desfazer."
+              : "O apagamento é definitivo e acontece neste aparelho. Não há como desfazer."}
           </Text>
         </View>
       </ScrollView>

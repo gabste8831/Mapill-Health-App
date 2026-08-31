@@ -81,4 +81,24 @@ export class InventoryRepository
       );
     });
   }
+
+  /**
+   * Quando cada estoque foi **conferido à mão** pela última vez.
+   *
+   * Só `manual_recount` conta. Baixa por dose e reposição mexem no número sem que ninguém tenha
+   * aberto a caixa — e é exatamente a distância entre o número do app e o que está lá dentro que o
+   * lembrete de recontagem existe para fechar.
+   *
+   * Devolve um mapa `inventoryItemId → ISO`. Estoque que nunca foi recontado simplesmente não
+   * aparece, e quem chama usa a data de cadastro como marco zero.
+   */
+  async findLastRecountByItem(): Promise<Map<string, string>> {
+    const rows = await this.database.getAllAsync<{ inventory_item_id: string; ultima: string }>(
+      `SELECT inventory_item_id, MAX(updated_at) AS ultima
+       FROM inventory_adjustments
+       WHERE reason = 'manual_recount' AND deleted_at IS NULL
+       GROUP BY inventory_item_id`,
+    );
+    return new Map(rows.map((row) => [row.inventory_item_id, row.ultima]));
+  }
 }
