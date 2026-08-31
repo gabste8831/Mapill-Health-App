@@ -31,7 +31,9 @@ export async function confirmarDosesDoAviso(doseScheduleIds: string[]): Promise<
   const doseScheduleRepository = new DoseScheduleRepository();
   const prescriptionRepository = new PrescriptionRepository();
   const intakeLogRepository = new IntakeLogRepository();
-  const registerIntake = new RegisterIntake(intakeLogRepository, new InventoryRepository());
+  const registerIntake = new RegisterIntake(intakeLogRepository, new InventoryRepository(), () =>
+    Crypto.randomUUID(),
+  );
 
   const agora = new Date().toISOString();
 

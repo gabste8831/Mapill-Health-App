@@ -55,7 +55,7 @@ import {
 } from "@/shared/number-input";
 import { deletePersistedFile } from "@/shared/persist-picked-file";
 import { MEDICATION_FORM_LABELS, UNIT_LABELS } from "@/shared/rotulos-de-medicamento";
-import { colors, withOpacity } from "@/shared/theme";
+import { colors } from "@/shared/theme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
   Button,

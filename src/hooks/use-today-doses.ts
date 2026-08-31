@@ -316,7 +316,9 @@ export async function gravarDesfecho(
     dose.latestLogId === null ? null : await intakeLogRepository.findById(dose.latestLogId);
 
   if (anterior === null) {
-    await new RegisterIntake(intakeLogRepository, inventoryRepository).execute({
+    await new RegisterIntake(intakeLogRepository, inventoryRepository, () =>
+      Crypto.randomUUID(),
+    ).execute({
       id: Crypto.randomUUID(),
       doseScheduleId: dose.doseScheduleId,
       medicationId: dose.medicationId,
@@ -327,7 +329,9 @@ export async function gravarDesfecho(
     return;
   }
 
-  await new CorrectIntake(intakeLogRepository, inventoryRepository).execute({
+  await new CorrectIntake(intakeLogRepository, inventoryRepository, () =>
+    Crypto.randomUUID(),
+  ).execute({
     id: Crypto.randomUUID(),
     previousLog: anterior,
     medicationId: dose.medicationId,

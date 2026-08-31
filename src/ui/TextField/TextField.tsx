@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import type { StyleProp, TextInputProps, TextStyle, ViewStyle } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
-import { colors, spacing, withOpacity } from "@/shared/theme";
+import { colors, spacing } from "@/shared/theme";
 import { styles } from "./TextField.styles";
 
 export type TextFieldProps = Omit<TextInputProps, "style"> & {

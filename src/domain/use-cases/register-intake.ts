@@ -1,7 +1,6 @@
-import * as Crypto from "expo-crypto";
-
 import type { InventoryAdjustment } from "../entities/inventory-item";
 import type { IntakeLog, IntakeStatus } from "../entities/intake-log";
+import type { IdGenerator } from "../ports/id-generator";
 import type { IntakeLogRepository } from "../ports/intake-log-repository";
 import type { InventoryRepository } from "../ports/inventory-repository";
 
@@ -25,6 +24,7 @@ export class RegisterIntake {
   constructor(
     private readonly intakeLogRepository: IntakeLogRepository,
     private readonly inventoryRepository: InventoryRepository,
+    private readonly gerarId: IdGenerator,
   ) {}
 
   async execute(input: RegisterIntakeInput): Promise<void> {
@@ -47,7 +47,7 @@ export class RegisterIntake {
     if (!item) return; // sem estoque cadastrado pra esse medicamento ainda
 
     const adjustment: InventoryAdjustment = {
-      id: Crypto.randomUUID(),
+      id: this.gerarId(),
       inventoryItemId: item.id,
       delta: -input.amount,
       reason: "intake_consumption",
