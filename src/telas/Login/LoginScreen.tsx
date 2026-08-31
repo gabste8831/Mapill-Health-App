@@ -73,8 +73,8 @@ export function LoginScreen({
               sincronização ainda. Num app de medicação, prometer cópia inexistente faz alguém
               trocar de aparelho confiando e perder o histórico. O texto descreve o que existe. */}
           <Text style={styles.footerCaption}>
-            Seus dados ficam neste aparelho, com ou sem conta. Entrar é opcional
-            e prepara a cópia na nuvem, que ainda não está disponível.
+            Seus dados ficam neste aparelho, com ou sem conta. Entrar é opcional e acrescenta uma
+            cópia na nuvem, para você não perder nada ao trocar de celular.
           </Text>
         </View>
       </ScrollView>

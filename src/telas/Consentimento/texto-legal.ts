@@ -18,13 +18,21 @@ import type { ComponentProps } from "react";
 
 import type { LegalSection } from "@/ui";
 
-/** Bump ao editar TERMS_OF_USE_SECTIONS ou PRIVACY_POLICY_SECTIONS - força re-consentimento. */
-export const CURRENT_TERMS_VERSION = "1.1.0";
+/**
+ * Bump ao editar TERMS_OF_USE_SECTIONS ou PRIVACY_POLICY_SECTIONS - força re-consentimento.
+ *
+ * **1.2.0 (30/08/2026)**: a cópia em nuvem deixou de ser promessa e passou a existir (D1). O texto
+ * anterior afirmava que os dados de saúde não saíam do aparelho, e prometia consultar de novo
+ * antes de qualquer envio começar — este bump é essa consulta. Sem ele, o primeiro upload
+ * aconteceria sob um consentimento dado para outra coisa.
+ */
+export const CURRENT_TERMS_VERSION = "1.2.0";
 
 export const APP_PURPOSE_TEXT =
   "O Mapill existe para ajudar você a manter sua rotina de medicamentos, estoque e " +
   "compromissos de saúde organizados em um só lugar. Ele funciona mesmo sem " +
-  "internet, e os seus dados ficam salvos no seu aparelho por padrão. Saiba mais sobre como usamos seus dados em Termos de Uso e Política de Privacidade.";
+  "internet, e os seus dados ficam salvos no seu aparelho. Se você vincular uma conta do Google, " +
+  "eles também ganham uma cópia na nuvem. Saiba mais sobre como usamos seus dados em Termos de Uso e Política de Privacidade.";
 
 export type DataPracticeHighlight = {
   title: string;
@@ -50,11 +58,11 @@ export const DATA_PRACTICE_HIGHLIGHTS: DataPracticeHighlight[] = [
   },
   {
     icon: "cloud-outline",
-    title: "Cópia em nuvem, opcional e ainda indisponível",
+    title: "Cópia em nuvem, e ela é opcional",
     description:
-      "Hoje seus dados ficam só no seu aparelho, com ou sem conta vinculada. A cópia em nuvem " +
-      "está prevista e será opcional: quando existir, será o login com Google que a habilita, e " +
-      "este texto será atualizado antes disso acontecer.",
+      "Sem conta vinculada, seus dados ficam só no aparelho. Vinculando uma conta do Google, eles " +
+      "passam a ter uma cópia na nuvem, para você não perder nada se trocar de celular. As fotos " +
+      "e a receita anexada continuam só no aparelho.",
   },
   {
     icon: "key-outline",
@@ -140,14 +148,20 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     paragraphs: [
       "Todos os dados ficam no seu aparelho, num banco de dados local (SQLite) - é a fonte de " +
         "verdade principal e funciona sem internet.",
-      "Nesta versão do app, seus dados de saúde não saem do aparelho: mesmo com a conta do " +
-        "Google vinculada, nada é enviado para a nuvem. A conta serve por ora só para " +
-        "autenticar você.",
-      "A cópia em nuvem está prevista para uma versão futura. Quando existir, ela será " +
-        "assíncrona, com o Supabase (nosso provedor de backend) atuando como operador dos dados " +
-        "nos termos da LGPD, apenas para fins de backup e recuperação em outro aparelho; fotos e " +
-        "anexos (ex: foto de receita) terão envio opt-out por item, e você será consultado " +
-        "novamente antes de qualquer envio começar.",
+      "Sem conta vinculada, seus dados de saúde não saem do aparelho. Não há envio nenhum, e o " +
+        "app funciona por completo assim.",
+      "Com a conta do Google vinculada, é criada uma cópia dos seus dados na nuvem, no Supabase " +
+        "(nosso provedor de backend, que atua como operador dos dados nos termos da LGPD). Ela " +
+        "serve para backup e para você recuperar tudo em outro aparelho. O envio é assíncrono e " +
+        "nunca trava o uso do app: se você estiver sem internet, os dados ficam salvos aqui e " +
+        "sobem depois.",
+      "O que sobe: medicamentos, tratamentos, horários, registros de ingestão, estoque, " +
+        "compromissos, sua ficha de saúde e o registro do seu consentimento. Cada usuário só " +
+        "acessa os próprios dados - o banco é configurado para recusar qualquer leitura fora " +
+        "disso.",
+      "O que NÃO sobe: as fotos e os arquivos. A foto da sua ficha, a foto da caixa do remédio e " +
+        "a receita anexada continuam apenas neste aparelho. Se o envio de anexos vier a existir, " +
+        "ele será opt-out por item e este texto será atualizado antes.",
     ],
   },
   {
@@ -169,8 +183,9 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
         "apagados, não apenas ocultados da tela. Apagar tudo também desvincula a sua conta do " +
         "Google e devolve o app ao estado de recém-instalado. A conta do Google em si não é " +
         "excluída - ela apenas deixa de estar ligada ao Mapill.",
-      "Quando a cópia em nuvem existir, a exclusão passará a alcançar também os dados " +
-        "guardados no Supabase, com remoção definitiva.",
+      "Para apagar também a cópia na nuvem, é preciso estar com a conta vinculada - é ela que " +
+        "prova que os dados são seus. Enquanto a exclusão na nuvem não estiver disponível no app, " +
+        "você pode solicitá-la pelo contato no fim deste documento, e ela é feita em até 15 dias.",
     ],
   },
   {

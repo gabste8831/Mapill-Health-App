@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useSync } from "@/hooks/use-sync";
 import { colors } from "@/shared/theme";
-import { Card, GoogleLogo, Header } from "@/ui";
+import { Card, GoogleLogo, Header, IndicadorDeSync } from "@/ui";
 import { styles } from "./ContaScreen.styles";
 
 export type ContaScreenProps = {
@@ -67,6 +68,7 @@ export function ContaScreen({
   onEraseEverything,
 }: ContaScreenProps) {
   const isSignedIn = accountEmail !== null;
+  const sync = useSync();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -89,17 +91,29 @@ export function ContaScreen({
                 label="Vincular uma conta do Google"
                 hint={
                   googleDisponivel
-                    ? "Nada do que já está salvo é perdido. A cópia na nuvem ainda não está disponível."
+                    ? "Nada do que já está salvo é perdido, e seus dados passam a ter cópia na nuvem."
                     : "Indisponível nesta versão do app, que saiu sem a configuração do login."
                 }
                 onPress={onSignIn}
               />
             )}
           </Card>
+
+          {/* O estado da cópia, e não uma promessa sobre ela. Aparece só com conta vinculada:
+              sem conta não há nuvem, e um indicador de sincronização ali seria falar de algo que
+              não existe. */}
+          {isSignedIn ? (
+            <IndicadorDeSync
+              estado={sync.estado}
+              sincronizando={sync.sincronizando}
+              onSincronizar={() => void sync.sincronizarAgora()}
+            />
+          ) : null}
+
           <Text style={styles.sectionFooter}>
             {isSignedIn
-              ? "Seus dados ficam neste aparelho. Desvincular não apaga nada."
-              : "Seus dados ficam neste aparelho, com ou sem conta vinculada."}
+              ? "Seus dados ficam neste aparelho e têm cópia na sua conta. Desvincular não apaga nada."
+              : "Seus dados ficam neste aparelho. Vincular uma conta acrescenta a cópia na nuvem."}
           </Text>
         </View>
 
