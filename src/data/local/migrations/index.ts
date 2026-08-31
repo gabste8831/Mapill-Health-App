@@ -14,6 +14,7 @@ import { MIGRATION_011_PRESCRIPTION_INTAKE_INSTRUCTIONS } from "./011-prescripti
 import { MIGRATION_012_DOSE_SCHEDULE_AMOUNT } from "./012-dose-schedule-amount";
 import { MIGRATION_013_PRESCRIPTION_INTAKE_NOTE_AND_RENEWAL } from "./013-prescription-intake-note-and-renewal";
 import { MIGRATION_014_APPOINTMENT_PLACE_AND_PROFESSIONAL } from "./014-appointment-place-and-professional";
+import { MIGRATION_015_CMED_CATALOG } from "./015-cmed-catalog";
 
 type Migration = {
   version: number;
@@ -36,6 +37,7 @@ const MIGRATIONS: Migration[] = [
   { version: 12, sql: MIGRATION_012_DOSE_SCHEDULE_AMOUNT },
   { version: 13, sql: MIGRATION_013_PRESCRIPTION_INTAKE_NOTE_AND_RENEWAL },
   { version: 14, sql: MIGRATION_014_APPOINTMENT_PLACE_AND_PROFESSIONAL },
+  { version: 15, sql: MIGRATION_015_CMED_CATALOG },
 ];
 
 /**

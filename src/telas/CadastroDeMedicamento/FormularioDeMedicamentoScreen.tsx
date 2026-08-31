@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { Alert, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import type {
@@ -34,7 +34,9 @@ import { doseFaltanteDoPrazo } from "@/domain/use-cases/dose-faltante-do-prazo";
 import { dosesDeHojeJaPassadas } from "@/domain/use-cases/doses-de-hoje-ja-passadas";
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { summarizeTreatment } from "@/domain/use-cases/summarize-treatment";
+import type { CatalogEntry } from "@/domain/ports/medication-catalog";
 import { ACCEPTED_DOCUMENT_LABEL, useDocumentPicker } from "@/hooks/use-document-picker";
+import { useMedicationCatalog } from "@/hooks/use-medication-catalog";
 import { usePhotoPicker, type PhotoOrigin } from "@/hooks/use-photo-picker";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import {
@@ -67,6 +69,7 @@ import {
   KeyboardAwareScrollView,
   OptionGroup,
   SelectField,
+  SugestoesDeMedicamento,
   TextField,
   ToggleChips,
   type OptionGroupOption,
@@ -305,6 +308,19 @@ function indicesDuplicados(doses: EntradaDeDose[]): number[] {
 type FormularioDeMedicamentoScreenProps = {
   /** Ausente = cadastro novo. Presente = edição, com a tela já preenchida. */
   initialValue?: MedicamentoDraft;
+  /**
+   * O que o **scanner** leu da caixa, quando o cadastro veio de lá.
+   *
+   * Separado de `initialValue` porque não é a mesma coisa: aquele é um cadastro que já existe e
+   * está sendo editado; este é um cadastro novo com três campos adiantados pela base pública. A
+   * posologia continua vazia nos dois casos que importam — a CMED sabe qual remédio é, e nunca
+   * quanto a pessoa toma.
+   */
+  preenchidoDaCmed?: {
+    name: string;
+    activeIngredient: string;
+    prescriptionRequirement: PrescriptionRequirement;
+  };
   onSubmit: (draft: MedicamentoDraft) => void;
   onBack: () => void;
 };
@@ -324,6 +340,7 @@ type FormularioDeMedicamentoScreenProps = {
  */
 export function FormularioDeMedicamentoScreen({
   initialValue,
+  preenchidoDaCmed,
   onSubmit,
   onBack,
 }: FormularioDeMedicamentoScreenProps) {
@@ -339,7 +356,43 @@ export function FormularioDeMedicamentoScreen({
    * uma posologia que o app inventou. Vale para forma, dose, frequência e duração — e é a mesma
    * razão que tirou os horários sugeridos.
    */
-  const [name, setName] = useState(initialValue?.name ?? "");
+  const [name, setName] = useState(initialValue?.name ?? preenchidoDaCmed?.name ?? "");
+  /**
+   * O que veio da CMED, quando veio.
+   *
+   * `sugestaoAceita` fecha a lista depois da escolha; `requisitoDaCmed` guarda a tarja, que o
+   * formulário não pergunta — quem cadastra à mão não tem como saber, e agora a base responde.
+   * Numa edição já nasce com o valor gravado, senão reabrir o cadastro rebaixaria um controlado
+   * para isento sem ninguém mexer nisso.
+   *
+   * Vindo do scanner, `sugestaoAceita` já começa ligado: o nome foi escolhido na tela anterior, e
+   * abrir o formulário com a lista de sugestões aberta pediria de novo o que já foi respondido.
+   */
+  const [sugestaoAceita, setSugestaoAceita] = useState(preenchidoDaCmed !== undefined);
+  const [requisitoDaCmed, setRequisitoDaCmed] = useState<PrescriptionRequirement>(
+    initialValue?.prescriptionRequirement ?? preenchidoDaCmed?.prescriptionRequirement ?? "none",
+  );
+  const sugestoes = useMedicationCatalog(sugestaoAceita ? "" : name);
+
+  /**
+   * Preenche o que a base sabe e **para por aí**.
+   *
+   * Nome, princípio ativo e tarja vêm da CMED. Forma farmacêutica, dose e posologia **não** —
+   * a base traz a apresentação como texto ("500 MG COM REV CT BL AL PLAS INC X 20"), de onde dá
+   * para adivinhar "comprimido", mas adivinhar forma farmacêutica num app de medicação é
+   * exatamente o tipo de palpite que o cadastro inteiro foi desenhado para não dar. O que a
+   * pessoa toma, e quanto, continua sendo resposta de quem tem a caixa e a receita na mão.
+   */
+  function aceitarSugestao(entrada: CatalogEntry) {
+    const nomeComDosagem =
+      entrada.strength.length > 0 ? `${entrada.name} ${entrada.strength}` : entrada.name;
+    setName(nomeComDosagem);
+    // A CMED escreve tudo em maiúsculas; no app o princípio ativo é texto corrido.
+    setActiveIngredient(entrada.activeIngredient.toLowerCase());
+    setRequisitoDaCmed(entrada.prescriptionRequirement);
+    setSugestaoAceita(true);
+    Keyboard.dismiss();
+  }
   const [form, setForm] = useState<MedicationForm | null>(initialValue?.form ?? null);
   const [doseAmount, setDoseAmount] = useState(
     initialValue === undefined ? "" : String(initialValue.doseAmount),
@@ -443,18 +496,25 @@ export function FormularioDeMedicamentoScreen({
    * `voltarParaLembrete` é a intenção pendente, consumida no foco seguinte; `ajudaDeAlertasAberta`
    * é onde a leitura estava.
    */
-  const [voltarParaLembrete, setVoltarParaLembrete] = useState(false);
+  const voltarParaLembrete = useRef(false);
   const [ajudaDeAlertasAberta, setAjudaDeAlertasAberta] = useState(false);
 
-  // A volta dos termos é o retorno do foco. Consome a intenção no mesmo passo em que a atende,
-  // senão o popup reabriria em toda visita posterior à tela.
-  useFocusEffect(
-    useCallback(() => {
-      if (!voltarParaLembrete) return;
-      setVoltarParaLembrete(false);
-      setReminderSheetOpen(true);
-    }, [voltarParaLembrete]),
-  );
+  /**
+   * A volta dos termos é o retorno do foco. Consome a intenção no mesmo passo em que a atende,
+   * senão o popup reabriria em toda visita posterior à tela.
+   *
+   * A intenção mora numa **ref**, e não em estado: ela não pinta nada na tela, e como estado ela
+   * obrigava o callback a depender dela — dependência que muda a cada consumo. Ref é o que este
+   * dado sempre foi: um recado de uma navegação para a seguinte.
+   *
+   * Sem `useCallback`: com o React Compiler ligado, a memoização é dele. Escrevê-la à mão aqui
+   * apenas o impedia de fazer o trabalho, e era o que o lint vinha apontando.
+   */
+  useFocusEffect(() => {
+    if (!voltarParaLembrete.current) return;
+    voltarParaLembrete.current = false;
+    setReminderSheetOpen(true);
+  });
 
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
   const [attachmentUri, setAttachmentUri] = useState<string | null>(
@@ -491,7 +551,9 @@ export function FormularioDeMedicamentoScreen({
   );
   const [storageLocation, setStorageLocation] = useState(initialValue?.storageLocation ?? "");
 
-  const [activeIngredient, setActiveIngredient] = useState(initialValue?.activeIngredient ?? "");
+  const [activeIngredient, setActiveIngredient] = useState(
+    initialValue?.activeIngredient ?? preenchidoDaCmed?.activeIngredient ?? "",
+  );
   const [intakeInstructions, setIntakeInstructions] = useState<IntakeInstruction[]>(
     initialValue?.intakeInstructions ?? [],
   );
@@ -1057,10 +1119,10 @@ export function FormularioDeMedicamentoScreen({
       name: name.trim(),
       activeIngredient: activeIngredient.trim(),
       form,
-      // A tarja não é perguntada: quem cadastra à mão não tem como saber, e o que ela comandaria
-      // (mostrar campos de receita) já é decidido pelo paciente anexar ou não a receita. Continua
-      // no domínio esperando a CMED preencher (bloco B1).
-      prescriptionRequirement: initialValue?.prescriptionRequirement ?? "none",
+      // A tarja não é perguntada — quem cadastra à mão não tem como saber. Vem da CMED quando o
+      // medicamento foi escolhido da lista de sugestões (B1), e continua em "none" no cadastro
+      // livre, onde o que comandaria os campos de receita já é decidido pelo paciente anexá-la.
+      prescriptionRequirement: requisitoDaCmed,
       doseAmount: parsedDoseAmount,
       doseUnit,
       schedule,
@@ -1119,10 +1181,21 @@ export function FormularioDeMedicamentoScreen({
             required
             placeholder="Ex: Losartana 50mg"
             value={name}
-            onChangeText={setName}
+            onChangeText={(valor) => {
+              setName(valor);
+              // Digitar de novo reabre as sugestões: quem escolheu errado corrige apagando, e o
+              // catálogo tem que voltar a ajudar em vez de ficar calado até sair da tela.
+              setSugestaoAceita(false);
+            }}
             onFocus={scrollToFocusedInput}
             maxLength={120}
           />
+
+          {/* Some assim que uma sugestão é aceita: manter a lista aberta depois da escolha faria
+              parecer que ainda falta decidir algo. */}
+          {!sugestaoAceita ? (
+            <SugestoesDeMedicamento sugestoes={sugestoes} onEscolher={aceitarSugestao} />
+          ) : null}
           <SelectField
             label="COMO VOCÊ TOMA?"
             value={form}
@@ -1806,7 +1879,7 @@ export function FormularioDeMedicamentoScreen({
            onde parou. */
         onAbrirTermos={() => {
           setReminderSheetOpen(false);
-          setVoltarParaLembrete(true);
+          voltarParaLembrete.current = true;
           router.push("/termos");
         }}
       />

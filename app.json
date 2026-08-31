@@ -59,6 +59,14 @@
           "icon": "./assets/images/android-icon-monochrome.png",
           "color": "#196FF3"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O Mapill usa a câmera para ler o código de barras da caixa do remédio e preencher o cadastro para você. Nenhuma foto é tirada ou guardada nesse processo.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "experiments": {

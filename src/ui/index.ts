@@ -25,6 +25,7 @@ export * from "./SearchField/SearchField";
 export * from "./SeletorDeOrdem/SeletorDeOrdem";
 export * from "./SelectField/SelectField";
 export * from "./SplashOverlay/SplashOverlay";
+export * from "./SugestoesDeMedicamento/SugestoesDeMedicamento";
 export * from "./SuccessOverlay/SuccessOverlay";
 export * from "./TextField/TextField";
 export * from "./TimeField/TimeField";

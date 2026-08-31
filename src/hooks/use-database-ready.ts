@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 
 import { initializeDatabase } from "@/data/local/database";
+import { importarCatalogoCmed } from "@/data/local/importar-cmed";
 
 /**
  * Roda as migrations do SQLite uma única vez na abertura do app e diz quando o banco está
@@ -22,6 +23,18 @@ export function useDatabaseReady(): boolean {
   useEffect(() => {
     if (Platform.OS === "web") return;
     initializeDatabase()
+      .then(() => {
+        /**
+         * O catálogo da CMED carrega **depois** de liberar a tela, e sem `await`.
+         *
+         * São ~21 mil inserções na primeira abertura. Elas não podem ficar entre a pessoa e a Home:
+         * a busca por nome é conveniência do cadastro, não pré-requisito de nada — enquanto ela não
+         * está pronta, o campo apenas não sugere, e o cadastro manual funciona igual.
+         */
+        void importarCatalogoCmed().catch((cause: unknown) => {
+          console.error("Falha ao importar o catálogo da CMED:", cause);
+        });
+      })
       .catch((cause: unknown) => {
         /**
          * Falhar aqui **também libera a UI**, e não é indiferença ao erro: enquanto isto ficava
