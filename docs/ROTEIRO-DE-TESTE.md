@@ -8,7 +8,7 @@
 >
 > | | Quando | Tempo |
 > |---|---|---|
-> | **[Parte 1 — C1, notificações](#parte-1--c1-notificações-e-alarmes-de-dose)** | **Agora**, com a build nova | 40–50 min |
+> | **[Parte 1 — Notificações e o que é novo](#parte-1--c1-notificações-e-alarmes-de-dose)** | **Agora**, com a build nova | ~1 h |
 > | **[Parte 2 — Validação completa](#parte-2--validação-completa-antes-da-defesa)** | Antes da defesa | ~2 h |
 >
 > Depois da Parte 1, o próximo documento é o [`ROTEIRO-DE-PRINTS.md`](./ROTEIRO-DE-PRINTS.md).
@@ -36,9 +36,15 @@ delas **mesmo quando passarem**: elas fecham formalmente o C1 no plano.
 O bloco de **maior risco técnico do projeto**, e a promessa central do Mapill: o app que avisa na
 hora, mesmo fechado.
 
-> 🔁 **Reteste de 29/08.** A primeira execução rendeu sete correções. **Refaça só os blocos 1, 2, 4
-> e 7** — os blocos 3, 5 e 6 passaram e a lógica deles não mudou. Os blocos 8 e 9 seguem por fazer,
-> e o 8 depende do alarme funcionar.
+> 🔁 **Rodada de 30/08.** Duas coisas ao mesmo tempo:
+>
+> **Reteste** — a execução de 29/08 rendeu oito correções. Refaça os blocos **1, 2, 4 e 7**; os
+> blocos 3, 5 e 6 passaram e a lógica deles não mudou. Os blocos **8 e 9** seguem por fazer, e o 8
+> depende do alarme funcionar.
+>
+> **Estreia** — os blocos **10 a 14** são de código que nunca rodou em aparelho: aviso de permissão
+> na Home, avisos de compromisso e receita (C3), relatório de adesão (D2), sugestão de medicamento
+> pelo nome (B1) e leitura de código de barras (B3).
 >
 > Além dos blocos, confira de passagem: a miniatura do anexo aparece **na hora** (não branca), o
 > teclado fecha ao tocar fora do campo, definir horário virou **uma etapa** (campo digitável com
@@ -282,6 +288,139 @@ do dia.
 **9.3** Deixe passar de um horário sem responder e abra a Home.
 
 > ✅ A dose aparece como **atrasada** (vermelha).
+
+---
+
+---
+
+## 10 — Aviso de permissão na Home 🔴
+
+**10.1** Com pelo menos um remédio com lembrete cadastrado, vá em **Configurações do Android** →
+Apps → Mapill → **Notificações** → **desligue**.
+
+**10.2** Volte ao app e olhe a **Home**.
+
+> ✅ 🔴 Um card **amarelo** no topo, **antes da agenda**, dizendo que o Mapill não vai avisar.
+> ✅ Ele diz quantos tratamentos estão esperando lembrete.
+> ✅ Tem o botão **"Religar os avisos"**, que abre as configurações.
+
+**10.3** Religue a permissão e volte.
+
+> ✅ 🔴 O card some sozinho, sem precisar reabrir o app.
+
+**10.4** 🔴 Desligue a permissão de novo, e **exclua todos os remédios com lembrete**.
+
+> ✅ 🔴 O card **não** aparece — sem tratamento esperando aviso, não há o que cobrar.
+
+---
+
+## 11 — Avisos de compromisso e receita 🔴 (C3)
+
+**11.1** **Calendário** → **+** → compromisso `Consulta de teste`, para **amanhã**, com lembrete
+**no dia** e **1 dia de antecedência**.
+
+> ✅ 🔴 O texto embaixo diz que os avisos chegam **às 8 da manhã**, por notificação.
+> ❌ Se disser que os lembretes "ainda estão sendo desenvolvidos", o texto é antigo.
+
+**11.2** 🔬 O aviso de antecedência cai hoje às 8h — se já passou das 8, ele não é agendado (é o
+comportamento correto). Para testar de verdade, cadastre um compromisso para **daqui a 2 dias**
+com antecedência de **1 dia**, e confira amanhã de manhã.
+
+> ✅ Chega uma notificação **"Compromisso amanhã"** com o nome e a data por extenso.
+> ✅ 🔴 Ela **não toca alarme** — é notificação, e respeita o silencioso.
+
+**11.3** 🔴 Exclua esse compromisso antes de o aviso chegar.
+
+> ✅ 🔴 O aviso **não** chega. *(Mesmo teste de alarme órfão do bloco 5, agora para compromisso.)*
+
+**11.4** Num remédio, anexe uma receita com **validade daqui a 8 dias** e peça aviso com **7 dias**
+de antecedência.
+
+> ✅ 🔬 Amanhã de manhã chega **"Receita vencendo"**, dizendo qual remédio e a data.
+
+---
+
+## 12 — Relatório de adesão 🔴 (D2)
+
+**12.1** Na **Home**, toque no card **"Acompanhamento semanal"** (o das barrinhas).
+
+> ✅ 🔴 Abre a tela **"Minha adesão"**.
+
+**12.2** Olhe o número grande.
+
+> ✅ 🔴 Mostra a porcentagem e, embaixo, "X de Y doses tomadas".
+> ✅ 🔴 **As doses de hoje que ainda não venceram NÃO entram na conta.** Confira: se você tem uma
+> dose às 22h e são 15h, ela não pode estar contando contra você.
+
+**12.3** Olhe os dois quadros lado a lado.
+
+> ✅ 🔴 **Puladas** e **sem resposta** são números **separados**, cada um com sua explicação.
+
+**12.4** Com mais de um remédio cadastrado, role até **"Por medicamento"**.
+
+> ✅ 🔴 Ordenado do **pior para o melhor** — quem está falhando aparece primeiro.
+
+**12.5** Troque o período para **7 dias** e **90 dias**.
+
+> ✅ Os números mudam de acordo.
+
+**12.6** 🔴 Num app recém-instalado, sem dose vencida ainda:
+
+> ✅ 🔴 Diz **"Ainda não há o que medir"**, e **nunca "0%"**.
+
+---
+
+## 13 — Busca de medicamento 🔴 (B1)
+
+**13.1** **Remédios** → **+** → **Cadastro manual**. No campo **NOME DA MEDICAÇÃO**, digite `dipi`.
+
+> ✅ 🔴 Aparece uma lista **"Encontrados na base da Anvisa"** com sugestões.
+> ✅ Cada linha mostra o nome, a dosagem em azul e o princípio ativo embaixo.
+> ⏳ Se não aparecer nada na **primeira abertura** do app, espere alguns segundos: a base está
+> sendo importada em segundo plano. Feche e abra o cadastro de novo.
+
+**13.2** 🔴 Toque numa sugestão.
+
+> ✅ 🔴 O nome é preenchido **com a dosagem** junto.
+> ✅ 🔴 A lista **some**.
+> ✅ 🔴 Descendo até **INFORMAÇÕES ADICIONAIS**, o **princípio ativo** já está preenchido.
+> ✅ 🔴 **Forma farmacêutica, dose e horários continuam vazios** — a base não adivinha posologia.
+
+**13.3** 🔴 Apague uma letra do nome.
+
+> ✅ 🔴 As sugestões voltam a aparecer.
+
+**13.4** Digite um nome que não existe, tipo `xyzabc`.
+
+> ✅ Nenhuma sugestão, e **nenhuma mensagem de erro** — o cadastro segue normal.
+
+---
+
+## 14 — Código de barras 🔴 (B3)
+
+⚠️ **Exige a build nova**: `expo-camera` é dependência nativa.
+
+**14.1** **Remédios** → **+** → **Escanear código de barras**.
+
+> ✅ 🔴 Pede permissão de câmera, explicando que **nenhuma foto é tirada ou guardada**.
+> ✅ 🔴 Recusando, aparece o botão **"Cadastrar sem escanear"** — não é beco sem saída.
+
+**14.2** Permita e aponte para a **caixa de um remédio comum** (dipirona, paracetamol).
+
+> ✅ 🔴 Uma moldura branca mostra onde mirar.
+> ✅ 🔴 Ao ler, mostra o remédio encontrado com nome, dosagem e princípio ativo.
+
+**14.3** 🔴 Toque em **"Continuar o cadastro"**.
+
+> ✅ 🔴 Abre o formulário **já preenchido** com nome e princípio ativo.
+> ✅ 🔴 A posologia continua vazia.
+> ✅ 🔴 Voltando dessa tela, você vai para a **escolha de cadastro** — e não para a câmera de novo.
+
+**14.4** 🔴 Escaneie um código que **não seja de remédio** (um pacote de bolacha, por exemplo).
+
+> ✅ 🔴 Diz **"Código não encontrado"**, explica por que acontece, mostra o número lido, e oferece
+> **"Cadastrar à mão"** e **"Ler outro código"**.
+> ❌ Não pode travar nem voltar sozinho.
 
 ---
 

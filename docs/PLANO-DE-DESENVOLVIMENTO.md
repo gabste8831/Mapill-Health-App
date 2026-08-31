@@ -214,9 +214,12 @@ depois custa retrabalho no componente de busca.
   + busca por EAN completa.
 
 **Pronto quando**
-- [ ] Busca por nome/princípio ativo retorna em < 200 ms com o app offline.
-- [ ] Nenhum use-case conhece a origem do dado (seed vs. API).
-- [ ] Peso adicionado ao app documentado neste arquivo.
+- [x] Busca por nome/princípio ativo retorna em < 200 ms com o app offline. — `LIKE` sobre coluna
+      já normalizada e indexada, com 6.992 linhas curtas. **Pendente de medição em device.**
+- [x] Nenhum use-case conhece a origem do dado (seed vs. API). — o port `MedicationCatalog` define
+      o contrato; a tela fala com o hook, e o hook com o repositório.
+- [x] Peso adicionado ao app documentado neste arquivo. — **782 KB** (`assets/data/cmed.json`),
+      contra 12 MB do xlsx original.
 
 **Rastreabilidade**: §2.4 (redução de carga cognitiva); `cmed-data.md`.
 
@@ -365,9 +368,13 @@ seu caso — campo fora de contexto gera dúvida, não completude.
 revisa e confirma antes de salvar.
 
 **Pronto quando**
-- [ ] EAN não encontrado cai graciosamente no cadastro manual, sem beco sem saída.
-- [ ] Permissão de câmera negada não quebra a tela — mostra a entrada manual.
-- [ ] Nada é salvo sem revisão do usuário.
+- [x] EAN não encontrado cai graciosamente no cadastro manual, sem beco sem saída. — a tela explica
+      por que acontece (manipulados, importados, base velha) e oferece os dois caminhos com o mesmo
+      peso. **Pendente de device.**
+- [x] Permissão de câmera negada não quebra a tela — mostra a entrada manual. **Pendente de
+      device.**
+- [x] Nada é salvo sem revisão do usuário. — o scanner lê e passa adiante; quem salva é o
+      formulário de sempre, com a posologia ainda por responder.
 
 **Rastreabilidade**: Nielsen (reconhecimento em vez de recordação); §2.4.
 
@@ -650,8 +657,8 @@ para quem já instalou.
 - [x] Os 10 gatilhos de reagendamento (C1.4) testados um a um, sem alarme órfão. — o bloco 5 do
       roteiro passou: excluir, mudar horário e desligar o lembrete, os três com o app fechado.
 - [ ] Checklist de borda (C1.8) percorrido. — não testado ainda (bloco 9 do roteiro).
-- [ ] Permissão revogada gera aviso visível na Home. — o aviso existe **no cadastro**; na Home
-      ainda não.
+- [x] Permissão revogada gera aviso visível na Home. — card que exige **as duas** condições
+      (permissão negada **e** tratamento esperando aviso), antes da agenda. **Pendente de device.**
 - [x] Nenhum `import` de `expo-notifications` fora de `src/notifications/`. — verificado por
       varredura.
 - [x] Texto da UI condiz com o nível realmente entregue. — "toca alto e vibra", e não "como
@@ -756,10 +763,14 @@ Calendário e Home abrem a escolha completa.
       separado da observação de preparo escrita antes ("jejum de 12h") — tempos e utilidades
       diferentes. **Nunca vira "faltou" sozinho por decurso de prazo**, mesma regra da dose não
       resolvida (decisão nº11.5): ausência de resposta não é desfecho.
-- [ ] Compromisso gera lembrete que dispara como o de dose. — **depende do C1**.
-- [ ] Receita vencendo aparece com destaque antes de vencer.
-- [ ] Grade de calendário mensal — fora do escopo desta rodada, a lista responde "qual é o
-      próximo e quando" sem obrigar a navegar entre meses.
+- [x] Compromisso gera lembrete que dispara como o de dose. — pelo **mesmo** mecanismo, e não um
+      paralelo: `planejarAvisosDeCompromisso` devolve o mesmo `AvisoDeDose` e entra na mesma
+      reconstrução de `reagendarTodosOsAvisos`. Dois canais independentes (antecedência e no dia),
+      sempre às 8h, sempre notificação e nunca alarme. **Pendente de device.**
+- [x] Receita vencendo aparece com destaque antes de vencer. — aviso na antecedência que o paciente
+      escolheu no B2, dizendo qual receita e em que dia vence. **Pendente de device.**
+- [x] Grade de calendário mensal — entregue no E1 (27/08), depois de esta linha ter sido escrita
+      como fora de escopo.
 
 ---
 
@@ -809,8 +820,13 @@ subir. Três coisas mudam por causa disso, e nenhuma é técnica:
 destaque, e um resumo exportável (PDF/imagem) que o paciente possa mostrar ao médico.
 
 **Pronto quando**
-- [ ] Histórico reflete correções retroativas corretamente.
-- [ ] Percentual de adesão calculado por um use-case testável, não dentro da tela.
+- [x] Histórico reflete correções retroativas corretamente. — a consulta usa o **último** log por
+      dose (`findBetween`), que é o mesmo caminho da Home e do calendário: corrigir uma dose muda o
+      relatório junto. **Pendente de device.**
+- [x] Percentual de adesão calculado por um use-case testável, não dentro da tela. —
+      `resumir-adesao.ts`, puro e com `agora` injetado, 24 casos verificados em Node.
+- [ ] Resumo exportável (PDF/imagem) para mostrar ao médico. — a tela existe e já serve para isso
+      em print; o arquivo em si sai junto da exportação de dados do D3.
 
 **Rastreabilidade**: §2.3.3 (auditoria clínica).
 
@@ -1155,12 +1171,14 @@ reteste**, e ele é curto: só o que mudou.
 ⚠️ **Exige build nova e desinstalar a anterior**: os canais de notificação subiram para `v2`, e
 canal já criado fica congelado no aparelho — som e importância não mudam por atualização.
 
-**Falta implementar, e não só testar** — item do "pronto quando" do C1 que segue aberto:
+**Entrou na fila de reteste depois de 29/08** — implementado, nunca visto em aparelho:
 
-- **Aviso de permissão revogada na Home.** Hoje ele existe só no popup de lembrete, ou seja, só
-  aparece para quem entra no cadastro. Quem revogou a permissão nas configurações e não volta lá
-  continua achando que será avisado — que é exatamente o silêncio que a decisão nº11.5 proíbe. O
-  card precisa nascer na Home enquanto houver prescrição que dependa da permissão.
+- **Aviso de permissão revogada na Home** (30/08), fechando o último item do C1 que faltava
+  escrever.
+- **Avisos de compromisso e de receita vencendo** (C3, 30/08).
+- **Relatório de adesão** (D2, 30/08), pelo card de acompanhamento semanal da Home.
+- **Sugestão de medicamento pelo nome** (B1) e **leitura de código de barras** (B3, 30/08).
+  ⚠️ O B3 exige build nova: `expo-camera` é dependência nativa.
 
 **Adiado com decisão registrada:** o botão `+` no centro da barra de navegação (as abas usam
 `NativeTabs`, e trocar por barra própria devolveria o risco do Material You resolvido em 23/08) e o
@@ -1390,3 +1408,8 @@ a partir do D1 é o que impede isso.
 | 2026-08-29 | UI | Corrigido | **Botões da tela do horário sem contraste, e sem saída para a Home.** O `outline` usa fundo branco, e o cartão da dose também é branco — o botão sumia. Passou a usar `emFolha`, a prop que já existia para o mesmo problema dentro do `BottomSheet`. O botão escolhido agora fica azul cheio e o outro contornado, nos dois sentidos: antes só "Tomei" refletia o estado. E a tela ganhou uma saída explícita para a Home — quem chega pela notificação entra direto nela, sem pilha atrás, e a seta do topo não tinha para onde voltar. |
 | 2026-08-29 | Anexos | Corrigido | **A miniatura branca era corrida, não cache.** O Gabriel descreveu o sintoma com precisão suficiente para achar a causa: a foto aparece branca ao anexar, e correta depois de salvar e voltar. `persistPickedFile` chamava `File.copy()`, que **devolve uma Promise** — e a função é síncrona, sem `await`. Ela retornava a URI de um arquivo ainda sendo escrito, o `expo-image` lia um arquivo vazio, e a miniatura saía branca; ao voltar à tela a cópia já tinha terminado e a mesma URI mostrava a foto. Isso fazia o defeito parecer de cache (foi diagnosticado como tal em 27/08, no F3) quando era de tempo. Trocado por `copySync`, que existe exatamente para este caso. Uma correção só, num lugar só, que cobre foto da ficha, foto da caixa e receita em PDF. |
 | 2026-08-30 | C1 | Concluído | **Aviso de permissão bloqueada na Home** — o último item do "pronto quando" do C1 que faltava implementar. O aviso equivalente já existia no popup de lembrete, mas ele só aparece para quem entra no cadastro, e quem desligou a permissão nas configurações do Android não tem motivo nenhum para voltar lá: continuaria abrindo o app todo dia, vendo os horários na agenda, e confiando num lembrete que nunca chegaria. É exatamente o que a decisão nº11.5 proíbe. O card exige **as duas** condições — permissão negada **e** tratamento esperando aviso —, porque sem a segunda ele apareceria para quem nunca pediu lembrete, cobrando algo que não muda nada e ensinando a ignorar o próximo aviso. Fica antes da agenda, e não no fim: ler os horários primeiro e descobrir depois que nenhum vai tocar é a ordem errada. Amarelo, e não o vermelho do estoque: nada foi perdido ainda, e gastar o vermelho onde não é emergência é o que faz ele parar de ser lido quando um remédio realmente acaba. Some sozinho ao voltar das configurações, no mesmo gesto que reagenda os avisos. |
+| 2026-08-30 | C3 | Concluído | **Compromissos e receitas passam a avisar**, fechando as duas pendências que dependiam do C1. Pelo **mesmo** mecanismo: `planejarAvisosDeCompromisso` devolve o mesmo `AvisoDeDose` e entra na mesma reconstrução — duas funções separadas se cancelariam mutuamente, porque `cancelarTudo` não sabe distinguir de quem é cada aviso pendente. Dois canais independentes (antecedência e no dia), sempre às 8h, sempre notificação e nunca alarme (decisão de 24/08). Duas mudanças de contrato saíram daqui: `jaAdiado` virou `semAcoesRapidas` (o campo controla se as ações de dose aparecem, e "já foi adiado" era só uma das razões para não caberem), e `cancelarTudo` passou a apagar por **exclusão** — tudo que não é lembrete adiado. Listar o que apagar exigiria lembrar de cada tipo novo de aviso, e o preço de esquecer um é o alarme órfão; esquecer de preservar custa, no máximo, um lembrete que não volta. 33 casos em Node. |
+| 2026-08-30 | D2 | Concluído | **Relatório de adesão** — a tela que transforma o app de lembrete em registro clínico (§2.3.3). Adesão é `confirmadas ÷ previstas`, e "previstas" são só as doses cujo horário já passou: incluir as futuras faria a taxa cair sozinha ao longo do dia e subir à noite, medindo o relógio em vez do comportamento. Pular reduz a adesão — é resposta legítima e o app nunca a trata como erro, mas adesão mede o que foi **tomado**, e contar a pulada como sucesso mentiria justamente para quem vai levar o número ao médico. Não responder conta igual a pular no número e **diferente na lista**: para a taxa as duas dizem "não tomou", para a conversa clínica são opostas. A tela não julga: sem parabéns, sem alerta por adesão baixa, sem meta — um app que elogia ou repreende o paciente pela própria adesão convida a corrigir o registro em vez do tratamento. 24 casos em Node. |
+| 2026-08-30 | B1 | Concluído | **Catálogo da CMED embarcado.** O xlsx da Anvisa tem 26.001 linhas e 74 colunas (12 MB); sobraram **6.992 registros e 782 KB**. Saíram os 12.946 não comercializados (sugerir um remédio que a farmácia não tem é pior que não sugerir), as ~60 colunas de preço (PF/PMC por alíquota de ICMS — dado de mercado, não clínico) e as duplicatas de embalagem: as seis apresentações de "Tylenol 500 MG" são a mesma coisa para quem cadastra um tratamento, mas 500 e 750 não são. A **tarja** finalmente preenche `prescriptionRequirement`, que o formulário nunca perguntou porque quem cadastra à mão não tem como saber — o comentário no código dizia, desde 21/08, que esperava este bloco. A importação (~21 mil inserções) roda **depois** de liberar a tela e sem `await`: a busca é conveniência do cadastro, não pré-requisito, e bloquear a splash por ela seria pagar um preço visível por um ganho opcional. |
+| 2026-08-30 | B3 | Concluído | **Leitura de código de barras**, com `expo-camera`. O scanner **não salva nada**: lê, encontra e passa adiante para o mesmo formulário de sempre, já preenchido no que a base sabe — um cadastro clínico criado por um código lido de relance seria dado que ninguém conferiu. EAN não encontrado **não é beco sem saída** (item do "pronto quando"): manipulados não têm código, importados não estão na CMED e a base envelhece, então o caminho manual fica a um toque com o mesmo peso visual. Recusar a permissão de câmera também não fecha nada. O que a base preenche são nome, princípio ativo e tarja; **forma farmacêutica, dose e posologia não** — daria para adivinhar "comprimido" da apresentação, e adivinhar forma farmacêutica num app de medicação é exatamente o tipo de palpite que este cadastro foi desenhado para não dar. |
+| 2026-08-30 | Build | Bloqueado até 01/09 | A cota mensal de builds Android do plano gratuito do EAS acabou, e reseta em **01/09**. Três tentativas desta leva falharam por isso — as duas primeiras em silêncio, porque o filtro de saída do comando engolia a mensagem. Nada se perde: o código está no GitHub e a build é um comando quando a cota voltar. Enquanto isso, o Metro (`npx expo start --dev-client`) cobre tudo que é JavaScript sobre a build já instalada; o que **não** cobre é a correção do canal de som do alarme e a permissão de câmera do B3, que são nativas. |
