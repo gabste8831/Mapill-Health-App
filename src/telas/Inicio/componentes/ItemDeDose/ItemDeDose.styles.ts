@@ -57,6 +57,16 @@ export const styles = StyleSheet.create({
   done: {
     opacity: 0.5,
   },
+  /**
+   * Hora, estado, nome e dose num nó só para o leitor de tela — e por isso também um bloco só no
+   * layout, ocupando o espaço que sobra antes dos botões.
+   */
+  infoAgrupada: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
   timeColumn: {
     minWidth: 64,
   },

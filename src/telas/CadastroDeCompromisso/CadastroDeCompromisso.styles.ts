@@ -72,7 +72,8 @@ export const styles = StyleSheet.create({
   campoLivre: {
     flexGrow: 1,
     minWidth: 72,
-    height: 44,
+    // `minHeight`: é campo de digitação, e altura travada corta o número em fonte ampliada.
+    minHeight: 44,
     paddingHorizontal: spacing.sm,
     textAlign: "center",
     borderWidth: 1,

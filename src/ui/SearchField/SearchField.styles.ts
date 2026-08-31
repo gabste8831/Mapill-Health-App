@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   /**
@@ -13,13 +13,16 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    height: 48,
+    // `minHeight`, e não `height`: com altura travada o texto da busca é recortado quando a fonte
+    // do sistema está ampliada, e a borda continua aqui porque isto é campo — ela informa que se
+    // pode escrever dentro.
+    minHeight: 48,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
     backgroundColor: colors.surfaceContainerLowest,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
+    boxShadow: surfaceShadow,
   },
   input: {
     flex: 1,

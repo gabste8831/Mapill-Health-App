@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   /**
@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
     borderRadius: radius.lg,
     overflow: "hidden",
     backgroundColor: colors.surfaceContainerLow,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
+    boxShadow: surfaceShadow,
   },
   header: {
     flexDirection: "row",

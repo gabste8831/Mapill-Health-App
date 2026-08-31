@@ -1,16 +1,14 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { colors, radius, spacing, surfaceCard, typography, withOpacity } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   container: {
+    ...surfaceCard,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     padding: spacing.md,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surfaceContainerLowest,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
   },
   icone: {
     width: 44,

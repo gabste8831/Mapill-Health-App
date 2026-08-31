@@ -68,7 +68,16 @@ export const colors = {
   onSurface: "#191C1E",
   onSurfaceVariant: "#414754",
 
-  outline: "#727786",
+  /**
+   * Escurecido de `#727786` para `#696E7C` em 30/08, na varredura de acessibilidade.
+   *
+   * O tom antigo dava **4.47:1** sobre branco e 4.24:1 sobre o fundo da tela — reprovado no AA
+   * (4.5:1) por uma margem que nenhum olho pega, e é por isso que o checklist manda medir em vez
+   * de julgar olhando. Ele não é só cor de borda: quatro telas o usam como **texto de apoio**
+   * (o resumo da ficha, a finalidade no consentimento, o status dos termos), e aí ele precisa
+   * passar como texto. Agora dá 5.09:1 e 4.83:1, com folga nos dois fundos.
+   */
+  outline: "#696E7C",
   outlineVariant: "#C1C6D7",
 } as const;
 

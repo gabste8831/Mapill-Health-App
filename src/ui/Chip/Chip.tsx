@@ -18,7 +18,11 @@ export function Chip({ label, onRemove }: ChipProps) {
           style={styles.chipRemove}
           onPress={onRemove}
           accessibilityRole="button"
-          accessibilityLabel={`Remover ${label}`}>
+          accessibilityLabel={`Remover ${label}`}
+          // O "×" desenhado é pequeno de propósito — crescer o botão incharia a chip inteira. O
+          // `hitSlop` leva a área tocável de 20 para 44 sem mudar nada do que se vê, que é o jeito
+          // certo de resolver alvo apertado em ação destrutiva.
+          hitSlop={12}>
           <Text style={styles.chipRemoveText}>×</Text>
         </Pressable>
       ) : null}

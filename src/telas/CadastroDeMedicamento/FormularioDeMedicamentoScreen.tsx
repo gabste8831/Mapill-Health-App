@@ -1373,7 +1373,8 @@ export function FormularioDeMedicamentoScreen({
                     onChangeText={handleCustomDosesChange}
                     onFocus={scrollToFocusedInput}
                     placeholder="Mais"
-                    placeholderTextColor={withOpacity(colors.outline, 0.8)}
+                    // Sem opacidade, igual ao TextField: a 0.8 dava 3.41:1, abaixo do AA.
+                    placeholderTextColor={colors.outline}
                     keyboardType="number-pad"
                     maxLength={2}
                     accessibilityLabel="Outra quantidade de doses por dia"

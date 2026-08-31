@@ -10,9 +10,11 @@ export const styles = StyleSheet.create({
     ...typography.label,
     color: colors.onSurfaceVariant,
   },
+  /** Mesma razão do `TextField`: altura travada recorta o valor escolhido em fonte ampliada. */
   selectField: {
-    height: 52,
+    minHeight: 52,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
     borderRadius: radius.md,

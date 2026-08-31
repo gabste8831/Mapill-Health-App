@@ -181,9 +181,10 @@ export const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
   },
+  /** 44: remover contato de emergência é destrutivo, e alvo de 32 é onde o toque erra. */
   contactRemove: {
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
   },

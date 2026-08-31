@@ -42,8 +42,11 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
             style,
           ]}
           // Mais sutil que o label (onSurfaceVariant) de propósito — o placeholder é uma dica,
-          // não deve competir visualmente com o texto que o paciente já preencheu.
-          placeholderTextColor={withOpacity(colors.outline, 0.6)}
+          // não deve competir visualmente com o texto que o paciente já preencheu. Mas sem
+          // opacidade: a 0.6 ele dava **2.38:1**, ilegível para quem tem baixa visão, e a dica de
+          // um campo de dose é onde isso menos pode acontecer. Em cheio dá 5.09:1 e continua
+          // claramente mais leve que o texto preenchido, que era o efeito pretendido.
+          placeholderTextColor={colors.outline}
           multiline={multiline}
           {...inputProps}
         />

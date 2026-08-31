@@ -49,7 +49,7 @@ O que resta do lado do código são **duas exclusões deliberadas**, ambas com m
 | O que | Bloco | Por que fica de fora |
 |---|---|---|
 | **Anexos no Storage** | [E9/D1](#d1-sincronização-sqlite--supabase-) | Subir imagem de receita exige um **segundo** bump dos termos, e o reconsentimento acontece uma vez só — errar o texto custa caro. O texto 1.2.0 já diz, explicitamente, que fotos e receita **não** sobem. |
-| **Checklist de acessibilidade** | [E1](#e1-estados-vazios-offline-erro-e-acessibilidade) | Tratado no artigo, por decisão de 30/08. O app cumpre o essencial (contraste, alvos grandes, texto claro); o checklist formal não cabe no prazo. |
+| **Checklist de acessibilidade** | [E1](#e1-estados-vazios-offline-erro-e-acessibilidade) | Tratado no artigo, por decisão de 30/08 — mas a **varredura por leitura de código foi feita em 31/08** e corrigiu seis defeitos reais (ver [6.5](#65-varredura-de-acessibilidade--3108)). O que resta é o teste manual com TalkBack ligado, que precisa de aparelho. |
 
 > ⚠️ **"Escrito" não é "funciona".** Doze blocos foram implementados entre 29 e 30/08 e **nenhum
 > deles rodou em aparelho** — a cota de builds do EAS acabou. O risco agora não é falta de código:
@@ -1427,6 +1427,38 @@ planilha.
 
 ---
 
+### 6.5 Varredura de acessibilidade — 31/08
+
+Feita **por leitura de código**, sem build, enquanto a cota do EAS não voltava. A ideia era achar
+agora o que viraria retrabalho depois: corrigido antes da build de 01/09, entra na mesma validação
+em vez de exigir uma terceira rodada.
+
+O ponto de partida foi o checklist do `usability-heuristics-health-ui`. Seis defeitos reais:
+
+| # | O que estava errado | Por que importa | Correção |
+|---|---|---|---|
+| 1 | **`height: 52` fixo no `Button` base** — e o mesmo em `TextField` e `SelectField` | Com a fonte do sistema ampliada, o rótulo de **todo botão do app** era recortado, incluindo o "Confirmar" da dose. Quem amplia a fonte do Android é exatamente o público deste app: a acessibilidade quebrava em quem mais depende dela | `minHeight` + `paddingVertical`, para crescer junto com o texto |
+| 2 | Altura travada também em `Chip`, `ToggleChips`, `SearchField` e no campo livre do compromisso | Mesmo recorte de texto | idem |
+| 3 | **Alvos de toque abaixo do piso**: 28px no editar/excluir do Calendário, 36px no confirmar/pular da dose, 32px no remover contato de emergência, 20px no "×" da chip | Todos ao lado de uma ação **destrutiva** ou de um par confirmar/pular, que é onde errar o toque falseia o registro clínico | 44px, e `hitSlop` de 12 onde crescer o botão incharia o layout |
+| 4 | **`outline` reprovava no WCAG AA**: 4.47:1 sobre branco | Ele não é só cor de borda — quatro telas o usam como **texto de apoio**. Reprovava por uma margem que olho nenhum pega, que é a razão de o checklist mandar medir | `#727786` → `#696E7C` (5.09:1) |
+| 5 | **Placeholder a 2.38:1** (`outline` a 60% de opacidade) | Ilegível para baixa visão, e um deles é a dica de um campo de dose | Opacidade removida; continua mais leve que o texto preenchido |
+| 6 | **Ordem de leitura do `ItemDeDose`** | O TalkBack parava quatro vezes por linha e anunciava o estado **antes** do nome do remédio — o contrário de como se pensa. O rótulo visual ("ATRASADA") também soa como grito lido em voz alta | Bloco de informação agrupado com `accessible`, lido como frase: *"Dipirona, 08:00, atrasada. 1 comprimido"*. O agrupamento fica no bloco, **não** no cartão, senão engoliria os botões |
+
+**O que já estava certo, e vale registrar no artigo:** nenhum componente desativa `allowFontScaling`;
+`accessibilityLabel` cobre todos os botões de ícone; `accessibilityState` está presente onde há
+seleção; os formulários usam **rótulo persistente** acima do campo, nunca placeholder como rótulo;
+não existe interação com prazo que penalize quem responde devagar; e o estado da dose nunca dependeu
+só de cor — o texto do status sempre esteve lá.
+
+O contraste foi **medido**, não estimado: script em Node sobre os 18 pares texto/fundo que o app usa
+de fato. Depois da correção, todos passam no AA. As duas cores criadas no passe de design de 30/08
+(`successSurface`, `errorSurface`) passam com folga — 8.53:1 e 8.18:1 para os rótulos de estado.
+
+⚠️ **O que isto não cobre:** teste manual com TalkBack ligado, percorrendo os fluxos críticos. Isso
+exige aparelho e fica para a sessão de validação.
+
+---
+
 ## 7. Log de progresso
 | Data | Bloco | Status | Observação |
 |---|---|---|---|
@@ -1563,3 +1595,4 @@ planilha.
 | 2026-08-30 | D3 | Concluído | **Exportação de dados** — direito de acesso e portabilidade (LGPD art. 18, II e V). **JSON e não PDF**: portabilidade quer dizer que o dado pode ir para outro lugar, e um PDF é bonito de ler e inútil de importar. Inclui **o que foi apagado** (`deleted_at` preenchido), porque ainda é dado do titular guardado pelo app e escondê-lo não seria a cópia completa que a lei pede. Sai pela folha de compartilhamento do sistema, e não para uma pasta escolhida pelo app: quem decide onde um arquivo com dado de saúde vai parar é a pessoa. Os anexos vão como **caminho**, não embutidos — base64 de imagens produziria um arquivo de dezenas de MB que nenhum leitor abre. O texto legal ganhou o parágrafo que descreve isso, junto com a exclusão remota pelo próprio app. |
 | 2026-08-30 | Plano | Marco | **Nenhum bloco obrigatório do roadmap segue em aberto.** Doze itens foram escritos entre 29 e 30/08: C1 (correções), C2, C3, D1, D2, D3, B1, B3, B5, o aviso de permissão na Home, o catálogo da CMED e o reconsentimento 1.2.0. Ficam fora, com motivo registrado, o **E9** (anexos no Storage — exige um segundo bump dos termos, e o reconsentimento acontece uma vez só) e o **checklist formal de acessibilidade** do E1, que o Gabriel tratará no artigo. ⚠️ **Escrito não é validado**: nenhum desses doze rodou em aparelho, porque a cota de builds do EAS acabou em 30/08 e reseta em 01/09. O risco do projeto deixou de ser falta de código e passou a ser a validação inteira concentrada numa sessão só. |
 | 2026-08-30 | Design | Concluído | **Passe de design em todo o app** — sombra no lugar de borda, mais respiro, alvos maiores. Não era bloco do roadmap: veio da leitura das telas em aparelho. A causa não era o espaçamento, e sim uma divergência: o `Card` do kit já usava sombra sem contorno, mas **sete telas desenhavam o próprio cartão com borda cinza** — e como o fundo (`#F7F9FB`) e o cartão (`#FFFFFF`) são quase da mesma cor, 1px de contorno lê como célula de planilha, não como superfície acima. Virou token (`surfaceCard`, `surfaceShadow`, `listGap`, `screenPadding`) justamente porque foi a cópia em cada arquivo que deixou as telas divergirem. **A borda fica nos campos de formulário**, onde ela informa que aquilo é editável, e no divisor entre registros curtos e repetidos, onde um cartão por linha viraria escada. Junto: o cartão de dose da Home **não tinha `borderRadius` nenhum** (único canto reto do app); os estados trocaram contorno colorido por faixa lateral de 4px, a linguagem que a `Dica` já falava; nasceram `successSurface` e `errorSurface`, porque `successContainer` é tom de chip e numa área grande punha dois blocos saturados em sequência — atrasada e "é agora" —, anulando a hierarquia que a cor deveria criar. Referências: Login, Ajustes e Calendário. Decisões em [6.4](#64-linguagem-visual--sombra-e-não-borda). |
+| 2026-08-31 | E1 | Concluído | **Varredura de acessibilidade por leitura de código**, feita enquanto a cota do EAS não voltava — para que o que fosse achado entrasse na build de 01/09 em vez de exigir uma terceira rodada de validação. Seis defeitos reais. O mais grave: **`height: 52` travado no `Button` base** (e em `TextField`/`SelectField`), que recortava o rótulo de **todo botão do app** com a fonte do sistema ampliada — inclusive o "Confirmar" da dose. Quem amplia a fonte do Android é justamente o público deste app, então a acessibilidade quebrava em quem mais depende dela. Junto: alvos de toque de 20 a 36px em ações **destrutivas** (excluir compromisso, remover contato de emergência) e no par confirmar/pular, onde errar o toque falseia o registro clínico; `outline` reprovando no AA por 4.47:1 sendo usado como **texto** em quatro telas; placeholder a 2.38:1; e a ordem de leitura do `ItemDeDose`, que fazia o TalkBack anunciar o estado antes do nome do remédio. O contraste foi **medido** em Node sobre os 18 pares reais, não estimado — depois da correção todos passam. Detalhes em [6.5](#65-varredura-de-acessibilidade--3108). Falta só o teste manual com TalkBack, que precisa de aparelho. |

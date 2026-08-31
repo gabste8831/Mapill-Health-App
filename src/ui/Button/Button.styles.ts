@@ -1,12 +1,24 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
+  /**
+   * `minHeight`, e nunca `height`.
+   *
+   * Com altura travada em 52, o rótulo de **todo botão do app** era recortado quando a pessoa
+   * aumenta a fonte nas configurações do Android — inclusive o "Confirmar" da dose, que é a ação
+   * mais importante que existe aqui. E quem aumenta a fonte do sistema é exatamente o público que
+   * este app atende: a acessibilidade quebrava justo em quem mais depende dela.
+   *
+   * O `paddingVertical` é o que deixa o botão crescer junto com o texto em vez de cortá-lo; os 52
+   * viram o piso, que continua sendo um alvo de toque folgado.
+   */
   base: {
-    height: 52,
+    minHeight: 52,
     borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -18,7 +30,7 @@ export const styles = StyleSheet.create({
   /** Sombra em vez de borda, mesma lógica do Card: lê como superfície, não como contorno. */
   outline: {
     backgroundColor: colors.surfaceContainerLowest,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
+    boxShadow: surfaceShadow,
   },
   /**
    * O mesmo botão, mas dentro de um `BottomSheet` — onde a sombra desaparece.
@@ -33,9 +45,13 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outlineVariant,
   },
+  /**
+   * O botão de texto não reserva os 52: ele é uma saída discreta ("Agora não"), e com o piso do
+   * `base` ficaria com a mesma presença de uma ação principal.
+   */
   text: {
     backgroundColor: "transparent",
-    height: "auto",
+    minHeight: 44,
     paddingVertical: spacing.sm,
   },
   disabled: {

@@ -101,8 +101,17 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.xs,
   },
+  /**
+   * Mesmo alvo de 44 da lista de remédios. `padding: xs` sobre um ícone de 20 dava 28px de área
+   * real — e um dos dois botões **exclui**, encostado no de editar. Alvo apertado ao lado de ação
+   * destrutiva é onde o erro de toque custa caro.
+   */
   acaoBotao: {
-    padding: spacing.xs,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.full,
   },
 
   detalhe: {
@@ -281,9 +290,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.xs,
   },
+  /** 44, e não 36: confirmar e pular ficam lado a lado, e trocar um pelo outro falseia o registro. */
   botaoDaDose: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.full,
