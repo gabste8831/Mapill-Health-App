@@ -1,4 +1,4 @@
-# Roteiro de teste em aparelho
+﻿# Roteiro de teste em aparelho
 
 > **Este é o único roteiro de teste do projeto.** Os roteiros datados das revisões anteriores
 > (26/08, 27/08, 29/08) foram cumpridos e removidos — o que eles apuraram virou registro no
@@ -42,10 +42,10 @@ hora, mesmo fechado.
 > blocos 3, 5 e 6 passaram e a lógica deles não mudou. Os blocos **8 e 9** seguem por fazer, e o 8
 > depende do alarme funcionar.
 >
-> **Estreia** — os blocos **10 a 16** são de código que nunca rodou em aparelho: aviso de permissão
+> **Estreia** — os blocos **10 a 18** são de código que nunca rodou em aparelho: aviso de permissão
 > na Home, avisos de compromisso e receita (C3), relatório de adesão (D2), sugestão de medicamento
-> pelo nome (B1), leitura de código de barras (B3), "Ignorar por agora" (C2) e a **sincronização
-> com o Supabase** (D1).
+> pelo nome (B1), código de barras (B3), "Ignorar por agora" (C2), a **sincronização
+> com o Supabase** (D1), exportar/apagar dados (D3) e o lembrete de recontagem (B5).
 >
 > Além dos blocos, confira de passagem: a miniatura do anexo aparece **na hora** (não branca), o
 > teclado fecha ao tocar fora do campo, definir horário virou **uma etapa** (campo digitável com
@@ -497,6 +497,50 @@ Depois religue a internet do segundo.
 
 > ✅ 🔬 A edição **mais recente** vence, nos dois aparelhos. Sem mistura: ou é uma versão, ou é a
 > outra, nunca metade de cada.
+
+---
+
+---
+
+## 17 — Exportar e apagar 🔴 (D3)
+
+⚠️ **Faça este bloco por último.** O 17.3 apaga tudo.
+
+**17.1** **Ajustes** → **Conta e dados** → **MEUS DADOS**.
+
+> ✅ 🔴 Existe **"Baixar uma cópia dos meus dados"**, **acima** dos dois de apagar.
+
+**17.2** 🔴 Toque nele.
+
+> ✅ 🔴 Abre a tela de compartilhamento do Android (Drive, e-mail, arquivos…).
+> ✅ Salve em algum lugar e abra o arquivo.
+> ✅ 🔴 É um JSON legível, com seções em português: Ficha de saúde, Medicamentos, Tratamentos,
+> Horários de dose, Registros de ingestão, Estoque, Compromissos.
+> ✅ 🔴 Os dados que você cadastrou estão lá.
+
+**17.3** 🔬 **Com a conta vinculada**, toque em **"Apagar meus dados de saúde"** e confirme.
+
+> ✅ Os remédios somem do app.
+> ✅ 🔬 **O teste que importa:** feche o app, abra de novo e espere a sincronização.
+> ✅ 🔴 Eles **não voltam**. Se voltarem, o apagamento na nuvem falhou — avise.
+
+**17.4** Olhe o rodapé da seção MEUS DADOS.
+
+> ✅ 🔴 Com conta vinculada, ele diz que o apagamento **alcança também a cópia na sua conta**.
+> ✅ Sem conta, diz que acontece neste aparelho.
+
+---
+
+## 18 — Lembrete de recontagem (B5)
+
+Este só aparece com estoque cadastrado há **mais de 30 dias** sem recontagem — provavelmente não
+dá para ver agora, e tudo bem.
+
+**18.1** Vá em **Remédios** → **Gerenciar estoques**.
+
+> ✅ Se algum estoque estiver há mais de um mês sem conferência, aparece um bloco **amarelo** no
+> topo: **"Vale conferir a caixa"**.
+> ✅ Com estoque recém-cadastrado, ele **não** aparece — e isso é o esperado.
 
 ---
 

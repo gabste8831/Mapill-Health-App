@@ -39,22 +39,21 @@ Nenhum bloco fecha sem estes seis itens:
 >
 > Prazo declarado: **~2 semanas de desenvolvimento**, defesa dentro de um mês.
 
-### 🔨 Código que falta escrever
+### ✅ Código: nada obrigatório em aberto
 
-**Restam três itens, todos pequenos.** O D1 (sincronização), o C2 (`deferred`) e o indicador de
-estado da sync foram entregues em 30/08.
+**Todos os blocos do roadmap estão escritos.** Os últimos três — lembrete de recontagem (B5),
+exportação de dados e exclusão na nuvem (D3) — saíram em 30/08.
 
-| # | O que | Bloco | Tamanho | Observação |
-|---|---|---|---|---|
-| 1 | **Exportar meus dados** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Direito do titular (LGPD art. 18). Arquivo legível com tudo. |
-| 2 | **Apagar dados da nuvem** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Agora possível: o D1 existe. Os textos já foram decididos (P1, 29/08), e o texto legal 1.2.0 já promete o prazo de 15 dias por contato. |
-| 3 | **Lembrete de recontagem de estoque** | [B5](#b5-estoque--tela-dedicada) | Pequeno | "Seu estoque está alinhado com a caixa?". Destravado pelo C1. |
+O que resta do lado do código são **duas exclusões deliberadas**, ambas com motivo registrado:
 
-**Ordem recomendada:** 3 → (1 e 2 juntos, porque compartilham a mecânica de percorrer as tabelas).
+| O que | Bloco | Por que fica de fora |
+|---|---|---|
+| **Anexos no Storage** | [E9/D1](#d1-sincronização-sqlite--supabase-) | Subir imagem de receita exige um **segundo** bump dos termos, e o reconsentimento acontece uma vez só — errar o texto custa caro. O texto 1.2.0 já diz, explicitamente, que fotos e receita **não** sobem. |
+| **Checklist de acessibilidade** | [E1](#e1-estados-vazios-offline-erro-e-acessibilidade) | Tratado no artigo, por decisão de 30/08. O app cumpre o essencial (contraste, alvos grandes, texto claro); o checklist formal não cabe no prazo. |
 
-**Fora desta leva, com decisão registrada:** o **E9** (anexos no Storage). Subir imagem de receita
-exige um segundo bump dos termos, e o reconsentimento acontece uma vez só — errar o texto custa
-caro. O texto 1.2.0 já diz, explicitamente, que fotos e receita **não** sobem.
+> ⚠️ **"Escrito" não é "funciona".** Doze blocos foram implementados entre 29 e 30/08 e **nenhum
+> deles rodou em aparelho** — a cota de builds do EAS acabou. O risco agora não é falta de código:
+> é a validação inteira estar concentrada numa única sessão de teste.
 
 ### 📱 Validação em aparelho (não é código)
 
@@ -512,8 +511,12 @@ listado** — misturar o que tem número com o que não tem quebraria a única c
       `lowStockAlertLeadDays` escolhido no cadastro.
 - [x] A quantidade nunca vai a negativo, nem por recontagem nem por dose confirmada — clamp em zero
       dentro da mesma transação que grava o evento.
-- [ ] Lembrete periódico "seu estoque está alinhado com a caixa?" (decisão nº6) — **depende do C1**,
-      porque é notificação. Fica anotado aqui e não em aberto na tela.
+- [x] Lembrete periódico "seu estoque está alinhado com a caixa?" (decisão nº6). — entregue em
+      30/08, e **sem notificação**: conferir uma caixa se faz de pé na frente do armário, e quem
+      abre a tela de estoque já está pensando nisso. Um aviso no meio do dia interromperia para
+      pedir algo que só se resolve em casa. O corte é de **30 dias** desde a última recontagem
+      manual — baixa por dose e reposição não contam como conferir, porque mexem no número sem que
+      ninguém tenha aberto a caixa. **Pendente de device.**
 
 ---
 
@@ -929,11 +932,16 @@ sem ela não há como testar o app sem desinstalar. Ajustes ganhou a seção MEU
 (`LocalDataRepository`), inclusive das fotos e receitas no diretório de documentos.
 
 **Pronto quando**
-- [ ] Exportação gera arquivo legível com todos os dados do titular.
-- [ ] Exclusão apaga de verdade nos dois lados — verificado no painel do Supabase. — **o lado
-      local está feito**; o lado servidor depende do D1 existir, e com sincronização ligada o
-      apagamento tem que acontecer **primeiro no servidor**, senão o próximo `pull` traz tudo de
-      volta.
+- [x] Exportação gera arquivo legível com todos os dados do titular. — JSON indentado, com rótulos
+      em português e as nove tabelas. **Inclui o que foi apagado** (`deleted_at` preenchido): ainda
+      é dado do titular, e escondê-lo não seria a cópia completa que a lei pede. Sai pela folha de
+      compartilhamento do sistema, e não para uma pasta escolhida pelo app — quem decide onde um
+      arquivo com dado de saúde vai parar é a pessoa. **Pendente de device.**
+- [x] Exclusão apaga de verdade nos dois lados. — a nuvem **primeiro**, e a ordem não é detalhe:
+      apagar só o local faria o próximo `pull` trazer tudo de volta, e a pessoa veria reaparecer o
+      que mandou apagar. `DELETE` de verdade, e não `deleted_at` — uma linha marcada como apagada
+      continua sendo dado pessoal num servidor. A marca d'água da sincronização é limpa junto.
+      **Pendente de device.**
 - [x] Exclusão tem confirmação em duas etapas. — e a segunda repete o que some em vez de só
       perguntar "tem certeza?", porque é ela que precisa ser lida.
 - [x] Revogar consentimento apaga os dados e devolve o app ao estado de primeira execução. —
@@ -1501,3 +1509,7 @@ a partir do D1 é o que impede isso.
 | 2026-08-30 | D1 | Implementado, falta validar em aparelho | **Sincronização SQLite ↔ Supabase.** Push antes de pull, sempre: o contrário faria uma edição local ainda não enviada ser sobrescrita pela versão antiga do servidor — e o LWW julgaria certo, porque a linha remota seria mesmo mais nova que a última que ele viu subir. Conflito por **Last-Write-Wins tudo-ou-nada por registro**, sem merge de campos: mesclar dois estados de uma prescrição poderia produzir uma posologia que ninguém escreveu, e num app de medicação essa é a pior classe de bug (§2.9.3). A ordem das tabelas segue as **dependências**, não o alfabeto — subir filho antes de pai criaria linha órfã do outro lado. `synced_at` é carimbado depois da confirmação do servidor e **por linha**, com o `updated_at` da própria linha, para que uma edição feita durante o envio continue pendente na próxima passada. A marca d'água do pull mora numa tabela local (`sync_state`) e não em AsyncStorage: ela precisa sumir junto no "apagar tudo", senão sobreviveria ao apagamento e o app concluiria que já baixou dados que não tem mais. Nunca bloqueia a UI e nunca lança. |
 | 2026-08-30 | D1 | Concluído | **Schema do Supabase** em `docs/supabase-schema.sql`, rodado no painel em 30/08. Nove tabelas, RLS em todas (`user_id = auth.uid()`), com `with check` no insert/update — sem ele o RLS protegeria a leitura e deixaria a **escrita** aberta, que é o erro clássico desta configuração. Índices sobre `(user_id, updated_at)`, que é exatamente a consulta do pull. As tabelas `cmed_*` ficam de fora: o catálogo da Anvisa é dado de referência embutido, igual em todo aparelho — sincronizá-lo replicaria um dicionário de 7 mil linhas por usuário e o apagaria junto no "apagar meus dados". **Conferido**: `pg_tables` devolve `rowsecurity = true` nas nove. |
 | 2026-08-30 | LGPD | Concluído | **Termos 1.1.0 → 1.2.0**, forçando reconsentimento. O texto anterior afirmava que os dados de saúde não saíam do aparelho e **prometia consultar de novo antes de qualquer envio começar** — este bump é essa consulta. Sem ele, o primeiro upload aconteceria sob um consentimento dado para outra coisa, que é exatamente o problema corrigido em 24/08 quando três telas prometiam backup inexistente. O texto novo diz o que sobe, o que **não** sobe (fotos da ficha e da caixa, receita anexada) e que cada usuário só acessa os próprios dados. Sobre a exclusão na nuvem, ele é honesto: enquanto o botão não existe no app, o pedido é por contato, em até 15 dias. Corrigidos junto os textos do login e do diálogo de vincular conta, que repetiam a promessa antiga. |
+| 2026-08-30 | B5 | Concluído | **Lembrete de recontagem de estoque**, o último item aberto do bloco. Só a recontagem manual conta como "conferir": baixa por dose e reposição mexem no número sem que ninguém tenha aberto a caixa, e é justamente a distância entre o número do app e o que está lá dentro que este lembrete existe para fechar. **Trinta dias, e não sete** — o erro que ele corrige se acumula devagar (uma dose tomada sem confirmar, um comprimido que caiu), e perguntar toda semana viraria tarefa doméstica com resposta automática, que é o oposto de conferir. Fica na **tela de estoque** e sem notificação: conferir uma caixa se faz de pé na frente do armário, e quem abre essa tela já está pensando nisso — um aviso no meio do dia interromperia para pedir algo que só se resolve em casa. |
+| 2026-08-30 | D3 | Concluído | **Exclusão alcança a nuvem, e ela vem primeiro.** O comentário em `local-data-repository.ts` previa isto desde que foi escrito: com o D1 ligado, apagar só o local faria o próximo `pull` trazer tudo de volta — e a pessoa veria reaparecer sozinho o que mandou apagar, que é a pior coisa que um botão de exclusão pode fazer. `DELETE` de verdade, e não `deleted_at`: o soft delete serve para contar ao outro aparelho que a linha morreu, mas aqui é o direito de exclusão da LGPD (art. 18), e uma linha marcada como apagada continua sendo dado pessoal guardado num servidor. Ordem **inversa** à da sincronização — lá é pai antes de filho para nada chegar órfão, aqui é filho antes de pai para nada ficar órfão. A marca d'água da sincronização é limpa junto, senão o próximo `pull` pularia exatamente as linhas mais antigas que ela. Não lança: falhar na nuvem não pode impedir o apagamento local, senão a pessoa ficaria sem conseguir apagar nem o que está no próprio aparelho. |
+| 2026-08-30 | D3 | Concluído | **Exportação de dados** — direito de acesso e portabilidade (LGPD art. 18, II e V). **JSON e não PDF**: portabilidade quer dizer que o dado pode ir para outro lugar, e um PDF é bonito de ler e inútil de importar. Inclui **o que foi apagado** (`deleted_at` preenchido), porque ainda é dado do titular guardado pelo app e escondê-lo não seria a cópia completa que a lei pede. Sai pela folha de compartilhamento do sistema, e não para uma pasta escolhida pelo app: quem decide onde um arquivo com dado de saúde vai parar é a pessoa. Os anexos vão como **caminho**, não embutidos — base64 de imagens produziria um arquivo de dezenas de MB que nenhum leitor abre. O texto legal ganhou o parágrafo que descreve isso, junto com a exclusão remota pelo próprio app. |
+| 2026-08-30 | Plano | Marco | **Nenhum bloco obrigatório do roadmap segue em aberto.** Doze itens foram escritos entre 29 e 30/08: C1 (correções), C2, C3, D1, D2, D3, B1, B3, B5, o aviso de permissão na Home, o catálogo da CMED e o reconsentimento 1.2.0. Ficam fora, com motivo registrado, o **E9** (anexos no Storage — exige um segundo bump dos termos, e o reconsentimento acontece uma vez só) e o **checklist formal de acessibilidade** do E1, que o Gabriel tratará no artigo. ⚠️ **Escrito não é validado**: nenhum desses doze rodou em aparelho, porque a cota de builds do EAS acabou em 30/08 e reseta em 01/09. O risco do projeto deixou de ser falta de código e passou a ser a validação inteira concentrada numa sessão só. |
