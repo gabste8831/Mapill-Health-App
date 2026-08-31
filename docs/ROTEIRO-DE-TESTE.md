@@ -328,8 +328,8 @@ Android e volte à Home.
 ## Ao terminar a Parte 1
 
 Me manda: **(1)** as falhas com o número do passo, **(2)** as respostas dos 🔬, mesmo as que
-passaram. Com isso o C1 fecha formalmente e seguimos para o
-[`ROTEIRO-DE-PRINTS.md`](./ROTEIRO-DE-PRINTS.md).
+passaram. Com isso o C1 fecha formalmente, e o próximo passo é capturar os prints do caminho
+crítico para o TCC.
 
 ---
 ---
