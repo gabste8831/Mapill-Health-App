@@ -41,20 +41,20 @@ Nenhum bloco fecha sem estes seis itens:
 
 ### 🔨 Código que falta escrever
 
+**Restam três itens, todos pequenos.** O D1 (sincronização), o C2 (`deferred`) e o indicador de
+estado da sync foram entregues em 30/08.
+
 | # | O que | Bloco | Tamanho | Observação |
 |---|---|---|---|---|
-| 1 | **Sincronização SQLite ↔ Supabase** | [D1](#d1-sincronização-sqlite--supabase-) | ⭐ Grande | O único bloco realmente grande que resta. Espelhar schema, RLS, push/pull, LWW. É pré-requisito de 3, 4 e 5. |
-| 2 | **`deferred` na tela de dose** | [C2](#c2-tela-dedicada-de-gerenciamento-de-dose) | Pequeno | "Ignorar por agora", distinto de pular. A tela do horário já existe (feita no C1); falta só este estado. |
-| 3 | **Exportar meus dados** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Direito do titular (LGPD art. 18). Arquivo legível com tudo. |
-| 4 | **Apagar dados da nuvem** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Depende do D1: hoje não há nuvem para apagar. Os textos já foram decididos (P1, 29/08). |
-| 5 | **Resumo de adesão exportável** | [D2](#d2-histórico-e-relatório-de-adesão) | Pequeno | Sai junto do item 3 — mesma mecânica de gerar arquivo. |
-| 6 | **Lembrete de recontagem de estoque** | [B5](#b5-estoque--tela-dedicada) | Pequeno | "Seu estoque está alinhado com a caixa?". Destravado pelo C1. |
-| 7 | **Indicador de "não sincronizado"** | [E1](#e1-estados-vazios-offline-erro-e-acessibilidade) | Pequeno | Depende do D1. |
+| 1 | **Exportar meus dados** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Direito do titular (LGPD art. 18). Arquivo legível com tudo. |
+| 2 | **Apagar dados da nuvem** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Agora possível: o D1 existe. Os textos já foram decididos (P1, 29/08), e o texto legal 1.2.0 já promete o prazo de 15 dias por contato. |
+| 3 | **Lembrete de recontagem de estoque** | [B5](#b5-estoque--tela-dedicada) | Pequeno | "Seu estoque está alinhado com a caixa?". Destravado pelo C1. |
 
-**Ordem recomendada:** 2 → 6 → 1 → (3, 4, 5, 7 juntos, no fim).
+**Ordem recomendada:** 3 → (1 e 2 juntos, porque compartilham a mecânica de percorrer as tabelas).
 
-Os pequenos primeiro porque rendem no artigo e não travam nada; o D1 depois porque é o único que
-pode consumir semanas — e o que não pode ficar pela metade.
+**Fora desta leva, com decisão registrada:** o **E9** (anexos no Storage). Subir imagem de receita
+exige um segundo bump dos termos, e o reconsentimento acontece uma vez só — errar o texto custa
+caro. O texto 1.2.0 já diz, explicitamente, que fotos e receita **não** sobem.
 
 ### 📱 Validação em aparelho (não é código)
 
@@ -747,10 +747,16 @@ outras pendentes/atrasadas do dia** abaixo (decisão nº2 — não é tela de fo
   para a Home, não fechar o app.
 
 **Pronto quando**
-- [ ] Abre corretamente vindo de notificação com o app fechado (deep link + rota inicial).
-- [ ] "Ignorar por agora" grava `deferred`, distinto de "nunca visto" e de "pulou".
-- [ ] Segundo adiamento é impossível **na UI**, não só bloqueado no domínio.
-- [ ] Nenhuma dose vira `skipped` sozinha por decurso de tempo (decisão nº11.5).
+- [x] Abre corretamente vindo de notificação com o app fechado (deep link + rota inicial). —
+      `getLastNotificationResponseAsync` no bootstrap, e a tela tem saída explícita para a Home,
+      porque vindo da notificação não há pilha atrás. **Pendente de device.**
+- [x] "Ignorar por agora" grava `deferred`, distinto de "nunca visto" e de "pulou". — terceira
+      ação na tela do horário, em `variant="text"`: saída legítima, não atalho. A dose continua
+      pendente e a tela diz isso. **Pendente de device.**
+- [x] Segundo adiamento é impossível **na UI**, não só bloqueado no domínio. — o botão **some** da
+      notificação (categoria sem a ação) em vez de aparecer e recusar.
+- [x] Nenhuma dose vira `skipped` sozinha por decurso de tempo (decisão nº11.5). — nada no código
+      escreve `skipped` sem toque; o tempo só muda a **cor** na Home (`late`), nunca o registro.
 
 ---
 
@@ -860,14 +866,29 @@ subir. Três coisas mudam por causa disso, e nenhuma é técnica:
    prometiam backup inexistente. Bump de `CURRENT_TERMS_VERSION` obrigatório.
 
 **Pronto quando**
-- [ ] Dado criado offline sobe sozinho ao voltar a conexão.
-- [ ] Instalar em segundo device com a mesma conta restaura os dados.
-- [ ] Editar o mesmo registro nos dois devices resolve por LWW, de forma determinística.
-- [ ] RLS testado: token de um usuário não lê linha de outro.
-- [ ] Anexo opt-out permanece só no device.
-- [ ] **Anexos sobem e voltam** no segundo device: foto da ficha, foto da caixa e receita (E9).
-- [ ] **O texto legal descreve o envio de anexos antes de o primeiro upload existir**, com bump de
-      versão e reconsentimento.
+- [x] Dado criado offline sobe sozinho ao voltar a conexão. — o push roda a cada volta ao primeiro
+      plano, e o critério é `synced_at IS NULL OR updated_at > synced_at`. **Pendente de device.**
+- [x] Instalar em segundo device com a mesma conta restaura os dados. — pull por marca d'água,
+      guardada em `sync_state` (tabela local, para sumir junto no "apagar tudo"). **Pendente de
+      device.**
+- [x] Editar o mesmo registro nos dois devices resolve por LWW, de forma determinística. — o mais
+      novo por `updated_at` vence, tudo-ou-nada por registro; empate mantém o local, porque empate
+      só acontece quando os dois lados já têm a mesma coisa. **Pendente de device.**
+- [x] RLS testado: token de um usuário não lê linha de outro. — política em todas as 9 tabelas,
+      com `with check` no insert/update (sem ele a leitura estaria protegida e a escrita aberta).
+      **Conferido no painel em 30/08**: `pg_tables` devolve `rowsecurity = true` nas nove.
+- [x] Anexo opt-out permanece só no device. — trivialmente verdadeiro por ora: **nenhum** anexo
+      sobe, e as colunas de caminho local estão listadas e documentadas em
+      `tabelas-sincronizaveis.ts`.
+- [ ] **Anexos sobem e voltam** no segundo device: foto da ficha, foto da caixa e receita (E9). —
+      **fora desta leva**, por decisão de 30/08: subir imagem de receita exige um segundo bump dos
+      termos, e o reconsentimento acontece uma vez só.
+- [x] **O texto legal descreve o envio de anexos antes de o primeiro upload existir**, com bump de
+      versão e reconsentimento. — `CURRENT_TERMS_VERSION` 1.1.0 → **1.2.0**. O texto anterior
+      afirmava que os dados não saíam do aparelho e prometia consultar de novo antes de qualquer
+      envio; este bump é essa consulta. Diz o que sobe, o que **não** sobe (fotos e receita) e que
+      cada usuário só acessa os próprios dados. Corrigidos junto os textos do login e do diálogo de
+      vincular conta, que repetiam a promessa antiga.
 
 **Rastreabilidade**: §2.9 (consistência eventual — Vogels, 2008), §2.9.3 (LWW — Kleppmann, 2017).
 
@@ -1238,6 +1259,10 @@ canal já criado fica congelado no aparelho — som e importância não mudam po
 - **Relatório de adesão** (D2, 30/08), pelo card de acompanhamento semanal da Home.
 - **Sugestão de medicamento pelo nome** (B1) e **leitura de código de barras** (B3, 30/08).
   ⚠️ O B3 exige build nova: `expo-camera` é dependência nativa.
+- **"Ignorar por agora"** na tela do horário (C2, 30/08).
+- **Sincronização com o Supabase** (D1, 30/08) — inclui o reconsentimento dos termos 1.2.0, que
+  aparece na primeira abertura depois de atualizar. ⚠️ Precisa de **dois aparelhos** (ou instalar,
+  apagar e reinstalar) para valer como teste de verdade.
 
 **Adiado com decisão registrada:** o botão `+` no centro da barra de navegação (as abas usam
 `NativeTabs`, e trocar por barra própria devolveria o risco do Material You resolvido em 23/08) e o
@@ -1472,3 +1497,7 @@ a partir do D1 é o que impede isso.
 | 2026-08-30 | B1 | Concluído | **Catálogo da CMED embarcado.** O xlsx da Anvisa tem 26.001 linhas e 74 colunas (12 MB); sobraram **6.992 registros e 782 KB**. Saíram os 12.946 não comercializados (sugerir um remédio que a farmácia não tem é pior que não sugerir), as ~60 colunas de preço (PF/PMC por alíquota de ICMS — dado de mercado, não clínico) e as duplicatas de embalagem: as seis apresentações de "Tylenol 500 MG" são a mesma coisa para quem cadastra um tratamento, mas 500 e 750 não são. A **tarja** finalmente preenche `prescriptionRequirement`, que o formulário nunca perguntou porque quem cadastra à mão não tem como saber — o comentário no código dizia, desde 21/08, que esperava este bloco. A importação (~21 mil inserções) roda **depois** de liberar a tela e sem `await`: a busca é conveniência do cadastro, não pré-requisito, e bloquear a splash por ela seria pagar um preço visível por um ganho opcional. |
 | 2026-08-30 | B3 | Concluído | **Leitura de código de barras**, com `expo-camera`. O scanner **não salva nada**: lê, encontra e passa adiante para o mesmo formulário de sempre, já preenchido no que a base sabe — um cadastro clínico criado por um código lido de relance seria dado que ninguém conferiu. EAN não encontrado **não é beco sem saída** (item do "pronto quando"): manipulados não têm código, importados não estão na CMED e a base envelhece, então o caminho manual fica a um toque com o mesmo peso visual. Recusar a permissão de câmera também não fecha nada. O que a base preenche são nome, princípio ativo e tarja; **forma farmacêutica, dose e posologia não** — daria para adivinhar "comprimido" da apresentação, e adivinhar forma farmacêutica num app de medicação é exatamente o tipo de palpite que este cadastro foi desenhado para não dar. |
 | 2026-08-30 | Build | Bloqueado até 01/09 | A cota mensal de builds Android do plano gratuito do EAS acabou, e reseta em **01/09**. Três tentativas desta leva falharam por isso — as duas primeiras em silêncio, porque o filtro de saída do comando engolia a mensagem. Nada se perde: o código está no GitHub e a build é um comando quando a cota voltar. Enquanto isso, o Metro (`npx expo start --dev-client`) cobre tudo que é JavaScript sobre a build já instalada; o que **não** cobre é a correção do canal de som do alarme e a permissão de câmera do B3, que são nativas. |
+| 2026-08-30 | C2 | Concluído | **"Ignorar por agora"** — a terceira resposta, e a única que não encerra a dose. Existe porque as outras duas obrigam a mentir quem ainda não sabe: quem está no ônibus com o remédio em casa não tomou (então "Tomei" é falso) e não decidiu pular (então "Pulei" também é). Sem esta saída, essa pessoa fecha o app sem responder — e o app perde a informação de que ela **viu**, que é diferente de nunca ter aberto. O tipo `IntakeStatus` e a coluna existiam desde a migration 002; faltava a UI oferecer. Fica em `variant="text"`, com metade do peso das outras: saída legítima, não atalho a ser incentivado. |
+| 2026-08-30 | D1 | Implementado, falta validar em aparelho | **Sincronização SQLite ↔ Supabase.** Push antes de pull, sempre: o contrário faria uma edição local ainda não enviada ser sobrescrita pela versão antiga do servidor — e o LWW julgaria certo, porque a linha remota seria mesmo mais nova que a última que ele viu subir. Conflito por **Last-Write-Wins tudo-ou-nada por registro**, sem merge de campos: mesclar dois estados de uma prescrição poderia produzir uma posologia que ninguém escreveu, e num app de medicação essa é a pior classe de bug (§2.9.3). A ordem das tabelas segue as **dependências**, não o alfabeto — subir filho antes de pai criaria linha órfã do outro lado. `synced_at` é carimbado depois da confirmação do servidor e **por linha**, com o `updated_at` da própria linha, para que uma edição feita durante o envio continue pendente na próxima passada. A marca d'água do pull mora numa tabela local (`sync_state`) e não em AsyncStorage: ela precisa sumir junto no "apagar tudo", senão sobreviveria ao apagamento e o app concluiria que já baixou dados que não tem mais. Nunca bloqueia a UI e nunca lança. |
+| 2026-08-30 | D1 | Concluído | **Schema do Supabase** em `docs/supabase-schema.sql`, rodado no painel em 30/08. Nove tabelas, RLS em todas (`user_id = auth.uid()`), com `with check` no insert/update — sem ele o RLS protegeria a leitura e deixaria a **escrita** aberta, que é o erro clássico desta configuração. Índices sobre `(user_id, updated_at)`, que é exatamente a consulta do pull. As tabelas `cmed_*` ficam de fora: o catálogo da Anvisa é dado de referência embutido, igual em todo aparelho — sincronizá-lo replicaria um dicionário de 7 mil linhas por usuário e o apagaria junto no "apagar meus dados". **Conferido**: `pg_tables` devolve `rowsecurity = true` nas nove. |
+| 2026-08-30 | LGPD | Concluído | **Termos 1.1.0 → 1.2.0**, forçando reconsentimento. O texto anterior afirmava que os dados de saúde não saíam do aparelho e **prometia consultar de novo antes de qualquer envio começar** — este bump é essa consulta. Sem ele, o primeiro upload aconteceria sob um consentimento dado para outra coisa, que é exatamente o problema corrigido em 24/08 quando três telas prometiam backup inexistente. O texto novo diz o que sobe, o que **não** sobe (fotos da ficha e da caixa, receita anexada) e que cada usuário só acessa os próprios dados. Sobre a exclusão na nuvem, ele é honesto: enquanto o botão não existe no app, o pedido é por contato, em até 15 dias. Corrigidos junto os textos do login e do diálogo de vincular conta, que repetiam a promessa antiga. |

@@ -42,9 +42,10 @@ hora, mesmo fechado.
 > blocos 3, 5 e 6 passaram e a lógica deles não mudou. Os blocos **8 e 9** seguem por fazer, e o 8
 > depende do alarme funcionar.
 >
-> **Estreia** — os blocos **10 a 14** são de código que nunca rodou em aparelho: aviso de permissão
+> **Estreia** — os blocos **10 a 16** são de código que nunca rodou em aparelho: aviso de permissão
 > na Home, avisos de compromisso e receita (C3), relatório de adesão (D2), sugestão de medicamento
-> pelo nome (B1) e leitura de código de barras (B3).
+> pelo nome (B1), leitura de código de barras (B3), "Ignorar por agora" (C2) e a **sincronização
+> com o Supabase** (D1).
 >
 > Além dos blocos, confira de passagem: a miniatura do anexo aparece **na hora** (não branca), o
 > teclado fecha ao tocar fora do campo, definir horário virou **uma etapa** (campo digitável com
@@ -421,6 +422,81 @@ de antecedência.
 > ✅ 🔴 Diz **"Código não encontrado"**, explica por que acontece, mostra o número lido, e oferece
 > **"Cadastrar à mão"** e **"Ler outro código"**.
 > ❌ Não pode travar nem voltar sozinho.
+
+---
+
+---
+
+## 15 — "Ignorar por agora" 🔴 (C2)
+
+**15.1** Toque numa notificação de dose (ou abra a tela do horário pela agenda).
+
+> ✅ 🔴 Abaixo de **Tomei** e **Pulei**, existe **"Ignorar por agora"**, em texto simples.
+> ✅ Ele tem menos peso visual que os outros dois — é saída, não atalho.
+
+**15.2** 🔴 Toque nele.
+
+> ✅ 🔴 Aparece um aviso azul: **"Você marcou para resolver depois. A dose continua pendente."**
+> ✅ 🔴 O botão **some** — não há o que ignorar duas vezes.
+> ✅ 🔴 A dose **não** ganha selo de Tomada nem de Pulada.
+
+**15.3** Volte para a Home.
+
+> ✅ 🔴 A dose continua na lista, como pendente. Ignorar não a resolve.
+
+**15.4** Vá em **Minha adesão** (card do acompanhamento semanal).
+
+> ✅ 🔴 Ela conta em **"sem resposta"**, e não em "puladas".
+
+---
+
+## 16 — Sincronização 🔴 (D1)
+
+⚠️ **Precisa de conta Google vinculada.** Sem conta, nada disso acontece — e é o comportamento
+correto.
+
+⚠️ Para valer como teste de verdade, o ideal são **dois aparelhos**. Dá para simular num só:
+cadastrar, apagar o app, reinstalar e entrar com a mesma conta.
+
+**16.1** 🔴 Ao abrir a build nova, o app deve **pedir o aceite dos termos de novo**.
+
+> ✅ 🔴 Porque a versão subiu para 1.2.0 — o texto mudou para descrever a cópia na nuvem.
+> ✅ 🔴 Lendo os termos, a seção "Onde seus dados ficam armazenados" diz o que sobe e que **fotos e
+> receita continuam só no aparelho**.
+> ❌ Se ele **não** pedir, o bump não pegou.
+
+**16.2** **Ajustes** → **Conta e dados**. Com a conta vinculada, olhe abaixo da linha da conta.
+
+> ✅ 🔴 Existe um bloco de sincronização, dizendo **"Tudo salvo na nuvem"** ou
+> **"N alterações para enviar"**.
+> ✅ 🔴 Sem conta vinculada, esse bloco **não aparece**.
+
+**16.3** 🔴 Cadastre um remédio novo e volte a essa tela.
+
+> ✅ Ele mostra alterações pendentes por um instante, e depois **"Tudo salvo na nuvem"**.
+> ✅ Tocando no bloco, ele sincroniza na hora.
+
+**16.4** 🔴 **Modo avião ligado**, cadastre outro remédio.
+
+> ✅ 🔴 O cadastro funciona **normalmente** — nada trava, nada reclama de internet.
+> ✅ 🔴 O bloco diz **"1 alteração para enviar"** e explica que ela já está salva no aparelho.
+
+**16.5** 🔴 Desligue o modo avião, saia do app e volte.
+
+> ✅ 🔴 O bloco volta para **"Tudo salvo na nuvem"** sozinho.
+
+**16.6** 🔬 **O teste que importa:** desinstale o app, instale de novo, e entre **com a mesma conta
+do Google**.
+
+> ✅ 🔴 Seus remédios, tratamentos, histórico e compromissos **voltam**.
+> ✅ 🔴 As **fotos não voltam** — e isso é o esperado: anexos não sobem (o texto legal diz isso).
+> 🔬 **Anote:** quanto tempo levou até os dados aparecerem?
+
+**16.7** 🔬 Se tiver dois aparelhos: edite o **mesmo** remédio nos dois, com o segundo offline.
+Depois religue a internet do segundo.
+
+> ✅ 🔬 A edição **mais recente** vence, nos dois aparelhos. Sem mistura: ou é uma versão, ou é a
+> outra, nunca metade de cada.
 
 ---
 
