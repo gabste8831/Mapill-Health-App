@@ -896,21 +896,101 @@ o nível B (som alto que ignora o silencioso) e **diz isso** na interface.
 agressivos com agendamentos em segundo plano. O comportamento precisa ser medido; se matar o
 lembrete, a mitigação é orientar o usuário a isentar o aplicativo.
 
-**Anexos permanecem locais.** Foto da ficha, foto da caixa e receita não sobem.
+**Anexos permanecem locais.** Foto da ficha, foto da caixa e receita não sobem — e a interface e o
+texto legal declaram isso explicitamente, em vez de deixar implícito.
+
+**Nenhum dado clínico sai para serviços de terceiros.** Não há integração com calendário externo,
+nem exportação automática para outro aplicativo. O que sai, sai por ação explícita do titular: a
+exportação em JSON, pela folha de compartilhamento do sistema, onde é ele quem decide o destino.
 
 **Uma conta é um paciente.** Sem papel de cuidador.
 
 ## 10.2 Trabalhos futuros
 
-- **Agente conversacional com integração à Anvisa** — consultar bula, interações e alternativas
-  genéricas por linguagem natural. Foi a ideia original da Fase 2, congelada para não comprometer o
-  caminho crítico.
-- **iOS**, com conta de desenvolvedor.
-- **Anexos na nuvem**, com o consentimento adequado.
-- **Papel de cuidador**, que muda o modelo de permissão inteiro.
-- **Relatório em PDF** formatado para levar ao médico.
-- **Teste automatizado de interface** — hoje a verificação automatizada cobre o domínio, e a
-  interface é validada manualmente.
+Organizados por natureza. Todos foram identificados durante o desenvolvimento e **excluídos por
+decisão**, não por esquecimento — cada um tem o motivo registrado no plano, na data em que foi
+adiado. Essa é a diferença entre um recorte e uma lacuna.
+
+### Integrações
+
+**Agente conversacional com integração à Anvisa.** Consultar bula, interações medicamentosas e
+alternativas genéricas por linguagem natural. Era a ideia original da Fase 2, congelada logo no
+início para não comprometer o caminho crítico — e o congelamento foi registrado como *regra de
+escopo*, não como intenção vaga.
+
+**Exportar compromissos para o Google Agenda.** O encaixe é natural: o Mapill já modela consulta,
+exame e terapia como "um ponto no tempo com lembrete", que é exatamente um evento de calendário. E
+resolveria um problema real — hoje o compromisso clínico só existe dentro do aplicativo, enquanto a
+pessoa organiza a vida no calendário que já usa. A conta do Google já está vinculada, então a
+identidade não seria obstáculo.
+
+**Duas ressalvas, e a segunda é a que decide.**
+
+A primeira é de produto: exportar as **doses** seria um erro. Três por dia, todos os dias,
+poluiriam o calendário a ponto de a pessoa desligar a integração inteira — e a dose já tem o
+mecanismo certo, que é o alarme nativo. Só os compromissos fazem sentido ali.
+
+A segunda é de proteção de dados. Um evento "consulta com cardiologista" é **dado pessoal sensível
+saindo do aplicativo para um serviço de terceiro**, fora do controle do titular e do meu. Isso
+exigiria escopo OAuth adicional, consentimento **específico** para esse envio — não dá para embutir
+no aceite geral, porque a LGPD pede destaque para dado sensível (art. 11, I) — e um novo bump da
+versão dos termos.
+
+E aqui está a razão concreta de ter ficado de fora: **o reconsentimento acontece uma vez só**. A
+versão 1.2.0 foi gasta para descrever a sincronização, e forçar o titular a reler os termos duas
+vezes em semanas seguidas transforma o consentimento informado em ruído — a pessoa passa a aceitar
+sem ler, que é o oposto do que a lei pretende.
+
+É a mesma razão pela qual os anexos ficaram fora do armazenamento em nuvem. Vale registrar que o
+critério não foi técnico nas duas vezes: foi o custo de gastar a atenção do titular.
+
+**Anexos no armazenamento em nuvem.** Foto da ficha, foto da caixa e receita. Mesmo raciocínio
+acima; a receita é o dado mais sensível que o aplicativo guarda.
+
+### Plataforma
+
+**iOS.** O código é mantido compilável, mas exige conta paga de desenvolvedor Apple. Há uma
+assimetria já mapeada a tratar: os gatilhos de notificação `DAILY` e `WEEKLY` são do Android, e
+`CALENDAR` é exclusivo do iOS — mais um motivo pelo qual o agendamento por data específica foi a
+escolha certa, já que é comum às duas plataformas.
+
+**Orientação sobre economia de bateria.** Se a validação confirmar que fabricantes agressivos matam
+o agendamento, o aplicativo precisa de uma tela ensinando a isentá-lo — sem isso, o lembrete falha
+em silêncio, que é o pior modo de falhar num app de medicação.
+
+### Funcionalidades adiadas com decisão registrada
+
+**Papel de cuidador.** Alguém que acompanha o tratamento de outra pessoa. Foi congelado porque muda
+o modelo de permissão inteiro: hoje uma conta é um paciente, e introduzir um segundo papel
+significaria repensar autenticação, sincronização e o consentimento — quem consente pelo dado de
+quem.
+
+**Relatório em PDF formatado para o médico.** A tela de adesão já cumpre a função em print, e a
+exportação em JSON garante a portabilidade que a lei exige. O PDF formatado é apresentação, não
+capacidade nova.
+
+**Sininho de notificações pendentes**, com contagem no cabeçalho. Melhoria, não defeito — o que
+está pendente já aparece na Home.
+
+**Botão `+` central na barra de navegação.** Adiado por uma razão técnica específica: as abas usam
+`NativeTabs`, que não aceita item central, e trocar por uma barra própria devolveria um problema de
+tema do Material You que já havia sido resolvido. O acesso ao cadastro existe em todas as abas que
+listam algo.
+
+**Tela de conquistas e medalhas.** Descartada por princípio, não por prazo: a gamificação do
+aplicativo é deliberadamente discreta (progresso do dia e adesão semanal), e um sistema de
+recompensas empurraria na direção contrária à decisão registrada em 6.4 — não transformar registro
+clínico em julgamento.
+
+### Verificação
+
+**Teste automatizado de interface.** Hoje a verificação automatizada cobre o domínio — funções
+puras executadas em Node — e a interface é validada manualmente por roteiro. Automatizar os fluxos
+críticos (cadastrar, confirmar dose, corrigir) reduziria o custo de cada rodada de validação.
+
+**Teste com leitor de tela.** A varredura de acessibilidade de 31/08 foi feita por leitura de
+código e corrigiu seis defeitos, mas percorrer os fluxos críticos com o TalkBack ligado exige
+aparelho e continua pendente.
 
 ---
 
