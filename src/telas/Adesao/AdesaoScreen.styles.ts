@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, listGap, screenPadding, spacing, surfaceCard, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -8,18 +8,15 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   conteudo: {
-    padding: spacing.md,
-    gap: spacing.md,
+    paddingHorizontal: screenPadding,
+    paddingTop: spacing.sm,
+    gap: spacing.gutter,
     paddingBottom: spacing.xxl,
   },
 
   /** O número grande, que é o que a pessoa veio ver — e o que ela vai mostrar ao médico. */
   destaque: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
+    ...surfaceCard,
     padding: spacing.lg,
     alignItems: "center",
     gap: spacing.xs,
@@ -52,12 +49,13 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.sm,
   },
+  /**
+   * Os três cartõezinhos lado a lado mantêm `padding: md`, e não o `gutter` do `surfaceCard`: em
+   * três colunas numa tela de celular, 24 de respiro interno não sobra largura para o número.
+   */
   contagem: {
+    ...surfaceCard,
     flex: 1,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
     padding: spacing.md,
     gap: 2,
   },
@@ -77,7 +75,7 @@ export const styles = StyleSheet.create({
   },
 
   secao: {
-    gap: spacing.sm,
+    gap: listGap,
   },
   secaoTitulo: {
     ...typography.label,
@@ -85,13 +83,10 @@ export const styles = StyleSheet.create({
   },
 
   linha: {
+    ...surfaceCard,
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    gap: spacing.md,
     padding: spacing.md,
   },
   linhaTexto: {
@@ -111,13 +106,18 @@ export const styles = StyleSheet.create({
     fontSize: 18,
   },
 
+  /**
+   * Aqui a linha divisória fica: são registros curtos e repetidos, não cartões — vinte deles em
+   * cartão separado viram uma escada. O traço só clareou, porque `outlineVariant` num divisor
+   * interno pesa como moldura de tabela.
+   */
   perdida: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant,
+    borderBottomColor: colors.surfaceContainerHigh,
   },
   perdidaNome: {
     ...typography.bodyLg,

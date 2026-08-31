@@ -1,20 +1,35 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
+  /**
+   * O cartão de dose, agora **arredondado e com sombra** como o resto do app.
+   *
+   * Ele não tinha `borderRadius` nenhum: era um retângulo de canto reto com borda cinza, no meio de
+   * uma tela onde tudo o mais é cartão arredondado. Era o que fazia a agenda parecer uma tabela
+   * colada na Home em vez de parte dela.
+   */
   base: {
     flexDirection: "row",
     alignItems: "center",
     padding: spacing.md,
     gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderRadius: radius.lg,
     backgroundColor: colors.surfaceContainerLowest,
+    boxShadow: surfaceShadow,
   },
+  /**
+   * Os estados não usam mais **borda colorida de 2px**, e sim uma faixa lateral grossa.
+   *
+   * A borda inteira desenhava um contorno em volta do cartão, que somado ao fundo colorido dava a
+   * ele o peso de um alerta de sistema — três desses na agenda e a tela vira um painel de avisos.
+   * A faixa à esquerda diz a mesma coisa com um gesto só, e é a mesma linguagem que a `Dica` e os
+   * blocos de permissão já usam.
+   */
   highlighted: {
-    borderWidth: 2,
-    borderColor: colors.primary,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
   },
   /**
    * Atrasada usa a cor de erro, e não a de atenção: é a única linha da agenda que representa algo
@@ -22,19 +37,22 @@ export const styles = StyleSheet.create({
    * então precisa continuar pedindo resposta).
    */
   late: {
-    borderWidth: 2,
-    borderColor: colors.error,
-    backgroundColor: colors.errorContainer,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.error,
+    backgroundColor: colors.errorSurface,
   },
   /**
-   * "É agora" ganha o mesmo peso de borda da atrasada, e não o da próxima: as duas pedem ação
-   * imediata, e é essa diferença — pede agora × está na fila — que a espessura precisa carregar.
-   * O que separa uma da outra é a cor, verde contra vermelho, que é o que você pediu no 12.1.
+   * "É agora" ganha o mesmo peso da atrasada: as duas pedem ação imediata, e é essa diferença —
+   * pede agora × está na fila — que o destaque precisa carregar. O que separa uma da outra é a cor.
+   *
+   * O fundo é o verde **diluído**, e não o `successContainer` cheio: aquele era vibrante demais
+   * para uma linha de lista, e competia com o vermelho da atrasada logo acima — dois blocos
+   * saturados lado a lado anulam a hierarquia que as cores deviam criar.
    */
   now: {
-    borderWidth: 2,
-    borderColor: colors.success,
-    backgroundColor: colors.successContainer,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.success,
+    backgroundColor: colors.successSurface,
   },
   done: {
     opacity: 0.5,
@@ -80,27 +98,32 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
   actions: {
-    gap: spacing.xs,
+    gap: spacing.sm,
     alignItems: "stretch",
   },
+  /** Pílula, e não retângulo de canto suave: acompanha as fichinhas de horário do resto do app. */
   confirmButton: {
     backgroundColor: colors.primary,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.sm,
+    borderRadius: radius.full,
   },
   confirmButtonText: {
     ...typography.label,
     color: colors.onPrimary,
     textAlign: "center",
   },
-  /** "Pular" é discreto de propósito: é uma saída legítima, não um atalho a ser incentivado. */
+  /**
+   * "Pular" é discreto de propósito: é uma saída legítima, não um atalho a ser incentivado.
+   *
+   * Fundo suave no lugar da borda cinza — mesma razão dos cartões: contorno de 1px sobre superfície
+   * clara lê como campo de formulário, e aqui é um botão.
+   */
   skipButton: {
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceContainer,
   },
   skipButtonText: {
     ...typography.label,

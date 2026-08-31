@@ -1,6 +1,14 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import {
+  colors,
+  listGap,
+  radius,
+  screenPadding,
+  spacing,
+  surfaceCard,
+  typography,
+} from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -8,37 +16,36 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: screenPadding,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.md,
   },
   subtitle: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
+    lineHeight: 22,
   },
   listContent: {
-    padding: spacing.md,
-    gap: spacing.md,
+    paddingHorizontal: screenPadding,
+    paddingTop: spacing.sm,
+    gap: listGap,
     paddingBottom: spacing.xxl,
   },
 
   // --- Cartão de um estoque ---
+  /** Mesmo cartão da lista de medicações: sombra, sem borda, respiro de `gutter`. */
   item: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
-    padding: spacing.md,
-    gap: spacing.xs,
+    ...surfaceCard,
+    gap: spacing.sm,
   },
   itemHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   itemHeaderText: {
     flex: 1,
+    gap: 2,
   },
   name: {
     ...typography.bodyLg,
@@ -68,10 +75,7 @@ export const styles = StyleSheet.create({
   acoes: {
     flexDirection: "row",
     gap: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
     paddingTop: spacing.sm,
-    marginTop: spacing.xs,
   },
   acao: {
     flex: 1,
@@ -81,10 +85,8 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     // Mesmo piso de alvo de toque usado no calendário: abaixo de 44 a linha vira armadilha.
     minHeight: 44,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.full,
+    backgroundColor: colors.surfaceContainer,
   },
   acaoTexto: {
     ...typography.label,

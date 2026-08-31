@@ -21,6 +21,7 @@ import {
   BottomSheet,
   Button,
   CenteredLoader,
+  EstadoDeErro,
   Fab,
   GradeDeMes,
   Header,
@@ -422,9 +423,7 @@ export function CalendarioScreen() {
       {/* O subtítulo saiu: a grade explica sozinha o que a tela é, e a frase custava altura numa
           tela onde o calendário e a lista já disputam espaço. */}
       {error !== null ? (
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
+        <EstadoDeErro mensagem={error} onTentarDeNovo={() => void reload()} />
       ) : (
         <>
           {/* A grade rola junto com a lista, e só o filtro gruda no topo (`stickyHeaderIndices`).

@@ -1,15 +1,29 @@
 import { StyleSheet } from "react-native";
 
-import { bottomTabInset, colors, radius, spacing, typography } from "@/shared/theme";
+import {
+  bottomTabInset,
+  colors,
+  listGap,
+  radius,
+  screenPadding,
+  spacing,
+  surfaceCard,
+  typography,
+} from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
   },
+  /**
+   * `gutter` entre os blocos, e não `lg`: a Home empilha coisas de natureza diferente — saudação,
+   * progresso do dia, agenda —, e é o espaço entre elas que diz que são assuntos separados.
+   */
   scrollContent: {
-    padding: spacing.md,
-    gap: spacing.lg,
+    paddingHorizontal: screenPadding,
+    paddingTop: spacing.sm,
+    gap: spacing.gutter,
     paddingBottom: bottomTabInset + spacing.xxl,
   },
   greetingRow: {
@@ -42,14 +56,22 @@ export const styles = StyleSheet.create({
     ...typography.headlineSm,
     color: colors.primary,
   },
+  /**
+   * A trilha subiu de 4 para 8px e a ponta ficou redonda. Com 4 ela era um fio: some no meio da
+   * tela e não se lê de relance, que é justamente o único jeito como um resumo do dia é lido.
+   *
+   * O trilho vazio também clareou — `outlineVariant` é a cor de contorno, e usada como área cheia
+   * ficava escura demais, dando à barra vazia o peso de uma barra cheia.
+   */
   progressTrack: {
-    height: 4,
-    backgroundColor: colors.outlineVariant,
-    borderRadius: radius.sm,
+    height: 8,
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: radius.full,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
+    borderRadius: radius.full,
     backgroundColor: colors.primary,
   },
   progressCaption: {
@@ -58,7 +80,7 @@ export const styles = StyleSheet.create({
     opacity: 0.7,
   },
   doseList: {
-    gap: spacing.sm,
+    gap: listGap,
   },
   sectionLabel: {
     ...typography.label,
@@ -81,14 +103,10 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   emptyState: {
+    ...surfaceCard,
     alignItems: "center",
     gap: spacing.sm,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surfaceContainerLowest,
+    paddingVertical: spacing.xl,
   },
   emptyTitle: {
     ...typography.headlineSm,
@@ -103,6 +121,25 @@ export const styles = StyleSheet.create({
   },
   errorText: {
     ...typography.bodyMd,
+    color: colors.error,
+  },
+  /**
+   * O erro da Home como faixa, e não como tela cheia: a saudação, o progresso e os cards continuam
+   * valendo, e trocar tudo por um aviso apagaria o contexto de quem só queria ver o dia.
+   */
+  erroInline: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.error,
+    backgroundColor: colors.errorSurface,
+  },
+  erroAcao: {
+    ...typography.label,
     color: colors.error,
   },
 });

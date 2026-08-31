@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useDosesDoHorario, type DoseDoHorario } from "@/hooks/use-doses-do-horario";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
 import { colors } from "@/shared/theme";
-import { Button, CenteredLoader, Header } from "@/ui";
+import { Button, CenteredLoader, EstadoDeErro, Header } from "@/ui";
 import { styles } from "./HorarioScreen.styles";
 
 type ItemProps = {
@@ -124,7 +124,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
 export function HorarioScreen() {
   const router = useRouter();
   const { instante } = useLocalSearchParams<{ instante: string }>();
-  const { doses, isLoading, error, registrar } = useDosesDoHorario(instante ?? "");
+  const { doses, isLoading, error, reload, registrar } = useDosesDoHorario(instante ?? "");
 
   const pendentes = doses.filter((dose) => !dose.resolvida).length;
 
@@ -135,6 +135,15 @@ export function HorarioScreen() {
 
   if (isLoading) return <CenteredLoader />;
 
+  if (error !== null) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <Header title="Hora do remédio" onBack={voltar} />
+        <EstadoDeErro mensagem={error} onTentarDeNovo={() => void reload()} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Header title="Hora do remédio" onBack={voltar} />
@@ -144,9 +153,7 @@ export function HorarioScreen() {
           <Text style={styles.quando}>{dataEHoraPorExtenso(new Date(instante))}</Text>
         ) : null}
 
-        {error !== null ? (
-          <Text style={styles.erro}>{error}</Text>
-        ) : doses.length === 0 ? (
+        {doses.length === 0 ? (
           <View style={styles.vazio}>
             <Text style={styles.vazioTitulo}>Nada para tomar neste horário</Text>
             <Text style={styles.vazioTexto}>

@@ -52,7 +52,7 @@ function resumoDaSemana(semana: DiaDaSemana[]): string {
 export function InicioScreen() {
   const router = useRouter();
   const { draft } = usePatientProfile();
-  const { agenda, isLoading, error, registrarDose, registrarDoses } = useTodayDoses();
+  const { agenda, isLoading, error, reload, registrarDose, registrarDoses } = useTodayDoses();
   const { permissao, abrirConfiguracoes } = useNotificationPermission();
 
   const hoje = new Date();
@@ -193,7 +193,17 @@ export function InicioScreen() {
           ) : null}
         </View>
 
-        {error !== null ? <Text style={styles.errorText}>{error}</Text> : null}
+        {/* Aqui o erro **não** toma a tela: a Home tem a saudação, o progresso e os cards, e
+            substituir tudo por um aviso apagaria o contexto de quem só queria ver o dia. A linha
+            com "tentar de novo" resolve sem esconder o resto. */}
+        {error !== null ? (
+          <View style={styles.erroInline}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Pressable onPress={() => void reload()} accessibilityRole="button" hitSlop={spacing.sm}>
+              <Text style={styles.erroAcao}>Tentar de novo</Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         {/* Antes da agenda, e não no fim: ele muda o que toda a lista abaixo significa. Ler os
             horários primeiro e descobrir depois que nenhum deles vai tocar é a ordem errada. */}

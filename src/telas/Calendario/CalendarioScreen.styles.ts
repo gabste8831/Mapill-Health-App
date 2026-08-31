@@ -1,6 +1,13 @@
 import { StyleSheet } from "react-native";
 
-import { bottomTabInset, colors, radius, spacing, typography } from "@/shared/theme";
+import {
+  bottomTabInset,
+  colors,
+  radius,
+  spacing,
+  surfaceCard,
+  typography,
+} from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -55,12 +62,9 @@ export const styles = StyleSheet.create({
   },
 
   // --- Item da lista ---
+  /** Só a sombra, sem o contorno — e o `boxShadow` que estava escrito à mão virou token. */
   item: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
+    ...surfaceCard,
     padding: spacing.md,
     gap: spacing.xs,
   },
@@ -114,7 +118,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+    borderTopColor: colors.surfaceContainerHigh,
     paddingTop: spacing.sm,
     marginTop: spacing.xs,
   },
@@ -130,7 +134,7 @@ export const styles = StyleSheet.create({
   perguntaDeDesfecho: {
     gap: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+    borderTopColor: colors.surfaceContainerHigh,
     paddingTop: spacing.sm,
     marginTop: spacing.xs,
   },
@@ -151,10 +155,10 @@ export const styles = StyleSheet.create({
     // 44 é o piso de alvo de toque confortável; abaixo disso a linha vira armadilha em tela
     // pequena, e o público do app inclui quem já não acerta um toque preciso.
     minHeight: 44,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: radius.full,
+    // Fundo suave no lugar do contorno: dois botões lado a lado dentro de um cartão sem borda,
+    // contornados, voltavam a desenhar a caixinha que o cartão deixou de ter.
+    backgroundColor: colors.surfaceContainer,
   },
   botaoDeDesfechoTexto: {
     ...typography.label,
@@ -167,7 +171,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+    borderTopColor: colors.surfaceContainerHigh,
     paddingTop: spacing.sm,
     marginTop: spacing.xs,
   },
@@ -195,7 +199,7 @@ export const styles = StyleSheet.create({
 
   /** Um dia inteiro da agenda: o cabeçalho, os compromissos e o bloco de doses. */
   dia: {
-    gap: spacing.sm,
+    gap: spacing.md,
     // Separa do filtro grudado logo acima, agora que o `listContent` não tem mais `gap` uniforme.
     marginTop: spacing.sm,
   },
@@ -238,11 +242,7 @@ export const styles = StyleSheet.create({
 
   // --- Bloco de doses do dia ---
   blocoDeDoses: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
+    ...surfaceCard,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
@@ -255,7 +255,7 @@ export const styles = StyleSheet.create({
   /** Divisória entre doses do mesmo dia — mais leve que um cartão por dose. */
   linhaComDivisoria: {
     borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+    borderTopColor: colors.surfaceContainerHigh,
   },
   horaDaDose: {
     ...typography.label,

@@ -17,10 +17,13 @@ import {
   resumirDose,
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
+import { useSync } from "@/hooks/use-sync";
 import { colors } from "@/shared/theme";
 import {
+  AvisoDePendencias,
   Button,
   CenteredLoader,
+  EstadoDeErro,
   Fab,
   FotoLocal,
   Header,
@@ -144,6 +147,7 @@ function normalizar(texto: string): string {
 export function RemediosScreen() {
   const router = useRouter();
   const { items, isLoading, error, reload } = useMedicationList();
+  const sync = useSync();
   const [busca, setBusca] = useState("");
   const [ordem, setOrdem] = useState<OrdemDeRemedios>("alfabetica");
 
@@ -233,9 +237,7 @@ export function RemediosScreen() {
       </View>
 
       {error !== null ? (
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
+        <EstadoDeErro mensagem={error} onTentarDeNovo={() => void reload()} />
       ) : (
         <FlatList
           data={visiveis}
@@ -261,6 +263,11 @@ export function RemediosScreen() {
           // custava três linhas de altura em toda rolagem, para dizer algo que se lê uma vez.
           ListHeaderComponent={
             <View style={styles.listHeader}>
+              {/* Uma linha para a tela inteira, e não um selo por card: a pergunta é "meus dados
+                  estão salvos?", e ela se responde uma vez. Some quando não há pendência — que é
+                  o caso comum, e sempre o caso de quem não vinculou conta. */}
+              <AvisoDePendencias pendentes={sync.estado.pendentes} />
+
               <Text style={styles.subtitle}>
                 Abaixo, suas medicações cadastradas em nosso sistema. Toque no lápis para ver mais
                 informações ou editar o cadastro, e na lixeira caso deseje excluir a medicação.

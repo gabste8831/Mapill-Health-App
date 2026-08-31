@@ -1,6 +1,15 @@
 import { StyleSheet } from "react-native";
 
-import { bottomTabInset, colors, radius, spacing, typography } from "@/shared/theme";
+import {
+  bottomTabInset,
+  colors,
+  listGap,
+  radius,
+  screenPadding,
+  spacing,
+  surfaceCard,
+  typography,
+} from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -8,13 +17,16 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: screenPadding,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.md,
   },
   subtitle: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
+    // Entrelinha maior num parágrafo de apoio: é o que separa "texto que se lê" de "texto que se
+    // pula", e o público do app inclui quem lê devagar.
+    lineHeight: 22,
   },
   busca: {
     marginTop: spacing.md,
@@ -32,45 +44,59 @@ export const styles = StyleSheet.create({
   /** O que rola junto com a lista: o texto de apoio e o acesso ao estoque. */
   listHeader: {
     gap: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.gutter,
   },
   listContent: {
-    padding: spacing.md,
-    gap: spacing.md,
+    paddingHorizontal: screenPadding,
+    paddingTop: spacing.sm,
+    gap: listGap,
     paddingBottom: bottomTabInset + spacing.xxl,
   },
 
   // --- Item da lista ---
+  /**
+   * O cartão do kit, sem borda. A borda cinza que estava aqui era o que dava à lista o aspecto de
+   * planilha: com o fundo da tela quase da mesma cor do cartão, o contorno de 1px lê como célula
+   * desenhada, e não como superfície acima. `surfaceCard` traz junto o respiro maior.
+   */
   item: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    // Mesma sombra do `Card` do kit, pra lista e formulário terem a mesma superfície.
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
-    padding: spacing.md,
-    gap: spacing.xs,
+    ...surfaceCard,
+    gap: spacing.sm,
   },
   itemHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
+    gap: spacing.md,
   },
+  /**
+   * A foto cresceu de 40 para 52 e ganhou canto mais redondo. Num cartão com mais respiro, a
+   * miniatura pequena ficava perdida no canto — e ela é o que faz reconhecer o remédio de relance,
+   * que é a razão de ela existir.
+   */
   photo: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.sm,
+    width: 52,
+    height: 52,
+    borderRadius: radius.md,
     backgroundColor: colors.surfaceContainer,
   },
   itemHeaderText: {
     flex: 1,
+    gap: 2,
   },
   acoes: {
     flexDirection: "row",
     gap: spacing.xs,
   },
+  /**
+   * Alvo de 40px, e não `padding: xs` sobre um ícone de 20. Num cartão de lista onde os dois
+   * botões ficam lado a lado — e um deles exclui —, o alvo apertado é o que faz errar de linha.
+   */
   acaoBotao: {
-    padding: spacing.xs,
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.full,
   },
   name: {
     ...typography.headlineSm,
@@ -90,13 +116,15 @@ export const styles = StyleSheet.create({
   timeRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.xs,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
+  /** Fichas com mais ar: `paddingVertical: 2` deixava o horário espremido dentro da pílula. */
   timeChip: {
     backgroundColor: colors.secondaryContainer,
     borderRadius: radius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   timeChipText: {
     ...typography.label,
@@ -104,15 +132,16 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 
+  /**
+   * Sem a linha divisória. Dentro de um cartão que já tem respiro, o traço cinza é ruído: o espaço
+   * separa melhor do que o risco — mesma razão pela qual as bordas saíram dos cartões.
+   */
   footerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
-    paddingTop: spacing.sm,
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
   stock: {
     ...typography.bodyMd,

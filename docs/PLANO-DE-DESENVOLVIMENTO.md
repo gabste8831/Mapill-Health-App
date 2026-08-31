@@ -55,6 +55,13 @@ O que resta do lado do código são **duas exclusões deliberadas**, ambas com m
 > deles rodou em aparelho** — a cota de builds do EAS acabou. O risco agora não é falta de código:
 > é a validação inteira estar concentrada numa única sessão de teste.
 
+**Passe de design (30/08) — feito.** Não era bloco do roadmap: nasceu da leitura das telas em
+aparelho. A causa estava mapeada — o `Card` do kit já usava sombra sem borda, mas **sete telas
+desenhavam o próprio cartão com borda cinza**, e era essa divergência que dava às listas o aspecto
+de planilha. A correção virou token em [`src/shared/theme/elevation.ts`](../src/shared/theme/elevation.ts)
+(`surfaceCard`, `surfaceShadow`, `listGap`, `screenPadding`), aplicado em Home, Remédios, Estoque,
+Calendário, Adesão e Horário. Decisões registradas em [6.4](#64-linguagem-visual--sombra-e-não-borda).
+
 ### 📱 Validação em aparelho (não é código)
 
 ⚠️ **Bloqueado até 01/09**: a cota mensal de builds do EAS acabou.
@@ -1378,6 +1385,48 @@ a partir do D1 é o que impede isso.
 
 ---
 
+### 6.4 Linguagem visual — sombra, e não borda
+
+Decidido em 30/08, a partir da leitura das telas em aparelho. As referências foram as telas que já
+tinham acertado o tom: **Login** (respiro), **Ajustes** (organização) e **Calendário** (hierarquia).
+
+**A causa.** O `Card` do kit já usava sombra sem borda, mas sete telas desenhavam o próprio cartão
+com `borderWidth: 1, borderColor: outlineVariant`. Como o fundo da tela (`#F7F9FB`) e o cartão
+(`#FFFFFF`) são quase da mesma cor, o contorno de 1px não lê como "superfície acima" — lê como
+célula desenhada. Era essa divergência, e não o espaçamento, que dava às listas o aspecto de
+planilha.
+
+| Regra | Onde vive |
+|---|---|
+| Cartão = fundo branco + `radius.lg` + sombra + `padding: gutter` | `surfaceCard` |
+| Sombra discreta: diz "está acima", não empilha camadas | `surfaceShadow` |
+| Respiro entre itens de lista > respiro dentro do item | `listGap` |
+| Uma margem lateral só, para o conteúdo não pular ao trocar de aba | `screenPadding` |
+
+**As exceções, que continuam certas:**
+
+- **Campos de formulário** (`TextField`, `SelectField`, `DateField`, `TimeField`, `SearchField`)
+  mantêm a borda: ali ela não decora, ela informa que aquilo é editável.
+- **Divisor interno** continua onde separa registros curtos e repetidos (as doses perdidas na
+  Adesão), porque vinte cartões seguidos viram escada. Só clareou para `surfaceContainerHigh` —
+  `outlineVariant` como divisor pesa feito moldura de tabela.
+
+**Os ajustes de cor e de alvo, na mesma passada:**
+
+- Os estados da dose na Home deixaram de usar **borda colorida em volta** e passaram a **faixa
+  lateral de 4px** — a mesma linguagem que a `Dica` e os blocos de permissão já falavam. O contorno
+  inteiro somado a fundo colorido dava a cada linha o peso de um alerta de sistema.
+- Nasceram `successSurface` e `errorSurface`. `successContainer` (`#A6F4C0`) é tom de chip, não de
+  cartão: numa área grande ele grita, e a dose atrasada logo acima da dose de agora punha dois
+  blocos saturados em sequência, anulando a hierarquia que a cor deveria criar.
+- O cartão de dose **não tinha `borderRadius` nenhum** — era o único retângulo de canto reto do
+  app.
+- A barra de progresso do dia subiu de 4 para 8px, e o trilho vazio clareou.
+- Alvos de toque em lista foram para 40–44px, e os botões secundários trocaram contorno por fundo
+  suave.
+
+---
+
 ## 7. Log de progresso
 | Data | Bloco | Status | Observação |
 |---|---|---|---|
@@ -1513,3 +1562,4 @@ a partir do D1 é o que impede isso.
 | 2026-08-30 | D3 | Concluído | **Exclusão alcança a nuvem, e ela vem primeiro.** O comentário em `local-data-repository.ts` previa isto desde que foi escrito: com o D1 ligado, apagar só o local faria o próximo `pull` trazer tudo de volta — e a pessoa veria reaparecer sozinho o que mandou apagar, que é a pior coisa que um botão de exclusão pode fazer. `DELETE` de verdade, e não `deleted_at`: o soft delete serve para contar ao outro aparelho que a linha morreu, mas aqui é o direito de exclusão da LGPD (art. 18), e uma linha marcada como apagada continua sendo dado pessoal guardado num servidor. Ordem **inversa** à da sincronização — lá é pai antes de filho para nada chegar órfão, aqui é filho antes de pai para nada ficar órfão. A marca d'água da sincronização é limpa junto, senão o próximo `pull` pularia exatamente as linhas mais antigas que ela. Não lança: falhar na nuvem não pode impedir o apagamento local, senão a pessoa ficaria sem conseguir apagar nem o que está no próprio aparelho. |
 | 2026-08-30 | D3 | Concluído | **Exportação de dados** — direito de acesso e portabilidade (LGPD art. 18, II e V). **JSON e não PDF**: portabilidade quer dizer que o dado pode ir para outro lugar, e um PDF é bonito de ler e inútil de importar. Inclui **o que foi apagado** (`deleted_at` preenchido), porque ainda é dado do titular guardado pelo app e escondê-lo não seria a cópia completa que a lei pede. Sai pela folha de compartilhamento do sistema, e não para uma pasta escolhida pelo app: quem decide onde um arquivo com dado de saúde vai parar é a pessoa. Os anexos vão como **caminho**, não embutidos — base64 de imagens produziria um arquivo de dezenas de MB que nenhum leitor abre. O texto legal ganhou o parágrafo que descreve isso, junto com a exclusão remota pelo próprio app. |
 | 2026-08-30 | Plano | Marco | **Nenhum bloco obrigatório do roadmap segue em aberto.** Doze itens foram escritos entre 29 e 30/08: C1 (correções), C2, C3, D1, D2, D3, B1, B3, B5, o aviso de permissão na Home, o catálogo da CMED e o reconsentimento 1.2.0. Ficam fora, com motivo registrado, o **E9** (anexos no Storage — exige um segundo bump dos termos, e o reconsentimento acontece uma vez só) e o **checklist formal de acessibilidade** do E1, que o Gabriel tratará no artigo. ⚠️ **Escrito não é validado**: nenhum desses doze rodou em aparelho, porque a cota de builds do EAS acabou em 30/08 e reseta em 01/09. O risco do projeto deixou de ser falta de código e passou a ser a validação inteira concentrada numa sessão só. |
+| 2026-08-30 | Design | Concluído | **Passe de design em todo o app** — sombra no lugar de borda, mais respiro, alvos maiores. Não era bloco do roadmap: veio da leitura das telas em aparelho. A causa não era o espaçamento, e sim uma divergência: o `Card` do kit já usava sombra sem contorno, mas **sete telas desenhavam o próprio cartão com borda cinza** — e como o fundo (`#F7F9FB`) e o cartão (`#FFFFFF`) são quase da mesma cor, 1px de contorno lê como célula de planilha, não como superfície acima. Virou token (`surfaceCard`, `surfaceShadow`, `listGap`, `screenPadding`) justamente porque foi a cópia em cada arquivo que deixou as telas divergirem. **A borda fica nos campos de formulário**, onde ela informa que aquilo é editável, e no divisor entre registros curtos e repetidos, onde um cartão por linha viraria escada. Junto: o cartão de dose da Home **não tinha `borderRadius` nenhum** (único canto reto do app); os estados trocaram contorno colorido por faixa lateral de 4px, a linguagem que a `Dica` já falava; nasceram `successSurface` e `errorSurface`, porque `successContainer` é tom de chip e numa área grande punha dois blocos saturados em sequência — atrasada e "é agora" —, anulando a hierarquia que a cor deveria criar. Referências: Login, Ajustes e Calendário. Decisões em [6.4](#64-linguagem-visual--sombra-e-não-borda). |

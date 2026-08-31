@@ -10,7 +10,7 @@ import {
 } from "@/hooks/use-adherence-report";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
 import type { AdesaoPorMedicamento } from "@/domain/use-cases/resumir-adesao";
-import { CenteredLoader, Header, OptionGroup, type OptionGroupOption } from "@/ui";
+import { CenteredLoader, EstadoDeErro, Header, OptionGroup, type OptionGroupOption } from "@/ui";
 import { styles } from "./AdesaoScreen.styles";
 
 /**
@@ -77,7 +77,7 @@ function LinhaDeMedicamento({ item }: { item: AdesaoPorMedicamento }) {
 export function AdesaoScreen() {
   const router = useRouter();
   const [periodo, setPeriodo] = useState<PeriodoDeAdesao>(30);
-  const { resumo, perdidas, isLoading, error } = useAdherenceReport(periodo);
+  const { resumo, perdidas, isLoading, error, reload } = useAdherenceReport(periodo);
 
   function voltar() {
     if (router.canGoBack()) router.back();
@@ -85,6 +85,17 @@ export function AdesaoScreen() {
   }
 
   if (isLoading) return <CenteredLoader />;
+
+  // Falhou a leitura: a tela inteira vira o erro, com saída. Mostrar o seletor de período sobre uma
+  // taxa que não carregou ofereceria escolhas que não mudam nada.
+  if (error !== null) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <Header title="Minha adesão" onBack={voltar} />
+        <EstadoDeErro mensagem={error} onTentarDeNovo={() => void reload()} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -96,8 +107,6 @@ export function AdesaoScreen() {
           onChange={(valor) => setPeriodo(Number(valor) as PeriodoDeAdesao)}
           options={OPCOES_DE_PERIODO}
         />
-
-        {error !== null ? <Text style={styles.erro}>{error}</Text> : null}
 
         {/* Sem dose vencida não há taxa a mostrar, e um "0%" seria a leitura errada de quem acabou
             de cadastrar o primeiro remédio. */}

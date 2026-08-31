@@ -20,6 +20,7 @@ import {
   BottomSheet,
   Button,
   CenteredLoader,
+  EstadoDeErro,
   Header,
   SeletorDeOrdem,
   TextField,
@@ -193,9 +194,7 @@ export function EstoqueScreen() {
       </View>
 
       {error !== null ? (
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
+        <EstadoDeErro mensagem={error} onTentarDeNovo={() => void reload()} />
       ) : (
         <FlatList
           data={visiveis}

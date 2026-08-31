@@ -1,16 +1,12 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, spacing, surfaceCard, typography } from "@/shared/theme";
 
 const BAR_ROW_HEIGHT = 80;
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
-    borderRadius: radius.lg,
-    padding: spacing.md,
+    ...surfaceCard,
     gap: spacing.md,
   },
   header: {
@@ -61,9 +57,9 @@ export const styles = StyleSheet.create({
   summary: {
     ...typography.bodyMd,
     color: colors.onSurface,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+    borderTopColor: colors.surfaceContainerHigh,
   },
 });
 

@@ -46,6 +46,17 @@ export const colors = {
   successContainer: "#A6F4C0",
   onSuccessContainer: "#005223",
 
+  /**
+   * As versões **diluídas** de sucesso e erro, para fundo de cartão numa lista.
+   *
+   * `successContainer` e `errorContainer` são os tons do Material para um chip ou um selo pequeno —
+   * numa área grande eles gritam, e dois cartões saturados em sequência (a dose atrasada logo acima
+   * da que é agora) anulam a hierarquia que a cor deveria criar. Estes são claros o bastante para
+   * tingir sem chamar mais atenção que o texto que carregam.
+   */
+  successSurface: "#EAF7EE",
+  errorSurface: "#FDECEA",
+
   background: "#F7F9FB",
   onBackground: "#191C1E",
   surface: "#F7F9FB",

@@ -1,6 +1,15 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import {
+  colors,
+  listGap,
+  radius,
+  screenPadding,
+  spacing,
+  surfaceCard,
+  typography,
+  withOpacity,
+} from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -8,8 +17,9 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   conteudo: {
-    padding: spacing.md,
-    gap: spacing.md,
+    paddingHorizontal: screenPadding,
+    paddingTop: spacing.sm,
+    gap: listGap,
     paddingBottom: spacing.xxl,
   },
   /** "Sábado, 29 de agosto às 08:00" — situa quem chegou pela notificação horas depois. */
@@ -24,13 +34,8 @@ export const styles = StyleSheet.create({
 
   // --- Cartão de dose ---
   card: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    boxShadow: "0px 1px 3px rgba(25, 28, 30, 0.08)",
-    padding: spacing.md,
-    gap: spacing.sm,
+    ...surfaceCard,
+    gap: spacing.md,
   },
   /** Respondida fica esmaecida, mas continua legível: é registro, não lixo. */
   cardResolvido: {
@@ -80,8 +85,8 @@ export const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSecondaryContainer,
     backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
-    padding: spacing.sm,
-    borderRadius: radius.sm,
+    padding: spacing.md,
+    borderRadius: radius.md,
   },
 
   /**
