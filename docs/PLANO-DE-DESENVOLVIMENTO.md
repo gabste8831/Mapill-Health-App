@@ -32,6 +32,62 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
+## 0.1 O QUE FALTA — quadro único (atualizado em 2026-08-30)
+
+> **Esta seção é o índice do que sobrou.** O resto do documento explica *por quê*; aqui está *o
+> quê*, em ordem de decisão. Cada linha aponta o bloco onde ela está detalhada.
+>
+> Prazo declarado: **~2 semanas de desenvolvimento**, defesa dentro de um mês.
+
+### 🔨 Código que falta escrever
+
+| # | O que | Bloco | Tamanho | Observação |
+|---|---|---|---|---|
+| 1 | **Sincronização SQLite ↔ Supabase** | [D1](#d1-sincronização-sqlite--supabase-) | ⭐ Grande | O único bloco realmente grande que resta. Espelhar schema, RLS, push/pull, LWW. É pré-requisito de 3, 4 e 5. |
+| 2 | **`deferred` na tela de dose** | [C2](#c2-tela-dedicada-de-gerenciamento-de-dose) | Pequeno | "Ignorar por agora", distinto de pular. A tela do horário já existe (feita no C1); falta só este estado. |
+| 3 | **Exportar meus dados** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Direito do titular (LGPD art. 18). Arquivo legível com tudo. |
+| 4 | **Apagar dados da nuvem** | [D3](#d3-configurações--direitos-lgpd) | Pequeno | Depende do D1: hoje não há nuvem para apagar. Os textos já foram decididos (P1, 29/08). |
+| 5 | **Resumo de adesão exportável** | [D2](#d2-histórico-e-relatório-de-adesão) | Pequeno | Sai junto do item 3 — mesma mecânica de gerar arquivo. |
+| 6 | **Lembrete de recontagem de estoque** | [B5](#b5-estoque--tela-dedicada) | Pequeno | "Seu estoque está alinhado com a caixa?". Destravado pelo C1. |
+| 7 | **Indicador de "não sincronizado"** | [E1](#e1-estados-vazios-offline-erro-e-acessibilidade) | Pequeno | Depende do D1. |
+
+**Ordem recomendada:** 2 → 6 → 1 → (3, 4, 5, 7 juntos, no fim).
+
+Os pequenos primeiro porque rendem no artigo e não travam nada; o D1 depois porque é o único que
+pode consumir semanas — e o que não pode ficar pela metade.
+
+### 📱 Validação em aparelho (não é código)
+
+⚠️ **Bloqueado até 01/09**: a cota mensal de builds do EAS acabou.
+
+| O que | Onde |
+|---|---|
+| **Reteste do C1** — blocos 1, 2, 4, 7 | [`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md), Parte 1 |
+| **Estreia** — blocos 10 a 14 (permissão na Home, C3, D2, B1, B3) | idem |
+| **Sobrevivência** 🔬 — reboot e economia de bateria | bloco 8 |
+| **Casos de borda** do C1.8 | bloco 9 |
+| **Validação completa**, antes da defesa | Parte 2 |
+
+### 📄 Entrega acadêmica
+
+| O que | Situação |
+|---|---|
+| Prints do caminho crítico | [`ROTEIRO-DE-PRINTS.md`](./ROTEIRO-DE-PRINTS.md) pronto, falta executar |
+| **Capítulo 4** — argumento do artigo → decisão de código | A escrever. O log de progresso deste arquivo é a matéria-prima. |
+| Limitações e trabalhos futuros | A escrever. Inclui iOS, agente Anvisa (Fase 2) e o que for cortado daqui. |
+| Acessibilidade (E1) | **Tratada no artigo**, por decisão de 30/08 — o app cumpre o essencial, e o checklist formal não cabe no prazo. |
+
+### ❌ Fora de escopo, com motivo registrado
+
+- **iOS** — exige conta Apple Developer paga. Citar como trabalho futuro, nunca prometer na defesa.
+- **Botão `+` no centro da barra** — `NativeTabs` não aceita item central, e trocar por barra
+  própria devolveria o risco do Material You resolvido em 23/08.
+- **Sininho de notificações pendentes** — melhoria, não defeito.
+- **Grade de calendário mensal** — já entregue no E1, apesar de estar escrita como fora de escopo
+  no C3.
+
+---
+
 ## 1. Estado atual (atualizado em 2026-08-27)
 
 ### Já pronto
@@ -354,8 +410,11 @@ seu caso — campo fora de contexto gera dúvida, não completude.
       partir do primeiro horário, mostrando a lista inteira antes de aplicar.
 - [x] Tratamento pode começar em data futura — "QUANDO COMEÇA" vale hoje e fica dito na tela, com
       atalho para alterar.
-- [ ] Seção de lembrete a ser retrabalhada em conversa própria (2026-08-21). O que existe hoje —
-      quatro modos, aviso de permissão e o acordeão "como funcionam" — fica como está até lá.
+- [x] Seção de lembrete retrabalhada. — aconteceu nas revisões de 26 a 30/08, e não numa conversa
+      própria: "Nenhum aviso" saiu (não configurar já é recusar), os três modos ganharam o layout
+      com "Os dois" na linha inteira, a permissão passou a ser pedida no toque que escolhe o modo,
+      e o texto do alarme deixou de prometer despertador. O acordeão "como funcionam" sobreviveu à
+      ida aos termos (F4).
 
 **Rastreabilidade**: §2.6 (use-case isolado da UI), §2.7.1 (confiabilidade algorítmica), Nielsen (prevenção de erros).
 
