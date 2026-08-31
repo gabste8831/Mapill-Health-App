@@ -13,10 +13,13 @@ type ItemProps = {
   dose: DoseDoHorario;
   onConfirmar: () => void;
   onPular: () => void;
+  /** "Ignorar por agora" — registra que viu, sem dizer se tomou. A dose segue pendente. */
+  onAdiar: () => void;
 };
 
-function ItemDeDose({ dose, onConfirmar, onPular }: ItemProps) {
+function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
   const confirmada = dose.latestStatus === "confirmed";
+  const adiada = dose.latestStatus === "deferred";
 
   return (
     <View style={[styles.card, dose.resolvida && styles.cardResolvido]}>
@@ -51,6 +54,15 @@ function ItemDeDose({ dose, onConfirmar, onPular }: ItemProps) {
         </Text>
       ) : null}
 
+      {/* Adiada não é resolvida: ela continua pendente e volta a aparecer. O que muda é a tela
+          dizer que a pessoa **viu** — sem isso, "vi e resolvo depois" seria indistinguível de
+          "nunca abri o app", e a dose voltaria como se ninguém tivesse notado nada. */}
+      {adiada ? (
+        <Text style={styles.adiadaDica}>
+          Você marcou para resolver depois. A dose continua pendente.
+        </Text>
+      ) : null}
+
       {/* O botão escolhido fica azul cheio; o outro, contornado. Enquanto nada foi respondido os
           dois são contornados — nenhuma das duas respostas pode parecer a sugerida, porque o
           registro só vale se for o que de fato aconteceu. */}
@@ -73,6 +85,27 @@ function ItemDeDose({ dose, onConfirmar, onPular }: ItemProps) {
           style={styles.acao}
         />
       </View>
+
+      {/**
+        * "Ignorar por agora" é a terceira resposta, e a única que **não** encerra a dose.
+        *
+        * Existe porque as duas de cima obrigam a mentir quem ainda não sabe: quem está no ônibus
+        * com o remédio em casa não tomou (então "Tomei" é falso) e não decidiu pular (então
+        * "Pulei" também é). Sem esta saída, essa pessoa fecha o app sem responder — e o app perde
+        * a informação de que ela **viu**, que é diferente de nunca ter aberto.
+        *
+        * Fica embaixo e em `text`, com metade do peso visual das outras: é saída legítima, não
+        * atalho a ser incentivado. Some quando a dose já foi resolvida ou já está adiada — nos
+        * dois casos não há o que adiar.
+        */}
+      {!dose.resolvida && !adiada ? (
+        <Button
+          label="Ignorar por agora"
+          variant="text"
+          onPress={onAdiar}
+          style={styles.acaoSecundaria}
+        />
+      ) : null}
     </View>
   );
 }
@@ -138,6 +171,7 @@ export function HorarioScreen() {
                 dose={dose}
                 onConfirmar={() => void registrar(dose, "confirmed")}
                 onPular={() => void registrar(dose, "skipped")}
+                onAdiar={() => void registrar(dose, "deferred")}
               />
             ))}
 

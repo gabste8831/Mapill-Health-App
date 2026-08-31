@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -71,6 +71,18 @@ export const styles = StyleSheet.create({
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,
   },
+  /**
+   * O aviso de dose adiada. Fundo azul claro, e não amarelo: adiar não é problema nem pendência
+   * de erro — é uma resposta legítima que só não encerra a dose. O amarelo está reservado para o
+   * que precisa de ação corretiva.
+   */
+  adiadaDica: {
+    ...typography.bodyMd,
+    color: colors.onSecondaryContainer,
+    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
+    padding: spacing.sm,
+    borderRadius: radius.sm,
+  },
 
   /**
    * Os dois botões lado a lado e do mesmo tamanho. "Tomei" e "Pulei" são respostas igualmente
@@ -83,6 +95,10 @@ export const styles = StyleSheet.create({
   },
   acao: {
     flex: 1,
+  },
+  /** Metade do peso das outras: saída legítima, não atalho a ser incentivado. */
+  acaoSecundaria: {
+    marginTop: spacing.xs,
   },
 
   /** Afastado da lista: é saída da tela, não mais uma ação de dose. */
