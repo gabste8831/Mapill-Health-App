@@ -1,17 +1,14 @@
-﻿# Roteiro de teste em aparelho
+# Roteiro de teste em aparelho
 
-> **Este é o único roteiro de teste do projeto.** Os roteiros datados das revisões anteriores
-> (26/08, 27/08, 29/08) foram cumpridos e removidos — o que eles apuraram virou registro no
-> [`PLANO-DE-DESENVOLVIMENTO.md`](./PLANO-DE-DESENVOLVIMENTO.md), §6.2 e log de progresso.
+> **Este é o único roteiro de teste do projeto.** Ele tem duas partes, e a ordem importa:
 >
-> Ele tem **duas partes**, e elas se leem em momentos diferentes:
+> | | O que é | Quando | Tempo |
+> |---|---|---|---|
+> | **[Parte 1 — Integridade](#parte-1--integridade)** | O que pode estar **quebrado**: treze blocos que nunca rodaram em aparelho | **Primeiro** | ~1 h |
+> | **[Parte 2 — Passada geral](#parte-2--passada-geral)** | O app inteiro, do zero, como quem nunca o abriu | Antes da defesa | ~2 h |
 >
-> | | Quando | Tempo |
-> |---|---|---|
-> | **[Parte 1 — Notificações e o que é novo](#parte-1--c1-notificações-e-alarmes-de-dose)** | **Agora**, com a build nova | ~1 h |
-> | **[Parte 2 — Validação completa](#parte-2--validação-completa-antes-da-defesa)** | Antes da defesa | ~2 h |
->
-> Depois da Parte 1, o próximo documento é o [`ROTEIRO-DE-PRINTS.md`](./ROTEIRO-DE-PRINTS.md).
+> A Parte 1 existe porque **treze blocos foram escritos entre 29 e 31/08 sem nenhuma execução em
+> aparelho**. Ela não cobre o app todo de propósito: cobre o que tem chance real de estar quebrado.
 
 ## Como reportar
 
@@ -23,700 +20,445 @@ Só o que falhar, com o número do passo:
 resto ok
 ```
 
-🔴 marca os passos que existem para pegar um bug específico. Se um deles falhar, **avise** — os
-seguintes costumam depender dele.
-
-🔬 marca as perguntas do **spike de viabilidade** que só o aparelho responde. Anote a resposta
-delas **mesmo quando passarem**: elas fecham formalmente o C1 no plano.
-
----
-
-# PARTE 1 — C1: notificações e alarmes de dose
-
-O bloco de **maior risco técnico do projeto**, e a promessa central do Mapill: o app que avisa na
-hora, mesmo fechado.
-
-> 🔁 **Rodada de 30/08.** Duas coisas ao mesmo tempo:
->
-> **Reteste** — a execução de 29/08 rendeu oito correções. Refaça os blocos **1, 2, 4 e 7**; os
-> blocos 3, 5 e 6 passaram e a lógica deles não mudou. Os blocos **8 e 9** seguem por fazer, e o 8
-> depende do alarme funcionar.
->
-> **Estreia** — os blocos **10 a 18** são de código que nunca rodou em aparelho: aviso de permissão
-> na Home, avisos de compromisso e receita (C3), relatório de adesão (D2), sugestão de medicamento
-> pelo nome (B1), código de barras (B3), "Ignorar por agora" (C2), a **sincronização
-> com o Supabase** (D1), exportar/apagar dados (D3) e o lembrete de recontagem (B5).
->
-> Além dos blocos, confira de passagem: a miniatura do anexo aparece **na hora** (não branca), o
-> teclado fecha ao tocar fora do campo, definir horário virou **uma etapa** (campo digitável com
-> relógio ao lado), e na Home a dose vira **ATRASADA** sozinha 30 min depois do horário.
+- 🔬 marca as perguntas que **só o aparelho responde**. Anote a resposta **mesmo quando passar** —
+  são elas que fecham o C1 formalmente no plano.
+- Se um passo falhar, os seguintes do mesmo bloco costumam depender dele. Avise e siga para o
+  próximo bloco.
 
 ## Antes de começar
 
-⚠️ **Build nova é obrigatória.** O `app.json` ganhou três permissões (`POST_NOTIFICATIONS`,
-`SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`), e permissão não entra por recarga do Metro.
+⚠️ **Build nova, e desinstale a anterior.** Três motivos que se somam:
 
-⚠️ **Desinstale o Mapill anterior antes de instalar.** Dois motivos que se somam: as permissões são
-concedidas na instalação e o Android guarda decisões antigas; e os canais de notificação subiram
-para `v2` — um canal já criado fica **congelado** no aparelho, e som e importância não mudam por
-atualização. Instalar por cima manteria o alarme mudo mesmo com a correção.
+1. O `app.json` ganhou permissões (`POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`),
+   e permissão não entra por recarga do Metro.
+2. Os canais de notificação subiram para **`v3`**. Um canal já criado fica **congelado** no
+   aparelho: som e importância não mudam por atualização. Instalar por cima manteria o alarme mudo.
+3. `expo-camera` é dependência nativa (bloco 8).
 
-⚠️ **Precisa de aparelho físico.** Emulador não serve para os blocos 2, 5 e 8: o que está em jogo é
-o comportamento do sistema com o app fechado e sob economia de bateria.
+⚠️ **Aparelho físico.** Emulador não serve para os blocos 1, 2 e 3 — o que está em jogo é o
+comportamento do sistema com o app fechado e sob economia de bateria.
 
 ```bash
 npx expo start --dev-client
 ```
 
-**Confirme em 10 segundos que é a build certa:** cadastre qualquer remédio com lembrete
-**Alarme**. Na primeira vez, o Android tem que **pedir permissão de notificações**. Se não pedir, a
-build é antiga.
+**Confirme em 10 segundos que é a build certa:** cadastre qualquer remédio com lembrete **Alarme**.
+O Android tem que **pedir permissão de notificações** na hora. Se não pedir, a build é antiga.
 
 ---
-
-## 1 — Permissão
-
-**1.1** App recém-instalado. Vá em **Remédios** → **+** → **Cadastro manual**.
-
-**1.2** Preencha o mínimo: nome `Teste Aviso`, **Comprimido**, dose `1`, **Todo dia**, **1×**,
-horário **daqui a 3 minutos**, **Uso contínuo**.
-
-**1.3** 🔴 Antes de salvar, abra **"Configurar lembrete"** e toque em **Alarme**.
-
-> ✅ 🔴 O Android pede permissão de notificações **neste momento** — não antes.
-> ✅ O texto do Alarme diz **"Toca alto e vibra, mesmo no silencioso"**.
-> ❌ Se disser "como despertador", o texto é antigo.
-
-**1.4** **Permita** e salve o cadastro.
-
-**1.5** 🔴 Teste a recusa: **Configurações do Android** → Apps → Mapill → **Notificações** →
-**desligue**.
-
-**1.6** Volte ao app, abra um cadastro e vá em **"Configurar lembrete"** → **Alarme**.
-
-> ✅ 🔴 Aparece um bloco **amarelo** dizendo que os avisos estão bloqueados.
-> ✅ 🔴 Ele tem o link **"Abrir as configurações do app"**, e o link funciona.
-> ✅ 🔴 O app **não** tenta pedir a permissão de novo (no Android o diálogo não abriria).
-
-**1.7** Religue a permissão e volte ao app.
-
-> ✅ O bloco amarelo some sozinho — sem precisar reabrir o app.
-
 ---
 
-## 2 — O aviso dispara com o app fechado 🔬
+# PARTE 1 — Integridade
 
-**A pergunta central do bloco.**
+## 1 — O alarme dispara com o app fechado 🔬
 
-**2.1** Cadastre `Teste Fechado`, dose `1`, **Todo dia**, **1×**, horário **daqui a 3 minutos**,
-**Uso contínuo**, lembrete **Alarme**.
+**A promessa central do app, e o maior risco técnico do projeto.** Na rodada de 29/08 ele chegou
+**mudo** — a causa era um campo `sound` que fazia o Android procurar um arquivo inexistente.
 
-**2.2** 🔴 **Feche o app completamente** — recentes, deslize para fora.
+**1.1** Cadastre `Teste Fechado`, dose `1`, Todo dia, 1×, horário **daqui a 3 min**, uso contínuo,
+lembrete **Alarme**.
 
-**2.3** Deixe o celular na mesa e espere.
+**1.2** **Feche o app completamente** (recentes, deslize para fora). Espere.
 
-> ✅ 🔴 **A notificação aparece com o app fechado.**
-> ✅ 🔴 Ela aparece **por cima** da tela (heads-up), não só na barra.
-> ✅ 🔴 Tem som e vibração longa.
-> ✅ Título `HH:MM — Teste Fechado`, corpo `Teste Fechado — 1 comprimido`.
-> ✅ Botões **Tomei** e **Adiar 5 min**.
+> ✅ A notificação **chega com o app fechado**.
+> ✅ Aparece **por cima da tela** (heads-up), não só na barra.
+> ✅ **Tem som e vibração.** ← *era isto que estava quebrado*
+> ✅ Título **"Hora do seu remédio"**, corpo **`Teste Fechado: 1 comprimido`**.
+> ✅ Mostra o **ícone do app**, não o triângulo genérico.
+> ❌ Título `HH:MM — Teste Fechado` significa build antiga.
 
-🔬 **Anote:** quanto tempo depois do horário exato ela chegou? (No horário? 1 min? Mais?)
+🔬 **Anote:** chegou no horário exato? Atrasou quanto?
 
----
+**1.3** Ative o **Não Perturbe** do Android. Cadastre um com **Alarme** e outro com **Notificação**,
+ambos para daqui a 3 min. Feche o app.
 
-## 3 — Vários remédios no mesmo horário 🔴
-
-**3.1** Cadastre **dois** remédios com horário **daqui a 4 minutos**: `Losartana` (dose `1`) e
-`Metformina` (dose `2`). Lembrete **Alarme** nos dois.
-
-**3.2** Feche o app e espere.
-
-> ✅ 🔴 Chega **UMA notificação só**, não duas.
-> ✅ 🔴 Título: **`HH:MM — 2 remédios`**.
-> ✅ 🔴 Corpo lista os dois, um por linha:
->    `Losartana — 1 comprimido` / `Metformina — 2 comprimidos`.
-> ✅ 🔴 O botão diz **"Tomei todas"**, e não "Tomei".
-
-**3.3** 🔴 **Não toque nos botões.** Toque no **corpo** da notificação.
-
-> ✅ 🔴 O app abre direto na tela **"Hora do remédio"** — não na Home.
-> ✅ 🔴 Os dois estão listados, cada um com **Tomei** e **Pulei** próprios.
-> ✅ No topo, diz quantas doses esperam resposta.
-
-**3.4** 🔴 Toque em **Tomei** só na Losartana.
-
-> ✅ 🔴 Ela ganha o selo **Tomada** e fica esmaecida; a Metformina continua esperando.
-> ✅ O topo passa a dizer **1 dose esperando resposta**.
-
-**3.5** Toque em **Pulei** na Metformina.
-
-> ✅ Selo **Pulada**. O topo diz **Tudo respondido por aqui**.
-
-**3.6** Vá em **Remédios** → **Estoque** e confira.
-
-> ✅ Só a Losartana descontou. Pulada não consome.
-
----
-
-## 4 — Os botões da notificação
-
-**4.1** Cadastre `Teste Botao`, dose `2`, **daqui a 3 minutos**, estoque `20`, lembrete **Alarme**.
-
-**4.2** Feche o app. Quando chegar, toque em **Tomei**.
-
-> ✅ 🔴 A notificação **some** e o app **não abre**.
-> ✅ 🔴 Abrindo depois, a dose aparece **já confirmada** na Home.
-> ✅ 🔴 O estoque caiu **2** (pela dose), e não 1.
-
-**4.3** 🔴 Cadastre outro para **daqui a 3 minutos**. Quando chegar, toque em **Adiar 5 min**.
-
-> ✅ 🔴 A notificação some.
-> ✅ 🔴 **Cinco minutos depois** ela volta, com o mesmo conteúdo.
-> ✅ 🔴 Na segunda vez, **o botão "Adiar" não existe mais** — só "Tomei".
->    *(Um adiamento por horário: o botão some em vez de aparecer e não funcionar.)*
-
-**4.4** 🔴 **Antes** de o aviso adiado voltar, abra o app e olhe a Home.
-
-> ✅ 🔴 A dose **não** aparece como pulada, nem confirmada. Continua pendente.
-> ❌ Se aparecer com qualquer status, o adiar está registrando desfecho — e não devia.
-
-**4.5** 🔴 Ainda antes de o aviso voltar, confirme essa dose **pela Home**.
-
-> ✅ 🔴 O aviso adiado **não** menciona esse remédio (ou não chega, se era o único). Ele é
-> recalculado, então só traz o que ainda está pendente.
-
----
-
-## 5 — Nada de alarme órfão 🔴
-
-**O pior defeito possível deste bloco: lembrete de um remédio que a pessoa já parou de tomar.**
-
-**5.1** Cadastre `Vai Sumir`, **daqui a 5 minutos**, lembrete **Alarme**.
-
-**5.2** 🔴 **Exclua o medicamento** (lixeira na lista). Feche o app.
-
-> ✅ 🔴 **A notificação NÃO chega.**
-> ❌ Se chegar, avise imediatamente.
-
-**5.3** Cadastre `Vai Mudar`, **daqui a 4 minutos**, lembrete **Alarme**.
-
-**5.4** 🔴 **Edite** e mude o horário para **daqui a 10 minutos**. Feche o app.
-
-> ✅ 🔴 Nada chega no horário antigo.
-> ✅ 🔴 Chega no horário novo.
-
-**5.5** Cadastre `Vai Desligar`, **daqui a 4 minutos**, lembrete **Alarme**.
-
-**5.6** 🔴 Edite e **feche o popup de lembrete sem escolher nada**. Feche o app.
-
-> ✅ 🔴 Nada chega. Não configurar já é recusar.
-
----
-
-## 6 — Notificação com o app aberto
-
-**6.1** Cadastre um remédio para **daqui a 3 minutos**, lembrete **Alarme**.
-
-**6.2** 🔴 Deixe o app **aberto**, numa tela qualquer.
-
-> ✅ 🔴 A notificação aparece mesmo assim, por cima da tela.
-> ✅ 🔴 O app **não** empilha tela sobre tela nem abre nada sozinho.
-
-**6.3** Toque nela.
-
-> ✅ Vai para a tela do horário normalmente.
-
----
-
-## 7 — Alarme × Notificação 🔬
-
-**A diferença tem que ser real — o app oferece as duas como escolhas distintas.**
-
-**7.1** 🔴 Ative o **Não Perturbe** do Android.
-
-**7.2** Cadastre um remédio com lembrete **Notificação**, **daqui a 3 minutos**. Feche o app.
-
-> ✅ Chega silenciosa, respeitando o Não Perturbe.
-
-**7.3** Cadastre outro com **Alarme**, **daqui a 3 minutos**. Feche o app.
-
-> ✅ 🔴 **Toca e vibra mesmo com o Não Perturbe ligado.**
-> ❌ Se ficar silencioso igual ao anterior, o `bypassDnd` não funcionou — e as duas opções viraram
-> a mesma coisa, o que exige mudar o texto do app.
+> ✅ O de **Notificação** chega silencioso.
+> ✅ O de **Alarme** **toca mesmo com o Não Perturbe ligado**.
+> ❌ Se os dois ficarem silenciosos, `bypassDnd` não funcionou — as duas opções viraram a mesma
+> coisa, e o texto do app precisa mudar.
 
 🔬 **Anote:** a diferença foi perceptível?
 
 ---
 
-## 8 — Sobrevivência 🔬
+## 2 — Os botões da notificação
 
-**8.1** Cadastre um remédio com **4 horários por dia**, uso contínuo, lembrete Alarme.
+Aqui estavam dois defeitos de 29/08: cinco toques em "Adiar" geravam **cinco** lembretes, e o
+estoque descontava 1 em vez da dose.
 
-**8.2** Abra o app, deixe carregar, e feche. *(Isso agenda ~28 avisos: 4/dia × 7 dias da janela.)*
+**2.1** Cadastre `Teste Botao`, dose **2**, daqui a 3 min, estoque **20**, Alarme. Feche o app.
+Quando chegar, toque em **Tomei**.
 
-**8.3** 🔬 **Reinicie o celular.** Depois do reboot, **não abra o app** e espere o próximo horário.
+> ✅ A notificação some e o app **não abre**.
+> ✅ Abrindo depois, a dose está **confirmada** na Home.
+> ✅ O estoque caiu **2** (a dose), e não 1.
 
-> ✅ 🔴 A notificação chega mesmo depois do reboot, sem o app ter sido aberto.
-> ❌ Se não chegar, anote — significa que dependemos do app ser aberto após cada reboot.
+**2.2** Cadastre outro para daqui a 3 min. Quando chegar, toque em **Adiar 5 min** — e toque
+**várias vezes** se a notificação não sumir na hora.
 
-**8.4** 🔬 **O mais importante e o mais chato:** deixe um remédio agendado para **daqui a 8 ou 12
-horas** (a noite serve), celular **sem carregador**, app fechado, economia de bateria do fabricante
-ativa.
+> ✅ Volta **uma única vez**, 5 min depois. Não cinco.
+> ✅ Na volta, o botão **"Adiar" não existe mais** — só "Tomei".
 
-> 🔬 **Anote:** chegou? No horário ou atrasado?
+**2.3** **Antes** de o aviso adiado voltar, abra a Home.
+
+> ✅ A dose continua **pendente** — nem pulada, nem confirmada. Adiar não registra desfecho.
+
+**2.4** Ainda antes de ele voltar, **confirme essa dose pela Home**.
+
+> ✅ O aviso adiado **não menciona esse remédio** (ou não chega, se era o único).
+
+---
+
+## 3 — Nada de alarme órfão
+
+**O pior defeito possível: lembrete de um remédio que a pessoa já parou de tomar.**
+
+**3.1** Cadastre `Vai Sumir`, daqui a 5 min, Alarme. **Exclua o medicamento.** Feche o app.
+
+> ✅ **A notificação NÃO chega.**
+
+**3.2** Cadastre `Vai Mudar`, daqui a 4 min, Alarme. **Edite** para daqui a 10 min. Feche o app.
+
+> ✅ Nada no horário antigo; chega no novo.
+
+**3.3** Cadastre `Vai Desligar`, daqui a 4 min. Edite e **feche o popup de lembrete sem escolher
+nada**. Feche o app.
+
+> ✅ Nada chega. Não configurar já é recusar.
+
+---
+
+## 4 — Vários remédios no mesmo horário
+
+**4.1** Cadastre **dois** para daqui a 4 min: `Losartana` (dose 1) e `Metformina` (dose 2), Alarme
+nos dois. Feche o app.
+
+> ✅ Chega **UMA notificação só**, não duas.
+> ✅ Título **"Hora dos seus remédios (2)"**.
+> ✅ Corpo com uma linha por remédio: `Losartana: 1 comprimido` / `Metformina: 2 comprimidos`.
+> ✅ O botão diz **"Tomei todas"**.
+
+**4.2** Toque no **corpo** da notificação (não nos botões).
+
+> ✅ Abre direto na tela **"Hora do remédio"**, não na Home.
+> ✅ Cada um com **Tomei** e **Pulei** próprios.
+
+**4.3** **Tomei** só na Losartana, **Pulei** na Metformina. Vá ao estoque.
+
+> ✅ Só a Losartana descontou. Pulada não consome.
+
+---
+
+## 5 — Sincronização com a nuvem 🔬 (D1)
+
+**O bloco mais novo e o que nunca rodou.** Precisa de **conta Google vinculada**.
+
+**5.1** Ao abrir a build nova, o app **pede o aceite dos termos de novo**.
+
+> ✅ Porque a versão subiu para **1.2.0**, descrevendo a cópia na nuvem.
+> ✅ Nos termos, "Onde seus dados ficam armazenados" diz que **fotos e receita continuam só no
+> aparelho**.
+> ❌ Se não pedir, o bump não pegou.
+
+**5.2** **Ajustes** → **Conta e dados**, abaixo da linha da conta.
+
+> ✅ Existe o bloco de sincronização: **"Tudo salvo na nuvem"** ou **"N alterações para enviar"**.
+> ✅ **Sem** conta vinculada, esse bloco **não aparece**.
+
+**5.3** **Modo avião ligado**, cadastre um remédio.
+
+> ✅ O cadastro funciona **normalmente** — nada trava nem reclama de internet.
+> ✅ O bloco diz **"1 alteração para enviar"**.
+
+**5.4** Desligue o modo avião, saia do app e volte.
+
+> ✅ Volta para **"Tudo salvo na nuvem"** sozinho.
+
+**5.5** 🔬 **O teste que importa:** desinstale o app, instale de novo, entre **com a mesma conta**.
+
+> ✅ Remédios, tratamentos, histórico e compromissos **voltam**.
+> ✅ As **fotos não voltam** — esperado, anexos não sobem.
+
+🔬 **Anote:** quanto tempo até os dados aparecerem?
+
+---
+
+## 6 — Exportar e apagar 🔬 (D3)
+
+⚠️ **Faça por último — o 6.2 apaga tudo.**
+
+**6.1** **Ajustes** → **Conta e dados** → **MEUS DADOS** → **"Baixar uma cópia dos meus dados"**.
+
+> ✅ Abre o compartilhamento do Android. Salve e abra o arquivo.
+> ✅ É um JSON legível, com seções em português, e **seus dados estão lá**.
+
+**6.2** 🔬 **Com a conta vinculada**, **"Apagar meus dados de saúde"** → confirme.
+
+> ✅ Os remédios somem.
+> ✅ 🔬 **O que importa:** feche o app, abra e espere sincronizar. Eles **não voltam**.
+> ❌ Se voltarem, o apagamento na nuvem falhou — avise.
+
+---
+
+## 7 — Sobrevivência 🔬
+
+**Decide se o app precisa de uma tela orientando a desativar a otimização de bateria.**
+
+**7.1** Cadastre um remédio com **4 horários/dia**, uso contínuo, Alarme. Abra o app, deixe
+carregar, feche. *(Isso agenda ~28 avisos.)*
+
+**7.2** 🔬 **Reinicie o celular.** **Não abra o app** e espere o próximo horário.
+
+> ✅ A notificação chega mesmo depois do reboot, sem o app ter sido aberto.
+> ❌ Se não chegar, dependemos do app ser aberto após cada reboot — anote.
+
+**7.3** 🔬 **O mais chato:** deixe um remédio agendado para **daqui a 8–12 h** (a noite serve),
+celular **sem carregador**, app fechado, economia de bateria do fabricante ativa.
+
+🔬 **Anote:** chegou? No horário ou atrasado? *(Xiaomi, Samsung e Motorola são os mais agressivos.)*
+
+---
+
+## 8 — Câmera e base de medicamentos (B1, B3)
+
+**8.1** **Remédios** → **+** → **Cadastro manual**. No nome, digite `dipi`.
+
+> ✅ Aparece **"Encontrados na base da Anvisa"** com sugestões.
+> ⏳ Na **primeira abertura** do app pode demorar: a base (7 mil itens) é importada em segundo
+> plano. Feche e abra o cadastro de novo.
+
+**8.2** Toque numa sugestão.
+
+> ✅ Nome preenchido **com a dosagem**; **princípio ativo** preenchido em INFORMAÇÕES ADICIONAIS.
+> ✅ **Forma, dose e horários continuam vazios** — a base não adivinha posologia.
+
+**8.3** **Remédios** → **+** → **Escanear código de barras**.
+
+> ✅ Pede permissão de câmera explicando que **nenhuma foto é tirada ou guardada**.
+> ✅ Recusando, aparece **"Cadastrar sem escanear"** — não é beco sem saída.
+
+**8.4** Aponte para a caixa de um remédio comum.
+
+> ✅ Mostra o remédio encontrado; **"Continuar o cadastro"** abre o formulário preenchido.
+
+**8.5** Escaneie um código **que não seja de remédio** (um pacote de bolacha).
+
+> ✅ Diz **"Código não encontrado"**, mostra o número lido, e oferece **"Cadastrar à mão"** e
+> **"Ler outro código"**. Não trava nem volta sozinho.
+
+---
+
+## 9 — O que mudou no visual (30 e 31/08)
+
+**Passe de design e varredura de acessibilidade.** Nada disso rodou em aparelho, e são justamente
+as duas coisas que **só se validam vendo**.
+
+**9.1** Percorra **Home**, **Remédios**, **Estoque**, **Calendário** e **Minha adesão**.
+
+> ✅ Os cartões têm **canto arredondado e sombra suave** — nenhum tem borda cinza de 1px.
+> ✅ Nenhuma lista parece **planilha**.
+> ✅ Na Home, o cartão da dose **não é mais um retângulo de canto reto**.
+
+**9.2** Olhe uma dose **"É AGORA"** e uma **"ATRASADA"** na Home.
+
+> ✅ Cada uma tem uma **faixa colorida à esquerda** (verde e vermelha), não um contorno em volta.
+> ✅ O fundo é um tom **suave** — o verde não "berra".
+
+**9.3** 🔬 **Configurações do Android** → Tela → **Tamanho da fonte** → aumente para o **máximo**.
+Volte ao app.
+
+> ✅ 🔬 **O texto dos botões não é cortado** — nem "Confirmar", nem os botões de formulário.
+> ✅ 🔬 Os campos de texto crescem junto com a letra, sem recortar o que foi digitado.
+> ❌ Qualquer texto cortado: anote em qual tela e qual botão.
 >
-> Decide se o app precisa de uma tela orientando a desativar a otimização de bateria. Xiaomi,
-> Samsung e Motorola são os mais agressivos.
+> *(Era o defeito mais grave da varredura: `height` travado recortava o rótulo de todo botão do app.
+> Devolva a fonte ao normal depois.)*
 
-**8.5** 🔬 Opcional: cadastre 3 ou 4 remédios com vários horários e veja se todos chegam ao longo
-do dia.
+**9.4** Toque nos botões de **excluir** na lista de remédios e no calendário, e no **×** de uma
+alergia na ficha.
 
-> 🔬 **Anote:** algum horário foi pulado?
+> ✅ Dá para acertar **sem esforço**, mesmo com o dedo. Nenhum alvo minúsculo.
 
----
+**9.5** 🔬 **Opcional, se der tempo:** ative o **TalkBack** e toque numa dose da Home.
 
-## 9 — Casos de borda
-
-**9.1** 🔴 Cadastre um remédio para **00:30** e confira no dia seguinte.
-
-> ✅ Chega às 00:30, e não em outro horário deslocado (bug de fuso).
-
-**9.2** 🔴 Confirme uma dose pela Home **antes** do horário. Feche o app e espere o horário.
-
-> ✅ 🔴 A notificação **não** chega — a dose já foi respondida.
-
-**9.3** Deixe passar de um horário sem responder e abra a Home.
-
-> ✅ A dose aparece como **atrasada** (vermelha).
+> ✅ 🔬 Ele lê a linha como **uma frase só**, na ordem: *"Dipirona, 08:00, atrasada. 1 comprimido"*.
+> ✅ 🔬 Os botões **Confirmar** e **Pular** continuam sendo lidos separadamente.
+> ❌ Se ele parar quatro vezes na mesma linha, ou ler o estado antes do nome, anote.
 
 ---
 
----
+## 10 — Os menores (C2, C3, D2, B5)
 
-## 10 — Aviso de permissão na Home 🔴
+Blocos pequenos que nunca rodaram. Um passo cada.
 
-**10.1** Com pelo menos um remédio com lembrete cadastrado, vá em **Configurações do Android** →
-Apps → Mapill → **Notificações** → **desligue**.
+**10.1 — Aviso de permissão (Home).** Desligue as notificações do Mapill nas configurações do
+Android e volte à Home.
 
-**10.2** Volte ao app e olhe a **Home**.
+> ✅ Card **amarelo** no topo, **antes da agenda**, com **"Religar os avisos"**.
+> ✅ Religando, ele **some sozinho**, sem reabrir o app.
 
-> ✅ 🔴 Um card **amarelo** no topo, **antes da agenda**, dizendo que o Mapill não vai avisar.
-> ✅ Ele diz quantos tratamentos estão esperando lembrete.
-> ✅ Tem o botão **"Religar os avisos"**, que abre as configurações.
+**10.2 — "Ignorar por agora" (C2).** Abra a tela do horário de uma dose.
 
-**10.3** Religue a permissão e volte.
+> ✅ Abaixo de Tomei e Pulei existe **"Ignorar por agora"**, em texto simples.
+> ✅ Tocando: aviso azul **"A dose continua pendente"**, e o botão **some**.
+> ✅ Na Home ela continua **pendente**; em Minha adesão conta como **"sem resposta"**, não "pulada".
 
-> ✅ 🔴 O card some sozinho, sem precisar reabrir o app.
+**10.3 — Relatório de adesão (D2).** Home → card **"Acompanhamento semanal"**.
 
-**10.4** 🔴 Desligue a permissão de novo, e **exclua todos os remédios com lembrete**.
+> ✅ Abre **"Minha adesão"** com a porcentagem e "X de Y doses tomadas".
+> ✅ **Doses de hoje que ainda não venceram NÃO entram na conta** — se você tem uma dose às 22h e
+> são 15h, ela não pode estar contando contra você.
+> ✅ **Puladas** e **sem resposta** são números **separados**.
+> ✅ "Por medicamento" ordenado do **pior para o melhor**.
+> ✅ Sem dose vencida, diz **"Ainda não há o que medir"** — nunca "0%".
 
-> ✅ 🔴 O card **não** aparece — sem tratamento esperando aviso, não há o que cobrar.
+**10.4 — Compromissos (C3).** Calendário → **+** → compromisso para **amanhã**, com lembrete.
 
----
-
-## 11 — Avisos de compromisso e receita 🔴 (C3)
-
-**11.1** **Calendário** → **+** → compromisso `Consulta de teste`, para **amanhã**, com lembrete
-**no dia** e **1 dia de antecedência**.
-
-> ✅ 🔴 O texto embaixo diz que os avisos chegam **às 8 da manhã**, por notificação.
+> ✅ O texto diz que os avisos chegam **às 8 da manhã**.
 > ❌ Se disser que os lembretes "ainda estão sendo desenvolvidos", o texto é antigo.
+> ✅ **Excluindo o compromisso**, o aviso dele **não chega**. *(Órfão, agora para compromisso.)*
 
-**11.2** 🔬 O aviso de antecedência cai hoje às 8h — se já passou das 8, ele não é agendado (é o
-comportamento correto). Para testar de verdade, cadastre um compromisso para **daqui a 2 dias**
-com antecedência de **1 dia**, e confira amanhã de manhã.
+**10.5 — Recontagem (B5).** Remédios → **Gerenciar estoques**.
 
-> ✅ Chega uma notificação **"Compromisso amanhã"** com o nome e a data por extenso.
-> ✅ 🔴 Ela **não toca alarme** — é notificação, e respeita o silencioso.
-
-**11.3** 🔴 Exclua esse compromisso antes de o aviso chegar.
-
-> ✅ 🔴 O aviso **não** chega. *(Mesmo teste de alarme órfão do bloco 5, agora para compromisso.)*
-
-**11.4** Num remédio, anexe uma receita com **validade daqui a 8 dias** e peça aviso com **7 dias**
-de antecedência.
-
-> ✅ 🔬 Amanhã de manhã chega **"Receita vencendo"**, dizendo qual remédio e a data.
-
----
-
-## 12 — Relatório de adesão 🔴 (D2)
-
-**12.1** Na **Home**, toque no card **"Acompanhamento semanal"** (o das barrinhas).
-
-> ✅ 🔴 Abre a tela **"Minha adesão"**.
-
-**12.2** Olhe o número grande.
-
-> ✅ 🔴 Mostra a porcentagem e, embaixo, "X de Y doses tomadas".
-> ✅ 🔴 **As doses de hoje que ainda não venceram NÃO entram na conta.** Confira: se você tem uma
-> dose às 22h e são 15h, ela não pode estar contando contra você.
-
-**12.3** Olhe os dois quadros lado a lado.
-
-> ✅ 🔴 **Puladas** e **sem resposta** são números **separados**, cada um com sua explicação.
-
-**12.4** Com mais de um remédio cadastrado, role até **"Por medicamento"**.
-
-> ✅ 🔴 Ordenado do **pior para o melhor** — quem está falhando aparece primeiro.
-
-**12.5** Troque o período para **7 dias** e **90 dias**.
-
-> ✅ Os números mudam de acordo.
-
-**12.6** 🔴 Num app recém-instalado, sem dose vencida ainda:
-
-> ✅ 🔴 Diz **"Ainda não há o que medir"**, e **nunca "0%"**.
-
----
-
-## 13 — Busca de medicamento 🔴 (B1)
-
-**13.1** **Remédios** → **+** → **Cadastro manual**. No campo **NOME DA MEDICAÇÃO**, digite `dipi`.
-
-> ✅ 🔴 Aparece uma lista **"Encontrados na base da Anvisa"** com sugestões.
-> ✅ Cada linha mostra o nome, a dosagem em azul e o princípio ativo embaixo.
-> ⏳ Se não aparecer nada na **primeira abertura** do app, espere alguns segundos: a base está
-> sendo importada em segundo plano. Feche e abra o cadastro de novo.
-
-**13.2** 🔴 Toque numa sugestão.
-
-> ✅ 🔴 O nome é preenchido **com a dosagem** junto.
-> ✅ 🔴 A lista **some**.
-> ✅ 🔴 Descendo até **INFORMAÇÕES ADICIONAIS**, o **princípio ativo** já está preenchido.
-> ✅ 🔴 **Forma farmacêutica, dose e horários continuam vazios** — a base não adivinha posologia.
-
-**13.3** 🔴 Apague uma letra do nome.
-
-> ✅ 🔴 As sugestões voltam a aparecer.
-
-**13.4** Digite um nome que não existe, tipo `xyzabc`.
-
-> ✅ Nenhuma sugestão, e **nenhuma mensagem de erro** — o cadastro segue normal.
-
----
-
-## 14 — Código de barras 🔴 (B3)
-
-⚠️ **Exige a build nova**: `expo-camera` é dependência nativa.
-
-**14.1** **Remédios** → **+** → **Escanear código de barras**.
-
-> ✅ 🔴 Pede permissão de câmera, explicando que **nenhuma foto é tirada ou guardada**.
-> ✅ 🔴 Recusando, aparece o botão **"Cadastrar sem escanear"** — não é beco sem saída.
-
-**14.2** Permita e aponte para a **caixa de um remédio comum** (dipirona, paracetamol).
-
-> ✅ 🔴 Uma moldura branca mostra onde mirar.
-> ✅ 🔴 Ao ler, mostra o remédio encontrado com nome, dosagem e princípio ativo.
-
-**14.3** 🔴 Toque em **"Continuar o cadastro"**.
-
-> ✅ 🔴 Abre o formulário **já preenchido** com nome e princípio ativo.
-> ✅ 🔴 A posologia continua vazia.
-> ✅ 🔴 Voltando dessa tela, você vai para a **escolha de cadastro** — e não para a câmera de novo.
-
-**14.4** 🔴 Escaneie um código que **não seja de remédio** (um pacote de bolacha, por exemplo).
-
-> ✅ 🔴 Diz **"Código não encontrado"**, explica por que acontece, mostra o número lido, e oferece
-> **"Cadastrar à mão"** e **"Ler outro código"**.
-> ❌ Não pode travar nem voltar sozinho.
-
----
-
----
-
-## 15 — "Ignorar por agora" 🔴 (C2)
-
-**15.1** Toque numa notificação de dose (ou abra a tela do horário pela agenda).
-
-> ✅ 🔴 Abaixo de **Tomei** e **Pulei**, existe **"Ignorar por agora"**, em texto simples.
-> ✅ Ele tem menos peso visual que os outros dois — é saída, não atalho.
-
-**15.2** 🔴 Toque nele.
-
-> ✅ 🔴 Aparece um aviso azul: **"Você marcou para resolver depois. A dose continua pendente."**
-> ✅ 🔴 O botão **some** — não há o que ignorar duas vezes.
-> ✅ 🔴 A dose **não** ganha selo de Tomada nem de Pulada.
-
-**15.3** Volte para a Home.
-
-> ✅ 🔴 A dose continua na lista, como pendente. Ignorar não a resolve.
-
-**15.4** Vá em **Minha adesão** (card do acompanhamento semanal).
-
-> ✅ 🔴 Ela conta em **"sem resposta"**, e não em "puladas".
-
----
-
-## 16 — Sincronização 🔴 (D1)
-
-⚠️ **Precisa de conta Google vinculada.** Sem conta, nada disso acontece — e é o comportamento
-correto.
-
-⚠️ Para valer como teste de verdade, o ideal são **dois aparelhos**. Dá para simular num só:
-cadastrar, apagar o app, reinstalar e entrar com a mesma conta.
-
-**16.1** 🔴 Ao abrir a build nova, o app deve **pedir o aceite dos termos de novo**.
-
-> ✅ 🔴 Porque a versão subiu para 1.2.0 — o texto mudou para descrever a cópia na nuvem.
-> ✅ 🔴 Lendo os termos, a seção "Onde seus dados ficam armazenados" diz o que sobe e que **fotos e
-> receita continuam só no aparelho**.
-> ❌ Se ele **não** pedir, o bump não pegou.
-
-**16.2** **Ajustes** → **Conta e dados**. Com a conta vinculada, olhe abaixo da linha da conta.
-
-> ✅ 🔴 Existe um bloco de sincronização, dizendo **"Tudo salvo na nuvem"** ou
-> **"N alterações para enviar"**.
-> ✅ 🔴 Sem conta vinculada, esse bloco **não aparece**.
-
-**16.3** 🔴 Cadastre um remédio novo e volte a essa tela.
-
-> ✅ Ele mostra alterações pendentes por um instante, e depois **"Tudo salvo na nuvem"**.
-> ✅ Tocando no bloco, ele sincroniza na hora.
-
-**16.4** 🔴 **Modo avião ligado**, cadastre outro remédio.
-
-> ✅ 🔴 O cadastro funciona **normalmente** — nada trava, nada reclama de internet.
-> ✅ 🔴 O bloco diz **"1 alteração para enviar"** e explica que ela já está salva no aparelho.
-
-**16.5** 🔴 Desligue o modo avião, saia do app e volte.
-
-> ✅ 🔴 O bloco volta para **"Tudo salvo na nuvem"** sozinho.
-
-**16.6** 🔬 **O teste que importa:** desinstale o app, instale de novo, e entre **com a mesma conta
-do Google**.
-
-> ✅ 🔴 Seus remédios, tratamentos, histórico e compromissos **voltam**.
-> ✅ 🔴 As **fotos não voltam** — e isso é o esperado: anexos não sobem (o texto legal diz isso).
-> 🔬 **Anote:** quanto tempo levou até os dados aparecerem?
-
-**16.7** 🔬 Se tiver dois aparelhos: edite o **mesmo** remédio nos dois, com o segundo offline.
-Depois religue a internet do segundo.
-
-> ✅ 🔬 A edição **mais recente** vence, nos dois aparelhos. Sem mistura: ou é uma versão, ou é a
-> outra, nunca metade de cada.
-
----
-
----
-
-## 17 — Exportar e apagar 🔴 (D3)
-
-⚠️ **Faça este bloco por último.** O 17.3 apaga tudo.
-
-**17.1** **Ajustes** → **Conta e dados** → **MEUS DADOS**.
-
-> ✅ 🔴 Existe **"Baixar uma cópia dos meus dados"**, **acima** dos dois de apagar.
-
-**17.2** 🔴 Toque nele.
-
-> ✅ 🔴 Abre a tela de compartilhamento do Android (Drive, e-mail, arquivos…).
-> ✅ Salve em algum lugar e abra o arquivo.
-> ✅ 🔴 É um JSON legível, com seções em português: Ficha de saúde, Medicamentos, Tratamentos,
-> Horários de dose, Registros de ingestão, Estoque, Compromissos.
-> ✅ 🔴 Os dados que você cadastrou estão lá.
-
-**17.3** 🔬 **Com a conta vinculada**, toque em **"Apagar meus dados de saúde"** e confirme.
-
-> ✅ Os remédios somem do app.
-> ✅ 🔬 **O teste que importa:** feche o app, abra de novo e espere a sincronização.
-> ✅ 🔴 Eles **não voltam**. Se voltarem, o apagamento na nuvem falhou — avise.
-
-**17.4** Olhe o rodapé da seção MEUS DADOS.
-
-> ✅ 🔴 Com conta vinculada, ele diz que o apagamento **alcança também a cópia na sua conta**.
-> ✅ Sem conta, diz que acontece neste aparelho.
-
----
-
-## 18 — Lembrete de recontagem (B5)
-
-Este só aparece com estoque cadastrado há **mais de 30 dias** sem recontagem — provavelmente não
-dá para ver agora, e tudo bem.
-
-**18.1** Vá em **Remédios** → **Gerenciar estoques**.
-
-> ✅ Se algum estoque estiver há mais de um mês sem conferência, aparece um bloco **amarelo** no
-> topo: **"Vale conferir a caixa"**.
-> ✅ Com estoque recém-cadastrado, ele **não** aparece — e isso é o esperado.
+> ✅ Com estoque recém-cadastrado, o bloco amarelo **não aparece** — ele só surge após **30 dias**
+> sem conferência. Provavelmente não dá para ver agora, e tudo bem.
 
 ---
 
 ## Ao terminar a Parte 1
 
-Me manda:
-
-1. **As falhas**, com o número do passo.
-2. **As respostas dos 🔬**, mesmo as que passaram.
-
-Com isso o C1 fecha formalmente e seguimos para o [`ROTEIRO-DE-PRINTS.md`](./ROTEIRO-DE-PRINTS.md).
+Me manda: **(1)** as falhas com o número do passo, **(2)** as respostas dos 🔬, mesmo as que
+passaram. Com isso o C1 fecha formalmente e seguimos para o
+[`ROTEIRO-DE-PRINTS.md`](./ROTEIRO-DE-PRINTS.md).
 
 ---
 ---
 
-# PARTE 2 — Validação completa (antes da defesa)
+# PARTE 2 — Passada geral
 
-> **Não é para agora.** Esta parte é a passada final antes da apresentação, quando o app estiver
-> fechado. Ela percorre o app inteiro do zero, como quem nunca o abriu.
+> **Não é para agora.** É a passada final antes da defesa, com o app fechado. Percorre tudo do zero,
+> como quem nunca o abriu. Começa apagando tudo e termina apagando tudo de novo — o primeiro
+> apagamento é para chegar ao zero, o último testa o direito de exclusão (LGPD).
 >
-> Começa apagando tudo e termina apagando tudo de novo — o primeiro apagamento é para chegar ao
-> zero, o último é para testar o direito de exclusão (LGPD).
->
-> **Percorrer na ordem:** os cadastros do começo alimentam os testes do meio.
-
-## As quatro sessões
-
-Dá para parar entre elas. Dentro de uma sessão, não.
+> **Percorrer na ordem:** os cadastros do começo alimentam os testes do meio. Dá para parar entre
+> sessões, não dentro de uma.
 
 | Sessão | O que cobre | Tempo |
 |---|---|---|
-| **1 — Entrar** | apagamento inicial, os dois caminhos de login, ficha, termos | ~20 min |
-| **2 — Cadastrar** | todas as formas farmacêuticas, frequências, anexos, lembrete | ~50 min |
-| **3 — Usar** | listagem, Home, estoque, calendário, compromissos, notificações | ~40 min |
-| **4 — Sair** | conta, apagamento parcial, apagamento total | ~15 min |
+| **1 — Entrar** | apagamento, os dois logins, ficha, termos | ~20 min |
+| **2 — Cadastrar** | formas farmacêuticas, frequências, anexos, lembrete | ~50 min |
+| **3 — Usar** | listagem, Home, estoque, calendário, compromissos | ~40 min |
+| **4 — Sair** | conta, apagamento parcial e total | ~15 min |
 
-## De onde vem o login com Google
-
-O `.env` **não sobe para o EAS** (está no `.easignore`), então uma build `preview`/`production` sem
-as variáveis cadastradas no servidor sai com o login indisponível.
-
-| Build | De onde vem o JS | De onde vêm as credenciais |
-|---|---|---|
-| `development` + `npx expo start --dev-client` | Metro da sua máquina | `.env` local |
-| `preview` / `production` | bundle do servidor EAS | variáveis de ambiente do EAS |
-
-Cadastradas nos três ambientes: `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
-Conferir com `eas env:list --environment preview`. Se o login disser "indisponível nesta versão", é
-aqui que se olha primeiro.
+**De onde vem o login com Google:** o `.env` **não sobe para o EAS** (está no `.easignore`). Numa
+build `preview`/`production`, as credenciais vêm das variáveis do servidor EAS; numa `development`
+com `npx expo start --dev-client`, vêm do `.env` local. Se o login disser "indisponível nesta
+versão", é aqui que se olha primeiro (`eas env:list --environment preview`).
 
 ---
 
 ## SESSÃO 1 — Entrar
 
-**1.1** **Ajustes** → **MEUS DADOS** → **"Apagar tudo e recomeçar"** → **Continuar** →
-**Apagar tudo**.
+**1.1** **Ajustes** → **MEUS DADOS** → **"Apagar tudo e recomeçar"** → Continuar → Apagar tudo.
 
-> ✅ 🔴 O app volta para a **tela de login**, como recém-instalado.
-> ✅ O segundo diálogo **repete o que acontece** — não só pergunta "tem certeza?".
+> ✅ O app volta para a **tela de login**, como recém-instalado.
+> ✅ O segundo diálogo **repete o que acontece** — não só "tem certeza?".
 
-**1.2** Na tela de login, leia o rodapé.
-
-> ✅ Diz que os dados ficam no aparelho com ou sem conta, e que entrar **prepara** a cópia na
-> nuvem, que ainda não está disponível.
-> ❌ Não pode prometer backup.
-
-**1.3** 🔴 **"Continuar sem login"** → no consentimento, toque na **seta de voltar**.
+**1.2** **"Continuar sem login"** → no consentimento, toque na **seta de voltar**.
 
 > ✅ Volta para o login. A escolha de entrada é arrependível.
 
-**1.4** Entre de novo, **aceite os termos**, e na ficha toque no **botão físico de voltar**.
+**1.3** Entre de novo, aceite os termos, e na ficha toque no **botão físico de voltar**.
 
-> ✅ 🔴 Volta para o consentimento, **não** fecha o app.
+> ✅ Volta para o consentimento, **não** fecha o app.
 
-**1.5** 🔴 Zere e teste o outro caminho: **"Continuar com Google"** → **feche o navegador sem
-escolher conta**.
+**1.4** Zere e teste o outro caminho: **"Continuar com Google"** → **feche o navegador sem escolher
+conta**.
 
-> ✅ 🔴 Volta ao app com aviso de login cancelado. Não trava nem entra em silêncio.
+> ✅ Volta ao app com aviso de login cancelado. Não trava nem entra em silêncio.
 
-**1.6** Entre com o Google de verdade e complete a ficha.
+**1.5** Entre com o Google de verdade, complete a ficha. Feche o app (recentes) e reabra **três
+vezes**.
 
-> ✅ 🔴 Pede o aceite dos termos, e depois entra na Home.
+> ✅ Vai direto para a Home; a tela de login **não pisca** antes.
+> ✅ A splash azul **sai sozinha** — nunca fica presa nela.
 
-**1.7** 🔴 Feche o app (recentes) e reabra, **três vezes**.
+**1.6** **Ajustes** → bloco azul da ficha.
 
-> ✅ 🔴 Vai direto para a Home. A tela de login **não pisca** antes.
-> ✅ 🔴 A splash azul **sai sozinha** — o app nunca fica preso nela.
+> ✅ **DATA DE NASCIMENTO** tem ícone de calendário **e** aceita digitação.
+> ✅ `29/02/2025` é recusado; datas futuras apagadas no calendário.
+> ✅ Tocando na foto, abre "Tirar foto agora" / "Escolher da galeria".
 
-**1.8** **Ajustes** → toque no bloco azul da ficha.
+**1.7** **Conta e dados** → **Termos e privacidade**.
 
-> ✅ 🔴 O campo **DATA DE NASCIMENTO** tem ícone de calendário **e** aceita digitação.
-> ✅ 🔴 `29/02/2025` é recusado; no calendário, o dia 29 de fev/2025 não existe e datas futuras
-> estão apagadas.
-> ✅ Tocando na **foto**, abre o popup com "Tirar foto agora" e "Escolher da galeria".
-
-**1.9** **Ajustes** → **"Conta e dados"** → **"Termos e privacidade"**.
-
-> ✅ 🔴 A linha tem **ícone de pessoa** (não o logo do Google).
-> ✅ "Aceito em" mostra **data e horário**. Versão aceita = versão atual.
+> ✅ Ícone de **pessoa** (não o logo do Google); "Aceito em" com data e horário.
 
 ---
 
 ## SESSÃO 2 — Cadastrar
 
-**2.1 — Comprimido, o caso comum.** `Losartana 50mg`, comprimido, dose `1`, **Todo dia**, **2×**,
-`08:00` e `20:00`, uso contínuo, estoque `28`, local `Gaveta da cozinha`, avisar com `7 dias`.
+**2.1 — O caso comum.** `Losartana 50mg`, comprimido, dose 1, Todo dia, 2×, `08:00` e `20:00`, uso
+contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 
-> ✅ 🔴 No popup de horários, abrem **dois campos numéricos** — não o mostrador redondo.
-> ✅ 🔴 É 24 horas: digitar `20` dá 20:00, sem AM/PM. `99` vira 23. `7` vira 07.
-> ✅ 🔴 Tocando em "Pronto", **o teclado fecha junto** com o popup.
-> ✅ Horário duplicado é barrado na digitação.
+> ✅ No popup de horários abrem **dois campos numéricos**, não o mostrador redondo.
+> ✅ É 24 h: `20` dá 20:00, sem AM/PM. `99` vira 23. `7` vira 07.
+> ✅ Em "Pronto", **o teclado fecha junto** com o popup.
+> ✅ Horário duplicado é barrado.
 
-**2.2 — Líquido, unidade ambígua.** `Xarope`, **Líquido**.
+**2.2 — Unidade ambígua.** `Xarope`, **Líquido**.
 
-> ✅ 🔴 Aparece **"COMO A DOSE É MEDIDA?"** antes da quantidade.
-> ✅ 🔴 A dica do copinho tem fundo **amarelo claro** com barra amarela viva à esquerda.
-> ✅ Escolha **ml**, dose `7,5` — a fração é aceita.
+> ✅ Aparece **"COMO A DOSE É MEDIDA?"** antes da quantidade.
+> ✅ A dica do copinho tem fundo **amarelo claro** com barra viva à esquerda.
+> ✅ Em **ml**, dose `7,5` — a fração é aceita.
 
-**2.3** 🔴 **Dependência entre campos.** Com o `7,5` preenchido, **volte** e troque a forma para
-**Comprimido**.
+**2.3 — Dependência entre campos.** Com `7,5` preenchido, volte e troque a forma para **Comprimido**.
 
-> ✅ 🔴 O campo de dose **fica vazio** — comprimido não aceita fração.
+> ✅ O campo de dose **fica vazio** — comprimido não aceita fração.
 
-**2.4** 🔴 Escolha **"Prazo definido"**, `7` dias. Troque para **"Uso contínuo"** e volte para
-**"Prazo definido"**.
+**2.4** Escolha **"Prazo definido"**, 7 dias. Troque para **"Uso contínuo"** e volte.
 
-> ✅ 🔴 O campo de dias está **vazio** — o `7` não voltou sozinho.
+> ✅ O campo de dias está **vazio** — o 7 não voltou sozinho.
 
-**2.5 — Dose que varia.** `Insulina NPH`, **Injeção**, **UI**, dose `10`, **Todo dia**, **2×**.
+**2.5 — Dose que varia.** `Insulina NPH`, Injeção, UI, dose 10, Todo dia, 2×.
 
-> ✅ 🔴 Existe o checkbox **"A dose muda de um horário para o outro"**, junto da dose.
-> ✅ Marque, defina `08:00` com `10` e `22:00` com `8`. As fichinhas mostram `08:00 · 10` e
-> `22:00 · 8`.
-> ✅ 🔴 Em "Preencher de X em X horas", uma frase diz que **as doses por horário são mantidas**.
+> ✅ Existe **"A dose muda de um horário para o outro"**. Marque: `08:00` com 10, `22:00` com 8.
+> ✅ Em "Preencher de X em X horas", uma frase diz que **as doses por horário são mantidas**.
 
-**2.6 — Dias da semana e ciclo.** `Metformina`, **Dias da semana**, Seg/Qua/Sex, `12:00`.
-Depois um com **ciclo** 21/7, cadastrado no meio da cartela.
+**2.6 — Frequências.** `Metformina` em **Dias da semana** (Seg/Qua/Sex, 12:00), e um com **ciclo**
+21/7 cadastrado no meio da cartela.
 
-> ✅ Dias alternados e pausa funcionam; erro de "dias ativos > tamanho do ciclo" é barrado.
+> ✅ Funcionam; "dias ativos > tamanho do ciclo" é barrado.
 
-**2.7 — Só quando precisar.** `Dipirona`, **Gotas**, dose `30` gotas, **Só quando precisar**,
-estoque `20` **ml**.
+**2.7 — Só quando precisar.** `Dipirona`, Gotas, dose 30 gotas, estoque 20 **ml**.
 
-> ✅ 🔴 Sem horário e sem data de início; o tempo vira "Sempre disponível".
-> ✅ 🔴 O estoque pergunta em **ml**, não em gotas.
+> ✅ Sem horário e sem data de início; o tempo vira "Sempre disponível".
+> ✅ O estoque pergunta em **ml**, não em gotas.
 
-**2.8 — Anexos.** Na `Losartana`, seção **ANEXOS**.
+**2.8 — Anexos.** Na Losartana, seção **ANEXOS**.
 
-> ✅ 🔴 A foto da caixa aparece **na hora**, e muda **toda vez** que você troca.
-> ✅ 🔴 Existe o rótulo **RECEITA MÉDICA**, e tocando no quadrado abre um popup com **três**
-> origens: câmera, galeria e arquivo.
-> ✅ 🔴 Fora do quadrado há um único rótulo **"Adicionar arquivo"**.
-> ✅ Com anexo escolhido: **"Alterar anexo"** e **"Remover"** (em vermelho).
-> ✅ 🔴 Em **RECEITA VÁLIDA ATÉ**, os dias já passados estão apagados no calendário.
+> ✅ A foto da caixa aparece **na hora** (não branca), e muda **toda vez** que você troca.
+> ✅ **RECEITA MÉDICA** abre popup com **três** origens: câmera, galeria e arquivo.
+> ✅ Com anexo: **"Alterar anexo"** e **"Remover"** (vermelho).
+> ✅ Em **RECEITA VÁLIDA ATÉ**, dias passados apagados.
 
 **2.9 — Lembrete.** Popup **"Configurar lembrete"**.
 
-> ✅ 🔴 Três opções, e **"Nenhum aviso" não existe** — não configurar já é recusar.
-> ✅ 🔴 **Alarme** e **Notificação** dividem a primeira linha; **Os dois** ocupa a linha inteira
-> embaixo.
-> ✅ 🔴 Abrindo "Como funcionam os alertas", o scroll desce **e sobe**.
-> ✅ 🔴 Tocando em "Ler os Termos" e voltando, você retorna **ao popup, com a ajuda ainda aberta**.
-> ✅ 🔴 O botão do fim **não está colado** na base da tela.
+> ✅ Três opções, e **"Nenhum aviso" não existe**.
+> ✅ **Alarme** e **Notificação** dividem a primeira linha; **Os dois** ocupa a linha de baixo.
+> ✅ Em "Como funcionam os alertas", o scroll desce **e sobe**.
+> ✅ "Ler os Termos" e voltar retorna **ao popup, com a ajuda ainda aberta**.
 
-**2.10 — Prazo × estoque.** `Amoxicilina`, dose `2`, **3×** de 8 em 8h a partir de `06:00`,
-**prazo** `7` dias, estoque `20`.
+**2.10 — Prazo × estoque.** `Amoxicilina`, dose 2, 3× de 8/8h desde `06:00`, prazo 7 dias, estoque
+20.
 
-> ✅ 🔴 Avisa que o tratamento consome 42 e você tem 20.
+> ✅ Avisa que o tratamento consome 42 e você tem 20.
 
-**2.11 — Doses de hoje já passadas.** *(De tarde ou à noite.)* Cadastre com horários que já
-passaram hoje.
+**2.11 — Doses de hoje já passadas.** *(De tarde ou à noite.)*
 
-> ✅ 🔴 Avisa quais horários de hoje não serão agendados.
-> ✅ 🔴 Pergunta **"VOCÊ JÁ TOMOU ALGUMA DELAS HOJE?"**, nada vem marcado.
-> ✅ 🔴 Marcando uma, diz que ela entra no histórico e que **o estoque não muda**.
-> ✅ 🔴 Salvando, o estoque fica **exatamente** no que você digitou.
+> ✅ Avisa quais horários de hoje não serão agendados.
+> ✅ Pergunta **"VOCÊ JÁ TOMOU ALGUMA DELAS HOJE?"**, nada vem marcado.
+> ✅ Marcando uma, diz que ela entra no histórico e que **o estoque não muda**.
+> ✅ Salvando, o estoque fica **exatamente** no que você digitou.
 
 ---
 
@@ -724,75 +466,60 @@ passaram hoje.
 
 **3.1 — Lista.** Aba **Remédios**.
 
-> ✅ 🔴 O card da Insulina mostra `08:00 · 10 UI` e `22:00 · 8 UI`.
-> ✅ 🔴 Rolando, o texto de apoio sobe e **a busca fica fixa**.
+> ✅ O card da Insulina mostra `08:00 · 10 UI` e `22:00 · 8 UI`.
+> ✅ Rolando, o texto de apoio sobe e **a busca fica fixa**.
 > ✅ Busca sem acento funciona (`acido` acha `Ácido`).
-> ✅ Ordenação: **A–Z**, **Mais recentes**, **Acabando**.
-> ✅ 🔴 O botão diz **"Gerenciar estoques"**.
-> ✅ Editar abre preenchido; excluir avisa que o histórico é mantido.
-> ✅ 🔴 O botão físico de voltar fecha o formulário.
+> ✅ Ordenação: A–Z, Mais recentes, Acabando.
+> ✅ Excluir avisa que o histórico é mantido; o botão físico de voltar fecha o formulário.
 
 **3.2 — Home.**
 
 > ✅ Progresso do dia, próxima dose, atrasadas em vermelho.
-> ✅ 🔴 Dose dentro da janela do horário aparece em **verde**, com **É AGORA**.
-> ✅ 🔴 Passados 30 minutos, ela fica **vermelha** com **ATRASADA**.
-> ✅ 🔴 "Confirmar todas" lista **os nomes** de cada dose no diálogo.
-> ✅ 🔴 O estoque cai **pela dose**, não 1 por dose.
-> ✅ 🔴 O card "Estoque" diz quantas medicações são controladas e termina com **"toque para
-> gerenciar"**.
+> ✅ Dose na janela do horário aparece com **É AGORA**; 30 min depois vira **ATRASADA**.
+> ✅ "Confirmar todas" lista **os nomes** de cada dose no diálogo.
+> ✅ O estoque cai **pela dose**, não 1 por dose.
 
 **3.3 — Estoque.**
 
-> ✅ Ordenação: **Acaba primeiro**, **Menos na caixa**, **A–Z**.
-> ✅ 🔴 A Insulina prevê **16 ou 17 dias** (10 + 8 = 18 UI/dia, não 2 × 10).
-> ✅ 🔴 A Dipirona (gotas com estoque em ml) diz **"Sem previsão de término"**.
+> ✅ Ordenação: Acaba primeiro, Menos na caixa, A–Z.
+> ✅ A Insulina prevê **16 ou 17 dias** (10 + 8 = 18 UI/dia, não 2 × 10).
+> ✅ A Dipirona (gotas com estoque em ml) diz **"Sem previsão de término"**.
 > ✅ "Recontar" mostra a diferença antes de confirmar.
 
 **3.4 — Calendário.**
 
-> ✅ 🔴 Grade do mês azul, com pontinhos nos dias com algo marcado.
-> ✅ 🔴 Rolando, **a grade sobe junto** e só os filtros grudam no topo.
-> ✅ Filtros **Tudo / Compromissos / Remédios** mudam a grade e a lista.
-> ✅ 🔴 "Nada marcado para este dia" tem **espaço em volta**.
-> ✅ 🔴 Avançando dois meses, as doses **continuam aparecendo** (são projetadas).
+> ✅ Grade do mês azul, com pontinhos nos dias com algo marcado.
+> ✅ Rolando, **a grade sobe junto** e só os filtros grudam no topo.
+> ✅ Filtros Tudo / Compromissos / Remédios mudam a grade e a lista.
+> ✅ Avançando dois meses, as doses **continuam aparecendo** (são projetadas).
 
-**3.5 — Compromissos.** Cadastre um futuro (5 dias) e um passado.
+**3.5 — Compromissos.** Um futuro (5 dias) e um passado.
 
-> ✅ 🔴 **DATA** e **HORÁRIO** estão em **linhas separadas**.
-> ✅ 🔴 Com data/horário no passado, avisa e a seção **LEMBRETES some por completo**.
-> ✅ 🔴 Configurando o lembrete e **depois** voltando a data para trás, avisa que **o lembrete foi
-> descartado**.
-> ✅ 🔴 No card do passado, existe **"Você foi?"** com **Fui** e **Não fui**, e dá para anotar.
-> ✅ 🔴 O rótulo é **"COM QUANTOS DIAS DE ANTECEDÊNCIA"**, e **"OUTRO PRAZO, EM DIAS"** tem linha
-> própria.
-> ✅ `0` ou `999` dão erro pedindo entre 1 e 180.
-
-**3.6 — Notificações.** Repita, resumido, os blocos 2, 3 e 5 da Parte 1.
-
-> ✅ Chega com o app fechado; um aviso por horário; nenhum alarme órfão.
+> ✅ **DATA** e **HORÁRIO** em **linhas separadas**.
+> ✅ Com data no passado, avisa e a seção **LEMBRETES some**.
+> ✅ Configurando o lembrete e **depois** voltando a data, avisa que **o lembrete foi descartado**.
+> ✅ No card do passado, **"Você foi?"** com Fui / Não fui, e dá para anotar.
+> ✅ `0` ou `999` dias dão erro pedindo entre 1 e 180.
 
 ---
 
 ## SESSÃO 4 — Sair
 
-**4.1** **Ajustes** → **Conta e dados** → **MEUS DADOS** → **"Apagar meus dados de saúde"**.
+**4.1** **Conta e dados** → **MEUS DADOS** → **"Apagar meus dados de saúde"**.
 
 > ✅ O diálogo diz o que some e o que fica.
-> ✅ 🔴 Confirmando, a ficha continua intacta e o acesso ao estoque **some** da Home e de Remédios.
+> ✅ A ficha continua intacta; o acesso ao estoque **some** da Home e de Remédios.
 
-**4.2** 🔴 Desvincule a conta do Google.
+**4.2** Desvincule a conta do Google.
 
-> ✅ 🔴 O diálogo explica que **nada é apagado** — nem no aparelho, nem na nuvem.
-> *(A ação de apagar da nuvem é requisito do D1, quando a sincronização existir.)*
+> ✅ O diálogo explica o que acontece com a cópia na nuvem.
 
 **4.3** Vincule de novo.
 
-> ✅ 🔴 Antes de abrir o Google, um diálogo diz que vincular confirma os termos, com três opções:
-> **Cancelar**, **Ler os termos**, **Vincular**.
-> ✅ 🔴 Depois de vincular, "Aceito em" mostra a data **de agora**.
+> ✅ Antes de abrir o Google, um diálogo diz que vincular confirma os termos: **Cancelar**, **Ler os
+> termos**, **Vincular**.
+> ✅ Depois, "Aceito em" mostra a data **de agora**.
 
-**4.4** **"Apagar tudo e recomeçar"** → **Continuar** → **Apagar tudo**.
+**4.4** **"Apagar tudo e recomeçar"** → Continuar → Apagar tudo.
 
-> ✅ Volta para a tela de login.
-> ✅ 🔴 Entrando com o Google de novo, funciona e o aceite é pedido outra vez.
+> ✅ Volta para a tela de login; entrando com o Google de novo, o aceite é pedido outra vez.
