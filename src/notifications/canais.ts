@@ -34,8 +34,49 @@ export const CANAL_LEMBRETE = "dose-reminder-v4";
  * `USE_FULL_SCREEN_INTENT`, que o Android 14+ restringe a apps de alarme e chamada, e que o
  * `expo-notifications` nem expõe. O texto do app descreve o que existe (nível B do plano).
  */
+/**
+ * Apaga o canal se ele já existir **mudo**, para que a criação abaixo valha.
+ *
+ * Um canal congela na criação: `setNotificationChannelAsync` sobre um id existente atualiza só
+ * nome e descrição, e som e importância continuam os que nasceram com ele. Por isso a regra é
+ * versionar o id — mas isso só resolve para quem **desinstalou**. Reinstalar por cima, ou o backup
+ * automático do Android restaurando os canais, traz o canal velho de volta com o defeito dentro.
+ *
+ * Foi o que deixou o alarme mudo em duas rodadas de teste: o código estava certo e o aparelho
+ * guardava a versão errada, sem nenhum sinal disso. `deleteNotificationChannelAsync` é a única
+ * forma de recuperar sem depender de o usuário desinstalar direito — e num app de medicação não
+ * dá para deixar o lembrete depender de um passo manual bem executado.
+ *
+ * Só apaga quando o canal está comprovadamente ruim: som ausente, ou som que é nome de arquivo em
+ * vez de URI resolvida (`content://…`), que é o sintoma exato do `"default"` inexistente.
+ */
+async function apagarCanalDefeituoso(id: string): Promise<void> {
+  const canal = await Notifications.getNotificationChannelAsync(id);
+  if (canal === null) return;
+
+  /**
+   * `as unknown as string` porque a tipagem mente aqui: ela declara `'default' | 'custom' | null`,
+   * mas o que o sistema devolve na leitura é a **URI resolvida** (`content://settings/…`) — e é
+   * justamente a diferença entre URI e nome cru que distingue canal bom de canal mudo.
+   */
+  const som = canal.sound as unknown as string | null | undefined;
+  const mudo = som === null || som === undefined || som === "";
+  const somInvalido = typeof som === "string" && som !== "" && !som.includes("://");
+  if (!mudo && !somInvalido) return;
+
+  await Notifications.deleteNotificationChannelAsync(id);
+  if (__DEV__) {
+    console.log(`[Mapill] canal ${id} estava mudo (som: ${som ?? "nenhum"}) — apagado e recriado.`);
+  }
+}
+
 export async function registrarCanais(): Promise<void> {
   if (Platform.OS !== "android") return;
+
+  // Antes de criar: se um canal com este id sobreviveu de uma instalação anterior com defeito,
+  // criar de novo não corrigiria nada — o Android ignoraria os valores novos.
+  await apagarCanalDefeituoso(CANAL_ALARME);
+  await apagarCanalDefeituoso(CANAL_LEMBRETE);
 
   await Notifications.setNotificationChannelAsync(CANAL_ALARME, {
     name: "Alarmes de dose",
@@ -134,8 +175,9 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
   const problemas: string[] = [];
 
   // Um som "resolvido" é um `content://` do sistema. O nome cru de um arquivo que não existe
-  // significa canal mudo — foi exatamente o que aconteceu com "default".
-  const som = canal.sound;
+  // significa canal mudo — foi exatamente o que aconteceu com "default". O `as unknown` é pelo
+  // mesmo motivo de `apagarCanalDefeituoso`: a tipagem declara o que se escreve, não o que se lê.
+  const som = canal.sound as unknown as string | null | undefined;
   if (som === null || som === undefined) {
     problemas.push("SEM SOM (canal mudo)");
   } else if (typeof som === "string" && !som.includes("://")) {

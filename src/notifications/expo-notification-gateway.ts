@@ -140,6 +140,22 @@ export class ExpoNotificationGateway implements NotificationGateway {
       scheduledFor: aviso.quando.toISOString(),
     };
 
+    /**
+     * Em desenvolvimento, diz **para qual canal cada aviso foi**.
+     *
+     * O diagnóstico de canal responde "o canal está bom?"; este responde "o aviso foi para o canal
+     * certo?". São perguntas diferentes, e na validação de 01/09 a segunda ficou sem resposta: o
+     * alarme não tocou e não havia como saber se o canal nasceu mudo ou se o aviso saiu como
+     * lembrete. Com as duas linhas no console, a próxima falha se explica sem outra ida ao
+     * aparelho.
+     */
+    if (__DEV__ && Platform.OS === "android") {
+      const canal = aviso.modo === "alarm" ? CANAL_ALARME : CANAL_LEMBRETE;
+      console.log(
+        `[Mapill] agendando "${aviso.titulo}" → modo=${aviso.modo} canal=${canal} em ${aviso.quando.toLocaleString("pt-BR")}`,
+      );
+    }
+
     await Notifications.scheduleNotificationAsync({
       identifier: aviso.chave,
       content: {
