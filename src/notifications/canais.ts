@@ -38,36 +38,28 @@ export const CANAL_LEMBRETE = "dose-reminder-v4";
  * Apaga o canal se ele já existir **mudo**, para que a criação abaixo valha.
  *
  * Um canal congela na criação: `setNotificationChannelAsync` sobre um id existente atualiza só
- * nome e descrição, e som e importância continuam os que nasceram com ele. Por isso a regra é
- * versionar o id — mas isso só resolve para quem **desinstalou**. Reinstalar por cima, ou o backup
- * automático do Android restaurando os canais, traz o canal velho de volta com o defeito dentro.
+ * nome e descrição, e som e importância continuam os que nasceram com ele. Versionar o id resolve
+ * para quem desinstala, mas não para quem reinstala por cima nem para o backup do Android
+ * restaurando canais. Apagar é a única recuperação que não depende de o usuário fazer um passo
+ * manual direito — e num app de medicação o lembrete não pode depender disso.
  *
- * Foi o que deixou o alarme mudo em duas rodadas de teste: o código estava certo e o aparelho
- * guardava a versão errada, sem nenhum sinal disso. `deleteNotificationChannelAsync` é a única
- * forma de recuperar sem depender de o usuário desinstalar direito — e num app de medicação não
- * dá para deixar o lembrete depender de um passo manual bem executado.
+ * **Mudo é `sound: null`, e só isso.** A leitura passa por
+ * `ExpoNotificationsChannelSerializer.toString(Uri)`, que devolve três coisas: `null` quando não há
+ * som, **`"default"` quando o canal usa `Settings.System.DEFAULT_NOTIFICATION_URI`** — o caso bom,
+ * que é o nosso — e `"custom"` para qualquer outra URI.
  *
- * Só apaga quando o canal está comprovadamente ruim: som ausente, ou som que é nome de arquivo em
- * vez de URI resolvida (`content://…`), que é o sintoma exato do `"default"` inexistente.
+ * A palavra `"default"` significa coisas **opostas** dependendo da direção: escrita, é um nome de
+ * arquivo a resolver (e quebra); lida, é a confirmação de que o som padrão está ativo. Confundir as
+ * duas foi o que fez a versão anterior desta função apagar e recriar, a cada abertura, um canal que
+ * estava perfeitamente saudável.
  */
 async function apagarCanalDefeituoso(id: string): Promise<void> {
   const canal = await Notifications.getNotificationChannelAsync(id);
   if (canal === null) return;
-
-  /**
-   * `as unknown as string` porque a tipagem mente aqui: ela declara `'default' | 'custom' | null`,
-   * mas o que o sistema devolve na leitura é a **URI resolvida** (`content://settings/…`) — e é
-   * justamente a diferença entre URI e nome cru que distingue canal bom de canal mudo.
-   */
-  const som = canal.sound as unknown as string | null | undefined;
-  const mudo = som === null || som === undefined || som === "";
-  const somInvalido = typeof som === "string" && som !== "" && !som.includes("://");
-  if (!mudo && !somInvalido) return;
+  if (canal.sound !== null) return;
 
   await Notifications.deleteNotificationChannelAsync(id);
-  if (__DEV__) {
-    console.log(`[Mapill] canal ${id} estava mudo (som: ${som ?? "nenhum"}) — apagado e recriado.`);
-  }
+  if (__DEV__) console.log(`[Mapill] canal ${id} estava sem som — apagado e recriado.`);
 }
 
 export async function registrarCanais(): Promise<void> {
@@ -174,15 +166,13 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
    */
   const problemas: string[] = [];
 
-  // Um som "resolvido" é um `content://` do sistema. O nome cru de um arquivo que não existe
-  // significa canal mudo — foi exatamente o que aconteceu com "default". O `as unknown` é pelo
-  // mesmo motivo de `apagarCanalDefeituoso`: a tipagem declara o que se escreve, não o que se lê.
-  const som = canal.sound as unknown as string | null | undefined;
-  if (som === null || som === undefined) {
-    problemas.push("SEM SOM (canal mudo)");
-  } else if (typeof som === "string" && !som.includes("://")) {
-    problemas.push(`som '${som}' é nome de arquivo, não URI — canal provavelmente MUDO`);
-  }
+  /**
+   * Na **leitura**, `"default"` é o valor bom: o serializador nativo traduz
+   * `Settings.System.DEFAULT_NOTIFICATION_URI` para essa palavra. Só `null` é canal mudo.
+   * (Na escrita a palavra tem o sentido oposto — ver `apagarCanalDefeituoso`.)
+   */
+  const som = canal.sound;
+  if (som === null || som === undefined) problemas.push("SEM SOM (canal mudo)");
 
   // MAX (5) é o que permite heads-up. Abaixo disso o aviso vai direto para a barra, sem interromper.
   if (canal.importance < Notifications.AndroidImportance.MAX) {
