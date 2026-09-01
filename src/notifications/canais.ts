@@ -119,12 +119,47 @@ export async function registrarCanais(): Promise<void> {
 export async function diagnosticarCanalDeAlarme(): Promise<string> {
   if (Platform.OS !== "android") return "iOS/web: sem canais.";
   const canal = await Notifications.getNotificationChannelAsync(CANAL_ALARME);
-  if (canal === null) return `Canal ${CANAL_ALARME} não existe.`;
+  if (canal === null) {
+    return `❌ Canal ${CANAL_ALARME} NÃO EXISTE — nenhum alarme vai tocar.`;
+  }
+
+  /**
+   * O diagnóstico **conclui**, em vez de só despejar valores.
+   *
+   * Na validação de 01/09 ele imprimiu `som: default · bypassDnd: false` e essa linha continha a
+   * resposta inteira — mas exigia saber de cor que "default" ali significa mudo. Interpretar aqui
+   * é o que transforma o log em resposta: quem testa não deveria precisar decorar a semântica do
+   * `AndroidXNotificationsChannelManager` para saber se o alarme vai tocar.
+   */
+  const problemas: string[] = [];
+
+  // Um som "resolvido" é um `content://` do sistema. O nome cru de um arquivo que não existe
+  // significa canal mudo — foi exatamente o que aconteceu com "default".
+  const som = canal.sound;
+  if (som === null || som === undefined) {
+    problemas.push("SEM SOM (canal mudo)");
+  } else if (typeof som === "string" && !som.includes("://")) {
+    problemas.push(`som '${som}' é nome de arquivo, não URI — canal provavelmente MUDO`);
+  }
+
+  // MAX (5) é o que permite heads-up. Abaixo disso o aviso vai direto para a barra, sem interromper.
+  if (canal.importance < Notifications.AndroidImportance.MAX) {
+    problemas.push(`importance ${canal.importance} < MAX — não interrompe a tela`);
+  }
+
+  if (!canal.bypassDnd) {
+    // Não é defeito do código: depende de uma permissão que o Android não concede sozinho.
+    problemas.push("bypassDnd desligado — não fura o Não Perturbe (falta a permissão do sistema)");
+  }
+
+  const estado = problemas.length === 0 ? "✅ OK" : `⚠️ ${problemas.join(" | ")}`;
+
   return [
+    estado,
     `id: ${canal.id}`,
     `importance: ${canal.importance}`,
-    `som: ${canal.sound ?? "NENHUM (mudo)"}`,
+    `som: ${som ?? "NENHUM"}`,
     `bypassDnd: ${canal.bypassDnd}`,
-    `audioAttributes.usage: ${canal.audioAttributes?.usage ?? "-"}`,
+    `usage: ${canal.audioAttributes?.usage ?? "-"}`,
   ].join(" · ");
 }
