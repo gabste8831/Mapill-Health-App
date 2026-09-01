@@ -10,9 +10,17 @@ import { colors } from "@/shared/theme";
  * descrição — som, importância e bypass ficam congelados no aparelho de quem já instalou, e uma
  * correção nossa simplesmente não apareceria para essas pessoas. Subir o sufixo cria um canal novo
  * e a mudança passa a valer. A regra: mexeu em som ou importância, sobe a versão.
+ *
+ * **v3 → v4 (01/09).** O diagnóstico no aparelho devolveu `som: default · bypassDnd: false`: o v3
+ * tinha nascido numa build anterior, com a string `"default"` ainda sendo enviada, e ficou
+ * congelado assim. Nenhuma correção no código mudaria aquele canal — a única saída é um id novo.
+ *
+ * A causa raiz estava **fora deste arquivo**: `sound: true` no conteúdo da notificação
+ * (`expo-notification-gateway`), que o nativo converte para `"default"` e trata como nome de
+ * arquivo. Corrigido lá; aqui só a consequência.
  */
-export const CANAL_ALARME = "dose-alarm-v3";
-export const CANAL_LEMBRETE = "dose-reminder-v3";
+export const CANAL_ALARME = "dose-alarm-v4";
+export const CANAL_LEMBRETE = "dose-reminder-v4";
 
 /**
  * Cria os canais. Idempotente — chamar de novo com o mesmo id não faz nada.

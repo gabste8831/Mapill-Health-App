@@ -39,6 +39,43 @@ export type TabelaSincronizavel = (typeof TABELAS_SINCRONIZAVEIS)[number];
 export const COLUNAS_LOCAIS = ["synced_at"] as const;
 
 /**
+ * Colunas que **sobraram no SQLite** e não existem no servidor.
+ *
+ * O SQLite não remove coluna, e a regra do projeto é que migration publicada não se edita — então
+ * uma coluna substituída fica lá, vazia, para sempre. A 004 criou `emergency_contact_name/phone/
+ * relationship` e a 005 as trocou por `emergency_contacts` (uma lista JSON); as três antigas
+ * continuam na tabela local, e o schema do Supabase — escrito a partir do modelo **atual** — nunca
+ * as teve.
+ *
+ * Foi o que quebrou a sincronização na validação de 01/09:
+ * `Could not find the 'emergency_contact_name' column of 'patient_profiles' in the schema cache`.
+ * O push mandava a linha inteira, incluindo o que morreu na 005, e o PostgREST recusa o lote todo —
+ * uma coluna órfã bloqueava a sincronização inteira do usuário.
+ *
+ * Listar em vez de filtrar por schema remoto é deliberado: falha de sincronização por coluna nova
+ * deve aparecer como erro, e não ser engolida em silêncio. O que entra aqui é só o que já foi
+ * substituído por outra coluna, com a migration que fez a troca anotada ao lado.
+ */
+export const COLUNAS_ORFAS: Partial<Record<TabelaSincronizavel, string[]>> = {
+  // Substituídas pela lista `emergency_contacts` na migration 005.
+  patient_profiles: [
+    "emergency_contact_name",
+    "emergency_contact_phone",
+    "emergency_contact_relationship",
+  ],
+  /**
+   * A receita nasceu como anexo do **compromisso** (migration 002) e mudou de dono em 20/08: ela
+   * pertence à prescrição, onde o paciente já está descrevendo o medicamento. As colunas viraram
+   * `attachment_uri` / `attachment_valid_until` / `attachment_sync_opt_out` em `prescriptions`, e
+   * estas três ficaram vazias no SQLite.
+   *
+   * Não deram erro na validação de 01/09 só porque `patient_profiles` sobe primeiro e o push parou
+   * ali. Seriam a falha seguinte.
+   */
+  appointments: ["prescription_photo_uri", "prescription_valid_until", "photo_sync_opt_out"],
+};
+
+/**
  * Colunas cujo conteúdo é um caminho de arquivo **no aparelho** (`file:///data/user/0/…`).
  *
  * Sobem como estão, e é inútil do outro lado — um caminho do aparelho A não abre no aparelho B.

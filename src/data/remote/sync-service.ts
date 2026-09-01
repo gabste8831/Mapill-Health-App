@@ -5,6 +5,7 @@ import { supabase } from "./supabase-client";
 import {
   COLUNAS_DE_ARQUIVO_LOCAL,
   COLUNAS_LOCAIS,
+  COLUNAS_ORFAS,
   TABELAS_SINCRONIZAVEIS,
   type TabelaSincronizavel,
 } from "./tabelas-sincronizaveis";
@@ -80,10 +81,14 @@ async function gravarMarcaDagua(tabela: TabelaSincronizavel, quando: string): Pr
 function paraRemoto(
   linha: Record<string, unknown>,
   colunasBooleanas: string[],
+  colunasOrfas: string[],
 ): Record<string, unknown> {
   const saida: Record<string, unknown> = {};
   for (const [coluna, valor] of Object.entries(linha)) {
     if ((COLUNAS_LOCAIS as readonly string[]).includes(coluna)) continue;
+    // Colunas que a migration seguinte substituiu e o SQLite nunca removeu: enviá-las faz o
+    // PostgREST recusar o lote inteiro, porque no servidor elas nunca existiram.
+    if (colunasOrfas.includes(coluna)) continue;
     if (colunasBooleanas.includes(coluna)) {
       saida[coluna] = valor === 1 || valor === true;
       continue;
@@ -142,11 +147,15 @@ async function enviar(tabela: TabelaSincronizavel, userId: string): Promise<numb
   if (pendentes.length === 0) return 0;
 
   const booleanas = COLUNAS_BOOLEANAS[tabela];
+  const orfas = COLUNAS_ORFAS[tabela] ?? [];
   let enviados = 0;
 
   for (let i = 0; i < pendentes.length; i += TAMANHO_DO_LOTE) {
     const lote = pendentes.slice(i, i + TAMANHO_DO_LOTE);
-    const payload = lote.map((linha) => ({ ...paraRemoto(linha, booleanas), user_id: userId }));
+    const payload = lote.map((linha) => ({
+      ...paraRemoto(linha, booleanas, orfas),
+      user_id: userId,
+    }));
 
     const { error } = await supabase!.from(tabela).upsert(payload, { onConflict: "id" });
     if (error !== null) throw new Error(`${tabela}: ${error.message}`);

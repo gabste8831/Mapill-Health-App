@@ -49,17 +49,41 @@ async function prepararSistema(): Promise<void> {
   await registrarCategorias();
   jaPreparado = true;
 
-  // Só em desenvolvimento: diz no console o que o **sistema** guardou sobre o canal, e não o que
-  // pedimos. Duas rodadas de teste se perderam com o canal nascendo mudo sem nenhum sinal disso.
-  if (__DEV__) console.log("[Mapill] canal de alarme →", await diagnosticarCanalDeAlarme());
+  /**
+   * Só em desenvolvimento: diz no console o que o **sistema** guardou sobre o canal, e não o que
+   * pedimos. Duas rodadas de teste se perderam com o canal nascendo mudo sem nenhum sinal disso.
+   *
+   * Dentro de `try`: em 01/09 uma falha ao resolver esta função derrubou o `prepararSistema`
+   * inteiro, e com ele o reagendamento de todos os avisos. **Uma ferramenta de diagnóstico não
+   * pode quebrar o que ela existe para observar** — o pior modo de falhar de um app de medicação é
+   * o alarme sumir por causa de um `console.log`.
+   */
+  if (__DEV__) {
+    try {
+      console.log("[Mapill] canal de alarme →", await diagnosticarCanalDeAlarme());
+    } catch (erro) {
+      console.log("[Mapill] diagnóstico do canal indisponível:", erro);
+    }
+  }
 }
 
 function traduzirPermissao(status: Notifications.NotificationPermissionsStatus): NotificationPermission {
   if (status.granted) return "concedida";
-  // `canAskAgain` falso significa que o diálogo do sistema não abre mais — no Android isso
-  // acontece já na primeira negativa. Tratar como "não pedida" faria o app insistir para sempre
-  // num diálogo que nunca aparece.
-  if (status.canAskAgain) return "naoPedida";
+
+  /**
+   * **`naoPedida` só antes de existir uma resposta.** Depois que a pessoa já decidiu — e desligar
+   * o app nas configurações do Android é decidir —, o estado é `negada`, mesmo que o sistema
+   * ainda aceite abrir o diálogo.
+   *
+   * O erro anterior era usar `canAskAgain` como se ele respondesse "a pessoa já negou?". Ele
+   * responde outra coisa: "o diálogo ainda abre?". Desligar nas configurações devolve
+   * `granted: false` com `canAskAgain: true`, e o app concluía "ainda não perguntei" — então o
+   * card de avisos bloqueados **nunca aparecia** na Home (falhou no bloco 10.1 em 01/09).
+   *
+   * `status.status` distingue os dois: `undetermined` é ausência de resposta; qualquer outra
+   * coisa sem `granted` é recusa, tenha ela vindo do diálogo ou das configurações.
+   */
+  if (status.status === "undetermined") return "naoPedida";
   return "negada";
 }
 
@@ -123,12 +147,21 @@ export class ExpoNotificationGateway implements NotificationGateway {
         body: aviso.corpo,
         data: dados,
         categoryIdentifier: categoriaDoAviso(aviso.doseScheduleIds.length, aviso.semAcoesRapidas),
-        // Booleano, e não o nome de um arquivo — quem decide o som no Android 8+ é o canal. Serve
-        // ao iOS, onde não há canal e o som é decidido por notificação.
-        sound: true,
+        /**
+         * `sound` **só no iOS**, e por isso dentro do spread de plataforma.
+         *
+         * No Android 8+ quem decide o som é o canal, e este campo não deveria ter efeito nenhum —
+         * mas ele tem: o nativo converte `true` para a string `"default"` e sai procurando um
+         * arquivo com esse nome, que não existe. É a origem do
+         * `Custom sound 'default' not found in native app` que aparecia a cada agendamento.
+         *
+         * É a **terceira** vez que a string "default" quebra o som deste app, sempre pelo mesmo
+         * mal-entendido: no Android, ausência significa "som padrão" e qualquer string significa
+         * "arquivo com este nome". Aqui a correção é não mandar o campo nesta plataforma.
+         */
         ...(Platform.OS === "android"
           ? { channelId: aviso.modo === "alarm" ? CANAL_ALARME : CANAL_LEMBRETE }
-          : {}),
+          : { sound: true }),
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
