@@ -3,8 +3,16 @@ import { Pressable, Text, View } from "react-native";
 
 import type { ReminderMode } from "@/domain/entities/prescription";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
+import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
 import { colors } from "@/shared/theme";
-import { Accordion, BottomSheet, Button, OptionGroup, type OptionGroupOption } from "@/ui";
+import {
+  Accordion,
+  BottomSheet,
+  Button,
+  OptionGroup,
+  PainelDePermissoes,
+  type OptionGroupOption,
+} from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
 
 /** Um sino que toca, um que avisa, um que faz os dois e um cortado. A família se lê de relance. */
@@ -100,9 +108,8 @@ export function ConfiguracaoDeLembrete({
   onAjudaToggle,
 }: ConfiguracaoDeLembreteProps) {
   const dependeDoAparelho = value !== null && value !== "none";
-  const { permissao, pedir, abrirConfiguracoes, abrirAcessoAoNaoPerturbe } =
-    useNotificationPermission();
-  const escolheuAlarme = value === "alarm" || value === "both";
+  const { permissao, pedir } = useNotificationPermission();
+  const permissoes = usePermissoesDeAlarme();
 
   /**
    * A permissão é pedida **aqui**, no toque que escolhe o modo — e não no onboarding.
@@ -143,59 +150,22 @@ export function ConfiguracaoDeLembrete({
             promete pedir outra vez não faria nada. O caminho real é as configurações do sistema, e
             é isso que a tela oferece — em vez de deixar a pessoa achando que o lembrete está
             configurado quando ele nunca vai chegar. */}
-        {permissaoNegada ? (
-          <View style={styles.avisoDePermissaoNegada}>
-            <Text style={styles.avisoDePermissaoTitulo}>Os avisos estão bloqueados</Text>
-            <Text style={styles.avisoDePermissaoTexto}>
-              Sua escolha fica salva, mas o Mapill não consegue avisar enquanto a permissão estiver
-              desligada. O Android não deixa o app pedir de novo por aqui — quem religa é você, nas
-              configurações:
-            </Text>
-            {/* O caminho escrito, e não só o botão. Quem chega nas configurações do Android sem
-                saber o que procurar desiste na primeira tela — e a permissão fica desligada por
-                falta de instrução, não por decisão. */}
-            <Text style={styles.avisoDePermissaoPasso}>
-              1. Toque no botão abaixo{"\n"}
-              2. Entre em <Text style={styles.avisoDePermissaoDestaque}>Notificações</Text>
-              {"\n"}
-              3. Ligue{" "}
-              <Text style={styles.avisoDePermissaoDestaque}>Permitir notificações</Text>
-              {"\n"}
-              4. Volte para o Mapill
-            </Text>
-            <Pressable onPress={() => void abrirConfiguracoes()} accessibilityRole="button">
-              <Text style={styles.linkParaTermos}>Abrir as configurações do Mapill</Text>
-            </Pressable>
-          </View>
-        ) : null}
-
         {/**
-          * O alarme precisa de uma **segunda** permissão para atravessar o Não Perturbe, e o
-          * Android nunca a pede sozinho — não existe diálogo para ela, só uma tela do sistema. Sem
-          * isso o alarme toca no dia a dia mas fica mudo no DND, que é justamente quando ele mais
-          * importaria.
+          * O que falta para este lembrete funcionar, num painel só.
           *
-          * Aparece como oferta, não como erro: o alarme já funciona sem ela. O que muda é atravessar
-          * o silencioso, e quem decide se quer isso é a pessoa.
+          * Antes havia dois blocos escritos à mão aqui — um para a permissão de notificação, outro
+          * para o Não Perturbe — e cada um cobria metade do problema. Faltavam o alarme exato do
+          * Android 12+ e a economia de bateria, que são justamente as duas causas de "o aviso não
+          * chegou" que ninguém consegue diagnosticar sozinho.
+          *
+          * O painel lista as quatro, diz o que cada uma muda e leva à tela certa de cada uma.
           */}
-        {escolheuAlarme && !permissaoNegada ? (
-          <View style={styles.avisoDeAlarme}>
-            <Text style={styles.avisoDePermissaoTitulo}>Para tocar no “Não perturbe”</Text>
-            <Text style={styles.avisoDePermissaoTexto}>
-              O alarme já toca alto e vibra. Para ele tocar também com o “Não perturbe” ligado, o
-              Android pede uma autorização à parte:
-            </Text>
-            <Text style={styles.avisoDePermissaoPasso}>
-              1. Toque no botão abaixo{"\n"}
-              2. Procure o <Text style={styles.avisoDePermissaoDestaque}>Mapill</Text> na lista
-              {"\n"}
-              3. Ligue a autorização{"\n"}
-              4. Volte para o Mapill
-            </Text>
-            <Pressable onPress={() => void abrirAcessoAoNaoPerturbe()} accessibilityRole="button">
-              <Text style={styles.linkParaTermos}>Autorizar o alarme no “Não perturbe”</Text>
-            </Pressable>
-          </View>
+        {dependeDoAparelho && permissoes.temPendencia ? (
+          <PainelDePermissoes
+            itens={permissoes.itens}
+            vaiTocar={permissoes.vaiTocar}
+            onPedirTudo={permissao === "naoPedida" ? () => void permissoes.pedir() : undefined}
+          />
         ) : null}
 
         {/* Condição, não ressalva. Dizer o que precisa estar em ordem dá o que fazer; dizer que

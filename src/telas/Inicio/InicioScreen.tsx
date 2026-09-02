@@ -4,13 +4,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePatientProfile } from "@/hooks/use-patient-profile";
+import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
 import { dataPorExtenso } from "@/shared/datas-por-extenso";
 import { spacing } from "@/shared/theme";
 import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-today-doses";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { CenteredLoader, Fab, Header } from "@/ui";
 import { CardAdesaoSemanal } from "@/telas/Inicio/componentes/CardAdesaoSemanal/CardAdesaoSemanal";
-import { CardAvisosBloqueados } from "@/telas/Inicio/componentes/CardAvisosBloqueados/CardAvisosBloqueados";
+import { PainelDePermissoes } from "@/ui/PainelDePermissoes/PainelDePermissoes";
 import { CardEstoque } from "@/telas/Inicio/componentes/CardEstoque/CardEstoque";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
@@ -53,7 +54,8 @@ export function InicioScreen() {
   const router = useRouter();
   const { draft } = usePatientProfile();
   const { agenda, isLoading, error, reload, registrarDose, registrarDoses } = useTodayDoses();
-  const { permissao, abrirConfiguracoes } = useNotificationPermission();
+  const { permissao, pedir } = useNotificationPermission();
+  const permissoesDoAlarme = usePermissoesDeAlarme();
 
   const hoje = new Date();
   const nome = primeiroNome(draft?.fullName ?? "");
@@ -64,12 +66,13 @@ export function InicioScreen() {
   const demaisDoses = agenda.doses.filter((dose) => dose.status !== "late");
 
   /**
-   * As duas condições juntas, e nunca uma só: a permissão está negada **e** existe tratamento
-   * esperando aviso. Sem a segunda, o card apareceria para quem nunca pediu lembrete nenhum,
-   * cobrando uma permissão que não muda nada na vida dessa pessoa — e aviso que não importa é
-   * aviso que ensina a ignorar os próximos.
+   * O painel de permissões aparece quando falta algo **e** existe tratamento esperando aviso.
+   *
+   * A segunda condição é o que impede o app de cobrar autorização de quem nunca pediu lembrete
+   * nenhum — permissão que não muda nada na vida da pessoa é o tipo de aviso que ensina a ignorar
+   * os próximos.
    */
-  const avisosBloqueados = permissao === "negada" && agenda.tratamentosComLembrete > 0;
+  const cobrarPermissoes = permissoesDoAlarme.temPendencia && agenda.tratamentosComLembrete > 0;
 
   /**
    * Confirmar pede confirmação explícita: gravar ingestão é registro clínico, e um toque acidental
@@ -207,10 +210,23 @@ export function InicioScreen() {
 
         {/* Antes da agenda, e não no fim: ele muda o que toda a lista abaixo significa. Ler os
             horários primeiro e descobrir depois que nenhum deles vai tocar é a ordem errada. */}
-        {avisosBloqueados ? (
-          <CardAvisosBloqueados
-            tratamentosAfetados={agenda.tratamentosComLembrete}
-            onAbrirConfiguracoes={() => void abrirConfiguracoes()}
+        {cobrarPermissoes ? (
+          <PainelDePermissoes
+            itens={permissoesDoAlarme.itens}
+            vaiTocar={permissoesDoAlarme.vaiTocar}
+            /**
+             * O botão de pedir só existe enquanto o diálogo do sistema ainda abre. Depois de negada,
+             * `requestPermission` retorna na hora sem mostrar nada — e um botão que não faz nada é
+             * pior que botão nenhum. Aí sobram os itens da lista, que levam à tela do sistema.
+             */
+            onPedirTudo={
+              permissao === "naoPedida"
+                ? () => {
+                    void pedir();
+                    void permissoesDoAlarme.consultar();
+                  }
+                : undefined
+            }
           />
         ) : null}
 
