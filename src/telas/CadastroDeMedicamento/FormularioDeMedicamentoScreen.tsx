@@ -54,7 +54,7 @@ import {
   parseDecimalInput,
 } from "@/shared/number-input";
 import { deletePersistedFile } from "@/shared/persist-picked-file";
-import { MEDICATION_FORM_LABELS, UNIT_LABELS } from "@/shared/rotulos-de-medicamento";
+import { capitalizarNome, MEDICATION_FORM_LABELS, UNIT_LABELS } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
@@ -389,11 +389,20 @@ export function FormularioDeMedicamentoScreen({
    * pessoa toma, e quanto, continua sendo resposta de quem tem a caixa e a receita na mão.
    */
   function aceitarSugestao(entrada: CatalogEntry) {
-    const nomeComDosagem =
-      entrada.strength.length > 0 ? `${entrada.name} ${entrada.strength}` : entrada.name;
+    /**
+     * O que é **gravado** também vem capitalizado, e não só o que a lista mostra.
+     *
+     * A CMED escreve tudo em maiúsculas. Antes o nome ia para o campo como veio, então quem
+     * escolhia uma sugestão cadastrava "DIPIRONA SÓDICA" e via isso na lista de remédios, no
+     * alarme e no relatório para o médico, para sempre. Quem digitava à mão escrevia normal — dois
+     * cadastros do mesmo remédio ficavam diferentes conforme o caminho.
+     */
+    const nome = capitalizarNome(entrada.name);
+    const nomeComDosagem = entrada.strength.length > 0 ? `${nome} ${entrada.strength}` : nome;
     setName(nomeComDosagem);
-    // A CMED escreve tudo em maiúsculas; no app o princípio ativo é texto corrido.
-    setActiveIngredient(entrada.activeIngredient.toLowerCase());
+    // Capitalizado também: `toLowerCase()` deixava "ácido acetilsalicílico" sem a inicial, o que
+    // num campo de texto corrido lê como digitação apressada.
+    setActiveIngredient(capitalizarNome(entrada.activeIngredient));
     setRequisitoDaCmed(entrada.prescriptionRequirement);
     setSugestaoAceita(true);
     Keyboard.dismiss();

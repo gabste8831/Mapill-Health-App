@@ -52,7 +52,6 @@ export const styles = StyleSheet.create({
   },
   nome: {
     ...typography.headlineSm,
-    fontSize: 18,
     color: colors.onSurface,
   },
   quantidade: {
@@ -68,8 +67,7 @@ export const styles = StyleSheet.create({
     gap: 2,
   },
   seloTexto: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     color: colors.onSurfaceVariant,
   },
   corrigirDica: {

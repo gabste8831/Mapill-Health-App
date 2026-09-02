@@ -27,8 +27,7 @@ export const styles = StyleSheet.create({
    * como "seus dados sumiram" — e essa leitura é pior que o erro em si.
    */
   tranquilizador: {
-    ...typography.bodyMd,
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 320,

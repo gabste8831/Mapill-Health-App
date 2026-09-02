@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import type { CatalogEntry } from "@/domain/ports/medication-catalog";
+import { capitalizarNome, resumirSubstancia } from "@/shared/rotulos-de-medicamento";
 import { colors } from "@/shared/theme";
 import { styles } from "./SugestoesDeMedicamento.styles";
 
@@ -34,20 +35,29 @@ export function SugestoesDeMedicamento({ sugestoes, onEscolher }: SugestoesDeMed
           style={styles.item}
           onPress={() => onEscolher(entrada)}
           accessibilityRole="button"
-          accessibilityLabel={`Usar ${entrada.name} ${entrada.strength}`}>
+          accessibilityLabel={`Usar ${capitalizarNome(entrada.name)} ${entrada.strength}`}>
           <View style={styles.itemTexto}>
-            <Text style={styles.nome}>
-              {entrada.name}
+            {/**
+             * O nome vem da CMED **inteiro em maiúsculas**, e assim ele ocupa mais largura, quebra
+             * em três linhas e se lê mais devagar — caixa alta apaga a silhueta da palavra, que é
+             * por onde se reconhece um nome familiar de relance.
+             *
+             * `numberOfLines={1}`: a lista aparece sob o dedo de quem está digitando, e cada linha
+             * a mais empurra a sugestão seguinte para fora da tela.
+             */}
+            <Text style={styles.nome} numberOfLines={1}>
+              {capitalizarNome(entrada.name)}
               {entrada.strength.length > 0 ? (
                 <Text style={styles.dosagem}> {entrada.strength}</Text>
               ) : null}
             </Text>
             {/* O princípio ativo é o que distingue dois nomes comerciais parecidos, e é por ele que
-                muita gente reconhece o próprio remédio. Uma linha só: a CMED às vezes lista quatro
-                substâncias, e o bloco viraria um parágrafo. */}
+                muita gente reconhece o próprio remédio. `resumirSubstancia` mostra a primeira e
+                conta o resto: a CMED às vezes lista seis, e a fórmula completa pertence à bula, não
+                a uma lista de escolha rápida. */}
             {entrada.activeIngredient.length > 0 ? (
               <Text style={styles.substancia} numberOfLines={1}>
-                {entrada.activeIngredient.toLowerCase()}
+                {resumirSubstancia(entrada.activeIngredient)}
               </Text>
             ) : null}
           </View>

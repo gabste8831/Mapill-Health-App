@@ -21,6 +21,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
   },
+  /** 48 e nao um token: numero de exibicao, unico no app. Criar token para um uso so infla a escala. */
   destaqueTaxa: {
     ...typography.headlineMd,
     fontSize: 48,
@@ -69,8 +70,7 @@ export const styles = StyleSheet.create({
   },
   /** A explicação em letra menor: o rótulo sozinho não distingue "pulada" de "sem resposta". */
   contagemDica: {
-    ...typography.bodyMd,
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.onSurfaceVariant,
   },
 
@@ -103,7 +103,6 @@ export const styles = StyleSheet.create({
   },
   linhaTaxa: {
     ...typography.headlineSm,
-    fontSize: 18,
   },
 
   /**
@@ -129,8 +128,7 @@ export const styles = StyleSheet.create({
    * semana tende a parar de registrar em vez de parar de esquecer.
    */
   perdidaSelo: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     color: colors.onSurfaceVariant,
   },
 

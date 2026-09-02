@@ -32,8 +32,7 @@ export const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   fieldErrorText: {
-    ...typography.bodyMd,
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.error,
   },
 });

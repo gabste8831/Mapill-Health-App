@@ -50,11 +50,42 @@ export const typography: Record<string, TextStyle> = {
     fontSize: 14,
     lineHeight: 22,
   },
+  /**
+   * Texto de apoio pequeno — mensagem de erro, dica sob um número, princípio ativo numa sugestão.
+   *
+   * **Não é o `label` menor.** `label` é rótulo: vem em caixa alta, com espaçamento entre letras, e
+   * serve para nomear uma seção. Isto aqui é frase, e frase em caixa alta se lê mais devagar.
+   *
+   * Nasceu tarde: sete lugares faziam `...bodyMd, fontSize: 12` porque não havia onde pegar isto
+   * pronto, e dois arquivos chegaram a escrever `...typography.bodySm` — que **não existia**, e
+   * espalhar `undefined` não dá erro: os dois textos herdavam a fonte do sistema em vez da Plus
+   * Jakarta, em silêncio.
+   */
+  bodySm: {
+    fontFamily: "PlusJakartaSans_400Regular",
+    fontSize: 12,
+    lineHeight: 18,
+  },
   label: {
     fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12,
     lineHeight: 16,
     letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  /**
+   * O degrau abaixo do `label`: selo e legenda — "ATRASADA", "OBRIGATÓRIO", as iniciais dos dias
+   * sob as barras da semana.
+   *
+   * Dez lugares já escreviam `...label, fontSize: 10`, ou seja, o token existia de fato e só não
+   * tinha nome. Formalizá-lo documenta que a escala tem esse degrau e para de convidar a
+   * sobrescrita — que é como o 10 vira 9 em algum canto e ninguém percebe.
+   */
+  caption: {
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontSize: 10,
+    lineHeight: 14,
+    letterSpacing: 0.5,
     textTransform: "uppercase",
   },
   // Variante "peso forte" pra informação crítica (dose, horário) mesmo em contextos

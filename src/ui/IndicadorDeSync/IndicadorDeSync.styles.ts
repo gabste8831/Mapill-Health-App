@@ -30,8 +30,7 @@ export const styles = StyleSheet.create({
     color: colors.onSurface,
   },
   detalhe: {
-    ...typography.bodyMd,
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.onSurfaceVariant,
   },
 });

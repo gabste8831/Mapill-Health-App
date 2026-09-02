@@ -11,6 +11,12 @@ export type DoseDoAlarme = {
   doseScheduleId: string;
   medicationId: string;
   medicationName: string;
+  /**
+   * A foto da caixa, quando existe. O alarme dispara com a pessoa recém-acordada, e **reconhecer a
+   * caixa é mais rápido que ler o nome** — ainda mais para quem toma cinco remédios de nomes
+   * parecidos.
+   */
+  photoUri: string | null;
   quantidadeFormatada: string;
   amount: number;
   intakeNote: string | null;
@@ -68,6 +74,7 @@ export function useDosesDoAlarme(instanteIso: string) {
           doseScheduleId: doseSchedule.id,
           medicationId: medication.id,
           medicationName: medication.name,
+          photoUri: medication.photoUri,
           quantidadeFormatada: formatarQuantidade(doseSchedule.amount, prescription.doseUnit),
           amount: doseSchedule.amount,
           intakeNote: prescription.intakeNote,

@@ -35,8 +35,7 @@ export const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   selo: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     overflow: "hidden",
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm,

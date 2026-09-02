@@ -24,8 +24,7 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
   selo: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     overflow: "hidden",
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm,
@@ -60,8 +59,7 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   erro: {
-    ...typography.bodyMd,
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.error,
   },
   /**

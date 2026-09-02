@@ -87,8 +87,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.errorSurface,
   },
   seloTexto: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     color: colors.error,
   },
 

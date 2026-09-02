@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
 import { dispensarAlarmeAtivo } from "@/notifications/notifee-gateway";
 import { colors } from "@/shared/theme";
-import { Button, CenteredLoader } from "@/ui";
+import { Button, CenteredLoader, FotoLocal } from "@/ui";
 import { styles } from "./AlarmeScreen.styles";
 
 const SOM_DO_ALARME = require("../../../assets/sounds/alarme_de_dose.wav");
@@ -168,6 +168,19 @@ export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
         <View style={styles.lista}>
           {pendentes.map((dose) => (
             <View key={dose.doseScheduleId} style={styles.item}>
+              {/**
+               * A foto da caixa, quando existe.
+               *
+               * Reconhecer a embalagem é mais rápido que ler o nome — e às 6 da manhã, sem óculos,
+               * é às vezes a única coisa que se lê de verdade. Para quem toma cinco remédios de
+               * nomes parecidos, é o que separa a caixa certa da errada.
+               *
+               * **Só quando existe.** Sem foto, nada ocupa o lugar: esta é a tela que menos pode
+               * ter ruído, e um quadrado cinza vazio de madrugada não ajuda ninguém.
+               */}
+              {dose.photoUri !== null ? (
+                <FotoLocal uri={dose.photoUri} style={styles.foto} />
+              ) : null}
               <Text style={styles.nome}>{dose.medicationName}</Text>
               <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
               {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (

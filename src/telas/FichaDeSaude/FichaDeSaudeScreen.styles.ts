@@ -36,8 +36,7 @@ export const styles = StyleSheet.create({
    * cor sozinha não é sinal legível pra quem não a distingue.
    */
   selo: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     overflow: "hidden",
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm,
@@ -74,8 +73,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   infoBannerText: {
+    // `bodyMd` inteiro: o 13 era um meio-termo entre dois degraus da escala, sem razão registrada.
     ...typography.bodyMd,
-    fontSize: 13,
     color: colors.onPrimaryContainer,
     flex: 1,
     padding: spacing.sm,

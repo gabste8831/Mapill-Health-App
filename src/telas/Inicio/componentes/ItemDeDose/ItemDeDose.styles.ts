@@ -77,8 +77,7 @@ export const styles = StyleSheet.create({
     color: colors.onSurface,
   },
   statusLabel: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     color: colors.primary,
   },
   statusLabelUpcoming: {

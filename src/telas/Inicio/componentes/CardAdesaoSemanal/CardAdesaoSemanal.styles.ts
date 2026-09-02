@@ -49,8 +49,7 @@ export const styles = StyleSheet.create({
   dayLabel: {
     flex: 1,
     textAlign: "center",
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     color: colors.onSurfaceVariant,
     opacity: 0.6,
   },

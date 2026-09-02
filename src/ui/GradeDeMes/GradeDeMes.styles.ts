@@ -32,6 +32,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     paddingBottom: spacing.xs,
   },
+  /** 11 porque sete rotulos precisam caber na largura da tela; abaixo do `caption` de proposito. */
   rotuloDaSemana: {
     ...typography.label,
     // Menor que o resto: é legenda de coluna, lida uma vez e depois ignorada.

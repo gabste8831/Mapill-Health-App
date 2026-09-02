@@ -18,8 +18,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   texto: {
-    ...typography.bodyMd,
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.onSurfaceVariant,
     flex: 1,
   },

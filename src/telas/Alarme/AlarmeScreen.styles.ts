@@ -41,6 +41,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
   /** A hora em tamanho de relógio: quem acorda com o alarme quer saber que horas são. */
+  /** 56 e display de instancia unica: a hora precisa ser legivel a distancia, de olhos recem-abertos. */
   hora: {
     ...typography.headlineXl,
     fontSize: 56,
@@ -60,6 +61,16 @@ export const styles = StyleSheet.create({
   item: {
     ...surfaceCard,
     gap: spacing.xs,
+  },
+  /**
+   * Larga e baixa, como a caixa vista de frente na prateleira — e não um quadrado de miniatura. O
+   * objetivo aqui é reconhecer de longe, não identificar num item de lista.
+   */
+  foto: {
+    width: "100%",
+    height: 140,
+    borderRadius: radius.md,
+    marginBottom: spacing.xs,
   },
   nome: {
     ...typography.headlineMd,

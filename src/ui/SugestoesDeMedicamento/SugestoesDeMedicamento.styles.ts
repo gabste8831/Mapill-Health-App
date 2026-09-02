@@ -14,8 +14,7 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   titulo: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     color: colors.onSurfaceVariant,
     paddingHorizontal: spacing.xs,
   },
@@ -44,8 +43,7 @@ export const styles = StyleSheet.create({
     color: colors.primary,
   },
   substancia: {
-    ...typography.bodyMd,
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.onSurfaceVariant,
   },
 });

@@ -165,3 +165,72 @@ export function resumirDose(
   if (variaPorHorario) return `Dose variável (${UNIT_PLURALS[doseUnit]})`;
   return formatarQuantidade(doseAmount, doseUnit);
 }
+
+/**
+ * Palavras que ficam em minúscula no meio de um nome — preposições e artigos.
+ *
+ * A primeira palavra é exceção e sempre sobe: "A Saúde da Mulher", não "a Saúde da Mulher".
+ */
+const PALAVRAS_MINUSCULAS = new Set(["de", "da", "do", "das", "dos", "e", "em", "com", "para", "a", "o"]);
+
+/**
+ * Siglas e unidades que **não** viram capitalizadas — elas significam algo em caixa alta.
+ *
+ * A lista é curta de propósito: cobre o que aparece de fato na base da CMED. Uma heurística
+ * genérica ("toda palavra de até 3 letras é sigla") transformaria "AAS" em sigla junto com "SAL",
+ * e trocar o nome de um remédio por engano é pior que exibi-lo capitalizado.
+ */
+const SIGLAS = new Set([
+  "AAS", "XR", "CR", "SR", "LA", "MG", "ML", "UI", "G", "MCG", "HCT", "DHA", "EPA",
+  "AZ", "BD", "CD", "ZN", "FE", "K", "D3", "B12", "B6", "B1", "C", "D", "E", "N",
+]);
+
+/**
+ * Capitaliza um nome que veio da CMED, que entrega **tudo em maiúsculas**.
+ *
+ * `"A SAÚDE DA MULHER"` → `"A Saúde da Mulher"`, `"AAS PROTECT"` → `"AAS Protect"`.
+ *
+ * **Só a exibição muda.** O que é gravado continua sendo o texto original da Anvisa: é base pública
+ * de referência, a busca por EAN depende dela, e normalizar na ingestão apagaria a rastreabilidade
+ * da fonte — o dado deixaria de ser o que o órgão publicou.
+ *
+ * A razão de existir é de leitura: um nome longo em caixa alta ocupa mais largura, quebra em três
+ * linhas na lista de sugestões, e se lê mais devagar — caixa alta elimina a silhueta das palavras,
+ * que é por onde se reconhece um nome familiar de relance.
+ */
+export function capitalizarNome(texto: string): string {
+  return texto
+    .trim()
+    .toLowerCase()
+    .split(/(\s+|-)/)
+    .map((parte, indice) => {
+      if (/^(\s+|-)$/.test(parte) || parte.length === 0) return parte;
+      const maiuscula = parte.toUpperCase();
+      if (SIGLAS.has(maiuscula)) return maiuscula;
+      // Número com unidade colada ("500MG", "10ML") sobe inteiro: "500Mg" fica pior que "500MG".
+      if (/^\d/.test(parte)) return maiuscula;
+      if (indice > 0 && PALAVRAS_MINUSCULAS.has(parte)) return parte;
+      return parte.charAt(0).toUpperCase() + parte.slice(1);
+    })
+    .join("");
+}
+
+/**
+ * O princípio ativo de uma sugestão, em uma linha.
+ *
+ * A CMED separa múltiplas substâncias por `;`, e alguns produtos trazem cinco ou seis — a lista
+ * inteira ocupa três linhas e empurra a próxima sugestão para fora da tela. A primeira substância
+ * mais a contagem diz o que a pessoa precisa saber ali: **qual remédio é este**. A fórmula completa
+ * pertence à bula, não a uma lista de escolha rápida.
+ */
+export function resumirSubstancia(substancia: string): string {
+  const partes = substancia
+    .split(";")
+    .map((parte) => parte.trim())
+    .filter((parte) => parte.length > 0);
+
+  if (partes.length === 0) return "";
+  const primeira = capitalizarNome(partes[0]);
+  if (partes.length === 1) return primeira;
+  return `${primeira} e mais ${partes.length - 1}`;
+}

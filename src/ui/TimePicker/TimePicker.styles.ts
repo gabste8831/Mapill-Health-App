@@ -49,8 +49,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainerLowest,
   },
   rotulo: {
-    ...typography.label,
-    fontSize: 10,
+    ...typography.caption,
     color: colors.onSurfaceVariant,
   },
   /** Os dois pontos entre as caixas, alinhados com os números e não com os rótulos. */
