@@ -27,6 +27,20 @@ export type FotoLocalProps = {
 export function FotoLocal({ uri, style }: FotoLocalProps) {
   return (
     <Image
+      /**
+       * `key` na URI **remonta o componente** quando a foto muda, e é a segunda camada contra a
+       * miniatura branca.
+       *
+       * `recyclingKey` (abaixo) limpa o conteúdo da view antes de carregar a próxima, mas ela
+       * continua sendo a mesma view — e no Android isso deixa espaço para o carregador reaproveitar
+       * o que já tinha em vez de reler o disco. `key` é a instrução que o React entende sem
+       * ambiguidade: outra URI, outro componente. Custo zero aqui, porque trocar de foto não é
+       * operação de rolagem.
+       *
+       * Os dois juntos, e não um ou outro: `key` cobre a troca de foto, `recyclingKey` cobre o
+       * reaproveitamento de view dentro de lista.
+       */
+      key={uri}
       source={{ uri }}
       // O cinza vem antes do `style` de quem chama, que pode sobrescrevê-lo — é só o piso para o
       // quadrado nunca ficar transparente enquanto a imagem carrega.

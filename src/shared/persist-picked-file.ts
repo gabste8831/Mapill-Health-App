@@ -43,6 +43,26 @@ export function persistPickedFile(
    * troca quem recebe a URI recebe um arquivo pronto para ler.
    */
   new File(pickedUri).copySync(destination);
+
+  /**
+   * **Confere que o arquivo chegou inteiro antes de devolver a URI.**
+   *
+   * O `copySync` acima já deveria bastar — e o comentário acima explica por que ele substituiu o
+   * `copy()` assíncrono. Mas o defeito da miniatura branca **continuou aparecendo** depois daquela
+   * correção, o que significa que "a chamada retornou" e "o arquivo está legível" não são a mesma
+   * coisa em todo aparelho: a foto vem do picker com `quality: 0.8` e tem centenas de KB, não as
+   * dezenas que a correção anterior assumiu.
+   *
+   * Ler `exists` e `size` força o sistema de arquivos a responder sobre o destino, e devolve um
+   * erro em vez de uma URI que aponta para nada. Quem chama já sabe lidar com falha (`PhotoPick`
+   * tem o caso `failed`), e uma mensagem é melhor que um quadrado branco — que é indistinguível de
+   * "o app não funcionou".
+   */
+  const destinoOk = destination.exists && (destination.size ?? 0) > 0;
+  if (!destinoOk) {
+    throw new Error("O arquivo escolhido não pôde ser copiado por completo.");
+  }
+
   if (replacing) deletePersistedFile(replacing);
   return destination.uri;
 }
