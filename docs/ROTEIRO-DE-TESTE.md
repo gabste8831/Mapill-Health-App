@@ -40,10 +40,31 @@
 > Um ganho a conferir de propósito: o botão "Tomei" agora grava **com o app fechado**, sem depender
 > de a pessoa abrir o app depois. Antes a escrita só acontecia na abertura seguinte.
 >
-> Ordem sugerida desta rodada: **2 → 3 → 4 → 5 → 12 → 7 → 11**. Os três primeiros cobrem o que a
-> troca de fundação afetou, o 5 e o 12 nunca rodaram, o 7 precisa de tempo real correndo, e o **11
-> fica por último porque mexe no relógio e reinstala o app** — depois dele o estado do aparelho não
-> serve para os outros blocos.
+> ### 🎨 E o passe de design (02/09)
+>
+> Dez frentes mexeram em **coisa transversal** — feedback de toque, teclado, tipografia, cor,
+> espaçamento. Isso significa que **qualquer tela pode ter regredido**, não só as que foram tocadas
+> de propósito.
+>
+> O [bloco 12.9](#129--o-passe-de-design-0209) cobre o que mudou, item a item. O
+> [bloco 14](#14--regressão-todas-as-telas) percorre o app inteiro procurando o que quebrou sem
+> ninguém pedir.
+>
+> ---
+>
+> ### Ordem sugerida desta rodada
+>
+> **12.9 → 2 → 3 → 4 → 5 → 12 → 7 → 13 → 14 → 11**
+>
+> | Bloco | Por que nesta posição |
+> |---|---|
+> | **12.9** | Primeiro: é o que acabou de mudar, e é a única build que ninguém viu ainda |
+> | **2, 3, 4** | A troca de biblioteca invalidou o que passou em 01/09 |
+> | **5, 12** | Nunca rodaram |
+> | **7** | Precisa de tempo real correndo (reboot, bateria) |
+> | **13** | TalkBack e fonte ampliada — depois que o visual estiver conferido |
+> | **14** | A varredura de regressão, com o olho já calibrado pelos anteriores |
+> | **11** | **Por último**: mexe no relógio e reinstala o app, e depois dele o estado do aparelho não serve para mais nada |
 
 ## Como reportar
 
@@ -768,6 +789,39 @@ Remédios, Estoque e Ajustes.
 
 🔬 **Anote qualquer texto cortado, botão espremido ou linha sobreposta.** É o defeito mais provável
 de sobrar, e o mais fácil de ver.
+
+---
+
+## 14 — Regressão: todas as telas
+
+**Por que este bloco existe.** O passe de design mexeu em tipografia, cor, espaçamento e no
+comportamento de todo elemento tocável. Nada disso é local: uma escala de fonte que mudou aparece
+em telas que ninguém abriu de propósito para editar.
+
+Percorra **todas** as telas procurando quatro coisas: **texto cortado**, **botão espremido**,
+**contraste ruim** e **layout quebrado**.
+
+| Tela | O que olhar em especial |
+|---|---|
+| **Home** | Respiro entre os blocos (aumentou), progresso, dose atrasada, estado vazio |
+| **Remédios** | Busca com foco, ícones com fundo, alinhamento com **e sem** foto na mesma lista |
+| **Estoque** | "Repor" azul ≠ "Recontar", previsão de término, aviso de recontagem |
+| **Calendário** | Grade **não deve ter mudado**; dia selecionado redondo; pontos visíveis quando selecionado |
+| **Adesão** | Bloco azul do número, tabela por medicamento (cores das faixas continuam ali), botão do PDF, seletor de medicamentos |
+| **Cadastro de medicamento** | ⚠️ o mais longo: revelação progressiva, popups, rodapé, sugestões, dias da semana |
+| **Cadastro de compromisso** | Campos, cascata de lembretes, data no passado |
+| **Ficha de saúde** | Foto, contatos de emergência, selos, banner azul |
+| **Horário** | Cartão, Tomei/Pulei com estado marcado, "Ignorar por agora" |
+| **Alarme** | Tela cheia azul, **foto do remédio** (nova), som em loop, as quatro saídas |
+| **Ajustes / Conta** | O hero original — ele inspirou o resto e **não pode ter regredido** |
+| **Login / Consentimento / Termos** | Não foram tocados de propósito: confirmar que continuam iguais |
+| **Scanner** | Câmera, moldura, entrada manual |
+
+**Depois, repita com a fonte do sistema no máximo** (Configurações → Tela → Tamanho da fonte).
+
+🔬 **É aqui que altura travada aparece.** Duas varreduras já acharam o mesmo defeito em lugares
+diferentes — sempre onde uma tela desenhou o próprio botão em vez de usar o do kit. Se algum texto
+cortar, anote a tela e o elemento: é o mesmo padrão, e a correção é conhecida.
 
 ---
 
