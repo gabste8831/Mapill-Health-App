@@ -8,6 +8,8 @@ import notifee, {
 import { Platform } from "react-native";
 
 import type { AvisoDeDose } from "@/domain/ports/notification-gateway";
+import { colors } from "@/shared/theme";
+import { ACAO_TOMEI } from "./acoes";
 
 /**
  * O alarme que **abre uma tela e toca até alguém desligar** — o diferencial do Mapill.
@@ -126,6 +128,18 @@ export async function agendarAlarmeDeTelaCheia(aviso: AvisoDeDose): Promise<void
          */
         category: AndroidCategory.ALARM,
         importance: AndroidImportance.HIGH,
+        /**
+         * **A identidade do app na barra de avisos.**
+         *
+         * `notification_icon` é o drawable que o plugin do `expo-notifications` gera a partir do
+         * `icon` declarado no `app.json` — o mesmo que os outros avisos do Mapill já usam. Sem
+         * declarar aqui, o Notifee cai no ícone padrão do sistema, e o alarme apareceria com a
+         * cara de "app genérico" no meio dos avisos que têm a marca.
+         *
+         * A cor é a do app, e ela tinge o ícone na barra de status.
+         */
+        smallIcon: "notification_icon",
+        color: colors.primary,
         // Não sai da bandeja com um deslize: um alarme de medicação precisa de resposta, e dispensar
         // sem querer é o mesmo que perder a dose.
         autoCancel: false,
@@ -138,6 +152,36 @@ export async function agendarAlarmeDeTelaCheia(aviso: AvisoDeDose): Promise<void
           id: "alarme",
           mainComponent: COMPONENTE_DE_ALARME,
         },
+        /**
+         * Tocar no **corpo** abre a tela do alarme, e não só o app.
+         *
+         * Sem `pressAction`, uma notificação do Notifee não faz nada ao ser tocada — nem abre o
+         * app. Quem caiu no caminho heads-up ficaria com um aviso que só oferece um botão, sem jeito
+         * de ver os detalhes nem de responder dose por dose.
+         */
+        pressAction: {
+          id: "alarme",
+          mainComponent: COMPONENTE_DE_ALARME,
+        },
+        /**
+         * As mesmas ações rápidas do modo `notification`, e não é redundância.
+         *
+         * Quando a pessoa **está usando o celular**, o Android mostra o alarme como heads-up em vez
+         * de abrir a tela cheia — é comportamento documentado do `fullScreenAction`, e faz sentido:
+         * roubar a tela de quem está no meio de uma ligação seria pior. Nesse caminho, sem estes
+         * botões, o aviso viraria um bloco de texto sem saída, e a pessoa teria de abrir o app para
+         * fazer o que dois toques resolvem.
+         *
+         * Os identificadores são os mesmos do `expo-notifications` (`ACAO_TOMEI`), então a resposta
+         * cai no mesmo tratamento — a lógica de confirmar dose não é duplicada, só alcançada por
+         * outro caminho.
+         */
+        actions: [
+          {
+            title: aviso.doseScheduleIds.length > 1 ? "Tomei todas" : "Tomei",
+            pressAction: { id: ACAO_TOMEI },
+          },
+        ],
         // Acorda a tela: um alarme que dispara com o celular na mesa, apagado, precisa ser visto.
         lightUpScreen: true,
       },
@@ -169,5 +213,18 @@ export async function cancelarAlarmesDeTelaCheia(): Promise<void> {
  */
 export async function dispensarAlarmeAtivo(): Promise<void> {
   if (Platform.OS !== "android") return;
-  await notifee.cancelDisplayedNotifications();
+
+  /**
+   * Tira **só os alarmes** da bandeja, e não tudo.
+   *
+   * `cancelDisplayedNotifications()` sem argumento apaga todas as notificações do app — inclusive
+   * lembretes de outros horários que ainda esperam resposta, e avisos de consulta. Responder um
+   * alarme não é motivo para limpar a bandeja inteira: a pessoa perderia avisos que nunca viu.
+   */
+  const naBandeja = await notifee.getDisplayedNotifications();
+  const nossos = naBandeja
+    .map(({ notification }) => notification.id)
+    .filter((id): id is string => typeof id === "string" && ehAlarmeDeTelaCheia(id));
+
+  if (nossos.length > 0) await notifee.cancelDisplayedNotifications(nossos);
 }

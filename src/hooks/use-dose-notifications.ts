@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { AppState } from "react-native";
 
+import { escutarAlarmeDeTelaCheia } from "@/notifications/escutar-alarme";
 import {
   consultarRespostaDeAbertura,
   escutarRespostas,
@@ -44,6 +45,10 @@ export function useDoseNotifications(): void {
       if (estado === "active") void reagendarTodosOsAvisos();
     });
     const pararDeEscutar = escutarRespostas(abrirHorario);
+    // O alarme de tela cheia tem lista e handlers próprios (Notifee), separados dos do
+    // `expo-notifications`. É o que trata o "Tomei" quando o Android rebaixa a tela cheia para
+    // heads-up — o que ele faz sempre que a pessoa está usando o celular.
+    const pararDeEscutarAlarme = escutarAlarmeDeTelaCheia();
 
     void consultarRespostaDeAbertura().then((dados) => {
       if (dados !== null) abrirHorario(dados);
@@ -52,6 +57,7 @@ export function useDoseNotifications(): void {
     return () => {
       assinaturaDoEstado.remove();
       pararDeEscutar();
+      pararDeEscutarAlarme();
     };
   }, [router]);
 }

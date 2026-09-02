@@ -1,8 +1,10 @@
 import notifee from "@notifee/react-native";
 import { useEffect, useState } from "react";
+import { BackHandler } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useDatabaseReady } from "@/hooks/use-database-ready";
+import { ehAlarmeDeTelaCheia } from "@/notifications/alarme-em-tela-cheia";
 import { CenteredLoader } from "@/ui";
 import { AlarmeScreen } from "./AlarmeScreen";
 
@@ -33,13 +35,39 @@ export function AlarmeRaiz() {
   useEffect(() => {
     let ativo = true;
 
+    function usar(dados: Record<string, unknown> | undefined) {
+      const scheduledFor = typeof dados?.scheduledFor === "string" ? dados.scheduledFor : null;
+      if (scheduledFor !== null) setInstanteIso(scheduledFor);
+      return scheduledFor !== null;
+    }
+
     async function lerHorario() {
       const inicial = await notifee.getInitialNotification();
       if (!ativo) return;
+      if (usar(inicial?.notification.data)) return;
 
-      const dados = inicial?.notification.data;
-      const scheduledFor = typeof dados?.scheduledFor === "string" ? dados.scheduledFor : null;
-      setInstanteIso(scheduledFor ?? new Date().toISOString());
+      /**
+       * Sem notificação inicial, procura entre as que estão **na bandeja**.
+       *
+       * `getInitialNotification` só responde quando a Activity nasceu de um toque. Vindo do
+       * `fullScreenAction` com o app já rodando, ou se o sistema remontar a tela, ela volta nula — e
+       * cair direto para "agora" abriria um alarme **sem dose nenhuma**, porque dificilmente existe
+       * uma agendada para este exato minuto. Uma tela de alarme vazia é pior que nenhuma: ela toca,
+       * assusta, e não diz o que tomar.
+       *
+       * O alarme fica na bandeja (`ongoing: true`), então ele está lá para ser encontrado.
+       */
+      const naBandeja = await notifee.getDisplayedNotifications();
+      if (!ativo) return;
+
+      const doAlarme = naBandeja.find(({ notification }) =>
+        typeof notification.id === "string" ? ehAlarmeDeTelaCheia(notification.id) : false,
+      );
+      if (usar(doAlarme?.notification.data)) return;
+
+      // Última saída: o horário atual. A tela abre com a lista vazia, mas os botões de silenciar e
+      // sair continuam funcionando — o som para, que é o mínimo que ela deve garantir.
+      setInstanteIso(new Date().toISOString());
     }
 
     void lerHorario();
@@ -55,11 +83,18 @@ export function AlarmeRaiz() {
       <AlarmeScreen
         instanteIso={instanteIso}
         /**
-         * Fechar a tela cheia é encerrar a **Activity** que o Notifee abriu, e não navegar para
-         * trás — não há pilha atrás dela. Sem isso, responder deixaria a tela aberta sobre a tela
-         * de bloqueio, com o alarme já resolvido.
+         * Fechar a tela cheia é **encerrar a Activity**, e não navegar para trás: não há pilha
+         * atrás dela — ela nasceu de uma notificação, por cima da tela de bloqueio.
+         *
+         * `BackHandler.exitApp()` faz exatamente isso. Não é `stopForegroundService`, que só
+         * encerra um serviço em primeiro plano — recurso que este alarme não usa, e chamá-lo
+         * deixaria a tela aberta com o alarme já respondido.
+         *
+         * "Sair do app" soa drástico, mas aqui é o certo: esta Activity **é** tudo o que está
+         * aberto. Quem chegou por ela não tinha o Mapill em uso, e devolver o aparelho ao estado em
+         * que estava é o comportamento esperado de um despertador desligado.
          */
-        onFechar={() => void notifee.stopForegroundService()}
+        onFechar={() => BackHandler.exitApp()}
       />
     </SafeAreaProvider>
   );
