@@ -110,8 +110,13 @@ export async function registrarCanais(): Promise<void> {
      * (acesso à política do Não Perturbe). Sem ela, esta flag é ignorada em silêncio — o canal é
      * criado, não dá erro, e o alarme simplesmente não fura o DND.
      *
-     * Continua declarada porque, concedida a permissão, ela passa a valer sem recriar o canal. Quem
-     * conduz a pessoa até lá é a tela de lembrete (ver `useNotificationPermission`).
+     * ⚠️ **Exige `android.permission.ACCESS_NOTIFICATION_POLICY` no `app.json`.** Ela estava
+     * faltando até 02/09, e o sintoma era exatamente o que a validação encontrou: o app **não
+     * aparecia na lista** do Não Perturbe, então não havia como concedê-la, e `bypassDnd`
+     * permanecia `false` para sempre. O Android só lista quem declara a permissão no manifesto.
+     *
+     * Não removê-la do `app.json`: sem ela, este `bypassDnd: true` é uma linha decorativa, e a tela
+     * que ensina a autorizar leva a uma lista onde o Mapill não existe.
      */
     bypassDnd: true,
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
