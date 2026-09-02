@@ -4,9 +4,8 @@ import { Pressable, Text, View } from "react-native";
 import type { ReminderMode } from "@/domain/entities/prescription";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import {
-  Accordion,
   BottomSheet,
   Button,
   OptionGroup,
@@ -77,14 +76,13 @@ type ConfiguracaoDeLembreteProps = {
   value: ReminderMode | null;
   onChange: (mode: ReminderMode) => void;
   onClose: () => void;
-  /** Abre os Termos de Uso. Quem navega é a tela — este popup não conhece rota. */
-  onAbrirTermos: () => void;
   /**
-   * Se a ajuda está aberta. Vive na tela, e não aqui, porque este componente desmonta quando se
-   * navega para os termos — e é justamente daí que a pessoa precisa voltar para o mesmo lugar.
+   * Abre a tela "Como funcionam os alertas". Quem navega é a tela — este popup não conhece rota.
+   *
+   * Substituiu `onAbrirTermos` + `ajudaAberta` + `onAjudaToggle`: com a explicação numa rota
+   * própria, não há mais estado de leitura para preservar através de uma navegação.
    */
-  ajudaAberta: boolean;
-  onAjudaToggle: (aberta: boolean) => void;
+  onAbrirAjuda: () => void;
 };
 
 /**
@@ -93,19 +91,26 @@ type ConfiguracaoDeLembreteProps = {
  * uma tela própria é o que permite explicar cada modo antes de escolher, em vez de oferecer três
  * palavras num select.
  *
- * É também onde a pessoa é **apresentada** ao assunto: o que o app faz na hora da dose, o que ele
- * precisa do aparelho e o que ele não faz. Apresentação, não manual; a versão completa continua
- * nos termos de uso, e o texto daqui usa as mesmas palavras da seção 3 de lá, porque duas versões
- * da mesma promessa é como uma delas vira mentira.
+ * ## O que mora aqui, e o que não
+ *
+ * A folha guarda **a decisão** — a pergunta do título, as três respostas, e o que o sistema exige
+ * para que a resposta valha (o painel de permissões, que é acionável: cada linha abre o ajuste que
+ * falta). Isso é o que não se pode adiar sem tornar a escolha vazia.
+ *
+ * A apresentação do assunto — o que o alerta mostra, como se responde, o que o app não faz — vive
+ * em `AjudaDeAlertasScreen`. Ela estava aqui dentro de um acordeão, somando uma quarta camada a uma
+ * folha que já tinha três, e empurrando o botão "Pronto" para fora da tela. Explicação empilhada
+ * sobre decisão não informa mais; adia a decisão.
+ *
+ * O texto de lá continua usando as mesmas palavras da seção 3 dos termos, porque duas versões da
+ * mesma promessa é como uma delas vira mentira.
  */
 export function ConfiguracaoDeLembrete({
   visible,
   value,
   onChange,
   onClose,
-  onAbrirTermos,
-  ajudaAberta,
-  onAjudaToggle,
+  onAbrirAjuda,
 }: ConfiguracaoDeLembreteProps) {
   const dependeDoAparelho = value !== null && value !== "none";
   const { permissao, pedir } = useNotificationPermission();
@@ -123,8 +128,6 @@ export function ConfiguracaoDeLembrete({
     onChange(modo);
     if (modo !== "none" && permissao === "naoPedida") void pedir();
   }
-
-  const permissaoNegada = dependeDoAparelho && permissao === "negada";
 
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Como quer ser avisado?">
@@ -168,76 +171,23 @@ export function ConfiguracaoDeLembrete({
           />
         ) : null}
 
-        {/* Condição, não ressalva. Dizer o que precisa estar em ordem dá o que fazer; dizer que
-            "não garantimos" só transfere a insegurança sem dar saída.
-
-            Some quando a permissão está negada: ali o bloco acima já diz o que fazer, e os dois
-            juntos dariam dois conselhos diferentes para o mesmo problema. */}
-        {dependeDoAparelho && !permissaoNegada ? (
-          <View style={styles.avisoDePermissao}>
-            <Text style={styles.avisoDePermissaoTitulo}>Depende do seu aparelho</Text>
-            <Text style={styles.avisoDePermissaoTexto}>
-              Com a permissão de avisos ativa, volume ligado e o Mapill fora da economia de
-              bateria, os alertas chegam na hora marcada.
-            </Text>
-          </View>
-        ) : null}
-
-        <Accordion
-          title="Como funcionam os alertas"
-          toggleLabel
-          defaultExpanded={ajudaAberta}
-          onToggle={onAjudaToggle}>
-          <View style={styles.blocoDeAjuda}>
-            <View style={styles.assuntoDeAjuda}>
-              <Text style={styles.assuntoDeAjudaTitulo}>Na hora da dose</Text>
-              <Text style={styles.assuntoDeAjudaTexto}>
-                O alerta mostra o horário, o remédio, a quantidade daquele horário e a orientação
-                de como tomar, se você tiver anotado alguma.
-              </Text>
-            </View>
-
-            <View style={styles.assuntoDeAjuda}>
-              <Text style={styles.assuntoDeAjudaTitulo}>Confirmar, adiar ou ignorar</Text>
-              <Text style={styles.assuntoDeAjudaTexto}>
-                Você responde dali mesmo, sem abrir o app, e a resposta define o status da dose.
-                Confirmou: o estoque desconta, se você estiver controlando. Ignorou: fica
-                registrado que a dose não foi tomada. Os dois entram no seu histórico.
-              </Text>
-            </View>
-
-            <View style={styles.assuntoDeAjuda}>
-              <Text style={styles.assuntoDeAjudaTitulo}>Se você adiar</Text>
-              <Text style={styles.assuntoDeAjudaTexto}>
-                O alerta volta em 5 minutos, uma vez só, para o app não virar despertador
-                infinito. Se você não responder nessa segunda vez, a dose fica registrada como não
-                tomada e continua na sua lista do dia até você dizer o contrário.
-              </Text>
-            </View>
-
-            <View style={styles.assuntoDeAjuda}>
-              <Text style={styles.assuntoDeAjudaTitulo}>O que o Mapill não faz</Text>
-              <Text style={styles.assuntoDeAjudaTexto}>
-                • Não confirma dose sozinho. Quem responde é você, sempre.
-              </Text>
-              <Text style={styles.assuntoDeAjudaTexto}>
-                • Não decide sua posologia nem substitui quem receitou. Ele auxilia o tratamento,
-                não conduz.
-              </Text>
-              <Text style={styles.assuntoDeAjudaTexto}>
-                • Não controla as regras do seu celular. Com permissão, volume e bateria em ordem,
-                o Mapill trabalha para manter os alertas íntegros; fora disso, o sistema decide.
-              </Text>
-            </View>
-
-            {/* Link, e não instrução de navegação: o texto anterior mandava procurar numa "aba
-                Perfil" que nem existe com esse nome, e quem está no meio de um cadastro não vai
-                sair caçando. Abre os termos e volta pra cá com o cadastro intacto. */}
-            <Pressable onPress={onAbrirTermos} accessibilityRole="link">
-              <Text style={styles.linkParaTermos}>Ler os Termos de Uso completos</Text>
-            </Pressable>
-          </View>
-        </Accordion>
+        {/**
+         * A explicação saiu daqui e virou tela (`cadastro/ajuda-de-alertas`).
+         *
+         * O aviso "Depende do seu aparelho" saiu junto: quando falta alguma autorização, o painel
+         * acima já diz o mesmo **e** leva à tela de cada ajuste; quando não falta nada, ele
+         * anunciava um risco sem nada a fazer a respeito. O texto continua existindo, na tela de
+         * ajuda, onde é condição explicada em vez de ressalva no meio de uma decisão.
+         *
+         * Link e não acordeão: dobrado aqui dentro, o conteúdo empurrava o botão "Pronto" para
+         * fora da tela e obrigava quem só queria escolher um modo a rolar por tudo.
+         */}
+        <Pressable
+          style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
+          onPress={onAbrirAjuda}
+          accessibilityRole="link">
+          <Text style={styles.linkParaTermos}>Como funcionam os alertas</Text>
+        </Pressable>
 
         <Button label="Pronto" onPress={onClose} />
       </View>
