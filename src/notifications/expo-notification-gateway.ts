@@ -225,6 +225,31 @@ export class ExpoNotificationGateway implements NotificationGateway {
    * o banco, e a janela entre tocar e gravar é justamente onde o toque repetido cabe.
    */
   async dispensar(chave: string): Promise<void> {
-    await Notifications.dismissNotificationAsync(chave).catch(() => {});
+    /**
+     * A busca é pelo **conteúdo**, e não pelo identificador.
+     *
+     * `dismissNotificationAsync(id)` espera o id que o **sistema** deu à notificação já exibida, e
+     * ele não é o mesmo que passamos em `identifier` no agendamento — aquele identifica o *pedido*,
+     * este a notificação *na bandeja*. Chamar com a nossa chave não achava nada, o `catch` engolia
+     * a falha em silêncio, e o aviso continuava lá aceitando toque atrás de toque.
+     *
+     * Era o defeito de 29/08 de volta, pelo mesmo sintoma e por outra causa: antes o handler
+     * repetia porque nada dispensava; agora porque a dispensa mirava o alvo errado.
+     *
+     * `getPresentedNotificationsAsync` devolve o que está na bandeja com os dados que viajaram
+     * junto — e é por `data.chave` que reconhecemos a nossa.
+     */
+    const naBandeja = await Notifications.getPresentedNotificationsAsync().catch(() => []);
+
+    const alvos = naBandeja.filter((notificacao) => {
+      const dados = notificacao.request.content.data as Partial<DadosDoAviso> | undefined;
+      return dados?.chave === chave;
+    });
+
+    await Promise.all(
+      alvos.map((notificacao) =>
+        Notifications.dismissNotificationAsync(notificacao.request.identifier).catch(() => {}),
+      ),
+    );
   }
 }
