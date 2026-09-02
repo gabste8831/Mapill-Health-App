@@ -54,8 +54,22 @@ export const styles = StyleSheet.create({
     borderLeftColor: colors.success,
     backgroundColor: colors.successSurface,
   },
-  done: {
-    opacity: 0.5,
+  /**
+   * A opacidade da dose resolvida **não mora mais aqui**: ela é animada no componente, para a linha
+   * se acomodar em vez de trocar de aparência num quadro só.
+   *
+   * Deixar o estilo estático junto do animado faria os dois se multiplicarem — a linha resolvida
+   * chegaria a 0.25 e pareceria apagada.
+   */
+
+  /**
+   * O escurecimento do toque numa linha já resolvida (a que abre a correção retroativa).
+   *
+   * É um fundo, e não opacidade: a opacidade da linha pertence à animação de acomodação, e um
+   * segundo valor absoluto por cima faria a linha clarear ao ser tocada em vez de escurecer.
+   */
+  pressionada: {
+    backgroundColor: colors.surfaceContainer,
   },
   /**
    * Hora, estado, nome e dose num nó só para o leitor de tela — e por isso também um bloco só no

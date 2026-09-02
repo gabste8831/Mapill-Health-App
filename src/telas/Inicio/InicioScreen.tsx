@@ -1,5 +1,7 @@
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import Animated, { FadeInDown, useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
@@ -9,7 +11,7 @@ import { dataPorExtenso } from "@/shared/datas-por-extenso";
 import { spacing } from "@/shared/theme";
 import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-today-doses";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
-import { CenteredLoader, Fab, Header } from "@/ui";
+import { BarraDeProgresso, CenteredLoader, Fab, Header, SuccessOverlay } from "@/ui";
 import { CardAdesaoSemanal } from "@/telas/Inicio/componentes/CardAdesaoSemanal/CardAdesaoSemanal";
 import { PainelDePermissoes } from "@/ui/PainelDePermissoes/PainelDePermissoes";
 import { CardEstoque } from "@/telas/Inicio/componentes/CardEstoque/CardEstoque";
@@ -24,6 +26,31 @@ import { styles } from "./InicioScreen.styles";
  * prevenir.
  */
 const MAXIMO_LISTADO_NO_LOTE = 6;
+
+/** Atraso entre uma linha e a seguinte na entrada da agenda. */
+const ESCALONAMENTO_MS = 45;
+
+/**
+ * Quantas linhas participam do escalonamento.
+ *
+ * Depois disso o atraso é o mesmo para todas: com dez remédios, esperar meio segundo pela última
+ * linha aparecer não é elegância, é a tela demorando a ficar pronta. O teto mantém a impressão de
+ * cascata em quem tem poucas doses sem punir quem tem muitas.
+ */
+const MAXIMO_ESCALONADO = 6;
+
+/**
+ * A entrada de uma linha da agenda: sobe um pouco enquanto aparece, atrasada pela posição.
+ *
+ * O deslocamento é pequeno de propósito — a lista chega de baixo o suficiente para o olho seguir a
+ * ordem de cima para baixo, sem que a tela pareça montar-se peça por peça toda vez que alguém abre
+ * a Home.
+ */
+function entradaEscalonada(indice: number) {
+  return FadeInDown.duration(260)
+    .delay(Math.min(indice, MAXIMO_ESCALONADO) * ESCALONAMENTO_MS)
+    .withInitialValues({ transform: [{ translateY: 8 }] });
+}
 
 /** O primeiro nome, que é como uma saudação fala. Vazio quando a ficha não tem nome. */
 function primeiroNome(fullName: string): string {
@@ -61,6 +88,40 @@ export function InicioScreen() {
   const nome = primeiroNome(draft?.fullName ?? "");
   const total = agenda.doses.length;
   const progresso = total === 0 ? 0 : agenda.resolvidas / total;
+
+  const semMovimento = useReducedMotion();
+
+  /**
+   * O `SuccessOverlay` do dia fechado — a pausa que celebra **algo que de fato terminou**.
+   *
+   * ## Por que aqui e não a cada dose
+   *
+   * O overlay é de tela cheia e dura quase três segundos. Emendá-lo em cada confirmação
+   * transformaria o gesto mais repetido do app no mais demorado, e no lote de atrasadas dispararia
+   * várias vezes seguidas. A linha que se acomoda já dá a confirmação do gesto individual; o
+   * overlay fica para o único momento em que há um marco: a última dose do dia.
+   *
+   * ## Por que comparar com o render anterior, e não testar `progresso === 1`
+   *
+   * A condição precisa ser a **transição** para o dia completo, não o estado. Quem abre a Home às
+   * 22h com tudo já confirmado não acabou de fazer nada — receberia uma comemoração por existir, e
+   * a mesma voltaria a cada `reload`.
+   *
+   * Guardar o valor anterior em **estado** é o padrão que o React documenta para isto (ajustar
+   * estado quando algo muda entre renders): o `set` durante o render é descartado se o componente
+   * renderizar de novo antes de pintar, então nenhum quadro chega à tela sem o overlay que deveria
+   * ter — e, ao contrário de um ref, nada é escondido do React.
+   */
+  const diaFechado = total > 0 && agenda.resolvidas === total;
+  const [diaFechadoAntes, setDiaFechadoAntes] = useState(diaFechado);
+  const [comemorar, setComemorar] = useState(false);
+
+  if (diaFechadoAntes !== diaFechado) {
+    setDiaFechadoAntes(diaFechado);
+    // Só a passagem para fechado comemora. O caminho de volta (uma correção retroativa reabre o
+    // dia) apenas atualiza a memória, sem festejar o desfazer.
+    if (diaFechado) setComemorar(true);
+  }
   const proximaDose = agenda.doses.find((dose) => dose.status === "next");
   const atrasadas = agenda.doses.filter((dose) => dose.status === "late");
   const demaisDoses = agenda.doses.filter((dose) => dose.status !== "late");
@@ -186,9 +247,12 @@ export function InicioScreen() {
                 <Text style={styles.progressLabel}>PROGRESSO DIÁRIO</Text>
                 <Text style={styles.progressValue}>{Math.round(progresso * 100)}%</Text>
               </View>
-              <View style={styles.progressTrack}>
-                <View style={[styles.progressFill, { width: `${progresso * 100}%` }]} />
-              </View>
+              <BarraDeProgresso
+                valor={progresso}
+                trackStyle={styles.progressTrack}
+                fillStyle={styles.progressFill}
+                accessibilityLabel="Progresso das doses de hoje"
+              />
               <Text style={styles.progressCaption}>
                 {agenda.resolvidas} de {total} {total === 1 ? "dose concluída" : "doses concluídas"} hoje
               </Text>
@@ -260,17 +324,20 @@ export function InicioScreen() {
                 </Pressable>
               ) : null}
             </View>
-            {atrasadas.map((dose) => (
-              <ItemDeDose
+            {atrasadas.map((dose, indice) => (
+              <Animated.View
                 key={dose.doseScheduleId}
-                time={dose.time}
-                medicationName={dose.medicationName}
-                note={descricaoDaDose(dose)}
-                status={dose.status}
-                onConfirm={() => confirmar(dose)}
-                onSkip={() => pular(dose)}
-                onCorrect={() => corrigir(dose)}
-              />
+                entering={semMovimento ? undefined : entradaEscalonada(indice)}>
+                <ItemDeDose
+                  time={dose.time}
+                  medicationName={dose.medicationName}
+                  note={descricaoDaDose(dose)}
+                  status={dose.status}
+                  onConfirm={() => confirmar(dose)}
+                  onSkip={() => pular(dose)}
+                  onCorrect={() => corrigir(dose)}
+                />
+              </Animated.View>
             ))}
           </View>
         ) : null}
@@ -296,17 +363,25 @@ export function InicioScreen() {
         {demaisDoses.length > 0 ? (
           <View style={styles.doseList}>
             <Text style={styles.sectionLabel}>Hoje</Text>
-            {demaisDoses.map((dose) => (
-              <ItemDeDose
+            {demaisDoses.map((dose, indice) => (
+              <Animated.View
                 key={dose.doseScheduleId}
-                time={dose.time}
-                medicationName={dose.medicationName}
-                note={descricaoDaDose(dose)}
-                status={dose.status}
-                onConfirm={() => confirmar(dose)}
-                onSkip={() => pular(dose)}
-                onCorrect={() => corrigir(dose)}
-              />
+                /**
+                 * O escalonamento continua **de onde as atrasadas pararam**: as duas listas são
+                 * blocos visuais distintos, mas uma sequência só descendo a tela. Reiniciar o atraso
+                 * no zero faria a segunda lista brotar junto com o meio da primeira.
+                 */
+                entering={semMovimento ? undefined : entradaEscalonada(atrasadas.length + indice)}>
+                <ItemDeDose
+                  time={dose.time}
+                  medicationName={dose.medicationName}
+                  note={descricaoDaDose(dose)}
+                  status={dose.status}
+                  onConfirm={() => confirmar(dose)}
+                  onSkip={() => pular(dose)}
+                  onCorrect={() => corrigir(dose)}
+                />
+              </Animated.View>
             ))}
           </View>
         ) : null}
@@ -346,6 +421,21 @@ export function InicioScreen() {
         accessibilityLabel="Cadastrar medicação ou compromisso"
         onPress={() => router.push("/cadastro/escolha")}
       />
+
+      {/**
+       * A comemoração do dia fechado.
+       *
+       * Fica **fora** do `ScrollView` e depois do `Fab` para cobrir a tela inteira, e some sozinha —
+       * `onDone` só desliga o estado, sem navegar: quem fechou o dia continua na Home, que é onde
+       * ela já estava. Não há para onde levar alguém que acabou de terminar o que tinha para fazer.
+       */}
+      {comemorar ? (
+        <SuccessOverlay
+          title="Dia completo"
+          description={`Todas as ${total} ${total === 1 ? "dose" : "doses"} de hoje estão registradas.`}
+          onDone={() => setComemorar(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
