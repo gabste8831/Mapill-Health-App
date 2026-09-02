@@ -32,6 +32,73 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
+## 0.0 RETOMADA — onde parei (02/09, 17h40)
+
+> **Leia esta seção primeiro se estiver voltando ao projeto, ou abrindo em outra máquina.** Ela diz
+> o que está em andamento agora; o índice do que falta no geral está em [0.1.1](#011-o-que-falta--índice-0209).
+
+### O que está rodando
+
+**Build EAS `f9f36c0e`** (perfil `development`, commit `871a50a`) — disparada em 02/09 com o passe
+de design. [Painel](https://expo.dev/accounts/gabsteffens/projects/mapill-app/builds/f9f36c0e-2324-49d7-8ab9-52fda8837d29).
+
+⚠️ **Desinstale a versão anterior antes de instalar esta.** Os canais de notificação subiram para
+**v5**, e canal do Android congela na criação: instalar por cima manteria som e importância antigos,
+e a sessão inteira seria gasta diagnosticando algo que não é defeito.
+
+### O passe de design — 10 de 14 frentes entregues
+
+Todas commitadas e no GitHub. O plano completo, com o raciocínio de cada uma, está em
+`~/.claude/plans/tender-plotting-river.md` (arquivo local, não versionado — o resumo abaixo basta
+para continuar).
+
+| # | O que | Estado |
+|---|---|---|
+| 7 | Relógio nativo (mostrador redondo atrás do ícone) | ✅ |
+| 0 | Três cores divergentes (splash, sombra do FAB, rgba manuais) | ✅ |
+| 10 | A foto que ficava branca | ✅ código — **só o aparelho confirma** |
+| 8 | Teclado: o gesto de tocar em área vazia | ✅ |
+| 9 | Rodapé que saía colado no teclado | ✅ |
+| 1 | Feedback de toque + busca viva + ícones de Remédios | ✅ |
+| 2 | Escala tipográfica (`bodySm`, `caption`) | ✅ |
+| 12 | Sugestões da CMED capitalizadas e enxutas | ✅ |
+| 13 | Foto do medicamento na tela de alarme | ✅ |
+| 4 | Azul nas telas brancas + respiro da Home | ✅ |
+
+### As 4 que faltam
+
+**Nenhuma exige build nova** — são JavaScript puro e rodam pelo Metro (`npx expo start --dev-client`)
+sobre a build acima.
+
+| # | O que | Por onde começar |
+|---|---|---|
+| **3** | Unificar os botões que as telas desenham à mão | Sobraram ~8 lugares (Calendário, Estoque, `CardEstoqueBaixo`). O `ItemDeDose` é o mais delicado: são os botões de confirmar/pular, e mexer neles exige testar o fluxo de verdade. `IconButton` já ganhou a variante `sutil` na fase 1 |
+| **5** | Movimento | Três lugares, nesta ordem: transição ao confirmar dose (reusar o `SuccessOverlay`), barra de progresso da Home crescendo com `withTiming`, entrada escalonada da lista. **Não** animar troca de abas, alerta de atraso nem `GradeDeMes` |
+| **6** | Desafogar `ConfiguracaoDeLembrete` | Diagnóstico feito: quatro camadas competem no mesmo nível numa folha. A proposta é a folha guardar **só a decisão** (frase + modos + Pronto), o acordeão virar tela `AjudaDeAlertas`, e o aviso "Depende do seu aparelho" **sair** — o painel de permissões já diz a mesma coisa e ainda leva à tela certa |
+| **11** | Visualizador de mídia | Toca na miniatura, expande sobre fundo escurecido **sem ocupar a tela toda**, sai tocando fora ou no X. Serve foto da ficha, da caixa e receita — esta última é a que mais precisa, porque é para **ler** |
+
+### Decisões deste passe que valem lembrar
+
+- **O azul entra por tela, não por template.** Cheguei a extrair um `HeroDeTela` genérico e ele foi
+  descartado: o que agradou no Ajustes foi a *presença* da cor, não o formato. Repetir a faixa em
+  todas deixaria as telas iguais entre si.
+- **Login, EscolhaDeCadastro e as telas de cadastro não se mexem** — decisão do Gabriel, ficaram bons.
+- **O dia selecionado do calendário continua círculo.**
+- **O plugin `expo-notifications` fica no `app.json`** mesmo sem nenhuma linha importar a biblioteca:
+  ele é de *build* e gera o ícone de notificação e o som do alarme, os dois consumidos pelo Notifee
+  pelo nome.
+
+### Verificação antes de qualquer commit
+
+```
+npx tsc --noEmit && npx expo lint
+node scripts/conferir-relatorio.mjs      # 28
+node scripts/conferir-ids-de-aviso.mjs   # 14
+node scripts/conferir-rotulos-cmed.mjs   # 12
+```
+
+---
+
 ## 0.1 O QUE FALTA — quadro único (atualizado em 2026-09-02)
 
 > ### 🔄 Revisão de escopo — 02/09
