@@ -638,6 +638,83 @@ Gere o relatório com **um** medicamento desmarcado.
 
 ---
 
+## 12.9 — O passe de design (02/09)
+
+**Dez frentes mexeram em coisa transversal** — toque, teclado, tipografia, cor. Este bloco cobre o
+que mudou; a regressão de todas as telas vem depois, no bloco 14.
+
+**A. O toque responde.** Percorra Home, Remédios, Estoque e Cadastro tocando em botões, chips,
+ícones e linhas.
+
+> ✅ 🔴 **Tudo** o que é tocável escurece e/ou encolhe ao toque. Antes nada respondia.
+> ✅ Nada treme: linhas de largura total (checkbox, acordeão) só escurecem, não encolhem.
+
+**B. O teclado sai.** Em Ficha, Cadastro de medicamento e Cadastro de compromisso:
+
+> ✅ 🔴 **Tocar em área vazia** fecha o teclado — era o gesto que faltava.
+> ✅ **Enter** fecha (menos em campo de observação, onde ele quebra linha).
+> ✅ Arrastar a lista fecha.
+> ✅ Tocar direto num botão com o teclado aberto: o botão responde no **primeiro** toque.
+
+**C. O rodapé não cola.** No cadastro, com o teclado aberto:
+
+> ✅ 🔴 O botão de salvar **sai de cena** em vez de ficar espremido na borda do teclado.
+> ✅ Fechando o teclado (toque em área vazia), ele volta.
+> ⚠️ No **popup** de horário é o oposto e está certo: ali o botão continua à vista.
+
+**D. O relógio.** Campo de horário → toque no ícone de relógio.
+
+> ✅ 🔴 Abre o **mostrador redondo nativo** do Android, e não os dois campos digitáveis.
+> ✅ Digitar pelo teclado no campo continua funcionando.
+> ✅ As cores do popup são as do Mapill — **não** o verde/roxo do tema do sistema.
+> ✅ Escolher **20:00** grava 20:00 (formato 24h, sem AM/PM).
+
+**E. As sugestões da CMED.** No cadastro, digite `dipi`.
+
+> ✅ 🔴 Nomes em **"Dipirona Sódica"**, não `DIPIRONA SÓDICA`.
+> ✅ **4 sugestões**, não 6 — e a lista não cobre o campo que está sendo digitado.
+> ✅ Nome longo corta com reticências em vez de quebrar em três linhas.
+> ✅ Buscar `aas`: a sigla continua **AAS** em caixa alta.
+> ✅ 🔴 **Escolhendo** uma sugestão, o nome que vai para o campo também está capitalizado.
+
+**F. A foto no alarme.** Cadastre um remédio **com foto** da caixa e alarme para +3 min.
+
+> ✅ 🔴 A foto aparece na tela do alarme, larga, acima do nome.
+> ✅ Um remédio **sem** foto não deixa espaço vazio nem quebra o layout.
+
+**G. Cor e espaçamento.**
+
+> ✅ **Home**: os blocos têm mais respiro entre si.
+> ✅ **Remédios**: remédio sem foto mostra um quadrado azul claro com ícone — e a lista fica
+> alinhada, com e sem foto.
+> ✅ **Remédios**: os ícones de editar/excluir têm **fundo** e parecem botões.
+> ✅ **Busca**: ao tocar, ganha anel azul e a lupa fica azul.
+> ✅ **Adesão**: o número grande está num bloco azul.
+> ✅ **Estoque**: "Repor" tem fundo azul claro, diferente de "Recontar".
+
+**H. A foto que ficava branca** 🔴🔬 — **o único item do passe que só o aparelho pode dar como
+resolvido.**
+
+O defeito: escolher a foto, confirmar, e a miniatura ficar branca — aparecendo só depois de sair e
+voltar da tela. A causa conhecida já tinha sido corrigida antes e o defeito continuou, então a
+correção de agora cobre as **duas** hipóteses restantes sem conseguir distinguir qual era.
+
+Ficha de saúde → **adicionar foto pela galeria**.
+
+> ✅ 🔴 A miniatura aparece **na hora**, sem precisar sair e voltar.
+
+Repita pela **câmera**. Depois repita na **foto da caixa** de um medicamento. E por fim **troque**
+uma foto já existente.
+
+> ✅ Em todos, a foto nova aparece imediatamente e a antiga não volta.
+
+🔬 **Se ainda falhar, anote duas coisas** — elas dizem qual das hipóteses é a certa, e sem isso a
+próxima correção seria chute:
+> 1. A foto era grande? (foto de câmera é maior que de galeria)
+> 2. Ela aparece sozinha depois de alguns segundos parado na tela, ou só ao sair e voltar?
+
+---
+
 ## 13 — Acessibilidade com o TalkBack 🔬 (E1)
 
 **Fecha o último item do E1.** A varredura por código (02/09) corrigiu sete defeitos, mas leitor de
