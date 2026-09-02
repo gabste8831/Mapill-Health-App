@@ -198,6 +198,7 @@ export function SeletorDeHorarios({
             // Horário em branco não pode virar ficha preenchida: quem bate o olho leria uma
             // hora resolvida e sairia da tela achando que terminou.
             const isPending = parseTimeInput(value.at) === null;
+            const duplicado = duplicateIndexes.includes(index);
             return (
               <View
                 // Índice como chave: os campos são posicionais e nenhum é inserido no meio.
@@ -205,8 +206,18 @@ export function SeletorDeHorarios({
                 style={[
                   styles.timeChip,
                   isPending && styles.timeChipVazio,
-                  duplicateIndexes.includes(index) && styles.timeChipErro,
-                ]}>
+                  duplicado && styles.timeChipErro,
+                ]}
+                /**
+                 * O fundo vermelho diz **qual** dos horários está repetido; o texto de erro abaixo
+                 * só diz que existe repetição. Quem não distingue a cor sabe que há um problema e
+                 * não sabe onde — então a informação que a cor carrega vai também no rótulo.
+                 */
+                accessibilityLabel={
+                  duplicado
+                    ? `${textoDaFicha(value)}, horário repetido`
+                    : textoDaFicha(value)
+                }>
                 <Text style={styles.timeChipText}>{textoDaFicha(value)}</Text>
               </View>
             );

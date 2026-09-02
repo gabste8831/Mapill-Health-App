@@ -23,7 +23,28 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
 
   return (
     <View style={[styles.card, dose.resolvida && styles.cardResolvido]}>
-      <View style={styles.cardTopo}>
+      {/**
+       * O bloco de informação lido como **uma frase só**, na ordem em que a pessoa pensa: que
+       * remédio, quanto, como está.
+       *
+       * Sem isto o TalkBack para em quatro nós soltos e o selo "Tomada"/"Pulada" chega depois de um
+       * ícone mudo. É o mesmo tratamento que o `ItemDeDose` da Home já faz — e esta tela é o destino
+       * do toque na notificação, então merece pelo menos o mesmo cuidado.
+       *
+       * O agrupamento fica **aqui**, e não no cartão inteiro: `accessible` no cartão engoliria
+       * "Tomei" e "Pulei" num nó só, e o leitor perderia justamente as ações que importam.
+       */}
+      <View
+        style={styles.cardTopo}
+        accessible
+        accessibilityLabel={[
+          dose.medicationName,
+          dose.quantidadeFormatada,
+          dose.resolvida ? (confirmada ? "dose tomada" : "dose pulada") : "aguardando resposta",
+          dose.intakeNote ?? "",
+        ]
+          .filter((parte) => parte.length > 0)
+          .join(", ")}>
         <View style={styles.cardTexto}>
           <Text style={styles.nome}>{dose.medicationName}</Text>
           <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
@@ -69,11 +90,21 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
       {/* `emFolha` porque o cartão da dose é branco como o botão: sem o contorno, o `outline` some
           no fundo e sobra um texto solto — o mesmo motivo pelo qual a prop existe para o
           `BottomSheet`. */}
+      {/* `accessibilityState.selected` porque o preenchimento é a **única** pista de qual resposta
+          já está registrada, e "azul cheio vs. contornado" não existe para quem usa leitor de tela:
+          os dois botões soariam idênticos antes e depois de responder. É a mesma regra que a lista
+          de doses perdidas segue — estado nunca só por cor. */}
       <View style={styles.acoes}>
         <Button
           label="Tomei"
           onPress={onConfirmar}
           variant={confirmada ? "primary" : "outline"}
+          accessibilityState={{ selected: confirmada }}
+          accessibilityLabel={
+            confirmada
+              ? `Tomei, registrado para ${dose.medicationName}`
+              : `Registrar que tomou ${dose.medicationName}`
+          }
           emFolha
           style={styles.acao}
         />
@@ -81,6 +112,12 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
           label="Pulei"
           onPress={onPular}
           variant={dose.latestStatus === "skipped" ? "primary" : "outline"}
+          accessibilityState={{ selected: dose.latestStatus === "skipped" }}
+          accessibilityLabel={
+            dose.latestStatus === "skipped"
+              ? `Pulei, registrado para ${dose.medicationName}`
+              : `Registrar que não tomou ${dose.medicationName}`
+          }
           emFolha
           style={styles.acao}
         />

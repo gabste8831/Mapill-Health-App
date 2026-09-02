@@ -32,7 +32,7 @@ const VARIANT_LABEL_STYLE: Record<ButtonVariant, keyof typeof styles> = {
  * Botão padrão do app — altura, raio e cores vêm de `Button.styles.ts` (um lugar só pra mudar
  * o padrão global). Pra mudar só uma instância específica, passe `style`.
  */
-export function Button({ label, variant = "primary", loading = false, icon, emFolha = false, disabled, style, ...pressableProps }: ButtonProps) {
+export function Button({ label, variant = "primary", loading = false, icon, emFolha = false, disabled, style, accessibilityState, ...pressableProps }: ButtonProps) {
   const isDisabled = disabled || loading;
 
   return (
@@ -46,7 +46,15 @@ export function Button({ label, variant = "primary", loading = false, icon, emFo
       ]}
       disabled={isDisabled}
       accessibilityRole="button"
-      accessibilityState={{ disabled: isDisabled }}
+      /**
+       * O estado de quem chama é **mesclado**, não substituído.
+       *
+       * Antes `accessibilityState` era fixo aqui e o spread vinha depois, então quem passasse
+       * `{ selected: true }` apagava o `disabled` sem perceber — e um botão desabilitado deixava
+       * de ser anunciado como tal. Botão que o leitor de tela apresenta como tocável e não
+       * responde ao toque ensina a desconfiar da interface inteira.
+       */
+      accessibilityState={{ ...accessibilityState, disabled: isDisabled }}
       {...pressableProps}>
       {loading ? (
         <ActivityIndicator color={variant === "primary" ? colors.onPrimary : colors.primary} />

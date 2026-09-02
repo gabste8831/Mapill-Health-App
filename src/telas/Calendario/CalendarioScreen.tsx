@@ -206,10 +206,21 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
       </View>
 
       {resolvida ? (
+        /**
+         * O ícone **precisa falar**: ele é o único portador do desfecho nesta linha.
+         *
+         * Ícones do `@expo/vector-icons` são glifos de fonte — sem rótulo o TalkBack lê nada ou um
+         * caractere sem sentido, e a linha seria anunciada como "08:00, Losartana, 1 comprimido"
+         * sem dizer se foi tomada ou pulada, que é exatamente a informação que se veio buscar.
+         *
+         * Vale a regra de sempre: estado nunca só por cor — aqui, nunca só por glifo.
+         */
         <Ionicons
           name={tomada ? "checkmark-circle" : "close-circle"}
           size={20}
           color={tomada ? colors.primary : colors.error}
+          accessibilityRole="image"
+          accessibilityLabel={tomada ? "Dose tomada" : "Dose não tomada"}
         />
       ) : onRegistrar !== undefined ? (
         <View style={styles.acoesDaDose}>

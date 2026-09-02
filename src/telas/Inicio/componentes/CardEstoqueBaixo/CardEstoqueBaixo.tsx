@@ -22,13 +22,23 @@ export function CardEstoqueBaixo({
       <View style={styles.header}>
         <Text style={styles.label}>Alerta de estoque</Text>
       </View>
-      <View>
+      {/* Agrupado para o alerta ser lido como uma frase — "Losartana, 3 dias restantes" — em vez
+          de dois nós soltos que só fazem sentido juntos. */}
+      <View
+        accessible
+        accessibilityLabel={`${medicationName}, ${daysRemaining} dias restantes`}>
         <Text style={styles.medicationName}>{medicationName}</Text>
         <Text style={styles.daysRemaining}>{daysRemaining} dias restantes</Text>
       </View>
       {/* Só o caminho que resolve o aviso. O "ignorar lembrete" que existia aqui não tinha para
           onde ir: nada guardava a dispensa, e o card voltava igual na abertura seguinte. */}
-      <Pressable style={styles.primaryButton} onPress={onAbrirEstoque} accessibilityRole="button">
+      <Pressable
+        style={styles.primaryButton}
+        onPress={onAbrirEstoque}
+        accessibilityRole="button"
+        // O rótulo carrega o medicamento: "Abrir estoque" sozinho, lido longe do card, não diz de
+        // quê.
+        accessibilityLabel={`Abrir o estoque de ${medicationName}`}>
         <Text style={styles.primaryButtonText}>Abrir estoque</Text>
       </Pressable>
     </View>

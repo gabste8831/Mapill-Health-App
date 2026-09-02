@@ -192,7 +192,10 @@ export const styles = StyleSheet.create({
    * diferente faria parecer que o horário mora em outro lugar.
    */
   botaoDeHorario: {
-    height: 52,
+    // `minHeight` e não `height`: com a fonte do sistema ampliada, altura travada recorta o horário
+    // — o mesmo defeito corrigido em `Button`/`TextField` em 31/08, que escapou aqui por este
+    // botão ser desenhado pela tela em vez de vir do kit.
+    minHeight: 52,
     paddingHorizontal: spacing.md,
     justifyContent: "center",
     borderWidth: 1,

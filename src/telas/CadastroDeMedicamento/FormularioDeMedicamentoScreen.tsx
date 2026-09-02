@@ -169,14 +169,18 @@ const DOSES_PER_DAY_OPTIONS: OptionGroupOption<string>[] = Array.from(
   (_, index) => ({ value: String(index + 1), label: `${index + 1}×` }),
 );
 
-const WEEKDAYS: { value: Weekday; label: string }[] = [
-  { value: 0, label: "Dom" },
-  { value: 1, label: "Seg" },
-  { value: 2, label: "Ter" },
-  { value: 3, label: "Qua" },
-  { value: 4, label: "Qui" },
-  { value: 5, label: "Sex" },
-  { value: 6, label: "Sáb" },
+/**
+ * `nome` existe só para o leitor de tela: a ficha mostra "Seg" porque sete nomes inteiros não
+ * cabem lado a lado, mas o TalkBack lê a abreviação letra a letra ou como palavra truncada.
+ */
+const WEEKDAYS: { value: Weekday; label: string; nome: string }[] = [
+  { value: 0, label: "Dom", nome: "domingo" },
+  { value: 1, label: "Seg", nome: "segunda-feira" },
+  { value: 2, label: "Ter", nome: "terça-feira" },
+  { value: 3, label: "Qua", nome: "quarta-feira" },
+  { value: 4, label: "Qui", nome: "quinta-feira" },
+  { value: 5, label: "Sex", nome: "sexta-feira" },
+  { value: 6, label: "Sáb", nome: "sábado" },
 ];
 
 const INTAKE_INSTRUCTION_LABELS: Record<IntakeInstruction, string> = {
@@ -1278,8 +1282,12 @@ export function FormularioDeMedicamentoScreen({
                       key={weekday.value}
                       style={[styles.weekday, isSelected && styles.weekdaySelected]}
                       onPress={() => toggleWeekday(weekday.value)}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}>
+                      // `checkbox` e não `button`: são sete opções que se acumulam, e o leitor
+                      // anuncia "marcado/desmarcado" em vez de deixar o estado só no preenchimento
+                      // da ficha. Mesmo papel que o `ToggleChips` do kit já usa.
+                      accessibilityRole="checkbox"
+                      accessibilityLabel={weekday.nome}
+                      accessibilityState={{ checked: isSelected }}>
                       <Text style={[styles.weekdayText, isSelected && styles.weekdayTextSelected]}>
                         {weekday.label}
                       </Text>
@@ -1576,7 +1584,10 @@ export function FormularioDeMedicamentoScreen({
                   <Pressable
                     style={[styles.rowValue, styles.rowValueAtivo]}
                     onPress={() => setStockSheetOpen(true)}
-                    accessibilityRole="button">
+                    accessibilityRole="button"
+                    // Sem rótulo, o leitor concatena os filhos e anuncia "Controle ativo Editar",
+                    // que não diz *o que* se edita.
+                    accessibilityLabel="Editar o controle de estoque">
                     <Text style={styles.rowValueText}>
                       {linhasDoEstoque.length > 0 ? "Controle ativo" : "Nada preenchido ainda"}
                     </Text>
@@ -1757,7 +1768,8 @@ export function FormularioDeMedicamentoScreen({
                   <Pressable
                     style={[styles.rowValue, styles.rowValueAtivo]}
                     onPress={() => setReminderSheetOpen(true)}
-                    accessibilityRole="button">
+                    accessibilityRole="button"
+                    accessibilityLabel={`Editar o lembrete, hoje em ${REMINDER_LABELS[reminderMode]}`}>
                     <Text style={styles.rowValueText}>{REMINDER_LABELS[reminderMode]}</Text>
                     <Text style={styles.rowValueAction}>Editar</Text>
                   </Pressable>

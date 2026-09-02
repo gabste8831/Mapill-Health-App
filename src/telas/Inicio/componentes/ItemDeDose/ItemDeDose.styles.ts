@@ -111,9 +111,21 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     alignItems: "stretch",
   },
-  /** Pílula, e não retângulo de canto suave: acompanha as fichinhas de horário do resto do app. */
+  /**
+   * Pílula, e não retângulo de canto suave: acompanha as fichinhas de horário do resto do app.
+   *
+   * `minHeight: 44` porque o padding sozinho dava **32pt** (16 de linha + 8 + 8), e estes são os
+   * dois alvos mais tocados do aplicativo — a agenda do dia é a tela onde a dose se confirma. Dois
+   * alvos pequenos empilhados a 8px um do outro convidam a confirmar quando se queria pular, e
+   * errar o toque aqui **falseia o registro clínico**: grava uma dose que não foi tomada.
+   *
+   * Escapou da varredura de 31/08 porque aquela corrigiu o kit (`Button`, `TextField`), e estes
+   * botões são desenhados pela própria tela.
+   */
   confirmButton: {
     backgroundColor: colors.primary,
+    minHeight: 44,
+    justifyContent: "center",
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
@@ -130,6 +142,8 @@ export const styles = StyleSheet.create({
    * clara lê como campo de formulário, e aqui é um botão.
    */
   skipButton: {
+    minHeight: 44,
+    justifyContent: "center",
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
