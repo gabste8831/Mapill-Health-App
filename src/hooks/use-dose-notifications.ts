@@ -45,10 +45,18 @@ export function useDoseNotifications(): void {
       if (estado === "active") void reagendarTodosOsAvisos();
     });
     const pararDeEscutar = escutarRespostas(abrirHorario);
-    // O alarme de tela cheia tem lista e handlers próprios (Notifee), separados dos do
-    // `expo-notifications`. É o que trata o "Tomei" quando o Android rebaixa a tela cheia para
-    // heads-up — o que ele faz sempre que a pessoa está usando o celular.
-    const pararDeEscutarAlarme = escutarAlarmeDeTelaCheia();
+
+    /**
+     * O alarme tem handlers próprios (Notifee), separados dos do `expo-notifications`.
+     *
+     * Além de tratar o "Tomei" da notificação, ele **abre a tela do alarme** quando o aviso chega
+     * com o app em primeiro plano. O Android rebaixa a tela cheia para heads-up sempre que a pessoa
+     * está usando o celular, e não há como pedir o contrário pela API — mas o app rodando pode
+     * navegar, e o resultado é o mesmo: a tela do alarme por cima do que estava aberto.
+     */
+    const pararDeEscutarAlarme = escutarAlarmeDeTelaCheia((scheduledFor) => {
+      router.push({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
+    });
 
     void consultarRespostaDeAbertura().then((dados) => {
       if (dados !== null) abrirHorario(dados);

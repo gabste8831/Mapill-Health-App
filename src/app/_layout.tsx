@@ -123,6 +123,13 @@ export default function RootLayout() {
           <Stack.Screen name="conta" />
           <Stack.Screen name="horario/[instante]" />
           <Stack.Screen name="adesao" />
+          {/* O alarme entra por cima de tudo e **não sai por gesto**: sair exige responder, como na
+              versão em tela cheia. Deslizar para fechar um alarme de medicação sem querer é o mesmo
+              que perder a dose. */}
+          <Stack.Screen
+            name="alarme/[instante]"
+            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
+          />
           <Stack.Screen name="cadastro" options={{ presentation: 'modal' }} />
         </Stack>
       </>

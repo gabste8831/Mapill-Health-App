@@ -39,12 +39,62 @@ function lerDoseScheduleIds(evento: Event): string[] | null {
   }
 }
 
-async function tratar(evento: Event): Promise<void> {
-  if (evento.type !== EventType.ACTION_PRESS) return;
-  if (evento.detail.pressAction?.id !== ACAO_TOMEI) return;
+/** Avisa quem está ouvindo que um alarme foi entregue com o app aberto. */
+type AoDisparar = (scheduledFor: string) => void;
+let aoDisparar: AoDisparar | null = null;
 
+/**
+ * Horários cuja tela já foi aberta nesta execução.
+ *
+ * Vive no módulo, e não em estado de React, porque os handlers do Notifee também vivem: eles são
+ * registrados uma vez e sobrevivem às montagens e desmontagens de tela. Um `Set` em componente
+ * seria zerado a cada navegação, e a trava não travaria nada.
+ *
+ * Não é limpo: são poucas entradas por execução — um alarme por horário —, e esquecer o que já foi
+ * aberto é justamente o defeito que ele evita.
+ */
+const jaAbertos = new Set<string>();
+
+async function tratar(evento: Event): Promise<void> {
   const id = evento.detail.notification?.id;
   if (id === undefined || !ehAlarmeDeTelaCheia(id)) return;
+
+  /**
+   * **O alarme chegou com o app aberto: o app abre a tela ele mesmo.**
+   *
+   * O Android rebaixa o `fullScreenAction` para heads-up sempre que a pessoa está usando o celular,
+   * e essa decisão é do sistema — a API de notificação não deixa forçar. A regra existe para
+   * proteger quem está no meio de uma ligação, e faz sentido em geral.
+   *
+   * Mas aqui ela contraria o que o app existe para fazer. A dose tem hora, e o alarme é justamente
+   * o que traz a atenção de volta para a rotina posológica — a alternativa a usar o despertador do
+   * celular. Um aviso discreto no topo da tela é exatamente o que se ignora sem perceber.
+   *
+   * Com o app em primeiro plano existe um caminho que não depende do sistema: navegar. `DELIVERED`
+   * chega no instante em que o aviso é mostrado, e daí a própria tela do alarme entra por cima —
+   * mesma tela, mesmo som em loop, mesmos botões.
+   */
+  if (evento.type === EventType.DELIVERED) {
+    const scheduledFor = evento.detail.notification?.data?.scheduledFor;
+    if (typeof scheduledFor !== "string") return;
+
+    /**
+     * Um horário abre a tela **uma vez só**.
+     *
+     * `DELIVERED` pode chegar mais de uma vez para a mesma notificação — o Notifee reemite ao
+     * reentregar o aviso, e o handler de primeiro plano também dispara em algumas transições de
+     * estado. Sem esta trava, cada repetição empilharia outra tela de alarme por cima da anterior,
+     * e a pessoa teria de fechar várias para voltar ao que estava fazendo.
+     */
+    if (jaAbertos.has(scheduledFor)) return;
+    jaAbertos.add(scheduledFor);
+
+    aoDisparar?.(scheduledFor);
+    return;
+  }
+
+  if (evento.type !== EventType.ACTION_PRESS) return;
+  if (evento.detail.pressAction?.id !== ACAO_TOMEI) return;
 
   const doseScheduleIds = lerDoseScheduleIds(evento);
   if (doseScheduleIds === null || doseScheduleIds.length === 0) return;
@@ -69,7 +119,14 @@ async function tratar(evento: Event): Promise<void> {
  * `onBackgroundEvent` cobre o app fechado ou em segundo plano — que é o caso normal de um alarme de
  * dose —, e `onForegroundEvent` cobre quem estava com o app aberto.
  */
-export function escutarAlarmeDeTelaCheia(): () => void {
+export function escutarAlarmeDeTelaCheia(abrirAlarme: AoDisparar): () => void {
+  aoDisparar = abrirAlarme;
+
   notifee.onBackgroundEvent(tratar);
-  return notifee.onForegroundEvent((evento) => void tratar(evento));
+  const parar = notifee.onForegroundEvent((evento) => void tratar(evento));
+
+  return () => {
+    aoDisparar = null;
+    parar();
+  };
 }
