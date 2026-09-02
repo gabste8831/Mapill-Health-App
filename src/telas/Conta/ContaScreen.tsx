@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { exportarDados } from "@/data/repositories/exportar-dados";
 import { useSync } from "@/hooks/use-sync";
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { Card, GoogleLogo, Header, IndicadorDeSync } from "@/ui";
 import { styles } from "./ContaScreen.styles";
 
@@ -37,7 +37,8 @@ type LinhaProps = {
 
 function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
   return (
-    <Pressable style={styles.row} onPress={onPress} accessibilityRole="button">
+    // Linha de largura total: escurece, mas não encolhe — escalar faria o texto vizinho tremer.
+    <Pressable style={estadoDePressao(styles.row)} onPress={onPress} accessibilityRole="button">
       <View style={styles.rowIcon}>{icon}</View>
       <View style={styles.rowText}>
         <Text style={[styles.rowLabel, destrutiva && styles.rowLabelDestrutiva]}>{label}</Text>

@@ -15,7 +15,7 @@ import {
 } from "@/hooks/use-inventory-list";
 import { formatDecimalInput, formatIntegerInput, parseDecimalInput } from "@/shared/number-input";
 import { formatarNumero, formatarQuantidadeLivre } from "@/shared/rotulos-de-medicamento";
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
@@ -106,7 +106,7 @@ function CartaoDeEstoque({ item, onRecontar, onRepor }: ItemDeEstoqueProps) {
           toda vez que voltasse da farmácia. */}
       <View style={styles.acoes}>
         <Pressable
-          style={styles.acao}
+          style={estadoDePressao(styles.acao, { escala: true })}
           onPress={onRecontar}
           accessibilityRole="button"
           accessibilityLabel={`Recontar o estoque de ${medication.name}`}>
@@ -114,7 +114,7 @@ function CartaoDeEstoque({ item, onRecontar, onRepor }: ItemDeEstoqueProps) {
           <Text style={styles.acaoTexto}>Recontar</Text>
         </Pressable>
         <Pressable
-          style={[styles.acao, styles.acaoPrimaria]}
+          style={estadoDePressao([styles.acao, styles.acaoPrimaria], { escala: true })}
           onPress={onRepor}
           accessibilityRole="button"
           accessibilityLabel={`Repor o estoque de ${medication.name}`}>

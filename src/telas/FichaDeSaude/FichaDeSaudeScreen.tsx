@@ -14,13 +14,14 @@ import { usePhotoPicker, type PhotoOrigin } from "@/hooks/use-photo-picker";
 import { parseDateInput, toDateInput } from "@/shared/date-input";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { deletePersistedFile } from "@/shared/persist-picked-file";
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
   Card,
   Chip, DateField, EscolhaDeOrigemDaFoto, FotoLocal, Header, IconButton, KeyboardAwareScrollView, SelectField,
   TextField,
+  VisualizadorDeMidia,
   type SelectOption
 } from "@/ui";
 import { styles } from "./FichaDeSaudeScreen.styles";
@@ -151,7 +152,9 @@ function EmergencyContactsField({
                 </Text>
               </View>
               <Pressable
-                style={styles.contactRemove}
+                // Ícone de lixeira: alvo autocontido, e o fundo ao toque é o que o faz parecer
+                // botão — sem ele, um ícone solto não anuncia que é tocável.
+                style={estadoDePressao(styles.contactRemove, { escala: true, superficie: true })}
                 onPress={() => onRemove(index)}
                 accessibilityRole="button"
                 accessibilityLabel={`Remover contato ${contact.name}`}
@@ -233,6 +236,8 @@ export function FichaDeSaudeScreen({
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
   /** Câmera ou galeria — a pergunta só existe depois de decidir que quer uma foto. */
   const [escolhendoOrigem, setEscolhendoOrigem] = useState(false);
+  /** A foto da ficha ampliada sobre o formulário. */
+  const [vendoFoto, setVendoFoto] = useState(false);
   const { isPicking, pickPhoto } = usePhotoPicker("ficha-foto");
   const [dateOfBirthInput, setDateOfBirthInput] = useState(
     toDateInput(initialValue?.dateOfBirth ?? ""),
@@ -352,11 +357,19 @@ export function FichaDeSaudeScreen({
 
         <View style={styles.photoRow}>
           <Pressable
-            style={photoUri ? styles.photoFrame : styles.photoPlaceholder}
-            onPress={() => setEscolhendoOrigem(true)}
+            // Não responde enquanto a foto está sendo escolhida: o toque já foi aceito, e reagir
+            // de novo sugeriria que o primeiro não pegou.
+            style={estadoDePressao(photoUri ? styles.photoFrame : styles.photoPlaceholder, {
+              escala: !isPicking,
+              opacidade: !isPicking,
+            })}
+            /* Com foto, o toque amplia; sem foto, escolhe a origem. O link ao lado ("Trocar foto")
+               continua sendo o caminho da troca — antes os dois faziam a mesma coisa, e não havia
+               como simplesmente olhar a foto da ficha. */
+            onPress={() => (photoUri ? setVendoFoto(true) : setEscolhendoOrigem(true))}
             disabled={isPicking}
             accessibilityRole="button"
-            accessibilityLabel={photoUri ? "Trocar foto da ficha" : "Adicionar foto à ficha"}
+            accessibilityLabel={photoUri ? "Ver a foto da ficha" : "Adicionar foto à ficha"}
           >
             {photoUri ? (
               <FotoLocal uri={photoUri} style={styles.photo} />
@@ -364,11 +377,19 @@ export function FichaDeSaudeScreen({
               <Ionicons name="camera-outline" size={24} color={colors.onSurfaceVariant} />
             )}
           </Pressable>
-          <Pressable onPress={() => setEscolhendoOrigem(true)} disabled={isPicking} accessibilityRole="button">
+          <Pressable
+            style={estadoDePressao(styles.photoAcao, {
+              superficie: !isPicking,
+              opacidade: !isPicking,
+            })}
+            onPress={() => setEscolhendoOrigem(true)}
+            disabled={isPicking}
+            accessibilityRole="button">
             <Text style={styles.photoAddLabel}>{photoUri ? "Trocar foto" : "Adicionar foto"}</Text>
           </Pressable>
           {photoUri ? (
             <Pressable
+              style={estadoDePressao(styles.photoAcao, { superficie: true })}
               onPress={() => {
                 deletePersistedFile(photoUri);
                 setPhotoUri(null);
@@ -508,6 +529,12 @@ export function FichaDeSaudeScreen({
         title="Foto da ficha"
         onClose={() => setEscolhendoOrigem(false)}
         onEscolher={(origin) => void handlePickPhoto(origin)}
+      />
+
+      <VisualizadorDeMidia
+        uri={vendoFoto ? photoUri : null}
+        titulo="Foto da ficha"
+        onClose={() => setVendoFoto(false)}
       />
     </SafeAreaView>
   );

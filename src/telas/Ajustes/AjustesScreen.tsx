@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { Card, FotoLocal } from "@/ui";
 import { styles } from "./AjustesScreen.styles";
 
@@ -31,7 +31,8 @@ type LinhaProps = {
 
 function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
   return (
-    <Pressable style={styles.row} onPress={onPress} accessibilityRole="button">
+    // Linha de largura total: escurece, mas não encolhe — escalar faria o texto vizinho tremer.
+    <Pressable style={estadoDePressao(styles.row)} onPress={onPress} accessibilityRole="button">
       <View style={styles.rowIcon}>{icon}</View>
       <View style={styles.rowText}>
         <Text style={[styles.rowLabel, destrutiva && styles.rowLabelDestrutiva]}>{label}</Text>
@@ -69,7 +70,8 @@ export function AjustesScreen({
             {/* Ajustes é aba, mas também é destino do atalho de conta da Home — quem chegou por
                 lá espera poder voltar de onde veio, e não caçar a aba anterior na barra. */}
             <Pressable
-              style={styles.backButton}
+              // Ícone solto sobre o azul do hero: alvo autocontido, encolhe ao toque.
+              style={estadoDePressao(styles.backButton, { escala: true })}
               onPress={onBack}
               accessibilityRole="button"
               accessibilityLabel="Voltar">
@@ -78,7 +80,11 @@ export function AjustesScreen({
             <Text style={styles.heroTitle}>Ajustes</Text>
           </View>
 
-          <Pressable style={styles.identity} onPress={onEditProfile} accessibilityRole="button">
+          <Pressable
+            // O bloco de identidade ocupa a largura do hero: escurece sem encolher.
+            style={estadoDePressao(styles.identity)}
+            onPress={onEditProfile}
+            accessibilityRole="button">
             <View style={styles.avatar}>
               {photoUri ? (
                 <FotoLocal uri={photoUri} style={styles.avatarImage} />

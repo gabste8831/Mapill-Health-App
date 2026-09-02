@@ -16,7 +16,7 @@ import { dataEHoraPorExtenso, dataPorExtenso, diaEMesCurto } from "@/shared/data
 import { toLocalIsoDay } from "@/shared/date-input";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { resumirAviso } from "@/shared/rotulos-de-compromisso";
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
@@ -76,7 +76,7 @@ function ItemDeCompromisso({
             "toca e abre alguma coisa" não diz o que vai acontecer. */}
         <View style={styles.acoes}>
           <Pressable
-            style={styles.acaoBotao}
+            style={estadoDePressao(styles.acaoBotao, { escala: true, superficie: true })}
             onPress={onEdit}
             accessibilityRole="button"
             accessibilityLabel={`Ver ou editar ${appointment.title}`}
@@ -84,7 +84,7 @@ function ItemDeCompromisso({
             <Ionicons name="pencil-outline" size={20} color={colors.primary} />
           </Pressable>
           <Pressable
-            style={styles.acaoBotao}
+            style={estadoDePressao(styles.acaoBotao, { escala: true, superficie: true })}
             onPress={onDelete}
             accessibilityRole="button"
             accessibilityLabel={`Excluir ${appointment.title}`}
@@ -118,7 +118,7 @@ function ItemDeCompromisso({
           <Text style={styles.perguntaTexto}>Você foi?</Text>
           <View style={styles.botoesDeDesfecho}>
             <Pressable
-              style={styles.botaoDeDesfecho}
+              style={estadoDePressao(styles.botaoDeDesfecho, { escala: true })}
               onPress={() => onResponder("attended")}
               accessibilityRole="button"
               accessibilityLabel="Marcar que compareceu">
@@ -126,7 +126,7 @@ function ItemDeCompromisso({
               <Text style={styles.botaoDeDesfechoTexto}>Fui</Text>
             </Pressable>
             <Pressable
-              style={styles.botaoDeDesfecho}
+              style={estadoDePressao(styles.botaoDeDesfecho, { escala: true })}
               onPress={() => onResponder("missed")}
               accessibilityRole="button"
               accessibilityLabel="Marcar que não compareceu">
@@ -142,7 +142,8 @@ function ItemDeCompromisso({
           {/* A linha inteira é o toque: é por ela que se corrige um "não fui" marcado por engano,
               e que se acrescenta depois o que o médico disse. */}
           <Pressable
-            style={styles.desfecho}
+            // Linha inteira, não botão: escurece sem encolher.
+            style={estadoDePressao(styles.desfecho)}
             onPress={onRevisarDesfecho}
             accessibilityRole="button"
             accessibilityLabel="Alterar o que aconteceu neste compromisso">
@@ -225,14 +226,14 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
       ) : onRegistrar !== undefined ? (
         <View style={styles.acoesDaDose}>
           <Pressable
-            style={styles.botaoDaDose}
+            style={estadoDePressao(styles.botaoDaDose, { escala: true })}
             onPress={() => onRegistrar("confirmed")}
             accessibilityRole="button"
             accessibilityLabel={`Confirmar ${dose.medicationName} das ${dose.time}`}>
             <Ionicons name="checkmark" size={18} color={colors.primary} />
           </Pressable>
           <Pressable
-            style={styles.botaoDaDose}
+            style={estadoDePressao(styles.botaoDaDose, { escala: true })}
             onPress={() => onRegistrar("skipped")}
             accessibilityRole="button"
             accessibilityLabel={`Pular ${dose.medicationName} das ${dose.time}`}>

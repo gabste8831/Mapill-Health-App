@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Keyboard, Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
 import {
   horariosEmSerie,
@@ -190,7 +190,8 @@ export function SeletorDeHorarios({
         />
       ) : (
         <Pressable
-          style={styles.timeChipRow}
+          // A fila de fichinhas ocupa a largura da tela: escurece sem encolher.
+          style={estadoDePressao(styles.timeChipRow)}
           onPress={() => setSheetOpen(true)}
           accessibilityRole="button"
           accessibilityLabel={`Editar horários: ${values.map((value) => value.at).join(", ")}`}>
@@ -277,7 +278,7 @@ export function SeletorDeHorarios({
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>PRIMEIRO HORÁRIO</Text>
               <Pressable
-                style={styles.botaoDeHorario}
+                style={estadoDePressao(styles.botaoDeHorario)}
                 onPress={() => {
                   setRascunho(null);
                   setModo({ tipo: "relogioDaSerie" });

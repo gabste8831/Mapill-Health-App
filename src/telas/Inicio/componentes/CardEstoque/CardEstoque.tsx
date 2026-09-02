@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./CardEstoque.styles";
 
 type CardEstoqueProps = {
@@ -23,7 +23,8 @@ type CardEstoqueProps = {
 export function CardEstoque({ quantidade, onPress }: CardEstoqueProps) {
   return (
     <Pressable
-      style={styles.container}
+      // Card de largura total: escurece sem encolher.
+      style={estadoDePressao(styles.container)}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel="Abrir o estoque das suas medicações">

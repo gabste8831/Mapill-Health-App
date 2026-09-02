@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 
+import { estadoDePressao } from "@/shared/theme";
 import { styles } from "./CardEstoqueBaixo.styles";
 
 type CardEstoqueBaixoProps = {
@@ -33,7 +34,7 @@ export function CardEstoqueBaixo({
       {/* Só o caminho que resolve o aviso. O "ignorar lembrete" que existia aqui não tinha para
           onde ir: nada guardava a dispensa, e o card voltava igual na abertura seguinte. */}
       <Pressable
-        style={styles.primaryButton}
+        style={estadoDePressao(styles.primaryButton, { escala: true })}
         onPress={onAbrirEstoque}
         accessibilityRole="button"
         // O rótulo carrega o medicamento: "Abrir estoque" sozinho, lido longe do card, não diz de

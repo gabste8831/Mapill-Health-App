@@ -107,6 +107,19 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  /**
+   * O alvo em volta dos links de foto ("Trocar foto", "Remover").
+   *
+   * O texto sozinho tinha a altura da própria linha — perto de 20px, menos da metade dos 44 que um
+   * alvo de dedo pede. O padding aqui é o que dá área ao toque **e** o que permite o fundo aparecer
+   * ao pressionar: sem contêiner, não há onde pintar.
+   */
+  photoAcao: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.full,
+  },
   photoAddLabel: {
     ...typography.label,
     color: colors.primary,

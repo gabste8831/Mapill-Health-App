@@ -9,6 +9,7 @@ import {
   type PeriodoDeAdesao,
 } from "@/hooks/use-adherence-report";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
+import { estadoDePressao } from "@/shared/theme";
 import type { AdesaoPorMedicamento } from "@/domain/use-cases/resumir-adesao";
 import { useRelatorioPdf } from "@/hooks/use-relatorio-pdf";
 import {
@@ -242,7 +243,8 @@ export function AdesaoScreen() {
               existe, e a linha a mais só empurraria o botão para baixo. */}
           {medicamentos.length > 1 ? (
             <Pressable
-              style={styles.filtro}
+              // Linha de largura total: escurece sem encolher.
+              style={estadoDePressao(styles.filtro)}
               onPress={() => setSelecionando(true)}
               accessibilityRole="button"
               accessibilityLabel={`Medicamentos do relatório: ${resumoDaSelecao}. Toque para escolher.`}

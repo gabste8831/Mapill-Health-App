@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import type { ItemDePermissao } from "@/notifications/permissoes-de-alarme";
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./PainelDePermissoes.styles";
 
 type PainelDePermissoesProps = {
@@ -60,7 +60,8 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
         {pendentes.map((item) => (
           <Pressable
             key={item.chave}
-            style={styles.item}
+            // Linha de largura total que abre uma tela do sistema: escurece sem encolher.
+            style={estadoDePressao(styles.item)}
             onPress={() => void item.abrir()}
             accessibilityRole="button"
             accessibilityLabel={`${item.titulo}. ${item.descricao} Toque para abrir as configurações.`}>
@@ -83,7 +84,10 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
       {/* Só quando o diálogo ainda pode abrir. Depois de negada, este botão não faria nada — e um
           botão que não faz nada é pior que botão nenhum. */}
       {onPedirTudo !== undefined ? (
-        <Pressable onPress={onPedirTudo} accessibilityRole="button" style={styles.botaoPedir}>
+        <Pressable
+          onPress={onPedirTudo}
+          accessibilityRole="button"
+          style={estadoDePressao(styles.botaoPedir, { escala: true })}>
           <Text style={styles.botaoPedirTexto}>Permitir avisos</Text>
         </Pressable>
       ) : null}

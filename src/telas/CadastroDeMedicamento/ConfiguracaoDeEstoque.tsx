@@ -9,6 +9,7 @@ import {
   type OptionGroupOption,
 } from "@/ui";
 import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
+import { estadoDePressao } from "@/shared/theme";
 import { styles } from "./CadastroDeMedicamento.styles";
 
 const LEAD_DAYS_OPTIONS: OptionGroupOption<string>[] = [
@@ -117,7 +118,10 @@ export function ConfiguracaoDeEstoque({
         ) : null}
 
         <Button label="Pronto" onPress={onClose} />
-        <Pressable onPress={onDisable} accessibilityRole="button">
+        <Pressable
+          style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
+          onPress={onDisable}
+          accessibilityRole="button">
           <Text style={styles.textoDeSaida}>Não quero controlar o estoque deste remédio</Text>
         </Pressable>
       </View>

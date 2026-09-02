@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { estadoDePressao } from "@/shared/theme";
 import { Card, Header } from "@/ui";
 import { styles } from "./EscolhaDeCadastroScreen.styles";
 
@@ -42,7 +43,12 @@ export function EscolhaDeCadastroScreen({
 
         <View style={styles.options}>
           {options.map((option) => (
-            <Pressable key={option.label} onPress={option.onPress} accessibilityRole="button">
+            <Pressable
+              key={option.label}
+              // O alvo é o card inteiro, de largura total: escurece sem encolher.
+              style={estadoDePressao(undefined)}
+              onPress={option.onPress}
+              accessibilityRole="button">
               <Card>
                 <View style={styles.optionRow}>
                   <View style={styles.optionIcon}>{option.icon}</View>

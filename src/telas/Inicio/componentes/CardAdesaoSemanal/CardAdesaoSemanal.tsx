@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { barRowHeight, styles } from "./CardAdesaoSemanal.styles";
 
 type DiaDeAdesao = {
@@ -28,7 +28,9 @@ type CardAdesaoSemanalProps = {
 export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesaoSemanalProps) {
   return (
     <Pressable
-      style={styles.container}
+      // Card de largura total, e só responde quando há relatório a abrir: reagir ao toque sem
+      // `onAbrirRelatorio` prometeria uma navegação que não acontece.
+      style={estadoDePressao(styles.container, { opacidade: onAbrirRelatorio !== undefined })}
       onPress={onAbrirRelatorio}
       disabled={onAbrirRelatorio === undefined}
       accessibilityRole={onAbrirRelatorio ? "button" : undefined}
