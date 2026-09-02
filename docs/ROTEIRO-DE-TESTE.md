@@ -4,11 +4,19 @@
 >
 > | | O que é | Quando | Tempo |
 > |---|---|---|---|
-> | **[Parte 1 — Integridade](#parte-1--integridade)** | O que pode estar **quebrado**: treze blocos que nunca rodaram em aparelho | **Primeiro** | ~1 h |
+> | **[Parte 1 — Integridade](#parte-1--integridade)** | O que pode estar **quebrado** | **Primeiro** | ~1 h |
 > | **[Parte 2 — Passada geral](#parte-2--passada-geral)** | O app inteiro, do zero, como quem nunca o abriu | Antes da defesa | ~2 h |
 >
-> A Parte 1 existe porque **treze blocos foram escritos entre 29 e 31/08 sem nenhuma execução em
-> aparelho**. Ela não cobre o app todo de propósito: cobre o que tem chance real de estar quebrado.
+> A Parte 1 não cobre o app todo de propósito: cobre o que tem chance real de estar quebrado.
+>
+> **Rodada de 02/09.** Duas coisas mudaram desde a última execução, e são as duas primeiras a
+> testar:
+>
+> - O **alarme virou tela cheia** com som contínuo (blocos 0 e 1). Até aqui ele era uma notificação
+>   de alta prioridade, que toca uma vez e para — o que não é um despertador.
+> - As **permissões viraram um painel só** (bloco 0), com as quatro que o alarme precisa. Duas delas
+>   nunca tinham sido pedidas, e são justamente as causas de "o aviso não chegou" que ninguém
+>   diagnostica sozinho: alarme exato e economia de bateria.
 
 ## Como reportar
 
@@ -27,13 +35,14 @@ resto ok
 
 ## Antes de começar
 
-⚠️ **Build nova, e desinstale a anterior.** Três motivos que se somam:
+⚠️ **Build nova, e desinstale a anterior.** Quatro motivos que se somam:
 
-1. O `app.json` ganhou permissões (`POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`),
-   e permissão não entra por recarga do Metro.
-2. Os canais de notificação subiram para **`v3`**. Um canal já criado fica **congelado** no
-   aparelho: som e importância não mudam por atualização. Instalar por cima manteria o alarme mudo.
-3. `expo-camera` é dependência nativa (bloco 8).
+1. Permissões novas no `app.json` (`USE_FULL_SCREEN_INTENT`, `ACCESS_NOTIFICATION_POLICY`), e
+   permissão não entra por recarga do Metro.
+2. **Notifee** é dependência nativa — é ele que abre o alarme em tela cheia.
+3. Os canais subiram para **`v4`**. Um canal já criado fica **congelado** no aparelho: som e
+   importância não mudam por atualização. Instalar por cima manteria o alarme mudo.
+4. `expo-camera` é dependência nativa (bloco 8).
 
 ⚠️ **Aparelho físico.** Emulador não serve para os blocos 1, 2 e 3 — o que está em jogo é o
 comportamento do sistema com o app fechado e sob economia de bateria.
@@ -42,42 +51,76 @@ comportamento do sistema com o app fechado e sob economia de bateria.
 npx expo start --dev-client
 ```
 
-**Confirme em 10 segundos que é a build certa:** cadastre qualquer remédio com lembrete **Alarme**.
-O Android tem que **pedir permissão de notificações** na hora. Se não pedir, a build é antiga.
+**Confirme em 10 segundos que é a build certa:** abra o app com um remédio já cadastrado com
+lembrete. Deve aparecer o **painel de permissões** na Home, listando o que falta autorizar. Se não
+aparecer nada e o alarme não tocar, a build é antiga.
 
 ---
 ---
 
 # PARTE 1 — Integridade
 
-## 1 — O alarme dispara com o app fechado 🔬
+## 0 — As permissões 🔴
 
-**A promessa central do app, e o maior risco técnico do projeto.** Na rodada de 29/08 ele chegou
-**mudo** — a causa era um campo `sound` que fazia o Android procurar um arquivo inexistente.
+**Faça primeiro.** Sem elas nada abaixo funciona, e o app agora conduz o processo inteiro.
 
-**1.1** Cadastre `Teste Fechado`, dose `1`, Todo dia, 1×, horário **daqui a 3 min**, uso contínuo,
+**0.1** Abra o app com pelo menos um remédio cadastrado com lembrete.
+
+> ✅ 🔴 Painel na Home listando o que falta autorizar, **antes da agenda**.
+> ✅ Cada linha diz a **consequência** ("Sem isto o aviso pode atrasar dezenas de minutos"), e não o
+> nome técnico da permissão.
+> ✅ As que impedem o alarme de tocar trazem o selo **OBRIGATÓRIO**.
+
+**0.2** Toque em cada linha e conceda.
+
+> ✅ 🔴 Cada uma abre a **tela certa** do Android — não a tela genérica do app.
+> ✅ 🔴 Voltando ao Mapill, a linha concedida **some sozinha** do painel.
+
+**0.3** Com tudo concedido:
+
+> ✅ 🔴 O painel **desaparece por completo**.
+
+🔬 **Anote:** quantas das quatro seu aparelho pediu? (Depende da versão do Android e do fabricante.)
+
+---
+
+## 1 — O alarme em tela cheia 🔴🔬
+
+**O diferencial do app, e o que motivou esta build.** Até aqui o "alarme" era uma notificação de
+alta prioridade — tocava uma vez e parava. Agora é um despertador de verdade: abre a tela, toca em
+loop, e alguém precisa vir desligar.
+
+**1.1** Cadastre `Teste Alarme`, dose `1`, Todo dia, 1×, horário **daqui a 3 min**, uso contínuo,
 lembrete **Alarme**.
 
-**1.2** **Feche o app completamente** (recentes, deslize para fora). Espere.
+**1.2** **Feche o app** completamente (recentes, deslize para fora) e **bloqueie o celular**. Espere.
 
-> ✅ A notificação **chega com o app fechado**.
-> ✅ Aparece **por cima da tela** (heads-up), não só na barra.
-> ✅ **Tem som e vibração.** ← *era isto que estava quebrado*
-> ✅ Título **"Hora do seu remédio"**, corpo **`Teste Fechado: 1 comprimido`**.
-> ✅ Mostra o **ícone do app**, não o triângulo genérico.
-> ❌ Título `HH:MM — Teste Fechado` significa build antiga.
+> ✅ 🔴 **Uma tela azul ocupa o aparelho inteiro**, por cima da tela de bloqueio.
+> ✅ 🔴 **O som toca em loop** e não para sozinho.
+> ✅ 🔴 Mostra a hora em número grande e o nome do remédio com a dose.
+> ✅ 🔴 Tem os botões **Silenciar**, **Tomei**, **Pulei** e **Responder depois**.
+> ❌ Se vier só uma notificação na barra, a tela cheia não subiu — anote e siga para o 1.5.
 
-🔬 **Anote:** chegou no horário exato? Atrasou quanto?
+🔬 **Anote:** a tela apareceu com o celular **bloqueado**, ou só depois de desbloquear?
 
-**1.3** Ative o **Não Perturbe** do Android. Cadastre um com **Alarme** e outro com **Notificação**,
-ambos para daqui a 3 min. Feche o app.
+**1.3** 🔴 Toque em **Silenciar**.
 
-> ✅ O de **Notificação** chega silencioso.
-> ✅ O de **Alarme** **toca mesmo com o Não Perturbe ligado**.
-> ❌ Se os dois ficarem silenciosos, `bypassDnd` não funcionou — as duas opções viraram a mesma
-> coisa, e o texto do app precisa mudar.
+> ✅ 🔴 O som **para na hora**.
+> ✅ 🔴 A tela **continua aberta**, dizendo que a dose ainda espera resposta.
+> ✅ O botão some — não há o que silenciar duas vezes.
 
-🔬 **Anote:** a diferença foi perceptível?
+**1.4** 🔴 Toque em **Tomei**.
+
+> ✅ 🔴 A tela fecha.
+> ✅ 🔴 Abrindo o app, a dose aparece **confirmada** na Home.
+> ✅ 🔴 O estoque descontou.
+
+**1.5** Cadastre outro para daqui a 3 min, com lembrete **Notificação** (não alarme). Feche o app.
+
+> ✅ 🔴 Chega uma **notificação comum** na barra — **sem** tela cheia.
+> ✅ É a diferença entre as duas opções: uma avisa, a outra acorda.
+
+🔬 **Anote:** a diferença entre os dois modos ficou clara?
 
 ---
 
@@ -86,8 +129,11 @@ ambos para daqui a 3 min. Feche o app.
 Aqui estavam dois defeitos de 29/08: cinco toques em "Adiar" geravam **cinco** lembretes, e o
 estoque descontava 1 em vez da dose.
 
-**2.1** Cadastre `Teste Botao`, dose **2**, daqui a 3 min, estoque **20**, Alarme. Feche o app.
-Quando chegar, toque em **Tomei**.
+⚠️ **Use lembrete `Notificação` neste bloco inteiro.** Os botões de ação vivem na notificação, e o
+modo `Alarme` agora abre a tela cheia em vez de mostrar uma — o que ele faz está no bloco 1.
+
+**2.1** Cadastre `Teste Botao`, dose **2**, daqui a 3 min, estoque **20**, **Notificação**. Feche o
+app. Quando chegar, toque em **Tomei**.
 
 > ✅ A notificação some e o app **não abre**.
 > ✅ Abrindo depois, a dose está **confirmada** na Home.
@@ -113,9 +159,13 @@ Quando chegar, toque em **Tomei**.
 
 **O pior defeito possível: lembrete de um remédio que a pessoa já parou de tomar.**
 
-**3.1** Cadastre `Vai Sumir`, daqui a 5 min, Alarme. **Exclua o medicamento.** Feche o app.
+Este bloco ficou **mais importante** nesta build: agora existem dois agendadores (o Notifee para o
+alarme, o `expo-notifications` para o resto), e cada um só enxerga a própria lista. Se o
+cancelamento esquecer um dos dois lados, o alarme de um tratamento excluído continua tocando.
 
-> ✅ **A notificação NÃO chega.**
+**3.1** Cadastre `Vai Sumir`, daqui a 5 min, **Alarme**. **Exclua o medicamento.** Feche o app.
+
+> ✅ 🔴 **Nada acontece no horário** — nem tela cheia, nem notificação.
 
 **3.2** Cadastre `Vai Mudar`, daqui a 4 min, Alarme. **Edite** para daqui a 10 min. Feche o app.
 
@@ -130,22 +180,23 @@ nada**. Feche o app.
 
 ## 4 — Vários remédios no mesmo horário
 
-**4.1** Cadastre **dois** para daqui a 4 min: `Losartana` (dose 1) e `Metformina` (dose 2), Alarme
-nos dois. Feche o app.
+**4.1** Cadastre **dois** para daqui a 4 min: `Losartana` (dose 1) e `Metformina` (dose 2),
+**Alarme** nos dois. Feche o app.
 
-> ✅ Chega **UMA notificação só**, não duas.
-> ✅ Título **"Hora dos seus remédios (2)"**.
-> ✅ Corpo com uma linha por remédio: `Losartana: 1 comprimido` / `Metformina: 2 comprimidos`.
-> ✅ O botão diz **"Tomei todas"**.
+> ✅ 🔴 Abre **UMA tela de alarme só**, não duas.
+> ✅ 🔴 Ela lista **os dois remédios**, cada um com sua dose.
+> ✅ Os botões dizem **"Tomei todas"** e **"Pulei todas"**.
 
-**4.2** Toque no **corpo** da notificação (não nos botões).
+**4.2** Toque em **Tomei todas**. Vá ao estoque.
 
-> ✅ Abre direto na tela **"Hora do remédio"**, não na Home.
-> ✅ Cada um com **Tomei** e **Pulei** próprios.
+> ✅ 🔴 Os **dois** descontaram.
 
-**4.3** **Tomei** só na Losartana, **Pulei** na Metformina. Vá ao estoque.
+**4.3** Repita o cadastro dos dois, agora com **Notificação**, e toque no **corpo** da notificação
+(não nos botões).
 
-> ✅ Só a Losartana descontou. Pulada não consome.
+> ✅ Chega **uma notificação só**, título **"Hora dos seus remédios (2)"**, uma linha por remédio.
+> ✅ Abre a tela **"Hora do remédio"**, com **Tomei** e **Pulei** próprios de cada um.
+> ✅ **Tomei** só na Losartana e **Pulei** na Metformina: só a Losartana desconta.
 
 ---
 
@@ -291,11 +342,14 @@ alergia na ficha.
 
 Blocos pequenos que nunca rodaram. Um passo cada.
 
-**10.1 — Aviso de permissão (Home).** Desligue as notificações do Mapill nas configurações do
-Android e volte à Home.
+**10.1 — Permissão revogada (Home).** Com tudo concedido (bloco 0), **desligue as notificações** do
+Mapill nas configurações do Android e volte à Home.
 
-> ✅ Card **amarelo** no topo, **antes da agenda**, com **"Religar os avisos"**.
-> ✅ Religando, ele **some sozinho**, sem reabrir o app.
+> ✅ 🔴 O painel de permissões **reaparece**, agora em **vermelho**, dizendo que o alarme **não vai
+> tocar** — porque falta uma obrigatória.
+> ✅ 🔴 Religando a permissão e voltando, ele **some sozinho**, sem reabrir o app.
+> ✅ 🔴 Excluindo **todos** os remédios com lembrete, o painel **não aparece** — sem tratamento
+> esperando aviso, não há o que cobrar.
 
 **10.2 — "Ignorar por agora" (C2).** Abra a tela do horário de uma dose.
 
