@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, FlatList, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { excluirMedicamento } from "@/hooks/use-medication-registration";
@@ -18,7 +18,7 @@ import {
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
 import { useSync } from "@/hooks/use-sync";
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import {
   AvisoDePendencias,
   Button,
@@ -30,6 +30,7 @@ import {
   IconButton,
   SearchField,
   SeletorDeOrdem,
+  VisualizadorDeMidia,
   type OpcaoDeOrdem,
 } from "@/ui";
 import { styles } from "./RemediosScreen.styles";
@@ -46,9 +47,11 @@ type ItemDeRemedioProps = {
   /** Ausente quando não há tratamento pra editar — o card fica inerte, e o texto explica. */
   onEdit?: () => void;
   onDelete: () => void;
+  /** Amplia a foto da caixa. Só chamado quando existe foto. */
+  onVerFoto: (uri: string, nome: string) => void;
 };
 
-function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
+function ItemDeRemedio({ item, onEdit, onDelete, onVerFoto }: ItemDeRemedioProps) {
   const { medication, prescription, inventory } = item;
   // Com a dose junto quando ela varia por horário: é o caso em que a hora sozinha esconde
   // justamente o que se quer conferir na fichinha.
@@ -70,7 +73,15 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
          * inventar superfície nova.
          */}
         {medication.photoUri !== null ? (
-          <FotoLocal uri={medication.photoUri} style={styles.photo} />
+          /* A foto da caixa existe para responder "é este o remédio?", e numa miniatura de 56px
+             essa pergunta às vezes não se responde — caixas da mesma família são quase iguais. */
+          <Pressable
+            style={estadoDePressao(undefined, { escala: true })}
+            onPress={() => onVerFoto(medication.photoUri ?? "", medication.name)}
+            accessibilityRole="button"
+            accessibilityLabel={`Ver a foto de ${medication.name}`}>
+            <FotoLocal uri={medication.photoUri} style={styles.photo} />
+          </Pressable>
         ) : (
           <View style={[styles.photo, styles.photoVazia]}>
             <Ionicons name="medkit-outline" size={24} color={colors.primary} />
@@ -171,6 +182,8 @@ export function RemediosScreen() {
   const sync = useSync();
   const [busca, setBusca] = useState("");
   const [ordem, setOrdem] = useState<OrdemDeRemedios>("alfabetica");
+  /** A foto da caixa ampliada sobre a lista — o título é o nome do remédio. */
+  const [midiaAberta, setMidiaAberta] = useState<{ uri: string; titulo: string } | null>(null);
 
   // Sobre `items`, e não sobre `visiveis`: o acesso ao estoque não pode sumir porque a busca em
   // curso não casou com nenhum remédio controlado.
@@ -275,6 +288,7 @@ export function RemediosScreen() {
           renderItem={({ item }) => (
             <ItemDeRemedio
               item={item}
+              onVerFoto={(uri, nome) => setMidiaAberta({ uri, titulo: nome })}
               onEdit={
                 item.prescription === null
                   ? undefined
@@ -344,6 +358,12 @@ export function RemediosScreen() {
       <Fab
         accessibilityLabel="Cadastrar medicação"
         onPress={() => router.push("/cadastro/medicamento")}
+      />
+
+      <VisualizadorDeMidia
+        uri={midiaAberta?.uri ?? null}
+        titulo={midiaAberta?.titulo ?? ""}
+        onClose={() => setMidiaAberta(null)}
       />
     </SafeAreaView>
   );

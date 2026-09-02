@@ -7,6 +7,14 @@ export type FotoLocalProps = {
   /** Caminho no diretório de documentos do app, vindo de `persistPickedFile`. */
   uri: string;
   style?: StyleProp<ImageStyle>;
+  /**
+   * Como a imagem preenche o espaço. `cover` (padrão) para miniatura, onde o corte não custa nada
+   * e o enquadramento cheio é o que faz a lista ficar alinhada.
+   *
+   * `contain` para quando a imagem é **lida** e não reconhecida — a receita ampliada, em que cortar
+   * a borda pode cortar justamente a posologia escrita à mão no canto.
+   */
+  contentFit?: "cover" | "contain";
 };
 
 /**
@@ -24,7 +32,7 @@ export type FotoLocalProps = {
  * e reler custa menos que exibir a imagem errada num app onde a foto serve para **reconhecer o
  * remédio certo**.
  */
-export function FotoLocal({ uri, style }: FotoLocalProps) {
+export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) {
   return (
     <Image
       /**
@@ -45,7 +53,7 @@ export function FotoLocal({ uri, style }: FotoLocalProps) {
       // O cinza vem antes do `style` de quem chama, que pode sobrescrevê-lo — é só o piso para o
       // quadrado nunca ficar transparente enquanto a imagem carrega.
       style={[{ backgroundColor: colors.surfaceContainer }, style]}
-      contentFit="cover"
+      contentFit={contentFit}
       cachePolicy="none"
       recyclingKey={uri}
       /**
@@ -54,7 +62,7 @@ export function FotoLocal({ uri, style }: FotoLocalProps) {
        * branco lê como "não funcionou" — foi o que fez a miniatura parecer quebrada numa vez e
        * funcionar na outra, conforme a cópia terminasse antes ou depois do render.
        */
-      placeholderContentFit="cover"
+      placeholderContentFit={contentFit}
       transition={150}
     />
   );

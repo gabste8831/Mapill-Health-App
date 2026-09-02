@@ -410,5 +410,18 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     textAlign: "center",
   },
+  /**
+   * O alvo em volta de um link de texto solto (a saída do estoque, "Ler os Termos").
+   *
+   * Estes são `Text` dentro de `Pressable` sem contêiner próprio: a área tocável tinha a altura da
+   * linha, e não havia superfície onde pintar o toque. O padding resolve as duas coisas de uma vez
+   * — alvo de dedo, e algo que responda quando o dedo chega.
+   */
+  alvoDeLink: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.md,
+  },
 
 });

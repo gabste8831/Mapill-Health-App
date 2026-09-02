@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useMemo, useRef, useState } from "react";
+import { useRouter } from "expo-router";
+import { useMemo, useState } from "react";
 import { Alert, Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -55,7 +55,8 @@ import {
 } from "@/shared/number-input";
 import { deletePersistedFile } from "@/shared/persist-picked-file";
 import { capitalizarNome, MEDICATION_FORM_LABELS, UNIT_LABELS } from "@/shared/rotulos-de-medicamento";
-import { colors } from "@/shared/theme";
+import { abrirDocumento } from "@/shared/abrir-anexo";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
   Button,
@@ -76,6 +77,7 @@ import {
   type SelectOption,
   type ToggleChipOption,
   RodapeDeFormulario,
+  VisualizadorDeMidia,
 } from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
 import { ConfiguracaoDeEstoque } from "./ConfiguracaoDeEstoque";
@@ -503,33 +505,16 @@ export function FormularioDeMedicamentoScreen({
   const [isReminderSheetOpen, setReminderSheetOpen] = useState(false);
 
   /**
-   * O estado do popup de lembrete que precisa **sobreviver à ida aos termos**. Mora aqui, e não
-   * dentro do popup, justamente porque o popup desmonta ao navegar: guardado lá, ele renasceria
-   * fechado e no começo do texto.
+   * Aqui viviam `voltarParaLembrete` (uma ref) e `ajudaDeAlertasAberta`, com um `useFocusEffect`
+   * para reabrir o popup na volta dos termos.
    *
-   * `voltarParaLembrete` é a intenção pendente, consumida no foco seguinte; `ajudaDeAlertasAberta`
-   * é onde a leitura estava.
+   * Os três existiam por uma razão só: a ajuda morava **dentro** do popup, e ler os termos exigia
+   * fechá-lo para navegar — dois modais empilhados travam a tela no Android. Era preciso lembrar
+   * que ele estava aberto, em que ponto a leitura parou, e remontar tudo no foco seguinte.
+   *
+   * Com a ajuda numa rota própria dentro do mesmo stack do cadastro, não há estado a preservar: a
+   * navegação é um `push` comum e o voltar do Android desfaz sozinho.
    */
-  const voltarParaLembrete = useRef(false);
-  const [ajudaDeAlertasAberta, setAjudaDeAlertasAberta] = useState(false);
-
-  /**
-   * A volta dos termos é o retorno do foco. Consome a intenção no mesmo passo em que a atende,
-   * senão o popup reabriria em toda visita posterior à tela.
-   *
-   * A intenção mora numa **ref**, e não em estado: ela não pinta nada na tela, e como estado ela
-   * obrigava o callback a depender dela — dependência que muda a cada consumo. Ref é o que este
-   * dado sempre foi: um recado de uma navegação para a seguinte.
-   *
-   * Sem `useCallback`: com o React Compiler ligado, a memoização é dele. Escrevê-la à mão aqui
-   * apenas o impedia de fazer o trabalho, e era o que o lint vinha apontando.
-   */
-  useFocusEffect(() => {
-    if (!voltarParaLembrete.current) return;
-    voltarParaLembrete.current = false;
-    setReminderSheetOpen(true);
-  });
-
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
   const [attachmentUri, setAttachmentUri] = useState<string | null>(
     initialValue?.attachmentUri ?? null,
@@ -967,6 +952,36 @@ export function FormularioDeMedicamentoScreen({
     else if (alvo === "receita") await pick(prescriptionPhoto, guardarFoto, attachmentUri, origin);
   }
 
+  /** A mídia aberta em tela cheia, ou `null`. Só imagens — PDF vai para o leitor do sistema. */
+  const [midiaAberta, setMidiaAberta] = useState<{ uri: string; titulo: string } | null>(null);
+
+  /**
+   * O toque no quadrado da receita, que faz três coisas diferentes conforme o que há lá.
+   *
+   * Sem anexo, pergunta a origem. Com **imagem**, amplia aqui mesmo. Com **PDF**, entrega ao leitor
+   * do aparelho — não dá para renderizá-lo sem dependência nativa, e o leitor do sistema faz melhor
+   * de qualquer forma (zoom, páginas, imprimir, encaminhar ao médico).
+   */
+  async function verReceita() {
+    if (attachmentUri === null) {
+      setOrigemPendente("receita");
+      return;
+    }
+
+    if (attachmentKind === "image") {
+      setMidiaAberta({ uri: attachmentUri, titulo: "Receita médica" });
+      return;
+    }
+
+    const abriu = await abrirDocumento(attachmentUri);
+    if (!abriu) {
+      Alert.alert(
+        "Não foi possível abrir",
+        "Nenhum aplicativo deste aparelho abre PDF. O arquivo continua guardado aqui.",
+      );
+    }
+  }
+
   const horariosDeHojeDescartados = useMemo(
     () =>
       schedule === null || doseUnit === null || !isScheduleComplete
@@ -1290,7 +1305,10 @@ export function FormularioDeMedicamentoScreen({
                   return (
                     <Pressable
                       key={weekday.value}
-                      style={[styles.weekday, isSelected && styles.weekdaySelected]}
+                      // Fichinha autocontida, como um chip: encolhe ao toque.
+                      style={estadoDePressao([styles.weekday, isSelected && styles.weekdaySelected], {
+                        escala: true,
+                      })}
                       onPress={() => toggleWeekday(weekday.value)}
                       // `checkbox` e não `button`: são sete opções que se acumulam, e o leitor
                       // anuncia "marcado/desmarcado" em vez de deixar o estado só no preenchimento
@@ -1450,7 +1468,7 @@ export function FormularioDeMedicamentoScreen({
                 />
               ) : (
                 <Pressable
-                  style={styles.rowValue}
+                  style={estadoDePressao(styles.rowValue)}
                   onPress={() => setAlteraInicio(true)}
                   accessibilityRole="button"
                   accessibilityLabel="Alterar a data de início do tratamento">
@@ -1592,7 +1610,7 @@ export function FormularioDeMedicamentoScreen({
               {tracksStock ? (
                 <>
                   <Pressable
-                    style={[styles.rowValue, styles.rowValueAtivo]}
+                    style={estadoDePressao([styles.rowValue, styles.rowValueAtivo])}
                     onPress={() => setStockSheetOpen(true)}
                     accessibilityRole="button"
                     // Sem rótulo, o leitor concatena os filhos e anuncia "Controle ativo Editar",
@@ -1645,11 +1663,19 @@ export function FormularioDeMedicamentoScreen({
 
               <View style={styles.photoRow}>
                 <Pressable
-                  style={photoUri ? styles.photoFrame : styles.photoPlaceholder}
-                  onPress={() => setOrigemPendente("caixa")}
+                  style={estadoDePressao(photoUri ? styles.photoFrame : styles.photoPlaceholder, {
+                    escala: !boxPhoto.isPicking,
+                    opacidade: !boxPhoto.isPicking,
+                  })}
+                  /* Com foto, o toque **vê**; sem foto, escolhe a origem. Antes o quadrado abria o
+                     seletor nos dois casos, então não havia como olhar a foto já anexada sem
+                     substituí-la — e o link ao lado ("Trocar foto da caixa") já cobre a troca. */
+                  onPress={() =>
+                    photoUri ? setMidiaAberta({ uri: photoUri, titulo: "Foto da caixa" }) : setOrigemPendente("caixa")
+                  }
                   disabled={boxPhoto.isPicking}
                   accessibilityRole="button"
-                  accessibilityLabel="Foto da embalagem">
+                  accessibilityLabel={photoUri ? "Ver a foto da embalagem" : "Adicionar foto da embalagem"}>
                   {photoUri ? (
                     <FotoLocal uri={photoUri} style={styles.photo} />
                   ) : (
@@ -1662,6 +1688,7 @@ export function FormularioDeMedicamentoScreen({
                 </Pressable>
                 <View style={styles.photoTextGroup}>
                   <Pressable
+                    style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
                     onPress={() => setOrigemPendente("caixa")}
                     accessibilityRole="button">
                     <Text style={styles.photoAddLabel}>
@@ -1684,11 +1711,23 @@ export function FormularioDeMedicamentoScreen({
                   primeiro pela galeria. */}
               <View style={styles.photoRow}>
                 <Pressable
-                  style={attachmentUri ? styles.photoFrame : styles.photoPlaceholder}
-                  onPress={() => setOrigemPendente("receita")}
+                  style={estadoDePressao(
+                    attachmentUri ? styles.photoFrame : styles.photoPlaceholder,
+                    {
+                      escala: !prescriptionPhoto.isPicking && !prescriptionFile.isPicking,
+                      opacidade: !prescriptionPhoto.isPicking && !prescriptionFile.isPicking,
+                    },
+                  )}
+                  /* A receita é o anexo que existe para ser **lido** — e era justamente o único
+                     que não dava para abrir: o toque no quadrado ia direto ao seletor de arquivo.
+                     Imagem abre no visualizador; PDF vai para o leitor do aparelho, que tem zoom e
+                     rolagem de páginas que uma camada nossa não teria. */
+                  onPress={() => void verReceita()}
                   disabled={prescriptionPhoto.isPicking || prescriptionFile.isPicking}
                   accessibilityRole="button"
-                  accessibilityLabel="Anexo da receita médica">
+                  accessibilityLabel={
+                    attachmentUri === null ? "Adicionar anexo da receita médica" : "Ver a receita médica"
+                  }>
                   {attachmentUri !== null && attachmentKind === "image" ? (
                     <FotoLocal uri={attachmentUri} style={styles.photo} />
                   ) : (
@@ -1702,6 +1741,9 @@ export function FormularioDeMedicamentoScreen({
                 <View style={styles.photoTextGroup}>
                   {attachmentUri === null ? (
                     <Pressable
+                      style={estadoDePressao(styles.alvoDeLink, {
+                        superficie: !prescriptionPhoto.isPicking && !prescriptionFile.isPicking,
+                      })}
                       onPress={() => setOrigemPendente("receita")}
                       disabled={prescriptionPhoto.isPicking || prescriptionFile.isPicking}
                       accessibilityRole="button">
@@ -1713,11 +1755,15 @@ export function FormularioDeMedicamentoScreen({
                     // meio disso perdia a validade e o aviso de renovação já preenchidos.
                     <View style={styles.acoesDeAnexo}>
                       <Pressable
+                        style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
                         onPress={() => setOrigemPendente("receita")}
                         accessibilityRole="button">
                         <Text style={styles.photoAddLabel}>Alterar anexo</Text>
                       </Pressable>
-                      <Pressable onPress={removerReceita} accessibilityRole="button">
+                      <Pressable
+                        style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
+                        onPress={removerReceita}
+                        accessibilityRole="button">
                         <Text style={styles.photoRemoveLabel}>
                           {attachmentKind === "document" ? "Remover receita" : "Remover foto"}
                         </Text>
@@ -1776,7 +1822,7 @@ export function FormularioDeMedicamentoScreen({
                 <Text style={styles.sectionTitle}>LEMBRETE</Text>
                 {reminderMode !== null ? (
                   <Pressable
-                    style={[styles.rowValue, styles.rowValueAtivo]}
+                    style={estadoDePressao([styles.rowValue, styles.rowValueAtivo])}
                     onPress={() => setReminderSheetOpen(true)}
                     accessibilityRole="button"
                     accessibilityLabel={`Editar o lembrete, hoje em ${REMINDER_LABELS[reminderMode]}`}>
@@ -1889,22 +1935,21 @@ export function FormularioDeMedicamentoScreen({
         visible={isReminderSheetOpen}
         value={reminderMode}
         onChange={setReminderMode}
-        onClose={() => {
+        onClose={() => setReminderSheetOpen(false)}
+        /* Fecha o popup e empurra a ajuda no **mesmo** stack do cadastro: rota dentro do modal que
+           já está aberto, e não um segundo modal por cima (que no Android trava a tela). O botão de
+           voltar traz de volta ao formulário; o popup reabre com um toque, e não há mais estado de
+           leitura para preservar no caminho. */
+        onAbrirAjuda={() => {
           setReminderSheetOpen(false);
-          setAjudaDeAlertasAberta(false);
+          router.push("/cadastro/ajuda-de-alertas");
         }}
-        ajudaAberta={ajudaDeAlertasAberta}
-        onAjudaToggle={setAjudaDeAlertasAberta}
-        /* Fecha o popup para navegar — dois modais empilhados no Android é caminho para tela
-           travada —, mas **guarda que ele estava aberto** e reabre na volta, com o acordeão no
-           mesmo estado. Quem toca em "ler os termos" dentro da ajuda está no meio de uma leitura;
-           devolver para o formulário nu perde o lugar e obriga a refazer dois toques para achar
-           onde parou. */
-        onAbrirTermos={() => {
-          setReminderSheetOpen(false);
-          voltarParaLembrete.current = true;
-          router.push("/termos");
-        }}
+      />
+
+      <VisualizadorDeMidia
+        uri={midiaAberta?.uri ?? null}
+        titulo={midiaAberta?.titulo ?? ""}
+        onClose={() => setMidiaAberta(null)}
       />
 
       {/* "Anexo da receita" e não "Foto da receita": desde que o arquivo virou uma das origens, o
