@@ -11,12 +11,7 @@ import {
   type DoseAAvisar,
 } from "@/domain/use-cases/planejar-avisos-de-dose";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
-import {
-  agendarAlarmeDeTelaCheia,
-  cancelarAlarmesDeTelaCheia,
-  registrarCanalDeAlarme,
-} from "./alarme-em-tela-cheia";
-import { ExpoNotificationGateway } from "./expo-notification-gateway";
+import { NotifeeGateway } from "./notifee-gateway";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`), então não há o que agendar. */
 const persistsLocally = Platform.OS !== "web";
@@ -34,7 +29,7 @@ const persistsLocally = Platform.OS !== "web";
  */
 const JANELA_DE_AVISOS_EM_DIAS = 7;
 
-const gateway = new ExpoNotificationGateway();
+const gateway = new NotifeeGateway();
 
 /**
  * A execução em curso, quando há uma.
@@ -80,9 +75,6 @@ async function executarReagendamento(): Promise<void> {
     // é a tela, no momento em que a pessoa liga o lembrete.
     if ((await gateway.consultarPermissao()) !== "concedida") {
       await gateway.cancelarTudo();
-      // Os dois lados: alarme de tela cheia sem permissão de notificação não dispara, e deixá-lo
-      // agendado só criaria um aviso fantasma para quando a permissão voltasse.
-      await cancelarAlarmesDeTelaCheia();
       return;
     }
 
@@ -156,26 +148,22 @@ async function executarReagendamento(): Promise<void> {
     const avisos = [...planejarAvisosDeDose({ doses, agora, ate }), ...avisosDeCompromisso];
 
     /**
-     * **Dois agendadores, um para cada promessa que o cadastro faz.**
+     * **Cancelar tudo, depois agendar tudo** — a RN14, e agora ela é verdade por construção.
      *
-     * O modo `alarm` vai para o Notifee, que é quem sabe abrir tela cheia sobre o bloqueio — é o
-     * despertador de verdade, com som contínuo, que a pessoa precisa vir desligar. Todo o resto
-     * (lembretes, compromissos, receitas) continua no `expo-notifications`, que já cumpre bem o
-     * papel de avisar sem interromper.
+     * Até 02/09 esta linha era duas: um `cancelarTudo` para cada biblioteca, porque cada uma só
+     * enxergava a própria lista de agendamentos. Funcionava, mas dependia de disciplina — um
+     * terceiro ponto de cancelamento que esquecesse uma das chamadas traria de volta o **alarme
+     * órfão**, o lembrete de um remédio que a pessoa já parou de tomar, e nada no compilador
+     * denunciaria.
      *
-     * A reconstrução completa da RN14 vale para os dois: cancelar tudo dos dois lados antes de
-     * agendar qualquer coisa é o que garante zero alarme órfão. Cada biblioteca só enxerga a
-     * própria lista, então esquecer um dos dois cancelamentos deixaria avisos de um tratamento já
-     * excluído tocando para sempre.
+     * Com um agendador só, "cancelar tudo" é literalmente tudo. O defeito deixou de ser possível
+     * em vez de ser evitado por atenção.
      */
     await gateway.cancelarTudo();
-    await cancelarAlarmesDeTelaCheia();
-
-    await registrarCanalDeAlarme();
 
     for (const aviso of avisos) {
-      if (aviso.modo === "alarm") await agendarAlarmeDeTelaCheia(aviso);
-      else await gateway.agendar(aviso);
+      // O modo decide o canal e se abre tela cheia; quem agenda é o mesmo gateway nos dois casos.
+      await gateway.agendar(aviso);
     }
   } catch (cause) {
     // Não relança: reagendar é consequência de outra ação (salvar um cadastro, confirmar uma

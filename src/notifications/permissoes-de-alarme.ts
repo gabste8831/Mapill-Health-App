@@ -2,7 +2,7 @@ import notifee, { AndroidNotificationSetting, AuthorizationStatus } from "@notif
 import Constants from "expo-constants";
 import { Linking, Platform } from "react-native";
 
-import { CANAL_ALARME_TELA_CHEIA, registrarCanalDeAlarme } from "./alarme-em-tela-cheia";
+import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
 
 /** O `applicationId` do app — a tela de tela cheia do Android 14 exige saber de quem ela é. */
 const PACOTE = Constants.expoConfig?.android?.package ?? "com.gabsteffens.mapillapp";
@@ -73,13 +73,13 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
    * ter autorizado o Não Perturbe. Sem isto, o canal continuaria com o `bypassDnd: false` com que
    * nasceu, e o item ficaria pendente para sempre, cobrando algo já feito.
    */
-  await registrarCanalDeAlarme();
+  await registrarCanais();
 
   const [settings, bateriaOtimizada, powerManager, canal] = await Promise.all([
     notifee.getNotificationSettings(),
     notifee.isBatteryOptimizationEnabled(),
     notifee.getPowerManagerInfo(),
-    notifee.getChannel(CANAL_ALARME_TELA_CHEIA),
+    notifee.getChannel(CANAL_ALARME),
   ]);
 
   const notificacoes = settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;

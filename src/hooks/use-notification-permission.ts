@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { AppState, Platform } from "react-native";
 
 import type { NotificationPermission } from "@/domain/ports/notification-gateway";
-import { ExpoNotificationGateway } from "@/notifications/expo-notification-gateway";
+import { NotifeeGateway } from "@/notifications/notifee-gateway";
 
-const gateway = new ExpoNotificationGateway();
+const gateway = new NotifeeGateway();
 
 /** No navegador não há permissão de notificação a gerenciar (§5.1 — web é vitrine). */
 const temNotificacoes = Platform.OS !== "web";

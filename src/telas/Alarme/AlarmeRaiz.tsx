@@ -4,7 +4,7 @@ import { BackHandler } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useDatabaseReady } from "@/hooks/use-database-ready";
-import { ehAlarmeDeTelaCheia } from "@/notifications/alarme-em-tela-cheia";
+import { ehAlarmeDeTelaCheia } from "@/notifications/notifee-gateway";
 import { CenteredLoader } from "@/ui";
 import { AlarmeScreen } from "./AlarmeScreen";
 

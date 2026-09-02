@@ -5,7 +5,7 @@ import { Text, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
-import { dispensarAlarmeAtivo } from "@/notifications/alarme-em-tela-cheia";
+import { dispensarAlarmeAtivo } from "@/notifications/notifee-gateway";
 import { colors } from "@/shared/theme";
 import { Button, CenteredLoader } from "@/ui";
 import { styles } from "./AlarmeScreen.styles";

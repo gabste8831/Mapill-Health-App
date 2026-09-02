@@ -10,10 +10,10 @@ import { RegisterIntake } from "@/domain/use-cases/register-intake";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { ACAO_ADIAR, ACAO_TOMEI, MINUTOS_DE_ADIAMENTO } from "./acoes";
 import {
-  ExpoNotificationGateway,
+  NotifeeGateway,
   PREFIXO_ADIADO,
   type DadosDoAviso,
-} from "./expo-notification-gateway";
+} from "./notifee-gateway";
 import { reagendarTodosOsAvisos } from "./reagendar-avisos";
 
 /**
@@ -146,7 +146,7 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
   if (linhas.length === 0) return;
 
   const quando = new Date(Date.now() + MINUTOS_DE_ADIAMENTO * 60_000);
-  await new ExpoNotificationGateway().agendar({
+  await new NotifeeGateway().agendar({
     // `PREFIXO_ADIADO` é o que faz este aviso escapar do `cancelarTudo` da grade: ele não pertence
     // à janela de horários, e sim ao toque em "Adiar" que acabou de acontecer.
     chave: `${PREFIXO_ADIADO}${quando.toISOString()}`,
@@ -189,7 +189,7 @@ export async function tratarRespostaAoAviso(
 ): Promise<RespostaAoAviso> {
   const respondeuPorBotao = actionIdentifier === ACAO_TOMEI || actionIdentifier === ACAO_ADIAR;
   if (respondeuPorBotao && dados.chave.length > 0) {
-    await new ExpoNotificationGateway().dispensar(dados.chave);
+    await new NotifeeGateway().dispensar(dados.chave);
   }
 
   if (actionIdentifier === ACAO_TOMEI) {

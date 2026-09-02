@@ -2,12 +2,11 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { AppState } from "react-native";
 
-import { escutarAlarmeDeTelaCheia } from "@/notifications/escutar-alarme";
 import {
   consultarRespostaDeAbertura,
-  escutarRespostas,
-} from "@/notifications/escutar-respostas";
-import type { DadosDoAviso } from "@/notifications/expo-notification-gateway";
+  escutarAvisos,
+} from "@/notifications/escutar-avisos";
+import type { DadosDoAviso } from "@/notifications/notifee-gateway";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 
 /**
@@ -44,18 +43,18 @@ export function useDoseNotifications(): void {
     const assinaturaDoEstado = AppState.addEventListener("change", (estado) => {
       if (estado === "active") void reagendarTodosOsAvisos();
     });
-    const pararDeEscutar = escutarRespostas(abrirHorario);
-
     /**
-     * O alarme tem handlers próprios (Notifee), separados dos do `expo-notifications`.
+     * Um listener só, para os dois modos.
      *
-     * Além de tratar o "Tomei" da notificação, ele **abre a tela do alarme** quando o aviso chega
-     * com o app em primeiro plano. O Android rebaixa a tela cheia para heads-up sempre que a pessoa
-     * está usando o celular, e não há como pedir o contrário pela API — mas o app rodando pode
-     * navegar, e o resultado é o mesmo: a tela do alarme por cima do que estava aberto.
+     * `aoDispararAlarme` existe porque o Android rebaixa a tela cheia para heads-up sempre que a
+     * pessoa está usando o celular, e não há como pedir o contrário pela API — mas o app rodando
+     * pode navegar, e o resultado é o mesmo: a tela do alarme por cima do que estava aberto.
      */
-    const pararDeEscutarAlarme = escutarAlarmeDeTelaCheia((scheduledFor) => {
-      router.push({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
+    const pararDeEscutar = escutarAvisos({
+      aoAbrirHorario: abrirHorario,
+      aoDispararAlarme: (scheduledFor) => {
+        router.push({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
+      },
     });
 
     void consultarRespostaDeAbertura().then((dados) => {
@@ -65,7 +64,6 @@ export function useDoseNotifications(): void {
     return () => {
       assinaturaDoEstado.remove();
       pararDeEscutar();
-      pararDeEscutarAlarme();
     };
   }, [router]);
 }
