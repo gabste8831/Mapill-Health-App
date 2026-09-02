@@ -40,11 +40,21 @@
 > Um ganho a conferir de propósito: o botão "Tomei" agora grava **com o app fechado**, sem depender
 > de a pessoa abrir o app depois. Antes a escrita só acontecia na abertura seguinte.
 >
-> ### 🎨 E o passe de design (02/09)
+> ### 🎨 E o passe de design — **fechado, 14 de 14** (02/09)
 >
-> Dez frentes mexeram em **coisa transversal** — feedback de toque, teclado, tipografia, cor,
-> espaçamento. Isso significa que **qualquer tela pode ter regredido**, não só as que foram tocadas
-> de propósito.
+> Catorze frentes mexeram em **coisa transversal** — feedback de toque, teclado, tipografia, cor,
+> espaçamento, movimento. Isso significa que **qualquer tela pode ter regredido**, não só as que
+> foram tocadas de propósito.
+>
+> As **quatro últimas** entraram na tarde de 02/09 e nunca foram vistas em aparelho:
+>
+> - **Movimento** (12.9-I): a barra de progresso cresce, a linha da dose se acomoda, a lista entra
+>   em cascata, e o dia completo ganha uma comemoração. Tudo respeita "reduzir movimento".
+> - **Os botões que faltavam** (12.9-A2 e A3): 23 alvos em 10 telas, incluindo "Confirmar" e "Pular"
+>   da Home — os dois mais tocados do app, e os únicos que não respondiam.
+> - **O popup de lembrete desafogado** (12.9-J): a explicação virou tela própria. ⚠️ Isso **muda um
+>   passo já escrito** — ver 2.9 na Parte 2.
+> - **O visualizador de mídia** (12.9-K): a receita finalmente abre para ser lida.
 >
 > O [bloco 12.9](#129--o-passe-de-design-0209) cobre o que mudou, item a item. O
 > [bloco 14](#14--regressão-todas-as-telas) percorre o app inteiro procurando o que quebrou sem
@@ -661,14 +671,35 @@ Gere o relatório com **um** medicamento desmarcado.
 
 ## 12.9 — O passe de design (02/09)
 
-**Dez frentes mexeram em coisa transversal** — toque, teclado, tipografia, cor. Este bloco cobre o
-que mudou; a regressão de todas as telas vem depois, no bloco 14.
+**As catorze frentes, fechadas.** Todas mexeram em coisa transversal — toque, teclado, tipografia,
+cor, movimento. Este bloco cobre o que mudou; a regressão de todas as telas vem depois, no bloco 14.
 
 **A. O toque responde.** Percorra Home, Remédios, Estoque e Cadastro tocando em botões, chips,
 ícones e linhas.
 
 > ✅ 🔴 **Tudo** o que é tocável escurece e/ou encolhe ao toque. Antes nada respondia.
 > ✅ Nada treme: linhas de largura total (checkbox, acordeão) só escurecem, não encolhem.
+
+**A2. O que faltava responder** _(02/09, tarde — 23 alvos em 10 telas)_. A varredura anterior pegou
+o kit; estes são os que cada tela desenhava à mão e escaparam.
+
+> ✅ 🔴 **Home**: "Confirmar" e "Pular" numa dose respondem ao toque. Eram os dois alvos **mais
+> tocados do app** e os únicos mudos.
+> ✅ **Ajustes** e **Conta**: as linhas da lista, o voltar do topo azul, o bloco da identidade.
+> ✅ **Calendário**: editar, excluir, "Fui"/"Não fui", confirmar/pular dose, a linha do desfecho.
+> ✅ **Estoque**: "Repor" e "Recontar".
+> ✅ **Home**: os cards de adesão, estoque e estoque baixo.
+> ✅ **Cadastro**: linhas de valor, os quadros de foto, as fichinhas de dia da semana.
+> ✅ **Ficha**: a lixeira de contato, o quadro da foto.
+> ✅ 🔴 O painel de permissões: cada linha escurece ao toque antes de abrir a tela do sistema.
+
+**A3. Os alvos pequenos demais** 🔴. Links de texto que eram só palavra, sem área de dedo.
+
+> ✅ Em **Ficha de saúde**, "Trocar foto" e "Remover" têm **44pt de altura** — antes tinham a
+> altura da letra (~20pt).
+> ✅ O mesmo em **Cadastro**: "Alterar anexo", "Remover receita", "Adicionar arquivo".
+> ✅ Todos ganham **fundo** ao toque, em vez de nada acontecer.
+> 🔬 **Com a fonte do sistema no máximo**, confira se algum desses links corta o texto.
 
 **B. O teclado sai.** Em Ficha, Cadastro de medicamento e Cadastro de compromisso:
 
@@ -734,6 +765,96 @@ próxima correção seria chute:
 > 1. A foto era grande? (foto de câmera é maior que de galeria)
 > 2. Ela aparece sozinha depois de alguns segundos parado na tela, ou só ao sair e voltar?
 
+**I. O movimento** _(frente 5)_. Três lugares, e **nenhum outro** — se algo mais estiver animando,
+é defeito.
+
+**I.1 — A barra de progresso da Home.** Com duas ou mais doses no dia, confirme uma.
+
+> ✅ 🔴 A barra **cresce** até a nova porcentagem, em vez de saltar.
+> ✅ O movimento dura menos de meio segundo e não atrasa o toque seguinte.
+> ✅ Confirmando duas em sequência rápida, a barra acompanha sem engasgar.
+
+**I.2 — A linha da dose.** Ainda na Home, confirme uma dose e olhe a linha dela.
+
+> ✅ 🔴 A linha **esmaece** até o estado resolvido, em vez de trocar de aparência num quadro.
+> ✅ Os botões "Confirmar"/"Pular" sobem e somem junto.
+> ✅ Numa dose que vira **"É AGORA"** sozinha (espere o horário chegar com a tela aberta), os
+> botões **aparecem suavemente**, não brotam.
+
+**I.3 — O dia completo** 🔴. Confirme a **última** dose pendente do dia.
+
+> ✅ Aparece a tela cheia de sucesso: **"Dia completo"** com a contagem das doses.
+> ✅ Ela **some sozinha** em ~3s e devolve a Home — não navega para lugar nenhum.
+> ✅ 🔴 **Feche o app e reabra com o dia já completo**: a comemoração **não** volta. Ela é para o
+> momento em que o dia fecha, não para o estado de estar fechado.
+> ✅ Corrigindo uma dose para "não tomei" e confirmando de novo, ela reaparece — o dia fechou de novo.
+
+**I.4 — A entrada da lista.** Saia da Home e volte.
+
+> ✅ As doses entram **em cascata**, de cima para baixo, cada uma logo após a anterior.
+> ✅ Com muitas doses (6+), as últimas **não** ficam esperando: o escalonamento tem teto.
+
+**I.5 — Reduzir movimento** 🔴🔬. Ligue **Configurações → Acessibilidade → Reduzir movimento** (ou
+"Remover animações") e repita I.1 a I.4.
+
+> ✅ 🔴 **Nada anima** — a barra pula direto para o valor, a lista aparece inteira, a linha muda de
+> uma vez.
+> ✅ Tudo continua **correto**: os números, os estados e a comemoração do dia completo seguem
+> aparecendo. Só o movimento sai.
+> 🔬 Se alguma coisa ainda se mexer, anote qual: é a que não está lendo a preferência do sistema.
+
+**J. O popup de lembrete, desafogado** _(frente 6)_. Cadastro → linha **LEMBRETE**.
+
+> ✅ 🔴 A folha tem **só**: a pergunta, as três opções, o painel de permissões (quando falta algo) e
+> "Pronto". O botão **cabe na tela** sem rolar.
+> ✅ 🔴 O acordeão "Como funcionam os alertas" **não está mais ali** — virou um link.
+> ✅ O aviso "Depende do seu aparelho" **sumiu da folha**.
+
+Toque em **"Como funcionam os alertas"**.
+
+> ✅ 🔴 Abre uma **tela** com os quatro assuntos, o bloco "Depende do seu aparelho" e o link dos termos.
+> ✅ O **botão físico de voltar** devolve ao formulário. O popup fecha junto — reabre com um toque.
+> ✅ 🔴 Dali, toque em **"Ler os Termos de Uso completos"**: abre os termos, e voltar traz de volta
+> à ajuda. Nada trava.
+> ⚠️ **Mudou de propósito:** antes o popup reabria sozinho com o acordeão no ponto da leitura. Esse
+> comportamento não existe mais — ele era contorno para a ajuda viver dentro de um modal.
+
+**K. O visualizador de mídia** _(frente 11)_ 🔴. O anexo que existia para ser lido e não abria.
+
+**K.1** **Remédios** → toque na **miniatura** de um remédio com foto.
+
+> ✅ 🔴 A foto **amplia** sobre a lista, com fundo escurecido — sem trocar de tela.
+> ✅ Sai tocando **fora**, no **X**, ou no **botão físico de voltar**.
+> ✅ Tocar **na própria foto** não fecha.
+> ✅ O título mostra o **nome do remédio**.
+
+**K.2** **Cadastro** → toque no quadrado da **foto da caixa** já preenchido.
+
+> ✅ 🔴 **Amplia** a foto. Antes abria o seletor de arquivo e não havia como só olhar.
+> ✅ "Trocar foto da caixa", ao lado, continua trocando.
+> ✅ Sem foto, o quadrado continua abrindo a escolha de origem.
+
+**K.3** **Cadastro** → **RECEITA MÉDICA** com uma **foto** anexada, toque no quadrado.
+
+> ✅ 🔴 Amplia, e a imagem aparece **inteira** — não cortada. Numa receita, a borda cortada pode ser
+> a posologia escrita à mão.
+
+**K.4** Agora anexe um **PDF** como receita e toque no quadrado.
+
+> ✅ 🔴 Abre a **folha de compartilhamento do sistema**, e dá para abrir num leitor de PDF.
+> ✅ Fechando a folha sem escolher nada, **nenhum erro** aparece.
+> 🔬 Se disser "Não foi possível abrir", anote: significa que o aparelho não tem leitor de PDF.
+
+**K.5** **Ficha de saúde** → toque na foto da ficha.
+
+> ✅ Amplia. "Trocar foto" continua trocando.
+
+**K.6** 🔬 **O alarme não tem visualizador, e isso é de propósito.** Com um alarme tocando, toque na
+foto do remédio.
+
+> ✅ 🔴 **Nada acontece.** Abrir uma camada por cima de um alarme daria uma saída que não responde
+> a dose nenhuma.
+
 ---
 
 ## 13 — Acessibilidade com o TalkBack 🔬 (E1)
@@ -794,26 +915,28 @@ de sobrar, e o mais fácil de ver.
 
 ## 14 — Regressão: todas as telas
 
-**Por que este bloco existe.** O passe de design mexeu em tipografia, cor, espaçamento e no
-comportamento de todo elemento tocável. Nada disso é local: uma escala de fonte que mudou aparece
+**Por que este bloco existe.** O passe de design mexeu em tipografia, cor, espaçamento, movimento e
+no comportamento de todo elemento tocável. Nada disso é local: uma escala de fonte que mudou aparece
 em telas que ninguém abriu de propósito para editar.
 
-Percorra **todas** as telas procurando quatro coisas: **texto cortado**, **botão espremido**,
-**contraste ruim** e **layout quebrado**.
+Percorra **todas** as telas procurando cinco coisas: **texto cortado**, **botão espremido**,
+**contraste ruim**, **layout quebrado** e — agora — **algo que responde ao toque e não deveria, ou
+não responde e deveria**.
 
 | Tela | O que olhar em especial |
 |---|---|
-| **Home** | Respiro entre os blocos (aumentou), progresso, dose atrasada, estado vazio |
-| **Remédios** | Busca com foco, ícones com fundo, alinhamento com **e sem** foto na mesma lista |
-| **Estoque** | "Repor" azul ≠ "Recontar", previsão de término, aviso de recontagem |
-| **Calendário** | Grade **não deve ter mudado**; dia selecionado redondo; pontos visíveis quando selecionado |
-| **Adesão** | Bloco azul do número, tabela por medicamento (cores das faixas continuam ali), botão do PDF, seletor de medicamentos |
-| **Cadastro de medicamento** | ⚠️ o mais longo: revelação progressiva, popups, rodapé, sugestões, dias da semana |
+| **Home** | Respiro entre os blocos (aumentou), progresso **animado**, dose atrasada, estado vazio, os cards tocáveis |
+| **Remédios** | Busca com foco, ícones com fundo, alinhamento com **e sem** foto, miniatura que **amplia** |
+| **Estoque** | "Repor" azul ≠ "Recontar" (os dois respondem ao toque), previsão de término, aviso de recontagem |
+| **Calendário** | Grade **não deve ter mudado**; dia selecionado redondo; pontos visíveis; os 5 botões do card respondem |
+| **Adesão** | Bloco azul do número, tabela por medicamento, botão do PDF, seletor de medicamentos |
+| **Cadastro de medicamento** | ⚠️ o mais longo: revelação progressiva, popups, rodapé, sugestões, dias da semana, **anexos que abrem** |
+| **Ajuda de alertas** | 🆕 tela nova: os quatro assuntos, "Depende do seu aparelho", link dos termos, voltar |
 | **Cadastro de compromisso** | Campos, cascata de lembretes, data no passado |
-| **Ficha de saúde** | Foto, contatos de emergência, selos, banner azul |
+| **Ficha de saúde** | Foto (que **amplia**), contatos de emergência, selos, banner azul, links com alvo de 44pt |
 | **Horário** | Cartão, Tomei/Pulei com estado marcado, "Ignorar por agora" |
-| **Alarme** | Tela cheia azul, **foto do remédio** (nova), som em loop, as quatro saídas |
-| **Ajustes / Conta** | O hero original — ele inspirou o resto e **não pode ter regredido** |
+| **Alarme** | Tela cheia azul, **foto do remédio**, som em loop, as quatro saídas — e a foto **não** amplia |
+| **Ajustes / Conta** | O hero original — ele inspirou o resto e **não pode ter regredido**; as linhas respondem |
 | **Login / Consentimento / Termos** | Não foram tocados de propósito: confirmar que continuam iguais |
 | **Scanner** | Câmera, moldura, entrada manual |
 
@@ -940,13 +1063,19 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 > ✅ **RECEITA MÉDICA** abre popup com **três** origens: câmera, galeria e arquivo.
 > ✅ Com anexo: **"Alterar anexo"** e **"Remover"** (vermelho).
 > ✅ Em **RECEITA VÁLIDA ATÉ**, dias passados apagados.
+> ✅ _(02/09)_ Com anexo, tocar no **quadrado** amplia a foto (ou abre o PDF no leitor do sistema) —
+> quem troca é o link ao lado.
 
 **2.9 — Lembrete.** Popup **"Configurar lembrete"**.
 
 > ✅ Três opções, e **"Nenhum aviso" não existe**.
 > ✅ **Alarme** e **Notificação** dividem a primeira linha; **Os dois** ocupa a linha de baixo.
-> ✅ Em "Como funcionam os alertas", o scroll desce **e sobe**.
-> ✅ "Ler os Termos" e voltar retorna **ao popup, com a ajuda ainda aberta**.
+> ✅ A folha tem só a decisão e "Pronto" — o botão **cabe na tela** sem rolar.
+> ✅ "Como funcionam os alertas" é um **link** que abre uma tela; o scroll dela desce **e sobe**.
+> ✅ Dali, "Ler os Termos" abre os termos, e voltar retorna **à ajuda**.
+>
+> ⚠️ _Mudou em 02/09._ O acordeão dentro do popup e o retorno "ao popup com a ajuda aberta" não
+> existem mais — a explicação virou tela própria (bloco 12.9-J).
 
 **2.10 — Prazo × estoque.** `Amoxicilina`, dose 2, 3× de 8/8h desde `06:00`, prazo 7 dias, estoque
 20.
@@ -971,6 +1100,7 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 > ✅ Busca sem acento funciona (`acido` acha `Ácido`).
 > ✅ Ordenação: A–Z, Mais recentes, Acabando.
 > ✅ Excluir avisa que o histórico é mantido; o botão físico de voltar fecha o formulário.
+> ✅ _(02/09)_ Tocar na **miniatura** de um remédio com foto amplia a imagem.
 
 **3.2 — Home.**
 

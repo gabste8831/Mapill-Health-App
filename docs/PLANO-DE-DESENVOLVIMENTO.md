@@ -40,13 +40,22 @@ Nenhum bloco fecha sem estes seis itens:
 ### O que está rodando
 
 **Build EAS `f9f36c0e`** (perfil `development`, commit `871a50a`) — disparada em 02/09 com o passe
-de design. [Painel](https://expo.dev/accounts/gabsteffens/projects/mapill-app/builds/f9f36c0e-2324-49d7-8ab9-52fda8837d29).
+de design, **cancelada** depois de 1 h+ na fila.
+[Painel](https://expo.dev/accounts/gabsteffens/projects/mapill-app/builds/f9f36c0e-2324-49d7-8ab9-52fda8837d29).
+
+⚠️ **A fila era um incidente do Expo**, não uma falha do projeto: "Elevated Linux worker queue times"
+(02/09, 14:44 PDT → *Identified* 14:52), causado por caches de pacote sob alta carga. Builds
+canceladas **contam na cota** de 30/mês; builds que o Expo derruba com "lost connection to the
+worker" costumam ser excluídas da cobrança. Conferir consumo com `eas build:list` antes da próxima.
+
+**A próxima build sai com tudo**: o passe de design completo (14/14) já está commitado e é JS puro,
+então nada dele exigiu esperar por uma build. O que exige build nativa continua sendo só o Notifee.
 
 ⚠️ **Desinstale a versão anterior antes de instalar esta.** Os canais de notificação subiram para
 **v5**, e canal do Android congela na criação: instalar por cima manteria som e importância antigos,
 e a sessão inteira seria gasta diagnosticando algo que não é defeito.
 
-### O passe de design — 10 de 14 frentes entregues
+### O passe de design — **14 de 14 frentes entregues** ✅
 
 Todas commitadas e no GitHub. O plano completo, com o raciocínio de cada uma, está em
 `~/.claude/plans/tender-plotting-river.md` (arquivo local, não versionado — o resumo abaixo basta
@@ -65,17 +74,35 @@ para continuar).
 | 13 | Foto do medicamento na tela de alarme | ✅ |
 | 4 | Azul nas telas brancas + respiro da Home | ✅ |
 
-### As 4 que faltam
+### As 4 últimas — entregues em 02/09 (tarde)
 
-**Nenhuma exige build nova** — são JavaScript puro e rodam pelo Metro (`npx expo start --dev-client`)
-sobre a build acima.
+**Nenhuma exigiu build nova** — são JavaScript puro e rodam pelo Metro (`npx expo start --dev-client`)
+sobre a build acima. `tsc` e `expo lint` limpos.
 
-| # | O que | Por onde começar |
+| # | O que | Como ficou |
 |---|---|---|
-| **3** | Unificar os botões que as telas desenham à mão | Sobraram ~8 lugares (Calendário, Estoque, `CardEstoqueBaixo`). O `ItemDeDose` é o mais delicado: são os botões de confirmar/pular, e mexer neles exige testar o fluxo de verdade. `IconButton` já ganhou a variante `sutil` na fase 1 |
-| **5** | Movimento | Três lugares, nesta ordem: transição ao confirmar dose (reusar o `SuccessOverlay`), barra de progresso da Home crescendo com `withTiming`, entrada escalonada da lista. **Não** animar troca de abas, alerta de atraso nem `GradeDeMes` |
-| **6** | Desafogar `ConfiguracaoDeLembrete` | Diagnóstico feito: quatro camadas competem no mesmo nível numa folha. A proposta é a folha guardar **só a decisão** (frase + modos + Pronto), o acordeão virar tela `AjudaDeAlertas`, e o aviso "Depende do seu aparelho" **sair** — o painel de permissões já diz a mesma coisa e ainda leva à tela certa |
-| **11** | Visualizador de mídia | Toca na miniatura, expande sobre fundo escurecido **sem ocupar a tela toda**, sai tocando fora ou no X. Serve foto da ficha, da caixa e receita — esta última é a que mais precisa, porque é para **ler** |
+| **5** | Movimento | `BarraDeProgresso` no kit (`withTiming`); a linha da dose se acomoda em 260 ms; entrada escalonada nas duas listas com teto de 6; `SuccessOverlay` **só quando o dia fecha em 100%**, disparado pela transição e não pelo estado. Tudo com `useReducedMotion` |
+| **3** | Unificar os botões desenhados à mão | 23 alvos em 10 telas (a estimativa era ~8) + `PainelDePermissoes`. Inclui "Confirmar"/"Pular" do `ItemDeDose`, os mais tocados do app |
+| **6** | Desafogar `ConfiguracaoDeLembrete` | A folha ficou com a decisão + painel + "Pronto". A ajuda virou `cadastro/ajuda-de-alertas` (rota **dentro** do stack do cadastro, não modal sobre modal). O aviso "Depende do seu aparelho" saiu e virou seção na tela nova |
+| **11** | Visualizador de mídia | `VisualizadorDeMidia` no kit, em 4 pontos: ficha, caixa, receita e miniatura de Remédios. PDF vai ao leitor do sistema via `expo-sharing` (`shared/abrir-anexo.ts`) — renderizar PDF exigiria dependência nativa |
+
+**Decisões que fugiram da letra do plano, e por quê:**
+
+- **O `SuccessOverlay` não entrou em cada confirmação de dose.** Ele é de tela cheia e dura ~3 s;
+  emendá-lo no gesto mais repetido do app o tornaria o mais demorado, e no lote de atrasadas
+  dispararia várias vezes seguidas. A linha que se acomoda dá a confirmação do gesto; o overlay
+  ficou para o marco real — a última dose do dia.
+- **PDF não abre dentro do app.** `expo-image` não o renderiza, e um leitor exigiria build nativa.
+  O leitor do aparelho ainda entrega mais: zoom, páginas, imprimir e encaminhar ao médico.
+
+**Achados de borda corrigidos no caminho:**
+
+- Links de foto ("Trocar foto", "Remover", "Alterar anexo") tinham a **altura da letra** (~20 pt) como
+  alvo de toque. Agora têm 44 pt, com fundo ao pressionar.
+- O quadrado da receita **abria o seletor de arquivo mesmo com anexo** — não havia como ver o que
+  estava anexado sem substituí-lo.
+- `Linha` está **duplicado** entre `AjustesScreen` e `ContaScreen` (componente idêntico, mesmos
+  comentários). Corrigido nos dois; **não** extraído para o kit — fica como dívida anotada.
 
 ### Decisões deste passe que valem lembrar
 
