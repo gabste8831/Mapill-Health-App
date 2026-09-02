@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import { Pressable, TextInput, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./SearchField.styles";
 
 export type SearchFieldProps = {
@@ -27,9 +28,18 @@ export function SearchField({
   clearAccessibilityLabel = "Limpar busca",
   style,
 }: SearchFieldProps) {
+  const [focado, setFocado] = useState(false);
+
   return (
-    <View style={[styles.container, style]}>
-      <Ionicons name="search" size={20} color={colors.outline} />
+    <View style={[styles.container, focado && styles.containerFocado, style]}>
+      {/**
+       * A lupa acompanha o foco: cinza em repouso, azul enquanto se escreve.
+       *
+       * Ela é o elemento que diz "aqui se busca", e estava na cor mais apagada do componente — o
+       * campo inteiro lia como desligado. Junto do anel de foco, é o que dá sinal de vida à busca
+       * sem acrescentar enfeite nenhum.
+       */}
+      <Ionicons name="search" size={20} color={focado ? colors.primary : colors.onSurfaceVariant} />
 
       <TextInput
         style={styles.input}
@@ -40,13 +50,15 @@ export function SearchField({
         autoCorrect={false}
         autoCapitalize="none"
         returnKeyType="search"
+        onFocus={() => setFocado(true)}
+        onBlur={() => setFocado(false)}
         accessibilityLabel={placeholder}
       />
 
       {/* Só com texto: um X permanente sugere que há algo a limpar quando não há. */}
       {value.length > 0 ? (
         <Pressable
-          style={styles.clearButton}
+          style={estadoDePressao(styles.clearButton, { escala: true })}
           onPress={() => onChangeText("")}
           accessibilityRole="button"
           accessibilityLabel={clearAccessibilityLabel}

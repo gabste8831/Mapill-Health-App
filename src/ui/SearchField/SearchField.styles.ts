@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
+import { colors, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   /**
@@ -19,10 +19,24 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
-    borderWidth: 1,
+    /**
+     * Borda **ou** sombra, nunca as duas.
+     *
+     * Este era o único elemento do app com o par, contra a decisão de 21/08 (`elevation.ts`), e o
+     * resultado era um campo que não parecia nem superfície nem campo — o "search morto". Como a
+     * borda aqui tem função (dizer que se escreve dentro), quem sai é a sombra.
+     *
+     * A largura é 2 desde o repouso, e não 1: subir para 2 só no foco faria a pílula **crescer**
+     * um pixel para cada lado e empurrar o conteúdo ao redor. Com a espessura fixa, o foco muda só
+     * a cor.
+     */
+    borderWidth: 2,
     borderColor: colors.outlineVariant,
     backgroundColor: colors.surfaceContainerLowest,
-    boxShadow: surfaceShadow,
+  },
+  /** Focado: a borda assume a cor do app, e é o que diz "estou escrevendo aqui". */
+  containerFocado: {
+    borderColor: colors.primary,
   },
   input: {
     flex: 1,

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./ToggleChips.styles";
 
 export type ToggleChipOption<TValue extends string> = {
@@ -39,7 +39,9 @@ export function ToggleChips<TValue extends string>({
           return (
             <Pressable
               key={option.value}
-              style={[styles.chip, isSelected && styles.chipSelected]}
+              style={estadoDePressao([styles.chip, isSelected && styles.chipSelected], {
+                escala: true,
+              })}
               onPress={() =>
                 onChange(
                   isSelected

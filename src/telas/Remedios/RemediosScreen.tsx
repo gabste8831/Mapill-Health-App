@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, FlatList, Pressable, Text, View } from "react-native";
+import { Alert, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { excluirMedicamento } from "@/hooks/use-medication-registration";
@@ -27,6 +27,7 @@ import {
   Fab,
   FotoLocal,
   Header,
+  IconButton,
   SearchField,
   SeletorDeOrdem,
   type OpcaoDeOrdem,
@@ -74,25 +75,34 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
 
         {/* Duas ações explícitas em vez do card inteiro clicável: "abre alguma coisa" não diz o
             que vai acontecer, e ao lado de um botão de excluir isso pesa. */}
+        {/**
+         * `IconButton` do kit, e não `Pressable` desenhado aqui.
+         *
+         * Antes eram dois ícones **sem fundo nenhum**, distinguidos só pela cor — e o sintoma que
+         * denunciava isso era o texto de apoio desta tela precisar explicar em prosa o que o lápis
+         * e a lixeira fazem. Quando a interface precisa de legenda, ela falhou.
+         *
+         * O fundo é o que transforma um ícone em algo que se reconhece como tocável, e vir do kit
+         * é o que garante que os dois respondam ao toque e tenham o alvo de 44 — eram 40, e ficam
+         * encostados num destrutivo, onde errar apaga um tratamento.
+         */}
         <View style={styles.acoes}>
           {onEdit ? (
-            <Pressable
-              style={styles.acaoBotao}
+            <IconButton
+              variant="sutil"
+              tamanho="sm"
               onPress={onEdit}
-              accessibilityRole="button"
               accessibilityLabel={`Ver ou editar ${medication.name}`}
-              hitSlop={6}>
-              <Ionicons name="pencil-outline" size={20} color={colors.primary} />
-            </Pressable>
+              icon={<Ionicons name="pencil-outline" size={20} color={colors.primary} />}
+            />
           ) : null}
-          <Pressable
-            style={styles.acaoBotao}
+          <IconButton
+            variant="sutil"
+            tamanho="sm"
             onPress={onDelete}
-            accessibilityRole="button"
             accessibilityLabel={`Excluir ${medication.name}`}
-            hitSlop={6}>
-            <Ionicons name="trash-outline" size={20} color={colors.error} />
-          </Pressable>
+            icon={<Ionicons name="trash-outline" size={20} color={colors.error} />}
+          />
         </View>
       </View>
 

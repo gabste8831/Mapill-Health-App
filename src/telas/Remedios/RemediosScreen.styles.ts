@@ -87,17 +87,6 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.xs,
   },
-  /**
-   * Alvo de 40px, e não `padding: xs` sobre um ícone de 20. Num cartão de lista onde os dois
-   * botões ficam lado a lado — e um deles exclui —, o alvo apertado é o que faz errar de linha.
-   */
-  acaoBotao: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radius.full,
-  },
   name: {
     ...typography.headlineSm,
     color: colors.onSurface,

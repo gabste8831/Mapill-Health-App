@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, ScrollView, Text } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./SeletorDeOrdem.styles";
 
 export type OpcaoDeOrdem<T extends string> = {
@@ -41,7 +41,9 @@ export function SeletorDeOrdem<T extends string>({
         return (
           <Pressable
             key={option.value}
-            style={[styles.ficha, selecionada && styles.fichaSelecionada]}
+            style={estadoDePressao([styles.ficha, selecionada && styles.fichaSelecionada], {
+              escala: true,
+            })}
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: selecionada }}

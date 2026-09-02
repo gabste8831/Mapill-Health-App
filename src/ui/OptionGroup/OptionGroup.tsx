@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 
+import { estadoDePressao } from "@/shared/theme";
 import { styles } from "./OptionGroup.styles";
 
 export type OptionGroupOption<TValue extends string> = {
@@ -87,13 +88,16 @@ export function OptionGroup<TValue extends string>({
           return (
             <Pressable
               key={option.value}
-              style={[
-                styles.option,
-                styles[OPTION_STYLE[layout]],
-                alto && styles.optionAlto,
-                index === indiceDaLinhaInteira && styles.optionLinhaInteira,
-                isSelected && styles.optionSelected,
-              ]}
+              style={estadoDePressao(
+                [
+                  styles.option,
+                  styles[OPTION_STYLE[layout]],
+                  alto && styles.optionAlto,
+                  index === indiceDaLinhaInteira && styles.optionLinhaInteira,
+                  isSelected && styles.optionSelected,
+                ],
+                { escala: true },
+              )}
               onPress={() => onChange(option.value)}
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}>

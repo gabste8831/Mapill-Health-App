@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./Checkbox.styles";
 
 export type CheckboxProps = {
@@ -20,7 +20,8 @@ export type CheckboxProps = {
 export function Checkbox({ checked, onChange, label, accessibilityLabel }: CheckboxProps) {
   return (
     <Pressable
-      style={styles.row}
+      // Sem escala: a linha ocupa a largura toda, e encolher faria o texto vizinho tremer.
+      style={estadoDePressao(styles.row)}
       onPress={() => onChange(!checked)}
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}

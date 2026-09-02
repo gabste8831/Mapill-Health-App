@@ -4,7 +4,7 @@ import type { LayoutChangeEvent } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./Accordion.styles";
 
 export type AccordionTone = "claro" | "azul";
@@ -78,7 +78,8 @@ export function Accordion({
   return (
     <View style={[styles.section, isBlue && styles.sectionAzul]}>
       <Pressable
-        style={styles.header}
+        // Sem escala: o cabecalho ocupa a largura toda, e encolher faria o texto ao redor tremer.
+        style={estadoDePressao(styles.header)}
         onPress={toggle}
         accessibilityRole="button"
         accessibilityState={{ expanded: isExpanded }}

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { PressableProps, StyleProp, ViewStyle } from "react-native";
 import { ActivityIndicator, Pressable, Text } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { colors, estadoDePressao } from "@/shared/theme";
 import { styles } from "./Button.styles";
 
 export type ButtonVariant = "primary" | "outline" | "text";
@@ -37,13 +37,25 @@ export function Button({ label, variant = "primary", loading = false, icon, emFo
 
   return (
     <Pressable
-      style={[
-        styles.base,
-        styles[variant],
-        variant === "outline" && emFolha && styles.outlineEmFolha,
-        isDisabled && styles.disabled,
-        style,
-      ]}
+      /**
+       * O toque responde: escurece e encolhe um pouco.
+       *
+       * `escala` é seguro aqui porque um botão é alvo autocontido — mesmo o de largura total, que
+       * tem margem dos dois lados e não faz o texto vizinho tremer.
+       *
+       * Desabilitado não reage: já está a 50% de opacidade, e responder ao toque prometeria uma
+       * ação que não vai acontecer.
+       */
+      style={estadoDePressao(
+        [
+          styles.base,
+          styles[variant],
+          variant === "outline" && emFolha && styles.outlineEmFolha,
+          isDisabled && styles.disabled,
+          style,
+        ],
+        { escala: !isDisabled, opacidade: !isDisabled },
+      )}
       disabled={isDisabled}
       accessibilityRole="button"
       /**

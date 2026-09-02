@@ -1,5 +1,6 @@
 import { Pressable, Text } from "react-native";
 
+import { estadoDePressao } from "@/shared/theme";
 import { styles } from "./Fab.styles";
 
 export type FabProps = {
@@ -19,7 +20,9 @@ export type FabProps = {
 export function Fab({ onPress, accessibilityLabel }: FabProps) {
   return (
     <Pressable
-      style={styles.fab}
+      // Escala e opacidade: e o alvo mais convidativo da tela, e o unico que flutua sobre o
+      // conteudo — sem resposta ao toque ele parece um adesivo colado na tela.
+      style={estadoDePressao(styles.fab, { escala: true })}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}>
