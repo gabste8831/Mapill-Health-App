@@ -78,6 +78,30 @@ async function gravarMarcaDagua(tabela: TabelaSincronizavel, quando: string): Pr
  * `string` e `boolean` como sempre falaram, e quem conhece a diferença entre os dois bancos é a
  * camada que fala com os dois.
  */
+/**
+ * Colunas que o Postgres tipa como `date` ou `timestamptz`.
+ *
+ * Existem porque **os dois bancos discordam sobre o que é uma data vazia**. O SQLite guarda tudo
+ * como texto e aceita `""` numa coluna de data sem reclamar; o Postgres recusa o lote inteiro com
+ * `invalid input syntax for type date: ""`.
+ *
+ * A conversão fica aqui, na borda, e não em cada repositório: o `""` nasce da camada de
+ * apresentação, onde campo não preenchido é string vazia, e atravessa o app inteiro sem incomodar
+ * ninguém até encontrar o Postgres. Corrigir num lugar só é o que impede a próxima coluna de data
+ * de repetir o mesmo erro.
+ */
+const COLUNAS_DE_DATA = [
+  "date_of_birth",
+  "start_date",
+  "end_date",
+  "attachment_valid_until",
+  "scheduled_for",
+  "occurred_at",
+  "accepted_at",
+  "updated_at",
+  "deleted_at",
+];
+
 function paraRemoto(
   linha: Record<string, unknown>,
   colunasBooleanas: string[],
@@ -91,6 +115,11 @@ function paraRemoto(
     if (colunasOrfas.includes(coluna)) continue;
     if (colunasBooleanas.includes(coluna)) {
       saida[coluna] = valor === 1 || valor === true;
+      continue;
+    }
+    // Data vazia é ausência de data, e ausência no Postgres é `null`.
+    if (valor === "" && COLUNAS_DE_DATA.includes(coluna)) {
+      saida[coluna] = null;
       continue;
     }
     saida[coluna] = valor;

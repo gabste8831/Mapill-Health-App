@@ -50,7 +50,18 @@ export class PatientProfileRepository
     return {
       id: entity.id,
       full_name: entity.fullName,
-      date_of_birth: entity.dateOfBirth,
+      /**
+       * String vazia volta a ser `null` — **ausência é `null`, nunca `""`**.
+       *
+       * A entidade usa `""` para "não preenchido" porque a camada de apresentação trabalha com
+       * campos de texto, e `fromRow` faz essa conversão na leitura. Gravar de volta sem desfazê-la
+       * guardava `""` numa coluna de data, o que o SQLite aceita e o Postgres não: a sincronização
+       * quebrava com `invalid input syntax for type date: ""`.
+       *
+       * O erro só aparecia no push, longe da causa — e derrubava a sincronização inteira do
+       * usuário, porque o lote é recusado por completo.
+       */
+      date_of_birth: entity.dateOfBirth === "" ? null : entity.dateOfBirth,
       biological_sex: entity.biologicalSex,
       photo_uri: entity.photoUri,
       blood_type: entity.bloodType,
