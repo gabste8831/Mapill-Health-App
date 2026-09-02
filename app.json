@@ -74,7 +74,8 @@
         }
       ],
       "expo-sharing",
-      "expo-audio"
+      "expo-audio",
+      "./plugins/alarme-em-tela-cheia"
     ],
     "experiments": {
       "typedRoutes": true,

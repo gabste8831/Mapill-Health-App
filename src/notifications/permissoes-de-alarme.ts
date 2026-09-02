@@ -1,5 +1,11 @@
 import notifee, { AndroidNotificationSetting, AuthorizationStatus } from "@notifee/react-native";
-import { Platform } from "react-native";
+import Constants from "expo-constants";
+import { Linking, Platform } from "react-native";
+
+import { CANAL_ALARME_TELA_CHEIA, registrarCanalDeAlarme } from "./alarme-em-tela-cheia";
+
+/** O `applicationId` do app — a tela de tela cheia do Android 14 exige saber de quem ela é. */
+const PACOTE = Constants.expoConfig?.android?.package ?? "com.gabsteffens.mapillapp";
 
 /**
  * Tudo o que o alarme precisa do sistema operacional, num lugar só.
@@ -26,7 +32,7 @@ import { Platform } from "react-native";
 
 /** As quatro coisas que o sistema precisa autorizar para o alarme funcionar de verdade. */
 export type ItemDePermissao = {
-  chave: "notificacoes" | "alarmeExato" | "naoPerturbe" | "bateria";
+  chave: "notificacoes" | "alarmeExato" | "telaCheia" | "naoPerturbe" | "bateria";
   /** O que a pessoa lê. Descreve a consequência, não o nome técnico da permissão. */
   titulo: string;
   descricao: string;
@@ -60,10 +66,20 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
     return { itens: [], vaiTocar: true, temPendencia: false };
   }
 
-  const [settings, bateriaOtimizada, powerManager] = await Promise.all([
+  /**
+   * Recria o canal **antes** de ler, se ele estiver desatualizado.
+   *
+   * O diagnóstico roda a cada volta ao primeiro plano — que é exatamente quando a pessoa volta de
+   * ter autorizado o Não Perturbe. Sem isto, o canal continuaria com o `bypassDnd: false` com que
+   * nasceu, e o item ficaria pendente para sempre, cobrando algo já feito.
+   */
+  await registrarCanalDeAlarme();
+
+  const [settings, bateriaOtimizada, powerManager, canal] = await Promise.all([
     notifee.getNotificationSettings(),
     notifee.isBatteryOptimizationEnabled(),
     notifee.getPowerManagerInfo(),
+    notifee.getChannel(CANAL_ALARME_TELA_CHEIA),
   ]);
 
   const notificacoes = settings.authorizationStatus === AuthorizationStatus.AUTHORIZED;
@@ -101,12 +117,56 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       },
     },
     {
+      /**
+       * A permissão que faz a **tela cheia** aparecer, e não só uma notificação.
+       *
+       * O Android 14 mudou a regra: `USE_FULL_SCREEN_INTENT` deixou de ser concedida na instalação
+       * e passou a exigir autorização explícita, reservada a apps de alarme e chamada. Declarada e
+       * **não** autorizada, o sistema degrada em silêncio para uma notificação heads-up.
+       *
+       * Foi o que aconteceu no primeiro teste (02/09): o alarme "funcionou" — som e aviso —, mas a
+       * tela não subiu, e sem a tela não há som contínuo, porque o loop mora nela. O sintoma
+       * engana justamente por parecer sucesso parcial.
+       *
+       * Não há API de leitura: nem o Notifee nem o Expo expõem o estado desta permissão. Fica
+       * sempre listada, com o caminho para a tela onde se concede — melhor oferecer um passo a
+       * mais do que esconder a razão de o alarme não abrir.
+       */
+      chave: "telaCheia",
+      titulo: "Abrir a tela do alarme",
+      descricao:
+        "Sem isto o Android mostra só uma notificação, em vez de abrir a tela que toca até você desligar.",
+      concedida: false,
+      essencial: false,
+      abrir: async () => {
+        // A tela é por app e vive fora das configurações de notificação — só se chega por esta
+        // intent, com o pacote do app na URI.
+        await Linking.sendIntent("android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", [
+          { key: "android.provider.extra.APP_PACKAGE", value: PACOTE },
+        ]).catch(async () => {
+          // Android abaixo do 14 não tem esta tela, e a permissão já vem concedida: cair nas
+          // configurações do app evita um botão que parece quebrado.
+          await Linking.openSettings();
+        });
+      },
+    },
+    {
       chave: "naoPerturbe",
       titulo: "Tocar no silencioso",
       descricao: "Sem isto o alarme fica mudo quando o celular está no “Não perturbe”.",
-      // O Notifee não expõe leitura desta permissão. Tratada como pendente por padrão: é melhor
-      // oferecer um caminho a mais do que esconder o motivo de um alarme mudo.
-      concedida: false,
+      /**
+       * Lido do **canal**, e não de uma API de permissão.
+       *
+       * O app pede `bypassDnd: true` ao criar o canal, mas o Android só o mantém se a autorização
+       * de política do Não Perturbe estiver concedida — sem ela, o canal nasce com `false` e a flag
+       * é ignorada em silêncio. Então ler o canal de volta responde exatamente a pergunta que
+       * interessa: *o alarme atravessa o silencioso?*
+       *
+       * Antes disto o item era `false` fixo, e ficava na lista **para sempre**, mesmo depois de
+       * concedido — cobrando algo que a pessoa já tinha feito, que é o jeito mais rápido de ensinar
+       * a ignorar o painel inteiro.
+       */
+      concedida: canal?.bypassDnd === true,
       essencial: false,
       abrir: async () => {
         await notifee.openNotificationSettings();

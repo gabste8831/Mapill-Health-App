@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createAudioPlayer } from "expo-audio";
 import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
@@ -73,10 +73,40 @@ export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
     player.loop = true;
     player.play();
 
+    /**
+     * Rede de segurança do loop: se o áudio parar mesmo com `loop` ligado, isto o traz de volta.
+     *
+     * `loop` é o mecanismo principal e funciona. Mas ele é resolvido do lado nativo, e um alarme de
+     * medicação não pode depender de uma única garantia: se o sistema pausar o player por qualquer
+     * razão — foco de áudio disputado com outro app, por exemplo —, o alarme emudece sem sinal
+     * nenhum, e a pessoa continua dormindo.
+     *
+     * O intervalo é maior que o arquivo (4,1 s), então em operação normal ele nunca faz nada: só
+     * observa que o som está tocando e volta a dormir.
+     */
+    const vigia = setInterval(() => {
+      if (!player.playing) player.play();
+    }, 6_000);
+
     return () => {
+      clearInterval(vigia);
       player.pause();
       player.release();
     };
+  }, [silenciado]);
+
+  /**
+   * Vibra em ciclo enquanto o alarme está tocando.
+   *
+   * Independente do som, e é isso que a torna útil: se o volume estiver baixo, se o áudio falhar,
+   * ou se o aparelho estiver no bolso, a vibração é o que ainda avisa. O padrão longo é o mesmo do
+   * canal — vibração curta se confunde com mensagem, e a diferença entre "chegou um WhatsApp" e
+   * "está na hora do remédio" precisa ser sentida sem olhar a tela.
+   */
+  useEffect(() => {
+    if (silenciado) return;
+    Vibration.vibrate([0, 600, 400, 600, 1200], true);
+    return () => Vibration.cancel();
   }, [silenciado]);
 
   /** Silencia sozinho depois de um tempo — ver `SILENCIA_SOZINHO_EM_MS`. */

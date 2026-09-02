@@ -64,6 +64,21 @@ export function ehAlarmeDeTelaCheia(id: string): boolean {
 export async function registrarCanalDeAlarme(): Promise<void> {
   if (Platform.OS !== "android") return;
 
+  /**
+   * Se o canal existe **sem** `bypassDnd`, ele é apagado antes de recriar.
+   *
+   * O canal congela na criação: `createChannel` sobre um id existente atualiza nome e descrição, e
+   * mais nada. Quem instalou o app e **depois** autorizou a política do Não Perturbe ficaria com um
+   * canal que pediu o bypass e não o tem — para sempre, sem sinal nenhum.
+   *
+   * Apagar e recriar é a única forma de a autorização passar a valer sem desinstalar o app. Só
+   * acontece quando há divergência, então em operação normal isto não faz nada.
+   */
+  const existente = await notifee.getChannel(CANAL_ALARME_TELA_CHEIA);
+  if (existente !== null && !existente.bypassDnd) {
+    await notifee.deleteChannel(CANAL_ALARME_TELA_CHEIA);
+  }
+
   await notifee.createChannel({
     id: CANAL_ALARME_TELA_CHEIA,
     name: "Alarme de dose",
