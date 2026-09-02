@@ -1,5 +1,5 @@
 /**
- * Gera o som do alarme de dose (`assets/sounds/alarme-de-dose.wav`).
+ * Gera o som do alarme de dose (`assets/sounds/alarme_de_dose.wav`).
  *
  * **Por que gerado, e não baixado.** Um arquivo de som de terceiro traz licença junto, e este vai
  * embarcado num app que é entregue como trabalho acadêmico e vive num repositório público. Gerar a
@@ -14,6 +14,10 @@
  * A duração é de ~4 s. O loop contínuo é responsabilidade da tela de alarme (`expo-audio` com
  * `isLooping`), não do arquivo — um WAV longo só ocuparia espaço para dizer a mesma coisa.
  *
+ * **O nome usa `_` e não `-`, e isso não é estilo.** O plugin do `expo-notifications` copia este
+ * arquivo para `android/app/src/main/res/raw/`, e nomes de recurso do Android aceitam só letras
+ * minúsculas, dígitos e underscore. Com hífen, o build quebra na compilação de recursos.
+ *
  *     node scripts/gerar-som-de-alarme.mjs
  */
 
@@ -22,7 +26,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
-const DESTINO = join(RAIZ, "assets/sounds/alarme-de-dose.wav");
+const DESTINO = join(RAIZ, "assets/sounds/alarme_de_dose.wav");
 
 const TAXA = 44100; // Hz — padrão de CD, aceito por qualquer aparelho Android.
 const CANAIS = 1; // Mono: o alarme não ganha nada com estéreo, e o arquivo fica na metade.
@@ -94,4 +98,4 @@ writeFileSync(DESTINO, Buffer.concat([cabecalho, dados]));
 
 const segundos = (amostras.length / TAXA).toFixed(1);
 const kb = Math.round((cabecalho.length + dados.length) / 1024);
-console.log(`Gerado: assets/sounds/alarme-de-dose.wav — ${segundos}s, ${kb} KB`);
+console.log(`Gerado: assets/sounds/alarme_de_dose.wav — ${segundos}s, ${kb} KB`);

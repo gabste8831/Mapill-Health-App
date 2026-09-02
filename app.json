@@ -61,7 +61,8 @@
         "expo-notifications",
         {
           "icon": "./assets/images/android-icon-monochrome.png",
-          "color": "#196FF3"
+          "color": "#196FF3",
+          "sounds": ["./assets/sounds/alarme_de_dose.wav"]
         }
       ],
       [

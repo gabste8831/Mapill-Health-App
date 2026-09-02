@@ -11,6 +11,11 @@ import {
   type DoseAAvisar,
 } from "@/domain/use-cases/planejar-avisos-de-dose";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
+import {
+  agendarAlarmeDeTelaCheia,
+  cancelarAlarmesDeTelaCheia,
+  registrarCanalDeAlarme,
+} from "./alarme-em-tela-cheia";
 import { ExpoNotificationGateway } from "./expo-notification-gateway";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`), então não há o que agendar. */
@@ -75,6 +80,9 @@ async function executarReagendamento(): Promise<void> {
     // é a tela, no momento em que a pessoa liga o lembrete.
     if ((await gateway.consultarPermissao()) !== "concedida") {
       await gateway.cancelarTudo();
+      // Os dois lados: alarme de tela cheia sem permissão de notificação não dispara, e deixá-lo
+      // agendado só criaria um aviso fantasma para quando a permissão voltasse.
+      await cancelarAlarmesDeTelaCheia();
       return;
     }
 
@@ -147,8 +155,28 @@ async function executarReagendamento(): Promise<void> {
 
     const avisos = [...planejarAvisosDeDose({ doses, agora, ate }), ...avisosDeCompromisso];
 
+    /**
+     * **Dois agendadores, um para cada promessa que o cadastro faz.**
+     *
+     * O modo `alarm` vai para o Notifee, que é quem sabe abrir tela cheia sobre o bloqueio — é o
+     * despertador de verdade, com som contínuo, que a pessoa precisa vir desligar. Todo o resto
+     * (lembretes, compromissos, receitas) continua no `expo-notifications`, que já cumpre bem o
+     * papel de avisar sem interromper.
+     *
+     * A reconstrução completa da RN14 vale para os dois: cancelar tudo dos dois lados antes de
+     * agendar qualquer coisa é o que garante zero alarme órfão. Cada biblioteca só enxerga a
+     * própria lista, então esquecer um dos dois cancelamentos deixaria avisos de um tratamento já
+     * excluído tocando para sempre.
+     */
     await gateway.cancelarTudo();
-    for (const aviso of avisos) await gateway.agendar(aviso);
+    await cancelarAlarmesDeTelaCheia();
+
+    await registrarCanalDeAlarme();
+
+    for (const aviso of avisos) {
+      if (aviso.modo === "alarm") await agendarAlarmeDeTelaCheia(aviso);
+      else await gateway.agendar(aviso);
+    }
   } catch (cause) {
     // Não relança: reagendar é consequência de outra ação (salvar um cadastro, confirmar uma
     // dose), e derrubar essa ação por causa do aviso trocaria um problema pequeno por um grande.
