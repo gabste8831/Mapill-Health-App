@@ -412,15 +412,4 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  /**
-   * Rodapé fixo: o botão precisa estar à vista o tempo todo pra dizer, sem texto, que dá pra
-   * parar de preencher a qualquer momento.
-   */
-  footer: {
-    padding: spacing.md,
-    gap: spacing.sm,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
-  },
 });

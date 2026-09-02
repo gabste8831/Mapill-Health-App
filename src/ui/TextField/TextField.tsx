@@ -48,6 +48,17 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
           // claramente mais leve que o texto preenchido, que era o efeito pretendido.
           placeholderTextColor={colors.outline}
           multiline={multiline}
+          /**
+           * **A tecla do teclado fecha o teclado** — o gesto que faltava, junto do toque em área
+           * vazia e do arrastar a lista.
+           *
+           * Só em campo de uma linha: em `multiline` o Enter é quebra de linha, e trocar isso
+           * tiraria a única forma de escrever uma observação em dois parágrafos.
+           *
+           * Vem **antes** do spread, então uma tela que precise de outro comportamento (o
+           * `SearchField` usa `"search"`) continua podendo mandar no seu.
+           */
+          {...(multiline ? {} : { returnKeyType: "done" as const, blurOnSubmit: true })}
           {...inputProps}
         />
         {typeof error === "string" && error.length > 0 ? <Text style={styles.fieldErrorText}>{error}</Text> : null}

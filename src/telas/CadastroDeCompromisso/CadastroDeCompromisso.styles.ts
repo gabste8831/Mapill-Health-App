@@ -87,13 +87,6 @@ export const styles = StyleSheet.create({
     borderColor: colors.primary,
     backgroundColor: withOpacity(colors.secondaryContainer, 0.4),
   },
-  footer: {
-    padding: marginMobile,
-    gap: spacing.sm,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
-  },
   submitHint: {
     ...typography.bodyMd,
     color: colors.onSurfaceVariant,

@@ -75,6 +75,7 @@ import {
   type OptionGroupOption,
   type SelectOption,
   type ToggleChipOption,
+  RodapeDeFormulario,
 } from "@/ui";
 import { styles } from "./CadastroDeMedicamento.styles";
 import { ConfiguracaoDeEstoque } from "./ConfiguracaoDeEstoque";
@@ -1842,7 +1843,7 @@ export function FormularioDeMedicamentoScreen({
         ) : null}
       </KeyboardAwareScrollView>
 
-      <SafeAreaView style={styles.footer} edges={["bottom"]}>
+      <RodapeDeFormulario>
         <Button
           label={initialValue === undefined ? "Salvar medicação" : "Salvar alterações"}
           onPress={handleSubmit}
@@ -1851,7 +1852,7 @@ export function FormularioDeMedicamentoScreen({
         {pendencias.length > 0 ? (
           <Text style={styles.submitHint}>Falta preencher {emLista(pendencias)}.</Text>
         ) : null}
-      </SafeAreaView>
+      </RodapeDeFormulario>
 
       <ConfiguracaoDeEstoque
         visible={isStockSheetOpen}

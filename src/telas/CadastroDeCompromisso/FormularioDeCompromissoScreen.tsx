@@ -19,6 +19,7 @@ import {
   type OptionGroupOption,
   TextField,
   TimeField,
+  RodapeDeFormulario,
 } from "@/ui";
 import { styles } from "./CadastroDeCompromisso.styles";
 
@@ -473,7 +474,7 @@ export function FormularioDeCompromissoScreen({
         ) : null}
       </KeyboardAwareScrollView>
 
-      <SafeAreaView style={styles.footer} edges={["bottom"]}>
+      <RodapeDeFormulario>
         <Button
           label={initialValue === undefined ? "Salvar compromisso" : "Salvar alterações"}
           onPress={handleSubmit}
@@ -482,7 +483,7 @@ export function FormularioDeCompromissoScreen({
         {pendencias.length > 0 ? (
           <Text style={styles.submitHint}>Falta informar {emLista(pendencias)}.</Text>
         ) : null}
-      </SafeAreaView>
+      </RodapeDeFormulario>
     </SafeAreaView>
   );
 }

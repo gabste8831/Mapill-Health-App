@@ -242,6 +242,15 @@ export function RemediosScreen() {
         <FlatList
           data={visiveis}
           keyExtractor={(item) => item.medication.id}
+          /**
+           * As mesmas duas props do `KeyboardAwareScrollView`, aqui à mão: esta tela tem campo de
+           * busca mas não é formulário, então não passa por aquele componente — e ficava sem saída
+           * nenhuma para o teclado. Arrastar a lista dispensa (o gesto de quem quer ver o que está
+           * embaixo), e `handled` faz o primeiro toque num remédio valer em vez de ser gasto só
+           * fechando o teclado.
+           */
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <ItemDeRemedio
               item={item}
