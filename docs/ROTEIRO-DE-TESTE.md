@@ -17,6 +17,33 @@
 > - As **permissões viraram um painel só** (bloco 0), com as quatro que o alarme precisa. Duas delas
 >   nunca tinham sido pedidas, e são justamente as causas de "o aviso não chegou" que ninguém
 >   diagnostica sozinho: alarme exato e economia de bateria.
+>
+> **O caminho feliz do alarme já passou em 01/09** — tela cheia por cima do bloqueio, som em loop,
+> com o app fechado. O que **não** passou, e é o motivo do bloco novo, são os casos em que o alarme
+> pode **mentir**: o [bloco 11](#11--os-casos-de-borda-do-alarme--c18) reúne os nove casos de borda
+> do C1.8 e é o que fecha o bloco C1 formalmente no plano.
+>
+> Há também um **[bloco 12](#12--o-relatório-em-pdf-d4)**: o relatório em PDF, escrito em 02/09 e
+> nunca aberto num aparelho.
+>
+> ### 🔧 A fundação dos avisos mudou (02/09)
+>
+> **Todo o agendamento passou para o Notifee.** Antes eram duas bibliotecas — Notifee para o alarme
+> de tela cheia, `expo-notifications` para lembretes, compromissos e receitas. Agora é uma só, e o
+> motivo é o alarme órfão: com duas listas separadas, "cancelar tudo" dependia de lembrar de chamar
+> as duas. Detalhe em [C1.10](./PLANO-DE-DESENVOLVIMENTO.md).
+>
+> **O que isso significa para esta rodada:** o modo **Notificação** trocou de biblioteca por
+> inteiro, então o que passou em 01/09 **não vale mais como validado**. Os blocos 2, 3 e 4 voltam a
+> ser obrigatórios, mesmo tendo passado antes.
+>
+> Um ganho a conferir de propósito: o botão "Tomei" agora grava **com o app fechado**, sem depender
+> de a pessoa abrir o app depois. Antes a escrita só acontecia na abertura seguinte.
+>
+> Ordem sugerida desta rodada: **2 → 3 → 4 → 5 → 12 → 7 → 11**. Os três primeiros cobrem o que a
+> troca de fundação afetou, o 5 e o 12 nunca rodaram, o 7 precisa de tempo real correndo, e o **11
+> fica por último porque mexe no relógio e reinstala o app** — depois dele o estado do aparelho não
+> serve para os outros blocos.
 
 ## Como reportar
 
@@ -40,8 +67,9 @@ resto ok
 1. Permissões novas no `app.json` (`USE_FULL_SCREEN_INTENT`, `ACCESS_NOTIFICATION_POLICY`), e
    permissão não entra por recarga do Metro.
 2. **Notifee** é dependência nativa — é ele que abre o alarme em tela cheia.
-3. Os canais subiram para **`v4`**. Um canal já criado fica **congelado** no aparelho: som e
-   importância não mudam por atualização. Instalar por cima manteria o alarme mudo.
+3. Os canais subiram para **`v5`** (02/09, com a troca de biblioteca). Um canal já criado fica
+   **congelado** no aparelho: som e importância não mudam por atualização. Instalar por cima
+   manteria o alarme mudo.
 4. `expo-camera` é dependência nativa (bloco 8).
 
 ⚠️ **Aparelho físico.** Emulador não serve para os blocos 1, 2 e 3 — o que está em jogo é o
@@ -152,6 +180,24 @@ app. Quando chegar, toque em **Tomei**.
 **2.4** Ainda antes de ele voltar, **confirme essa dose pela Home**.
 
 > ✅ O aviso adiado **não menciona esse remédio** (ou não chega, se era o único).
+
+**2.5 — 🔴 O ganho da unificação: gravar com o app fechado.** Cadastre outro para daqui a 3 min,
+**Notificação**. Feche o app. Quando o aviso chegar, toque em **Tomei** e **não abra o app**.
+
+Espere um minuto, e só então abra.
+
+> ✅ 🔴 A dose **já está confirmada** ao abrir — a gravação aconteceu no toque, não na abertura.
+> ✅ 🔴 O estoque **já tinha descontado**.
+> ❌ Se a dose só aparecer confirmada *depois* de abrir o app, o handler de segundo plano não está
+> registrado. É o que o `index.js` faz antes de o roteador subir.
+
+**2.6 — O adiado sobrevive ao reagendamento.** Cadastre um para daqui a 3 min. Quando chegar, toque
+em **Adiar 5 min**. Em seguida **abra o app** (o que dispara um reagendamento completo) e feche.
+
+> ✅ 🔴 O aviso adiado **ainda chega**, ~5 min depois do toque.
+> ❌ Se não chegar, o `cancelarTudo` o apagou junto com a grade — era exatamente o defeito que a
+> migração introduziria se o filtro de id olhasse só o prefixo `adiado-`, já que o adiado é agendado
+> como alarme e seu id fica `alarme:adiado-…`.
 
 ---
 
@@ -376,6 +422,275 @@ Mapill nas configurações do Android e volte à Home.
 
 > ✅ Com estoque recém-cadastrado, o bloco amarelo **não aparece** — ele só surge após **30 dias**
 > sem conferência. Provavelmente não dá para ver agora, e tudo bem.
+
+---
+
+## 11 — Os casos de borda do alarme 🔬 (C1.8)
+
+**É o bloco que fecha o C1 no plano.** Os blocos 1 a 4 provam que o alarme funciona quando tudo
+está normal; este prova que ele não **mente** quando não está. Num app de medicação, os dois modos
+de falhar são opostos e igualmente graves: o aviso que **não chega**, e o aviso que chega **errado**
+— na hora errada, duplicado, ou de um remédio que a pessoa já tomou.
+
+Cada passo tem um número de C1.8 ao lado. Anote a resposta **mesmo quando passar**: são elas que
+marcam as caixas do plano.
+
+⚠️ **Este bloco mexe no relógio do aparelho e reinstala o app.** Faça-o **por último** na Parte 1 —
+depois dele o estado do aparelho não serve para os outros blocos.
+
+---
+
+**11.1 — Dose já confirmada não toca** *(C1.8 nº6)*
+
+Cadastre `Tomei Antes`, daqui a 4 min, **Alarme**. Abra a Home e **confirme a dose pela Home**,
+antes do horário. Feche o app e espere passar o horário.
+
+> ✅ 🔴 **Nada toca.** Nem tela cheia, nem notificação.
+> ❌ Se tocar, o cancelamento individual não alcançou o Notifee — é o mesmo risco do bloco 3, e o
+> mais provável de escapar, porque aqui quem cancela é a Home e não a edição do cadastro.
+
+---
+
+**11.2 — Alarme com o app já aberto na tela da dose** *(C1.8 nº5)*
+
+Cadastre `App Aberto`, daqui a 3 min, **Alarme**. **Deixe o app aberto**, e navegue até a tela do
+horário dessa mesma dose. Espere o horário.
+
+> ✅ 🔴 A tela de alarme aparece **mesmo com o app aberto** *(é o que o commit de 02/09 entregou)*.
+> ✅ 🔴 **Não empilha duas telas** — ao sair do alarme você não encontra outra tela de dose por baixo
+> esperando resposta da mesma dose.
+> ✅ Respondendo **Tomei** no alarme, a tela por baixo reflete a resposta, e não continua oferecendo
+> Tomei/Pulei para uma dose já resolvida.
+
+🔬 **Anote:** aconteceu de responder duas vezes a mesma dose?
+
+---
+
+**11.3 — Dose atravessando a meia-noite** *(C1.8 nº2)*
+
+Cadastre `Meia Noite` com **dois horários**: `23:50` e `00:10`. Uso contínuo, Alarme.
+
+> ✅ Os dois horários são aceitos e aparecem no resumo do cadastro.
+> ✅ 🔴 Na Home, a dose das `00:10` aparece **no dia seguinte**, não hoje.
+
+Se der para esperar a virada, espere. Se não, ajuste os horários para daqui a 3 e 8 min e confirme
+que os dois tocam — o que este passo testa de verdade é a geração, e ela já foi verificada em Node
+contra a virada de dia.
+
+🔬 **Anote:** a dose de `00:10` foi listada no dia certo?
+
+---
+
+**11.4 — Não perturbe / Foco** *(C1.8 nº4)*
+
+Cadastre `Silencioso`, daqui a 3 min, **Alarme**. Ative o **Não perturbe** do Android. Feche o app e
+bloqueie.
+
+> ✅ 🔴 **O alarme toca mesmo assim** — é o que `bypassDnd` e a permissão de política de notificação
+> existem para garantir *(commit `5747ed9`)*.
+> ❌ Se ficar mudo, anote: é a diferença entre o app cumprir ou não a promessa "toca alto, mesmo no
+> silencioso" — e, pela RN15, o **texto da interface teria que mudar**, não a promessa ficar.
+
+Repita com o celular no **silencioso** (não o Não perturbe — o botão de volume no mudo).
+
+> ✅ 🔴 Toca igual.
+
+🔬 **Anote os dois casos separadamente.** Eles falham por motivos diferentes.
+
+---
+
+**11.5 — Relógio do aparelho mudado à mão** *(C1.8 nº3)*
+
+Cadastre `Relogio`, daqui a **2 h**, Alarme. Feche o app. Nas configurações do Android, **desligue a
+hora automática** e adiante o relógio para **5 minutos antes** do horário da dose. Espere.
+
+> ✅ O aviso chega no horário **do relógio novo** — o agendamento é por data/hora local, então ele
+> acompanha.
+> ⚠️ Se **não** chegar, anote e verifique se ele chega ao **abrir o app** (o reagendamento da janela
+> acontece na abertura). Isso decide se o app precisa reagir à mudança de relógio ou se basta a
+> próxima abertura.
+
+**Devolva a hora automática ao terminar** — os passos seguintes dependem do relógio certo.
+
+🔬 **Anote:** chegou sozinho, só ao abrir o app, ou não chegou?
+
+---
+
+**11.6 — Fuso horário** *(C1.8 nº1)*
+
+Com a hora automática **desligada**, mude o **fuso** para um vizinho (ex.: Fortaleza / Manaus). Abra
+o app.
+
+> ✅ 🔴 A dose das 08:00 **continua às 08:00** na Home — o horário é uma promessa sobre o relógio de
+> parede da pessoa, não um instante absoluto. Quem toma remédio às 8 da manhã toma às 8 da manhã em
+> qualquer lugar.
+> ❌ Se a dose escorregar para 07:00 ou 09:00, anote — é o defeito mais sutil deste bloco.
+
+**Devolva o fuso** ao terminar.
+
+🔬 **Anote:** o horário escorregou?
+
+---
+
+**11.7 — App reinstalado** *(C1.8 nº9)*
+
+Com pelo menos um remédio cadastrado com alarme para daqui a algumas horas: **desinstale o Mapill**
+e instale a build de novo. **Não abra o app.** Espere o horário.
+
+> ✅ **Nada chega** — e isso é o comportamento **correto**: desinstalar leva embora os agendamentos
+> do sistema junto com o app.
+
+Agora **abra o app** uma vez e feche.
+
+> ✅ 🔴 A partir daí os avisos **voltam a chegar**, sem precisar reeditar nada. É o reagendamento da
+> janela na abertura.
+> ❌ Se não voltarem, existe um caminho em que a pessoa fica sem lembrete nenhum e **sem nenhum
+> sinal disso** — é o pior modo de falhar deste app.
+
+⚠️ Este passo **apaga os dados locais** se você não tiver conta vinculada. Faça-o por último, ou
+depois de conferir que o bloco 5 (sincronização) já restaurou.
+
+🔬 **Anote:** voltaram após a primeira abertura?
+
+---
+
+**11.8 — Bateria crítica** *(C1.8 nº8)*
+
+Não force. **Se em algum momento da semana o celular chegar abaixo de 15% com a economia extrema
+ligada** e houver dose agendada, anote se o aviso chegou.
+
+🔬 **Anote se acontecer naturalmente.** Não vale gastar uma sessão descarregando o aparelho de
+propósito.
+
+---
+
+**Fecha o quê:** os nove casos do C1.8. Com 11.1 a 11.7 anotados, a caixa *"Checklist de borda
+percorrido"* do plano fecha — 11.8 é oportunista e pode ficar como "não observado".
+
+---
+
+## 12 — O relatório em PDF (D4)
+
+**Escrito em 02/09, nunca aberto num aparelho.** O conteúdo já foi verificado em Node (28
+verificações em `scripts/conferir-relatorio.mjs`), então o que este bloco testa não é a conta — é o
+**documento**: se ele abre, se o texto não corta, e se dá para tirar do celular.
+
+⚠️ Faça-o **antes** do bloco 11, que mexe no relógio e reinstala o app.
+
+**12.1** Home → card **Acompanhamento semanal** → **Minha adesão**. Escolha **30 dias** e toque em
+**Gerar relatório em PDF**.
+
+> ✅ O botão mostra carregando e a folha de compartilhamento do sistema aparece.
+> ✅ Dá para **salvar** o arquivo e **enviar** por outro aplicativo.
+
+**12.2** Abra o PDF salvo.
+
+> ✅ Abre num leitor de PDF comum, sem erro.
+> ✅ **Cabeçalho** com o seu nome, o período (`03/08/2026 a 02/09/2026`) e a data de emissão.
+> ✅ **Tratamentos em curso** com dose, frequência e horários — os mesmos textos da aba Remédios.
+> ✅ **Adesão** com a porcentagem e a tabela por medicamento.
+> ✅ **Doses não tomadas** aparecem **contadas** ("Metformina — 4 · 2"), e **não** uma linha por
+> dose perdida.
+> ❌ Se vier uma lista longa de doses, uma por linha, o agrupamento não está sendo aplicado.
+
+**12.3** Confira se o número do papel bate com o da tela.
+
+> ✅ 🔴 A porcentagem do PDF é **idêntica** à que a tela mostra para o mesmo período. Se divergirem,
+> o relatório e a tela estão lendo coisas diferentes — e o papel é o que vai para o médico.
+
+**12.4** Cadastre um remédio com **`&` ou `<` no nome** — por exemplo `Vitamina A & D <teste>`.
+Gere o relatório de novo.
+
+> ✅ 🔴 O nome aparece **inteiro e correto** no PDF.
+> ❌ Se o documento vier **truncado** a partir dali, ou o nome sair pela metade, o escape falhou —
+> é o defeito que não dá erro nenhum e some com uma linha de tratamento.
+
+**12.5 — O filtro por medicamento.** Com **três ou mais** remédios cadastrados, toque na linha
+**MEDICAMENTOS NO RELATÓRIO**.
+
+> ✅ Diz **"Todos"** antes de você mexer, e todos aparecem **marcados** no popup.
+> ✅ Desmarcando um, a linha passa a dizer **"2 de 3"** (e não "1 de 3" — desmarcar um deixa os
+> outros dois, não deixa só o que você tocou).
+> ✅ Desmarcando um, sobra o nome do último: a linha mostra **o nome dele**, não "1 de 3".
+> ✅ 🔴 **Desmarcando todos, volta sozinho para "Todos"** — o app não deixa você gerar um relatório
+> sem tratamento nenhum.
+> ✅ Remarcando tudo à mão, volta a dizer **"Todos"**.
+
+Gere o relatório com **um** medicamento desmarcado.
+
+> ✅ 🔴 O PDF traz, logo abaixo do cabeçalho, **"Este relatório cobre 2 de 3 tratamentos — não o
+> tratamento completo do paciente"**.
+> ✅ O medicamento desmarcado **não aparece** em nenhuma seção.
+> ✅ Gerando de novo com **"Todos"**, esse aviso **some** do documento.
+
+**12.6** Com o app **recém-instalado** (ou com todas as doses ainda por vencer), gere o relatório.
+
+> ✅ Diz **"ainda não há o que medir"**, e em lugar nenhum aparece **0%**. *(RN20: zero por cento é
+> uma afirmação sobre o paciente; ausência de dados não é.)*
+
+**12.7** 🔬 **Se tiver acesso a uma impressora**, imprima em **preto e branco**.
+
+🔬 **Anote:** ficou legível? Alguma seção depende de cor para ser entendida?
+
+**12.8** **Modo avião ligado**, gere o relatório.
+
+> ✅ Gera normalmente — nenhum dado sai do aparelho para o PDF existir.
+
+---
+
+## 13 — Acessibilidade com o TalkBack 🔬 (E1)
+
+**Fecha o último item do E1.** A varredura por código (02/09) corrigiu sete defeitos, mas leitor de
+tela não se valida lendo código — só ouvindo. São poucos passos, e cobrem os fluxos onde errar tem
+consequência clínica.
+
+⚠️ **Ligue o TalkBack** em Configurações → Acessibilidade. Para desligar rápido, segure os dois
+botões de volume por três segundos.
+
+⚠️ **Ligue também a fonte ampliada** (Configurações → Tela → Tamanho da fonte, no máximo). Metade
+dos defeitos corrigidos só aparece assim.
+
+---
+
+**13.1 — A agenda da Home.** Deslize pelos itens de dose.
+
+> ✅ 🔴 Cada dose é lida como **uma frase só**: "Dipirona, 08:00, atrasada" — e **não** em quatro
+> paradas soltas.
+> ✅ 🔴 O nome do remédio vem **antes** do estado.
+> ✅ 🔴 "Confirmar" e "Pular" são alcançáveis e **não se tocam por engano** — foram de 32 para 44pt.
+> ✅ Com a fonte no máximo, o rótulo dos dois botões **não corta**.
+
+**13.2 — A tela do horário** (a que a notificação abre). Abra uma dose e responda **Tomei**.
+
+> ✅ 🔴 O cartão é lido como uma frase, terminando em "aguardando resposta".
+> ✅ 🔴 Depois de responder, o botão "Tomei" é anunciado como **selecionado** — antes os dois soavam
+> idênticos, e a única diferença era a cor.
+> ✅ O selo "Tomada" é lido junto do cartão.
+
+**13.3 — O calendário.** Vá a um dia com dose já resolvida.
+
+> ✅ 🔴 A linha diz **"dose tomada"** ou **"dose não tomada"** — antes o desfecho vinha só de um
+> ícone, que o leitor não anuncia.
+
+**13.4 — O cadastro de medicamento.** Escolha "Dias da semana".
+
+> ✅ Cada dia é lido por extenso ("segunda-feira"), não como "Seg".
+> ✅ São anunciados como **marcado/desmarcado**, não como botão.
+
+Agora abra os horários e **repita um horário de propósito**.
+
+> ✅ 🔴 A ficha do horário repetido é lida como **"08:00, horário repetido"** — o fundo vermelho
+> sozinho não diz qual dos horários é o problema.
+
+Volte e percorra as linhas de **estoque** e **lembrete**.
+
+> ✅ Dizem o que editam ("Editar o controle de estoque"), e não só "Controle ativo Editar".
+
+**13.5 — Fonte ampliada, varredura geral.** Ainda com a fonte no máximo, passe por Home, Cadastro,
+Remédios, Estoque e Ajustes.
+
+🔬 **Anote qualquer texto cortado, botão espremido ou linha sobreposta.** É o defeito mais provável
+de sobrar, e o mais fácil de ver.
 
 ---
 

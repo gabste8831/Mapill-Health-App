@@ -32,56 +32,88 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 0.1 O QUE FALTA — quadro único (atualizado em 2026-08-30)
+## 0.1 O QUE FALTA — quadro único (atualizado em 2026-09-02)
+
+> ### 🔄 Revisão de escopo — 02/09
+>
+> Três itens foram reexaminados. **Dois entraram, um ficou fora** — e o motivo de cada um está
+> registrado ao lado do motivo antigo, porque o que mudou foi o raciocínio, não só a conclusão:
+>
+> | O que | Situação | Por quê |
+> |---|---|---|
+> | **Alarme nível A** | ✅ **Entregue** | O descarte no spike confundiu limite da **biblioteca** com limite da **plataforma**. Validado em aparelho em 01/09 — ver [C1.9](#c1-notificações-e-alarmes-de-dose--maior-risco-técnico-do-projeto) |
+> | **Resumo em PDF** | ✅ **Entra** como [D4](#d4-relatório-em-pdf--o-resumo-que-sai-do-celular) | O argumento de 30/08 ("a tela serve em print") subestimava o buraco: o JSON cumpre a lei e é **ilegível para um médico**. Os dois não competem — um é a saída para máquina, o outro para humano |
+> | **Anexos no Storage (E9)** | ❌ **Fica fora** | ⚠️ **Não por dificuldade técnica** — é um upload, e a infra já existe. Fica fora porque o ganho é **invisível na defesa**, porque o RLS de Storage é superfície nova que erra em silêncio sobre o dado mais sensível do app, e porque "anexos não sobem" é um argumento de minimização **melhor** que o que o substituiria. Detalhe em [E9](#e9-anexos-no-armazenamento-em-nuvem--fora-de-escopo-confirmado-em-0209) |
+>
+> O **checklist formal de acessibilidade** continua por último — mas por **sequência**, não por
+> corte: vem depois do passe de front tela a tela, porque medir contraste de tela que ainda vai
+> mudar é medir duas vezes.
+
+### Estado do alarme (o que mudou)
+
+✅ **O alarme funciona.** Validado em aparelho em **01/09**: tela cheia por cima do bloqueio, som em
+loop, app fechado. O risco número um do projeto deixou de existir.
+
+O que sobra do C1 é o **bloco 11 do roteiro** — os casos de borda do C1.8. A pergunta mudou de
+*"funciona?"* para *"falha bem?"*, e é ela que fecha o bloco formalmente.
+
+---
+
+## 0.1.1 O que falta — índice (02/09)
 
 > **Esta seção é o índice do que sobrou.** O resto do documento explica *por quê*; aqui está *o
-> quê*, em ordem de decisão. Cada linha aponta o bloco onde ela está detalhada.
+> quê*. Cada linha aponta o bloco onde está detalhada.
 >
-> Prazo declarado: **~2 semanas de desenvolvimento**, defesa dentro de um mês.
+> Prazo declarado: defesa dentro de um mês.
 
 ### ✅ Código: nada obrigatório em aberto
 
-**Todos os blocos do roadmap estão escritos.** Os últimos três — lembrete de recontagem (B5),
-exportação de dados e exclusão na nuvem (D3) — saíram em 30/08.
+**Todos os blocos do roadmap estão escritos**, incluindo os dois reabertos em 02/09: o alarme em
+tela cheia ([C1.9](#c1-notificações-e-alarmes-de-dose--maior-risco-técnico-do-projeto), validado em
+aparelho em 01/09) e o [relatório em PDF](#d4-relatório-em-pdf--o-resumo-que-sai-do-celular).
 
-O que resta do lado do código são **duas exclusões deliberadas**, ambas com motivo registrado:
+Sobram **duas exclusões deliberadas**, ambas com motivo registrado — e nenhuma delas é dificuldade
+técnica:
 
 | O que | Bloco | Por que fica de fora |
 |---|---|---|
-| **Anexos no Storage** | [E9/D1](#d1-sincronização-sqlite--supabase-) | Subir imagem de receita exige um **segundo** bump dos termos, e o reconsentimento acontece uma vez só — errar o texto custa caro. O texto 1.2.0 já diz, explicitamente, que fotos e receita **não** sobem. |
-| **Checklist de acessibilidade** | [E1](#e1-estados-vazios-offline-erro-e-acessibilidade) | Tratado no artigo, por decisão de 30/08 — mas a **varredura por leitura de código foi feita em 31/08** e corrigiu seis defeitos reais (ver [6.5](#65-varredura-de-acessibilidade--3108)). O que resta é o teste manual com TalkBack ligado, que precisa de aparelho. |
+| **Anexos no Storage** | [E9](#e9-anexos-no-armazenamento-em-nuvem--fora-de-escopo-confirmado-em-0209) | **Confirmado fora em 02/09, com motivo novo.** Não é dificuldade técnica: o ganho é invisível na defesa, o RLS de Storage é superfície nova que erra em silêncio sobre a receita médica, e "anexos não sobem" é minimização demonstrada por ausência — argumento mais forte que o que o substituiria. O texto 1.2.0 já declara isso ao titular. |
+| **Passe de front + acessibilidade** | [E1](#e1-estados-vazios-offline-erro-e-acessibilidade) | Não é corte, é **sequência**: é o último item do projeto. A varredura por leitura de código (31/08) já mediu contraste e corrigiu alturas e alvos de toque; o que falta é o passe tela a tela e, depois dele, o TalkBack. Medir contraste de tela que ainda vai mudar é medir duas vezes. |
 
-> ⚠️ **"Escrito" não é "funciona".** Doze blocos foram implementados entre 29 e 30/08 e **nenhum
-> deles rodou em aparelho** — a cota de builds do EAS acabou. O risco agora não é falta de código:
-> é a validação inteira estar concentrada numa única sessão de teste.
+> ⚠️ **"Escrito" não é "validado".** Treze blocos foram implementados entre 29/08 e 02/09 e a maior
+> parte **nunca rodou em aparelho**. O risco do projeto deixou de ser falta de código: é a validação
+> concentrada em poucas sessões.
 
-**Passe de design (30/08) — feito.** Não era bloco do roadmap: nasceu da leitura das telas em
-aparelho. A causa estava mapeada — o `Card` do kit já usava sombra sem borda, mas **sete telas
-desenhavam o próprio cartão com borda cinza**, e era essa divergência que dava às listas o aspecto
-de planilha. A correção virou token em [`src/shared/theme/elevation.ts`](../src/shared/theme/elevation.ts)
-(`surfaceCard`, `surfaceShadow`, `listGap`, `screenPadding`), aplicado em Home, Remédios, Estoque,
-Calendário, Adesão e Horário. Decisões registradas em [6.4](#64-linguagem-visual--sombra-e-não-borda).
+### 📱 Validação em aparelho — o risco número um
 
-### 📱 Validação em aparelho (não é código)
+✅ **O alarme já foi validado em 01/09** (tela cheia sobre o bloqueio, som em loop, app fechado). O
+que resta são os modos de **falhar**, o que nunca rodou, e o que só o tempo responde.
 
-⚠️ **Bloqueado até 01/09**: a cota mensal de builds do EAS acabou.
+Ordem sugerida da próxima rodada — o bloco 11 fica por último porque mexe no relógio e reinstala o
+app, e depois dele o estado do aparelho não serve para os outros:
 
-| O que | Onde |
-|---|---|
-| **Reteste do C1** — blocos 1, 2, 4, 7 | [`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md), Parte 1 |
-| **Estreia** — blocos 10 a 14 (permissão na Home, C3, D2, B1, B3) | idem |
-| **Sobrevivência** 🔬 — reboot e economia de bateria | bloco 8 |
-| **Casos de borda** do C1.8 | bloco 9 |
-| **Validação completa**, antes da defesa | Parte 2 |
+| # | O que | Por que importa |
+|---|---|---|
+| **3** | Alarme órfão | Ficou mais arriscado: agora são **dois agendadores** (Notifee e `expo-notifications`), e cada um só enxerga a própria lista |
+| **5** | Sincronização (D1) | Nunca rodou |
+| **12** | Relatório em PDF (D4) | Nunca rodou. O passo 12.3 confere que o número do papel bate com o da tela |
+| **7** | Sobrevivência 🔬 | Reboot e economia de bateria do fabricante — as duas perguntas do spike que só o tempo responde |
+| **11** | Casos de borda do C1.8 | Fecha o C1 formalmente. Prova que o alarme não **mente** quando as condições não são normais |
+| **Parte 2** | Passada geral | Antes da defesa, com o app fechado, do zero |
 
-### 📄 Entrega acadêmica
+### 📄 Entrega acadêmica — o que sobra além do aparelho
 
 | O que | Situação |
 |---|---|
-| Prints do caminho crítico | A capturar na sessão de validação, seguindo a ordem da Parte 2 do roteiro |
-| **Capítulo 4** — argumento do artigo → decisão de código | Base pronta: [`GUIA-DO-TCC.md`](./GUIA-DO-TCC.md), escrito em 31/08 a partir do log deste arquivo. Traz requisitos numerados (RF01–RF44, RNF01–RNF12), 20 regras de negócio, a arquitetura, as fases, as decisões difíceis e o mapa argumento → código. Falta redigir o texto corrido. |
-| Limitações e trabalhos futuros | A escrever. Inclui iOS, agente Anvisa (Fase 2) e o que for cortado daqui. |
-| Acessibilidade (E1) | **Tratada no artigo**, por decisão de 30/08 — o app cumpre o essencial, e o checklist formal não cabe no prazo. |
+| **Capítulo 4** — argumento → decisão de código | Base pronta em [`GUIA-DO-TCC.md`](./GUIA-DO-TCC.md): RF01–RF44, RNF01–RNF12, 20 regras de negócio, arquitetura, decisões difíceis e o mapa argumento → código (seção 11). **Falta redigir o texto corrido.** |
+| Prints do caminho crítico | A capturar na sessão de validação, seguindo a Parte 2 do roteiro |
+| Limitações e trabalhos futuros | ✅ Escrito — seções 10.1 e 10.2 do guia, com o motivo de cada exclusão na data em que foi decidida |
+| Acessibilidade (E1) | O que foi medido entra no artigo; o passe de front e o TalkBack ficam para o fim |
+
+⚠️ **Duas seções do guia precisam ser atualizadas** com o que mudou em 01 e 02/09: a **6** (o
+spike concluiu "nível A inviável", e o nível A foi entregue — a lição é ter confundido limite da
+biblioteca com limite da plataforma) e a **9.2/10** (o PDF saiu de "trabalho futuro" para
+entregue).
 
 ### ❌ Fora de escopo, com motivo registrado
 
@@ -170,6 +202,7 @@ FASE D — CONFIABILIDADE (o que a banca vai perguntar)
   D1  Sincronização SQLite ↔ Supabase (LWW + RLS)
   D2  Histórico e relatório de adesão
   D3  Configurações + direitos LGPD (exportar/excluir)
+  D4  Relatório em PDF — o resumo que sai do celular        ← reaberto em 02/09
 
 FASE E — ACABAMENTO
   E1  Estados vazios, offline, erro e acessibilidade
@@ -753,17 +786,85 @@ para quem já instalou.
 > **O nível B continua existindo** como o modo `notification` do cadastro. As duas opções que o app
 > oferece passam a ser reais: uma avisa, a outra acorda.
 
+---
+
+> ### 🔧 C1.10 — Um agendador só (02/09)
+>
+> **O que mudou.** Entre 01 e 02/09 o app teve **duas** bibliotecas de notificação: o Notifee para o
+> alarme de tela cheia (a única coisa que o `expo-notifications` não faz) e o `expo-notifications`
+> para todo o resto — lembretes, compromissos, receitas, permissões. Agora é uma só.
+>
+> **Por que não bastava funcionar.** A escrita no banco já era única: as duas chamavam
+> `confirmarDosesDoAviso`, com a mesma guarda contra confirmação repetida, então o **estoque nunca
+> esteve em risco** por causa da duplicidade. O problema vivia no **cancelamento**.
+>
+> Cada biblioteca só enxerga a própria lista de agendamentos. A [RN14](#rn14) ("nunca editar, sempre
+> reconstruir") dependia de lembrar de cancelar dos dois lados — e isso é **convenção, não
+> construção**. Um terceiro ponto de cancelamento que esquecesse uma das chamadas traria de volta o
+> **alarme órfão**, o pior defeito deste domínio, sem que o compilador denunciasse nada.
+>
+> Com um agendador só, `cancelarTudo` é literalmente tudo. O defeito deixou de ser possível em vez de
+> ser evitado por atenção.
+>
+> **O ganho que não era só arrumação.** `onBackgroundEvent` processa a resposta **com o app
+> fechado**. O caminho anterior dependia de `getLastNotificationResponseAsync` no bootstrap — isto é,
+> de a pessoa **abrir o app** para o toque em "Tomei" ser processado. Para um botão que promete não
+> abrir o app, isso não era detalhe: era a promessa. Registrado em `index.js`, fora do ciclo de vida
+> do React, porque com o app fechado não há componente montado para assinar nada.
+>
+> **O que encolheu**
+>
+> | Antes | Agora |
+> |---|---|
+> | `expo-notification-gateway.ts` + `alarme-em-tela-cheia.ts` | `notifee-gateway.ts` |
+> | `escutar-respostas.ts` + `escutar-alarme.ts` | `escutar-avisos.ts` |
+> | `canais.ts` (Expo) | `canais-notifee.ts` |
+> | 4 categorias pré-registradas no sistema | botões montados na própria notificação |
+>
+> As categorias sumiram porque no Notifee as ações vão **na notificação**. Antes era preciso
+> registrar quatro combinações ("uma ou várias doses" × "pode adiar ou não") *antes* do agendamento,
+> e escolher a certa por uma função tradutora — com a chance de agendar apontando para uma categoria
+> que não corresponde ao que o aviso oferece.
+>
+> **O bug que a migração revelou.** O lembrete adiado é agendado com `modo: "alarm"` (precisa
+> interromper como o aviso original), então seu id ficou com **os dois** prefixos:
+> `alarme:adiado-…`. O filtro óbvio de `cancelarTudo` — comparar o id cru com `adiado-` — falharia, e
+> o aviso que a função existe para **preservar** seria apagado a cada reagendamento, em silêncio. A
+> pessoa perderia o lembrete que ela mesma pediu cinco minutos antes. Corrigido, e virou
+> `scripts/conferir-ids-de-aviso.mjs` — 14 verificações de regra de string, em Node.
+>
+> ⚠️ **O plugin `expo-notifications` continua no `app.json`, e não pode sair.** Nenhuma linha importa
+> a biblioteca, mas o plugin é de **build**: é ele que gera o drawable `notification_icon` e embarca
+> `alarme_de_dose` em `res/raw` — os dois consumidos pelo Notifee **pelo nome**. Removê-lo achando
+> que é dependência morta apagaria o som do alarme, sem erro de compilação.
+>
+> **Custo assumido:** os 10 gatilhos de reagendamento e o fluxo de permissões, que já haviam passado
+> em 01/09, voltam a precisar de validação. É o preço de trocar a fundação — e a razão de o bloco 3
+> do roteiro subir na ordem da próxima rodada.
+
 **C1 está pronto quando**
 - [x] Resultado do spike documentado e nível (A/B/C) escolhido explicitamente. — foi **nível B**,
       e o **A foi reaberto em 02/09** (ver C1.9): o descarte tinha confundido limite da biblioteca
       com limite da plataforma.
-- [ ] **Alarme em tela cheia, com som contínuo até o usuário desligar** — o diferencial do app.
-- [ ] Notificação dispara com o app **fechado**, em device Android físico (não só emulador).
-      — ⚠️ **falhou em 29/08**: o alarme não tocou (canal sem `sound` e sem categoria de
-      despertador). Corrigido; aguarda reteste.
-- [x] Os 10 gatilhos de reagendamento (C1.4) testados um a um, sem alarme órfão. — o bloco 5 do
-      roteiro passou: excluir, mudar horário e desligar o lembrete, os três com o app fechado.
-- [ ] Checklist de borda (C1.8) percorrido. — não testado ainda (bloco 9 do roteiro).
+- [x] **Alarme em tela cheia, com som contínuo até o usuário desligar** — o diferencial do app.
+      — **verificado em device (2026-09-01)**: a tela sobe por cima do bloqueio, com o app fechado,
+      e o som toca em loop até alguém vir desligar. É o nível A entregue. ⚠️ Confirmado no código
+      **anterior** à unificação; o caminho do alarme mudou pouco (o Notifee já era quem o agendava),
+      mas o canal subiu para `v5` e exige build nova.
+- [x] Notificação dispara com o app **fechado**, em device Android físico (não só emulador).
+      — havia **falhado em 29/08** (canal sem `sound` e sem categoria de despertador); **passou em
+      01/09** junto do alarme em tela cheia. ⚠️ O modo `notification` **mudou de biblioteca** na
+      unificação — esta é a metade que mais precisa de reteste (bloco 2 do roteiro).
+- [ ] Os 10 gatilhos de reagendamento (C1.4) testados um a um, sem alarme órfão. — tinham passado
+      em 01/09 (excluir, mudar horário e desligar o lembrete, os três com o app fechado), mas a
+      [unificação em torno do Notifee](#-c110--um-agendador-só-0209) **trocou a fundação** e
+      invalida aquela validação. Reabre para a próxima rodada — bloco 3 do roteiro.
+      *(A unificação reduz o risco desta caixa: `cancelarTudo` agora vê tudo. Mas é justamente por
+      ser mudança estrutural que ela precisa ser reconfirmada.)*
+- [ ] Checklist de borda (C1.8) percorrido. — **bloco 11 do roteiro**, escrito em 02/09 e ainda não
+      executado. É a última caixa do C1: os blocos 1 a 4 provam que o alarme funciona quando tudo
+      está normal; o 11 prova que ele não **mente** quando não está (dose já confirmada, meia-noite,
+      Não perturbe, relógio mudado, fuso, reinstalação).
 - [x] Permissão revogada gera aviso visível na Home. — card que exige **as duas** condições
       (permissão negada **e** tratamento esperando aviso), antes da agenda. **Pendente de device.**
 - [x] Nenhum `import` de `expo-notifications` fora de `src/notifications/`. — verificado por
@@ -771,8 +872,11 @@ para quem já instalou.
 - [x] Texto da UI condiz com o nível realmente entregue. — "toca alto e vibra", e não "como
       despertador"; o que depende de permissão à parte é dito e ensinado.
 
-> **O que falta, em uma frase:** o alarme tocar de verdade em aparelho, e as duas perguntas do
+> **O que falta, em uma frase:** os casos de borda (bloco 11 do roteiro), e as duas perguntas do
 > spike que só o tempo responde — sobreviver ao reboot e à economia de bateria do fabricante.
+>
+> *(Atualizado em 02/09: o alarme **tocou de verdade** em 01/09 — tela cheia sobre o bloqueio, som
+> em loop, app fechado. O que sobra deixou de ser "funciona?" e passou a ser "falha bem?".)*
 
 **Rastreabilidade**: §2.8 (agendamento nativo, independente do app estar aberto — é o argumento
 central do artigo sobre confiabilidade do lembrete).
@@ -928,9 +1032,10 @@ subir. Três coisas mudam por causa disso, e nenhuma é técnica:
 - [x] Anexo opt-out permanece só no device. — trivialmente verdadeiro por ora: **nenhum** anexo
       sobe, e as colunas de caminho local estão listadas e documentadas em
       `tabelas-sincronizaveis.ts`.
-- [ ] **Anexos sobem e voltam** no segundo device: foto da ficha, foto da caixa e receita (E9). —
-      **fora desta leva**, por decisão de 30/08: subir imagem de receita exige um segundo bump dos
-      termos, e o reconsentimento acontece uma vez só.
+- [~] **Anexos sobem e voltam** no segundo device: foto da ficha, foto da caixa e receita. — **fora
+      de escopo**, reconfirmado em 02/09 com motivo novo (o antigo caiu junto com a premissa de base
+      instalada). Ver [E9](#e9-anexos-no-armazenamento-em-nuvem--fora-de-escopo-confirmado-em-0209).
+      Não é caixa a fechar: é recorte declarado, e o texto legal 1.2.0 já o comunica ao titular.
 - [x] **O texto legal descreve o envio de anexos antes de o primeiro upload existir**, com bump de
       versão e reconsentimento. — `CURRENT_TERMS_VERSION` 1.1.0 → **1.2.0**. O texto anterior
       afirmava que os dados não saíam do aparelho e prometia consultar de novo antes de qualquer
@@ -953,8 +1058,10 @@ destaque, e um resumo exportável (PDF/imagem) que o paciente possa mostrar ao m
       relatório junto. **Pendente de device.**
 - [x] Percentual de adesão calculado por um use-case testável, não dentro da tela. —
       `resumir-adesao.ts`, puro e com `agora` injetado, 24 casos verificados em Node.
-- [ ] Resumo exportável (PDF/imagem) para mostrar ao médico. — a tela existe e já serve para isso
-      em print; o arquivo em si sai junto da exportação de dados do D3.
+- [x] Resumo exportável (PDF) para mostrar ao médico. — **reaberto e entregue em 02/09** como bloco
+      próprio, [D4](#d4-relatório-em-pdf--o-resumo-que-sai-do-celular). O argumento de 30/08 ("a tela
+      serve em print") subestimava o buraco: o JSON do D3 cumpre a lei e é ilegível para um médico.
+      **Pendente de device** (bloco 12 do roteiro).
 
 **Rastreabilidade**: §2.3.3 (auditoria clínica).
 
@@ -1003,24 +1110,203 @@ sem ela não há como testar o app sem desinstalar. Ajustes ganhou a seção MEU
 
 ---
 
+### D4. Relatório em PDF — o resumo que sai do celular
+
+**Reaberto em 02/09.** Estava fora desde 30/08 com o argumento "a tela de adesão já serve em print,
+e o JSON cumpre a portabilidade". O argumento subestimava o buraco: **o JSON cumpre a lei e é
+ilegível para um médico.** Os dois não competem, completam um par.
+
+| Saída | Para quê | Leitor |
+|---|---|---|
+| **JSON** (D3, existe) | Direito de portabilidade — o dado migra para outro sistema | Máquina |
+| **PDF** (D4) | Levar na consulta, mostrar para alguém | Humano |
+
+É também o **único artefato do app que existe fora do celular** — e, por isso, o único que continua
+servindo se o paciente estiver sem bateria na sala do médico.
+
+**O princípio que decide o conteúdo:** o relatório é lido em **consulta de quinze minutos**, não
+estudado. Cada item que entra precisa responder a pergunta que o médico faz de fato — *o que você
+está tomando, e você está tomando?* O resto compete com essa resposta.
+
+**O que entra**, em ordem de importância:
+
+1. **Cabeçalho** — nome do paciente, período coberto, data de emissão. Sem isso o papel não vale
+   nada numa consulta: um relatório sem período é um relatório sem afirmação.
+2. **Tratamentos ativos** — nome, dose e posologia **em português** ("1 comprimido, 3× ao dia"), não
+   na estrutura interna. É o que o médico mais quer ver.
+3. **Adesão do período** — percentual geral e por medicamento, do `resumir-adesao`. Vale aqui a
+   **RN20**: sem dose vencida, o relatório diz "ainda não há o que medir", nunca "0%".
+4. **Compromissos do período** — consultas e exames com o desfecho registrado.
+5. **Doses não tomadas** — **agrupadas e contadas por medicamento**, nunca linha a linha. "Losartana:
+   4 doses não tomadas em 30 dias" informa; quatro linhas vermelhas julgam. É a
+   [decisão 6.4](#64-linguagem-visual--sombra-e-não-borda) aplicada ao papel: registro clínico não
+   vira fileira de repreensões, e um documento que envergonha é um documento que não se mostra.
+
+**O que fica de fora, e por quê**
+
+| O que | Por quê |
+|---|---|
+| Histórico dose a dose | É o que o JSON faz. Em PDF viraria dezenas de páginas que ninguém lê |
+| Estoque | É operacional do paciente ("preciso comprar?"), não informação clínica |
+| Gráficos | Número em texto sobrevive a impressão em preto e branco; gráfico não |
+| Foto e anexos | Peso e sensibilidade, sem ganho para a conversa da consulta |
+
+**Filtros** (decidido em 02/09). Dois eixos, e **só dois** — cada filtro a mais é uma decisão que a
+pessoa precisa tomar antes de conseguir o papel que veio buscar:
+
+- **Período** — o eixo principal, porque adesão sem período não significa nada. **7 / 30 / 90 dias,
+  os mesmos da tela de adesão**, e 30 como padrão. O intervalo livre foi cogitado e descartado na
+  implementação: a tela já registrava, desde o D2, que "de 12/07 a 09/08" é trabalho e ninguém tem
+  essa pergunta — as reais são "como foi esta semana", "como foi o mês" e "como tem sido". Dar ao
+  papel um eixo de tempo diferente do da tela criaria duas respostas para a mesma pergunta.
+- **Medicamento** — todos (padrão) ou uma seleção. Serve ao caso real do paciente polimedicado que
+  vai ao **especialista**: quem consulta o cardiologista leva o que é do coração, e não a lista
+  inteira. Um relatório mais curto é mais lido.
+
+  Quatro regras sustentam o seletor, e as três primeiras existem para que ele não produza um estado
+  que ninguém quis:
+
+  | Regra | Por quê |
+  |---|---|
+  | **Ausência de filtro é lista vazia**, não "todos marcados" | Com a lista cheia, um remédio cadastrado amanhã **nasceria fora** do relatório, e ninguém entenderia por quê |
+  | **Desmarcar o último volta ao padrão** | Um PDF sem tratamento nenhum não é uma escolha, é um beco |
+  | **Marcar todos de volta grava como "sem filtro"** | Senão o cabeçalho declararia um recorte de "5 de 5", afirmando um corte que não existe |
+  | **O seletor só aparece com mais de um medicamento** | Escolher entre um item é uma decisão que não existe |
+
+  O aviso de que um relatório parcial afirma menos vem **antes** da lista, e não depois: quem já
+  desmarcou tudo e está saindo do popup não volta para ler um rodapé.
+
+⚠️ **O filtro por medicamento muda o que o documento afirma.** Um PDF com dois de cinco tratamentos
+não é "a adesão do paciente" — é a adesão *daqueles dois*. O cabeçalho precisa dizer isso
+explicitamente ("2 de 5 tratamentos"), senão o documento induz o leitor a uma conclusão que os
+dados não sustentam. É o mesmo princípio da RN20: o app não afirma sobre o paciente o que os dados
+não dizem.
+
+**Pronto quando**
+- [x] O conteúdo vem de use-cases puros, não montado na tela — o relatório precisa ser verificável
+      em Node como o resto do domínio. — `montar-relatorio.ts` recebe as doses e devolve o conteúdo;
+      o gerador só o veste em HTML. **28 verificações** em `scripts/conferir-relatorio.mjs`.
+- [x] O **período** funciona e aparece no cabeçalho. — reaproveita os 7/30/90 que a tela de adesão
+      já oferecia; não havia motivo para o papel ter um eixo de tempo diferente da tela.
+      **Pendente de device.**
+- [x] A **seleção de medicamentos** tem interface. — linha na tela mostrando o que está escolhido
+      ("Todos", o nome quando é um só, "2 de 5" quando é parcial) e popup com um checkbox por
+      tratamento. **Pendente de device.**
+- [x] Sem dose vencida no período, o PDF diz "ainda não há o que medir" (RN20) — nunca "0%".
+- [x] Doses não tomadas aparecem **contadas por medicamento**, nunca em lista linha a linha.
+- [x] Sai pela folha de compartilhamento do sistema, como a exportação do D3 — quem decide o destino
+      de um arquivo com dado de saúde é o titular. **Pendente de device.**
+- [x] Legível impresso em preto e branco. — sem cor e sem gráfico, por construção: a impressora da
+      clínica é preto e branco, e cor que vira cinza perde a distinção que deveria criar.
+- [x] Gerado 100% offline. — o HTML é montado no app e o `expo-print` o renderiza no aparelho.
+- [ ] **Verificado em aparelho**: o PDF abre, o texto não corta, e a folha de compartilhamento
+      oferece salvar e enviar. — bloco 12 do roteiro.
+
+**Entregue em 02/09.** Três arquivos: [`montar-relatorio.ts`](../src/domain/use-cases/montar-relatorio.ts)
+(o conteúdo, puro), [`gerar-relatorio-pdf.ts`](../src/data/repositories/gerar-relatorio-pdf.ts) (o
+documento) e [`use-relatorio-pdf.ts`](../src/hooks/use-relatorio-pdf.ts) (a costura com os
+repositórios). O botão fica na tela **Minha adesão**, e **fora** do bloco condicional da taxa: um
+relatório de tratamentos em curso serve na consulta mesmo quando nenhuma dose venceu ainda — e é
+justamente quem acabou de começar o tratamento que costuma ter a próxima consulta marcada.
+
+Dois cuidados que só apareceram ao escrever:
+
+- **Escape do texto do paciente.** Nome de remédio e título de compromisso são texto livre. Um `&`
+  em "Vitamina A & D" quebraria o documento e um `<` o truncaria **em silêncio** — que é o pior modo
+  de falhar aqui, porque um PDF que gera sem erro e perde uma linha de tratamento não denuncia nada.
+- **Os rótulos vêm de `rotulos-de-medicamento`**, os mesmos da lista de remédios. Se o relatório
+  tivesse a própria tradução, o que foi cadastrado como "Comprimido ou cápsula" apareceria no papel
+  com outro nome, e nada no código denunciaria.
+
+**Rastreabilidade**: §2.3.3 (auditoria clínica); Nielsen nº2 (correspondência com o mundo real — o
+documento fala a língua da consulta, não a do banco de dados).
+
+---
+
+### E9. Anexos no armazenamento em nuvem — **fora de escopo, confirmado em 02/09**
+
+**Reaberto e fechado no mesmo dia.** Vale registrar o caminho da decisão, porque o motivo mudou —
+e o motivo certo importa mais que a conclusão.
+
+**O que ele NÃO é.** Não é dificuldade técnica: subir arquivo para o Supabase Storage é uma chamada,
+e a infraestrutura já existe (cliente configurado, usuário autenticado, arquivo já em disco no
+diretório de documentos). Não é custo nem capacidade: 1 GB no plano gratuito, contra centenas de KB
+por foto. Registrar isso é necessário — um item excluído por "seria difícil" quando não seria vira
+uma lacuna disfarçada de recorte.
+
+**Por que fica fora, então.** Três razões que se somam, e nenhuma é a implementação em si:
+
+1. **O ganho é invisível na defesa.** Ninguém vê uma foto subindo. O E9 não produz nada que se
+   mostre à banca, enquanto o [D4](#d4-relatório-em-pdf--o-resumo-que-sai-do-celular) produz um
+   documento na mão.
+2. **A única parte que erra em silêncio é a que mais custa se errar.** O RLS de Storage protege
+   **caminhos de arquivo**, mecanismo distinto do RLS de tabela já dominado no D1. O erro clássico —
+   bucket público com RLS só na tabela — deixaria a **receita médica**, o dado mais sensível que o
+   app guarda, acessível por URL a quem a tivesse. É testável e resolvível, mas é superfície nova a
+   duas semanas da defesa.
+3. **O argumento do artigo é melhor sem ele.** "Anexos não sobem" é minimização (art. 6º, III)
+   demonstrada por ausência de funcionalidade — verificável em uma linha, impossível de contestar.
+
+**O que sustenta a exclusão perante a banca**: o texto legal 1.2.0 **já declara** que fotos e
+receita não sobem, e já prevê o caminho caso venham a subir — *"será opt-out por item e este texto
+será atualizado antes"*. A promessa e a implementação dizem a mesma coisa, que é a regra RN15
+aplicada ao consentimento.
+
+> **Nota sobre o motivo original.** Até 02/09 este bloco estava fora por um argumento diferente: o
+> segundo bump dos termos gastaria a atenção do titular, e o reconsentimento acontece uma vez só.
+> Esse argumento **caiu** — o app não está em produção, não há base instalada para quem o
+> reconsentimento custe algo. Ele continua válido para o dia em que o app for publicado, e é por
+> isso que fica escrito aqui em vez de ser apagado.
+
+**Se voltar** (pós-defesa): bucket com política sobre o caminho do arquivo, opt-out por item com
+padrão em não subir, exclusão alcançando o Storage antes do local (RN18), texto 1.3.0 com
+reconsentimento **antes** do primeiro upload, e a seção 8 do `GUIA-DO-TCC.md` reescrita — a
+minimização passa a ser "sobem por escolha explícita", que é outra afirmação.
+
+**Rastreabilidade**: LGPD art. 6º III (minimização), art. 11 (dado sensível).
+
+---
+
 ## FASE E — Acabamento
 
+> **Caixas conferidas em 02/09.** Boa parte desta fase estava marcada como aberta enquanto o log
+> registrava a entrega — dívida do documento, não do código. Conferidas uma a uma contra o
+> repositório e corrigidas abaixo.
+
 ### E1. Estados vazios, offline, erro e acessibilidade
-- [ ] Toda lista tem estado vazio com próxima ação clara.
-- [ ] Indicador visual de "dados não sincronizados".
-- [ ] Toda operação que pode falhar tem estado de erro com recuperação (nunca só um spinner infinito).
-- [ ] Checklist completo de `usability-heuristics-health-ui`: contraste, área de toque ≥ 48dp, escala de fonte do sistema respeitada, leitor de tela nos fluxos críticos.
+- [x] Toda lista tem estado vazio com próxima ação clara. — 14 telas com estado vazio próprio; a
+      Home ainda separa "app vazio" (nunca cadastrou) de "dia vazio" (tem tratamento, sem dose
+      hoje), que pedem ações diferentes.
+- [x] Indicador visual de "dados não sincronizados". — `IndicadorDeSync` no kit, usado em
+      Conta e dados.
+- [x] Toda operação que pode falhar tem estado de erro com recuperação (nunca só um spinner
+      infinito). — `EstadoDeErro` com "tentar de novo" nas telas que leem do banco.
+- [x] Checklist de `usability-heuristics-health-ui` — **segunda varredura, 02/09**. A de 31/08
+      cobriu o kit (`src/ui/`); esta cobriu as **telas**, que é onde os defeitos restantes estavam.
+      Sete corrigidos, ver [6.6](#66-segunda-varredura-de-acessibilidade--0209).
+- [ ] **Teste com TalkBack** nos fluxos críticos — precisa de aparelho, entra na próxima rodada
+      (bloco 13 do roteiro).
 
 ### E2. Build, device real e hardening
-- [ ] Development build EAS gerado e testado em Android físico.
-- [ ] Bateria/otimização agressiva (Xiaomi, Samsung) não mata as notificações — ou o app avisa o usuário.
-- [ ] Migração de banco testada com dado pré-existente (não só em banco zerado).
-- [ ] Nenhuma credencial no repositório; `.env` fora do git.
+- [x] Development build EAS gerado e testado em Android físico. — sete rodadas entre 22/08 e
+      01/09.
+- [ ] Bateria/otimização agressiva (Xiaomi, Samsung) não mata as notificações — ou o app avisa o
+      usuário. — **bloco 7 do roteiro**, e é a pergunta do spike que só o tempo responde. O painel
+      de permissões já conduz à isenção de bateria; falta medir se basta.
+- [x] Migração de banco testada com dado pré-existente (não só em banco zerado). — sequência 001 a
+      015 verificada com `node:sqlite`: banco zerado, banco na versão 14 **com dados**, e os 14
+      passos intermediários. 41 verificações.
+- [x] Nenhuma credencial no repositório; `.env` fora do git. — conferido: `.env` é ignorado, e só
+      o `.env.example` está versionado.
 
 ### E3. Materiais do TCC
-- [ ] Prints/roteiro de demonstração das funcionalidades do caminho crítico.
-- [ ] Capítulo 4 (Resultados) mapeando: argumento do artigo → arquivo/decisão de código.
-- [ ] Limitações e trabalhos futuros (inclui a Fase 2 do agente Anvisa).
+- [ ] Prints/roteiro de demonstração das funcionalidades do caminho crítico. — a capturar na
+      sessão de validação, seguindo a ordem da Parte 2 do roteiro.
+- [ ] Capítulo 4 (Resultados) mapeando: argumento do artigo → arquivo/decisão de código. — a base
+      está pronta em [`GUIA-DO-TCC.md`](./GUIA-DO-TCC.md), com o mapa argumento → código na seção
+      11. Falta redigir o texto corrido.
+- [x] Limitações e trabalhos futuros (inclui a Fase 2 do agente Anvisa). — seções 10.1 e 10.2 do
+      guia, com o motivo de cada exclusão registrado na data em que foi decidida.
 
 ---
 
@@ -1497,6 +1783,54 @@ exige aparelho e fica para a sessão de validação.
 
 ---
 
+### 6.6 Segunda varredura de acessibilidade — 02/09
+
+A de [31/08](#65-varredura-de-acessibilidade--3108) cobriu o **kit** (`Button`, `TextField`,
+`SelectField`, contraste). Esta cobriu as **telas** — e é ali que estavam os defeitos restantes,
+justamente porque o que a tela desenha sozinha não herda a correção do componente.
+
+Sete achados, todos corrigidos. Os três primeiros são os que importam.
+
+**1. Alvo de 32pt em "Confirmar" e "Pular" — o pior da lista.**
+`ItemDeDose` tinha só `paddingVertical: spacing.sm` sobre `typography.label` (linha de 16): 8 + 16 +
+8 = **32pt**, contra os 44 exigidos. São os **dois botões mais tocados do aplicativo**, empilhados a
+8px um do outro, na tela onde a dose se confirma. Errar o toque aqui não é incômodo: **falseia o
+registro clínico**, gravando uma dose que não foi tomada. Escapou em 31/08 porque aquela varredura
+corrigiu o kit, e estes botões são desenhados pela própria tela.
+
+**2. Estado do registro só por cor, na tela da notificação.**
+Em `HorarioScreen`, "Tomei" e "Pulei" indicavam a resposta já registrada **apenas** pela variante
+visual (preenchido × contornado). Para quem usa leitor de tela os dois soavam idênticos antes e
+depois de responder. Corrigido com `accessibilityState.selected` e rótulo que diz o que está
+registrado.
+
+Isso exigiu consertar o `Button` do kit junto: ele fixava `accessibilityState` **antes** do spread,
+então quem passasse `{ selected }` apagava o `disabled` sem perceber — e um botão desabilitado
+deixava de ser anunciado como tal.
+
+**3. Ícone mudo carregando o desfecho da dose.**
+No calendário, dose resolvida virava só um `<Ionicons>` sem rótulo. Ícones do `@expo/vector-icons`
+são glifos de fonte: o TalkBack lê nada. A linha era anunciada como *"08:00, Losartana, 1
+comprimido"* — **sem dizer se foi tomada ou pulada**, que é exatamente o que se foi ali buscar.
+
+**Os outros quatro:** `height: 52` travado no campo de horário do cadastro (mesmo defeito de 31/08,
+fora do kit); horário duplicado sinalizado só por fundo vermelho, sem dizer **qual**; dois "Editar"
+que o leitor anunciava como *"Controle ativo Editar"*, sem dizer o que se edita; e os chips de dia
+da semana com papel `button` em vez de `checkbox`, lendo a abreviação em vez do nome do dia.
+
+**O que a varredura confirmou intacto:** as correções de 31/08 seguem no lugar (`minHeight` em
+Button/TextField/SelectField, `hitSlop` nos alvos destrutivos, contraste do placeholder), e
+**`allowFontScaling={false}` não aparece em lugar nenhum** do `src/`.
+
+> **A lição, para o artigo.** Duas varreduras acharam o **mesmo** defeito — altura travada cortando
+> texto com fonte ampliada — em lugares diferentes: primeiro no kit, depois na tela que desenhou o
+> próprio botão em vez de importar o componente. É a mesma causa raiz do passe de design de 30/08,
+> quando sete telas desenhavam o próprio cartão com borda cinza. **Copiar o estilo em vez de
+> importar o componente é o que faz a correção não chegar** — e num app cujo público amplia a fonte
+> do sistema, o custo disso é a acessibilidade quebrar exatamente em quem mais depende dela.
+
+---
+
 ## 7. Log de progresso
 | Data | Bloco | Status | Observação |
 |---|---|---|---|
@@ -1636,3 +1970,14 @@ exige aparelho e fica para a sessão de validação.
 | 2026-08-31 | E1 | Concluído | **Varredura de acessibilidade por leitura de código**, feita enquanto a cota do EAS não voltava — para que o que fosse achado entrasse na build de 01/09 em vez de exigir uma terceira rodada de validação. Seis defeitos reais. O mais grave: **`height: 52` travado no `Button` base** (e em `TextField`/`SelectField`), que recortava o rótulo de **todo botão do app** com a fonte do sistema ampliada — inclusive o "Confirmar" da dose. Quem amplia a fonte do Android é justamente o público deste app, então a acessibilidade quebrava em quem mais depende dela. Junto: alvos de toque de 20 a 36px em ações **destrutivas** (excluir compromisso, remover contato de emergência) e no par confirmar/pular, onde errar o toque falseia o registro clínico; `outline` reprovando no AA por 4.47:1 sendo usado como **texto** em quatro telas; placeholder a 2.38:1; e a ordem de leitura do `ItemDeDose`, que fazia o TalkBack anunciar o estado antes do nome do remédio. O contraste foi **medido** em Node sobre os 18 pares reais, não estimado — depois da correção todos passam. Detalhes em [6.5](#65-varredura-de-acessibilidade--3108). Falta só o teste manual com TalkBack, que precisa de aparelho. |
 | 2026-08-31 | E3 | Concluído | **Guia completo do desenvolvimento** em [`GUIA-DO-TCC.md`](./GUIA-DO-TCC.md) — a base da parte escrita. Reúne o que o log deste arquivo registrou desde 19/08, organizado como argumento em vez de cronologia: a tese e o recorte (o que o app é e o que deliberadamente não é), **44 requisitos funcionais** numerados e 12 não funcionais, **20 regras de negócio** com a justificativa de cada uma, a arquitetura em quatro camadas, o desenvolvimento fase a fase, cinco decisões difíceis (onde havia um caminho óbvio e segui outro), o método de verificação, a conformidade LGPD artigo por artigo, os resultados medidos e o mapa argumento → código para o Capítulo 4. Escrito na primeira pessoa do Gabriel, porque é a base de um texto que ele assina. Corrigidas de passagem três referências ao `ROTEIRO-DE-PRINTS.md`, removido na limpeza de 29/08 e ainda linkado em dois documentos. |
 | 2026-08-31 | E3 | Ampliado | **Trabalhos futuros completos no guia.** A seção 10.2 passou a reunir tudo o que foi identificado e deixado de fora **por decisão**, com o motivo de cada um — é o que separa um recorte de uma lacuna. Entrou a **integração com o Google Agenda**, levantada pelo Gabriel: o encaixe é natural (compromisso clínico já é um evento de calendário, e a conta do Google já está vinculada), mas exportar dose poluiria o calendário a ponto de a pessoa desligar tudo, e exportar consulta é dado sensível indo para serviço de terceiro — exigiria escopo OAuth novo, consentimento específico (art. 11, I) e outro bump dos termos. E aqui está o critério que decidiu: **o reconsentimento acontece uma vez só**, a versão 1.2.0 foi gasta na sincronização, e forçar o titular a reler os termos duas vezes em semanas seguidas transforma consentimento informado em ruído. É a mesma razão dos anexos — nas duas vezes o critério não foi técnico, foi o custo de gastar a atenção do titular. Entraram também, com o motivo já registrado no plano: papel de cuidador, relatório em PDF, sininho de pendentes, botão central na barra, tela de conquistas, teste automatizado de interface e teste com leitor de tela. |
+| 2026-09-01 | C1.9 | Validado em aparelho | **O alarme tocou de verdade.** Tela cheia por cima do bloqueio, som em loop até alguém vir desligar, com o app fechado — o nível A que o spike tinha descartado. As três peças do C1.9 funcionaram como previsto: `expo-notifications` dispara, **Notifee** abre a tela cheia pelo `fullScreenAction`/`mainComponent`, e o som contínuo vem do **`expo-audio` em loop dentro da tela**, não da notificação. Confirma na prática a distinção que faltou no spike: notificação nenhuma toca em loop, em biblioteca nenhuma — quem toca é o app depois de aberto. Com isso as duas opções do cadastro passam a ser reais: uma avisa, a outra acorda. |
+| 2026-09-02 | C1 | Roteiro | **Bloco 11 do roteiro — os casos de borda do C1.8.** Os blocos 1 a 4 provam que o alarme funciona quando tudo está normal; este prova que ele não **mente** quando não está. Num app de medicação os dois modos de falhar são opostos e igualmente graves: o aviso que não chega, e o aviso que chega errado — na hora errada, duplicado, ou de um remédio já tomado. Sete passos executáveis (dose já confirmada, app aberto na própria tela, meia-noite, Não perturbe e silencioso, relógio mudado à mão, fuso, reinstalação) mais um oportunista (bateria crítica). Dois deles são os que mais têm chance de escapar: **11.1**, porque quem cancela é a Home e não a edição do cadastro, e **11.7**, onde a falha deixaria a pessoa sem lembrete nenhum e sem nenhum sinal disso. O bloco fica **por último** na Parte 1: mexe no relógio e reinstala o app. |
+| 2026-09-02 | Escopo | Revisão | **Três itens reexaminados: dois entram, um fica fora.** O **PDF** (D4) volta porque o argumento de 30/08 subestimava o buraco — o JSON cumpre a lei e é ilegível para um médico; os dois não competem, completam um par (máquina e humano), e o PDF é o único artefato do app que existe fora do celular. O **checklist de acessibilidade** fica por último, agora por **sequência** e não por corte: vem depois do passe de front tela a tela, porque medir contraste de tela que ainda vai mudar é medir duas vezes. O **E9** (anexos no Storage) foi reaberto e fechado no mesmo dia, e o registro importa mais que a conclusão: o motivo antigo (o segundo bump dos termos gastaria a atenção do titular) **caiu**, porque o app não está em produção e não há base instalada a quem o reconsentimento custe algo. Ficou fora por três motivos novos, e nenhum é dificuldade técnica — subir arquivo é uma chamada e a infra já existe: (a) o ganho é **invisível na defesa**, ninguém vê uma foto subindo, enquanto o D4 produz um documento na mão; (b) o **RLS de Storage protege caminhos de arquivo**, mecanismo distinto do RLS de tabela dominado no D1, e o erro clássico (bucket público com RLS só na tabela) exporia a **receita médica** por URL; (c) "anexos não sobem" é minimização (art. 6º III) demonstrada por **ausência de funcionalidade**, verificável em uma linha — argumento mais forte que o "sobem por escolha explícita" que o substituiria. Fica registrado no bloco que **não é difícil**: item excluído por "seria complicado" quando não seria vira lacuna disfarçada de recorte. |
+| 2026-09-02 | D4 | Escopo definido | **Relatório em PDF.** O princípio que decide o conteúdo: ele é lido em consulta de quinze minutos, não estudado — cada item precisa responder *o que você está tomando, e você está tomando?*, e o resto compete com essa resposta. Entram cabeçalho com período, tratamentos ativos com posologia em português, adesão do período, compromissos com desfecho, e doses não tomadas **agrupadas e contadas por medicamento** — nunca linha a linha, que é a decisão 6.4 aplicada ao papel: um documento que envergonha é um documento que não se mostra. Ficam fora histórico dose a dose (é o que o JSON faz), estoque (operacional, não clínico) e gráficos (número em texto sobrevive à impressão em preto e branco). **Dois filtros e só dois**: período (o eixo principal — adesão sem período não significa nada) e medicamento, este último pelo caso real do polimedicado que vai ao especialista e leva o que é do coração, não a lista inteira. ⚠️ O filtro por medicamento **muda o que o documento afirma**: dois de cinco tratamentos não são "a adesão do paciente", e o cabeçalho precisa declarar o recorte — mesmo princípio da RN20, o app não afirma o que os dados não dizem. |
+| 2026-09-02 | D4 | Entregue, falta validar em aparelho | **Relatório em PDF.** Três arquivos: `montar-relatorio.ts` (o conteúdo, puro), `gerar-relatorio-pdf.ts` (o documento) e `use-relatorio-pdf.ts` (a costura com os repositórios). A separação é a mesma do C1 entre decidir e executar: o use-case diz **o que** o relatório afirma, o gerador só o veste em HTML — e é o que permite verificar um documento clínico sem aparelho, sem banco e sem renderizador. **28 verificações** em `scripts/conferir-relatorio.mjs`. O botão fica em Minha adesão e **fora** do bloco condicional da taxa: um relatório de tratamentos em curso serve na consulta mesmo sem dose vencida, e é justamente quem começou o tratamento agora que tem a próxima consulta marcada. Dois cuidados que só apareceram ao escrever: (a) **escape do texto do paciente** — nome de remédio é texto livre, e um `&` em "Vitamina A & D" quebraria o documento enquanto um `<` o truncaria **em silêncio**, que é o pior modo de falhar porque um PDF gerado sem erro e faltando uma linha de tratamento não denuncia nada; (b) os rótulos vêm de `rotulos-de-medicamento`, os mesmos da lista de remédios — tradução própria faria "Comprimido ou cápsula" aparecer no papel com outro nome, sem nada no código denunciar. O **intervalo livre de datas foi descartado na implementação**: a tela de adesão já registrava desde o D2 que "de 12/07 a 09/08" é trabalho e ninguém tem essa pergunta, e dar ao papel um eixo de tempo diferente do da tela criaria duas respostas para a mesma pergunta — ficaram os 7/30/90 já existentes. ⚠️ **O filtro por medicamento tem a regra pronta e não tem interface**: o hook aceita a lista e o cabeçalho sabe declarar o recorte, mas a tela chama sem filtro. Fica como pendência aberta, e não como entregue — a regra existir não é a pessoa conseguir usá-la. |
+| 2026-09-02 | D4 | Roteiro | **Bloco 12 do roteiro.** O conteúdo já foi verificado em Node, então o bloco não testa a conta — testa o **documento**: se abre, se o texto não corta, e se sai do celular. O passo que mais importa é o **12.3**, conferir que a porcentagem do papel é idêntica à da tela: divergirem significa que os dois estão lendo coisas diferentes, e o papel é o que vai para o médico. O **12.4** cobre o escape com um nome contendo `&` e `<`, que é o defeito que não dá erro nenhum. |
+| 2026-09-02 | D4 | Concluído | **Seletor de medicamentos do relatório.** Linha na tela dizendo o que está escolhido — "Todos", o nome quando é um só, "2 de 5" quando é parcial — e popup com um checkbox por tratamento. O estado fica legível **sem abrir nada**, que é o que evita gerar um relatório recortado sem perceber. Quatro regras, e as três primeiras existem para o seletor não produzir estado que ninguém quis: (a) **ausência de filtro é lista vazia**, e não "todos marcados" — com a lista cheia, um remédio cadastrado amanhã nasceria **fora** do relatório e ninguém entenderia por quê; (b) **desmarcar o último volta ao padrão**, porque um PDF sem tratamento nenhum não é uma escolha, é um beco; (c) **marcar todos de volta grava como "sem filtro"**, senão o cabeçalho declararia um recorte de "5 de 5", afirmando um corte que não existe; (d) o seletor **só aparece com mais de um medicamento**, porque escolher entre um item é uma decisão que não existe. O universo listado são os medicamentos **com tratamento**, e não todos os cadastrados: um remédio sem prescrição não produz linha nenhuma, e oferecê-lo seria oferecer uma escolha que não muda nada. O aviso de que um relatório parcial afirma menos vem **antes** da lista: quem já desmarcou tudo e está saindo do popup não volta para ler um rodapé. Nove verificações da lógica de alternar rodadas em Node, incluindo os casos de borda de (b) e (c). Passo **12.5** do roteiro cobre em aparelho. |
+| 2026-09-02 | Plano | Conferência | **Caixas do E1/E2/D2 conferidas contra o repositório.** O quadro mostrava **13 itens em aberto** e a maioria era dívida do documento, não do código: estado vazio (14 telas têm), `IndicadorDeSync` (existe no kit e é usado), `EstadoDeErro` com recuperação (5 telas), migração com dado pré-existente (41 verificações em 015), `.env` fora do git (conferido com `git check-ignore`), dev build em aparelho (sete rodadas) e limitações/trabalhos futuros (seções 10.1 e 10.2 do guia). Sobraram **6 caixas reais**, e nenhuma é código obrigatório: três são validação em aparelho (C1.8, PDF, bateria), duas são entrega acadêmica (prints e Capítulo 4) e uma é o passe de front com acessibilidade, que é o último item por sequência. Vale o registro do porquê desta conferência: um plano que lista como pendente o que já foi feito perde a função de ser a fonte do que falta — e este documento é a matéria-prima do Capítulo 4. O quadro §0.1.1 foi reescrito com a ordem sugerida da próxima rodada de aparelho (3 → 5 → 12 → 7 → 11, o 11 por último porque mexe no relógio e reinstala o app). |
+| 2026-09-02 | C1.10 | Concluído, falta validar | **Um agendador só: tudo passou para o Notifee.** As duas bibliotecas funcionavam e o **estoque nunca esteve em risco** — a escrita já era única, com as duas chamando `confirmarDosesDoAviso` e a mesma guarda contra confirmação repetida. O problema vivia no **cancelamento**: cada biblioteca só enxerga a própria lista, então a RN14 dependia de lembrar de cancelar dos dois lados — convenção, não construção, e um terceiro ponto de cancelamento que esquecesse uma chamada traria de volta o alarme órfão sem o compilador denunciar. Agora `cancelarTudo` é literalmente tudo. **O ganho que não era só arrumação**: `onBackgroundEvent` grava a dose **com o app fechado**, enquanto o caminho anterior dependia de `getLastNotificationResponseAsync` no bootstrap — ou seja, de a pessoa abrir o app para o toque em "Tomei" ser processado. Para um botão que promete não abrir o app, isso era a promessa. Cinco arquivos viraram três, e as **quatro categorias pré-registradas sumiram** (no Notifee os botões vão na própria notificação, montados na hora). **O bug que a migração revelou**: o lembrete adiado é agendado com `modo: alarm`, então seu id ficou com os **dois** prefixos (`alarme:adiado-…`) — o filtro óbvio de `cancelarTudo` falharia e apagaria justamente o aviso que ele existe para preservar, em silêncio, fazendo a pessoa perder o lembrete que pediu cinco minutos antes. Corrigido e virou `scripts/conferir-ids-de-aviso.mjs`, 14 verificações. ⚠️ **O plugin `expo-notifications` fica no `app.json`**: nenhuma linha importa a biblioteca, mas o plugin é de **build** e gera o drawable `notification_icon` e o som `alarme_de_dose` em `res/raw`, os dois consumidos pelo Notifee pelo nome — removê-lo achando que é dependência morta apagaria o som do alarme sem erro de compilação. **Custo assumido**: os 10 gatilhos e o fluxo de permissões, que passaram em 01/09, voltam a precisar de validação — é o preço de trocar a fundação, e a razão de os blocos 2, 3 e 4 do roteiro voltarem a ser obrigatórios. Canais subiram para v5. |
+| 2026-09-02 | E1 | Concluído | **Segunda varredura de acessibilidade — agora nas telas.** A de 31/08 cobriu o kit; esta cobriu o que as telas desenham sozinhas, e é ali que estavam os defeitos restantes. Sete corrigidos. O mais grave: **alvo de 32pt em "Confirmar" e "Pular"** na agenda da Home — os dois botões mais tocados do app, empilhados a 8px, onde errar o toque **falseia o registro clínico** gravando uma dose que não foi tomada. Depois: o **estado do registro só por cor** na tela do Horário (destino do toque na notificação), onde "Tomei" e "Pulei" soavam idênticos no leitor antes e depois de responder — e consertar isso exigiu corrigir o `Button` do kit, que fixava `accessibilityState` antes do spread e apagava o `disabled` de quem passasse `selected`. E o **ícone mudo** do calendário, único portador do desfecho: a linha era anunciada como "08:00, Losartana, 1 comprimido" sem dizer se foi tomada ou pulada. Mais quatro menores: `height` travado no campo de horário do cadastro (mesmo defeito de 31/08, fora do kit), horário duplicado só por cor de fundo, dois "Editar" sem rótulo e chips de dia da semana com papel `button` em vez de `checkbox`. ⚠️ **A lição vale para o artigo**: duas varreduras acharam o **mesmo** defeito (altura travada) em lugares diferentes, porque a tela copiou o estilo em vez de importar o componente — mesma causa raiz do passe de design de 30/08, quando sete telas desenhavam o próprio cartão. Detalhes em [6.6](#66-segunda-varredura-de-acessibilidade--0209). |
+| 2026-09-02 | Build | Revisão pré-build | **Conferência completa antes de gastar a cota do EAS.** `npx expo prebuild` roda sem erro e o manifesto gerado traz as **sete permissões** do alarme, `showWhenLocked`/`turnScreenOn` na MainActivity (plugin local aplicado), `alarme_de_dose.wav` em `res/raw` e `notification_icon.png` em drawable. Cheguei a suspeitar que o **reboot** não estava coberto — o Notifee não declara `RECEIVE_BOOT_COMPLETED` no manifesto de origem —, mas está dentro do AAR pré-compilado (`RebootBroadcastReceiver`), e o merge acontece na compilação. Falso alarme, mas valia checar: é o bloco 7 do roteiro. Credenciais do Supabase confirmadas no ambiente `development` do EAS. E o **`tsc` ficou limpo pela primeira vez**: o erro da rota `/alarme/[instante]`, que aparecia desde ontem, era **cache de tipos desatualizado** do expo-router e não defeito — a rota sempre existiu. Regenerado. |
