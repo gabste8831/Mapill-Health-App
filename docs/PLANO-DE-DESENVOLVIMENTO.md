@@ -717,9 +717,47 @@ para quem já instalou.
 
 ---
 
+> ### 🔄 C1.9 — Nível A reaberto (02/09): o despertador de verdade
+>
+> **O nível B não cumpre a promessa do app.** A validação em aparelho mostrou o que o texto do
+> plano não tinha capturado: uma notificação de alta prioridade toca **uma vez e para**, e o
+> Gabriel foi direto ao ponto — *"o alarme precisa ser contínuo, o usuário precisa vir desligar"*.
+> É o diferencial do trabalho, a alternativa a usar o despertador do celular para lembrar de
+> remédio. Sem isso o Mapill é mais um app de notificação.
+>
+> **Por que o nível A tinha sido descartado, e por que volta.** O spike concluiu "inviável" porque
+> o `expo-notifications` não expõe `fullScreenIntent` — o que continua verdade, confirmado na doc
+> do SDK 57 e no código nativo do pacote. O erro foi tratar isso como limite da **plataforma**,
+> quando era limite da **biblioteca**. O Android permite; o `expo-notifications` é que não oferece.
+>
+> **O caminho.** Três peças, e nenhuma exige escrever Kotlin:
+>
+> | Peça | Como |
+> |---|---|
+> | Disparar no horário | `expo-notifications`, que já funciona — a notificação chega |
+> | Abrir tela cheia com o celular bloqueado | **Notifee**, `fullScreenAction` com `mainComponent` |
+> | Som **contínuo** até desligar | `expo-audio` em loop, dentro da tela |
+>
+> A peça que destrava é o `mainComponent`: ele aceita um componente React registrado, então a tela
+> de alarme é escrita em TypeScript como qualquer outra. E o som contínuo **não é da notificação** —
+> é da tela. Notificação nenhuma toca em loop, em biblioteca nenhuma; quem toca é o app depois de
+> aberto. Foi essa distinção que faltou no spike.
+>
+> Notifee é Apache 2.0, tem plugin oficial de Expo, e a tela `Horario` já existe com Tomei/Pulei —
+> ela é a base do que vai aparecer em tela cheia.
+>
+> **Riscos aceitos:** `USE_FULL_SCREEN_INTENT` exige autorização em "Alarmes e lembretes" no
+> Android 14+ (o app conduz até lá, como já faz com as outras permissões); e a Play Store restringe
+> a permissão a apps de alarme — irrelevante aqui, porque a entrega é dev build, não publicação.
+>
+> **O nível B continua existindo** como o modo `notification` do cadastro. As duas opções que o app
+> oferece passam a ser reais: uma avisa, a outra acorda.
+
 **C1 está pronto quando**
-- [x] Resultado do spike documentado e nível (A/B/C) escolhido explicitamente. — **nível B**, com o
-      A descartado por restrição de plataforma (`USE_FULL_SCREEN_INTENT`, Android 14+).
+- [x] Resultado do spike documentado e nível (A/B/C) escolhido explicitamente. — foi **nível B**,
+      e o **A foi reaberto em 02/09** (ver C1.9): o descarte tinha confundido limite da biblioteca
+      com limite da plataforma.
+- [ ] **Alarme em tela cheia, com som contínuo até o usuário desligar** — o diferencial do app.
 - [ ] Notificação dispara com o app **fechado**, em device Android físico (não só emulador).
       — ⚠️ **falhou em 29/08**: o alarme não tocou (canal sem `sound` e sem categoria de
       despertador). Corrigido; aguarda reteste.

@@ -27,7 +27,10 @@
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.USE_EXACT_ALARM",
-        "android.permission.ACCESS_NOTIFICATION_POLICY"
+        "android.permission.ACCESS_NOTIFICATION_POLICY",
+        "android.permission.USE_FULL_SCREEN_INTENT",
+        "android.permission.WAKE_LOCK",
+        "android.permission.VIBRATE"
       ]
     },
     "web": {
@@ -69,7 +72,8 @@
           "recordAudioAndroid": false
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,
