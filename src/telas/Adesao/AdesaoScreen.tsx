@@ -165,7 +165,9 @@ export function AdesaoScreen() {
         ) : (
           <>
             <View style={styles.destaque}>
-              <Text style={[styles.destaqueTaxa, styles[`taxa_${faixaDaTaxa(resumo.taxa)}`]]}>
+              {/* Branco sobre o azul: as faixas de cor seguem valendo na lista por medicamento,
+                  que está sobre fundo claro e tem contraste para elas. */}
+              <Text style={[styles.destaqueTaxa, styles.destaqueTaxaTexto]}>
                 {percentual(resumo.taxa)}
               </Text>
               <Text style={styles.destaqueLegenda}>

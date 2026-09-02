@@ -88,12 +88,23 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     backgroundColor: colors.surfaceContainer,
   },
+  /**
+   * "Repor" ganha superfície azul clara — antes ele era idêntico a "Recontar" e mudava só a cor do
+   * texto, ou seja, um botão primário disfarçado de secundário.
+   *
+   * As duas ações não têm o mesmo peso: recontar é conferência ocasional, repor é o que a pessoa
+   * veio fazer quando abriu esta tela porque o remédio está acabando. A cor diz qual é qual antes
+   * de o rótulo ser lido.
+   */
+  acaoPrimaria: {
+    backgroundColor: colors.secondaryContainer,
+  },
   acaoTexto: {
     ...typography.label,
     color: colors.onSurface,
   },
   acaoTextoPrimaria: {
-    color: colors.primary,
+    color: colors.onSecondaryContainer,
   },
 
   // --- Rodapé: o caminho pra quem não achou um remédio aqui ---

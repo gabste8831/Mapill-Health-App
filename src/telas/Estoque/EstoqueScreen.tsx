@@ -114,11 +114,11 @@ function CartaoDeEstoque({ item, onRecontar, onRepor }: ItemDeEstoqueProps) {
           <Text style={styles.acaoTexto}>Recontar</Text>
         </Pressable>
         <Pressable
-          style={styles.acao}
+          style={[styles.acao, styles.acaoPrimaria]}
           onPress={onRepor}
           accessibilityRole="button"
           accessibilityLabel={`Repor o estoque de ${medication.name}`}>
-          <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+          <Ionicons name="add-circle-outline" size={18} color={colors.onSecondaryContainer} />
           <Text style={[styles.acaoTexto, styles.acaoTextoPrimaria]}>Repor</Text>
         </Pressable>
       </View>

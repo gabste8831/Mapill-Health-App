@@ -79,6 +79,12 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md,
     backgroundColor: colors.surfaceContainer,
   },
+  /** O lugar da foto quando não há foto: azul claro com o ícone, em vez de um vazio. */
+  photoVazia: {
+    backgroundColor: colors.secondaryContainer,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   itemHeaderText: {
     flex: 1,
     gap: 2,

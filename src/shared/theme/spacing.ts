@@ -14,6 +14,17 @@ export const spacing = {
 export const marginMobile = spacing.md;
 
 /**
+ * O respiro entre **assuntos diferentes** de uma mesma tela — saudação, progresso do dia, agenda,
+ * estoque.
+ *
+ * Maior que o `gutter` (24) que separa itens de uma mesma lista, e é essa diferença que faz o
+ * trabalho: quando tudo é separado pela mesma distância, a tela lê como uma pilha só e cada bloco
+ * disputa atenção com o vizinho. Foi o que deixou a Home com sensação de sobrecarga apesar de
+ * nenhum bloco individualmente ser pesado.
+ */
+export const gapEntreSecoes = 40;
+
+/**
  * Distância da label até o campo dela (e do campo até a mensagem de erro). Um único valor pra
  * todo formulário — TextField, SelectField e as labels soltas dentro de Card usam este token,
  * senão o ritmo da tela desalinha conforme cada um é ajustado em separado.

@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 import {
   bottomTabInset,
   colors,
+  gapEntreSecoes,
   listGap,
   radius,
   screenPadding,
@@ -23,7 +24,9 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: screenPadding,
     paddingTop: spacing.sm,
-    gap: spacing.gutter,
+    // `gapEntreSecoes` (40) e não `gutter` (24): a Home empilha assuntos independentes, e com todos
+    // à mesma distância eles liam como uma pilha só — cada bloco disputando atenção com o vizinho.
+    gap: gapEntreSecoes,
     paddingBottom: bottomTabInset + spacing.xxl,
   },
   greetingRow: {

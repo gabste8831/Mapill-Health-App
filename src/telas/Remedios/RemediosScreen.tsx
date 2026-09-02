@@ -60,11 +60,22 @@ function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
   return (
     <View style={styles.item}>
       <View style={styles.itemHeader}>
-        {/* Sem foto não entra nada no lugar: um quadrado com iniciais ocupa o mesmo espaço de uma
-            foto pra dizer o que o nome ao lado já diz. */}
+        {/**
+         * Sem foto, um marcador neutro ocupa o lugar — e **não** iniciais, que repetiriam o nome
+         * ao lado.
+         *
+         * Antes não entrava nada, e a consequência era a lista desalinhar: numa tela onde a
+         * maioria não tem foto, o item que tem é que ficava deslocado. O marcador mantém a coluna
+         * do nome no mesmo lugar em todos os itens, e o azul claro dá à lista a cor que faltava sem
+         * inventar superfície nova.
+         */}
         {medication.photoUri !== null ? (
           <FotoLocal uri={medication.photoUri} style={styles.photo} />
-        ) : null}
+        ) : (
+          <View style={[styles.photo, styles.photoVazia]}>
+            <Ionicons name="medkit-outline" size={24} color={colors.primary} />
+          </View>
+        )}
 
         <View style={styles.itemHeaderText}>
           <Text style={styles.name}>{medication.name}</Text>

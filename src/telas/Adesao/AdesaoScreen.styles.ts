@@ -1,6 +1,15 @@
 import { StyleSheet } from "react-native";
 
-import { colors, listGap, screenPadding, spacing, surfaceCard, typography } from "@/shared/theme";
+import {
+  colors,
+  listGap,
+  radius,
+  screenPadding,
+  spacing,
+  surfaceCard,
+  typography,
+  withOpacity,
+} from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -14,9 +23,16 @@ export const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
 
-  /** O número grande, que é o que a pessoa veio ver — e o que ela vai mostrar ao médico. */
+  /**
+   * O número grande, que é o que a pessoa veio ver — e o que ela vai mostrar ao médico.
+   *
+   * Em azul cheio, e não em cartão branco: é o único dado que esta tela existe para entregar, e
+   * sobre branco ele era texto grande solto no meio de outros cartões brancos. A cor aqui não é
+   * decoração — é o que diz qual dos blocos da tela é a resposta.
+   */
   destaque: {
-    ...surfaceCard,
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
     padding: spacing.lg,
     alignItems: "center",
     gap: spacing.xs,
@@ -29,12 +45,18 @@ export const styles = StyleSheet.create({
   },
   destaqueLegenda: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: withOpacity(colors.onPrimary, 0.85),
   },
 
   /**
    * As três faixas de cor. Só a cor muda — nunca o tamanho, nem o ícone, nem uma mensagem de
    * incentivo. A cor orienta a leitura; o julgamento fica com o médico.
+   *
+   * Valem na **lista por medicamento**, que segue sobre fundo branco. O número em destaque agora
+   * mora no bloco azul e é branco: nenhuma das três teria contraste ali, e um número vermelho
+   * dentro de um bloco azul leria como erro do aplicativo em vez de informação sobre o tratamento.
+   * A distinção que a cor dava está na legenda logo abaixo — quantas de quantas, que é mais preciso
+   * que uma faixa.
    */
   taxa_boa: {
     color: colors.success,
@@ -44,6 +66,10 @@ export const styles = StyleSheet.create({
   },
   taxa_baixa: {
     color: colors.error,
+  },
+  /** O número dentro do bloco azul. */
+  destaqueTaxaTexto: {
+    color: colors.onPrimary,
   },
 
   contagens: {
