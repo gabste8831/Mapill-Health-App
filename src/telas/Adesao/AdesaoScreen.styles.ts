@@ -161,4 +161,39 @@ export const styles = StyleSheet.create({
     color: colors.error,
     textAlign: "center",
   },
+
+  /**
+   * A linha que abre o seletor de medicamentos — mesma anatomia do resumo de estoque no cadastro:
+   * rótulo em cima, o que está escolhido embaixo, e o toque abre o popup. O estado atual fica
+   * legível sem abrir nada, que é o que evita gerar um relatório recortado sem perceber.
+   */
+  filtro: {
+    ...surfaceCard,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  filtroRotulo: {
+    ...typography.label,
+    color: colors.onSurfaceVariant,
+  },
+  filtroValor: {
+    ...typography.bodyLg,
+    color: colors.onSurface,
+  },
+
+  /** O conteúdo do popup de seleção. */
+  folha: {
+    gap: listGap,
+  },
+  folhaAcoes: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  folhaAcao: {
+    flex: 1,
+  },
+  folhaItem: {
+    paddingVertical: spacing.xs,
+  },
 });

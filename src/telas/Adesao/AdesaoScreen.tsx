@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -10,7 +10,18 @@ import {
 } from "@/hooks/use-adherence-report";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
 import type { AdesaoPorMedicamento } from "@/domain/use-cases/resumir-adesao";
-import { CenteredLoader, EstadoDeErro, Header, OptionGroup, type OptionGroupOption } from "@/ui";
+import { useRelatorioPdf } from "@/hooks/use-relatorio-pdf";
+import {
+  BottomSheet,
+  Button,
+  CenteredLoader,
+  Checkbox,
+  Dica,
+  EstadoDeErro,
+  Header,
+  OptionGroup,
+  type OptionGroupOption,
+} from "@/ui";
 import { styles } from "./AdesaoScreen.styles";
 
 /**
@@ -78,6 +89,40 @@ export function AdesaoScreen() {
   const router = useRouter();
   const [periodo, setPeriodo] = useState<PeriodoDeAdesao>(30);
   const { resumo, perdidas, isLoading, error, reload } = useAdherenceReport(periodo);
+  const { gerar, gerando, erro: erroDoPdf, medicamentos } = useRelatorioPdf();
+
+  /**
+   * Quais medicamentos entram no relatório. **Lista vazia = todos**, e é o padrão.
+   *
+   * Guardar a ausência de filtro como lista vazia, em vez de "todos os ids marcados", é o que faz
+   * um remédio cadastrado depois entrar no relatório sozinho — com a lista cheia, ele nasceria
+   * fora e ninguém entenderia por quê.
+   */
+  const [selecionados, setSelecionados] = useState<string[]>([]);
+  const [selecionando, setSelecionando] = useState(false);
+
+  function alternar(id: string) {
+    setSelecionados((atual) => {
+      // Vazio significa "todos", então o primeiro toque materializa a lista completa para poder
+      // tirar um item dela — senão desmarcar um deixaria a lista com um só, que é o oposto.
+      const base = atual.length === 0 ? medicamentos.map((m) => m.id) : atual;
+      const proximo = base.includes(id) ? base.filter((outro) => outro !== id) : [...base, id];
+
+      // Desmarcar o último devolve ao padrão em vez de produzir um relatório sem tratamento
+      // nenhum: um PDF vazio não é uma escolha que alguém queira fazer, é um beco.
+      if (proximo.length === 0) return [];
+      // Marcar todos de volta é a mesma coisa que não filtrar, e precisa ser gravado assim para o
+      // cabeçalho do PDF não declarar um recorte que não existe.
+      return proximo.length === medicamentos.length ? [] : proximo;
+    });
+  }
+
+  const resumoDaSelecao =
+    selecionados.length === 0
+      ? "Todos"
+      : selecionados.length === 1
+        ? (medicamentos.find((m) => m.id === selecionados[0])?.nome ?? "1 medicamento")
+        : `${selecionados.length} de ${medicamentos.length}`;
 
   function voltar() {
     if (router.canGoBack()) router.back();
@@ -186,6 +231,88 @@ export function AdesaoScreen() {
             </Text>
           </>
         )}
+
+        {/* Fora do `if` da taxa de propósito: um relatório de tratamentos em curso serve na consulta
+            mesmo quando nenhuma dose venceu ainda, e é justamente quem acabou de começar o
+            tratamento que costuma ter a próxima consulta marcada. */}
+        <View style={styles.secao}>
+          {/* Só aparece com mais de um medicamento: escolher entre um item é uma decisão que não
+              existe, e a linha a mais só empurraria o botão para baixo. */}
+          {medicamentos.length > 1 ? (
+            <Pressable
+              style={styles.filtro}
+              onPress={() => setSelecionando(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`Medicamentos do relatório: ${resumoDaSelecao}. Toque para escolher.`}
+            >
+              <Text style={styles.filtroRotulo}>MEDICAMENTOS NO RELATÓRIO</Text>
+              <Text style={styles.filtroValor}>{resumoDaSelecao}</Text>
+            </Pressable>
+          ) : null}
+
+          <Button
+            variant="outline"
+            label="Gerar relatório em PDF"
+            loading={gerando}
+            onPress={() => void gerar(periodo, selecionados.length > 0 ? selecionados : null)}
+          />
+          <Text style={styles.rodape}>
+            Um resumo dos últimos {periodo} dias para levar à consulta: tratamentos em curso,
+            adesão e compromissos.
+          </Text>
+          {erroDoPdf !== null ? <Dica>{erroDoPdf}</Dica> : null}
+        </View>
+
+        <BottomSheet
+          visible={selecionando}
+          onClose={() => setSelecionando(false)}
+          title="Medicamentos no relatório"
+        >
+          <View style={styles.folha}>
+            {/* O aviso vem antes da lista, e não depois: quem já desmarcou tudo e está saindo do
+                popup não volta para ler um rodapé. Um relatório parcial afirma menos do que
+                parece, e é o cabeçalho do PDF que vai dizer isso ao médico. */}
+            <Dica>
+              Um relatório com parte dos tratamentos não descreve a adesão completa — o documento
+              declara o recorte no cabeçalho.
+            </Dica>
+
+            {/* Um atalho só, e não o par "todos / limpar": desmarcar tudo produz um relatório sem
+                nenhum tratamento, que não é um estado que alguém queira alcançar de propósito. */}
+            {selecionados.length > 0 ? (
+              <View style={styles.folhaAcoes}>
+                <View style={styles.folhaAcao}>
+                  <Button
+                    variant="text"
+                    emFolha
+                    label="Incluir todos"
+                    onPress={() => setSelecionados([])}
+                  />
+                </View>
+              </View>
+            ) : null}
+
+            {medicamentos.map((medicamento) => {
+              // Lista vazia = todos, então nenhum item aparece desmarcado no estado padrão. É o que
+              // faz "todos" e "cada um marcado à mão" serem a mesma coisa na tela e coisas
+              // diferentes no cabeçalho do PDF.
+              const marcado =
+                selecionados.length === 0 || selecionados.includes(medicamento.id);
+              return (
+                <View key={medicamento.id} style={styles.folhaItem}>
+                  <Checkbox
+                    checked={marcado}
+                    onChange={() => alternar(medicamento.id)}
+                    label={medicamento.nome}
+                    accessibilityLabel={medicamento.nome}
+                  />
+                </View>
+              );
+            })}
+
+            <Button label="Pronto" onPress={() => setSelecionando(false)} />
+          </View>
+        </BottomSheet>
       </ScrollView>
     </SafeAreaView>
   );
