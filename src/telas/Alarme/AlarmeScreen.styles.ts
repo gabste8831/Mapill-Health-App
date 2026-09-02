@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceCard, typography } from "@/shared/theme";
+import { colors, radius, spacing, surfaceCard, typography, withOpacity } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   /**
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     // Branco translúcido sobre o azul: o ícone se destaca sem precisar de uma segunda cor.
-    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    backgroundColor: withOpacity(colors.onPrimary, 0.18),
   },
   titulo: {
     ...typography.headlineMd,

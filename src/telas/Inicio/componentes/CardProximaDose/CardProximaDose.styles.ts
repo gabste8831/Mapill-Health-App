@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   container: {
@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.2)",
+    borderTopColor: withOpacity(colors.onPrimary, 0.2),
   },
   hintText: {
     ...typography.label,

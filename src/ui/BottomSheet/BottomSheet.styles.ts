@@ -1,11 +1,13 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(25, 28, 30, 0.4)",
+    // O scrim e onSurface a 40%: o mesmo cinza-azulado do texto, e nao um preto que nao existe
+    // no tema.
+    backgroundColor: withOpacity(colors.onSurface, 0.4),
     justifyContent: "flex-end",
   },
   sheet: {

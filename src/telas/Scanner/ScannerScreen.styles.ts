@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   safeArea: {
@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
   instrucaoTexto: {
     ...typography.bodyLg,
     color: colors.onPrimary,
-    backgroundColor: "rgba(25, 28, 30, 0.75)",
+    backgroundColor: withOpacity(colors.onSurface, 0.75),
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,

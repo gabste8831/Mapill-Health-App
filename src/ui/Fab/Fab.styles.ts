@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { bottomTabInset, colors, radius, spacing } from "@/shared/theme";
+import { bottomTabInset, colors, radius, spacing, surfaceShadowFlutuante } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   fab: {
@@ -14,10 +14,11 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    // `boxShadow` como o resto do app, e não `shadowColor`/`elevation`: preto puro dava um cinza
+    // mais frio que o das outras sombras, e a API antiga não aceita o token.
+    boxShadow: surfaceShadowFlutuante,
+    // `elevation` fica: no Android é ele que resolve a ordem de empilhamento, e sem isso o FAB
+    // pode ficar *atrás* de um cartão que role por baixo.
     elevation: 4,
   },
   icon: {

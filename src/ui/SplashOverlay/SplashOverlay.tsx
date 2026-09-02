@@ -76,9 +76,17 @@ const styles = StyleSheet.create({
   },
   splashOverlay: {
     ...StyleSheet.absoluteFill,
-    // Mesmo azul do `expo-splash-screen` no app.json — se um mudar, o outro tem que mudar junto,
-    // senão aparece um pisca de cor na troca.
-    backgroundColor: "#208AEF",
+    /**
+     * Mesmo azul do `expo-splash-screen` no `app.json` — se um mudar, o outro tem que mudar junto,
+     * senão aparece um pisca de cor na troca.
+     *
+     * **Estava divergente até 02/09**: o `app.json` usa `#196FF3` e aqui havia `#208AEF`, então o
+     * pisca que este comentário existe para evitar acontecia a cada abertura. Fica hardcoded de
+     * propósito, e não vira token: é o único valor do app que precisa casar com uma configuração
+     * **nativa**, fora do alcance do tema. `colors.primary` (`#0057BF`) é outro azul, mais escuro,
+     * e usá-lo aqui só trocaria a divergência de lugar.
+     */
+    backgroundColor: "#196FF3",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,

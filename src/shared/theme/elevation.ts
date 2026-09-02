@@ -17,6 +17,19 @@ export const surfaceShadow = "0px 1px 3px rgba(25, 28, 30, 0.08)";
 export const surfaceShadowElevada = "0px 2px 8px rgba(25, 28, 30, 0.10)";
 
 /**
+ * O que **flutua sobre o conteúdo**, e não apenas acima do fundo — hoje só o FAB.
+ *
+ * Mais forte que as duas acima porque o trabalho é outro: um cartão se separa do fundo, um botão
+ * flutuante precisa se separar de *qualquer coisa* que role por baixo dele, inclusive de outro
+ * cartão branco.
+ *
+ * Nasceu em 02/09 do `shadowColor: "#000"` que o `Fab` usava — preto puro dá um cinza mais frio que
+ * o `rgba(25, 28, 30, …)` do resto do app, e a diferença aparece justamente no elemento mais
+ * visível da tela.
+ */
+export const surfaceShadowFlutuante = "0px 4px 8px rgba(25, 28, 30, 0.20)";
+
+/**
  * O cartão padrão do app: fundo branco, cantos arredondados, sombra e respiro interno.
  *
  * Existe como token, e não como cópia em cada arquivo de estilo, porque foi exatamente a cópia que

@@ -1,135 +1,108 @@
-import { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { DateTimePicker, Host } from "@expo/ui/jetpack-compose";
+import { View } from "react-native";
 
 import { colors } from "@/shared/theme";
 import { styles } from "./TimePicker.styles";
 
 /**
- * Onde os campos começam quando ainda não há resposta. **Não é sugestão**: a posição inicial não é
- * um campo preenchido, e nada é gravado enquanto a pessoa não confirmar. Quem garante isso é quem
- * usa este componente — o `onChange` só dispara quando alguém digita.
+ * Onde o mostrador começa quando ainda não há resposta. **Não é sugestão**: a posição inicial de um
+ * relógio não é um campo preenchido, e nada é gravado enquanto a pessoa não confirmar. Quem garante
+ * isso é quem usa este componente — o `onChange` só dispara quando alguém mexe.
  */
 const HORARIO_NEUTRO = "08:00";
 
 export type TimePickerProps = {
-  /** "HH:MM" em que o seletor abre. */
+  /** "HH:MM" em que o mostrador abre. */
   initialValue: string | null;
   /** Só é chamado por interação de quem está usando, nunca ao montar. */
   onChange: (value: string) => void;
 };
 
-/** Limita ao intervalo do campo. Digitar 99 em horas vira 23, e não um erro a ser lido. */
-function limitar(valor: number, maximo: number): number {
-  if (Number.isNaN(valor)) return 0;
-  return Math.min(Math.max(valor, 0), maximo);
+function paraData(horario: string): Date {
+  const [horas, minutos] = horario.split(":");
+  const data = new Date();
+  data.setHours(Number(horas), Number(minutos), 0, 0);
+  return data;
 }
 
-function doisDigitos(valor: number): string {
-  return String(valor).padStart(2, "0");
+function paraHorario(data: Date): string {
+  const horas = String(data.getHours()).padStart(2, "0");
+  const minutos = String(data.getMinutes()).padStart(2, "0");
+  return `${horas}:${minutos}`;
 }
 
 /**
- * Escolha de horário em dois campos numéricos — hora e minuto, em 24 horas.
+ * O mostrador redondo nativo do Android (Material 3), atrás do ícone de relógio.
  *
- * **Escrito à mão, e não com o `DateTimePicker` do `@expo/ui`.** Aquele componente aceita
- * `variant="input"` no TypeScript, mas o Android o ignora para hora: em `DatePickerView.kt`, o
- * `ExpoTimePicker` chama sempre o `TimePicker` do Material 3 (o mostrador redondo) e nunca lê
- * `props.variant` — que só é consultado no caminho da *data*. `showVariantToggle` também não chega
- * lá, e por isso não existia o botão de alternar. As cores funcionavam porque passam por outro
- * caminho (`buildTimePickerColors`), o que fazia o problema parecer build velha quando não era.
+ * ## Por que ele voltou (02/09)
  *
- * A revisão em aparelho pediu digitação duas vezes, e a razão é a mesma das duas: girar não é gesto
- * óbvio, e o mostrador esconde a distinção entre manhã e noite — que é exatamente onde o erro é
- * caro, tomar às 20:00 o que era das 08:00. Aqui "20" é 20, sem AM/PM a interpretar.
+ * Este componente já foi o mostrador nativo, virou dois campos digitáveis escritos à mão, e agora
+ * volta a ser o mostrador. Vale registrar por quê, porque a ida e a volta **não** se contradizem —
+ * o que mudou foi o contexto ao redor.
  *
- * Multiplataforma por consequência: sem dependência nativa, o mesmo arquivo serve Android, iOS e
- * web. Os irmãos `.ios.tsx` e `.web.tsx` continuam existindo para quem prefira o seletor nativo de
- * cada sistema, e o contrato dos três é idêntico.
+ * Quando o `TimePicker` era o **único** caminho para escolher horário, o mostrador era um problema
+ * real: girar não é gesto óbvio, e o relógio analógico esconde a distinção entre manhã e noite —
+ * que é exatamente onde o erro é caro, tomar às 20:00 o que era das 08:00. Foi por isso que a
+ * revisão em aparelho pediu digitação duas vezes, e o componente foi reescrito à mão (o
+ * `variant="input"` do `@expo/ui` não funciona: `DatePickerView.kt` só lê `props.variant` no
+ * caminho da *data*, e ignora no da hora).
+ *
+ * Hoje o contexto é outro. O `TimeField` tem **o campo de digitação como caminho principal** — a
+ * pessoa digita `0800` direto, com máscara que recusa o impossível — e o relógio mora num ícone ao
+ * lado, para quem preferir. Como alternativa, e não como obrigação, o mostrador nativo é o certo:
+ * é o componente que o sistema oferece, que a pessoa já viu em outros aplicativos, e ninguém é
+ * forçado a girar nada.
+ *
+ * A objeção antiga continua verdadeira sobre o que ela falava; ela só não fala mais deste caso.
+ *
+ * É componente do Jetpack Compose, ou seja, **Android**. Os irmãos: `.ios.tsx` usa a roda do
+ * SwiftUI, e `.web.tsx` mantém os campos digitáveis para o preview do navegador.
  */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {
-  const [horas, minutos] = (initialValue ?? HORARIO_NEUTRO).split(":");
-  const [horaTexto, setHoraTexto] = useState(horas);
-  const [minutoTexto, setMinutoTexto] = useState(minutos);
-  /** Qual campo está em foco, só para desenhar a moldura de destaque. */
-  const [emFoco, setEmFoco] = useState<"hora" | "minuto" | null>(null);
-
-  /**
-   * Enquanto digita, o texto vale como está — apagar para escrever de novo é o gesto mais comum, e
-   * corrigir a cada tecla impediria o campo de ficar vazio no meio do caminho. O valor é publicado
-   * já normalizado, então quem ouve nunca recebe `"7:5"`.
-   */
-  function publicar(hora: string, minuto: string) {
-    const h = limitar(Number(hora), 23);
-    const m = limitar(Number(minuto), 59);
-    onChange(`${doisDigitos(h)}:${doisDigitos(m)}`);
-  }
-
-  function handleHora(raw: string) {
-    const digitos = raw.replace(/\D/g, "").slice(0, 2);
-    setHoraTexto(digitos);
-    publicar(digitos, minutoTexto);
-  }
-
-  function handleMinuto(raw: string) {
-    const digitos = raw.replace(/\D/g, "").slice(0, 2);
-    setMinutoTexto(digitos);
-    publicar(horaTexto, digitos);
-  }
-
-  /** No blur o campo assume a forma final: `7` vira `07`, vazio vira `00`, `99` vira o teto. */
-  function normalizarHora() {
-    setEmFoco(null);
-    setHoraTexto(doisDigitos(limitar(Number(horaTexto), 23)));
-  }
-
-  function normalizarMinuto() {
-    setEmFoco(null);
-    setMinutoTexto(doisDigitos(limitar(Number(minutoTexto), 59)));
-  }
-
   return (
     <View style={styles.container}>
-      <View style={styles.campos}>
-        <View style={styles.campo}>
-          <TextInput
-            style={[styles.entrada, emFoco === "hora" && styles.entradaFocada]}
-            value={horaTexto}
-            onChangeText={handleHora}
-            onFocus={() => setEmFoco("hora")}
-            onBlur={normalizarHora}
-            keyboardType="number-pad"
-            maxLength={2}
-            selectTextOnFocus
-            accessibilityLabel="Hora"
-            placeholder="00"
-            placeholderTextColor={colors.onSurfaceVariant}
-          />
-          <Text style={styles.rotulo}>HORA</Text>
-        </View>
-
-        <Text style={styles.separador}>:</Text>
-
-        <View style={styles.campo}>
-          <TextInput
-            style={[styles.entrada, emFoco === "minuto" && styles.entradaFocada]}
-            value={minutoTexto}
-            onChangeText={handleMinuto}
-            onFocus={() => setEmFoco("minuto")}
-            onBlur={normalizarMinuto}
-            keyboardType="number-pad"
-            maxLength={2}
-            selectTextOnFocus
-            accessibilityLabel="Minuto"
-            placeholder="00"
-            placeholderTextColor={colors.onSurfaceVariant}
-          />
-          <Text style={styles.rotulo}>MINUTO</Text>
-        </View>
-      </View>
-
-      {/* Dito uma vez, embaixo: sem AM/PM na tela, é a única coisa que explica por que "20" basta
-          para as oito da noite. */}
-      <Text style={styles.ajuda}>Formato de 24 horas — 20:00 é oito da noite.</Text>
+      <Host matchContents={{ vertical: true }} style={styles.host}>
+        <DateTimePicker
+          displayedComponents="hourAndMinute"
+          /**
+           * `is24Hour` apaga a maior armadilha do mostrador: sem AM/PM, "20" é 20. A confusão entre
+           * manhã e noite era metade do argumento contra este componente, e ela some com o formato
+           * de 24 horas.
+           */
+          is24Hour
+          /**
+           * `picker` é o mostrador redondo, e é o padrão do componente — declarado à vista porque é
+           * justamente a escolha que este arquivo existe para registrar.
+           *
+           * `showVariantToggle` mantém o botão que alterna para digitação dentro do próprio popup:
+           * quem abriu o relógio por engano não fica preso nele.
+           */
+          variant="picker"
+          showVariantToggle
+          initialDate={paraData(initialValue ?? HORARIO_NEUTRO).toISOString()}
+          /**
+           * `elementColors` em vez de só `color`.
+           *
+           * `color` pinta um subconjunto dos elementos, e o resto herda o acento do tema do
+           * sistema — foi o que fez o verde do Material You aparecer no aparelho, mesmo caso da
+           * pílula das abas resolvido em 23/08. Nomear cada peça é o que garante que o popup seja
+           * do Mapill em qualquer aparelho, e o SDK 57 passou a permitir isso.
+           */
+          color={colors.primary}
+          elementColors={{
+            containerColor: colors.surfaceContainerLowest,
+            clockDialColor: colors.surfaceContainer,
+            selectorColor: colors.primary,
+            clockDialSelectedContentColor: colors.onPrimary,
+            clockDialUnselectedContentColor: colors.onSurface,
+            timeSelectorSelectedContainerColor: colors.primaryContainer,
+            timeSelectorSelectedContentColor: colors.onPrimary,
+            timeSelectorUnselectedContainerColor: colors.surfaceContainer,
+            timeSelectorUnselectedContentColor: colors.onSurface,
+          }}
+          onDateSelected={(data) => onChange(paraHorario(data))}
+        />
+      </Host>
     </View>
   );
 }
