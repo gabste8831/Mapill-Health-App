@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./CardEstoque.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./CardEstoque.styles";
 
 type CardEstoqueProps = {
   /** Quantos remédios têm estoque controlado — é o que o card promete mostrar do outro lado. */
@@ -21,6 +21,9 @@ type CardEstoqueProps = {
  * por completo quando não há estoque controlado, em vez de convidar para uma tela vazia.
  */
 export function CardEstoque({ quantidade, onPress }: CardEstoqueProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <Pressable
       style={styles.container}
@@ -28,7 +31,7 @@ export function CardEstoque({ quantidade, onPress }: CardEstoqueProps) {
       accessibilityRole="button"
       accessibilityLabel="Abrir o estoque das suas medicações">
       <View style={styles.icone}>
-        <Ionicons name="cube" size={22} color={colors.primary} />
+        <Ionicons name="cube" size={22} color={cores.primary} />
       </View>
 
       <View style={styles.texto}>
@@ -42,7 +45,7 @@ export function CardEstoque({ quantidade, onPress }: CardEstoqueProps) {
         </Text>
       </View>
 
-      <Ionicons name="chevron-forward" size={18} color={colors.outline} />
+      <Ionicons name="chevron-forward" size={18} color={cores.outline} />
     </Pressable>
   );
 }

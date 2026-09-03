@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   sectionTitle: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     paddingBottom: spacing.sm,
   },
   /**
@@ -15,7 +14,7 @@ export const styles = StyleSheet.create({
    */
   paragraph: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "justify",
   },
-});
+}));

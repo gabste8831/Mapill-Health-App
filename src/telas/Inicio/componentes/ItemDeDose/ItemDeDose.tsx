@@ -1,7 +1,8 @@
 import { Pressable, Text, View } from "react-native";
 
 import type { DoseVisualStatus } from "@/hooks/use-today-doses";
-import { styles } from "./ItemDeDose.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./ItemDeDose.styles";
 
 type ItemDeDoseProps = {
   time: string;
@@ -53,6 +54,8 @@ export function ItemDeDose({
   onSkip,
   onCorrect,
 }: ItemDeDoseProps) {
+  const styles = useEstilos(criarEstilos);
+
   const resolvida = status === "confirmed" || status === "skipped";
   // "Na hora" é o caso mais acionável de todos: é literalmente agora.
   const acionavel = status === "next" || status === "now" || status === "late";

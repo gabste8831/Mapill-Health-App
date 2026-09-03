@@ -1,50 +1,39 @@
-import { StyleSheet } from "react-native";
 
-import {
-  bottomTabInset,
-  colors,
-  listGap,
-  radius,
-  screenPadding,
-  spacing,
-  surfaceCard,
-  typography,
-} from "@/shared/theme";
+import { bottomTabInset, estilosDoTema, listGap, radius, screenPadding, spacing, superficieDeCartao, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   header: {
     paddingHorizontal: screenPadding,
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
   },
-  subtitle: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    // Entrelinha maior num parágrafo de apoio: é o que separa "texto que se lê" de "texto que se
-    // pula", e o público do app inclui quem lê devagar.
-    lineHeight: 22,
-  },
   busca: {
     marginTop: spacing.md,
   },
   /**
-   * O respiro fica na contagem, e não no `gap` do cabeçalho: ela é um rótulo curto logo abaixo de
-   * um parágrafo, e coladas as duas linhas se leem como uma só. `gutter` afasta o suficiente pra
-   * virar informação separada.
+   * O mesmo respiro (`md` acima, `sm` abaixo) que separa a contagem do resto em Compromissos —
+   * aqui ela fica entre a busca e o seletor de ordem, em vez de sozinha no topo do que rola, mas
+   * o espaço ao redor dela é a mesma proporção nas duas telas.
    */
   contagem: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
-    marginTop: spacing.md,
+    color: cores.onSurfaceVariant,
+    marginTop: spacing.gutter,
+    marginBottom: spacing.md,
   },
-  /** O que rola junto com a lista: o texto de apoio e o acesso ao estoque. */
+  /**
+   * O que rola junto com a lista: o texto de apoio e o acesso ao estoque. Padding simétrico
+   * (mesmo ajuste feito em Compromissos) — era `marginBottom: gutter` (24) só embaixo, sem nada
+   * em cima, e o respiro ficava desequilibrado.
+   */
   listHeader: {
     gap: spacing.md,
-    marginBottom: spacing.gutter,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
   },
   listContent: {
     paddingHorizontal: screenPadding,
@@ -57,10 +46,10 @@ export const styles = StyleSheet.create({
   /**
    * O cartão do kit, sem borda. A borda cinza que estava aqui era o que dava à lista o aspecto de
    * planilha: com o fundo da tela quase da mesma cor do cartão, o contorno de 1px lê como célula
-   * desenhada, e não como superfície acima. `surfaceCard` traz junto o respiro maior.
+   * desenhada, e não como superfície acima. `superficieDeCartao` traz junto o respiro maior.
    */
   item: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     gap: spacing.sm,
   },
   itemHeader: {
@@ -77,11 +66,11 @@ export const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: cores.surfaceContainer,
   },
   /** O lugar da foto quando não há foto: azul claro com o ícone, em vez de um vazio. */
   photoVazia: {
-    backgroundColor: colors.secondaryContainer,
+    backgroundColor: cores.secondaryContainer,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -89,42 +78,70 @@ export const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  /** Editar e excluir dividindo a largura ao meio, abaixo de todo o resto do cartão. */
   acoes: {
     flexDirection: "row",
+    alignItems: "stretch",
+    marginTop: spacing.sm,
+  },
+  acaoBotao: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing.xs,
+    // Alvo de toque de sobra: são as duas ações mais tocadas do cartão depois de "ver detalhe".
+    minHeight: 40,
+  },
+  /**
+   * A linha vertical entre as duas metades — bem discreta de propósito: ela só separa, não
+   * precisa se notar sozinha. `outlineVariant` já é a cor mais clara de contorno do tema, e ainda
+   * assim entra a 50% — o traço na cor cheia competia com o texto das duas ações ao lado.
+   */
+  acaoDivisor: {
+    width: 1,
+    backgroundColor: cores.outlineVariant,
+    opacity: 0.5,
+  },
+  acaoTexto: {
+    ...typography.label,
+    color: cores.corDeDestaque,
+  },
+  acaoTextoDestrutivo: {
+    color: cores.error,
+  },
+
+  // --- Popup de detalhe ---
+  detalheBloco: {
+    gap: spacing.md,
+  },
+  detalheLinha: {
+    gap: 2,
+  },
+  detalheRotulo: {
+    ...typography.label,
+    color: cores.onSurfaceVariant,
+  },
+  detalheValor: {
+    ...typography.bodyLg,
+    color: cores.onSurface,
   },
   name: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   activeIngredient: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
-  /** Linha "1 comprimido · Todo dia" — a informação que a pessoa vem conferir. */
+  /**
+   * Linha "Todo dia · 08:00, 14:00, 20:00", no lugar onde antes ficava o princípio ativo — quando
+   * tomar, não quanto (isso fica no popup) nem o que é (a substância, que já está lá também).
+   */
   posology: {
     ...typography.bodyMd,
-    color: colors.onSurface,
-  },
-
-  timeRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  /** Fichas com mais ar: `paddingVertical: 2` deixava o horário espremido dentro da pílula. */
-  timeChip: {
-    backgroundColor: colors.secondaryContainer,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  timeChipText: {
-    ...typography.label,
-    color: colors.onSecondaryContainer,
-    letterSpacing: 0.3,
+    color: cores.onSurfaceVariant,
   },
 
   /**
@@ -140,39 +157,21 @@ export const styles = StyleSheet.create({
   },
   stock: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   stockLow: {
-    color: colors.error,
+    color: cores.error,
   },
   badge: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   // --- Estados ---
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    padding: spacing.lg,
-  },
-  emptyTitle: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    textAlign: "center",
-  },
-  emptyDescription: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    textAlign: "center",
-    maxWidth: 320,
-  },
   errorText: {
     ...typography.bodyMd,
-    color: colors.error,
+    color: cores.error,
     textAlign: "center",
     maxWidth: 320,
   },
-});
+}));

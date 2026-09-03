@@ -3,8 +3,8 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { BottomSheet } from "@/ui/BottomSheet/BottomSheet";
-import { colors } from "@/shared/theme";
-import { styles } from "./SelectField.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./SelectField.styles";
 
 export type SelectOption<TValue extends string> = { value: TValue; label: string };
 
@@ -28,6 +28,9 @@ export function SelectField<TValue extends string>({
   options,
   onChange,
 }: SelectFieldProps<TValue>) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [isPickerOpen, setPickerOpen] = useState(false);
   const selectedOption = options.find((option) => option.value === value) ?? null;
 
@@ -42,7 +45,7 @@ export function SelectField<TValue extends string>({
         <Text style={selectedOption ? styles.selectFieldValue : styles.selectFieldPlaceholder}>
           {selectedOption?.label ?? placeholder}
         </Text>
-        <Ionicons name="chevron-down" size={18} color={colors.onSurfaceVariant} />
+        <Ionicons name="chevron-down" size={18} color={cores.onSurfaceVariant} />
       </Pressable>
 
       <BottomSheet visible={isPickerOpen} onClose={() => setPickerOpen(false)} title={label}>
@@ -68,7 +71,7 @@ export function SelectField<TValue extends string>({
             <Text style={option.value === value ? styles.modalOptionTextSelected : styles.modalOptionText}>
               {option.label}
             </Text>
-            {option.value === value ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
+            {option.value === value ? <Ionicons name="checkmark" size={18} color={cores.primary} /> : null}
           </Pressable>
         ))}
       </BottomSheet>

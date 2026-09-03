@@ -12,6 +12,7 @@ export * from "./DatePicker/DatePicker";
 export * from "./Dica/Dica";
 export * from "./EscolhaDeOrigemDaFoto/EscolhaDeOrigemDaFoto";
 export * from "./EstadoDeErro/EstadoDeErro";
+export * from "./EstadoVazio/EstadoVazio";
 export * from "./Fab/Fab";
 export * from "./FotoLocal/FotoLocal";
 export * from "./GoogleLogo/GoogleLogo";

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./TimePicker.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./TimePicker.styles";
 
 /**
  * A versão do preview no navegador — dois campos numéricos escritos à mão.
@@ -59,6 +59,9 @@ function doisDigitos(valor: number): string {
  * cada sistema, e o contrato dos três é idêntico.
  */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [horas, minutos] = (initialValue ?? HORARIO_NEUTRO).split(":");
   const [horaTexto, setHoraTexto] = useState(horas);
   const [minutoTexto, setMinutoTexto] = useState(minutos);
@@ -114,7 +117,7 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
             selectTextOnFocus
             accessibilityLabel="Hora"
             placeholder="00"
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholderTextColor={cores.onSurfaceVariant}
           />
           <Text style={styles.rotulo}>HORA</Text>
         </View>
@@ -133,7 +136,7 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
             selectTextOnFocus
             accessibilityLabel="Minuto"
             placeholder="00"
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholderTextColor={cores.onSurfaceVariant}
           />
           <Text style={styles.rotulo}>MINUTO</Text>
         </View>

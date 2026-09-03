@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import type { ItemDePermissao } from "@/notifications/permissoes-de-alarme";
-import { colors } from "@/shared/theme";
-import { styles } from "./PainelDePermissoes.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./PainelDePermissoes.styles";
 
 type PainelDePermissoesProps = {
   itens: ItemDePermissao[];
@@ -34,6 +34,9 @@ type PainelDePermissoesProps = {
  * tocável em vez de haver um botão genérico de "configurações".
  */
 export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePermissoesProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const pendentes = itens.filter((item) => !item.concedida);
   if (pendentes.length === 0) return null;
 
@@ -43,7 +46,7 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
         <Ionicons
           name={vaiTocar ? "notifications-outline" : "warning"}
           size={22}
-          color={vaiTocar ? colors.onWarningSurface : colors.error}
+          color={vaiTocar ? cores.onWarningSurface : cores.error}
         />
         <Text style={styles.titulo}>
           {vaiTocar ? "Deixe o alarme mais confiável" : "O alarme não vai tocar"}
@@ -75,7 +78,7 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
               </View>
               <Text style={styles.itemDescricao}>{item.descricao}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.onSurfaceVariant} />
+            <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
           </Pressable>
         ))}
       </View>

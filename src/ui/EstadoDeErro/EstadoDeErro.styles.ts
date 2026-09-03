@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   container: {
     flex: 1,
     alignItems: "center",
@@ -12,13 +11,13 @@ export const styles = StyleSheet.create({
   },
   titulo: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "center",
   },
   /** A mensagem técnica, em cinza: informa quem for investigar, sem gritar com quem só quer usar. */
   mensagem: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 320,
   },
@@ -28,7 +27,7 @@ export const styles = StyleSheet.create({
    */
   tranquilizador: {
     ...typography.bodySm,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 320,
   },
@@ -36,4 +35,4 @@ export const styles = StyleSheet.create({
     marginTop: spacing.md,
     minWidth: 200,
   },
-});
+}));

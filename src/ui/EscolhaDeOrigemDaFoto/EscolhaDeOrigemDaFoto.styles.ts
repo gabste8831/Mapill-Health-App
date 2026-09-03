@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   body: {
     gap: spacing.sm,
   },
@@ -12,7 +11,7 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.md,
     borderRadius: radius.lg,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     // 64 dá folga de dedo numa escolha que é feita uma vez e não pode errar de linha.
     minHeight: 64,
   },
@@ -21,10 +20,10 @@ export const styles = StyleSheet.create({
   },
   rotulo: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   dica: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
-});
+}));

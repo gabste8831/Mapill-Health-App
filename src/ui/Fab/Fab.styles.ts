@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { bottomTabInset, colors, radius, spacing, surfaceShadowFlutuante } from "@/shared/theme";
+import { bottomTabInset, estilosDoTema, radius, spacing, surfaceShadowFlutuante } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   fab: {
     position: "absolute",
     right: spacing.md,
@@ -11,7 +10,7 @@ export const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     alignItems: "center",
     justifyContent: "center",
     // `boxShadow` como o resto do app, e não `shadowColor`/`elevation`: preto puro dava um cinza
@@ -22,8 +21,8 @@ export const styles = StyleSheet.create({
     elevation: 4,
   },
   icon: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     fontSize: 28,
     lineHeight: 28,
   },
-});
+}));

@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * Cinza claro, e não branco. O acordeão costuma morar dentro de um `Card` branco, e branco
    * sobre branco deixava só a sombra fininha dizendo que ali tem algo clicável, o que some
@@ -11,7 +10,7 @@ export const styles = StyleSheet.create({
   section: {
     borderRadius: radius.lg,
     overflow: "hidden",
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     boxShadow: surfaceShadow,
   },
   header: {
@@ -23,20 +22,20 @@ export const styles = StyleSheet.create({
     minHeight: 52,
   },
   sectionAzul: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   headerText: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
     flex: 1,
   },
   headerTextAzul: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   /** Afordância secundária: o título é que carrega a informação, isto só convida ao toque. */
   toggleLabel: {
     ...typography.bodyMd,
-    color: colors.primary,
+    color: cores.corDeDestaque,
     opacity: 0.7,
   },
   bodyClip: {
@@ -51,4 +50,4 @@ export const styles = StyleSheet.create({
     paddingTop: 0,
     gap: spacing.md,
   },
-});
+}));

@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   fileira: {
     flexDirection: "row",
     gap: spacing.sm,
@@ -17,16 +16,16 @@ export const styles = StyleSheet.create({
     // lista — é reversível num toque, diferente de confirmar uma dose.
     height: 40,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
   fichaSelecionada: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   rotulo: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   rotuloSelecionado: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
-});
+}));

@@ -3,7 +3,7 @@ import { Tabs } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { Platform } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { useCores } from "@/shared/theme";
 
 /**
  * A ramificação é feita aqui dentro, e não num `_layout.web.tsx`: arquivo de rota vem do
@@ -17,6 +17,8 @@ export default function AppTabsLayout() {
 
 // Ícone preenchido só na aba ativa.
 function AbasNativas() {
+  const cores = useCores();
+
   return (
     <NativeTabs
       /**
@@ -25,19 +27,25 @@ function AbasNativas() {
        * botão branco encostando nela se fundiam num bloco só. O degrau de cor faz a separação
        * que a borda faria. O azul fica reservado à aba ativa: é o único destaque, então ele
        * aponta.
+       *
+       * `corDeDestaque`, e não `primary` puro: no tema escuro `primary` é o navy escurecido
+       * (pedido do Gabriel, pensado para fundo de bloco), e usado como tinta de ícone/texto sobre
+       * a barra — que já é escura — ele quase some. `corDeDestaque` existe exatamente para isto:
+       * é `primary` em todo tema onde ele já é claro o bastante para ler como tinta, e um azul
+       * mais claro só no escuro. Ver `shared/theme/colors.ts`.
        */
-      backgroundColor={colors.surfaceContainerLow}
-      tintColor={colors.primary}
-      iconColor={{ default: colors.outline, selected: colors.primary }}
+      backgroundColor={cores.surfaceContainerLow}
+      tintColor={cores.corDeDestaque}
+      iconColor={{ default: cores.outline, selected: cores.corDeDestaque }}
       labelStyle={{
-        default: { color: colors.outline },
-        selected: { color: colors.primary },
+        default: { color: cores.outline },
+        selected: { color: cores.corDeDestaque },
       }}
       // Sem isto o Android pinta a pílula da aba ativa com a cor dinâmica do Material You, que
       // vem do papel de parede do aparelho — no teste ela saiu verde. A cor da marca não pode
       // depender de qual foto a pessoa colocou no celular.
-      indicatorColor={colors.secondaryContainer}
-      rippleColor={colors.secondaryContainer}>
+      indicatorColor={cores.secondaryContainer}
+      rippleColor={cores.secondaryContainer}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md={{ default: "home", selected: "home_filled" }} />
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
@@ -67,15 +75,17 @@ function AbasNativas() {
  * legível — o aparelho continua usando a barra nativa.
  */
 function AbasWeb() {
+  const cores = useCores();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.outline,
+        tabBarActiveTintColor: cores.primary,
+        tabBarInactiveTintColor: cores.outline,
         tabBarStyle: {
-          backgroundColor: colors.surfaceContainerLowest,
-          borderTopColor: colors.outlineVariant,
+          backgroundColor: cores.surfaceContainerLowest,
+          borderTopColor: cores.outlineVariant,
         },
       }}>
       <Tabs.Screen

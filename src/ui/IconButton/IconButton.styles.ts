@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius } from "@/shared/theme";
+import { estilosDoTema, radius } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   base: {
     borderRadius: radius.full,
     alignItems: "center",
@@ -26,18 +25,18 @@ export const styles = StyleSheet.create({
     height: 44,
   },
   primary: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   outline: {
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
   },
   /** Sem borda: dentro de um cartão, o contorno de 1px devolveria o aspecto de planilha. */
   sutil: {
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
   disabled: {
     opacity: 0.4,
   },
-});
+}));

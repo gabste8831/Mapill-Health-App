@@ -1,19 +1,23 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
+  /**
+   * Fundo âmbar diluído e o ícone na tinta cheia — **sem faixa lateral**.
+   *
+   * A faixa de 4px saiu do app inteiro: ela empurra o conteúdo para a direita, desalinhando uma
+   * dica do campo logo acima dela, e quem não repara na borda não recebe o aviso. Aqui o ícone
+   * "?" já fazia o trabalho de dizer "isto é apoio"; ele só precisava de uma cor que se enxergue.
+   *
+   * O padding subiu de `sm` (8) para `md` (16): com 8 o texto encostava na borda do bloco e a
+   * dica lia como um erro de layout em vez de um aviso desenhado.
+   */
   container: {
     flexDirection: "row",
     gap: spacing.sm,
-    padding: spacing.sm,
+    padding: spacing.md,
     borderRadius: radius.md,
-    // Amarelo diluído no fundo e cheio na barra da esquerda. O marrom anterior separava do texto
-    // mas lia como rodapé; o amarelo diz "atenção" de longe. A cor viva fica só na barra porque
-    // ela chama sem cobrir o texto — e uma dica não pode aparecer mais que um erro.
-    backgroundColor: colors.warningSurface,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
+    backgroundColor: cores.warningSurface,
   },
   /** Alinha o ícone com a primeira linha do texto, e não com o centro do bloco inteiro. */
   icone: {
@@ -21,7 +25,7 @@ export const styles = StyleSheet.create({
   },
   texto: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
     flex: 1,
   },
-});
+}));

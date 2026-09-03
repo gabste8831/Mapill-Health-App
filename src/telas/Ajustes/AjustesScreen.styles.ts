@@ -1,13 +1,12 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 const AVATAR_SIZE = 56;
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
     paddingBottom: spacing.xxl,
@@ -18,7 +17,7 @@ export const styles = StyleSheet.create({
    * lista uniforme: dá um ponto de entrada com peso visual antes das seções, que seguem neutras.
    */
   hero: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.gutter,
@@ -41,7 +40,7 @@ export const styles = StyleSheet.create({
   },
   heroTitle: {
     ...typography.headlineMd,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   identity: {
     flexDirection: "row",
@@ -55,7 +54,7 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primaryContainer,
+    backgroundColor: cores.primaryContainer,
   },
   avatarImage: {
     width: "100%",
@@ -63,7 +62,7 @@ export const styles = StyleSheet.create({
   },
   avatarInitials: {
     ...typography.headlineSm,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   identityText: {
     flex: 1,
@@ -71,12 +70,12 @@ export const styles = StyleSheet.create({
   },
   identityGreeting: {
     ...typography.bodyMd,
-    color: colors.onPrimaryContainer,
+    color: cores.onPrimaryContainer,
     opacity: 0.85,
   },
   identityName: {
     ...typography.headlineSm,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   identityEdit: {
     width: 32,
@@ -84,7 +83,7 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primaryContainer,
+    backgroundColor: cores.primaryContainer,
   },
   section: {
     paddingHorizontal: spacing.md,
@@ -92,7 +91,7 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     paddingLeft: spacing.xs,
   },
   row: {
@@ -114,23 +113,14 @@ export const styles = StyleSheet.create({
   },
   rowLabel: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /** Só o rótulo em vermelho, não a dica: a dica é o que explica a consequência e precisa ser lida. */
   rowLabelDestrutiva: {
-    color: colors.error,
-  },
-  /**
-   * Nota abaixo de um cartão, sobre a seção inteira. É onde o app diz onde os dados moram — dentro
-   * de uma linha essa frase pareceria a descrição de um botão, e ela não é.
-   */
-  sectionFooter: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    paddingHorizontal: spacing.xs,
+    color: cores.error,
   },
   rowHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
-});
+}));

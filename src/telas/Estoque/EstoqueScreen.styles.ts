@@ -1,19 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import {
-  colors,
-  listGap,
-  radius,
-  screenPadding,
-  spacing,
-  surfaceCard,
-  typography,
-} from "@/shared/theme";
+import { estilosDoTema, listGap, radius, screenPadding, spacing, superficieDeCartao, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   header: {
     paddingHorizontal: screenPadding,
@@ -22,7 +13,7 @@ export const styles = StyleSheet.create({
   },
   subtitle: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     lineHeight: 22,
   },
   listContent: {
@@ -35,7 +26,7 @@ export const styles = StyleSheet.create({
   // --- Cartão de um estoque ---
   /** Mesmo cartão da lista de medicações: sombra, sem borda, respiro de `gutter`. */
   item: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     gap: spacing.sm,
   },
   itemHeader: {
@@ -49,27 +40,27 @@ export const styles = StyleSheet.create({
   },
   name: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   local: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** O número é a resposta da tela, então ele tem o peso de um título e não o de um detalhe. */
   quantidade: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "right",
   },
   quantidadeCritica: {
-    color: colors.error,
+    color: cores.error,
   },
   previsao: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   previsaoCritica: {
-    color: colors.error,
+    color: cores.error,
   },
 
   acoes: {
@@ -86,7 +77,7 @@ export const styles = StyleSheet.create({
     // Mesmo piso de alvo de toque usado no calendário: abaixo de 44 a linha vira armadilha.
     minHeight: 44,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: cores.surfaceContainer,
   },
   /**
    * "Repor" ganha superfície azul clara — antes ele era idêntico a "Recontar" e mudava só a cor do
@@ -97,14 +88,14 @@ export const styles = StyleSheet.create({
    * de o rótulo ser lido.
    */
   acaoPrimaria: {
-    backgroundColor: colors.secondaryContainer,
+    backgroundColor: cores.secondaryContainer,
   },
   acaoTexto: {
     ...typography.label,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   acaoTextoPrimaria: {
-    color: colors.onSecondaryContainer,
+    color: cores.onSecondaryContainer,
   },
 
   // --- Rodapé: o caminho pra quem não achou um remédio aqui ---
@@ -113,27 +104,25 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.sm,
     borderRadius: radius.lg,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
   rodapeTitulo: {
     ...typography.label,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   rodapeTexto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   /**
-   * O lembrete de conferência. Amarelo com barra lateral, a mesma linguagem da `Dica` — porque é
+   * O lembrete de conferência. Âmbar diluído, a mesma linguagem da `Dica` — porque é
    * exatamente isso: apoio, não cobrança. O plano registra a recontagem como **não obrigatória**
    * (decisão nº6), e o app funciona igual se ninguém nunca conferir.
    */
   lembrete: {
-    backgroundColor: colors.warningSurface,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
-    borderRadius: radius.md,
+    backgroundColor: cores.warningSurface,
+    borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.xs,
     marginBottom: spacing.md,
@@ -145,11 +134,11 @@ export const styles = StyleSheet.create({
   },
   lembreteTitulo: {
     ...typography.label,
-    color: colors.onWarningSurface,
+    color: cores.onWarningSurface,
   },
   lembreteTexto: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
 
   // --- Popup de recontagem / reposição ---
@@ -158,42 +147,25 @@ export const styles = StyleSheet.create({
   },
   sheetMedicamento: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   sheetAtual: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   sheetPrevia: {
     ...typography.bodyMd,
-    color: colors.onSurface,
-    backgroundColor: colors.surfaceContainerLow,
+    color: cores.onSurface,
+    backgroundColor: cores.surfaceContainerLow,
     padding: spacing.sm,
     borderRadius: radius.md,
   },
 
   // --- Estados ---
-  centered: {
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    padding: spacing.lg,
-  },
-  emptyTitle: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-    textAlign: "center",
-  },
-  emptyDescription: {
-    ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    textAlign: "center",
-    maxWidth: 320,
-  },
   errorText: {
     ...typography.bodyMd,
-    color: colors.error,
+    color: cores.error,
     textAlign: "center",
     maxWidth: 320,
   },
-});
+}));

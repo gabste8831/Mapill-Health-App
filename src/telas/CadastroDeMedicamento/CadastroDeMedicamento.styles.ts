@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, fieldLabelGap, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
     padding: spacing.md,
@@ -22,16 +21,16 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.label,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   sectionHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** Sublinhado além da cor: cor sozinha não diz "clicável" para quem não distingue bem matiz. */
   linkParaTermos: {
     ...typography.bodyMd,
-    color: colors.primary,
+    color: cores.corDeDestaque,
     textDecorationLine: "underline",
   },
   selo: {
@@ -42,15 +41,15 @@ export const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   seloObrigatorio: {
-    backgroundColor: colors.primary,
-    color: colors.onPrimary,
+    backgroundColor: cores.primary,
+    color: cores.onPrimary,
   },
   fieldGroup: {
     gap: fieldLabelGap,
   },
   fieldLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   photoRow: {
@@ -63,9 +62,9 @@ export const styles = StyleSheet.create({
     height: 72,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
     borderStyle: "dashed",
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -75,7 +74,7 @@ export const styles = StyleSheet.create({
     height: 72,
     borderRadius: radius.md,
     overflow: "hidden",
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
   photo: {
     width: "100%",
@@ -99,16 +98,16 @@ export const styles = StyleSheet.create({
   },
   photoAddLabel: {
     ...typography.label,
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   /** Remover fica em vermelho ao lado de "Alterar": são ações de peso muito diferente. */
   photoRemoveLabel: {
     ...typography.label,
-    color: colors.error,
+    color: cores.error,
   },
   photoHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   /**
@@ -145,16 +144,16 @@ export const styles = StyleSheet.create({
   rowValueAtivo: {
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.5),
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.5),
   },
   rowValueText: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
     flex: 1,
   },
   rowValueAction: {
     ...typography.label,
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
 
   /** Resumo do que já foi definido no popup — fichinhas, no mesmo cinza dos botões de escolha. */
@@ -168,21 +167,21 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     alignItems: "center",
   },
   timeChipVazio: {
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
     backgroundColor: "transparent",
   },
   timeChipErro: {
-    backgroundColor: colors.errorContainer,
+    backgroundColor: cores.errorContainer,
   },
   timeChipText: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
 
   /**
@@ -198,20 +197,20 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
   },
   botaoDeHorarioErro: {
-    borderColor: colors.error,
+    borderColor: cores.error,
   },
   botaoDeHorarioTexto: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /** "--:--" é lacuna, não valor: fica no cinza de placeholder pra não ser lido como resposta. */
   botaoDeHorarioVazio: {
-    color: colors.outline,
+    color: cores.outline,
   },
 
   /** Cancelar e confirmar lado a lado, dividindo a largura em partes iguais. */
@@ -232,14 +231,14 @@ export const styles = StyleSheet.create({
     flexBasis: 48,
     minHeight: 48,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "center",
   },
   dosesInputAtivo: {
-    backgroundColor: colors.primary,
-    color: colors.onPrimary,
+    backgroundColor: cores.primary,
+    color: cores.onPrimary,
   },
 
   /** Os sete dias numa linha só, ocupando a largura toda — a semana se lê de uma vez ou não se lê. */
@@ -252,28 +251,28 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: "center",
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     alignItems: "center",
   },
   weekdaySelected: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   weekdayText: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   weekdayTextSelected: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
 
   submitHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
   fieldErrorText: {
     ...typography.bodyMd,
-    color: colors.error,
+    color: cores.error,
   },
   /**
    * Duas informações que o paciente deu e que não fecham entre si: estoque menor que o
@@ -285,8 +284,8 @@ export const styles = StyleSheet.create({
    */
   avisoDeConflito: {
     ...typography.bodyMd,
-    color: colors.error,
-    backgroundColor: withOpacity(colors.error, 0.08),
+    color: cores.error,
+    backgroundColor: withOpacity(cores.error, 0.08),
     padding: spacing.md,
     borderRadius: radius.md,
   },
@@ -302,8 +301,8 @@ export const styles = StyleSheet.create({
   /** Explicação que não é campo nem erro — texto de apoio que merece peso, tipo regra do sistema. */
   sectionHintDestaque: {
     ...typography.bodyMd,
-    color: colors.onSecondaryContainer,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.5),
+    color: cores.onSecondaryContainer,
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.5),
     padding: spacing.md,
     borderRadius: radius.md,
   },
@@ -317,7 +316,7 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.45),
   },
   /**
    * Um assunto, com título curto e o texto. Título e não lista corrida: quem abre o acordeão
@@ -328,11 +327,11 @@ export const styles = StyleSheet.create({
   },
   assuntoDeAjudaTitulo: {
     ...typography.label,
-    color: colors.onSecondaryContainer,
+    color: cores.onSecondaryContainer,
   },
   assuntoDeAjudaTexto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   /**
@@ -344,15 +343,15 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.45),
   },
   avisoDePermissaoTitulo: {
     ...typography.label,
-    color: colors.onSecondaryContainer,
+    color: cores.onSecondaryContainer,
   },
   avisoDePermissaoTexto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   /**
@@ -363,7 +362,7 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
   resumoLinha: {
     flexDirection: "row",
@@ -372,12 +371,12 @@ export const styles = StyleSheet.create({
   },
   resumoRotulo: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     width: 96,
   },
   resumoValor: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
     flex: 1,
   },
   sheetBody: {
@@ -388,27 +387,35 @@ export const styles = StyleSheet.create({
    * A virada de "só o essencial" para "o resto também". Acontece uma vez só, e é anunciada: se
    * cada seção nascesse conforme o paciente digita, a tela pularia debaixo do dedo e ninguém
    * perceberia que algo apareceu.
+   *
+   * Respiro maior dos dois lados (`lg`, e não só `sm` no topo) porque este bloco marca a virada
+   * de etapa — precisa de mais ar que o espaço comum entre cartões, senão lê como mais um item
+   * da lista em vez do intervalo que ele é. O traço acima reforça a mesma ideia visualmente.
    */
   revelacao: {
     gap: spacing.xs,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+    marginTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: cores.outlineVariant,
     alignItems: "center",
   },
   revelacaoTitulo: {
     ...typography.bodyLg,
-    color: colors.primary,
+    color: cores.corDeDestaque,
     textAlign: "center",
   },
   revelacaoHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
   /** Saída de uma configuração já ligada — discreta, porque desligar é exceção e não atalho. */
   textoDeSaida: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
 
-});
+}));

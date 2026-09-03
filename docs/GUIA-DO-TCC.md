@@ -990,7 +990,7 @@ críticos (cadastrar, confirmar dose, corrigir) reduziria o custo de cada rodada
 
 **Teste com leitor de tela.** A varredura de acessibilidade de 31/08 foi feita por leitura de
 código e corrigiu seis defeitos, mas percorrer os fluxos críticos com o TalkBack ligado exige
-aparelho e continua pendente.
+aparelho e continua pendente.sens
 
 ---
 

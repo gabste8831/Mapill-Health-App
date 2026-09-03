@@ -3,8 +3,8 @@ import { Keyboard, Modal, Pressable, ScrollView, Text, useWindowDimensions } fro
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
-import { spacing } from "@/shared/theme";
-import { styles } from "./BottomSheet.styles";
+import { spacing, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./BottomSheet.styles";
 
 /** Quanto da tela o popup pode ocupar, com o teclado fechado. O resto fica de respiro no topo. */
 const ALTURA_MAXIMA = 0.85;
@@ -29,6 +29,8 @@ export type BottomSheetProps = {
  * empurra o popup pra cima, e o conteúdo rola dentro do que sobrou.
  */
 export function BottomSheet({ visible, onClose, title, children }: BottomSheetProps) {
+  const styles = useEstilos(criarEstilos);
+
   const keyboardHeight = useKeyboardHeight();
   const { height: alturaDaTela } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -43,11 +45,13 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
    * a decisão. Com só um `padding` fixo ele ficava rente à borda, difícil de acertar e fácil de
    * confundir com o gesto de voltar do sistema.
    *
-   * Com o teclado aberto o inset não se aplica: a barra de gestos fica atrás do teclado, e somá-la
-   * empurraria o conteúdo para longe do dedo sem motivo.
+   * Com o teclado aberto o inset não se aplica (a barra de gestos fica atrás dele), mas o respiro
+   * continua precisando existir: sem ele o botão "Salvar" encosta direto na borda do teclado, sem
+   * nenhuma separação visual entre os dois — o que lia como os elementos estarem "grudados" por
+   * engano, e não como decisão de layout.
    */
   const respiroInferior =
-    spacing.md + (keyboardHeight > 0 ? 0 : Math.max(insets.bottom, spacing.sm));
+    spacing.md + (keyboardHeight > 0 ? spacing.md : Math.max(insets.bottom, spacing.sm));
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>

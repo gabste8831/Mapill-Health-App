@@ -3,7 +3,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Card, Header } from "@/ui";
-import { styles } from "./EscolhaDeCadastroScreen.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./EscolhaDeCadastroScreen.styles";
 
 export type OpcaoDeCadastro = {
   label: string;
@@ -34,6 +35,8 @@ export function EscolhaDeCadastroScreen({
   options,
   onBack,
 }: EscolhaDeCadastroScreenProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Header title={headerTitle} onBack={onBack} />

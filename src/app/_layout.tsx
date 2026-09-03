@@ -13,9 +13,11 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { Alert, useColorScheme } from 'react-native';
+import { Alert } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 import { isSupabaseConfigured } from '@/data/remote/supabase-client';
+import { ProvedorDeTema, useTema } from '@/shared/theme';
 import { useDatabaseReady } from '@/hooks/use-database-ready';
 import { useDoseNotifications } from '@/hooks/use-dose-notifications';
 import { useFirstRunGate } from '@/hooks/use-first-run-gate';
@@ -37,10 +39,26 @@ function AvisosDeDose() {
   return null;
 }
 
+/**
+ * O provedor de tema envolve **tudo**, inclusive as esperas que devolvem `null`.
+ *
+ * Se ele ficasse dentro de `RootLayout`, qualquer tela do onboarding renderizada antes dele —
+ * login, consentimento, ficha — não teria tema, e trocar para escuro deixaria o começo do app
+ * claro e o resto escuro. Por isso a raiz de verdade é este componente, e o antigo `RootLayout`
+ * virou o conteúdo dele.
+ */
+export default function RootLayout() {
+  return (
+    <ProvedorDeTema>
+      <ConteudoDaRaiz />
+    </ProvedorDeTema>
+  );
+}
+
 // A máquina de estados da primeira execução (login → consentimento → ficha → app) vive em
 // useFirstRunGate. Aqui só se decide o que renderizar pro step atual.
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function ConteudoDaRaiz() {
+  const { tema } = useTema();
   const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_300Light,
     PlusJakartaSans_400Regular,
@@ -120,7 +138,9 @@ export default function RootLayout() {
           <Stack.Screen name="ficha" />
           <Stack.Screen name="termos" />
           <Stack.Screen name="estoque" />
+          <Stack.Screen name="compromissos" />
           <Stack.Screen name="conta" />
+          <Stack.Screen name="tema" />
           <Stack.Screen name="horario/[instante]" />
           <Stack.Screen name="adesao" />
           {/* O alarme entra por cima de tudo e **não sai por gesto**: sair exige responder, como na
@@ -147,7 +167,11 @@ export default function RootLayout() {
    * Aqui ele cobre os quatro passos: qualquer que seja a tela decidida, a splash sai.
    */
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    // O tema do expo-router (fundo das transições de tela) segue o tema escolhido no app, e não o
+    // do sistema: quem escolheu "escuro" com o aparelho no claro veria um flash branco a cada
+    // navegação.
+    <ThemeProvider value={tema.esquema === 'escuro' ? DarkTheme : DefaultTheme}>
+      <StatusBar style={tema.esquema === 'escuro' ? 'light' : 'dark'} />
       <SplashOverlay />
       {conteudoDoPasso()}
     </ThemeProvider>

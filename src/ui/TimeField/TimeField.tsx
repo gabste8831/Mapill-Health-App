@@ -4,12 +4,12 @@ import { Pressable, View } from "react-native";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 
 import { formatTimeInput, parseTimeInput } from "@/shared/time-input";
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import { BottomSheet } from "../BottomSheet/BottomSheet";
 import { Button } from "../Button/Button";
 import { TextField } from "../TextField/TextField";
 import { TimePicker } from "../TimePicker/TimePicker";
-import { styles } from "./TimeField.styles";
+import { criarEstilos } from "./TimeField.styles";
 
 export type TimeFieldProps = {
   label: string;
@@ -44,6 +44,9 @@ export function TimeField({
   onFocus,
   semRotulo = false,
 }: TimeFieldProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [rascunho, setRascunho] = useState<string | null>(null);
 
@@ -83,7 +86,7 @@ export function TimeField({
         onPress={abrir}
         accessibilityRole="button"
         accessibilityLabel={`Escolher ${label} no relógio`}>
-        <Ionicons name="time-outline" size={22} color={colors.primary} />
+        <Ionicons name="time-outline" size={22} color={cores.primary} />
       </Pressable>
 
       <BottomSheet visible={isSheetOpen} onClose={() => setSheetOpen(false)} title={label}>

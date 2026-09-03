@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -23,7 +22,7 @@ export const styles = StyleSheet.create({
   },
   brandSubtitle: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 400,
   },
@@ -44,15 +43,15 @@ export const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 350,
     height: 1,
-    backgroundColor: colors.outlineVariant,
+    backgroundColor: cores.outlineVariant,
     opacity: 0.6,
     marginBottom: spacing.lg,
   },
   footerCaption: {
     ...typography.bodysm,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     opacity: 0.6,
     maxWidth: 350,
   },
-});
+}));

@@ -14,7 +14,7 @@ import { usePhotoPicker, type PhotoOrigin } from "@/hooks/use-photo-picker";
 import { parseDateInput, toDateInput } from "@/shared/date-input";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { deletePersistedFile } from "@/shared/persist-picked-file";
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
@@ -23,7 +23,7 @@ import {
   TextField,
   type SelectOption
 } from "@/ui";
-import { styles } from "./FichaDeSaudeScreen.styles";
+import { criarEstilos } from "./FichaDeSaudeScreen.styles";
 
 /** Nascimento tem limites próprios: não pode ser no futuro nem antes de 1900. */
 function parseDateOfBirth(displayValue: string): string | null {
@@ -109,6 +109,9 @@ function EmergencyContactsField({
   onRemove,
   onFocusField,
 }: EmergencyContactsFieldProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [isAddingContact, setAddingContact] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -156,7 +159,7 @@ function EmergencyContactsField({
                 accessibilityRole="button"
                 accessibilityLabel={`Remover contato ${contact.name}`}
               >
-                <Ionicons name="trash-outline" size={18} color={colors.error} />
+                <Ionicons name="trash-outline" size={18} color={cores.error} />
               </Pressable>
             </View>
           ))}
@@ -169,7 +172,7 @@ function EmergencyContactsField({
       <Button
         label="Adicionar contato"
         style={styles.addContactButton}
-        icon={<Ionicons name="add" size={18} color={colors.onPrimary} />}
+        icon={<Ionicons name="add" size={18} color={cores.onPrimary} />}
         onPress={() => setAddingContact(true)}
       />
 
@@ -227,6 +230,9 @@ export function FichaDeSaudeScreen({
   submitLabel = "Salvar e continuar",
   footerHint,
 }: FichaDeSaudeScreenProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const { scrollViewRef, scrollToFocusedInput, onScroll } =
     useScrollToFocusedInput();
   const [fullName, setFullName] = useState(initialValue?.fullName ?? "");
@@ -342,7 +348,7 @@ export function FichaDeSaudeScreen({
           <Ionicons
             name="lock-closed-outline"
             size={16}
-            color={colors.onPrimaryContainer}
+            color={cores.onPrimaryContainer}
           />
           <Text style={styles.infoBannerText}>
             Esses dados são sensíveis e ficam protegidos. O Mapill não
@@ -361,7 +367,7 @@ export function FichaDeSaudeScreen({
             {photoUri ? (
               <FotoLocal uri={photoUri} style={styles.photo} />
             ) : (
-              <Ionicons name="camera-outline" size={24} color={colors.onSurfaceVariant} />
+              <Ionicons name="camera-outline" size={24} color={cores.onSurfaceVariant} />
             )}
           </Pressable>
           <Pressable onPress={() => setEscolhendoOrigem(true)} disabled={isPicking} accessibilityRole="button">
@@ -455,7 +461,7 @@ export function FichaDeSaudeScreen({
                 maxLength={40}
               />
               <IconButton
-                icon={<Ionicons name="add" size={20} color={colors.onPrimary} />}
+                icon={<Ionicons name="add" size={20} color={cores.onPrimary} />}
                 onPress={addAllergy}
                 accessibilityLabel="Adicionar alergia"
               />

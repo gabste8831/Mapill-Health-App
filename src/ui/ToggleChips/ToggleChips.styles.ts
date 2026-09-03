@@ -1,14 +1,13 @@
-import { StyleSheet } from "react-native";
 
-import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   fieldGroup: {
     gap: fieldLabelGap,
   },
   fieldLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /**
    * Embrulha na largura que tiver. Diferente do `OptionGroup`, aqui a chip tem o tamanho do seu
@@ -34,16 +33,16 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
   chipSelected: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   chipText: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   chipTextSelected: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
-});
+}));

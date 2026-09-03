@@ -3,7 +3,8 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useKeyboardHeight } from "@/hooks/use-keyboard-height";
-import { styles } from "./RodapeDeFormulario.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./RodapeDeFormulario.styles";
 
 export type RodapeDeFormularioProps = {
   children: ReactNode;
@@ -39,6 +40,8 @@ export type RodapeDeFormularioProps = {
  * mede a altura do teclado e sobe o conteúdo inteiro.
  */
 export function RodapeDeFormulario({ children }: RodapeDeFormularioProps) {
+  const styles = useEstilos(criarEstilos);
+
   const tecladoAberto = useKeyboardHeight() > 0;
 
   if (tecladoAberto) return null;

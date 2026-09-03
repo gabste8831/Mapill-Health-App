@@ -1,14 +1,13 @@
-import { StyleSheet } from "react-native";
 
-import { colors, marginMobile, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, screenPadding, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
-    padding: marginMobile,
+    padding: screenPadding,
     gap: spacing.md,
     // Espaço pro rodapé fixo não cobrir o último campo quando a tela chega ao fim.
     paddingBottom: spacing.xxl,
@@ -21,7 +20,7 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   selo: {
     ...typography.caption,
@@ -31,36 +30,36 @@ export const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   seloObrigatorio: {
-    color: colors.onErrorContainer,
-    backgroundColor: colors.errorContainer,
+    color: cores.onErrorContainer,
+    backgroundColor: cores.errorContainer,
   },
   seloOpcional: {
-    color: colors.onSecondaryContainer,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.6),
+    color: cores.onSecondaryContainer,
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.6),
   },
   hint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** A confirmação em texto do que foi escolhido — "quarta-feira, 27 de agosto, às 14:30". */
   confirmacao: {
     ...typography.bodyMd,
-    color: colors.onSecondaryContainer,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.5),
+    color: cores.onSecondaryContainer,
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.5),
     padding: spacing.md,
     borderRadius: radius.md,
   },
   /** Cor de atenção, não de erro: escolher uma antecedência menor resolve, e nada foi perdido. */
   aviso: {
     ...typography.bodyMd,
-    color: colors.onTertiaryContainer,
-    backgroundColor: colors.tertiaryContainer,
+    color: cores.onTertiaryContainer,
+    backgroundColor: cores.tertiaryContainer,
     padding: spacing.md,
     borderRadius: radius.md,
   },
   erro: {
     ...typography.bodySm,
-    color: colors.error,
+    color: cores.error,
   },
   /**
    * O último lugar da fileira de antecedências: as opções cobrem o comum e este campo cobre o
@@ -75,19 +74,19 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     textAlign: "center",
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   campoLivreAtivo: {
-    borderColor: colors.primary,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.4),
+    borderColor: cores.primary,
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.4),
   },
   submitHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
-});
+}));

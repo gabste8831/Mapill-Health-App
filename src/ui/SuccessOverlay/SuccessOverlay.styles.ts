@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * Cobre a tela inteira, inclusive a barra de abas: a confirmação é o único assunto do momento,
    * e deixar a navegação à mostra convidaria a tocar em algo no meio da animação.
@@ -13,7 +12,7 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.gutter,
@@ -24,7 +23,7 @@ export const styles = StyleSheet.create({
     height: 96,
     borderRadius: 48,
     borderWidth: 3,
-    borderColor: colors.onPrimary,
+    borderColor: cores.onPrimary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -34,14 +33,14 @@ export const styles = StyleSheet.create({
   },
   title: {
     ...typography.headlineMd,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     textAlign: "center",
   },
   description: {
     ...typography.bodyLg,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     opacity: 0.9,
     textAlign: "center",
     maxWidth: 320,
   },
-});
+}));

@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import type { PressableProps, StyleProp, ViewStyle } from "react-native";
 import { ActivityIndicator, Pressable, Text } from "react-native";
 
-import { colors, estadoDePressao } from "@/shared/theme";
-import { styles } from "./Button.styles";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./Button.styles";
 
 export type ButtonVariant = "primary" | "outline" | "text";
 
@@ -22,7 +22,9 @@ export type ButtonProps = Omit<PressableProps, "style"> & {
   style?: StyleProp<ViewStyle>;
 };
 
-const VARIANT_LABEL_STYLE: Record<ButtonVariant, keyof typeof styles> = {
+type ChaveDeRotulo = "primaryLabel" | "outlineLabel" | "textLabel";
+
+const VARIANT_LABEL_STYLE: Record<ButtonVariant, ChaveDeRotulo> = {
   primary: "primaryLabel",
   outline: "outlineLabel",
   text: "textLabel",
@@ -33,6 +35,9 @@ const VARIANT_LABEL_STYLE: Record<ButtonVariant, keyof typeof styles> = {
  * o padrão global). Pra mudar só uma instância específica, passe `style`.
  */
 export function Button({ label, variant = "primary", loading = false, icon, emFolha = false, disabled, style, accessibilityState, ...pressableProps }: ButtonProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const isDisabled = disabled || loading;
 
   return (
@@ -69,7 +74,7 @@ export function Button({ label, variant = "primary", loading = false, icon, emFo
       accessibilityState={{ ...accessibilityState, disabled: isDisabled }}
       {...pressableProps}>
       {loading ? (
-        <ActivityIndicator color={variant === "primary" ? colors.onPrimary : colors.primary} />
+        <ActivityIndicator color={variant === "primary" ? cores.onPrimary : cores.primary} />
       ) : (
         <>
           {icon}

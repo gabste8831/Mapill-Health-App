@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
     paddingTop: spacing.sm,
@@ -18,7 +17,7 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     paddingLeft: spacing.xs,
   },
   row: {
@@ -40,11 +39,11 @@ export const styles = StyleSheet.create({
   },
   rowLabel: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /** Só o rótulo em vermelho, não a dica: a dica explica a consequência e precisa ser lida. */
   rowLabelDestrutiva: {
-    color: colors.error,
+    color: cores.error,
   },
   /**
    * Nota abaixo de um cartão, sobre a seção inteira. É onde o app diz onde os dados moram — dentro
@@ -52,11 +51,11 @@ export const styles = StyleSheet.create({
    */
   sectionFooter: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     paddingHorizontal: spacing.xs,
   },
   rowHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
-});
+}));

@@ -1,27 +1,23 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
-   * Amarelo com faixa lateral — a mesma linguagem da `Dica` e do aviso de estoque baixo.
+   * Âmbar diluído, sem faixa lateral — a mesma linguagem da `Dica`.
    *
-   * É apoio, não erro: falta um ajuste do sistema, e o app funciona. A faixa colorida à esquerda,
-   * em vez de contorno inteiro, segue a decisão de 30/08 — contorno somado a fundo colorido dá a
-   * qualquer bloco o peso de um alerta crítico, e aí nada mais consegue parecer urgente.
+   * É apoio, não erro: falta um ajuste do sistema, e o app funciona. Quem diz de que estado se
+   * trata é o par fundo + ícone (ver `estadoVisual` em shared/theme/cores.ts), e não mais uma
+   * barra de 4px na borda: ela deslocava o painel inteiro em relação ao card de dose logo abaixo.
    */
   painel: {
-    backgroundColor: colors.warningSurface,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
-    borderRadius: radius.md,
+    backgroundColor: cores.warningSurface,
+    borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.sm,
   },
   /** Falta uma essencial: o alarme não toca, e aí é erro mesmo. */
   painelCritico: {
-    backgroundColor: colors.errorSurface,
-    borderLeftColor: colors.error,
+    backgroundColor: cores.errorSurface,
   },
 
   topo: {
@@ -31,12 +27,12 @@ export const styles = StyleSheet.create({
   },
   titulo: {
     ...typography.label,
-    color: colors.onSurface,
+    color: cores.onSurface,
     flex: 1,
   },
   explicacao: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
     lineHeight: 22,
   },
 
@@ -58,7 +54,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
   },
   itemTexto: {
     flex: 1,
@@ -71,11 +67,11 @@ export const styles = StyleSheet.create({
   },
   itemTitulo: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   itemDescricao: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     lineHeight: 20,
   },
 
@@ -84,11 +80,11 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: radius.full,
-    backgroundColor: colors.errorSurface,
+    backgroundColor: cores.errorSurface,
   },
   seloTexto: {
     ...typography.caption,
-    color: colors.error,
+    color: cores.error,
   },
 
   botaoPedir: {
@@ -96,11 +92,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     marginTop: spacing.xs,
   },
   botaoPedirTexto: {
     ...typography.label,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
-});
+}));

@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { colors, estadoDePressao } from "@/shared/theme";
-import { styles } from "./ToggleChips.styles";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./ToggleChips.styles";
 
 export type ToggleChipOption<TValue extends string> = {
   value: TValue;
@@ -30,6 +30,9 @@ export function ToggleChips<TValue extends string>({
   options,
   onChange,
 }: ToggleChipsProps<TValue>) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <View style={styles.fieldGroup}>
       {label ? <Text style={styles.fieldLabel}>{label}</Text> : null}
@@ -54,7 +57,7 @@ export function ToggleChips<TValue extends string>({
               {/* O "certinho" desambigua marcado de apenas destacado — sem ele, um chip colorido
                   no meio de cinzas lê tanto como escolha quanto como sugestão do app. */}
               {isSelected ? (
-                <Ionicons name="checkmark-sharp" size={14} color={colors.onPrimary} />
+                <Ionicons name="checkmark-sharp" size={14} color={cores.onPrimary} />
               ) : null}
               <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
                 {option.label}

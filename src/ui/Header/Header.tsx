@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./Header.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { MarcaDoMapill } from "@/ui/MarcaDoMapill/MarcaDoMapill";
+import { criarEstilos } from "./Header.styles";
 
 export type HeaderAction = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -31,13 +31,16 @@ export type HeaderProps = {
  * A tela não decide se há pra onde voltar — quem passa `onBack` é quem conhece a navegação.
  */
 export function Header({ title, onBack, onAccount, action }: HeaderProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const accountButton = action ? (
     <Pressable
       style={styles.iconSlot}
       onPress={action.onPress}
       accessibilityRole="button"
       accessibilityLabel={action.label}>
-      <Ionicons name={action.icon} size={24} color={colors.primary} />
+      <Ionicons name={action.icon} size={24} color={cores.primary} />
     </Pressable>
   ) : onAccount ? (
     <Pressable
@@ -45,7 +48,7 @@ export function Header({ title, onBack, onAccount, action }: HeaderProps) {
       onPress={onAccount}
       accessibilityRole="button"
       accessibilityLabel="Abrir configurações da conta">
-      <Ionicons name="person-circle-outline" size={28} color={colors.onSurfaceVariant} />
+      <Ionicons name="person-circle-outline" size={28} color={cores.onSurfaceVariant} />
     </Pressable>
   ) : (
     <View style={styles.iconSlot} />
@@ -55,12 +58,7 @@ export function Header({ title, onBack, onAccount, action }: HeaderProps) {
     return (
       <View style={styles.header}>
         <View style={styles.brandSlot}>
-          <Image
-            source={require("@/assets/images/brand/mark-transparent-a.png")}
-            style={styles.brand}
-            contentFit="contain"
-            accessibilityLabel="Mapill"
-          />
+          <MarcaDoMapill />
         </View>
         {accountButton}
       </View>
@@ -75,7 +73,7 @@ export function Header({ title, onBack, onAccount, action }: HeaderProps) {
           onPress={onBack}
           accessibilityRole="button"
           accessibilityLabel="Voltar">
-          <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
+          <Ionicons name="arrow-back" size={24} color={cores.onSurface} />
         </Pressable>
       ) : (
         <View style={styles.iconSlot} />

@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import type { EstadoDaSync } from "@/data/remote/sync-service";
-import { colors } from "@/shared/theme";
-import { styles } from "./IndicadorDeSync.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./IndicadorDeSync.styles";
 
 export type IndicadorDeSyncProps = {
   estado: EstadoDaSync;
@@ -35,6 +35,9 @@ function quandoFoi(iso: string): string {
  * a dia ninguém precisa tocar nela: a sincronização acontece sozinha a cada volta ao app.
  */
 export function IndicadorDeSync({ estado, sincronizando, onSincronizar }: IndicadorDeSyncProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const temPendencias = estado.pendentes > 0;
 
   return (
@@ -46,12 +49,12 @@ export function IndicadorDeSync({ estado, sincronizando, onSincronizar }: Indica
       accessibilityLabel="Sincronizar agora">
       <View style={styles.icone}>
         {sincronizando ? (
-          <ActivityIndicator size="small" color={colors.primary} />
+          <ActivityIndicator size="small" color={cores.primary} />
         ) : (
           <Ionicons
             name={temPendencias ? "cloud-upload-outline" : "cloud-done-outline"}
             size={20}
-            color={temPendencias ? colors.onSurfaceVariant : colors.success}
+            color={temPendencias ? cores.onSurfaceVariant : cores.success}
           />
         )}
       </View>

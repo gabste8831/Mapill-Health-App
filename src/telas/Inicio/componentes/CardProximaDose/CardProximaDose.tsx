@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 
-import { styles } from "./CardProximaDose.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./CardProximaDose.styles";
 
 type CardProximaDoseProps = {
   time: string;
@@ -10,6 +11,8 @@ type CardProximaDoseProps = {
 
 /** Card de maior destaque da Home — única quebra intencional da paleta neutra. */
 export function CardProximaDose({ time, medicationLabel, hint }: CardProximaDoseProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>

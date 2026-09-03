@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import { Button } from "../Button/Button";
-import { styles } from "./EstadoDeErro.styles";
+import { criarEstilos } from "./EstadoDeErro.styles";
 
 export type EstadoDeErroProps = {
   /** A mensagem que veio do erro. Vai como está — quem a escreveu sabe o que aconteceu. */
@@ -25,9 +25,12 @@ export type EstadoDeErroProps = {
  * apaga nada, e a frase precisa dizer isso antes que a pessoa conclua o contrário.
  */
 export function EstadoDeErro({ mensagem, onTentarDeNovo }: EstadoDeErroProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <View style={styles.container}>
-      <Ionicons name="alert-circle-outline" size={40} color={colors.error} />
+      <Ionicons name="alert-circle-outline" size={40} color={cores.error} />
       <Text style={styles.titulo}>Não foi possível carregar</Text>
       <Text style={styles.mensagem}>{mensagem}</Text>
       <Text style={styles.tranquilizador}>

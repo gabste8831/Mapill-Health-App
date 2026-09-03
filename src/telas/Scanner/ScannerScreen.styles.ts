@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   camera: {
     flex: 1,
@@ -27,7 +26,7 @@ export const styles = StyleSheet.create({
     top: "35%",
     height: "20%",
     borderWidth: 2,
-    borderColor: colors.onPrimary,
+    borderColor: cores.onPrimary,
     borderRadius: radius.md,
   },
   instrucao: {
@@ -41,8 +40,8 @@ export const styles = StyleSheet.create({
   /** Fundo escuro atrás do texto: sobre a imagem da câmera, texto sem fundo some. */
   instrucaoTexto: {
     ...typography.bodyLg,
-    color: colors.onPrimary,
-    backgroundColor: withOpacity(colors.onSurface, 0.75),
+    color: cores.onPrimary,
+    backgroundColor: withOpacity(cores.onSurface, 0.75),
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
@@ -58,28 +57,28 @@ export const styles = StyleSheet.create({
   },
   rotulo: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   titulo: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   nome: {
     ...typography.headlineMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   texto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** O número lido, em destaque discreto: serve para conferir se a leitura pegou o código certo. */
   ean: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
-    backgroundColor: colors.surfaceContainerLow,
+    color: cores.onSurfaceVariant,
+    backgroundColor: cores.surfaceContainerLow,
     padding: spacing.sm,
     borderRadius: radius.sm,
     textAlign: "center",
     letterSpacing: 1,
   },
-});
+}));

@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Keyboard, Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
 import {
   horariosEmSerie,
@@ -11,7 +11,7 @@ import {
   serieCabeNoDia,
 } from "@/shared/time-input";
 import { BottomSheet, Button, TextField, TimeField, TimePicker } from "@/ui";
-import { styles } from "./CadastroDeMedicamento.styles";
+import { criarEstilos } from "./CadastroDeMedicamento.styles";
 
 /** "1ª dose", "2ª dose"… — dentro do popup há largura pra escrever por extenso. */
 const ORDINALS = ["1ª", "2ª", "3ª", "4ª", "5ª", "6ª", "7ª", "8ª", "9ª", "10ª", "11ª", "12ª"];
@@ -78,6 +78,9 @@ export function SeletorDeHorarios({
   duplicateIndexes = [],
   variacao,
 }: SeletorDeHorariosProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [isSheetOpen, setSheetOpen] = useState(false);
   /**
    * O popup tem um conteúdo por vez, e é sempre o mesmo popup. Guardar isso numa união em vez de
@@ -185,7 +188,7 @@ export function SeletorDeHorarios({
       {isEmpty ? (
         <Button
           label={values.length > 1 ? "Definir horários" : "Definir horário"}
-          icon={<Ionicons name="add" size={20} color={colors.onPrimary} />}
+          icon={<Ionicons name="add" size={20} color={cores.onPrimary} />}
           onPress={() => setSheetOpen(true)}
         />
       ) : (

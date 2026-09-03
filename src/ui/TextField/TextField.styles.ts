@@ -1,17 +1,16 @@
-import { StyleSheet } from "react-native";
 
-import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   fieldGroup: {
     gap: fieldLabelGap,
   },
   fieldLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   requiredMark: {
-    color: colors.error,
+    color: cores.error,
   },
   /**
    * `minHeight`, e não `height`: com a altura travada o texto digitado é recortado quando a fonte
@@ -22,17 +21,17 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   inputError: {
-    borderColor: colors.error,
+    borderColor: cores.error,
   },
   fieldErrorText: {
     ...typography.bodySm,
-    color: colors.error,
+    color: cores.error,
   },
-});
+}));

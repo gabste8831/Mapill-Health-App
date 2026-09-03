@@ -1,10 +1,9 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   container: {
-    backgroundColor: colors.error,
+    backgroundColor: cores.error,
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.md,
@@ -16,20 +15,20 @@ export const styles = StyleSheet.create({
   },
   label: {
     ...typography.label,
-    color: colors.onError,
+    color: cores.onError,
     opacity: 0.85,
   },
   medicationName: {
     ...typography.headlineMd,
-    color: colors.onError,
+    color: cores.onError,
   },
   daysRemaining: {
     ...typography.bodyMd,
-    color: colors.onError,
+    color: cores.onError,
     opacity: 0.9,
   },
   primaryButton: {
-    backgroundColor: colors.onError,
+    backgroundColor: cores.onError,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.sm,
@@ -37,7 +36,7 @@ export const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...typography.label,
-    color: colors.error,
+    color: cores.error,
   },
   secondaryButton: {
     paddingVertical: spacing.xs,
@@ -45,7 +44,7 @@ export const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     ...typography.label,
-    color: colors.onError,
+    color: cores.onError,
     opacity: 0.85,
   },
-});
+}));

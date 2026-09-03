@@ -4,12 +4,12 @@ import { Pressable, View } from "react-native";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 
 import { formatDateInput, parseDateInput, toDateInput } from "@/shared/date-input";
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import { BottomSheet } from "../BottomSheet/BottomSheet";
 import { Button } from "../Button/Button";
 import { DatePicker } from "../DatePicker/DatePicker";
 import { TextField } from "../TextField/TextField";
-import { styles } from "./DateField.styles";
+import { criarEstilos } from "./DateField.styles";
 
 export type DateFieldProps = {
   label: string;
@@ -48,6 +48,9 @@ export function DateField({
   minimo,
   maximo,
 }: DateFieldProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [rascunho, setRascunho] = useState<string | null>(null);
 
@@ -86,7 +89,7 @@ export function DateField({
         onPress={abrir}
         accessibilityRole="button"
         accessibilityLabel={`Escolher ${label} no calendário`}>
-        <Ionicons name="calendar-outline" size={22} color={colors.primary} />
+        <Ionicons name="calendar-outline" size={22} color={cores.primary} />
       </Pressable>
 
       <BottomSheet visible={isSheetOpen} onClose={() => setSheetOpen(false)} title={label}>

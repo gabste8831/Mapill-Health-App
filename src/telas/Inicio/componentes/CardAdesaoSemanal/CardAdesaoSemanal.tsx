@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { barRowHeight, styles } from "./CardAdesaoSemanal.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { barRowHeight, criarEstilos } from "./CardAdesaoSemanal.styles";
 
 type DiaDeAdesao = {
   label: string;
@@ -26,6 +26,9 @@ type CardAdesaoSemanalProps = {
  * de um item novo em algum menu — e a pergunta que ele responde nasce aqui.
  */
 export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesaoSemanalProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <Pressable
       style={styles.container}
@@ -36,7 +39,7 @@ export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesa
       <View style={styles.header}>
         <Text style={styles.title}>Acompanhamento semanal</Text>
         {onAbrirRelatorio ? (
-          <Ionicons name="chevron-forward" size={18} color={colors.onSurfaceVariant} />
+          <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
         ) : null}
       </View>
       <View style={styles.barsRow}>

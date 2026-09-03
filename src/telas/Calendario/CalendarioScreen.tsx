@@ -16,7 +16,7 @@ import { dataEHoraPorExtenso, dataPorExtenso, diaEMesCurto } from "@/shared/data
 import { toLocalIsoDay } from "@/shared/date-input";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { resumirAviso } from "@/shared/rotulos-de-compromisso";
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
@@ -31,7 +31,7 @@ import {
   type MarcasDoDia,
   type OpcaoDeOrdem,
 } from "@/ui";
-import { styles } from "./CalendarioScreen.styles";
+import { criarEstilos } from "./CalendarioScreen.styles";
 
 type ItemDeCompromissoProps = {
   appointment: Appointment;
@@ -51,6 +51,9 @@ function ItemDeCompromisso({
   onResponder,
   onRevisarDesfecho,
 }: ItemDeCompromissoProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const quando = new Date(appointment.scheduledFor);
   const horas = String(quando.getHours()).padStart(2, "0");
   const minutos = String(quando.getMinutes()).padStart(2, "0");
@@ -81,7 +84,7 @@ function ItemDeCompromisso({
             accessibilityRole="button"
             accessibilityLabel={`Ver ou editar ${appointment.title}`}
             hitSlop={6}>
-            <Ionicons name="pencil-outline" size={20} color={colors.primary} />
+            <Ionicons name="pencil-outline" size={20} color={cores.primary} />
           </Pressable>
           <Pressable
             style={styles.acaoBotao}
@@ -89,7 +92,7 @@ function ItemDeCompromisso({
             accessibilityRole="button"
             accessibilityLabel={`Excluir ${appointment.title}`}
             hitSlop={6}>
-            <Ionicons name="trash-outline" size={20} color={colors.error} />
+            <Ionicons name="trash-outline" size={20} color={cores.error} />
           </Pressable>
         </View>
       </View>
@@ -106,7 +109,7 @@ function ItemDeCompromisso({
           um aviso que não vai mais acontecer. */}
       {!passado && resumoDoAviso !== null ? (
         <View style={styles.rodapeDoItem}>
-          <Ionicons name="notifications-outline" size={14} color={colors.onSurfaceVariant} />
+          <Ionicons name="notifications-outline" size={14} color={cores.onSurfaceVariant} />
           <Text style={styles.aviso}>Lembrar {resumoDoAviso}</Text>
         </View>
       ) : null}
@@ -122,7 +125,7 @@ function ItemDeCompromisso({
               onPress={() => onResponder("attended")}
               accessibilityRole="button"
               accessibilityLabel="Marcar que compareceu">
-              <Ionicons name="checkmark" size={18} color={colors.primary} />
+              <Ionicons name="checkmark" size={18} color={cores.primary} />
               <Text style={styles.botaoDeDesfechoTexto}>Fui</Text>
             </Pressable>
             <Pressable
@@ -130,7 +133,7 @@ function ItemDeCompromisso({
               onPress={() => onResponder("missed")}
               accessibilityRole="button"
               accessibilityLabel="Marcar que não compareceu">
-              <Ionicons name="close" size={18} color={colors.error} />
+              <Ionicons name="close" size={18} color={cores.error} />
               <Text style={styles.botaoDeDesfechoTexto}>Não fui</Text>
             </Pressable>
           </View>
@@ -149,7 +152,7 @@ function ItemDeCompromisso({
             <Ionicons
               name={appointment.outcome === "attended" ? "checkmark-circle" : "close-circle"}
               size={16}
-              color={appointment.outcome === "attended" ? colors.primary : colors.error}
+              color={appointment.outcome === "attended" ? cores.primary : cores.error}
             />
             <Text
               style={[
@@ -160,7 +163,7 @@ function ItemDeCompromisso({
               ]}>
               {appointment.outcome === "attended" ? "Compareceu" : "Não compareceu"}
             </Text>
-            <Ionicons name="pencil-outline" size={14} color={colors.outline} />
+            <Ionicons name="pencil-outline" size={14} color={cores.outline} />
           </Pressable>
 
           {appointment.outcomeNotes !== null ? (
@@ -187,6 +190,9 @@ type LinhaDeDoseProps = {
 };
 
 function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const resolvida = doseResolvida(dose);
   const tomada = dose.latestStatus === "confirmed";
 
@@ -218,7 +224,7 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
         <Ionicons
           name={tomada ? "checkmark-circle" : "close-circle"}
           size={20}
-          color={tomada ? colors.primary : colors.error}
+          color={tomada ? cores.primary : cores.error}
           accessibilityRole="image"
           accessibilityLabel={tomada ? "Dose tomada" : "Dose não tomada"}
         />
@@ -229,14 +235,14 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
             onPress={() => onRegistrar("confirmed")}
             accessibilityRole="button"
             accessibilityLabel={`Confirmar ${dose.medicationName} das ${dose.time}`}>
-            <Ionicons name="checkmark" size={18} color={colors.primary} />
+            <Ionicons name="checkmark" size={18} color={cores.primary} />
           </Pressable>
           <Pressable
             style={styles.botaoDaDose}
             onPress={() => onRegistrar("skipped")}
             accessibilityRole="button"
             accessibilityLabel={`Pular ${dose.medicationName} das ${dose.time}`}>
-            <Ionicons name="close" size={18} color={colors.error} />
+            <Ionicons name="close" size={18} color={cores.error} />
           </Pressable>
         </View>
       ) : null}
@@ -268,6 +274,8 @@ function tituloDoDia(isoDay: string, hoje: string, amanha: string, ontem: string
 }
 
 export function CalendarioScreen() {
+  const styles = useEstilos(criarEstilos);
+
   const router = useRouter();
   const { dias, isLoading, error, reload, registrarDose } = useCalendarAgenda();
   const { excluirCompromisso, registrarDesfecho } = useAppointmentRegistration();
@@ -429,6 +437,14 @@ export function CalendarioScreen() {
       <Header
         title="Calendário"
         onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
+        // A agenda do dia só mostra o que está selecionado na grade — faltava um jeito de ver
+        // todos os compromissos cadastrados de uma vez, igual a lista de Remédios já oferece
+        // para as medicações.
+        action={{
+          icon: "list-outline",
+          label: "Ver todos os compromissos",
+          onPress: () => router.push("/compromissos"),
+        }}
       />
 
       {/* O subtítulo saiu: a grade explica sozinha o que a tela é, e a frase custava altura numa

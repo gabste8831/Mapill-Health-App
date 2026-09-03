@@ -1,20 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import {
-  colors,
-  listGap,
-  radius,
-  screenPadding,
-  spacing,
-  surfaceCard,
-  typography,
-  withOpacity,
-} from "@/shared/theme";
+import { estilosDoTema, listGap, radius, screenPadding, spacing, superficieDeCartao, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   conteudo: {
     paddingHorizontal: screenPadding,
@@ -31,7 +21,7 @@ export const styles = StyleSheet.create({
    * decoração — é o que diz qual dos blocos da tela é a resposta.
    */
   destaque: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     borderRadius: radius.lg,
     padding: spacing.lg,
     alignItems: "center",
@@ -45,7 +35,7 @@ export const styles = StyleSheet.create({
   },
   destaqueLegenda: {
     ...typography.bodyMd,
-    color: withOpacity(colors.onPrimary, 0.85),
+    color: withOpacity(cores.onPrimary, 0.85),
   },
 
   /**
@@ -59,17 +49,17 @@ export const styles = StyleSheet.create({
    * que uma faixa.
    */
   taxa_boa: {
-    color: colors.success,
+    color: cores.success,
   },
   taxa_media: {
-    color: colors.onWarningSurface,
+    color: cores.onWarningSurface,
   },
   taxa_baixa: {
-    color: colors.error,
+    color: cores.error,
   },
   /** O número dentro do bloco azul. */
   destaqueTaxaTexto: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
 
   contagens: {
@@ -77,27 +67,27 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   /**
-   * Os três cartõezinhos lado a lado mantêm `padding: md`, e não o `gutter` do `surfaceCard`: em
+   * Os três cartõezinhos lado a lado mantêm `padding: md`, e não o `gutter` do `superficieDeCartao`: em
    * três colunas numa tela de celular, 24 de respiro interno não sobra largura para o número.
    */
   contagem: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     flex: 1,
     padding: spacing.md,
     gap: 2,
   },
   contagemValor: {
     ...typography.headlineMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   contagemRotulo: {
     ...typography.label,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /** A explicação em letra menor: o rótulo sozinho não distingue "pulada" de "sem resposta". */
   contagemDica: {
     ...typography.bodySm,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   secao: {
@@ -105,11 +95,11 @@ export const styles = StyleSheet.create({
   },
   secaoTitulo: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   linha: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
@@ -121,11 +111,11 @@ export const styles = StyleSheet.create({
   },
   linhaNome: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   linhaDetalhe: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   linhaTaxa: {
     ...typography.headlineSm,
@@ -142,11 +132,11 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.surfaceContainerHigh,
+    borderBottomColor: cores.surfaceContainerHigh,
   },
   perdidaNome: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /**
    * Cinza, e não vermelho. A lista inteira já é de doses não tomadas — pintar cada linha de erro
@@ -155,12 +145,12 @@ export const styles = StyleSheet.create({
    */
   perdidaSelo: {
     ...typography.caption,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   rodape: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     marginTop: spacing.sm,
   },
 
@@ -171,18 +161,18 @@ export const styles = StyleSheet.create({
   },
   vazioTitulo: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "center",
   },
   vazioTexto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 320,
   },
   erro: {
     ...typography.bodyMd,
-    color: colors.error,
+    color: cores.error,
     textAlign: "center",
   },
 
@@ -192,17 +182,17 @@ export const styles = StyleSheet.create({
    * legível sem abrir nada, que é o que evita gerar um relatório recortado sem perceber.
    */
   filtro: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     padding: spacing.md,
     gap: spacing.xs,
   },
   filtroRotulo: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   filtroValor: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
 
   /** O conteúdo do popup de seleção. */
@@ -220,4 +210,4 @@ export const styles = StyleSheet.create({
   folhaItem: {
     paddingVertical: spacing.xs,
   },
-});
+}));

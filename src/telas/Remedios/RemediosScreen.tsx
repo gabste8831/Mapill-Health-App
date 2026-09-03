@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, FlatList, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { excluirMedicamento } from "@/hooks/use-medication-registration";
@@ -14,25 +14,25 @@ import {
 import {
   formatarQuantidadeLivre,
   horariosComDose,
+  horariosDaPosologia,
   resumirDose,
   resumirFrequencia,
 } from "@/shared/rotulos-de-medicamento";
-import { useSync } from "@/hooks/use-sync";
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import {
-  AvisoDePendencias,
+  BottomSheet,
   Button,
   CenteredLoader,
   EstadoDeErro,
+  EstadoVazio,
   Fab,
   FotoLocal,
   Header,
-  IconButton,
   SearchField,
   SeletorDeOrdem,
   type OpcaoDeOrdem,
 } from "@/ui";
-import { styles } from "./RemediosScreen.styles";
+import { criarEstilos } from "./RemediosScreen.styles";
 
 /** Alfabética primeiro por ser a que não muda sozinha: a lista fica onde a pessoa deixou. */
 const ORDENS_DE_REMEDIO: OpcaoDeOrdem<OrdemDeRemedios>[] = [
@@ -43,112 +43,164 @@ const ORDENS_DE_REMEDIO: OpcaoDeOrdem<OrdemDeRemedios>[] = [
 
 type ItemDeRemedioProps = {
   item: ItemDaListaDeRemedios;
-  /** Ausente quando não há tratamento pra editar — o card fica inerte, e o texto explica. */
+  onAbrirDetalhe: () => void;
+  /** Ausente quando não há tratamento pra editar — o botão fica inerte. */
   onEdit?: () => void;
   onDelete: () => void;
 };
 
-function ItemDeRemedio({ item, onEdit, onDelete }: ItemDeRemedioProps) {
+function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete }: ItemDeRemedioProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const { medication, prescription, inventory } = item;
-  // Com a dose junto quando ela varia por horário: é o caso em que a hora sozinha esconde
-  // justamente o que se quer conferir na fichinha.
+  const horarios = prescription === null ? [] : horariosDaPosologia(prescription.schedule);
+
+  return (
+    <View style={styles.item}>
+      {/* O card inteiro (menos a faixa de ações abaixo) abre o detalhe completo — é onde cabe o
+          que a lista não tem espaço para mostrar por extenso. */}
+      <Pressable
+        onPress={onAbrirDetalhe}
+        accessibilityRole="button"
+        accessibilityLabel={`Ver detalhes de ${medication.name}`}>
+        <View style={styles.itemHeader}>
+          {/**
+           * Sem foto, um marcador neutro ocupa o lugar — e **não** iniciais, que repetiriam o nome
+           * ao lado.
+           *
+           * Antes não entrava nada, e a consequência era a lista desalinhar: numa tela onde a
+           * maioria não tem foto, o item que tem é que ficava deslocado. O marcador mantém a
+           * coluna do nome no mesmo lugar em todos os itens, e o azul claro dá à lista a cor que
+           * faltava sem inventar superfície nova.
+           */}
+          {medication.photoUri !== null ? (
+            <FotoLocal uri={medication.photoUri} style={styles.photo} />
+          ) : (
+            <View style={[styles.photo, styles.photoVazia]}>
+              <Ionicons name="medkit-outline" size={24} color={cores.primary} />
+            </View>
+          )}
+
+          <View style={styles.itemHeaderText}>
+            <Text style={styles.name} numberOfLines={1}>
+              {medication.name}
+            </Text>
+            {/* Quando, não quanto: no lugar do princípio ativo, que não diz nada sobre a rotina do
+                dia a dia — é dado de identificação, não de uso, e já está no popup de detalhe. A
+                dose por tomada ("1 comprimido") também não entra aqui: ao lado do estoque no
+                rodapé, ela lia como "quanto tenho guardado". */}
+            {prescription !== null ? (
+              <Text style={styles.posology} numberOfLines={1}>
+                {resumirFrequencia(prescription.schedule)}
+                {horarios.length > 0 ? ` · ${horarios.join(", ")}` : ""}
+              </Text>
+            ) : (
+              <Text style={styles.activeIngredient}>Sem tratamento cadastrado.</Text>
+            )}
+          </View>
+        </View>
+
+        {inventory !== null ? (
+          <View style={styles.footerRow}>
+            {/* Sem estoque é o único caso em que o número vira aviso: o remédio acabou. */}
+            <Text style={[styles.stock, inventory.quantity === 0 && styles.stockLow]}>
+              {inventory.quantity === 0
+                ? "Estoque zerado"
+                : `Estoque: ${formatarQuantidadeLivre(inventory.quantity, inventory.unit)}`}
+            </Text>
+            {inventory.storageLocation !== null ? (
+              <Text style={styles.badge}>{inventory.storageLocation}</Text>
+            ) : null}
+          </View>
+        ) : null}
+      </Pressable>
+
+      {/* Editar/excluir dividindo a largura ao meio, separadas do toque em "ver detalhe" para as
+          duas ações continuarem explícitas (nunca escondidas atrás de um gesto), sem competir
+          mais pela largura do nome. */}
+      <View style={styles.acoes}>
+        {onEdit ? (
+          <Pressable
+            style={styles.acaoBotao}
+            onPress={onEdit}
+            accessibilityRole="button"
+            accessibilityLabel={`Editar ${medication.name}`}
+            hitSlop={6}>
+            <Ionicons name="pencil-outline" size={16} color={cores.corDeDestaque} />
+            <Text style={styles.acaoTexto}>Editar</Text>
+          </Pressable>
+        ) : null}
+        {onEdit ? <View style={styles.acaoDivisor} /> : null}
+        <Pressable
+          style={styles.acaoBotao}
+          onPress={onDelete}
+          accessibilityRole="button"
+          accessibilityLabel={`Excluir ${medication.name}`}
+          hitSlop={6}>
+          <Ionicons name="trash-outline" size={16} color={cores.error} />
+          <Text style={[styles.acaoTexto, styles.acaoTextoDestrutivo]}>Excluir</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+type LinhaDeDetalheProps = {
+  rotulo: string;
+  valor: string;
+};
+
+function LinhaDeDetalhe({ rotulo, valor }: LinhaDeDetalheProps) {
+  const styles = useEstilos(criarEstilos);
+  return (
+    <View style={styles.detalheLinha}>
+      <Text style={styles.detalheRotulo}>{rotulo}</Text>
+      <Text style={styles.detalheValor}>{valor}</Text>
+    </View>
+  );
+}
+
+/** Popup com tudo que o card não tem espaço para mostrar por extenso. */
+function DetalheDoRemedio({ item }: { item: ItemDaListaDeRemedios }) {
+  const styles = useEstilos(criarEstilos);
+  const { medication, prescription, inventory } = item;
   const horarios =
     prescription === null
       ? []
       : horariosComDose(prescription.schedule, prescription.doseAmount, prescription.doseUnit);
 
   return (
-    <View style={styles.item}>
-      <View style={styles.itemHeader}>
-        {/**
-         * Sem foto, um marcador neutro ocupa o lugar — e **não** iniciais, que repetiriam o nome
-         * ao lado.
-         *
-         * Antes não entrava nada, e a consequência era a lista desalinhar: numa tela onde a
-         * maioria não tem foto, o item que tem é que ficava deslocado. O marcador mantém a coluna
-         * do nome no mesmo lugar em todos os itens, e o azul claro dá à lista a cor que faltava sem
-         * inventar superfície nova.
-         */}
-        {medication.photoUri !== null ? (
-          <FotoLocal uri={medication.photoUri} style={styles.photo} />
-        ) : (
-          <View style={[styles.photo, styles.photoVazia]}>
-            <Ionicons name="medkit-outline" size={24} color={colors.primary} />
-          </View>
-        )}
-
-        <View style={styles.itemHeaderText}>
-          <Text style={styles.name}>{medication.name}</Text>
-          {medication.activeIngredient.length > 0 ? (
-            <Text style={styles.activeIngredient}>{medication.activeIngredient}</Text>
-          ) : null}
-        </View>
-
-        {/* Duas ações explícitas em vez do card inteiro clicável: "abre alguma coisa" não diz o
-            que vai acontecer, e ao lado de um botão de excluir isso pesa. */}
-        {/**
-         * `IconButton` do kit, e não `Pressable` desenhado aqui.
-         *
-         * Antes eram dois ícones **sem fundo nenhum**, distinguidos só pela cor — e o sintoma que
-         * denunciava isso era o texto de apoio desta tela precisar explicar em prosa o que o lápis
-         * e a lixeira fazem. Quando a interface precisa de legenda, ela falhou.
-         *
-         * O fundo é o que transforma um ícone em algo que se reconhece como tocável, e vir do kit
-         * é o que garante que os dois respondam ao toque e tenham o alvo de 44 — eram 40, e ficam
-         * encostados num destrutivo, onde errar apaga um tratamento.
-         */}
-        <View style={styles.acoes}>
-          {onEdit ? (
-            <IconButton
-              variant="sutil"
-              tamanho="sm"
-              onPress={onEdit}
-              accessibilityLabel={`Ver ou editar ${medication.name}`}
-              icon={<Ionicons name="pencil-outline" size={20} color={colors.primary} />}
-            />
-          ) : null}
-          <IconButton
-            variant="sutil"
-            tamanho="sm"
-            onPress={onDelete}
-            accessibilityLabel={`Excluir ${medication.name}`}
-            icon={<Ionicons name="trash-outline" size={20} color={colors.error} />}
-          />
-        </View>
-      </View>
-
-      {prescription !== null ? (
-        <Text style={styles.posology}>
-          {resumirDose(prescription.doseAmount, prescription.doseUnit, prescription.schedule)}
-          {" · "}
-          {resumirFrequencia(prescription.schedule)}
-        </Text>
-      ) : (
-        <Text style={styles.activeIngredient}>Sem tratamento cadastrado.</Text>
-      )}
-
-      {horarios.length > 0 ? (
-        <View style={styles.timeRow}>
-          {horarios.map((horario) => (
-            <View key={horario} style={styles.timeChip}>
-              <Text style={styles.timeChipText}>{horario}</Text>
-            </View>
-          ))}
-        </View>
+    <View style={styles.detalheBloco}>
+      {medication.activeIngredient.length > 0 ? (
+        <LinhaDeDetalhe rotulo="Princípio ativo" valor={medication.activeIngredient} />
       ) : null}
-
-      {inventory !== null ? (
-        <View style={styles.footerRow}>
-          {/* Sem estoque é o único caso em que o número vira aviso: o remédio acabou. */}
-          <Text style={[styles.stock, inventory.quantity === 0 && styles.stockLow]}>
-            {inventory.quantity === 0
-              ? "Estoque zerado"
-              : `Estoque: ${formatarQuantidadeLivre(inventory.quantity, inventory.unit)}`}
-          </Text>
-          {inventory.storageLocation !== null ? (
-            <Text style={styles.badge}>{inventory.storageLocation}</Text>
+      {prescription !== null ? (
+        <>
+          <LinhaDeDetalhe
+            rotulo="Dose"
+            valor={resumirDose(prescription.doseAmount, prescription.doseUnit, prescription.schedule)}
+          />
+          <LinhaDeDetalhe rotulo="Frequência" valor={resumirFrequencia(prescription.schedule)} />
+          {horarios.length > 0 ? (
+            <LinhaDeDetalhe rotulo="Horários" valor={horarios.join(" · ")} />
           ) : null}
-        </View>
+        </>
+      ) : (
+        <LinhaDeDetalhe rotulo="Tratamento" valor="Sem tratamento cadastrado." />
+      )}
+      {inventory !== null ? (
+        <LinhaDeDetalhe
+          rotulo="Estoque"
+          valor={
+            inventory.quantity === 0
+              ? "Zerado"
+              : formatarQuantidadeLivre(inventory.quantity, inventory.unit)
+          }
+        />
+      ) : null}
+      {inventory?.storageLocation != null ? (
+        <LinhaDeDetalhe rotulo="Guardado em" valor={inventory.storageLocation} />
       ) : null}
     </View>
   );
@@ -166,11 +218,14 @@ function normalizar(texto: string): string {
 }
 
 export function RemediosScreen() {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const router = useRouter();
   const { items, isLoading, error, reload } = useMedicationList();
-  const sync = useSync();
   const [busca, setBusca] = useState("");
   const [ordem, setOrdem] = useState<OrdemDeRemedios>("alfabetica");
+  const [detalheAberto, setDetalheAberto] = useState<ItemDaListaDeRemedios | null>(null);
 
   // Sobre `items`, e não sobre `visiveis`: o acesso ao estoque não pode sumir porque a busca em
   // curso não casou com nenhum remédio controlado.
@@ -275,6 +330,7 @@ export function RemediosScreen() {
           renderItem={({ item }) => (
             <ItemDeRemedio
               item={item}
+              onAbrirDetalhe={() => setDetalheAberto(item)}
               onEdit={
                 item.prescription === null
                   ? undefined
@@ -293,23 +349,13 @@ export function RemediosScreen() {
           // custava três linhas de altura em toda rolagem, para dizer algo que se lê uma vez.
           ListHeaderComponent={
             <View style={styles.listHeader}>
-              {/* Uma linha para a tela inteira, e não um selo por card: a pergunta é "meus dados
-                  estão salvos?", e ela se responde uma vez. Some quando não há pendência — que é
-                  o caso comum, e sempre o caso de quem não vinculou conta. */}
-              <AvisoDePendencias pendentes={sync.estado.pendentes} />
-
-              <Text style={styles.subtitle}>
-                Abaixo, suas medicações cadastradas em nosso sistema. Toque no lápis para ver mais
-                informações ou editar o cadastro, e na lixeira caso deseje excluir a medicação.
-              </Text>
-
               {/* Só existe quando há estoque cadastrado: o botão leva a uma tela que, sem isso,
                   abriria vazia — e oferecer caminho para o vazio é pior que não oferecer. */}
               {temEstoque ? (
                 <Button
                   label="Gerenciar estoques"
                   variant="outline"
-                  icon={<Ionicons name="cube-outline" size={20} color={colors.primary} />}
+                  icon={<Ionicons name="cube-outline" size={20} color={cores.primary} />}
                   onPress={() => router.push("/estoque")}
                 />
               ) : null}
@@ -319,20 +365,17 @@ export function RemediosScreen() {
             // Busca sem resultado e lista vazia pedem respostas diferentes: uma se resolve
             // mudando o que foi digitado, a outra cadastrando algo.
             termo.length > 0 ? (
-              <View style={styles.centered}>
-                <Text style={styles.emptyTitle}>Nenhuma medicação encontrada</Text>
-                <Text style={styles.emptyDescription}>
-                  Nada por aqui combina com “{busca.trim()}”. Confira a escrita ou busque pelo
-                  princípio ativo.
-                </Text>
-              </View>
+              <EstadoVazio
+                icone="search"
+                titulo="Nenhuma medicação encontrada"
+                descricao={`Nada por aqui combina com “${busca.trim()}”. Confira a escrita ou busque pelo princípio ativo.`}
+              />
             ) : (
-              <View style={styles.centered}>
-                <Text style={styles.emptyTitle}>Nenhum remédio por aqui ainda</Text>
-                <Text style={styles.emptyDescription}>
-                  Toque no + para cadastrar seu primeiro medicamento.
-                </Text>
-              </View>
+              <EstadoVazio
+                icone="medkit"
+                titulo="Nenhum remédio por aqui ainda"
+                descricao="Toque no + para cadastrar seu primeiro medicamento."
+              />
             )
           }
         />
@@ -345,6 +388,13 @@ export function RemediosScreen() {
         accessibilityLabel="Cadastrar medicação"
         onPress={() => router.push("/cadastro/medicamento")}
       />
+
+      <BottomSheet
+        visible={detalheAberto !== null}
+        onClose={() => setDetalheAberto(null)}
+        title={detalheAberto?.medication.name ?? ""}>
+        {detalheAberto !== null ? <DetalheDoRemedio item={detalheAberto} /> : null}
+      </BottomSheet>
     </SafeAreaView>
   );
 }

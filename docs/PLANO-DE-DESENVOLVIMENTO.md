@@ -1669,6 +1669,11 @@ canal já criado fica congelado no aparelho — som e importância não mudam po
 - **Sincronização com o Supabase** (D1, 30/08) — inclui o reconsentimento dos termos 1.2.0, que
   aparece na primeira abertura depois de atualizar. ⚠️ Precisa de **dois aparelhos** (ou instalar,
   apagar e reinstalar) para valer como teste de verdade.
+- **Sistema de temas** (03/09) — os quatro temas escolhíveis em Ajustes (Padrão, Escuro, Alto
+  contraste, Sem depender de cor). Testado no navegador sem erro de runtime, mas nunca em aparelho:
+  falta conferir toque real no seletor, leitura em TalkBack com cada tema ativo, e — o mais
+  importante para Alto contraste — legibilidade sob luz solar direta, que é justamente o cenário
+  que motivou o tema e que o navegador não reproduz. Ver [6.7](#67-sistema-de-temas--escuro-alto-contraste-sem-depender-de-cor).
 
 **Adiado com decisão registrada:** o botão `+` no centro da barra de navegação (as abas usam
 `NativeTabs`, e trocar por barra própria devolveria o risco do Material You resolvido em 23/08) e o
@@ -1896,6 +1901,115 @@ Button/TextField/SelectField, `hitSlop` nos alvos destrutivos, contraste do plac
 > importar o componente é o que faz a correção não chegar** — e num app cujo público amplia a fonte
 > do sistema, o custo disso é a acessibilidade quebrar exatamente em quem mais depende dela.
 
+### 6.7 Sistema de temas — escuro, alto contraste, sem depender de cor
+
+Nasceu de um pedido concreto do Gabriel: dark mode como as pessoas conhecem de outros apps, e
+junto dele outras estratégias de acessibilidade ligadas à cor — porque um app de saúde com público
+idoso e polimedicado tem em baixa visão e daltonismo um público real, não hipotético. A escolha de
+implementação não foi "trocar duas cores": foi decidir **onde mora a cor do app inteiro**.
+
+**A barreira técnica, medida antes de começar.** 567 usos de cor em 99 arquivos, todos dentro de
+`StyleSheet.create` — que roda **uma vez**, na importação do módulo, e nunca mais. Trocar de tema
+depois disso não repinta nada: a cor já está congelada num objeto que o React Native nem olha de
+novo. Não existia atalho: qualquer tema de verdade exige que a cor pare de ser lida no import e
+passe a ser lida a cada render.
+
+#### A arquitetura
+
+| Peça | Arquivo | Papel |
+|---|---|---|
+| Contrato de tema | `shared/theme/temas/tipos.ts` | `PaletaDeTema` é derivado de `typeof colors` — acrescentar uma cor na paleta padrão **quebra a compilação** de todo tema que não a definiu. Impossível esquecer uma cor num tema. |
+| Os 4 temas | `shared/theme/temas/{padrao,escuro,alto-contraste,daltonismo}.ts` | Cada um com o próprio cabeçalho explicando a decisão de cor — ver abaixo. |
+| Provedor | `shared/theme/tema-contexto.tsx` | `ProvedorDeTema` envolve a raiz do app (`_layout.tsx`), **acima** até das telas de onboarding — senão login/consentimento/ficha renderizariam sem tema e trocar para escuro deixaria o começo do app claro. Persiste a escolha via `AsyncStorage`. |
+| Migração mecânica | `shared/theme/usar-estilos.ts` | `estilosDoTema(({ cores, ajustes }) => ({...}))` no lugar de `StyleSheet.create({...})`; `useEstilos(criarEstilos)` no componente. Três linhas mudam por arquivo, o corpo do objeto de estilos fica idêntico. |
+| Rastreador de pendência | `scripts/tema-pendente.mjs` | Varre `src/` e lista, **por arquivo e por linha**, todo `colors.` fora do motor de temas — a resposta à pergunta "o que ainda não foi migrado", sem depender de abrir tela por tela. |
+
+Os tokens de superfície que várias telas compartilhavam (`surfaceCard`, `blocoInterno`,
+`estadoVisual`) viraram funções que recebem `cores` (`superficieDeCartao(cores, ajustes)`,
+`estadosVisuais(cores)`), com uma versão estática mantida só para o código ainda não migrado — o
+andaime que permite migrar telas uma a uma sem quebrar as que ainda não passaram.
+
+#### Os quatro temas
+
+- **Padrão** — o visual do Mapill de sempre, sem mudança nenhuma.
+- **Escuro** — pensado para o uso real do app à noite: a dose das 22h, o alarme de madrugada.
+  Nada de preto absoluto (`#0F1319`, evita halo em tela OLED); elevação por **luz, não sombra**
+  (superfície mais alta = mais clara, o inverso do tema claro); cores fortes **clareiam** em vez
+  de escurecer (`#0B5FD9` para `#7FB2FF`, porque azul escuro contra fundo escuro só some).
+- **Alto contraste** — para catarata e degeneração macular, que passam de 50% de incidência acima
+  dos 65 anos — a faixa etária que mais toma remédio todo dia. Preto e branco absolutos (21:1);
+  contorno **substitui** a sombra (`contornarSuperficies: true`, porque quem não enxerga 8% de
+  opacidade não vê onde um cartão termina); reforço de forma e ícone ligado, porque baixa visão
+  vem frequentemente acompanhada de percepção de cor reduzida.
+- **Sem depender de cor** (daltonismo) — deuteranopia e protanopia atingem cerca de 1 homem em 12,
+  e as duas confundem justamente vermelho com verde: as duas cores mais carregadas de significado
+  no app ("atrasada" e "é agora"). A saída não foi trocar a paleta por completo (verde não pode
+  virar azul, porque azul já é a cor da ação) — foi ligar `reforcarFormaEIcone`, que obriga todo
+  estado que hoje só usa cor a repetir o sinal em ícone e texto. Os ajustes de tinta que sobraram:
+  verde puxa para teal, vermelho puxa para magenta, âmbar escurece — pares que sobrevivem à
+  confusão onde o vermelho-tijolo/verde-grama original colapsava.
+
+A tela de Ajustes ganhou a seção **Aparência**, com um seletor de 5 opções (Automático + os 4
+temas) — cada linha mostra nome, descrição de para quem serve, e uma amostra de duas cores. A
+troca é instantânea, sem confirmação: é reversível num toque.
+
+#### Os dois bugs que a própria migração revelou
+
+Nenhum dos dois existia antes — os dois só existem porque cor congelada num asset ou num token
+estático é invisível até o dia em que o fundo ao redor muda. É o motivo de valer registrar aqui e
+não só no commit.
+
+**1. A wordmark "Mapill" desaparecia por completo no header do tema escuro.** Ela era uma imagem
+PNG (`mark-transparent-a.png`) com o texto "Mapill" pintado em preto sobre fundo transparente.
+Enquanto só existia o tema claro, preto bastava. No escuro o header vira quase-preto, e texto preto
+sobre quase-preto é invisível — sem erro, sem warning, só ausência. Corrigido desenhando a marca
+(`ui/MarcaDoMapill`): o ícone da cápsula vem de `react-native-svg` (já usado no `GoogleLogo`, cores
+próprias, não depende de tema), e a palavra "Mapill" virou `<Text>` de verdade, com cor lida do
+tema como qualquer outro texto do app. Nunca mais uma segunda imagem por tema.
+
+**2. O cartão "Nenhum remédio cadastrado" ficava branco (ilegível) no tema escuro.** Quatro
+arquivos recém-migrados (`InicioScreen`, `EstadoVazio`, `CardAdesaoSemanal`, `CardEstoque`) ainda
+faziam `...surfaceCard` — a versão **estática** do token, congelada no tema padrão — em vez de
+`...superficieDeCartao(cores, ajustes)`. O `StyleSheet` reagia ao tema em tudo, menos no fundo do
+próprio cartão, porque aquele valor específico nunca tinha sido convertido. Sintoma: card branco
+sólido com texto cinza-claro por cima, no meio de uma tela inteiramente escura — o tipo de defeito
+que só aparece testando o tema de verdade, nunca lendo o código.
+
+> **A lição, para o artigo.** É a mesma classe de erro que as duas varreduras de acessibilidade
+> (6.5, 6.6) já tinham documentado: um valor copiado em vez de importado é o que faz a correção
+> não chegar a todo lugar. Ali era estilo copiado entre telas; aqui é o mesmo token existindo em
+> duas versões (a reativa e a congelada) e o código pegando a errada sem avisar. A saída nas três
+> vezes foi a mesma — um lugar só de onde ler, e um jeito mecânico (aqui, um script) de achar quem
+> ainda não lê dali.
+
+#### Estado da migração
+
+Rastreado por `node scripts/tema-pendente.mjs`, não por memória:
+
+| Momento | Arquivos pendentes | Ocorrências |
+|---|---|---|
+| Início (motor pronto, nada migrado) | 99 | 607 |
+| Depois do kit de UI + Home | 64 | 432 |
+| Depois das telas de cadastro e listas | 32 | 93 |
+| Depois da varredura final | **3** | **4** |
+
+Os 3 arquivos finais são exceções corretas, não pendência disfarçada: `canais-notifee.ts` e
+`notifee-gateway.ts` definem a cor do LED de notificação do Android num código imperativo que roda
+uma vez na criação do canal, fora de qualquer render — não há hook de React ali para reagir a tema.
+`SplashOverlay.tsx` roda **antes** de o `ProvedorDeTema` conseguir carregar a preferência salva do
+disco, então precisa de uma cor fixa por definição — o próprio texto do componente já dizia isso
+antes desta rodada.
+
+`npx tsc --noEmit` e `npx expo lint` limpos ao final. Testado no navegador (Playwright, sem
+console.error nem exceção não tratada) percorrendo onboarding completo até Home, Remédios,
+Calendário e Ajustes, nos temas Padrão e Escuro, com o card de estado vazio, a wordmark do header,
+a grade do calendário e os chips de filtro conferidos visualmente nos dois.
+
+⚠️ **O que isto não cobre:** os temas Alto contraste e Sem depender de cor não foram conferidos
+visualmente por screenshot em todas as telas nesta rodada (o motor foi testado — a seleção troca a
+paleta corretamente, incluindo o contorno do alto contraste no lugar da sombra). E nenhum teste
+aqui usa TalkBack ligado. Os quatro temas entram na fila de validação em aparelho (6.2).
+
 ---
 
 ## 7. Log de progresso
@@ -2049,3 +2163,4 @@ Button/TextField/SelectField, `hitSlop` nos alvos destrutivos, contraste do plac
 | 2026-09-02 | E1 | Concluído | **Segunda varredura de acessibilidade — agora nas telas.** A de 31/08 cobriu o kit; esta cobriu o que as telas desenham sozinhas, e é ali que estavam os defeitos restantes. Sete corrigidos. O mais grave: **alvo de 32pt em "Confirmar" e "Pular"** na agenda da Home — os dois botões mais tocados do app, empilhados a 8px, onde errar o toque **falseia o registro clínico** gravando uma dose que não foi tomada. Depois: o **estado do registro só por cor** na tela do Horário (destino do toque na notificação), onde "Tomei" e "Pulei" soavam idênticos no leitor antes e depois de responder — e consertar isso exigiu corrigir o `Button` do kit, que fixava `accessibilityState` antes do spread e apagava o `disabled` de quem passasse `selected`. E o **ícone mudo** do calendário, único portador do desfecho: a linha era anunciada como "08:00, Losartana, 1 comprimido" sem dizer se foi tomada ou pulada. Mais quatro menores: `height` travado no campo de horário do cadastro (mesmo defeito de 31/08, fora do kit), horário duplicado só por cor de fundo, dois "Editar" sem rótulo e chips de dia da semana com papel `button` em vez de `checkbox`. ⚠️ **A lição vale para o artigo**: duas varreduras acharam o **mesmo** defeito (altura travada) em lugares diferentes, porque a tela copiou o estilo em vez de importar o componente — mesma causa raiz do passe de design de 30/08, quando sete telas desenhavam o próprio cartão. Detalhes em [6.6](#66-segunda-varredura-de-acessibilidade--0209). |
 | 2026-09-02 | Build | Revisão pré-build | **Conferência completa antes de gastar a cota do EAS.** `npx expo prebuild` roda sem erro e o manifesto gerado traz as **sete permissões** do alarme, `showWhenLocked`/`turnScreenOn` na MainActivity (plugin local aplicado), `alarme_de_dose.wav` em `res/raw` e `notification_icon.png` em drawable. Cheguei a suspeitar que o **reboot** não estava coberto — o Notifee não declara `RECEIVE_BOOT_COMPLETED` no manifesto de origem —, mas está dentro do AAR pré-compilado (`RebootBroadcastReceiver`), e o merge acontece na compilação. Falso alarme, mas valia checar: é o bloco 7 do roteiro. Credenciais do Supabase confirmadas no ambiente `development` do EAS. E o **`tsc` ficou limpo pela primeira vez**: o erro da rota `/alarme/[instante]`, que aparecia desde ontem, era **cache de tipos desatualizado** do expo-router e não defeito — a rota sempre existiu. Regenerado. |
 | 2026-09-02 | Design | Passe entregue | **Passe de design — dez frentes, da fundação às telas.** Nasceu de três incômodos que o Gabriel nomeou: o app não parecia "vivo", o azul sumia em metade das telas, e o teclado não saía. O levantamento achou a causa técnica do primeiro, e ela era mais concreta que gosto: **75 `Pressable` e zero feedback de toque** — `grep pressed` devolvia nada. Não era falta de animação, era nada responder ao dedo; e num público que já duvida da própria memória, a resposta a essa dúvida é **tocar de novo** — no botão de confirmar dose, isso registrava duas vezes. Feedback de toque virou a primeira camada da mesma proteção que a guarda de idempotência faz no banco. **Três bugs reais apareceram no caminho**, nenhum visível sem procurar: (a) `typography.bodySm` **não existia** e era espalhado com `...` em dois arquivos — spread de `undefined` não dá erro, os textos herdavam a fonte do sistema em silêncio; (b) o splash usava `#208AEF` com um comentário dizendo que espelhava o `app.json`, que tem `#196FF3` — o pisca de cor que o comentário existia para evitar acontecia a cada abertura; (c) o teclado não tinha o gesto que as pessoas tentam primeiro (tocar em área vazia): zero `TouchableWithoutFeedback` no app, e `returnKeyType` só na busca. **O que mudou de estrutura**: `interaction.ts` (o toque, num lugar só), `bodySm` e `caption` fechando a escala (30 `fontSize` soltos → 10, todos display de instância única e documentados), `RodapeDeFormulario` (que **sai de cena** com o teclado aberto em vez de colar nele), `IconButton` variante `sutil`, e `gapEntreSecoes` para separar assuntos de itens. **O azul entrou por tela, e não por template** — cheguei a extrair um `HeroDeTela` genérico e o Gabriel corrigiu a tempo: ele gostou da *presença* da cor no Ajustes, não do formato. Então cada tela ganhou cor no elemento que importa para ela (o número da adesão, o "Repor" do estoque, o marcador de foto em Remédios), e nenhuma virou cópia de outra. **Os rótulos da CMED** passaram a ser capitalizados **só na exibição** — o dado gravado continua sendo o que a Anvisa publicou, porque a busca por EAN depende dele. Quem escolhe a sugestão também grava capitalizado: antes, cadastrar pelo catálogo e cadastrar à mão produziam nomes diferentes para o mesmo remédio. 54 verificações em Node ao todo (28 relatório, 14 ids de aviso, 12 rótulos CMED). |
+| 2026-09-03 | Design | Sistema de temas entregue | **Dark mode, alto contraste e um modo sem depender de cor — os três escolhíveis em Ajustes, junto do tema Padrão.** Pedido concreto do Gabriel, e a barreira era técnica antes de ser visual: 567 usos de cor em 99 arquivos, todos dentro de `StyleSheet.create`, que roda uma vez na importação e nunca mais — trocar de tema sem migrar não repinta nada. A saída foi um motor onde `PaletaDeTema` é **derivado** da paleta padrão (`shared/theme/temas/tipos.ts`): acrescentar uma cor no tema padrão quebra a compilação de qualquer tema que não a defina, então é impossível um tema ficar pela metade. Migração mecânica (`estilosDoTema` no lugar de `StyleSheet.create`, `useEstilos` no componente) e rastreada por `scripts/tema-pendente.mjs`, que lista por arquivo e linha todo `colors.` fora do motor — resposta à preocupação do Gabriel de não conseguir identificar pontos não mapeados. **Escuro** pensado pro uso real à noite (dose das 22h, alarme de madrugada): sem preto absoluto, elevação por luz e não sombra, cores fortes clareiam em vez de escurecer. **Alto contraste** mira quem tem catarata ou degeneração macular (>50% de incidência acima dos 65, a faixa que mais toma remédio): preto/branco absolutos, contorno no lugar da sombra. **Sem depender de cor** cobre daltonismo (~1 homem em 12): não troca a paleta por completo, obriga todo estado que hoje só usa cor a repetir o sinal em ícone e texto. **Dois bugs reais só a migração revelou**: a wordmark "Mapill" (imagem PNG com texto preto fixo) desaparecia por completo no header escuro — corrigida desenhando a marca com `react-native-svg` e texto de verdade, cor lida do tema; e o card "Nenhum remédio cadastrado" ficava branco sólido no escuro porque quatro arquivos ainda liam a versão **estática** do token de cartão em vez da versão reativa ao tema — mesma classe de erro das varreduras de acessibilidade de 31/08 e 02/09 (valor copiado em vez de importado). Migração foi de 99 para **3 arquivos** pendentes, e os 3 são exceções corretas (cor de canal de notificação Android, e o Splash que roda antes do tema carregar). `tsc` e `expo lint` limpos. Detalhes, tabela de progresso e os dois bugs em [6.7](#67-sistema-de-temas--escuro-alto-contraste-sem-depender-de-cor). ⚠️ Testado no navegador nos temas Padrão e Escuro; Alto contraste e Sem depender de cor tiveram só o motor conferido — os quatro entram na fila de validação em aparelho. |
