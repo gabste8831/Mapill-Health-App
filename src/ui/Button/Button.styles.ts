@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * `minHeight`, e nunca `height`.
    *
@@ -25,11 +24,11 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
   primary: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   /** Sombra em vez de borda, mesma lógica do Card: lê como superfície, não como contorno. */
   outline: {
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     boxShadow: surfaceShadow,
   },
   /**
@@ -43,7 +42,7 @@ export const styles = StyleSheet.create({
    */
   outlineEmFolha: {
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
   },
   /**
    * O botão de texto não reserva os 52: ele é uma saída discreta ("Agora não"), e com o piso do
@@ -62,13 +61,13 @@ export const styles = StyleSheet.create({
     fontSize: 16,
   },
   primaryLabel: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   outlineLabel: {
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   textLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
-});
+}));

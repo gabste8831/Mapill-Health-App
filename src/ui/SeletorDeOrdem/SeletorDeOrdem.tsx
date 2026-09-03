@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, ScrollView, Text } from "react-native";
 
-import { colors, estadoDePressao } from "@/shared/theme";
-import { styles } from "./SeletorDeOrdem.styles";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./SeletorDeOrdem.styles";
 
 export type OpcaoDeOrdem<T extends string> = {
   value: T;
@@ -31,6 +31,9 @@ export function SeletorDeOrdem<T extends string>({
   options,
   onChange,
 }: SeletorDeOrdemProps<T>) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <ScrollView
       horizontal
@@ -51,7 +54,7 @@ export function SeletorDeOrdem<T extends string>({
             <Ionicons
               name={option.icon}
               size={16}
-              color={selecionada ? colors.onPrimary : colors.onSurfaceVariant}
+              color={selecionada ? cores.onPrimary : cores.onSurfaceVariant}
             />
             <Text style={[styles.rotulo, selecionada && styles.rotuloSelecionado]}>
               {option.label}

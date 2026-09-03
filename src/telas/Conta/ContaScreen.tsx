@@ -6,9 +6,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { exportarDados } from "@/data/repositories/exportar-dados";
 import { useSync } from "@/hooks/use-sync";
-import { colors, estadoDePressao } from "@/shared/theme";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { Card, GoogleLogo, Header, IndicadorDeSync } from "@/ui";
-import { styles } from "./ContaScreen.styles";
+import { criarEstilos } from "./ContaScreen.styles";
 
 export type ContaScreenProps = {
   /** E-mail da conta Google, ou `null` quando o app está sendo usado sem conta. */
@@ -36,6 +36,9 @@ type LinhaProps = {
 };
 
 function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     // Linha de largura total: escurece, mas não encolhe — escalar faria o texto vizinho tremer.
     <Pressable style={estadoDePressao(styles.row)} onPress={onPress} accessibilityRole="button">
@@ -44,7 +47,7 @@ function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
         <Text style={[styles.rowLabel, destrutiva && styles.rowLabelDestrutiva]}>{label}</Text>
         {hint ? <Text style={styles.rowHint}>{hint}</Text> : null}
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.outline} />
+      <Ionicons name="chevron-forward" size={18} color={cores.outline} />
     </Pressable>
   );
 }
@@ -70,6 +73,9 @@ export function ContaScreen({
   onEraseHealthData,
   onEraseEverything,
 }: ContaScreenProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const isSignedIn = accountEmail !== null;
   const sync = useSync();
   const [exportando, setExportando] = useState(false);
@@ -119,7 +125,7 @@ export function ContaScreen({
           <Card>
             {isSignedIn ? (
               <Linha
-                icon={<Ionicons name="link-outline" size={22} color={colors.onSurfaceVariant} />}
+                icon={<Ionicons name="link-outline" size={22} color={cores.onSurfaceVariant} />}
                 label="Desvincular esta conta"
                 hint={accountEmail ?? undefined}
                 onPress={onSignOut}
@@ -161,7 +167,7 @@ export function ContaScreen({
           <Card>
             <Linha
               icon={
-                <Ionicons name="document-text-outline" size={22} color={colors.onSurfaceVariant} />
+                <Ionicons name="document-text-outline" size={22} color={cores.onSurfaceVariant} />
               }
               label="Termos e privacidade"
               hint="Ler os termos aceitos e ver a data do seu aceite"
@@ -180,21 +186,21 @@ export function ContaScreen({
                 passar o olho por ela primeiro. */}
             <Linha
               icon={
-                <Ionicons name="download-outline" size={22} color={colors.onSurfaceVariant} />
+                <Ionicons name="download-outline" size={22} color={cores.onSurfaceVariant} />
               }
               label={exportando ? "Preparando o arquivo…" : "Baixar uma cópia dos meus dados"}
               hint="Um arquivo com tudo que o app guarda sobre você, para salvar onde quiser."
               onPress={() => void exportar()}
             />
             <Linha
-              icon={<Ionicons name="trash-outline" size={22} color={colors.error} />}
+              icon={<Ionicons name="trash-outline" size={22} color={cores.error} />}
               label="Apagar meus dados de saúde"
               hint="Medicamentos, tratamentos, horários, histórico e estoque. Sua ficha continua."
               destrutiva
               onPress={onEraseHealthData}
             />
             <Linha
-              icon={<Ionicons name="nuclear-outline" size={22} color={colors.error} />}
+              icon={<Ionicons name="nuclear-outline" size={22} color={cores.error} />}
               label="Apagar tudo e recomeçar"
               hint="Inclui a ficha e o consentimento. O app volta como recém-instalado."
               destrutiva

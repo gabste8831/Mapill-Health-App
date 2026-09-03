@@ -1,4 +1,5 @@
 import { colors } from "./colors";
+import type { AjustesDeTema, PaletaDeTema } from "./temas/tipos";
 import { radius, spacing } from "./spacing";
 
 /**
@@ -38,13 +39,28 @@ export const surfaceShadowFlutuante = "0px 4px 8px rgba(25, 28, 30, 0.20)";
  *
  * O `padding` é `gutter` (24) e não `md` (16): é o respiro que separa um cartão que se lê de um
  * cartão que se aperta, e a diferença aparece mais em lista, onde vários se sucedem.
+ *
+ * Reativa ao tema: no alto contraste a sombra é invisível, então o contorno assume o papel dela.
  */
-export const surfaceCard = {
-  backgroundColor: colors.surfaceContainerLowest,
-  borderRadius: radius.lg,
-  padding: spacing.gutter,
-  boxShadow: surfaceShadow,
-} as const;
+export function superficieDeCartao(cores: PaletaDeTema, ajustes?: AjustesDeTema) {
+  return {
+    backgroundColor: cores.surfaceContainerLowest,
+    borderRadius: radius.lg,
+    padding: spacing.gutter,
+    ...(ajustes?.contornarSuperficies
+      ? { borderWidth: 1, borderColor: cores.outlineVariant }
+      : { boxShadow: surfaceShadow }),
+  } as const;
+}
+
+/**
+ * A versão estática, para os arquivos que ainda não foram migrados para temas.
+ *
+ * Ela lê a paleta padrão uma vez, na importação — ou seja, **não responde a troca de tema**. É o
+ * andaime da migração gradual: enquanto uma tela ainda a usa, ela funciona no tema padrão em vez
+ * de quebrar. `node scripts/tema-pendente.mjs` lista quem ainda depende disto.
+ */
+export const surfaceCard = superficieDeCartao(colors);
 
 /**
  * O respiro entre itens de uma lista.
@@ -58,7 +74,7 @@ export const listGap = spacing.md;
 /**
  * A margem lateral de toda tela de conteúdo.
  *
- * Um valor, e não `md` em umas telas e `gutter` em outras — o que faz o conteúdo "pular" de lado
+ * Um valor, e não `md` em umas telas e `gutter` em outras — o que fazia o conteúdo "pular" de lado
  * ao navegar entre abas, e é o tipo de inconsistência que se sente sem se nomear.
  */
 export const screenPadding = spacing.md;

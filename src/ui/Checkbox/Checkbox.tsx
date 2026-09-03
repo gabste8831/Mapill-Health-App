@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import { colors, estadoDePressao } from "@/shared/theme";
-import { styles } from "./Checkbox.styles";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./Checkbox.styles";
 
 export type CheckboxProps = {
   checked: boolean;
@@ -18,6 +18,9 @@ export type CheckboxProps = {
  * facilitar o toque (relevante pro público idoso/polimedicado do Mapill).
  */
 export function Checkbox({ checked, onChange, label, accessibilityLabel }: CheckboxProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <Pressable
       // Sem escala: a linha ocupa a largura toda, e encolher faria o texto vizinho tremer.
@@ -27,7 +30,7 @@ export function Checkbox({ checked, onChange, label, accessibilityLabel }: Check
       accessibilityState={{ checked }}
       accessibilityLabel={accessibilityLabel}>
       <View style={[styles.box, checked && styles.boxChecked]}>
-        {checked ? <Ionicons name="checkmark-sharp" size={16} color={colors.onPrimary} /> : null}
+        {checked ? <Ionicons name="checkmark-sharp" size={16} color={cores.onPrimary} /> : null}
       </View>
       <Text style={styles.label}>{label}</Text>
     </Pressable>

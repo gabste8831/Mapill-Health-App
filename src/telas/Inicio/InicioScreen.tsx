@@ -8,7 +8,7 @@ import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePatientProfile } from "@/hooks/use-patient-profile";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
 import { dataPorExtenso } from "@/shared/datas-por-extenso";
-import { spacing } from "@/shared/theme";
+import { spacing, useEstilos } from "@/shared/theme";
 import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-today-doses";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { BarraDeProgresso, CenteredLoader, Fab, Header, SuccessOverlay } from "@/ui";
@@ -18,7 +18,7 @@ import { CardEstoque } from "@/telas/Inicio/componentes/CardEstoque/CardEstoque"
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
 import { ItemDeDose } from "@/telas/Inicio/componentes/ItemDeDose/ItemDeDose";
-import { styles } from "./InicioScreen.styles";
+import { criarEstilos } from "./InicioScreen.styles";
 
 /**
  * Quantas doses o diálogo do lote nomeia antes de resumir o resto. Além disso o texto vira uma
@@ -78,6 +78,8 @@ function resumoDaSemana(semana: DiaDaSemana[]): string {
 }
 
 export function InicioScreen() {
+  const styles = useEstilos(criarEstilos);
+
   const router = useRouter();
   const { draft } = usePatientProfile();
   const { agenda, isLoading, error, reload, registrarDose, registrarDoses } = useTodayDoses();

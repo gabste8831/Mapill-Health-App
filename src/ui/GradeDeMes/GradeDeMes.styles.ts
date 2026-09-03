@@ -1,11 +1,16 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
-  /** Faixa colorida, como o topo de Ajustes: separa o calendário da lista sem precisar de borda. */
+export const criarEstilos = estilosDoTema(({ cores }) => ({
+  /**
+   * Faixa de destaque, como o topo de Ajustes: separa o calendário da lista sem precisar de
+   * borda. `superficieDeDestaque`, e não `primary` direto: no tema escuro esse bloco é o que
+   * ocupa a maior fatia de tela do app inteiro pintado de uma cor só, e um fundo cinza discreto
+   * ali evita competir com o resto da paleta escura — ver o cabeçalho de `superficieDeDestaque`
+   * em `shared/theme/colors.ts`. No tema claro o valor é idêntico ao `primary` de sempre.
+   */
   container: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.superficieDeDestaque,
     borderBottomLeftRadius: radius.lg,
     borderBottomRightRadius: radius.lg,
     paddingHorizontal: spacing.sm,
@@ -25,7 +30,7 @@ export const styles = StyleSheet.create({
   },
   titulo: {
     ...typography.bodyLg,
-    color: colors.onPrimary,
+    color: cores.onSuperficieDeDestaque,
     textTransform: "capitalize",
   },
   semana: {
@@ -39,7 +44,7 @@ export const styles = StyleSheet.create({
     fontSize: 11,
     flex: 1,
     textAlign: "center",
-    color: withOpacity(colors.onPrimary, 0.7),
+    color: withOpacity(cores.onSuperficieDeDestaque, 0.7),
   },
   grade: {
     flexDirection: "row",
@@ -62,17 +67,17 @@ export const styles = StyleSheet.create({
   /** Hoje é contorno, e não preenchimento: ele situa, mas quem manda na tela é o dia selecionado. */
   numeroHoje: {
     borderWidth: 1,
-    borderColor: colors.onPrimary,
+    borderColor: cores.onSuperficieDeDestaque,
   },
   numeroSelecionado: {
-    backgroundColor: colors.onPrimary,
+    backgroundColor: cores.onSuperficieDeDestaque,
   },
   numero: {
     ...typography.bodyMd,
-    color: colors.onPrimary,
+    color: cores.onSuperficieDeDestaque,
   },
   numeroTextoSelecionado: {
-    color: colors.primary,
+    color: cores.superficieDeDestaque,
   },
   pontos: {
     flexDirection: "row",
@@ -87,10 +92,10 @@ export const styles = StyleSheet.create({
   },
   /** Branco para o compromisso: é o que a pessoa marcou, e o que ela procura no mês. */
   pontoDeCompromisso: {
-    backgroundColor: colors.onPrimary,
+    backgroundColor: cores.onSuperficieDeDestaque,
   },
   /** A dose é rotina, então fica mais discreta — senão o mês inteiro vira uma parede de pontos. */
   pontoDeDose: {
-    backgroundColor: withOpacity(colors.onPrimary, 0.45),
+    backgroundColor: withOpacity(cores.onSuperficieDeDestaque, 0.45),
   },
-});
+}));

@@ -4,7 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import type { ReminderMode } from "@/domain/entities/prescription";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
-import { colors, estadoDePressao } from "@/shared/theme";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
@@ -12,7 +12,7 @@ import {
   PainelDePermissoes,
   type OptionGroupOption,
 } from "@/ui";
-import { styles } from "./CadastroDeMedicamento.styles";
+import { criarEstilos } from "./CadastroDeMedicamento.styles";
 
 /** Um sino que toca, um que avisa, um que faz os dois e um cortado. A família se lê de relance. */
 const MODE_ICONS: Record<ReminderMode, keyof typeof MaterialCommunityIcons.glyphMap> = {
@@ -22,12 +22,12 @@ const MODE_ICONS: Record<ReminderMode, keyof typeof MaterialCommunityIcons.glyph
   none: "bell-off",
 };
 
-function iconeDoModo(mode: ReminderMode, isSelected: boolean) {
+function iconeDoModo(mode: ReminderMode, isSelected: boolean, cores: ReturnType<typeof useCores>) {
   return (
     <MaterialCommunityIcons
       name={MODE_ICONS[mode]}
       size={22}
-      color={isSelected ? colors.onPrimary : colors.primary}
+      color={isSelected ? cores.onPrimary : cores.primary}
     />
   );
 }
@@ -41,7 +41,10 @@ function iconeDoModo(mode: ReminderMode, isSelected: boolean) {
  * `reminderMode` fica em `none` e o cadastro salva igual. A dose continua na Home e no calendário
  * de qualquer forma, então não há nada que a escolha explícita preservasse.
  */
-function opcoesDeModo(value: ReminderMode | null): OptionGroupOption<ReminderMode>[] {
+function opcoesDeModo(
+  value: ReminderMode | null,
+  cores: ReturnType<typeof useCores>,
+): OptionGroupOption<ReminderMode>[] {
   return [
     {
       value: "alarm",
@@ -53,19 +56,19 @@ function opcoesDeModo(value: ReminderMode | null): OptionGroupOption<ReminderMod
       // despertador e entregar um "pling" é promessa de segurança falsa.
       label: "Alarme",
       hint: "Toca alto e vibra, mesmo no silencioso.",
-      icon: iconeDoModo("alarm", value === "alarm"),
+      icon: iconeDoModo("alarm", value === "alarm", cores),
     },
     {
       value: "notification",
       label: "Notificação",
       hint: "Aparece na barra e respeita o silencioso.",
-      icon: iconeDoModo("notification", value === "notification"),
+      icon: iconeDoModo("notification", value === "notification", cores),
     },
     {
       value: "both",
       label: "Os dois",
       hint: "O alarme na hora, a notificação depois.",
-      icon: iconeDoModo("both", value === "both"),
+      icon: iconeDoModo("both", value === "both", cores),
     },
   ];
 }
@@ -112,6 +115,9 @@ export function ConfiguracaoDeLembrete({
   onClose,
   onAbrirAjuda,
 }: ConfiguracaoDeLembreteProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const dependeDoAparelho = value !== null && value !== "none";
   const { permissao, pedir } = useNotificationPermission();
   const permissoes = usePermissoesDeAlarme();
@@ -145,7 +151,7 @@ export function ConfiguracaoDeLembrete({
           alto
           ultimaOcupaLinha
           value={value}
-          options={opcoesDeModo(value)}
+          options={opcoesDeModo(value, cores)}
           onChange={escolherModo}
         />
 

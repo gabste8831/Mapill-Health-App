@@ -9,8 +9,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./SuccessOverlay.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./SuccessOverlay.styles";
 
 /**
  * Quanto o aviso fica na tela antes de começar a sair. Tempo de ler a frase inteira sem pressa —
@@ -35,6 +35,9 @@ export type SuccessOverlayProps = {
  * cadastro de um medicamento é o fim de um fluxo longo: merece a pausa que diz "acabou, deu certo".
  */
 export function SuccessOverlay({ title, description, onDone }: SuccessOverlayProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const scale = useSharedValue(0.6);
   const opacity = useSharedValue(0);
 
@@ -72,7 +75,7 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
       accessibilityViewIsModal
       accessibilityRole="alert">
       <Animated.View style={[styles.check, checkStyle]}>
-        <Ionicons name="checkmark" size={52} color={colors.onPrimary} />
+        <Ionicons name="checkmark" size={52} color={cores.onPrimary} />
       </Animated.View>
 
       <View style={styles.texts}>

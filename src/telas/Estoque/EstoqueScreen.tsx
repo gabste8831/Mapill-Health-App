@@ -15,18 +15,19 @@ import {
 } from "@/hooks/use-inventory-list";
 import { formatDecimalInput, formatIntegerInput, parseDecimalInput } from "@/shared/number-input";
 import { formatarNumero, formatarQuantidadeLivre } from "@/shared/rotulos-de-medicamento";
-import { colors, estadoDePressao } from "@/shared/theme";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
   CenteredLoader,
   EstadoDeErro,
+  EstadoVazio,
   Header,
   SeletorDeOrdem,
   TextField,
   type OpcaoDeOrdem,
 } from "@/ui";
-import { styles } from "./EstoqueScreen.styles";
+import { criarEstilos } from "./EstoqueScreen.styles";
 
 const MESES_CURTOS = [
   "jan",
@@ -80,6 +81,9 @@ type ItemDeEstoqueProps = {
 };
 
 function CartaoDeEstoque({ item, onRecontar, onRepor }: ItemDeEstoqueProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const { inventory, medication, depletion } = item;
   const critico = previsaoEhCritica(inventory.quantity, depletion);
 
@@ -110,7 +114,7 @@ function CartaoDeEstoque({ item, onRecontar, onRepor }: ItemDeEstoqueProps) {
           onPress={onRecontar}
           accessibilityRole="button"
           accessibilityLabel={`Recontar o estoque de ${medication.name}`}>
-          <Ionicons name="calculator-outline" size={18} color={colors.onSurface} />
+          <Ionicons name="calculator-outline" size={18} color={cores.onSurface} />
           <Text style={styles.acaoTexto}>Recontar</Text>
         </Pressable>
         <Pressable
@@ -118,7 +122,7 @@ function CartaoDeEstoque({ item, onRecontar, onRepor }: ItemDeEstoqueProps) {
           onPress={onRepor}
           accessibilityRole="button"
           accessibilityLabel={`Repor o estoque de ${medication.name}`}>
-          <Ionicons name="add-circle-outline" size={18} color={colors.onSecondaryContainer} />
+          <Ionicons name="add-circle-outline" size={18} color={cores.onSecondaryContainer} />
           <Text style={[styles.acaoTexto, styles.acaoTextoPrimaria]}>Repor</Text>
         </Pressable>
       </View>
@@ -130,6 +134,9 @@ function CartaoDeEstoque({ item, onRecontar, onRepor }: ItemDeEstoqueProps) {
 type Edicao = { item: ItemDeEstoque; modo: "recontagem" | "reposicao" };
 
 export function EstoqueScreen() {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const router = useRouter();
   const { items, aRecontar, isLoading, error, reload } = useInventoryList();
   const [edicao, setEdicao] = useState<Edicao | null>(null);
@@ -220,7 +227,7 @@ export function EstoqueScreen() {
             aRecontar.length > 0 ? (
               <View style={styles.lembrete}>
                 <View style={styles.lembreteTopo}>
-                  <Ionicons name="help-circle" size={20} color={colors.onWarningSurface} />
+                  <Ionicons name="help-circle" size={20} color={cores.onWarningSurface} />
                   <Text style={styles.lembreteTitulo}>Vale conferir a caixa</Text>
                 </View>
                 <Text style={styles.lembreteTexto}>
@@ -232,12 +239,11 @@ export function EstoqueScreen() {
             ) : null
           }
           ListEmptyComponent={
-            <View style={styles.centered}>
-              <Text style={styles.emptyTitle}>Nenhum estoque controlado</Text>
-              <Text style={styles.emptyDescription}>
-                O controle de estoque é opcional e se liga no cadastro de cada medicação.
-              </Text>
-            </View>
+            <EstadoVazio
+              icone="cube"
+              titulo="Nenhum estoque controlado"
+              descricao="O controle de estoque é opcional e se liga no cadastro de cada medicação."
+            />
           }
           // O rodapé é o único lugar onde um remédio sem controle de estoque aparece — como
           // caminho, não como linha na lista. Listá-lo aqui misturaria o que tem número com o

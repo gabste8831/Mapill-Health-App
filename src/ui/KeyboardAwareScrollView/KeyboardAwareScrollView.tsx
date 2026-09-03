@@ -14,7 +14,7 @@ import {
  * O autoscroll até o campo focado vem de `useScrollToFocusedInput`.
  */
 export const KeyboardAwareScrollView = forwardRef<ScrollViewType, ScrollViewProps>(
-  ({ children, ...scrollViewProps }, ref) => {
+  ({ children, contentContainerStyle, ...scrollViewProps }, ref) => {
     return (
       <KeyboardAvoidingView
         style={styles.flexFill}
@@ -47,8 +47,20 @@ export const KeyboardAwareScrollView = forwardRef<ScrollViewType, ScrollViewProp
            *
            * Não conflita com `keyboardShouldPersistTaps="handled"`: aquele decide o que acontece
            * quando o toque encontra um controle; este só age no toque que não encontrou nenhum.
+           *
+           * `contentContainerStyle` vem **daqui**, e não do `ScrollView` acima.
+           *
+           * O bug: o `ScrollView` do RN Web aplica `contentContainerStyle` no `<div>` de conteúdo
+           * — mas esse `<div>` só tem **um filho**, este `Pressable`, então `gap` e `padding`
+           * definidos ali não valem para nada (não há irmãos para espaçar). Os campos e cards de
+           * verdade ficam um nível abaixo, dentro do `Pressable`, que antes não herdava layout
+           * nenhum — o resultado era cards colados um no outro em toda tela que usa este
+           * componente (Ficha de Saúde, cadastro de medicação, cadastro de compromisso, Remédios).
            */}
-          <Pressable onPress={() => Keyboard.dismiss()} accessible={false}>
+          <Pressable
+            onPress={() => Keyboard.dismiss()}
+            accessible={false}
+            style={[styles.conteudo, contentContainerStyle]}>
             {children}
           </Pressable>
         </ScrollView>
@@ -61,5 +73,8 @@ KeyboardAwareScrollView.displayName = "KeyboardAwareScrollView";
 const styles = StyleSheet.create({
   flexFill: {
     flex: 1,
+  },
+  conteudo: {
+    flexGrow: 1,
   },
 });

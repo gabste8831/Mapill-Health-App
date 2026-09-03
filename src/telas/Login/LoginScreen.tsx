@@ -3,7 +3,8 @@ import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button, GoogleLogo } from "@/ui";
-import { styles } from "./LoginScreen.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./LoginScreen.styles";
 
 type LoginScreenProps = {
   onAuthenticated: () => void;
@@ -26,6 +27,8 @@ export function LoginScreen({
   onContinueWithoutLogin,
   googleDisponivel,
 }: LoginScreenProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView

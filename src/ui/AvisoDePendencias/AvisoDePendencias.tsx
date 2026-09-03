@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./AvisoDePendencias.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./AvisoDePendencias.styles";
 
 export type AvisoDePendenciasProps = {
   /** Quantas alterações locais ainda não subiram. Zero esconde o aviso. */
@@ -26,11 +26,14 @@ export type AvisoDePendenciasProps = {
  * portanto não há pendência.
  */
 export function AvisoDePendencias({ pendentes }: AvisoDePendenciasProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   if (pendentes <= 0) return null;
 
   return (
     <View style={styles.container}>
-      <Ionicons name="cloud-upload-outline" size={16} color={colors.onSurfaceVariant} />
+      <Ionicons name="cloud-upload-outline" size={16} color={cores.onSurfaceVariant} />
       <Text style={styles.texto}>
         {pendentes === 1
           ? "1 alteração ainda não subiu para a nuvem. Ela já está salva aqui."

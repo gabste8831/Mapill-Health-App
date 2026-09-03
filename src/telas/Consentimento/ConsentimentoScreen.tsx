@@ -9,7 +9,8 @@ import {
   PRIVACY_POLICY_SECTIONS,
   TERMS_OF_USE_SECTIONS,
 } from "./texto-legal";
-import { styles } from "./ConsentimentoScreen.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./ConsentimentoScreen.styles";
 
 type ConsentimentoScreenProps = {
   /** Só chamado depois dos dois checkboxes marcados — registra o consentimento e libera o app. */
@@ -24,6 +25,8 @@ type ConsentimentoScreenProps = {
 // Bloqueante de propósito: sem "pular" nem "decidir depois". Dado de saúde é sensível por
 // definição legal e atravessa toda funcionalidade central — não existe modo sem consentimento.
 export function ConsentimentoScreen({ onAccept, onBack }: ConsentimentoScreenProps) {
+  const styles = useEstilos(criarEstilos);
+
   const [hasReadTerms, setHasReadTerms] = useState(false);
   const [hasConsentedToDataProcessing, setHasConsentedToDataProcessing] = useState(false);
 

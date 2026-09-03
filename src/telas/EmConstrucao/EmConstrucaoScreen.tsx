@@ -4,8 +4,8 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Header } from "@/ui";
-import { colors } from "@/shared/theme";
-import { styles } from "./EmConstrucaoScreen.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./EmConstrucaoScreen.styles";
 
 type EmConstrucaoScreenProps = {
   title: string;
@@ -17,11 +17,14 @@ type EmConstrucaoScreenProps = {
 
 /** Ocupa as rotas que já existem mas ainda não têm conteúdo: Calendário, Remédios, Ajustes, Scanner, Compromisso. */
 export function EmConstrucaoScreen({ title, description, icon = "hammer-wrench", onBack }: EmConstrucaoScreenProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <Header title={title} onBack={onBack} />
       <View style={styles.content}>
-        <MaterialCommunityIcons name={icon} size={40} color={colors.primary} />
+        <MaterialCommunityIcons name={icon} size={40} color={cores.primary} />
         <Text style={styles.description}>{description}</Text>
       </View>
     </SafeAreaView>

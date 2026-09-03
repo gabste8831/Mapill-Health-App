@@ -1,17 +1,16 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   overlay: {
     flex: 1,
     // O scrim e onSurface a 40%: o mesmo cinza-azulado do texto, e nao um preto que nao existe
     // no tema.
-    backgroundColor: withOpacity(colors.onSurface, 0.4),
+    backgroundColor: withOpacity(cores.onSurface, 0.4),
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     paddingTop: spacing.md,
@@ -20,7 +19,7 @@ export const styles = StyleSheet.create({
   },
   title: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /**
    * O respiro de baixo fica aqui, e não no `sheet`: com o padding no container, o conteúdo rolado
@@ -30,4 +29,4 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: spacing.md,
   },
-});
+}));

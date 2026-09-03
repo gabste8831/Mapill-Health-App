@@ -1,10 +1,9 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceCard, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, superficieDeCartao, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   container: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
@@ -16,17 +15,17 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.full,
-    backgroundColor: withOpacity(colors.primary, 0.1),
+    backgroundColor: withOpacity(cores.primary, 0.1),
   },
   texto: {
     flex: 1,
   },
   titulo: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   descricao: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
-});
+}));

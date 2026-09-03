@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * O cartão de dose, agora **arredondado e com sombra** como o resto do app.
    *
@@ -16,7 +15,7 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.md,
     borderRadius: radius.lg,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     boxShadow: surfaceShadow,
   },
   /**
@@ -29,7 +28,7 @@ export const styles = StyleSheet.create({
    */
   highlighted: {
     borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
+    borderLeftColor: cores.primary,
   },
   /**
    * Atrasada usa a cor de erro, e não a de atenção: é a única linha da agenda que representa algo
@@ -38,8 +37,8 @@ export const styles = StyleSheet.create({
    */
   late: {
     borderLeftWidth: 4,
-    borderLeftColor: colors.error,
-    backgroundColor: colors.errorSurface,
+    borderLeftColor: cores.error,
+    backgroundColor: cores.errorSurface,
   },
   /**
    * "É agora" ganha o mesmo peso da atrasada: as duas pedem ação imediata, e é essa diferença —
@@ -51,8 +50,8 @@ export const styles = StyleSheet.create({
    */
   now: {
     borderLeftWidth: 4,
-    borderLeftColor: colors.success,
-    backgroundColor: colors.successSurface,
+    borderLeftColor: cores.success,
+    backgroundColor: cores.successSurface,
   },
   /**
    * A opacidade da dose resolvida **não mora mais aqui**: ela é animada no componente, para a linha
@@ -69,7 +68,7 @@ export const styles = StyleSheet.create({
    * segundo valor absoluto por cima faria a linha clarear ao ser tocada em vez de escurecer.
    */
   pressionada: {
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: cores.surfaceContainer,
   },
   /**
    * Hora, estado, nome e dose num nó só para o leitor de tela — e por isso também um bloco só no
@@ -88,21 +87,21 @@ export const styles = StyleSheet.create({
     ...typography.label,
     textTransform: "none",
     fontSize: 16,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   statusLabel: {
     ...typography.caption,
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   statusLabelUpcoming: {
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     opacity: 0.7,
   },
   statusLabelNow: {
-    color: colors.onSuccessContainer,
+    color: cores.onSuccessContainer,
   },
   statusLabelLate: {
-    color: colors.onErrorContainer,
+    color: cores.onErrorContainer,
   },
   content: {
     flex: 1,
@@ -110,7 +109,7 @@ export const styles = StyleSheet.create({
   medicationName: {
     ...typography.headlineSm,
     fontSize: 16,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /** Só a pulada é riscada: a tomada não é uma tarefa cancelada, é uma tarefa cumprida. */
   medicationNameSkipped: {
@@ -118,7 +117,7 @@ export const styles = StyleSheet.create({
   },
   note: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   actions: {
     gap: spacing.sm,
@@ -136,7 +135,7 @@ export const styles = StyleSheet.create({
    * botões são desenhados pela própria tela.
    */
   confirmButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     minHeight: 44,
     justifyContent: "center",
     paddingVertical: spacing.sm,
@@ -145,7 +144,7 @@ export const styles = StyleSheet.create({
   },
   confirmButtonText: {
     ...typography.label,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     textAlign: "center",
   },
   /**
@@ -160,11 +159,11 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: cores.surfaceContainer,
   },
   skipButtonText: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
-});
+}));

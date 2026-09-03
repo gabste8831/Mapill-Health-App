@@ -1,12 +1,11 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, surfaceCard, typography } from "@/shared/theme";
+import { estilosDoTema, spacing, superficieDeCartao, typography } from "@/shared/theme";
 
 const BAR_ROW_HEIGHT = 80;
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   container: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     gap: spacing.md,
   },
   header: {
@@ -16,7 +15,7 @@ export const styles = StyleSheet.create({
   },
   title: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   barsRow: {
     flexDirection: "row",
@@ -30,7 +29,7 @@ export const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   bar: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     borderRadius: 2,
     opacity: 0.2,
   },
@@ -40,7 +39,7 @@ export const styles = StyleSheet.create({
   /** Traço fino de "não havia dose", visualmente distinto de uma barra curta. */
   barVazia: {
     height: 2,
-    backgroundColor: colors.outlineVariant,
+    backgroundColor: cores.outlineVariant,
     borderRadius: 2,
   },
   labelsRow: {
@@ -50,16 +49,16 @@ export const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     ...typography.caption,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     opacity: 0.6,
   },
   summary: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
     paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.surfaceContainerHigh,
+    borderTopColor: cores.surfaceContainerHigh,
   },
-});
+}));
 
 export const barRowHeight = BAR_ROW_HEIGHT;

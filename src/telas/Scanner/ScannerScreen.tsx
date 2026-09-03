@@ -6,7 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { CatalogEntry } from "@/domain/ports/medication-catalog";
 import { useBuscaPorEan } from "@/hooks/use-medication-catalog";
 import { Button, Header } from "@/ui";
-import { styles } from "./ScannerScreen.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./ScannerScreen.styles";
 
 /**
  * O que a tela está fazendo. Estados explícitos em vez de booleanos soltos: "lendo" e
@@ -40,6 +41,8 @@ export type ScannerScreenProps = {
  * envelhece. O caminho manual continua a um toque de distância, com o mesmo peso visual.
  */
 export function ScannerScreen({ onUsar, onBack }: ScannerScreenProps) {
+  const styles = useEstilos(criarEstilos);
+
   const [permissao, pedirPermissao] = useCameraPermissions();
   const [estado, setEstado] = useState<EstadoDaLeitura>({ tipo: "lendo" });
   const buscarPorEan = useBuscaPorEan();

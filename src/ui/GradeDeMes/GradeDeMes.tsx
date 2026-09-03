@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./GradeDeMes.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./GradeDeMes.styles";
 
 /** O que existe num dia — decide quais pontinhos ele mostra. */
 export type MarcasDoDia = {
@@ -78,6 +78,9 @@ export function GradeDeMes({
   onSelecionar,
   onMudarMes,
 }: GradeDeMesProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <View style={styles.container}>
       <View style={styles.cabecalho}>
@@ -87,7 +90,7 @@ export function GradeDeMes({
           accessibilityRole="button"
           accessibilityLabel="Mês anterior"
           hitSlop={8}>
-          <Ionicons name="chevron-back" size={20} color={colors.onPrimary} />
+          <Ionicons name="chevron-back" size={20} color={cores.onPrimary} />
         </Pressable>
 
         <Text style={styles.titulo}>
@@ -100,7 +103,7 @@ export function GradeDeMes({
           accessibilityRole="button"
           accessibilityLabel="Próximo mês"
           hitSlop={8}>
-          <Ionicons name="chevron-forward" size={20} color={colors.onPrimary} />
+          <Ionicons name="chevron-forward" size={20} color={cores.onPrimary} />
         </Pressable>
       </View>
 

@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Pressable, TextInput, View, type StyleProp, type ViewStyle } from "react-native";
 
-import { colors, estadoDePressao } from "@/shared/theme";
-import { styles } from "./SearchField.styles";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./SearchField.styles";
 
 export type SearchFieldProps = {
   value: string;
@@ -28,10 +28,13 @@ export function SearchField({
   clearAccessibilityLabel = "Limpar busca",
   style,
 }: SearchFieldProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [focado, setFocado] = useState(false);
 
   return (
-    <View style={[styles.container, focado && styles.containerFocado, style]}>
+    <View style={[styles.container, style]}>
       {/**
        * A lupa acompanha o foco: cinza em repouso, azul enquanto se escreve.
        *
@@ -39,14 +42,14 @@ export function SearchField({
        * campo inteiro lia como desligado. Junto do anel de foco, é o que dá sinal de vida à busca
        * sem acrescentar enfeite nenhum.
        */}
-      <Ionicons name="search" size={20} color={focado ? colors.primary : colors.onSurfaceVariant} />
+      <Ionicons name="search" size={20} color={focado ? cores.primary : cores.onSurfaceVariant} />
 
       <TextInput
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={colors.outline}
+        placeholderTextColor={cores.outline}
         autoCorrect={false}
         autoCapitalize="none"
         returnKeyType="search"
@@ -63,7 +66,7 @@ export function SearchField({
           accessibilityRole="button"
           accessibilityLabel={clearAccessibilityLabel}
           hitSlop={8}>
-          <Ionicons name="close-circle" size={20} color={colors.outline} />
+          <Ionicons name="close-circle" size={20} color={cores.outline} />
         </Pressable>
       ) : null}
     </View>

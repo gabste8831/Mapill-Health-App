@@ -1,20 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import {
-  colors,
-  listGap,
-  radius,
-  screenPadding,
-  spacing,
-  surfaceCard,
-  typography,
-  withOpacity,
-} from "@/shared/theme";
+import { estilosDoTema, listGap, radius, screenPadding, spacing, superficieDeCartao, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   conteudo: {
     paddingHorizontal: screenPadding,
@@ -25,16 +15,16 @@ export const styles = StyleSheet.create({
   /** "Sábado, 29 de agosto às 08:00" — situa quem chegou pela notificação horas depois. */
   quando: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   resumo: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
 
   // --- Cartão de dose ---
   card: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     gap: spacing.md,
   },
   /** Respondida fica esmaecida, mas continua legível: é registro, não lixo. */
@@ -52,15 +42,15 @@ export const styles = StyleSheet.create({
   },
   nome: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   quantidade: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   orientacao: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   selo: {
     alignItems: "center",
@@ -68,11 +58,11 @@ export const styles = StyleSheet.create({
   },
   seloTexto: {
     ...typography.caption,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   corrigirDica: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /**
    * O aviso de dose adiada. Fundo azul claro, e não amarelo: adiar não é problema nem pendência
@@ -81,8 +71,8 @@ export const styles = StyleSheet.create({
    */
   adiadaDica: {
     ...typography.bodyMd,
-    color: colors.onSecondaryContainer,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
+    color: cores.onSecondaryContainer,
+    backgroundColor: withOpacity(cores.secondaryContainer, 0.45),
     padding: spacing.md,
     borderRadius: radius.md,
   },
@@ -117,18 +107,18 @@ export const styles = StyleSheet.create({
   },
   vazioTitulo: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "center",
   },
   vazioTexto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 320,
   },
   erro: {
     ...typography.bodyMd,
-    color: colors.error,
+    color: cores.error,
     textAlign: "center",
   },
-});
+}));

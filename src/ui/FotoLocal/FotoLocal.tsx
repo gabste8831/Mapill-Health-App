@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import type { StyleProp, ImageStyle } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { useCores } from "@/shared/theme";
 
 export type FotoLocalProps = {
   /** Caminho no diretório de documentos do app, vindo de `persistPickedFile`. */
@@ -33,6 +33,8 @@ export type FotoLocalProps = {
  * remédio certo**.
  */
 export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) {
+  const cores = useCores();
+
   return (
     <Image
       /**
@@ -52,7 +54,7 @@ export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) 
       source={{ uri }}
       // O cinza vem antes do `style` de quem chama, que pode sobrescrevê-lo — é só o piso para o
       // quadrado nunca ficar transparente enquanto a imagem carrega.
-      style={[{ backgroundColor: colors.surfaceContainer }, style]}
+      style={[{ backgroundColor: cores.surfaceContainer }, style]}
       contentFit={contentFit}
       cachePolicy="none"
       recyclingKey={uri}

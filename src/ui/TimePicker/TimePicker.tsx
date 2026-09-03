@@ -1,8 +1,8 @@
 import { DateTimePicker, Host } from "@expo/ui/jetpack-compose";
 import { View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./TimePicker.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./TimePicker.styles";
 
 /**
  * Onde o mostrador começa quando ainda não há resposta. **Não é sugestão**: a posição inicial de um
@@ -59,6 +59,9 @@ function paraHorario(data: Date): string {
  * SwiftUI, e `.web.tsx` mantém os campos digitáveis para o preview do navegador.
  */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <View style={styles.container}>
       <Host matchContents={{ vertical: true }} style={styles.host}>
@@ -88,17 +91,17 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
            * pílula das abas resolvido em 23/08. Nomear cada peça é o que garante que o popup seja
            * do Mapill em qualquer aparelho, e o SDK 57 passou a permitir isso.
            */
-          color={colors.primary}
+          color={cores.primary}
           elementColors={{
-            containerColor: colors.surfaceContainerLowest,
-            clockDialColor: colors.surfaceContainer,
-            selectorColor: colors.primary,
-            clockDialSelectedContentColor: colors.onPrimary,
-            clockDialUnselectedContentColor: colors.onSurface,
-            timeSelectorSelectedContainerColor: colors.primaryContainer,
-            timeSelectorSelectedContentColor: colors.onPrimary,
-            timeSelectorUnselectedContainerColor: colors.surfaceContainer,
-            timeSelectorUnselectedContentColor: colors.onSurface,
+            containerColor: cores.surfaceContainerLowest,
+            clockDialColor: cores.surfaceContainer,
+            selectorColor: cores.primary,
+            clockDialSelectedContentColor: cores.onPrimary,
+            clockDialUnselectedContentColor: cores.onSurface,
+            timeSelectorSelectedContainerColor: cores.primaryContainer,
+            timeSelectorSelectedContentColor: cores.onPrimary,
+            timeSelectorUnselectedContainerColor: cores.surfaceContainer,
+            timeSelectorUnselectedContentColor: cores.onSurface,
           }}
           onDateSelected={(data) => onChange(paraHorario(data))}
         />

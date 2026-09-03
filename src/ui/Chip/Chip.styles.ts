@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /** `minHeight`: com altura travada, a chip recorta o próprio texto em fonte ampliada. */
   chip: {
     flexDirection: "row",
@@ -13,13 +12,13 @@ export const styles = StyleSheet.create({
     minHeight: 40,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
   },
   chipText: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   chipRemove: {
     width: 20,
@@ -30,7 +29,7 @@ export const styles = StyleSheet.create({
   },
   chipRemoveText: {
     ...typography.label,
-    color: colors.error,
+    color: cores.error,
     fontSize: 14,
   },
-});
+}));

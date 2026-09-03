@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, withOpacity } from "@/shared/theme";
+import { estilosDoTema, spacing, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * Sombra para cima, e **não** a borda de 1px que havia aqui.
    *
@@ -18,11 +17,11 @@ export const styles = StyleSheet.create({
    * tela e não apareceria.
    */
   rodape: {
-    backgroundColor: colors.background,
-    boxShadow: `0px -2px 8px ${withOpacity(colors.onSurface, 0.08)}`,
+    backgroundColor: cores.background,
+    boxShadow: `0px -2px 8px ${withOpacity(cores.onSurface, 0.08)}`,
   },
   conteudo: {
     padding: spacing.md,
     gap: spacing.sm,
   },
-});
+}));

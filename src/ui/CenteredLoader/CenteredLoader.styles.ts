@@ -1,14 +1,13 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing } from "@/shared/theme";
+import { estilosDoTema, spacing } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.md,
     padding: spacing.lg,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
-});
+}));

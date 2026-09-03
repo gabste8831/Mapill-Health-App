@@ -10,8 +10,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 import type { DoseVisualStatus } from "@/hooks/use-today-doses";
-import { estadoDePressao } from "@/shared/theme";
-import { styles } from "./ItemDeDose.styles";
+import { estadoDePressao, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./ItemDeDose.styles";
 
 /**
  * O tempo que a linha leva para se acomodar no estado resolvido.
@@ -81,6 +81,8 @@ export function ItemDeDose({
   onSkip,
   onCorrect,
 }: ItemDeDoseProps) {
+  const styles = useEstilos(criarEstilos);
+
   const resolvida = status === "confirmed" || status === "skipped";
   // "Na hora" é o caso mais acionável de todos: é literalmente agora.
   const acionavel = status === "next" || status === "now" || status === "late";

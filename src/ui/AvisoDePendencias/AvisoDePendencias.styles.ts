@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * Discreto de propósito: fundo neutro, ícone pequeno, texto de apoio. Ele informa, não alerta —
    * e um aviso que compete com o conteúdo da lista seria lido uma vez e ignorado nas seguintes.
@@ -11,7 +10,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     borderRadius: radius.sm,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -19,7 +18,7 @@ export const styles = StyleSheet.create({
   },
   texto: {
     ...typography.bodySm,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     flex: 1,
   },
-});
+}));

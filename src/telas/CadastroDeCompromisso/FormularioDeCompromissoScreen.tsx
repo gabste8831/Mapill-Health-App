@@ -21,7 +21,8 @@ import {
   TimeField,
   RodapeDeFormulario,
 } from "@/ui";
-import { styles } from "./CadastroDeCompromisso.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./CadastroDeCompromisso.styles";
 
 /** Antecedência máxima aceita. Meio ano antes já não é lembrete, é outro compromisso. */
 const MAX_ANTECEDENCIA_EM_DIAS = 180;
@@ -85,6 +86,8 @@ export function FormularioDeCompromissoScreen({
   onSubmit,
   onBack,
 }: FormularioDeCompromissoScreenProps) {
+  const styles = useEstilos(criarEstilos);
+
   const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
 
   const instanteInicial = initialValue === undefined ? null : new Date(initialValue.scheduledFor);

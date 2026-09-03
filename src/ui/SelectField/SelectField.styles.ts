@@ -1,14 +1,13 @@
-import { StyleSheet } from "react-native";
 
-import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   fieldGroup: {
     gap: fieldLabelGap,
   },
   fieldLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** Mesma razão do `TextField`: altura travada recorta o valor escolhido em fonte ampliada. */
   selectField: {
@@ -16,20 +15,20 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   selectFieldValue: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   selectFieldPlaceholder: {
     ...typography.bodyLg,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   modalOption: {
     flexDirection: "row",
@@ -39,14 +38,14 @@ export const styles = StyleSheet.create({
   },
   modalOptionText: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   modalOptionTextSelected: {
     ...typography.bodyLg,
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   modalOptionTextMuted: {
     ...typography.bodyLg,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
-});
+}));

@@ -9,8 +9,8 @@ import {
   type OptionGroupOption,
 } from "@/ui";
 import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
-import { estadoDePressao } from "@/shared/theme";
-import { styles } from "./CadastroDeMedicamento.styles";
+import { estadoDePressao, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./CadastroDeMedicamento.styles";
 
 const LEAD_DAYS_OPTIONS: OptionGroupOption<string>[] = [
   { value: "3", label: "3 dias" },
@@ -68,6 +68,8 @@ export function ConfiguracaoDeEstoque({
   storageLocation,
   onStorageLocationChange,
 }: ConfiguracaoDeEstoqueProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Controle de estoque">
       <View style={styles.sheetBody}>

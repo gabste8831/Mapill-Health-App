@@ -5,9 +5,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useDosesDoHorario, type DoseDoHorario } from "@/hooks/use-doses-do-horario";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import { Button, CenteredLoader, EstadoDeErro, Header } from "@/ui";
-import { styles } from "./HorarioScreen.styles";
+import { criarEstilos } from "./HorarioScreen.styles";
 
 type ItemProps = {
   dose: DoseDoHorario;
@@ -18,6 +18,9 @@ type ItemProps = {
 };
 
 function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const confirmada = dose.latestStatus === "confirmed";
   const adiada = dose.latestStatus === "deferred";
 
@@ -60,7 +63,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
             <Ionicons
               name={confirmada ? "checkmark-circle" : "close-circle"}
               size={22}
-              color={confirmada ? colors.success : colors.onSurfaceVariant}
+              color={confirmada ? cores.success : cores.onSurfaceVariant}
             />
             <Text style={styles.seloTexto}>{confirmada ? "Tomada" : "Pulada"}</Text>
           </View>
@@ -159,6 +162,8 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
  * caminho reconhece o outro.
  */
 export function HorarioScreen() {
+  const styles = useEstilos(criarEstilos);
+
   const router = useRouter();
   const { instante } = useLocalSearchParams<{ instante: string }>();
   const { doses, isLoading, error, reload, registrar } = useDosesDoHorario(instante ?? "");

@@ -7,7 +7,8 @@ import {
   TERMS_OF_USE_SECTIONS,
 } from "@/telas/Consentimento/texto-legal";
 import { Card, Header, LegalAccordion } from "@/ui";
-import { styles } from "./TermosScreen.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./TermosScreen.styles";
 
 export type TermosScreenProps = {
   /** Versão que o paciente aceitou. `null` enquanto nenhum consentimento foi registrado. */
@@ -37,6 +38,8 @@ function toDisplayDate(isoTimestamp: string): string {
  * uma ação de exclusão, e não um botão perdido numa tela de leitura.
  */
 export function TermosScreen({ acceptedVersion, acceptedAt, onBack }: TermosScreenProps) {
+  const styles = useEstilos(criarEstilos);
+
   const isUpToDate = acceptedVersion === CURRENT_TERMS_VERSION;
 
   return (

@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing } from "@/shared/theme";
+import { estilosDoTema, radius, spacing } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   container: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -23,8 +22,8 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: cores.outlineVariant,
+    backgroundColor: cores.surfaceContainerLowest,
   },
   sheetBody: {
     gap: spacing.md,
@@ -36,4 +35,4 @@ export const styles = StyleSheet.create({
   acao: {
     flex: 1,
   },
-});
+}));

@@ -1,10 +1,9 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   container: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.md,
@@ -17,16 +16,16 @@ export const styles = StyleSheet.create({
   },
   label: {
     ...typography.label,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     opacity: 0.7,
   },
   time: {
     ...typography.headlineXlBold,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   medication: {
     ...typography.bodyLg,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   hintRow: {
     flexDirection: "row",
@@ -34,12 +33,12 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: withOpacity(colors.onPrimary, 0.2),
+    borderTopColor: withOpacity(cores.onPrimary, 0.2),
   },
   hintText: {
     ...typography.label,
     textTransform: "none",
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     opacity: 0.85,
   },
-});
+}));

@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -28,7 +27,7 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.label,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /**
    * As duas seções são marcadas, não só a obrigatória: o contraste entre "obrigatório" e
@@ -43,31 +42,31 @@ export const styles = StyleSheet.create({
     // paddingVertical: 2,
   },
   seloObrigatorio: {
-    backgroundColor: colors.primary,
-    color: colors.onPrimary,
+    backgroundColor: cores.primary,
+    color: cores.onPrimary,
   },
   seloOpcional: {
-    backgroundColor: colors.surfaceContainerHigh,
-    color: colors.onSurfaceVariant,
+    backgroundColor: cores.surfaceContainerHigh,
+    color: cores.onSurfaceVariant,
   },
   sectionHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   footerHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
   subtitle: {
     ...typography.bodySm,
-    color: colors.outline,
+    color: cores.outline,
   },
   infoBanner: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
     borderRadius: radius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -75,7 +74,7 @@ export const styles = StyleSheet.create({
   infoBannerText: {
     // `bodyMd` inteiro: o 13 era um meio-termo entre dois degraus da escala, sem razão registrada.
     ...typography.bodyMd,
-    color: colors.onPrimaryContainer,
+    color: cores.onPrimaryContainer,
     flex: 1,
     padding: spacing.sm,
   },
@@ -89,9 +88,9 @@ export const styles = StyleSheet.create({
     height: 72,
     borderRadius: radius.full,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
     borderStyle: "dashed",
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -101,7 +100,7 @@ export const styles = StyleSheet.create({
     height: 72,
     borderRadius: radius.full,
     overflow: "hidden",
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
   photo: {
     width: "100%",
@@ -122,17 +121,17 @@ export const styles = StyleSheet.create({
   },
   photoAddLabel: {
     ...typography.label,
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   photoRemoveLabel: {
     ...typography.label,
-    color: colors.error,
+    color: cores.error,
   },
   // Label "solta" usada dentro de um Card quando o campo abaixo não é um TextField com label
   // própria (ex: título da seção "Alergias"/"Contato de emergência" acima de um grupo de campos).
   fieldLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   allergyChipsRow: {
     flexDirection: "row",
@@ -156,7 +155,7 @@ export const styles = StyleSheet.create({
   // não há nenhum contato cadastrado.
   emptyHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   // Mesmo respiro de contactList/allergyChipsRow — separa a ação da lista acima dela.
   addContactButton: {
@@ -177,9 +176,9 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
+    borderColor: cores.outlineVariant,
   },
   contactInfo: {
     flex: 1,
@@ -187,11 +186,11 @@ export const styles = StyleSheet.create({
   },
   contactName: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   contactMeta: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** 44: remover contato de emergência é destrutivo, e alvo de 32 é onde o toque erra. */
   contactRemove: {
@@ -200,4 +199,4 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+}));

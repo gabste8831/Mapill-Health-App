@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   /**
    * `flexGrow: 1` faz o conteúdo ocupar pelo menos a altura da tela, e só então o
@@ -21,7 +20,7 @@ export const styles = StyleSheet.create({
   },
   intro: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
   options: {
@@ -42,7 +41,7 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: withOpacity(colors.surfaceContainer, 0.5),
+    backgroundColor: withOpacity(cores.surfaceContainer, 0.5),
   },
   optionText: {
     flex: 1,
@@ -50,11 +49,11 @@ export const styles = StyleSheet.create({
   },
   optionLabel: {
     ...typography.headlineSmRegular,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   optionDescription: {
     ...typography.bodyMd,
-    color: colors.onSecondaryContainer,
+    color: cores.onSecondaryContainer,
     maxWidth: 300,
   },
-});
+}));

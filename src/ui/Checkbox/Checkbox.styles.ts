@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   row: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -18,17 +17,17 @@ export const styles = StyleSheet.create({
     height: typography.bodyMd.lineHeight,
     borderRadius: radius.sm,
     borderWidth: 1.5,
-    borderColor: colors.outline,
+    borderColor: cores.outline,
     alignItems: "center",
     justifyContent: "center",
   },
   boxChecked: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: cores.primary,
+    borderColor: cores.primary,
   },
   label: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
     flex: 1,
   },
-});
+}));

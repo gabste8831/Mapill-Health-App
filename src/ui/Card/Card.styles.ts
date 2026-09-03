@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceShadow } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, surfaceShadow } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * Sombra em vez de borda: o fundo da tela e o card são quase da mesma cor, então a borda de
    * 1px fazia o card parecer uma caixa desenhada e não uma superfície acima. A sombra é
@@ -12,10 +11,10 @@ export const styles = StyleSheet.create({
    * claro que a cópia dele em cinco arquivos era o que deixava as telas divergirem.
    */
   card: {
-    backgroundColor: colors.surfaceContainerLowest,
+    backgroundColor: cores.surfaceContainerLowest,
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.gutter,
     boxShadow: surfaceShadow,
   },
-});
+}));

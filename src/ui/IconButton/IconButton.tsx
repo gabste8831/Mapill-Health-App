@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import type { PressableProps, StyleProp, ViewStyle } from "react-native";
 import { Pressable } from "react-native";
 
-import { estadoDePressao } from "@/shared/theme";
-import { styles } from "./IconButton.styles";
+import { estadoDePressao, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./IconButton.styles";
 
 /**
  * `sutil` é o ícone dentro de um cartão de lista: fundo neutro, sem borda, sem sombra.
@@ -37,6 +37,8 @@ export function IconButton({
   style,
   ...pressableProps
 }: IconButtonProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <Pressable
       style={estadoDePressao(

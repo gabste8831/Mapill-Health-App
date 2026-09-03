@@ -4,8 +4,8 @@ import type { LayoutChangeEvent } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
-import { colors, estadoDePressao } from "@/shared/theme";
-import { styles } from "./Accordion.styles";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./Accordion.styles";
 
 export type AccordionTone = "claro" | "azul";
 
@@ -39,9 +39,12 @@ export function Accordion({
   defaultExpanded = false,
   onToggle,
 }: AccordionProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const [isExpanded, setExpanded] = useState(defaultExpanded);
   const isBlue = tone === "azul";
-  const foreground = isBlue ? colors.onPrimary : colors.primary;
+  const foreground = isBlue ? cores.onPrimary : cores.primary;
 
   /**
    * Animar a altura de 0 até a real é o que faz o bloco "descer". Antes o conteúdo entrava com

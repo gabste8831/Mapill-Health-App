@@ -56,7 +56,7 @@ import {
 import { deletePersistedFile } from "@/shared/persist-picked-file";
 import { capitalizarNome, MEDICATION_FORM_LABELS, UNIT_LABELS } from "@/shared/rotulos-de-medicamento";
 import { abrirDocumento } from "@/shared/abrir-anexo";
-import { colors, estadoDePressao } from "@/shared/theme";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
   Button,
@@ -79,7 +79,7 @@ import {
   RodapeDeFormulario,
   VisualizadorDeMidia,
 } from "@/ui";
-import { styles } from "./CadastroDeMedicamento.styles";
+import { criarEstilos } from "./CadastroDeMedicamento.styles";
 import { ConfiguracaoDeEstoque } from "./ConfiguracaoDeEstoque";
 import { ConfiguracaoDeLembrete } from "./ConfiguracaoDeLembrete";
 import { entradasVazias, SeletorDeHorarios, type EntradaDeDose } from "./SeletorDeHorarios";
@@ -351,6 +351,9 @@ export function FormularioDeMedicamentoScreen({
   onSubmit,
   onBack,
 }: FormularioDeMedicamentoScreenProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const router = useRouter();
   const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
   const boxPhoto = usePhotoPicker("medicamento-caixa");
@@ -1410,7 +1413,7 @@ export function FormularioDeMedicamentoScreen({
                     onFocus={scrollToFocusedInput}
                     placeholder="Mais"
                     // Sem opacidade, igual ao TextField: a 0.8 dava 3.41:1, abaixo do AA.
-                    placeholderTextColor={colors.outline}
+                    placeholderTextColor={cores.outline}
                     keyboardType="number-pad"
                     maxLength={2}
                     accessibilityLabel="Outra quantidade de doses por dia"
@@ -1598,11 +1601,8 @@ export function FormularioDeMedicamentoScreen({
         {essencialCompleto ? (
           <>
             <View style={styles.revelacao}>
-              <Text style={styles.revelacaoTitulo}>Seu medicamento já pode ser cadastrado!</Text>
-              <Text style={styles.revelacaoHint}>
-                O que vem abaixo é opcional e serve pra você ter mais controle: saber quando o
-                estoque está acabando, guardar a receita à mão e ser lembrado na hora certa.
-              </Text>
+              <Text style={styles.revelacaoTitulo}>Já pode cadastrar!</Text>
+              <Text style={styles.revelacaoHint}>O resto abaixo é opcional.</Text>
             </View>
 
             <Card>
@@ -1682,7 +1682,7 @@ export function FormularioDeMedicamentoScreen({
                     <MaterialCommunityIcons
                       name="camera-plus"
                       size={24}
-                      color={colors.onSurfaceVariant}
+                      color={cores.onSurfaceVariant}
                     />
                   )}
                 </Pressable>
@@ -1734,7 +1734,7 @@ export function FormularioDeMedicamentoScreen({
                     <MaterialCommunityIcons
                       name={attachmentUri === null ? "file-document-outline" : "file-pdf-box"}
                       size={24}
-                      color={attachmentUri === null ? colors.onSurfaceVariant : colors.primary}
+                      color={attachmentUri === null ? cores.onSurfaceVariant : cores.primary}
                     />
                   )}
                 </Pressable>

@@ -9,7 +9,7 @@ import {
   type PeriodoDeAdesao,
 } from "@/hooks/use-adherence-report";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
-import { estadoDePressao } from "@/shared/theme";
+import { estadoDePressao , useEstilos } from "@/shared/theme";
 import type { AdesaoPorMedicamento } from "@/domain/use-cases/resumir-adesao";
 import { useRelatorioPdf } from "@/hooks/use-relatorio-pdf";
 import {
@@ -23,7 +23,8 @@ import {
   OptionGroup,
   type OptionGroupOption,
 } from "@/ui";
-import { styles } from "./AdesaoScreen.styles";
+
+import { criarEstilos } from "./AdesaoScreen.styles";
 
 /**
  * `OptionGroup` e não `SeletorDeOrdem`: período não é ordenação. O seletor de ordem exige um ícone
@@ -55,6 +56,8 @@ function faixaDaTaxa(taxa: number): "boa" | "media" | "baixa" {
 }
 
 function LinhaDeMedicamento({ item }: { item: AdesaoPorMedicamento }) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <View style={styles.linha}>
       <View style={styles.linhaTexto}>
@@ -87,6 +90,8 @@ function LinhaDeMedicamento({ item }: { item: AdesaoPorMedicamento }) {
  * é exatamente o que destruiria o valor deste número.
  */
 export function AdesaoScreen() {
+  const styles = useEstilos(criarEstilos);
+
   const router = useRouter();
   const [periodo, setPeriodo] = useState<PeriodoDeAdesao>(30);
   const { resumo, perdidas, isLoading, error, reload } = useAdherenceReport(periodo);

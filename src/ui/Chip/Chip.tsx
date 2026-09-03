@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 
-import { styles } from "./Chip.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./Chip.styles";
 
 export type ChipProps = {
   label: string;
@@ -10,6 +11,8 @@ export type ChipProps = {
 
 /** Chip removível — usado hoje em alergias, reutilizável pra qualquer lista curta de tags. */
 export function Chip({ label, onRemove }: ChipProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <View style={styles.chip}>
       <Text style={styles.chipText}>{label}</Text>

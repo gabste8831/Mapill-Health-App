@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   container: {
     alignItems: "center",
     paddingVertical: spacing.sm,
@@ -36,8 +35,8 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     width: 92,
     paddingVertical: spacing.sm,
-    color: colors.onSurface,
-    backgroundColor: colors.surfaceContainerLow,
+    color: cores.onSurface,
+    backgroundColor: cores.surfaceContainerLow,
     borderRadius: radius.md,
     borderWidth: 2,
     // Transparente e não zero: a borda do foco não pode mudar a altura da caixa, senão os dois
@@ -45,24 +44,24 @@ export const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   entradaFocada: {
-    borderColor: colors.primary,
-    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: cores.primary,
+    backgroundColor: cores.surfaceContainerLowest,
   },
   rotulo: {
     ...typography.caption,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** Os dois pontos entre as caixas, alinhados com os números e não com os rótulos. */
   separador: {
     ...typography.headlineSm,
     fontSize: 30,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     // Sobe o mesmo tanto que a altura do rótulo abaixo empurraria para baixo.
     marginBottom: spacing.md,
   },
   ajuda: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
   },
-});
+}));

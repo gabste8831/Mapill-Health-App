@@ -31,6 +31,7 @@ export default function AjustesRoute() {
       onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
       onEditProfile={() => router.push("/ficha")}
       onOpenAccount={() => router.push("/conta")}
+      onOpenTheme={() => router.push("/tema")}
     />
   );
 }

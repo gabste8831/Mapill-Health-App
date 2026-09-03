@@ -1,7 +1,7 @@
 import { DateTimePicker, Host } from "@expo/ui/jetpack-compose";
 import { View } from "react-native";
 
-import { colors } from "@/shared/theme";
+import { useCores } from "@/shared/theme";
 import { styles } from "./DatePicker.styles";
 
 export type DatePickerProps = {
@@ -40,33 +40,35 @@ function paraIsoDay(data: Date): string {
  * as outras plataformas.
  */
 export function DatePicker({ initialValue, onChange, minimo, maximo }: DatePickerProps) {
+  const cores = useCores();
+
   return (
     <View style={styles.container}>
       <Host matchContents={{ vertical: true }} style={styles.host}>
         <DateTimePicker
           displayedComponents="date"
           variant="picker"
-          color={colors.primary}
+          color={cores.primary}
           // Mesmo motivo do TimePicker: sem isto, parte dos elementos herda o acento do tema do
           // sistema, e o calendário aparece com a cor do celular em vez da do app.
           elementColors={{
-            containerColor: colors.surfaceContainerLowest,
-            titleContentColor: colors.onSurfaceVariant,
-            headlineContentColor: colors.onSurface,
-            weekdayContentColor: colors.onSurfaceVariant,
-            subheadContentColor: colors.onSurfaceVariant,
-            navigationContentColor: colors.onSurfaceVariant,
-            dayContentColor: colors.onSurface,
-            disabledDayContentColor: colors.outline,
-            selectedDayContainerColor: colors.primary,
-            selectedDayContentColor: colors.onPrimary,
-            todayContentColor: colors.primary,
-            todayDateBorderColor: colors.primary,
-            yearContentColor: colors.onSurface,
-            selectedYearContainerColor: colors.primary,
-            selectedYearContentColor: colors.onPrimary,
-            currentYearContentColor: colors.primary,
-            dividerColor: colors.outlineVariant,
+            containerColor: cores.surfaceContainerLowest,
+            titleContentColor: cores.onSurfaceVariant,
+            headlineContentColor: cores.onSurface,
+            weekdayContentColor: cores.onSurfaceVariant,
+            subheadContentColor: cores.onSurfaceVariant,
+            navigationContentColor: cores.onSurfaceVariant,
+            dayContentColor: cores.onSurface,
+            disabledDayContentColor: cores.outline,
+            selectedDayContainerColor: cores.primary,
+            selectedDayContentColor: cores.onPrimary,
+            todayContentColor: cores.primary,
+            todayDateBorderColor: cores.primary,
+            yearContentColor: cores.onSurface,
+            selectedYearContainerColor: cores.primary,
+            selectedYearContentColor: cores.onPrimary,
+            currentYearContentColor: cores.primary,
+            dividerColor: cores.outlineVariant,
           }}
           selectableDates={
             minimo !== undefined || maximo !== undefined

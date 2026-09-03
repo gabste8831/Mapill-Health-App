@@ -2,7 +2,8 @@ import { DatePicker, Host } from "@expo/ui/swift-ui";
 import { useState } from "react";
 import { View } from "react-native";
 
-import { styles } from "./TimePicker.styles";
+import { useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./TimePicker.styles";
 
 import type { TimePickerProps } from "./TimePicker";
 
@@ -32,6 +33,8 @@ function paraHorario(data: Date): string {
  * avisa: ela só aparece no primeiro build de iOS, longe de quem a criou.
  */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {
+  const styles = useEstilos(criarEstilos);
+
   const [selecionado, setSelecionado] = useState(() =>
     paraData(initialValue ?? HORARIO_NEUTRO),
   );

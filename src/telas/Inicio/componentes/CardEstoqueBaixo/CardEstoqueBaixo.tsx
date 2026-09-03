@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 
-import { estadoDePressao } from "@/shared/theme";
-import { styles } from "./CardEstoqueBaixo.styles";
+import { estadoDePressao, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./CardEstoqueBaixo.styles";
 
 type CardEstoqueBaixoProps = {
   medicationName: string;
@@ -18,6 +18,8 @@ export function CardEstoqueBaixo({
   daysRemaining,
   onAbrirEstoque,
 }: CardEstoqueBaixoProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>

@@ -1,21 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import {
-  bottomTabInset,
-  colors,
-  gapEntreSecoes,
-  listGap,
-  radius,
-  screenPadding,
-  spacing,
-  surfaceCard,
-  typography,
-} from "@/shared/theme";
+import { bottomTabInset, estilosDoTema, gapEntreSecoes, listGap, radius, screenPadding, spacing, superficieDeCartao, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   /**
    * `gutter` entre os blocos, e não `lg`: a Home empilha coisas de natureza diferente — saudação,
@@ -37,11 +26,11 @@ export const styles = StyleSheet.create({
   },
   dateLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   greeting: {
     ...typography.headlineXl,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   progressBlock: {
     gap: spacing.sm,
@@ -53,11 +42,11 @@ export const styles = StyleSheet.create({
   },
   progressLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   progressValue: {
     ...typography.headlineSm,
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   /**
    * A trilha subiu de 4 para 8px e a ponta ficou redonda. Com 4 ela era um fio: some no meio da
@@ -68,18 +57,18 @@ export const styles = StyleSheet.create({
    */
   progressTrack: {
     height: 8,
-    backgroundColor: colors.surfaceContainerHigh,
+    backgroundColor: cores.surfaceContainerHigh,
     borderRadius: radius.full,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   progressCaption: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     opacity: 0.7,
   },
   doseList: {
@@ -87,7 +76,7 @@ export const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** O rótulo da seção e a ação que vale para ela inteira, na mesma linha. */
   sectionHeaderRow: {
@@ -102,29 +91,29 @@ export const styles = StyleSheet.create({
    */
   bulkAction: {
     ...typography.label,
-    color: colors.primary,
+    color: cores.corDeDestaque,
     paddingVertical: spacing.xs,
   },
   emptyState: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     alignItems: "center",
     gap: spacing.sm,
     paddingVertical: spacing.xl,
   },
   emptyTitle: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "center",
   },
   emptyDescription: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 320,
   },
   errorText: {
     ...typography.bodyMd,
-    color: colors.error,
+    color: cores.error,
   },
   /**
    * O erro da Home como faixa, e não como tela cheia: a saudação, o progresso e os cards continuam
@@ -138,11 +127,11 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     borderLeftWidth: 4,
-    borderLeftColor: colors.error,
-    backgroundColor: colors.errorSurface,
+    borderLeftColor: cores.error,
+    backgroundColor: cores.errorSurface,
   },
   erroAcao: {
     ...typography.label,
-    color: colors.error,
+    color: cores.error,
   },
-});
+}));

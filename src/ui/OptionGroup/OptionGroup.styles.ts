@@ -1,14 +1,13 @@
-import { StyleSheet } from "react-native";
 
-import { colors, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   fieldGroup: {
     gap: fieldLabelGap,
   },
   fieldLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   row: {
     flexDirection: "row",
@@ -31,7 +30,7 @@ export const styles = StyleSheet.create({
   },
   option: {
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     justifyContent: "center",
   },
   /**
@@ -90,22 +89,22 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
   },
   optionSelected: {
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   optionLabel: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   optionLabelSelected: {
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
   optionHint: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   // Não é o branco cheio do label: continua sendo texto de apoio depois de selecionado, e
   // igualar os dois apagaria a hierarquia que o hint tem quando o cartão está apagado.
   optionHintSelected: {
-    color: colors.secondaryContainer,
+    color: cores.secondaryContainer,
   },
-});
+}));

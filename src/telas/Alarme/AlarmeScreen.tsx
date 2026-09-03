@@ -6,9 +6,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
 import { dispensarAlarmeAtivo } from "@/notifications/notifee-gateway";
-import { colors } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import { Button, CenteredLoader, FotoLocal } from "@/ui";
-import { styles } from "./AlarmeScreen.styles";
+import { criarEstilos } from "./AlarmeScreen.styles";
 
 const SOM_DO_ALARME = require("../../../assets/sounds/alarme_de_dose.wav");
 
@@ -50,6 +50,9 @@ type AlarmeScreenProps = {
  * notificação de tela cheia só a traz até aqui.
  */
 export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   const { doses, isLoading, registrar } = useDosesDoAlarme(instanteIso);
   const [silenciado, setSilenciado] = useState(false);
 
@@ -152,7 +155,7 @@ export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
       <View style={styles.conteudo}>
         <View style={styles.cabecalho}>
           <View style={styles.icone}>
-            <Ionicons name="alarm" size={40} color={colors.onPrimary} />
+            <Ionicons name="alarm" size={40} color={cores.onPrimary} />
           </View>
           <Text style={styles.titulo}>Hora do seu remédio</Text>
           <Text style={styles.hora}>

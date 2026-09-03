@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
-import { colors } from "@/shared/theme";
-import { styles } from "./Dica.styles";
+import { useCores, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./Dica.styles";
 
 export type DicaProps = {
   children: string;
@@ -17,10 +17,14 @@ export type DicaProps = {
  * a pessoa procurar a caixa do remédio e ela achar que errou alguma coisa.
  */
 export function Dica({ children }: DicaProps) {
+  const styles = useEstilos(criarEstilos);
+  const cores = useCores();
+
   return (
     <View style={styles.container}>
-      {/* O `?` no tom escuro do amarelo, e não no amarelo vivo: sobre o fundo claro o vivo some. */}
-      <Ionicons name="help-circle" size={18} color={colors.onWarningSurface} style={styles.icone} />
+      {/* O `?` na tinta âmbar: agora que a cor é legível (4.8:1), ela carrega o sinal que a faixa
+          lateral carregava antes — ver o cabeçalho de `estadoVisual` em shared/theme/cores.ts. */}
+      <Ionicons name="help-circle" size={20} color={cores.warning} style={styles.icone} />
       <Text style={styles.texto}>{children}</Text>
     </View>
   );

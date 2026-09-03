@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import { estadoDePressao } from "@/shared/theme";
-import { styles } from "./OptionGroup.styles";
+import { estadoDePressao, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./OptionGroup.styles";
 
 export type OptionGroupOption<TValue extends string> = {
   value: TValue;
@@ -75,6 +75,8 @@ export function OptionGroup<TValue extends string>({
   ultimaOcupaLinha = false,
   trailing,
 }: OptionGroupProps<TValue>) {
+  const styles = useEstilos(criarEstilos);
+
   const impar = options.length % 2 === 1;
   const indiceDaLinhaInteira =
     layout === "grade" && ultimaOcupaLinha && impar ? options.length - 1 : -1;

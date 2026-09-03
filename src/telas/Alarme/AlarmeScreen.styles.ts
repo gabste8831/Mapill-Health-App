@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, surfaceCard, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, superficieDeCartao, typography, withOpacity } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   /**
    * Fundo **azul cheio**, e não o cinza claro do resto do app.
    *
@@ -13,7 +12,7 @@ export const styles = StyleSheet.create({
    */
   safeArea: {
     flex: 1,
-    backgroundColor: colors.primary,
+    backgroundColor: cores.primary,
   },
   conteudo: {
     flex: 1,
@@ -33,11 +32,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     // Branco translúcido sobre o azul: o ícone se destaca sem precisar de uma segunda cor.
-    backgroundColor: withOpacity(colors.onPrimary, 0.18),
+    backgroundColor: withOpacity(cores.onPrimary, 0.18),
   },
   titulo: {
     ...typography.headlineMd,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     textAlign: "center",
   },
   /** A hora em tamanho de relógio: quem acorda com o alarme quer saber que horas são. */
@@ -46,7 +45,7 @@ export const styles = StyleSheet.create({
     ...typography.headlineXl,
     fontSize: 56,
     lineHeight: 64,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
   },
 
   lista: {
@@ -59,7 +58,7 @@ export const styles = StyleSheet.create({
    * decide se vai tomar o remédio certo. É o texto mais importante do aplicativo inteiro.
    */
   item: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     gap: spacing.xs,
   },
   /**
@@ -74,15 +73,15 @@ export const styles = StyleSheet.create({
   },
   nome: {
     ...typography.headlineMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   quantidade: {
     ...typography.headlineSm,
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   orientacao: {
     ...typography.bodyLg,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     lineHeight: 26,
   },
 
@@ -99,9 +98,9 @@ export const styles = StyleSheet.create({
   /** Fica no lugar do botão de silenciar, para a lista de ações não pular quando ele some. */
   silenciadoAviso: {
     ...typography.bodyMd,
-    color: colors.onPrimary,
+    color: cores.onPrimary,
     textAlign: "center",
     opacity: 0.85,
     paddingVertical: spacing.md,
   },
-});
+}));

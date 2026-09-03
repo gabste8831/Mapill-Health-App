@@ -1,11 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import { colors, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
     padding: spacing.md,
@@ -14,7 +13,7 @@ export const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   statusList: {
     gap: spacing.sm,
@@ -26,18 +25,18 @@ export const styles = StyleSheet.create({
   },
   statusLabel: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   statusValue: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   statusText: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   statusHint: {
     ...typography.bodyMd,
-    color: colors.outline,
+    color: cores.outline,
   },
-});
+}));

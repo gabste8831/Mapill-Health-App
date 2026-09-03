@@ -1,18 +1,10 @@
-import { StyleSheet } from "react-native";
 
-import {
-  bottomTabInset,
-  colors,
-  radius,
-  spacing,
-  surfaceCard,
-  typography,
-} from "@/shared/theme";
+import { bottomTabInset, estilosDoTema, radius, spacing, superficieDeCartao, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   header: {
     paddingHorizontal: spacing.md,
@@ -21,7 +13,7 @@ export const styles = StyleSheet.create({
   },
   subtitle: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /**
    * A grade dentro do scroll precisa desfazer o `paddingHorizontal` dele: a faixa azul vai de borda
@@ -44,7 +36,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: -spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   /**
    * Sem `gap`: a grade, o filtro grudado e a lista precisam de respiros diferentes, e um espaço
@@ -57,14 +49,14 @@ export const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     marginTop: spacing.sm,
   },
 
   // --- Item da lista ---
   /** Só a sombra, sem o contorno — e o `boxShadow` que estava escrito à mão virou token. */
   item: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     padding: spacing.md,
     gap: spacing.xs,
   },
@@ -83,7 +75,7 @@ export const styles = StyleSheet.create({
    */
   horaDoCompromisso: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     width: 44,
   },
   itemHeaderText: {
@@ -91,11 +83,11 @@ export const styles = StyleSheet.create({
   },
   tipo: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   quando: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   acoes: {
     flexDirection: "row",
@@ -116,24 +108,24 @@ export const styles = StyleSheet.create({
 
   detalhe: {
     ...typography.bodyMd,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   observacao: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   rodapeDoItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: colors.surfaceContainerHigh,
+    borderTopColor: cores.surfaceContainerHigh,
     paddingTop: spacing.sm,
     marginTop: spacing.xs,
   },
   aviso: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   /**
@@ -143,13 +135,13 @@ export const styles = StyleSheet.create({
   perguntaDeDesfecho: {
     gap: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.surfaceContainerHigh,
+    borderTopColor: cores.surfaceContainerHigh,
     paddingTop: spacing.sm,
     marginTop: spacing.xs,
   },
   perguntaTexto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   botoesDeDesfecho: {
     flexDirection: "row",
@@ -167,11 +159,11 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     // Fundo suave no lugar do contorno: dois botões lado a lado dentro de um cartão sem borda,
     // contornados, voltavam a desenhar a caixinha que o cartão deixou de ter.
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: cores.surfaceContainer,
   },
   botaoDeDesfechoTexto: {
     ...typography.label,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
 
   /** O desfecho já respondido, com a cor dizendo qual foi antes de a palavra ser lida. */
@@ -180,7 +172,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: colors.surfaceContainerHigh,
+    borderTopColor: cores.surfaceContainerHigh,
     paddingTop: spacing.sm,
     marginTop: spacing.xs,
   },
@@ -189,16 +181,16 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   desfechoCompareceu: {
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   desfechoFaltou: {
-    color: colors.error,
+    color: cores.error,
   },
   /** A anotação do que aconteceu — o que vale a longo prazo, e por isso não fica em cinza fraco. */
   anotacaoDoDesfecho: {
     ...typography.bodyMd,
-    color: colors.onSurface,
-    backgroundColor: colors.surfaceContainerLow,
+    color: cores.onSurface,
+    backgroundColor: cores.surfaceContainerLow,
     padding: spacing.sm,
     borderRadius: radius.md,
   },
@@ -220,7 +212,7 @@ export const styles = StyleSheet.create({
    */
   vazioDoDia: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     paddingVertical: spacing.xl,
     paddingHorizontal: spacing.md,
@@ -239,19 +231,19 @@ export const styles = StyleSheet.create({
   },
   diaTitulo: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   diaHoje: {
-    color: colors.primary,
+    color: cores.corDeDestaque,
   },
   diaData: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
 
   // --- Bloco de doses do dia ---
   blocoDeDoses: {
-    ...surfaceCard,
+    ...superficieDeCartao(cores, ajustes),
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
@@ -264,11 +256,11 @@ export const styles = StyleSheet.create({
   /** Divisória entre doses do mesmo dia — mais leve que um cartão por dose. */
   linhaComDivisoria: {
     borderTopWidth: 1,
-    borderTopColor: colors.surfaceContainerHigh,
+    borderTopColor: cores.surfaceContainerHigh,
   },
   horaDaDose: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     width: 44,
   },
   textoDaDose: {
@@ -276,11 +268,11 @@ export const styles = StyleSheet.create({
   },
   nomeDaDose: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   quantidadeDaDose: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /** Dose já confirmada continua visível, mas para de disputar atenção com o que falta responder. */
   doseResolvida: {
@@ -297,7 +289,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.full,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
   },
 
   // --- Estados ---
@@ -310,19 +302,19 @@ export const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
     textAlign: "center",
   },
   emptyDescription: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     textAlign: "center",
     maxWidth: 320,
   },
   errorText: {
     ...typography.bodyMd,
-    color: colors.error,
+    color: cores.error,
     textAlign: "center",
     maxWidth: 320,
   },
-});
+}));

@@ -1,8 +1,7 @@
-import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * Fundo neutro, sem cor de estado. Nem verde de sucesso nem amarelo de atenção: ter alterações
    * por enviar é o funcionamento normal de um app offline-first, e pintar isso de aviso ensinaria
@@ -12,7 +11,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    backgroundColor: colors.surfaceContainerLow,
+    backgroundColor: cores.surfaceContainerLow,
     borderRadius: radius.md,
     padding: spacing.md,
   },
@@ -27,10 +26,10 @@ export const styles = StyleSheet.create({
   },
   titulo: {
     ...typography.bodyLg,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   detalhe: {
     ...typography.bodySm,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
-});
+}));

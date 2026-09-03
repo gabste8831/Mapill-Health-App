@@ -1,7 +1,7 @@
 import { Pressable, Text } from "react-native";
 
-import { estadoDePressao } from "@/shared/theme";
-import { styles } from "./Fab.styles";
+import { estadoDePressao, useEstilos } from "@/shared/theme";
+import { criarEstilos } from "./Fab.styles";
 
 export type FabProps = {
   onPress: () => void;
@@ -18,6 +18,8 @@ export type FabProps = {
  * Calendário ainda não sabe se é compromisso ou remédio.
  */
 export function Fab({ onPress, accessibilityLabel }: FabProps) {
+  const styles = useEstilos(criarEstilos);
+
   return (
     <Pressable
       // Escala e opacidade: e o alvo mais convidativo da tela, e o unico que flutua sobre o
