@@ -114,6 +114,10 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
           </View>
         </View>
 
+        {/* O card mostra cinco coisas e só elas: foto (ou o marcador), nome, frequência com os
+            horários, estoque, e as duas ações. Onde o remédio está guardado saiu daqui — é dado de
+            quem já foi buscar a caixa, não de quem está percorrendo a lista, e continua no popup de
+            detalhe junto do resto. */}
         {inventory !== null ? (
           <View style={styles.footerRow}>
             {/* Sem estoque é o único caso em que o número vira aviso: o remédio acabou. */}
@@ -122,9 +126,6 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
                 ? "Estoque zerado"
                 : `Estoque: ${formatarQuantidadeLivre(inventory.quantity, inventory.unit)}`}
             </Text>
-            {inventory.storageLocation !== null ? (
-              <Text style={styles.badge}>{inventory.storageLocation}</Text>
-            ) : null}
           </View>
         ) : null}
       </Pressable>
@@ -363,19 +364,22 @@ export function RemediosScreen() {
           showsVerticalScrollIndicator={false}
           // O texto explicativo rola junto com a lista, e só a busca fica fixa: parado no topo ele
           // custava três linhas de altura em toda rolagem, para dizer algo que se lê uma vez.
+          // Só existe quando há estoque cadastrado: o botão leva a uma tela que, sem isso, abriria
+          // vazia — e oferecer caminho para o vazio é pior que não oferecer.
+          //
+          // `null` e não um `View` vazio: o `gap` da lista conta o header como item, então um
+          // contêiner sem conteúdo ainda abria um vão antes do primeiro card.
           ListHeaderComponent={
-            <View style={styles.listHeader}>
-              {/* Só existe quando há estoque cadastrado: o botão leva a uma tela que, sem isso,
-                  abriria vazia — e oferecer caminho para o vazio é pior que não oferecer. */}
-              {temEstoque ? (
+            temEstoque ? (
+              <View style={styles.listHeader}>
                 <Button
                   label="Gerenciar estoques"
                   variant="outline"
                   icon={<Ionicons name="cube-outline" size={20} color={cores.primary} />}
                   onPress={() => router.push("/estoque")}
                 />
-              ) : null}
-            </View>
+              </View>
+            ) : null
           }
           ListEmptyComponent={
             // Busca sem resultado e lista vazia pedem respostas diferentes: uma se resolve

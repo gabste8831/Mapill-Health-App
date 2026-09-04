@@ -6,34 +6,42 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     flex: 1,
     backgroundColor: cores.background,
   },
+  /**
+   * Sem `paddingBottom`: ele existia para afastar a contagem do que vem abaixo, mas o
+   * `marginBottom` dela já faz isso, e os dois somavam.
+   */
   header: {
     paddingHorizontal: screenPadding,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
   },
   busca: {
     marginTop: spacing.md,
   },
   /**
-   * O mesmo respiro (`md` acima, `sm` abaixo) que separa a contagem do resto em Compromissos —
-   * aqui ela fica entre a busca e o seletor de ordem, em vez de sozinha no topo do que rola, mas
-   * o espaço ao redor dela é a mesma proporção nas duas telas.
+   * O mesmo respiro (`md` acima, `sm` abaixo) que separa a contagem do resto em Compromissos.
+   *
+   * Era `gutter` (24) em cima e `md` (16) embaixo, e o de baixo somava com o `paddingBottom` do
+   * `header` e com o `paddingTop` do `listHeader` logo abaixo — três espaços empilhados, 48px até o
+   * primeiro card ou o botão de estoque, contra 8px em Compromissos. A diferença nasce de as duas
+   * telas montarem isto de formas diferentes: lá a contagem rola junto com a lista e não tem margem
+   * própria; aqui ela mora no bloco fixo do topo, junto da busca, e precisa das suas.
    */
   contagem: {
     ...typography.label,
     color: cores.onSurfaceVariant,
-    marginTop: spacing.gutter,
-    marginBottom: spacing.md,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   /**
-   * O que rola junto com a lista: o texto de apoio e o acesso ao estoque. Padding simétrico
-   * (mesmo ajuste feito em Compromissos) — era `marginBottom: gutter` (24) só embaixo, sem nada
-   * em cima, e o respiro ficava desequilibrado.
+   * O acesso ao estoque, que rola junto com a lista.
+   *
+   * Sem padding próprio: o respiro acima já vem do `marginBottom` da contagem, e o de baixo do
+   * `gap` do `listContent` — que é o mesmo espaço entre dois cards, então o botão fica na malha da
+   * lista em vez de flutuar. Quando não há estoque cadastrado este bloco fica vazio, e sem padding
+   * ele também não ocupa altura nenhuma.
    */
   listHeader: {
     gap: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
   },
   listContent: {
     paddingHorizontal: screenPadding,
@@ -147,12 +155,14 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   /**
    * Sem a linha divisória. Dentro de um cartão que já tem respiro, o traço cinza é ruído: o espaço
    * separa melhor do que o risco — mesma razão pela qual as bordas saíram dos cartões.
+   *
+   * Só o estoque mora aqui. O `space-between` que existia empurrava o local de guarda para a
+   * direita, e saiu junto com ele: com um filho só, ele não teria efeito nenhum além de confundir
+   * quem for mexer nesta linha depois.
    */
   footerRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.sm,
     marginTop: spacing.sm,
   },
   stock: {
@@ -161,10 +171,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   },
   stockLow: {
     color: cores.error,
-  },
-  badge: {
-    ...typography.label,
-    color: cores.onSurfaceVariant,
   },
 
   // --- Estados ---

@@ -9,7 +9,7 @@ import { useAppointmentRegistration } from "@/hooks/use-appointment-registration
 import type { Appointment } from "@/domain/entities/appointment";
 import { dataEHoraPorExtenso, dataPorExtenso } from "@/shared/datas-por-extenso";
 import { useCores, useEstilos } from "@/shared/theme";
-import { BottomSheet, CenteredLoader, EstadoDeErro, EstadoVazio, Header } from "@/ui";
+import { BottomSheet, CenteredLoader, EstadoDeErro, EstadoVazio, Fab, Header } from "@/ui";
 import { criarEstilos } from "./CompromissosScreen.styles";
 
 export type CompromissosScreenProps = {
@@ -247,11 +247,22 @@ export function CompromissosScreen({ onBack }: CompromissosScreenProps) {
             <EstadoVazio
               icone="calendar"
               titulo="Nenhum compromisso cadastrado"
-              descricao="Toque no + no Calendário para cadastrar sua primeira consulta ou exame."
+              descricao="Toque no + para cadastrar sua primeira consulta ou exame."
             />
           }
         />
       )}
+
+      {/* Vai direto ao formulário de compromisso, sem passar pela pergunta "medicação ou
+          compromisso?": quem está nesta lista já respondeu, ao estar aqui, o que vai cadastrar —
+          mesma razão pela qual o + da lista de Remédios pula a escolha.
+
+          Fora do `FlatList` para existir também com a lista vazia, que era justamente o caso em que
+          não havia como cadastrar nada: o estado vazio mandava voltar ao Calendário. */}
+      <Fab
+        accessibilityLabel="Cadastrar compromisso"
+        onPress={() => router.push("/cadastro/compromisso")}
+      />
 
       <BottomSheet
         visible={detalheAberto !== null}
