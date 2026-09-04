@@ -120,6 +120,38 @@ o "todo dia" ficou ótimo, mas a contagem continuou sem refletir a mudança / na
   com margem própria, é parte do mesmo bloco do cabeçalho. Sobre a contagem "1 medicação
   cadastrada": os valores de margem estavam corretos no código (conferido de novo); se ainda não
   refletir depois de recarregar, pode ser cache do bundler — avisar que investigo mais fundo.
+
+no card do remédio quero somente: foto (ou o quadradinho azul), nome, frequência, horário, estoque
+e os dois botões de editar e excluir. "Onde está guardado" foge do escopo que defini — pode
+retirar. Algo além disso que esteja aparecendo, também pode sair.
+- [x] Feito: removido o `badge` com o local de guarda do rodapé do card (continua no popup de
+  detalhe, em "Guardado em"). O `footerRow` perdeu o `justifyContent: space-between` e o `gap`, que
+  só existiam para empurrar esse local à direita — com um filho só não faziam nada. Estilo `badge`
+  removido do arquivo, que ficou órfão. O card agora tem exatamente os cinco itens pedidos.
+
+o espaçamento entre a contagem ("1 medicação cadastrada") e o card / botão "Gerenciar estoques"
+está muito grande — parece resquício de estilização anterior. Usar a tela de Compromissos como
+parâmetro, lá o espaçamento está correto.
+- [x] Feito: era resquício mesmo, e somava **três** espaços. A causa é estrutural: em Compromissos
+  a contagem rola junto com a lista e não tem margem própria (o respiro vem só do `listHeader`); em
+  Remédios ela mora no bloco fixo do topo, junto da busca, e tinha margens próprias — `marginTop:
+  gutter` (24) e `marginBottom: md` (16). Esse `marginBottom` somava com o `paddingBottom: md` do
+  `header` e com o `paddingTop: md` do `listHeader`: **48px** até o primeiro elemento, contra 8 em
+  Compromissos. Agora a contagem usa `md` em cima e `sm` embaixo (o que o comentário do arquivo já
+  prometia), o `paddingBottom` do `header` saiu e o `listHeader` ficou só com o `gap`. De quebra, o
+  `ListHeaderComponent` passa a devolver `null` quando não há estoque — como `View` vazio, o `gap`
+  da lista ainda contava um vão antes do primeiro card.
+
+### Compromissos (continuação)
+
+entrando na listagem de compromissos sem nenhum cadastrado, não há como cadastrar um dali — o ícone
+de + não está presente. Ele precisa estar, e indo direto ao cadastro de compromisso, sem passar
+pela escolha entre compromisso e medicação.
+- [x] Feito: adicionado o `Fab` à tela, fora do `FlatList` (para existir também com a lista vazia,
+  que era justamente o caso sem saída), indo direto a `/cadastro/compromisso` — sem passar por
+  `/cadastro/escolha`, mesma razão pela qual o + de Remédios pula a pergunta: quem está na lista já
+  respondeu o que vai cadastrar. O texto do estado vazio dizia "Toque no + no Calendário", mandando
+  a pessoa para outra tela; virou "Toque no + para cadastrar sua primeira consulta ou exame".
 -
 
 ### Ajustes
@@ -162,6 +194,55 @@ acho que o layout de sugestões ao escrever o nome de um medicamento que consta 
   retos continuando a linha do campo, só os de baixo arredondados). Removido o princípio ativo de
   cada item — só nome e dosagem. Título trocado de "Encontrados na base da Anvisa" para "É algum
   destes?". Em `src/ui/SugestoesDeMedicamento/`.
+
+quebra de layout em ANEXOS: nos textos ("Adicionar foto da caixa" / "Ajuda a reconhecer o remédio
+de relance"), o espaçamento e o alinhamento estão errados. Padronizar o espaçamento entre título e
+subtítulo, e alinhar os textos à esquerda para ficarem rentes ao espaço de preenchimento da mídia.
+- [x] Feito: eram duas causas somadas. (1) O alinhamento: o link ficava dentro de `alvoDeLink`, que
+  tem `paddingHorizontal: sm` (8px), enquanto a dica abaixo é `Text` solto sem padding — o título
+  saía 8px à direita da dica, e nenhum dos dois rente ao quadrado da mídia. Como `alvoDeLink` é
+  compartilhado ("Ler os Termos", saída do estoque, "Alterar anexo"/"Remover" lado a lado, onde o
+  padding separa os dois), criei `alvoDeLinkRente` — mesmo alvo de 44pt, sem padding lateral — e
+  apliquei só nos dois links que encabeçam bloco de texto ao lado de mídia (foto da caixa e
+  receita). (2) O espaçamento: `photoTextGroup` tinha `gap: xs` que somava com a folga vertical dos
+  44pt do alvo, afastando a dica do título que ela explica. Gap removido — o respiro agora vem só
+  do alvo, igual em todas as seções de anexo. Em `CadastroDeMedicamento.styles.ts` e
+  `FormularioDeMedicamentoScreen.tsx`.
+
+no painel "deixe o alarme mais confiável" (dentro do popup de lembrete): o botão "abrir a tela do
+alarme" não funciona, só exibe a tela de bloqueio — e não vejo necessidade dele. "Tocar no
+silencioso" só redireciona pras configurações do app, não dá pra entender o que fazer. O mesmo com
+"funcionar com a tela apagada": clico e não há indicativo do que preciso fazer. Se não é um
+redirecionamento exato, podemos retirar.
+- [x] Feito: os três tinham causas diferentes. (1) **"Abrir a tela do alarme" removido.** O Android
+  não expõe API para ler `USE_FULL_SCREEN_INTENT`, então o item tinha `concedida: false` fixo e
+  nunca saía do painel, mesmo concedido — cobrava para sempre algo já feito. E a intent que o abre
+  não existe em todo aparelho, caindo num `openSettings()` genérico: era a tela "estranha" que você
+  viu. A permissão continua no `app.json` (concedida na instalação na maioria dos aparelhos); o que
+  saiu foi a cobrança impossível de satisfazer ou verificar. (2) **"Tocar no silencioso": destino
+  corrigido.** Abria `openNotificationSettings()` — as notificações do app, onde essa autorização
+  não existe. Agora abre a tela de acesso à política do Não Perturbe
+  (`NOTIFICATION_POLICY_ACCESS_SETTINGS`), com fallback para o comportamento antigo. (3) **Os dois
+  que ficaram ganharam instrução.** Campo novo `comoFazer` no `ItemDePermissao`, exibido abaixo da
+  consequência em cor de destaque: "Na lista que abrir, procure o Mapill e permita o acesso" e, no
+  da bateria, texto que muda conforme a tela ("sem restrições" nos aparelhos com gerenciador
+  próprio — Xiaomi/Samsung/Motorola —, "Permitir" na tela padrão do Android). Em
+  `permissoes-de-alarme.ts`, `PainelDePermissoes.tsx` e `.styles.ts`.
+
+"tocar no silencioso" funcionou. Já "funcionar com a tela apagada" redireciona para uma tela de
+"início automático em segundo plano"; eu autorizo, volto ao app e o botão continua aparecendo. Só
+temos que validar isso: quando o usuário aprova a permissão, o botão sai da tela.
+- [x] Feito: **item removido**, e o motivo é que essa validação não é possível. O item abria uma
+  tela e verificava **outra**: nos aparelhos com gerenciador próprio (Xiaomi/Samsung/Motorola) ele
+  mandava para o "início automático" do fabricante, mas lia `isBatteryOptimizationEnabled()`, que é
+  a otimização de bateria do Android — ajustes independentes. Autorizar o autostart não mudava o
+  que estava sendo lido, e o item ficava pendente para sempre. Não há API para ler o autostart
+  (telas proprietárias não expõem estado), então ele nunca sairia sozinho. Aplicado o mesmo critério
+  da tela cheia: **só entra no painel o que o app consegue ler de volta**. A orientação sobre
+  bateria virou um parágrafo no bloco "Depende do seu aparelho" da tela de ajuda de alertas — com o
+  nome dos fabricantes e o que procurar ("sem restrições" / início automático). De quebra, corrigi o
+  texto daquele bloco, que prometia que o app "leva você ao ajuste certo" para a bateria — o que
+  deixou de ser verdade. O painel agora tem **três** itens.
 -
 
 ### Scanner
@@ -199,6 +280,86 @@ acho que o layout de sugestões ao escrever o nome de um medicamento que consta 
 
 ### Estoque
 `src/telas/Estoque/` — controle de quantidade por medicamento.
+
+a mensagem do topo ("quanto ainda resta de cada medicação e quando ela deve acabar...") pode ser
+mais compacta. O card pode ser melhor aproveitado: o nome e o local dividem a largura com "30
+comprimidos" e quebram muito — palavras longas em espaço pequeno. Deixar mais colorido, com mais
+ênfase no que importa (o estoque e quando acaba). Aplicar a busca, igual à lista de remédios. E o
+trecho "falta alguma medicação nessa lista" pode sair, mantendo só o botão "ver minhas medicações".
+- [x] Feito: (1) **Frase do topo** reduzida a uma linha — "A quantidade cai sozinha a cada dose
+  confirmada", que é a única parte que não se deduz olhando os cards. (2) **Card reestruturado**: o
+  nome passou a ocupar a linha inteira (com o local abaixo, ambos com `numberOfLines={1}`), em vez
+  de dividir a largura com a quantidade — que na tipografia de título é larga e comia o espaço do
+  nome, fazendo os três quebrarem. Quantidade e previsão viraram uma **faixa com fundo próprio**
+  (`secondaryContainer`), que é a resposta da tela; quando o estoque acabou ou acaba hoje, **o bloco
+  inteiro** fica vermelho (`errorSurface`), não só o texto — a cor de um bloco se vê rolando a
+  lista, a de uma palavra não. Mesma decisão da faixa lateral das doses atrasadas na Home. (3)
+  **Busca adicionada**, no mesmo padrão de Medicações: `SearchField` + contagem dinâmica ("2 de 5
+  medicações" durante a busca), normalização sem acento, e estado vazio próprio para "não encontrei"
+  separado de "não há estoque controlado". A busca é só por nome — o local de guarda é onde a caixa
+  está, não como o remédio se chama. (4) **Rodapé enxuto**: sobrou só o botão; o título e o
+  parágrafo saíram, e com eles o fundo e o padding da caixa, que não tinham mais o que conter.
+  Aproveitei para tirar o `paddingBottom` do `header`, o mesmo empilhamento de espaço já corrigido
+  em Medicações.
+
+melhorou muito. A frase do topo pode sair, deixando só a busca. Mas indicar mais coisas: o local
+precisa estar explícito, com a palavra "Local:" antes. Abaixo, em azul principal, ênfase no número:
+"Estoque: 30 comprimidos". E o prazo ("acaba em 30 de dezembro") quebra linha, vai embaixo, com
+estilização diferente — não dentro do mesmo escopo do estoque.
+- [x] Feito: (1) Frase do topo removida; a tela abre direto na busca. O estilo `subtitle` ficou
+  órfão e saiu. (2) **"Local:" explícito** antes do lugar de guarda — sozinho, logo abaixo do nome
+  do remédio, "Gaveta da geladeira" lia como parte do nome. O rótulo fica em `onSurfaceVariant` e o
+  valor em `onSurface`: o dado é a informação, o rótulo só o nomeia. (3) **Faixa de estoque em azul
+  principal** (`primaryContainer`, texto branco), com "Estoque:" antes do número; no estado crítico
+  o bloco inteiro vira `error` com texto branco. (4) **Prazo fora da faixa**, em texto de apoio
+  abaixo dela — quanto resta é um fato contado, quando acaba é uma projeção sobre o ritmo do
+  tratamento; no mesmo bloco os dois liam como uma informação só, e a estimativa ganhava o peso de
+  um número conferido. No crítico ele fica vermelho, mas sem fundo.
+
+não gostei do destaque azul no campo de estoque. Estoque e local podem ficar na mesma estilização.
+Para diferenciar, uma linha horizontal abaixo do nome do remédio, dando diferença de escopo. E o
+botão "Repor" em azul principal.
+- [x] Feito: o fundo azul saiu da quantidade — local e estoque agora têm o mesmo peso, com os
+  rótulos "Local:" / "Estoque:" fazendo a distinção (são dados do mesmo tipo, e dar fundo a um
+  fazia o outro parecer secundário). Traço de 1px (`outlineVariant`) abaixo do nome, sem margem
+  própria — o `gap` do cartão já dá o respiro, e somar margem abriria o dobro de espaço em volta de
+  um traço fino. "Repor" passou para `primaryContainer` com texto e ícone brancos: o azul saiu do
+  dado e foi para a ação, que é o que se vem fazer nesta tela. No estado crítico a quantidade fica
+  vermelha só no texto, sem fundo. Estilos `faixaDeEstoque`, `faixaDeEstoqueCritica`,
+  `rotuloDeEstoque` e `itemHeaderText` removidos por terem ficado órfãos.
+
+o aviso "acaba em 30 dias" precisa de uma estilização diferente — uma cor um pouco mais clara, em
+tom de aviso.
+- [x] Feito: o prazo virou uma **etiqueta com três estados**, porque havia um problema por trás da
+  cor: existiam só dois (cinza e vermelho), então "acaba em 3 dias" era pintado igual a "acaba em
+  90" — e a diferença entre os dois é justamente o que se vem descobrir nesta tela. Agora: **cinza**
+  (texto puro, sem fundo) enquanto o prazo é confortável; **âmbar** (`warningSurface`, a mesma
+  linguagem da `Dica` e do lembrete de conferência) ao entrar na janela de reposição; **vermelho**
+  (`errorSurface`) quando acabou ou acaba hoje. A etiqueta encolhe até o texto (`alignSelf:
+  flex-start`) em vez de atravessar o cartão. A janela do âmbar é a que **a própria pessoa
+  configurou** no cadastro (`lowStockAlertLeadDays`), com 7 dias de piso para quem não ativou o
+  alerta — quem pediu aviso com 30 dias tem motivo, e pintar só no sétimo dia contradiria o que ela
+  definiu como "está acabando".
+
+o cliente entra nesta seção querendo ajustar a notificação de estoque e não encontra — ela só existe
+no cadastro. Agregar aqui, reaproveitando o mesmo escopo do cadastro. E deixar a busca igual à de
+medicações (mesmo placeholder e tal).
+- [x] Feito: **aviso de estoque baixo agora editável na tela de Estoque**, mantido também no
+  cadastro (dois caminhos, o mesmo campo — sem cópia de estado). Uma linha discreta no rodapé de
+  cada card mostra o estado atual ("Avisar 7 dias antes de acabar" / "Sem aviso de estoque baixo") e
+  abre um `BottomSheet` com o mesmo `Checkbox` + `OptionGroup` (3/7/15/30) do cadastro — o
+  `ConfiguracaoDeEstoque` não foi reaproveitado inteiro porque carrega quantidade e local, que aqui
+  já têm caminho em "Repor"/"Recontar". Terceira linha e não terceiro botão: "Recontar" e "Repor"
+  dividem a largura em dois, e um terceiro espremeria os rótulos (o que corta primeiro com fonte
+  ampliada); a linha ainda dá espaço para dizer o estado em vez de só oferecer a ação. Trouxe junto
+  o aviso de conflito do cadastro (antecedência maior que o estoque que resta). Nova função
+  `salvarAvisoDeEstoqueBaixo` em `use-inventory-list.ts` — grava nos mesmos campos e **não** cria
+  `InventoryAdjustment`, porque aquela tabela é o histórico de movimentação de quantidade e mudar
+  quando o app avisa não move nada. **Busca alinhada com Medicações**: mesmo placeholder ("Buscar
+  por nome ou princípio ativo"), busca também pelo princípio ativo (era só nome), mesmo texto de
+  estado vazio, e as duas props de teclado que faltavam (`keyboardDismissMode="on-drag"` e
+  `keyboardShouldPersistTaps="handled"`) — sem elas o teclado não fechava ao arrastar e o primeiro
+  toque em "Repor" era gasto só fechando o teclado.
 
 -
 

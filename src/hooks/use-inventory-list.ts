@@ -168,6 +168,38 @@ export async function aplicarMudancaDeEstoque(
 }
 
 /**
+ * Liga ou desliga o aviso de estoque baixo, e com quantos dias de antecedência.
+ *
+ * Escreve nos **mesmos campos** que o cadastro do medicamento edita — não há cópia de estado nem
+ * segunda fonte de verdade: são dois caminhos até o mesmo dado, e é o que permite oferecer o ajuste
+ * onde a pessoa procura por ele (aqui, gerenciando estoque) sem tirá-lo de onde ele nasce.
+ *
+ * Diferente de `aplicarMudancaDeEstoque`, isto não gera `InventoryAdjustment`: a tabela de ajustes
+ * é o histórico de **movimentação de quantidade**, e mudar quando o app avisa não move nada.
+ */
+export async function salvarAvisoDeEstoqueBaixo(
+  inventoryItemId: string,
+  aviso: { habilitado: boolean; diasDeAntecedencia: number | null },
+): Promise<void> {
+  if (!persistsLocally) return;
+
+  const repository = new InventoryRepository();
+  const atual = await repository.findById(inventoryItemId);
+  if (atual === null) return;
+
+  await repository.save({
+    ...atual,
+    lowStockAlertEnabled: aviso.habilitado,
+    // Sem antecedência o alerta não teria quando disparar, então desligar limpa o valor em vez de
+    // guardá-lo — é a mesma regra do cadastro.
+    lowStockAlertLeadDays: aviso.habilitado ? aviso.diasDeAntecedencia : null,
+    updatedAt: new Date().toISOString(),
+    // Volta para a fila de sincronização: o registro mudou depois do último envio.
+    syncedAt: null,
+  });
+}
+
+/**
  * Os estoques controlados, recarregados a cada volta ao foco — é o que faz a quantidade já estar
  * certa depois de uma dose confirmada em outra tela.
  */
