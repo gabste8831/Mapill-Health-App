@@ -86,9 +86,23 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
         <View style={styles.condicoes}>
           <Text style={styles.condicoesTitulo}>Depende do seu aparelho</Text>
           <Text style={styles.texto}>
-            Com a permissão de avisos ativa, volume ligado e o Mapill fora da economia de bateria,
-            os alertas chegam na hora marcada. Quando falta algum desses, o app avisa na tela de
-            escolha do alerta e leva você ao ajuste certo.
+            Com a permissão de avisos ativa e o volume ligado, os alertas chegam na hora marcada.
+            Quando falta uma dessas autorizações, o app avisa na tela de escolha do alerta e leva
+            você ao ajuste certo.
+          </Text>
+          {/**
+           * A economia de bateria fica aqui, e **não** no painel de permissões.
+           *
+           * O painel só lista o que o app consegue ler de volta — e o "início automático" dos
+           * fabricantes não expõe estado nenhuma API. Cobrado lá, o item nunca sumia, nem depois de
+           * autorizado. Como recomendação escrita ele diz a mesma coisa sem prometer uma
+           * verificação que não existe.
+           */}
+          <Text style={[styles.texto, styles.condicoesParagrafo]}>
+            Alguns aparelhos — sobretudo Xiaomi, Samsung e Motorola — desligam apps em segundo plano
+            para poupar bateria, e isso pode atrasar ou impedir o alarme. Se um aviso não chegar,
+            procure o Mapill nas configurações de bateria do seu celular e marque-o como “sem
+            restrições”, ou permita o início automático.
           </Text>
         </View>
 

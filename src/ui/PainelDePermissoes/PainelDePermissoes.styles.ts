@@ -74,6 +74,19 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
     lineHeight: 20,
   },
+  /**
+   * O passo dentro da tela do sistema, um degrau abaixo da consequência.
+   *
+   * Cor de destaque e não o cinza da descrição: é a única linha do item que diz o que **fazer**, e
+   * precisa se separar do texto que explica por que importa. O respiro em cima marca essa virada de
+   * assunto sem precisar de outro elemento.
+   */
+  itemComoFazer: {
+    ...typography.bodySm,
+    color: cores.corDeDestaque,
+    lineHeight: 18,
+    marginTop: spacing.xs,
+  },
 
   /** Separa o que impede o alarme do que só o degrada — as duas coisas pedem urgências diferentes. */
   selo: {

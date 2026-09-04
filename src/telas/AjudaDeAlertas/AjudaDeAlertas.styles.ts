@@ -78,6 +78,16 @@ export const styles = StyleSheet.create({
     ...typography.label,
     color: colors.onSecondaryContainer,
   },
+  /**
+   * O segundo parágrafo do bloco, separado do primeiro.
+   *
+   * O `gap: xs` do bloco existe para colar o título ao texto que ele encabeça; entre dois
+   * parágrafos de assuntos diferentes — o que o app garante, e o que o aparelho pode atrapalhar —
+   * 4px os faz ler como um só.
+   */
+  condicoesParagrafo: {
+    marginTop: spacing.sm,
+  },
   /** Alvo de dedo em volta do link para os termos — o texto sozinho tem a altura da linha. */
   alvoDeLink: {
     minHeight: 44,

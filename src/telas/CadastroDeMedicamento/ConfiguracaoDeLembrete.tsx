@@ -167,7 +167,8 @@ export function ConfiguracaoDeLembrete({
           * Android 12+ e a economia de bateria, que são justamente as duas causas de "o aviso não
           * chegou" que ninguém consegue diagnosticar sozinho.
           *
-          * O painel lista as quatro, diz o que cada uma muda e leva à tela certa de cada uma.
+          * O painel lista as três, diz o que cada uma muda, leva à tela certa de cada uma e — nas duas em
+ * que a tela do sistema não se explica sozinha — diz o que procurar depois de chegar lá.
           */}
         {dependeDoAparelho && permissoes.temPendencia ? (
           <PainelDePermissoes

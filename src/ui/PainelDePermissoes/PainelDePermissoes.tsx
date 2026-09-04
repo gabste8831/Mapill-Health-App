@@ -18,10 +18,10 @@ type PainelDePermissoesProps = {
  *
  * ## Por que uma lista, e não um aviso só
  *
- * São quatro autorizações em quatro telas diferentes do Android, e elas falham de formas
+ * São três autorizações em três telas diferentes do Android, e elas falham de formas
  * diferentes: sem notificação nada toca, sem alarme exato toca atrasado, sem Não Perturbe toca
  * mudo, com economia de bateria pode não tocar. Um aviso genérico — "conceda as permissões" —
- * deixaria a pessoa procurando em quatro lugares sem saber qual resolve o quê.
+ * deixaria a pessoa procurando em três lugares sem saber qual resolve o quê.
  *
  * Cada linha diz **a consequência** ("Sem isto o aviso pode atrasar dezenas de minutos"), e não o
  * nome técnico da permissão. É a consequência que faz alguém decidir se vale ir até as
@@ -67,7 +67,7 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
             style={estadoDePressao(styles.item)}
             onPress={() => void item.abrir()}
             accessibilityRole="button"
-            accessibilityLabel={`${item.titulo}. ${item.descricao} Toque para abrir as configurações.`}>
+            accessibilityLabel={`${item.titulo}. ${item.descricao}${item.comoFazer ? ` ${item.comoFazer}` : ""} Toque para abrir as configurações.`}>
             <View style={styles.itemTexto}>
               <View style={styles.itemTopo}>
                 <Text style={styles.itemTitulo}>{item.titulo}</Text>
@@ -78,6 +78,12 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
                 ) : null}
               </View>
               <Text style={styles.itemDescricao}>{item.descricao}</Text>
+              {/* O passo dentro da tela do sistema, para o toque não terminar num lugar onde nada
+                  indica o que fazer. Vem depois da consequência: primeiro por que importa, depois
+                  o que fazer a respeito. */}
+              {item.comoFazer !== undefined ? (
+                <Text style={styles.itemComoFazer}>{item.comoFazer}</Text>
+              ) : null}
             </View>
             <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
           </Pressable>

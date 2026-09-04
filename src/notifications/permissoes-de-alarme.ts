@@ -1,18 +1,14 @@
 import notifee, { AndroidNotificationSetting, AuthorizationStatus } from "@notifee/react-native";
-import Constants from "expo-constants";
 import { Linking, Platform } from "react-native";
 
 import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
-
-/** O `applicationId` do app — a tela de tela cheia do Android 14 exige saber de quem ela é. */
-const PACOTE = Constants.expoConfig?.android?.package ?? "com.gabsteffens.mapillapp";
 
 /**
  * Tudo o que o alarme precisa do sistema operacional, num lugar só.
  *
  * ## Por que uma central, e não cada tela cuidando da sua
  *
- * O lembrete de dose depende de **quatro** autorizações diferentes, concedidas em quatro telas
+ * O lembrete de dose depende de **três** autorizações diferentes, concedidas em três telas
  * diferentes do Android, e nenhuma delas avisa quando é revogada. Antes disso elas estavam
  * espalhadas — a permissão de notificação no cadastro, o Não Perturbe num link solto — e o
  * resultado era o app prometendo um alarme que o sistema não deixava tocar, sem que ninguém
@@ -30,12 +26,47 @@ const PACOTE = Constants.expoConfig?.android?.package ?? "com.gabsteffens.mapill
  * exata onde se resolve. Um botão que abre a tela certa vale mais que um diálogo que nunca aparece.
  */
 
-/** As quatro coisas que o sistema precisa autorizar para o alarme funcionar de verdade. */
+/**
+ * As três coisas que o sistema precisa autorizar para o alarme funcionar de verdade.
+ *
+ * ## A regra que define quem entra nesta lista
+ *
+ * **Só entra o que o app consegue ler de volta.** Um item cujo estado não se lê nunca sai do
+ * painel: ele continua cobrando depois de atendido, e um painel que cobra o que já foi feito ensina
+ * a ignorar o painel inteiro — inclusive as duas linhas que de fato impedem o alarme de tocar.
+ *
+ * Eram cinco, e duas saíram por essa regra:
+ *
+ * - **Tela cheia** (`USE_FULL_SCREEN_INTENT`, Android 14+): não há API de leitura, então o item
+ *   vivia com `concedida: false` fixo. A intent que abre a tela também não existe em todo aparelho,
+ *   caindo num `openSettings()` genérico que não leva a lugar reconhecível.
+ * - **Economia de bateria**: aqui o problema era mais sutil, e pior. Nos aparelhos com gerenciador
+ *   próprio (Xiaomi, Samsung, Motorola) o item **abria uma tela e verificava outra** — mandava para
+ *   o "início automático" do fabricante, mas lia `isBatteryOptimizationEnabled()`, a otimização do
+ *   Android. São ajustes independentes: autorizar o autostart não muda o que estava sendo lido, e o
+ *   item ficava pendente para sempre mesmo com tudo concedido. Não há API para o autostart — essas
+ *   telas são proprietárias e não expõem estado.
+ *
+ * As duas permissões continuam valendo no aparelho; o que saiu foi a cobrança que ninguém conseguia
+ * satisfazer nem verificar. A economia de bateria segue documentada na tela de ajuda de alertas,
+ * como recomendação — que é o lugar de algo que se explica mas não se confere.
+ */
 export type ItemDePermissao = {
-  chave: "notificacoes" | "alarmeExato" | "telaCheia" | "naoPerturbe" | "bateria";
+  chave: "notificacoes" | "alarmeExato" | "naoPerturbe";
   /** O que a pessoa lê. Descreve a consequência, não o nome técnico da permissão. */
   titulo: string;
   descricao: string;
+  /**
+   * O que procurar **depois** que a tela do sistema abrir.
+   *
+   * As telas do Android não explicam por que alguém chegou nelas: a de política do Não Perturbe é
+   * uma lista de dezenas de apps, e a de bateria abre numa página de opções onde nada diz respeito
+   * ao alarme. Sem esta linha, o toque no item levava a pessoa a um lugar estranho e a deixava lá —
+   * era o que fazia o painel parecer quebrado mesmo abrindo a tela certa.
+   *
+   * Ausente nos itens em que a própria tela já é a resposta (o interruptor de notificações do app).
+   */
+  comoFazer?: string;
   concedida: boolean;
   /**
    * Sem ela o alarme **não toca de jeito nenhum**. As demais degradam a experiência (toca em
@@ -75,10 +106,8 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
    */
   await registrarCanais();
 
-  const [settings, bateriaOtimizada, powerManager, canal] = await Promise.all([
+  const [settings, canal] = await Promise.all([
     notifee.getNotificationSettings(),
-    notifee.isBatteryOptimizationEnabled(),
-    notifee.getPowerManagerInfo(),
     notifee.getChannel(CANAL_ALARME),
   ]);
 
@@ -117,43 +146,10 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       },
     },
     {
-      /**
-       * A permissão que faz a **tela cheia** aparecer, e não só uma notificação.
-       *
-       * O Android 14 mudou a regra: `USE_FULL_SCREEN_INTENT` deixou de ser concedida na instalação
-       * e passou a exigir autorização explícita, reservada a apps de alarme e chamada. Declarada e
-       * **não** autorizada, o sistema degrada em silêncio para uma notificação heads-up.
-       *
-       * Foi o que aconteceu no primeiro teste (02/09): o alarme "funcionou" — som e aviso —, mas a
-       * tela não subiu, e sem a tela não há som contínuo, porque o loop mora nela. O sintoma
-       * engana justamente por parecer sucesso parcial.
-       *
-       * Não há API de leitura: nem o Notifee nem o Expo expõem o estado desta permissão. Fica
-       * sempre listada, com o caminho para a tela onde se concede — melhor oferecer um passo a
-       * mais do que esconder a razão de o alarme não abrir.
-       */
-      chave: "telaCheia",
-      titulo: "Abrir a tela do alarme",
-      descricao:
-        "Sem isto o Android mostra só uma notificação, em vez de abrir a tela que toca até você desligar.",
-      concedida: false,
-      essencial: false,
-      abrir: async () => {
-        // A tela é por app e vive fora das configurações de notificação — só se chega por esta
-        // intent, com o pacote do app na URI.
-        await Linking.sendIntent("android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", [
-          { key: "android.provider.extra.APP_PACKAGE", value: PACOTE },
-        ]).catch(async () => {
-          // Android abaixo do 14 não tem esta tela, e a permissão já vem concedida: cair nas
-          // configurações do app evita um botão que parece quebrado.
-          await Linking.openSettings();
-        });
-      },
-    },
-    {
       chave: "naoPerturbe",
       titulo: "Tocar no silencioso",
       descricao: "Sem isto o alarme fica mudo quando o celular está no “Não perturbe”.",
+      comoFazer: "Na lista que abrir, procure o Mapill e permita o acesso.",
       /**
        * Lido do **canal**, e não de uma API de permissão.
        *
@@ -168,22 +164,26 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        */
       concedida: canal?.bypassDnd === true,
       essencial: false,
+      /**
+       * A tela de **acesso à política do Não Perturbe**, e não as notificações do app.
+       *
+       * `openNotificationSettings()` levava às notificações do Mapill — onde esta autorização não
+       * existe. Quem chegava lá via as categorias de notificação, não achava nada sobre silencioso,
+       * e voltava sem ter feito o que o item pedia. O item continuava pendente, e o motivo era
+       * invisível.
+       *
+       * A autorização vive numa lista do sistema (todos os apps que podem furar o Não Perturbe), e
+       * é a intent abaixo que a abre. Sem `extra` de pacote: esta tela é uma lista geral, e é por
+       * isso que a instrução manda procurar o Mapill nela.
+       */
       abrir: async () => {
-        await notifee.openNotificationSettings();
-      },
-    },
-    {
-      chave: "bateria",
-      titulo: "Funcionar com a tela apagada",
-      descricao: "A economia de bateria do seu aparelho pode impedir o alarme de tocar.",
-      concedida: !bateriaOtimizada,
-      essencial: false,
-      abrir: async () => {
-        // Fabricantes agressivos (Xiaomi, Samsung, Motorola) têm uma tela **própria**, além da do
-        // Android. `activity` não-nulo diz que este aparelho é um deles — e é lá que a configuração
-        // que realmente mata o alarme costuma estar.
-        if (powerManager.activity !== null) await notifee.openPowerManagerSettings();
-        else await notifee.openBatteryOptimizationSettings();
+        await Linking.sendIntent("android.settings.NOTIFICATION_POLICY_ACCESS_SETTINGS").catch(
+          async () => {
+            // Aparelho sem essa tela: as notificações do app são o lugar mais próximo de onde a
+            // pessoa consegue seguir, e é melhor que um toque que não faz nada.
+            await notifee.openNotificationSettings();
+          },
+        );
       },
     },
   ];
