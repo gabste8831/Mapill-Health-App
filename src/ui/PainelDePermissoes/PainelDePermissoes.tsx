@@ -48,12 +48,12 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
           size={22}
           color={vaiTocar ? cores.onWarningSurface : cores.error}
         />
-        <Text style={styles.titulo}>
+        <Text style={[styles.titulo, !vaiTocar && styles.tituloCritico]}>
           {vaiTocar ? "Deixe o alarme mais confiável" : "O alarme não vai tocar"}
         </Text>
       </View>
 
-      <Text style={styles.explicacao}>
+      <Text style={[styles.explicacao, !vaiTocar && styles.explicacaoCritica]}>
         {vaiTocar
           ? "Estes ajustes do sistema evitam que o aviso atrase ou fique mudo."
           : "Falta uma autorização do Android para o Mapill conseguir avisar você."}

@@ -1,10 +1,10 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import type { ReminderMode } from "@/domain/entities/prescription";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
-import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { useCores, useEstilos } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
@@ -189,12 +189,10 @@ export function ConfiguracaoDeLembrete({
          * Link e não acordeão: dobrado aqui dentro, o conteúdo empurrava o botão "Pronto" para
          * fora da tela e obrigava quem só queria escolher um modo a rolar por tudo.
          */}
-        <Pressable
-          style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
-          onPress={onAbrirAjuda}
-          accessibilityRole="link">
-          <Text style={styles.linkParaTermos}>Como funcionam os alertas</Text>
-        </Pressable>
+        {/* Botão de contorno, e não link de texto: ele abre uma tela inteira, que é o que os dois
+            botões desta folha fazem — tratá-lo como texto sublinhado o fazia parecer nota de rodapé
+            do "Pronto". `outline` para não competir com o primário, que é quem fecha a decisão. */}
+        <Button label="Como funcionam os alertas" variant="outline" onPress={onAbrirAjuda} />
 
         <Button label="Pronto" onPress={onClose} />
       </View>

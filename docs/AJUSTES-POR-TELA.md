@@ -209,6 +209,46 @@ subtítulo, e alinhar os textos à esquerda para ficarem rentes ao espaço de pr
   do alvo, igual em todas as seções de anexo. Em `CadastroDeMedicamento.styles.ts` e
   `FormularioDeMedicamentoScreen.tsx`.
 
+o espaçamento abaixo de "Adicionar foto da caixa" e "Adicionar arquivo" está muito grande. E ao
+clicar sobre eles aparece um efeito de cor que ficou estranho — pode retirar.
+- [x] Feito: as duas coisas eram efeito colateral da correção anterior. (1) **O vão**: o
+  `alvoDeLinkRente` tinha `minHeight: 44` e o texto do link tem ~20 — sobrava folga vertical dentro
+  do alvo, e o `alignItems: center` do `photoRow` a empurrava para baixo da dica. Troquei a altura
+  fixa por `paddingVertical: xs` + `hitSlop={12}`: a área de dedo continua ali (o `hitSlop` estende
+  o toque para fora da caixa), mas sem ocupar espaço no layout. (2) **O efeito**: era o `superficie:
+  true`, que pinta fundo ao toque — pensado para linha de lista, e num link curto no meio do texto
+  ele desenha um retângulo do tamanho da frase, que lê como falha de renderização. Removido dos
+  quatro links de anexo ("Adicionar/Trocar foto da caixa", "Adicionar arquivo", "Alterar anexo",
+  "Remover"); a opacidade, que é o padrão do `estadoDePressao`, continua respondendo ao toque.
+
+reduzir a frase "Aceita PDF, JPG ou PNG. Fica só no aparelho, não sobe pra nuvem." — pode tirar a
+parte da nuvem.
+- [x] Feito: virou só "Aceita PDF, JPG ou PNG." A lista de formatos vem do
+  `ACCEPTED_DOCUMENT_LABEL`, compartilhado com a mensagem de erro do seletor de arquivos, então os
+  dois lugares continuam dizendo o mesmo. A promessa de que o anexo não sai do aparelho continua
+  nos Termos (é o que o bloco 5.1 do roteiro confere) — o comportamento não mudou, só deixou de ser
+  repetida em cada cadastro.
+
+no popup de lembrete: não gostei do vermelho e amarelo com opacidade baixa das mensagens de alerta.
+Os botões ("Tocar no silencioso") e o texto abaixo precisam de mais destaque — título vs. subtítulo,
+o subtítulo talvez 1px menor. E "Como funcionam os alertas" pode ser um button mesmo.
+- [x] Feito: (1) **O painel encorpado.** `warningSurface` (`#FEF6E7`) e `errorSurface` (`#FDECEA`)
+  são quase brancos, e dentro de um popup — que já é superfície branca — o bloco sumia. Trocar o
+  token estragaria a `Dica`, que usa os mesmos sobre fundo cinza. **Primeira tentativa foi borda de
+  1px + texto tingido, e o Gabriel pediu para tirar a borda: a cor do card em si não tinha mudado —
+  estava certo, eu só havia contornado o bloco.** Agora o fundo é calculado, misturando 12% da cor
+  do texto do estado na superfície dele (`misturarCores`, nova em `with-opacity.ts`): o aviso vai de
+  `#FEF6E7` para `rgb(238,223,204)`, continua âmbar mas com corpo. Opaca e não `rgba`, senão o tom
+  mudaria conforme a superfície atrás. Cada tema resolve o próprio par — no escuro a "tinta" é clara
+  e o fundo clareia. O título e a explicação seguem tingidos (eram `onSurface`, o cinza de qualquer
+  texto — o conteúdo não pertencia ao bloco que o cercava). (2) **Hierarquia nas linhas**: título e
+  descrição eram ambos `400Regular` separados por 2px — o que não se lê como hierarquia. Título foi
+  para semibold e a descrição para 13px (entre o `bodyMd` 14 e o `bodySm` 12; ela é a consequência e
+  precisa ser lida). A escada ficou 16 semibold → 13 cinza → 12 azul (o "como fazer"). (3) **"Como
+  funcionam os alertas" virou `Button` `outline`** — ele abre uma tela inteira, como os outros
+  botões da folha; de link de texto parecia nota de rodapé do "Pronto". `outline` para não competir
+  com o primário.
+
 no painel "deixe o alarme mais confiável" (dentro do popup de lembrete): o botão "abrir a tela do
 alarme" não funciona, só exibe a tela de bloqueio — e não vejo necessidade dele. "Tocar no
 silencioso" só redireciona pras configurações do app, não dá pra entender o que fazer. O mesmo com
