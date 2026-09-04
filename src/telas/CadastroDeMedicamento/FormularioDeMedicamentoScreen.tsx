@@ -1687,10 +1687,14 @@ export function FormularioDeMedicamentoScreen({
                   )}
                 </Pressable>
                 <View style={styles.photoTextGroup}>
+                  {/* Sem `superficie`: o fundo ao toque foi feito para linha de lista, e num link
+                      curto no meio do texto ele pinta um retângulo do tamanho da frase — lê como
+                      falha de renderização, não como resposta ao dedo. A opacidade basta. */}
                   <Pressable
-                    style={estadoDePressao(styles.alvoDeLinkRente, { superficie: true })}
+                    style={estadoDePressao(styles.alvoDeLinkRente)}
                     onPress={() => setOrigemPendente("caixa")}
-                    accessibilityRole="button">
+                    accessibilityRole="button"
+                    hitSlop={12}>
                     <Text style={styles.photoAddLabel}>
                       {photoUri ? "Trocar foto da caixa" : "Adicionar foto da caixa"}
                     </Text>
@@ -1742,11 +1746,12 @@ export function FormularioDeMedicamentoScreen({
                   {attachmentUri === null ? (
                     <Pressable
                       style={estadoDePressao(styles.alvoDeLinkRente, {
-                        superficie: !prescriptionPhoto.isPicking && !prescriptionFile.isPicking,
+                        opacidade: !prescriptionPhoto.isPicking && !prescriptionFile.isPicking,
                       })}
                       onPress={() => setOrigemPendente("receita")}
                       disabled={prescriptionPhoto.isPicking || prescriptionFile.isPicking}
-                      accessibilityRole="button">
+                      accessibilityRole="button"
+                      hitSlop={12}>
                       <Text style={styles.photoAddLabel}>Adicionar arquivo</Text>
                     </Pressable>
                   ) : (
@@ -1755,25 +1760,30 @@ export function FormularioDeMedicamentoScreen({
                     // meio disso perdia a validade e o aviso de renovação já preenchidos.
                     <View style={styles.acoesDeAnexo}>
                       <Pressable
-                        style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
+                        style={estadoDePressao(styles.alvoDeLinkRente)}
                         onPress={() => setOrigemPendente("receita")}
-                        accessibilityRole="button">
+                        accessibilityRole="button"
+                        hitSlop={12}>
                         <Text style={styles.photoAddLabel}>Alterar anexo</Text>
                       </Pressable>
                       <Pressable
-                        style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
+                        style={estadoDePressao(styles.alvoDeLinkRente)}
                         onPress={removerReceita}
-                        accessibilityRole="button">
+                        accessibilityRole="button"
+                        hitSlop={12}>
                         <Text style={styles.photoRemoveLabel}>
                           {attachmentKind === "document" ? "Remover receita" : "Remover foto"}
                         </Text>
                       </Pressable>
                     </View>
                   )}
+                  {/* Só os formatos. A promessa de que o anexo não sai do aparelho continua nos
+                      Termos, que é onde ela vale — repeti-la aqui custava uma frase em cada
+                      cadastro para dizer algo que não muda de um remédio para o outro. */}
                   <Text style={styles.photoHint}>
                     {attachmentUri !== null && attachmentName.length > 0
                       ? attachmentName
-                      : `Aceita ${ACCEPTED_DOCUMENT_LABEL}. Fica só no aparelho, não sobe pra nuvem.`}
+                      : `Aceita ${ACCEPTED_DOCUMENT_LABEL}.`}
                   </Text>
                 </View>
               </View>

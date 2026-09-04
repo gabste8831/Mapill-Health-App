@@ -446,12 +446,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * entre si e nenhuma ficava rente ao quadrado da mídia, que é a borda que o olho usa como
    * referência. Aqui o respiro lateral vem do `gap` da linha, não do alvo.
    *
-   * A altura de 44 fica: ela é o alvo de dedo, e é o que este bloco ganhou na varredura de
-   * acessibilidade.
+   * A área de dedo vem do `hitSlop`, e não de `minHeight`: com 44 de altura fixa sobrava folga
+   * vertical dentro do alvo (o texto tem ~20), e essa folga abria um vão visível entre o link e a
+   * dica logo abaixo. O `hitSlop` estende o alcance do toque para fora da caixa sem ocupar espaço
+   * no layout — mesma proteção, sem o buraco.
    */
   alvoDeLinkRente: {
-    minHeight: 44,
-    justifyContent: "center",
+    paddingVertical: spacing.xs,
     paddingHorizontal: 0,
     borderRadius: radius.md,
   },
