@@ -1688,7 +1688,7 @@ export function FormularioDeMedicamentoScreen({
                 </Pressable>
                 <View style={styles.photoTextGroup}>
                   <Pressable
-                    style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
+                    style={estadoDePressao(styles.alvoDeLinkRente, { superficie: true })}
                     onPress={() => setOrigemPendente("caixa")}
                     accessibilityRole="button">
                     <Text style={styles.photoAddLabel}>
@@ -1741,7 +1741,7 @@ export function FormularioDeMedicamentoScreen({
                 <View style={styles.photoTextGroup}>
                   {attachmentUri === null ? (
                     <Pressable
-                      style={estadoDePressao(styles.alvoDeLink, {
+                      style={estadoDePressao(styles.alvoDeLinkRente, {
                         superficie: !prescriptionPhoto.isPicking && !prescriptionFile.isPicking,
                       })}
                       onPress={() => setOrigemPendente("receita")}

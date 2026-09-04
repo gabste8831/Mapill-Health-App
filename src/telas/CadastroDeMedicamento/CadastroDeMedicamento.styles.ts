@@ -92,9 +92,16 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     columnGap: spacing.md,
     rowGap: spacing.xs,
   },
+  /**
+   * O texto ao lado da mídia: o link que age, e a dica que explica.
+   *
+   * Sem `gap`: o link mora num alvo de 44pt que já centraliza o texto com folga em cima e embaixo,
+   * e somar espaço a essa folga afastava a dica do título que ela explica — os dois liam como dois
+   * assuntos em vez de um. O respiro entre eles é o que sobra do alvo, e é o mesmo em todas as
+   * seções de anexo.
+   */
   photoTextGroup: {
     flex: 1,
-    gap: spacing.xs,
   },
   photoAddLabel: {
     ...typography.label,
@@ -428,6 +435,24 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: spacing.sm,
+    borderRadius: radius.md,
+  },
+  /**
+   * O mesmo alvo, mas **rente à esquerda** — para o link que encabeça um bloco de texto ao lado de
+   * uma mídia (a foto da caixa, o anexo da receita).
+   *
+   * O `paddingHorizontal` do `alvoDeLink` empurrava o título 8px para dentro enquanto a dica
+   * abaixo, um `Text` solto, começava no zero. As duas linhas do mesmo bloco saíam desalinhadas
+   * entre si e nenhuma ficava rente ao quadrado da mídia, que é a borda que o olho usa como
+   * referência. Aqui o respiro lateral vem do `gap` da linha, não do alvo.
+   *
+   * A altura de 44 fica: ela é o alvo de dedo, e é o que este bloco ganhou na varredura de
+   * acessibilidade.
+   */
+  alvoDeLinkRente: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 0,
     borderRadius: radius.md,
   },
 
