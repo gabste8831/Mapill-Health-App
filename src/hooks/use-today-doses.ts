@@ -15,6 +15,7 @@ import type { Prescription } from "@/domain/entities/prescription";
 import { CorrectIntake } from "@/domain/use-cases/correct-intake";
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { RegisterIntake } from "@/domain/use-cases/register-intake";
+import { anunciarDosesResolvidas, ouvirDosesResolvidas } from "@/notifications/doses-resolvidas";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import { toLocalIsoDay, todayIsoDate } from "@/shared/date-input";
 
@@ -319,8 +320,33 @@ export async function gravarDesfecho(
   const inventoryRepository = new InventoryRepository();
   const occurredAt = new Date().toISOString();
 
-  const anterior =
-    dose.latestLogId === null ? null : await intakeLogRepository.findById(dose.latestLogId);
+  /**
+   * O desfecho atual vem do **banco**, e não do que a tela carregou.
+   *
+   * `dose.latestLogId` é a memória de quando a tela montou, e entre aquele instante e este toque a
+   * dose pode ter sido resolvida em outro lugar — pela notificação, por outra tela, pelo handler de
+   * segundo plano. A tela de alarme é o caso extremo: ela carrega uma vez e não recarrega (não há
+   * foco a que voltar), então sua cópia envelhece por todo o tempo em que o alarme toca.
+   *
+   * Confiando na memória, uma dose já confirmada pela notificação era vista como nova aqui, e o
+   * `RegisterIntake` gravava uma **segunda** ingestão: o estoque de 10 caía para 8 com uma dose só.
+   * Reler é o que faz o segundo caminho reconhecer o primeiro e corrigir em vez de somar.
+   */
+  const logs = await intakeLogRepository.findByDoseSchedule(dose.doseScheduleId);
+  const anterior = logs.at(-1) ?? null;
+
+  /**
+   * Repetir o mesmo desfecho não faz nada.
+   *
+   * Confirmar o que já está confirmado não é uma correção — é o mesmo fato dito duas vezes, e
+   * gravá-lo somaria um registro ao histórico que o médico vai ler. Acontece de verdade: o alarme
+   * continua tocando depois de a dose ser confirmada pela notificação, e responder na tela é o
+   * gesto natural para calar o som.
+   *
+   * Um desfecho **diferente** segue passando: mudar de "pulei" para "tomei" é correção legítima, e
+   * é para isso que o `CorrectIntake` existe.
+   */
+  if (anterior !== null && anterior.status === status) return;
 
   if (anterior === null) {
     await new RegisterIntake(intakeLogRepository, inventoryRepository, () =>
@@ -333,6 +359,18 @@ export async function gravarDesfecho(
       occurredAt,
       amount: dose.amount,
     });
+    /**
+     * Avisa quem estiver mostrando esta dose agora.
+     *
+     * É a tela de alarme que precisa: ela toca em loop, e continuar tocando depois de a dose ser
+     * confirmada em outro lugar — pelo corpo da notificação, que leva à tela do horário — é o app
+     * contradizendo o que acabou de gravar. Ela revalida sozinha a cada poucos segundos, mas
+     * esses segundos de som depois da resposta leem como defeito.
+     *
+     * Fica no funil da gravação, e não em cada tela: Home, tela do horário e alarme passam todos
+     * por aqui, e anunciar em cada chamador abriria caminho para alguém esquecer.
+     */
+    anunciarDosesResolvidas([dose.doseScheduleId]);
     return;
   }
 
@@ -346,7 +384,10 @@ export async function gravarDesfecho(
     occurredAt,
     amount: dose.amount,
   });
+
+  anunciarDosesResolvidas([dose.doseScheduleId]);
 }
+
 
 /**
  * A agenda de hoje, recarregada quando a tela volta ao foco — é o que faz um cadastro feito agora
@@ -384,7 +425,22 @@ export function useTodayDoses() {
     useCallback(() => {
       void reload();
       const intervalo = setInterval(() => void reload(), 60_000);
-      return () => clearInterval(intervalo);
+      /**
+       * A dose resolvida **em outro lugar** também atualiza a Home, sem esperar o minuto.
+       *
+       * O `useFocusEffect` cobre o caminho normal — voltar da tela do horário devolve o foco e
+       * recarrega. O que ele não cobre é a Home **já em foco** quando algo é confirmado fora dela:
+       * o botão da notificação com o app aberto, ou o handler de segundo plano. Aí a tela ficaria
+       * mostrando como pendente, por até um minuto, uma dose já registrada — e num app de medicação
+       * essa defasagem convida a confirmar de novo.
+       *
+       * O intervalo continua como rede, para o caso de o anúncio não chegar.
+       */
+      const pararDeOuvir = ouvirDosesResolvidas(() => void reload());
+      return () => {
+        clearInterval(intervalo);
+        pararDeOuvir();
+      };
     }, [reload]),
   );
 

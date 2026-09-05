@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import type { IntakeStatus } from "@/domain/entities/intake-log";
 import { useDosesDoHorario, type DoseDoHorario } from "@/hooks/use-doses-do-horario";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
 import { useCores, useEstilos } from "@/shared/theme";
@@ -175,6 +176,30 @@ export function HorarioScreen() {
     else router.replace("/");
   }
 
+  /**
+   * Respondida a última dose, a tela sai sozinha.
+   *
+   * Ela existe para uma pergunta só — "tomou ou não?" —, e depois de respondida não há mais nada a
+   * fazer aqui: o botão "Ver meu dia" era um passo a mais para sair de uma tela que já cumpriu o
+   * que tinha a cumprir.
+   *
+   * **Só quando não sobra pendente.** Com vários remédios no mesmo horário, sair na primeira
+   * resposta levaria embora a chance de responder os outros — e é justamente o horário com vários
+   * remédios que mais precisa desta tela, porque é onde a resposta é parcial ("tomei este, aquele
+   * não").
+   *
+   * O atraso deixa a linha respondida ser vista antes de a tela trocar: sem ele, o toque e a
+   * navegação acontecem no mesmo quadro, e não fica claro o que foi registrado.
+   */
+  async function registrarEsair(dose: DoseDoHorario, status: IntakeStatus) {
+    await registrar(dose, status);
+    const aindaPendentes = doses.filter(
+      (outra) => !outra.resolvida && outra.doseScheduleId !== dose.doseScheduleId,
+    ).length;
+    if (aindaPendentes > 0) return;
+    setTimeout(voltar, 450);
+  }
+
   if (isLoading) return <CenteredLoader />;
 
   if (error !== null) {
@@ -218,22 +243,28 @@ export function HorarioScreen() {
               <ItemDeDose
                 key={dose.doseScheduleId}
                 dose={dose}
-                onConfirmar={() => void registrar(dose, "confirmed")}
-                onPular={() => void registrar(dose, "skipped")}
+                onConfirmar={() => void registrarEsair(dose, "confirmed")}
+                onPular={() => void registrarEsair(dose, "skipped")}
+                /* "Ignorar por agora" **não** sai: ele diz explicitamente que a dose continua
+                   pendente, e levar embora quem acabou de adiar a decisão contradiria isso. */
                 onAdiar={() => void registrar(dose, "deferred")}
               />
             ))}
 
-            {/* Saída explícita para a Home, além da seta do topo. Quem chegou pela notificação
-                entrou direto nesta tela, sem passar pelo app: a seta leva "para trás" numa pilha
-                que pode não ter nada atrás. E depois de responder as doses deste horário, o passo
-                seguinte natural é ver o dia inteiro. */}
-            <Button
-              label={pendentes === 0 ? "Ver meu dia" : "Ir para a Home"}
-              variant="outline"
-              onPress={() => router.replace("/")}
-              style={styles.irParaHome}
-            />
+            {/* A saída para quem **não** vai responder agora.
+
+                Some depois da última resposta, porque ali a tela já sai sozinha — e um botão que
+                aparece no instante em que deixa de ser necessário é ruído. Quem chegou pela
+                notificação entrou direto nesta tela, sem passar pelo app: a seta do topo leva
+                "para trás" numa pilha que pode não ter nada atrás, e este botão é o caminho certo. */}
+            {pendentes > 0 ? (
+              <Button
+                label="Ir para a Home"
+                variant="outline"
+                onPress={() => router.replace("/")}
+                style={styles.irParaHome}
+              />
+            ) : null}
           </>
         )}
       </ScrollView>

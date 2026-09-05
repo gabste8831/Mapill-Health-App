@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
-import { AccessibilityInfo, Text, View } from "react-native";
+import { AccessibilityInfo, Modal, Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -70,18 +70,32 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
   const checkStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Animated.View
-      style={[styles.overlay, overlayStyle]}
-      accessibilityViewIsModal
-      accessibilityRole="alert">
-      <Animated.View style={[styles.check, checkStyle]}>
-        <Ionicons name="checkmark" size={52} color={cores.onPrimary} />
-      </Animated.View>
+    /**
+     * `Modal`, e não uma `View` absoluta.
+     *
+     * `position: absolute` cobre o **pai**, e a Home vive dentro do navegador de abas: a barra de
+     * navegação ficava por cima da comemoração, à mostra e tocável no meio da animação — exatamente
+     * o que o comentário do estilo dizia estar evitando. O `Modal` renderiza acima de toda a
+     * árvore, inclusive da barra.
+     *
+     * `transparent` porque quem pinta o fundo é o próprio overlay, que precisa esmaecer junto com o
+     * conteúdo; e `animationType="none"` porque a entrada e a saída são as do Reanimated logo
+     * abaixo — deixar as duas ativas daria duas animações sobrepostas.
+     */
+    <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={onDone}>
+      <Animated.View
+        style={[styles.overlay, overlayStyle]}
+        accessibilityViewIsModal
+        accessibilityRole="alert">
+        <Animated.View style={[styles.check, checkStyle]}>
+          <Ionicons name="checkmark" size={52} color={cores.onPrimary} />
+        </Animated.View>
 
-      <View style={styles.texts}>
-        <Text style={styles.title}>{title}</Text>
-        {description ? <Text style={styles.description}>{description}</Text> : null}
-      </View>
-    </Animated.View>
+        <View style={styles.texts}>
+          <Text style={styles.title}>{title}</Text>
+          {description ? <Text style={styles.description}>{description}</Text> : null}
+        </View>
+      </Animated.View>
+    </Modal>
   );
 }

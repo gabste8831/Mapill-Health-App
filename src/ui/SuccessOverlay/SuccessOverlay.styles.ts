@@ -5,6 +5,10 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * Cobre a tela inteira, inclusive a barra de abas: a confirmação é o único assunto do momento,
    * e deixar a navegação à mostra convidaria a tocar em algo no meio da animação.
+   *
+   * Quem garante o "inclusive a barra de abas" é o `Modal` no componente, e não este `absolute`:
+   * posição absoluta cobre o pai, e o pai desta tela está **dentro** do navegador de abas. Sem o
+   * `Modal`, a barra ficava por cima da comemoração.
    */
   overlay: {
     position: "absolute",

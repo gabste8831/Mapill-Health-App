@@ -1,7 +1,13 @@
 import notifee, { EventType, type Event } from "@notifee/react-native";
 
-import { ACAO_ADIAR, ACAO_TOMEI } from "./acoes";
-import { ehAlarmeDeTelaCheia, lerDadosDoAviso, type DadosDoAviso } from "./notifee-gateway";
+import { ACAO_ADIAR, ACAO_PULEI, ACAO_TOMEI } from "./acoes";
+import { pedirParaEncerrarAlarme } from "./doses-resolvidas";
+import {
+  dispensarAlarmeAtivo,
+  ehAlarmeDeTelaCheia,
+  lerDadosDoAviso,
+  type DadosDoAviso,
+} from "./notifee-gateway";
 import { tratarRespostaAoAviso } from "./responder-aviso";
 
 /**
@@ -94,6 +100,34 @@ async function tratar(evento: Event): Promise<void> {
   const resultado = await tratarRespostaAoAviso(acao, dados);
 
   if (resultado.tipo === "abrirHorario") {
+    /**
+     * Tocar num **alarme** abre a tela do alarme, e não a do horário.
+     *
+     * Os dois avisos caem aqui, mas pedem telas diferentes. Com o aparelho em uso o Android rebaixa
+     * o alarme para um heads-up, e tocá-lo levava à tela de confirmação — que não tem foto do
+     * remédio, nem adiar, nem silenciar. Quem foi interrompido por um despertador perdia justamente
+     * o que faz dele um despertador, e ficava com um formulário de "tomou ou não?".
+     *
+     * A tela do alarme existe como rota (`/alarme/[instante]`) exatamente para este caso: o app
+     * abre por conta própria o que o sistema não deixou irromper.
+     */
+    if (ehAlarmeDeTelaCheia(id)) {
+      // Sai da trava do `DELIVERED`: um toque é intenção explícita, e recusá-lo porque a entrega já
+      // foi registrada deixaria o toque sem efeito nenhum.
+      jaAbertos.delete(dados.scheduledFor);
+      aoDispararAlarme?.(dados.scheduledFor);
+      return;
+    }
+
+    /**
+     * A notificação comum leva à tela do horário, onde a resposta parcial cabe.
+     *
+     * Se houver um alarme tocando em paralelo, ele sai: escolher outro caminho para responder é uma
+     * resposta a ele, e continuar berrando enquanto a pessoa decide na outra tela é cobrar algo que
+     * ela já foi atender.
+     */
+    await dispensarAlarmeAtivo().catch(() => {});
+    pedirParaEncerrarAlarme();
     aoAbrirHorario?.(resultado.dados);
     return;
   }
@@ -106,7 +140,7 @@ async function tratar(evento: Event): Promise<void> {
    * 29/08. A guarda contra repetição vive em `confirmarDosesDoAviso` — esta linha é a segunda
    * camada, para o aviso não ficar convidando ao toque depois de resolvido.
    */
-  if (acao === ACAO_TOMEI || acao === ACAO_ADIAR) {
+  if (acao === ACAO_TOMEI || acao === ACAO_PULEI || acao === ACAO_ADIAR) {
     await notifee.cancelNotification(id).catch(() => {});
   }
 }
