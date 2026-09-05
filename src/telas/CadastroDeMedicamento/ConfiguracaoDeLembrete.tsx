@@ -1,10 +1,10 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import type { ReminderMode } from "@/domain/entities/prescription";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
-import { useCores, useEstilos } from "@/shared/theme";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import {
   BottomSheet,
   Button,
@@ -64,12 +64,6 @@ function opcoesDeModo(
       hint: "Aparece na barra e respeita o silencioso.",
       icon: iconeDoModo("notification", value === "notification", cores),
     },
-    {
-      value: "both",
-      label: "Os dois",
-      hint: "O alarme na hora, a notificação depois.",
-      icon: iconeDoModo("both", value === "both", cores),
-    },
   ];
 }
 
@@ -86,6 +80,18 @@ type ConfiguracaoDeLembreteProps = {
    * própria, não há mais estado de leitura para preservar através de uma navegação.
    */
   onAbrirAjuda: () => void;
+  /**
+   * Desliga o lembrete deste tratamento.
+   *
+   * Só existe quando já **há** um configurado. "Nenhum aviso" saiu das opções de propósito — entre
+   * três escolhas, ela convida a recusar o lembrete antes de entender o que ele faz, e num app de
+   * medicação essa não é uma escolha para se oferecer de bandeja.
+   *
+   * Mas isso deixou a edição sem volta: quem já tinha alarme não conseguia desligá-lo por caminho
+   * nenhum. Como saída explícita, no fim da folha e só para quem já configurou, ela desfaz uma
+   * decisão em vez de sugerir uma.
+   */
+  onRemover: () => void;
 };
 
 /**
@@ -114,6 +120,7 @@ export function ConfiguracaoDeLembrete({
   onChange,
   onClose,
   onAbrirAjuda,
+  onRemover,
 }: ConfiguracaoDeLembreteProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
@@ -167,7 +174,7 @@ export function ConfiguracaoDeLembrete({
           * Android 12+ e a economia de bateria, que são justamente as duas causas de "o aviso não
           * chegou" que ninguém consegue diagnosticar sozinho.
           *
-          * O painel lista as três, diz o que cada uma muda, leva à tela certa de cada uma e — nas duas em
+          * O painel lista as que faltam, diz o que cada uma muda, leva à tela certa de cada uma e — nas que
  * que a tela do sistema não se explica sozinha — diz o que procurar depois de chegar lá.
           */}
         {dependeDoAparelho && permissoes.temPendencia ? (
@@ -192,9 +199,29 @@ export function ConfiguracaoDeLembrete({
         {/* Botão de contorno, e não link de texto: ele abre uma tela inteira, que é o que os dois
             botões desta folha fazem — tratá-lo como texto sublinhado o fazia parecer nota de rodapé
             do "Pronto". `outline` para não competir com o primário, que é quem fecha a decisão. */}
-        <Button label="Como funcionam os alertas" variant="outline" onPress={onAbrirAjuda} />
+        {/* `emFolha` porque o `outline` usa a mesma superfície do `BottomSheet`: sem ele, o botão
+            fica branco sobre branco e a sombra que o separaria não se vê contra a folha elevada. */}
+        <Button
+          label="Como funcionam os alertas"
+          variant="outline"
+          emFolha
+          onPress={onAbrirAjuda}
+        />
 
         <Button label="Pronto" onPress={onClose} />
+
+        {/* Só depois de configurado: no cadastro novo, não abrir esta folha já é recusar, e o
+            botão ofereceria desfazer o que ainda não foi feito. Na edição ele é o único caminho
+            de volta — sem ele, quem ligou o alarme uma vez não conseguia mais desligá-lo. */}
+        {value !== null && value !== "none" ? (
+          <Pressable
+            style={estadoDePressao(styles.alvoDeLink)}
+            onPress={onRemover}
+            accessibilityRole="button"
+            accessibilityLabel="Não quero ser avisado das doses deste remédio">
+            <Text style={styles.textoDeSaida}>Não quero ser avisado deste remédio</Text>
+          </Pressable>
+        ) : null}
       </View>
     </BottomSheet>
   );

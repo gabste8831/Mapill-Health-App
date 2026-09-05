@@ -5,9 +5,21 @@ import type { SyncableEntity } from "./syncable";
  * Livre por prescrição, não global — cada tratamento tem sua própria criticidade
  * (ex: insulina pede alarme, suplemento de rotina pode ser só notificação ou nada).
  *
- * `both` existe porque os dois canais fazem coisas diferentes: o alarme interrompe a pessoa na
- * hora, e a notificação **fica** na barra depois de dispensado. Quem precisa das duas coisas
- * estava tendo que escolher uma.
+ * ## `both` está aposentado
+ *
+ * Ele emitia um alarme **e** uma notificação para o mesmo horário. A escolha saiu da tela em 05/09:
+ * o problema nunca foi emitir os dois, e sim mantê-los consistentes — dois avisos vivos, cada um
+ * com botão de confirmar, e a mesma dose podendo ser respondida por qualquer um. O teste em
+ * aparelho mostrou o preço: a dose confirmada pela notificação era descontada **de novo** pelo
+ * alarme, que seguia aberto com a lista de antes.
+ *
+ * A redundância que ele prometia já existe sem ele: o alarme é criado com `ongoing: true`, então
+ * fica na bandeja depois de tocar. O que `both` acrescentava era um segundo aviso, não a
+ * permanência — e cada caminho a mais para confirmar a mesma dose é um caminho a mais para divergir.
+ *
+ * O valor continua no tipo porque pode estar gravado em tratamentos salvos antes da remoção;
+ * `planejar-avisos-de-dose` o lê como `alarm`, que é o modo mais forte e o que aquela escolha
+ * buscava.
  */
 export type ReminderMode = "alarm" | "notification" | "both" | "none";
 

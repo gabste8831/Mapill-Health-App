@@ -28,6 +28,15 @@
  */
 
 export const ACAO_TOMEI = "tomei";
+/**
+ * "Pulei" — o par de "Tomei" na notificação, e a resposta que faltava ali.
+ *
+ * A notificação oferecia "Tomei" e "Adiar", o que dava saída para quem tomou e para quem quer ser
+ * lembrado depois, mas nenhuma para **quem não tomou**. Registrar isso importa tanto quanto o
+ * contrário: o relatório distingue "pulada" de "sem registro", e sem este botão a dose não tomada
+ * caía no segundo caso por falta de caminho, não por escolha.
+ */
+export const ACAO_PULEI = "pulei";
 export const ACAO_ADIAR = "adiar";
 
 /** Quanto tempo o adiamento empurra o aviso. Um só por horário — ver `snoozeCount`. */

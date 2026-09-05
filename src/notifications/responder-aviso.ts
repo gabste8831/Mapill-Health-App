@@ -7,8 +7,9 @@ import { MedicationRepository } from "@/data/repositories/medication-repository"
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose } from "@/domain/entities/intake-log";
 import { RegisterIntake } from "@/domain/use-cases/register-intake";
+import { anunciarDosesResolvidas } from "./doses-resolvidas";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
-import { ACAO_ADIAR, ACAO_TOMEI, MINUTOS_DE_ADIAMENTO } from "./acoes";
+import { ACAO_ADIAR, ACAO_PULEI, ACAO_TOMEI, MINUTOS_DE_ADIAMENTO } from "./acoes";
 import {
   NotifeeGateway,
   PREFIXO_ADIADO,
@@ -27,7 +28,18 @@ import { reagendarTodosOsAvisos } from "./reagendar-avisos";
  * carimbar o horário previsto inventaria um dado que ninguém forneceu (§2.3.3 — o registro é de
  * monitoramento eletrônico, e ele vale por ser fiel ao que aconteceu de fato).
  */
-export async function confirmarDosesDoAviso(doseScheduleIds: string[]): Promise<void> {
+export async function confirmarDosesDoAviso(
+  doseScheduleIds: string[],
+  /**
+   * O desfecho a gravar. `confirmed` desconta o estoque; `skipped` só registra.
+   *
+   * O parâmetro entrou quando a notificação ganhou o botão "Pulei": as duas respostas percorrem
+   * exatamente o mesmo caminho — mesma guarda contra repetição, mesmo anúncio, mesmo reagendamento
+   * —, e a única diferença é esta palavra. Duplicar a função para trocá-la abriria duas cópias de
+   * uma regra que precisa continuar sendo uma.
+   */
+  status: "confirmed" | "skipped" = "confirmed",
+): Promise<void> {
   const doseScheduleRepository = new DoseScheduleRepository();
   const prescriptionRepository = new PrescriptionRepository();
   const intakeLogRepository = new IntakeLogRepository();
@@ -64,13 +76,17 @@ export async function confirmarDosesDoAviso(doseScheduleIds: string[]): Promise<
       id: Crypto.randomUUID(),
       doseScheduleId,
       medicationId: prescription.medicationId,
-      status: "confirmed",
+      status,
       occurredAt: agora,
       // A dose gravada no agendamento, e não a da prescrição: elas divergem quando a dose varia
       // por horário, e é a do agendamento que descreve o que se toma **nesta** vez.
       amount: doseSchedule.amount,
     });
   }
+
+  // Avisa a tela de alarme, se ela estiver aberta tocando: sem isto ela só perceberia na próxima
+  // revalidação, e o som seguiria por alguns segundos depois de a dose já estar registrada.
+  anunciarDosesResolvidas(doseScheduleIds);
 
   // As doses confirmadas deixam de gerar aviso, e o horário reagendado some da fila.
   await reagendarTodosOsAvisos();
@@ -130,6 +146,13 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
   const medicationRepository = new MedicationRepository();
 
   const linhas: string[] = [];
+  /**
+   * O horário original das doses — o que a tela de alarme usa para encontrá-las.
+   *
+   * Todas as doses de um aviso compartilham o instante (é o que as agrupa), então basta o da
+   * primeira que existir.
+   */
+  let instanteDasDoses: string | null = null;
   for (const doseScheduleId of doseScheduleIds) {
     const doseSchedule = await doseScheduleRepository.findById(doseScheduleId);
     if (doseSchedule === null) continue;
@@ -137,13 +160,14 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
     if (prescription === null) continue;
     const medication = await medicationRepository.findById(prescription.medicationId);
     if (medication === null) continue;
+    instanteDasDoses ??= doseSchedule.scheduledFor;
     // Dois pontos, e não travessão: o mesmo formato do aviso da grade (ver `planejarAvisosDeDose`).
     linhas.push(
       `${medication.name}: ${formatarQuantidade(doseSchedule.amount, prescription.doseUnit)}`,
     );
   }
 
-  if (linhas.length === 0) return;
+  if (linhas.length === 0 || instanteDasDoses === null) return;
 
   const quando = new Date(Date.now() + MINUTOS_DE_ADIAMENTO * 60_000);
   await new NotifeeGateway().agendar({
@@ -159,6 +183,9 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
         : `Hora dos seus remédios, de novo (${linhas.length})`,
     corpo: linhas.join("\n"),
     doseScheduleIds,
+    // Sem isto a tela de alarme procuraria as doses no minuto em que "Adiar" foi tocado, onde não
+    // existe nenhuma — e o alarme voltava sem nome, sem dose e sem foto, com o "Tomei" sem efeito.
+    instanteDasDoses,
     modo: "alarm",
     // Já foi adiado: o aviso que volta não oferece adiar de novo.
     semAcoesRapidas: true,
@@ -187,13 +214,23 @@ export async function tratarRespostaAoAviso(
   actionIdentifier: string,
   dados: DadosDoAviso,
 ): Promise<RespostaAoAviso> {
-  const respondeuPorBotao = actionIdentifier === ACAO_TOMEI || actionIdentifier === ACAO_ADIAR;
+  const respondeuPorBotao =
+    actionIdentifier === ACAO_TOMEI ||
+    actionIdentifier === ACAO_PULEI ||
+    actionIdentifier === ACAO_ADIAR;
   if (respondeuPorBotao && dados.chave.length > 0) {
     await new NotifeeGateway().dispensar(dados.chave);
   }
 
   if (actionIdentifier === ACAO_TOMEI) {
     await confirmarDosesDoAviso(dados.doseScheduleIds);
+    return { tipo: "resolvida" };
+  }
+
+  // "Pulei" percorre o mesmo caminho, gravando o outro desfecho: registrar que **não** foi tomada
+  // é tão informativo quanto o contrário, e é o que separa "pulada" de "sem registro" no relatório.
+  if (actionIdentifier === ACAO_PULEI) {
+    await confirmarDosesDoAviso(dados.doseScheduleIds, "skipped");
     return { tipo: "resolvida" };
   }
 

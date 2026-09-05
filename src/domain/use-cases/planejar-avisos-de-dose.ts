@@ -55,14 +55,30 @@ function chaveDoHorario(scheduledFor: string): string {
 
 
 /**
- * O aviso é do **horário**, e o modo é o mais exigente entre as doses dele.
+ * O canal que o horário dispara — **um só**, sempre.
  *
- * Duas doses no mesmo minuto, uma marcada como alarme e outra como notificação, não podem virar
- * dois avisos — seriam dois toques seguidos dizendo a mesma coisa. Viram um só, e ele toca como
- * alarme: rebaixar para notificação silenciaria um lembrete que a pessoa pediu alto, e é sempre
- * pior errar para menos num aviso de medicação.
+ * Duas doses no mesmo minuto, uma marcada como alarme e outra como notificação, não viram dois
+ * avisos: seriam dois toques seguidos dizendo a mesma coisa. O horário sobe para o alarme, porque
+ * rebaixar silenciaria um lembrete que a pessoa pediu alto, e é sempre pior errar para menos num
+ * aviso de medicação.
+ *
+ * ## Por que "Os dois" deixou de existir
+ *
+ * A opção emitia um alarme **e** uma notificação para o mesmo horário, e chegou a funcionar. O
+ * problema não era emitir — era manter os dois consistentes: dois avisos vivos, cada um com botão
+ * de confirmar, e a mesma dose podendo ser respondida por qualquer um deles. Sincronizar uma
+ * Activity de tela cheia com a bandeja do sistema em tempo real é frágil por construção, e o teste
+ * em aparelho (05/09) mostrou o preço: a dose confirmada pela notificação era descontada de novo
+ * pelo alarme, que continuava aberto com a lista de antes.
+ *
+ * A redundância que a opção prometia já existe sem ela: o alarme é criado com `ongoing: true`, então
+ * ele **fica** na bandeja depois de tocar. O que "Os dois" acrescentava era um segundo aviso, não a
+ * permanência — e cada caminho a mais para confirmar a mesma dose é um caminho a mais para
+ * divergir.
  */
 function modoDoHorario(modos: ReminderMode[]): "alarm" | "notification" | null {
+  // `both` conta como alarme: a opção saiu da tela (ver abaixo), e o modo mais forte é o que ela
+  // buscava. Um valor gravado antes da remoção continua avisando, e no modo certo.
   if (modos.some((modo) => modo === "alarm" || modo === "both")) return "alarm";
   if (modos.some((modo) => modo === "notification")) return "notification";
   return null;
