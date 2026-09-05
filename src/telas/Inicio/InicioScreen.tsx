@@ -4,10 +4,12 @@ import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAppointmentList } from "@/hooks/use-appointment-list";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePatientProfile } from "@/hooks/use-patient-profile";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
 import { dataPorExtenso } from "@/shared/datas-por-extenso";
+import { toLocalIsoDay } from "@/shared/date-input";
 import { spacing, useEstilos } from "@/shared/theme";
 import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-today-doses";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
@@ -17,6 +19,7 @@ import { PainelDePermissoes } from "@/ui/PainelDePermissoes/PainelDePermissoes";
 import { CardEstoque } from "@/telas/Inicio/componentes/CardEstoque/CardEstoque";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
+import { ItemDeCompromisso } from "@/telas/Inicio/componentes/ItemDeCompromisso/ItemDeCompromisso";
 import { ItemDeDose } from "@/telas/Inicio/componentes/ItemDeDose/ItemDeDose";
 import { criarEstilos } from "./InicioScreen.styles";
 
@@ -83,6 +86,9 @@ export function InicioScreen() {
   const router = useRouter();
   const { draft } = usePatientProfile();
   const { agenda, isLoading, error, reload, registrarDose, registrarDoses } = useTodayDoses();
+  // Só a lista importa aqui: o carregamento é coberto pelo da agenda, e um erro de compromisso não
+  // pode esconder as doses do dia — a seção simplesmente não aparece.
+  const { items: compromissos } = useAppointmentList();
   const { permissao, pedir } = useNotificationPermission();
   const permissoesDoAlarme = usePermissoesDeAlarme();
 
@@ -127,6 +133,21 @@ export function InicioScreen() {
   const proximaDose = agenda.doses.find((dose) => dose.status === "next");
   const atrasadas = agenda.doses.filter((dose) => dose.status === "late");
   const demaisDoses = agenda.doses.filter((dose) => dose.status !== "late");
+
+  /**
+   * Os compromissos de hoje, na mesma agenda das doses.
+   *
+   * A Home respondia "o que tomo hoje?" e deixava de fora a consulta das 14h — que é parte do mesmo
+   * dia e, muitas vezes, o compromisso de saúde mais importante dele. Quem tinha os dois precisava
+   * abrir o Calendário para lembrar de um deles.
+   *
+   * Comparação pelo dia local (`toLocalIsoDay`) e não pelo ISO cru: `scheduledFor` é um instante em
+   * UTC, e uma consulta das 21h no Brasil cai no dia seguinte se comparada como texto.
+   */
+  const hojeIso = toLocalIsoDay(hoje);
+  const compromissosDeHoje = compromissos.filter(
+    (compromisso) => toLocalIsoDay(new Date(compromisso.scheduledFor)) === hojeIso,
+  );
 
   /**
    * O painel de permissões aparece quando falta algo **e** existe tratamento esperando aviso.
@@ -351,10 +372,14 @@ export function InicioScreen() {
               <Text style={styles.emptyTitle}>
                 {agenda.temMedicamentos ? "Nenhuma dose para hoje" : "Nenhum remédio cadastrado"}
               </Text>
+              {/* Com compromisso no dia, "não há nada hoje" seria falso — o bloco deles vem logo
+                  abaixo. O texto muda para dizer que faltam doses, não o dia inteiro. */}
               <Text style={styles.emptyDescription}>
                 {agenda.temMedicamentos
                   ? "Seus tratamentos não têm dose marcada para hoje."
-                  : "Toque no + para cadastrar seu primeiro medicamento e ver a agenda do dia aqui."}
+                  : compromissosDeHoje.length > 0
+                    ? "Nenhum remédio cadastrado ainda. Seus compromissos de hoje estão logo abaixo."
+                    : "Toque no + para cadastrar seu primeiro medicamento e ver a agenda do dia aqui."}
               </Text>
             </View>
           </View>
@@ -382,6 +407,48 @@ export function InicioScreen() {
                   onConfirm={() => confirmar(dose)}
                   onSkip={() => pular(dose)}
                   onCorrect={() => corrigir(dose)}
+                />
+              </Animated.View>
+            ))}
+          </View>
+        ) : null}
+
+        {/* Os compromissos vêm **depois** das doses, e em bloco próprio.
+
+            Depois porque a dose é o que o app cobra ação: ela tem horário curto, botões e um estado
+            que vence. O compromisso é do dia inteiro do ponto de vista de quem o lê aqui — saber que
+            há consulta às 14h muda o planejamento, mas não pede toque nenhum agora.
+
+            Em bloco próprio, e não intercalados por horário na mesma lista, porque as duas linhas se
+            respondem de formas diferentes: misturadas, a consulta apareceria entre duas doses
+            pedindo "Confirmar" e "Pular", e a ausência desses botões nela leria como falta. */}
+        {compromissosDeHoje.length > 0 ? (
+          <View style={styles.doseList}>
+            <Text style={styles.sectionLabel}>
+              {compromissosDeHoje.length === 1
+                ? "Compromisso de hoje"
+                : `${compromissosDeHoje.length} compromissos de hoje`}
+            </Text>
+            {compromissosDeHoje.map((compromisso, indice) => (
+              <Animated.View
+                key={compromisso.id}
+                /**
+                 * A cascata continua de onde a agenda parou: as três listas são blocos distintos,
+                 * mas uma sequência só descendo a tela.
+                 */
+                entering={
+                  semMovimento
+                    ? undefined
+                    : entradaEscalonada(atrasadas.length + demaisDoses.length + indice)
+                }>
+                <ItemDeCompromisso
+                  time={new Date(compromisso.scheduledFor).toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                  title={compromisso.title}
+                  location={compromisso.location}
+                  outcome={compromisso.outcome}
                 />
               </Animated.View>
             ))}

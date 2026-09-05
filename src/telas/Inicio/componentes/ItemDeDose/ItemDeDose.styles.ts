@@ -1,30 +1,34 @@
+import { estilosDoTema, radius, spacing, superficieDeCartao, typography } from "@/shared/theme";
 
-import { estilosDoTema, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
-
-export const criarEstilos = estilosDoTema(({ cores }) => ({
+export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
-   * O cartão de dose, agora **arredondado e com sombra** como o resto do app.
+   * O cartão de uma dose: os dados em cima, as duas ações embaixo dividindo a largura.
    *
-   * Ele não tinha `borderRadius` nenhum: era um retângulo de canto reto com borda cinza, no meio de
-   * uma tela onde tudo o mais é cartão arredondado. Era o que fazia a agenda parecer uma tabela
-   * colada na Home em vez de parte dela.
+   * `superficieDeCartao` sem nada por cima — o mesmo cartão do "Acompanhamento semanal" logo
+   * abaixo na Home, e o mesmo de Remédios, Compromissos e Estoque. Repetir fundo, raio e sombra à
+   * mão aqui era o que fazia esta linha destoar dos cartões vizinhos, e é a cópia que o token
+   * existe para evitar. De quebra, ele troca a sombra por contorno no alto contraste, onde sombra
+   * não se enxerga.
    */
   base: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: spacing.md,
+    ...superficieDeCartao(cores, ajustes),
     gap: spacing.md,
-    borderRadius: radius.lg,
-    backgroundColor: cores.surfaceContainerLowest,
-    boxShadow: surfaceShadow,
   },
   /**
-   * Os estados não usam mais **borda colorida de 2px**, e sim uma faixa lateral grossa.
+   * O corpo tocável dentro do cartão: só os dados da dose.
    *
-   * A borda inteira desenhava um contorno em volta do cartão, que somado ao fundo colorido dava a
-   * ele o peso de um alerta de sistema — três desses na agenda e a tela vira um painel de avisos.
-   * A faixa à esquerda diz a mesma coisa com um gesto só, e é a mesma linguagem que a `Dica` e os
-   * blocos de permissão já usam.
+   * Sem estilo de superfície própria — fundo, canto e sombra pertencem ao cartão (`base`), que é
+   * uma `View` comum justamente porque o Reanimated não aplicava o `boxShadow`.
+   */
+  corpo: {
+    gap: spacing.md,
+  },
+  /**
+   * Os estados usam **faixa lateral**, e não borda em volta do cartão inteiro.
+   *
+   * A borda completa somada ao fundo colorido dava ao cartão o peso de um alerta de sistema — três
+   * desses na agenda e a tela vira um painel de avisos. A faixa à esquerda diz a mesma coisa com um
+   * gesto só, e é a mesma linguagem da `Dica` e dos blocos de permissão.
    */
   highlighted: {
     borderLeftWidth: 4,
@@ -34,54 +38,66 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * Atrasada usa a cor de erro, e não a de atenção: é a única linha da agenda que representa algo
    * que já deveria ter acontecido e não aconteceu (decisão nº11.5 — ela nunca se resolve sozinha,
    * então precisa continuar pedindo resposta).
+   *
+   * Só a faixa muda de cor: o fundo do cartão continua branco, como o de qualquer outro cartão do
+   * app. Tingir o fundo inteiro fazia a agenda de um dia comum — que tem sempre alguma dose na hora
+   * ou atrasada — virar uma pilha de blocos coloridos, e o cartão deixava de parecer parte da mesma
+   * família dos outros da Home.
    */
   late: {
     borderLeftWidth: 4,
     borderLeftColor: cores.error,
-    backgroundColor: cores.errorSurface,
   },
   /**
    * "É agora" ganha o mesmo peso da atrasada: as duas pedem ação imediata, e é essa diferença —
-   * pede agora × está na fila — que o destaque precisa carregar. O que separa uma da outra é a cor.
-   *
-   * O fundo é o verde **diluído**, e não o `successContainer` cheio: aquele era vibrante demais
-   * para uma linha de lista, e competia com o vermelho da atrasada logo acima — dois blocos
-   * saturados lado a lado anulam a hierarquia que as cores deviam criar.
+   * pede agora × está na fila — que o destaque precisa carregar. O que separa uma da outra é a cor
+   * da faixa, e o rótulo de estado na coluna da hora.
    */
   now: {
     borderLeftWidth: 4,
     borderLeftColor: cores.success,
-    backgroundColor: cores.successSurface,
   },
-  /**
-   * A opacidade da dose resolvida **não mora mais aqui**: ela é animada no componente, para a linha
-   * se acomodar em vez de trocar de aparência num quadro só.
-   *
-   * Deixar o estilo estático junto do animado faria os dois se multiplicarem — a linha resolvida
-   * chegaria a 0.25 e pareceria apagada.
-   */
-
   /**
    * O escurecimento do toque numa linha já resolvida (a que abre a correção retroativa).
    *
    * É um fundo, e não opacidade: a opacidade da linha pertence à animação de acomodação, e um
    * segundo valor absoluto por cima faria a linha clarear ao ser tocada em vez de escurecer.
+   *
+   * A opacidade do estado resolvido **não mora aqui**: ela é animada no componente, para a linha se
+   * acomodar em vez de trocar de aparência num quadro só. Um estilo estático junto do animado faria
+   * os dois se multiplicarem, e a linha resolvida chegaria a 0.25.
    */
   pressionada: {
     backgroundColor: cores.surfaceContainer,
   },
+
   /**
-   * Hora, estado, nome e dose num nó só para o leitor de tela — e por isso também um bloco só no
-   * layout, ocupando o espaço que sobra antes dos botões.
+   * Hora e estado à esquerda, remédio e dose à direita — num nó só para o leitor de tela.
+   *
+   * Sem agrupar, o TalkBack para quatro vezes na mesma linha e anuncia o estado antes do nome do
+   * remédio, que é o contrário do que se quer ouvir.
+   */
+  /**
+   * `stretch` para os dois filhos terem a altura da linha: é isso que dá à coluna da hora o espaço
+   * para se centrar dentro dela (com `flex-start` ela encolheria ao próprio texto, e `center`
+   * dentro dela não teria o que distribuir).
    */
   infoAgrupada: {
-    flex: 1,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "stretch",
     gap: spacing.md,
   },
+  /**
+   * Guarda `08:00` e o rótulo do estado embaixo, um sob o outro.
+   *
+   * `center` no eixo vertical: o bloco da direita cresce quando o nome do remédio quebra em duas
+   * linhas, e a hora alinhada pelo topo ficava pendurada no canto. Centrada, ela acompanha o
+   * conteúdo qualquer que seja a altura dele.
+   */
   timeColumn: {
-    minWidth: 64,
+    width: 68,
+    gap: 2,
+    justifyContent: "center",
   },
   time: {
     ...typography.label,
@@ -103,8 +119,10 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   statusLabelLate: {
     color: cores.onErrorContainer,
   },
+  /** Nome do remédio e, abaixo, a dose. Ocupa o que sobra da largura depois da coluna da hora. */
   content: {
     flex: 1,
+    gap: 2,
   },
   medicationName: {
     ...typography.headlineSm,
@@ -119,31 +137,37 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
+
+  /** Os dois botões dividem a largura do cartão, meio a meio. */
   actions: {
+    flexDirection: "row",
     gap: spacing.sm,
-    alignItems: "stretch",
   },
   /**
    * Pílula, e não retângulo de canto suave: acompanha as fichinhas de horário do resto do app.
    *
-   * `minHeight: 44` porque o padding sozinho dava **32pt** (16 de linha + 8 + 8), e estes são os
-   * dois alvos mais tocados do aplicativo — a agenda do dia é a tela onde a dose se confirma. Dois
-   * alvos pequenos empilhados a 8px um do outro convidam a confirmar quando se queria pular, e
-   * errar o toque aqui **falseia o registro clínico**: grava uma dose que não foi tomada.
+   * A caixa tem 36, e o alvo de toque volta aos 44 pelo `hitSlop` no componente: estes são os dois
+   * alvos mais tocados do aplicativo — a agenda do dia é a tela onde a dose se confirma —, e errar
+   * o toque aqui **falseia o registro clínico**, gravando uma dose que não foi tomada. O que
+   * encolheu foi o desenho, não a área que o dedo alcança.
    *
    * Escapou da varredura de 31/08 porque aquela corrigiu o kit (`Button`, `TextField`), e estes
    * botões são desenhados pela própria tela.
    */
   confirmButton: {
-    backgroundColor: cores.primary,
-    minHeight: 44,
+    flex: 1,
+    // 44 continua sendo o alvo real de toque, garantido pelo `hitSlop` no componente. O que encolhe
+    // é a caixa desenhada: com os dois dividindo a largura do cartão, a pílula cheia pesava mais
+    // que a dose que ela responde.
+    minHeight: 36,
     justifyContent: "center",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
     borderRadius: radius.full,
+    backgroundColor: cores.primary,
   },
   confirmButtonText: {
-    ...typography.label,
+    ...typography.caption,
     color: cores.onPrimary,
     textAlign: "center",
   },
@@ -154,15 +178,16 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * clara lê como campo de formulário, e aqui é um botão.
    */
   skipButton: {
-    minHeight: 44,
+    flex: 1,
+    minHeight: 36,
     justifyContent: "center",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
     borderRadius: radius.full,
     backgroundColor: cores.surfaceContainer,
   },
   skipButtonText: {
-    ...typography.label,
+    ...typography.caption,
     color: cores.onSurfaceVariant,
     textAlign: "center",
   },

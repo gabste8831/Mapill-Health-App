@@ -125,43 +125,60 @@ export function ItemDeDose({
   const descricaoFalada = `${medicationName}, ${time}, ${STATUS_FALADO[status]}. ${note}`;
 
   return (
-    <AnimatedPressable
-      /**
-       * O `done` saiu da lista: a opacidade do estado resolvido agora vem de `estiloAnimado`, e
-       * manter as duas faria a linha resolvida chegar a 0.25 — o estilo estático multiplicando o
-       * valor animado.
-       *
-       * O toque só responde quando há o que tocar: linha não resolvida não navega para lugar nenhum,
-       * e escurecer ao toque prometeria uma ação que não existe.
-       */
-      // O tipo do callback vem anotado à mão: `createAnimatedComponent` perde a assinatura do
-      // `style` funcional do `Pressable` ao reembrulhar o componente.
-      style={({ pressed }: { pressed: boolean }) => [
+    /**
+     * O cartão (fundo, canto, sombra e faixa de estado) mora numa `View` comum, e **não** no
+     * `AnimatedPressable` de dentro.
+     *
+     * O `boxShadow` do `superficieDeCartao` é a propriedade nova do RN 0.86, e um componente do
+     * Reanimated 4 com `style` **função** — a assinatura que o `Pressable` exige para saber se está
+     * pressionado — não a aplicava: o cartão saía sem fundo e sem sombra, enquanto o
+     * `CardAdesaoSemanal` logo abaixo, um `Pressable` comum com o mesmo token, aparecia certo. Era
+     * a única diferença entre os dois.
+     *
+     * Separar por responsabilidade resolve sem abrir mão de nada: a `View` desenha o cartão, o
+     * `AnimatedPressable` cuida da opacidade animada e do toque.
+     */
+    <View
+      style={[
         styles.base,
         status === "next" && styles.highlighted,
         status === "now" && styles.now,
         status === "late" && styles.late,
-        estiloAnimado,
+      ]}>
+      <AnimatedPressable
         /**
-         * O toque escurece **um pouco mais** o que a animação já deixou em 0.5, em vez de usar
-         * `estadoDePressao`: aquele devolve uma opacidade absoluta, que sobrescreveria o valor
-         * animado e faria a linha *clarear* ao ser tocada. Aqui as duas se somam, que é o que o
-         * olho espera de um toque.
+         * O `done` saiu da lista: a opacidade do estado resolvido agora vem de `estiloAnimado`, e
+         * manter as duas faria a linha resolvida chegar a 0.25 — o estilo estático multiplicando o
+         * valor animado.
          *
-         * Sem `scale`: esta é uma linha de largura total, e encolhê-la faz o texto vizinho parecer
-         * tremer (ver `pressedScale`). E só quando há o que tocar — linha não resolvida não navega
-         * para lugar nenhum, e responder ao toque prometeria uma ação que não existe.
+         * O toque só responde quando há o que tocar: linha não resolvida não navega para lugar
+         * nenhum, e escurecer ao toque prometeria uma ação que não existe.
          */
-        pressed && resolvida && styles.pressionada,
-      ]}
-      onPress={resolvida ? onCorrect : undefined}
-      // O agrupamento fica no bloco de informação, e **não** aqui: `accessible` no cartão inteiro
-      // engoliria "Confirmar" e "Pular" num nó só, e o leitor de tela perderia justamente as duas
-      // ações que importam.
-      accessibilityRole={resolvida ? "button" : undefined}
-      accessibilityLabel={
-        resolvida ? `${descricaoFalada} Toque para corrigir o registro.` : undefined
-      }>
+        // O tipo do callback vem anotado à mão: `createAnimatedComponent` perde a assinatura do
+        // `style` funcional do `Pressable` ao reembrulhar o componente.
+        style={({ pressed }: { pressed: boolean }) => [
+          styles.corpo,
+          estiloAnimado,
+          /**
+           * O toque escurece **um pouco mais** o que a animação já deixou em 0.5, em vez de usar
+           * `estadoDePressao`: aquele devolve uma opacidade absoluta, que sobrescreveria o valor
+           * animado e faria a linha *clarear* ao ser tocada. Aqui as duas se somam, que é o que o
+           * olho espera de um toque.
+           *
+           * Sem `scale`: esta é uma linha de largura total, e encolhê-la faz o texto vizinho
+           * parecer tremer (ver `pressedScale`). E só quando há o que tocar — linha não resolvida
+           * não navega para lugar nenhum, e responder ao toque prometeria uma ação que não existe.
+           */
+          pressed && resolvida && styles.pressionada,
+        ]}
+        onPress={resolvida ? onCorrect : undefined}
+        // O agrupamento fica no bloco de informação, e **não** aqui: `accessible` no cartão inteiro
+        // engoliria "Confirmar" e "Pular" num nó só, e o leitor de tela perderia justamente as duas
+        // ações que importam.
+        accessibilityRole={resolvida ? "button" : undefined}
+        accessibilityLabel={
+          resolvida ? `${descricaoFalada} Toque para corrigir o registro.` : undefined
+        }>
       <View
         style={styles.infoAgrupada}
         accessible={!resolvida}
@@ -186,7 +203,8 @@ export function ItemDeDose({
           </Text>
           <Text style={styles.note}>{note}</Text>
         </View>
-      </View>
+        </View>
+      </AnimatedPressable>
 
       {acionavel ? (
         /**
@@ -196,32 +214,43 @@ export function ItemDeDose({
          * relógio que muda o estado. Sem transição, dois botões simplesmente aparecem no meio de
          * uma linha que estava quieta, e o movimento mais brusco da tela seria justamente o que
          * ninguém pediu. `FadeIn` faz a mesma aparição ser lida como algo que chegou.
+         *
+         * Irmãos do `AnimatedPressable`, e não filhos: dentro dele, cada toque em "Confirmar"
+         * atravessava para o cartão, que na dose resolvida abre a correção retroativa.
          */
-        <Animated.View style={styles.actions} entering={semMovimento ? undefined : FadeIn.duration(ACOMODAR_MS)}>
+        <Animated.View
+          style={styles.actions}
+          entering={semMovimento ? undefined : FadeIn.duration(ACOMODAR_MS)}>
+          {/* "Pular" à esquerda e "Confirmar" à direita: o destrutivo-ish primeiro e a ação
+              esperada no canto onde o polegar chega — a mesma ordem de Cancelar/OK que o sistema
+              usa, e que a mão já conhece sem precisar ler. */}
+          {/* `hitSlop` vertical devolve os 44 de alvo que a caixa de 36 não tem mais: estes são os
+              dois alvos mais tocados do app, e errar entre eles falseia o registro clínico. */}
+          <Pressable
+            style={estadoDePressao(styles.skipButton, { escala: true })}
+            onPress={onSkip}
+            hitSlop={{ top: 4, bottom: 4 }}
+            accessibilityRole="button"
+            accessibilityLabel={`Pular ${medicationName}`}>
+            <Text style={styles.skipButtonText}>Pular</Text>
+          </Pressable>
           <Pressable
             /**
              * Estes dois são os alvos mais tocados do app, e eram os únicos sem resposta ao toque —
              * o mesmo defeito que a varredura de 31/08 corrigiu no kit e não alcançou aqui, porque
              * a tela desenha os próprios botões (frente #3 do passe).
              *
-             * `escala` é seguro: são alvos autocontidos numa coluna à direita, não linhas de
-             * largura total.
+             * `escala` é seguro: são alvos autocontidos, não linhas de largura total.
              */
             style={estadoDePressao(styles.confirmButton, { escala: true })}
             onPress={onConfirm}
+            hitSlop={{ top: 4, bottom: 4 }}
             accessibilityRole="button"
             accessibilityLabel={`Confirmar ${medicationName}`}>
             <Text style={styles.confirmButtonText}>Confirmar</Text>
           </Pressable>
-          <Pressable
-            style={estadoDePressao(styles.skipButton, { escala: true })}
-            onPress={onSkip}
-            accessibilityRole="button"
-            accessibilityLabel={`Pular ${medicationName}`}>
-            <Text style={styles.skipButtonText}>Pular</Text>
-          </Pressable>
         </Animated.View>
       ) : null}
-    </AnimatedPressable>
+    </View>
   );
 }
