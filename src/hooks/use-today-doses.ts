@@ -37,13 +37,17 @@ export type DoseVisualStatus = "confirmed" | "skipped" | "late" | "now" | "next"
 /**
  * A janela do "na hora", em minutos: **15 antes e 30 depois** do horário marcado.
  *
- * Assimétrica de propósito. Antes da hora a dose ainda não é para ser tomada, então a folga é curta
- * — só o bastante para quem viu o alerta e foi buscar o copo d'água. Depois, o que se está medindo é
- * a vida real: meia hora cobre o almoço que atrasou ou a reunião que passou do fim, sem esticar
- * tanto a ponto de "no horário" deixar de significar alguma coisa.
+ * Antes da hora a dose ainda não é para ser tomada, então a folga é curta — só o bastante para quem
+ * viu o alerta e foi buscar o copo d'água.
+ *
+ * Depois do horário a folga é **menor ainda**: cinco minutos, o tempo de confirmar a dose que se
+ * está tomando agora. Eram trinta, e o efeito em aparelho foi três doses vencidas em verde ao mesmo
+ * tempo, às 19:35, com horários de 19:31 a 19:34 — meia hora de tolerância faz a tela contradizer o
+ * relógio que a pessoa tem na mão, e verde é a cor que menos pode enganar num app de medicação,
+ * porque é a que diz "está tudo em ordem".
  */
 const TOLERANCIA_ANTES_EM_MINUTOS = 15;
-const TOLERANCIA_DEPOIS_EM_MINUTOS = 30;
+const TOLERANCIA_DEPOIS_EM_MINUTOS = 5;
 
 export type DoseDoDia = {
   doseScheduleId: string;
@@ -200,11 +204,14 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
       dose.status = "late";
       continue;
     }
-    // Dentro da janela, dos dois lados do horário. Vem antes de "próxima" porque uma dose na hora
-    // **é** a próxima a tomar, e o que ela precisa dizer é que a hora chegou.
+    // Dentro da janela, dos dois lados do horário: o que ela precisa dizer é que a hora chegou.
+    //
+    // **Não** marca `proximaMarcada`: "agora" e "próxima" respondem a perguntas diferentes. A dose
+    // na hora já está na agenda, em verde, pedindo ação; o card do topo responde "e depois desta,
+    // o que vem?". Enquanto uma consumia a outra, ter qualquer dose na janela apagava o card azul
+    // da tela inteira — foi o que sumiu com ele quando três doses ficaram "na hora" juntas.
     if (dose.scheduledFor <= inicioDaJanela) {
       dose.status = "now";
-      proximaMarcada = true;
       continue;
     }
     dose.status = proximaMarcada ? "upcoming" : "next";
