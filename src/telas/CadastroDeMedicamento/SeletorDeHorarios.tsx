@@ -319,7 +319,7 @@ export function SeletorDeHorarios({
             {variacao !== undefined ? (
               <Text style={styles.sectionHint}>
                 {variacao.ativa
-                  ? "As doses que você definiu por horário são mantidas — a série só recalcula as horas."
+                  ? "As doses que você definiu por horário são mantidas. A série só recalcula as horas."
                   : "Depois de preencher, dá para marcar “A dose muda de um horário para o outro” na lista."}
               </Text>
             ) : null}

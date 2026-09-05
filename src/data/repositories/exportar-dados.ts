@@ -71,7 +71,7 @@ export async function exportarDados(): Promise<DadosExportados> {
     aviso:
       "Esta é a cópia completa dos seus dados guardados pelo Mapill neste aparelho, incluindo " +
       "registros marcados como excluídos (campo deleted_at preenchido). As fotos e a receita " +
-      "anexada não estão dentro deste arquivo — apenas o caminho delas no aparelho.",
+      "anexada não estão dentro deste arquivo, apenas o caminho delas no aparelho.",
   };
 
   let totalDeRegistros = 0;

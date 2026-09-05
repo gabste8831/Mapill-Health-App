@@ -29,9 +29,10 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   },
 
   // --- Cartão de um estoque ---
-  /** Mesmo cartão da lista de medicações: sombra, sem borda, respiro de `gutter`. */
+  /** Mesmo cartão da lista de medicações, e o mesmo respiro apertado (`md`, não o `gutter`). */
   item: {
     ...superficieDeCartao(cores, ajustes),
+    padding: spacing.md,
     gap: spacing.sm,
   },
   name: {

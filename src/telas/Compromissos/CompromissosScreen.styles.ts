@@ -34,8 +34,10 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   },
 
   // --- Item da lista ---
+  /** Mesmo aperto de Remédios (`md` no lugar do `gutter` do token): é a mesma lista, em outra aba. */
   item: {
     ...superficieDeCartao(cores, ajustes),
+    padding: spacing.md,
     gap: spacing.sm,
   },
   itemHeader: {

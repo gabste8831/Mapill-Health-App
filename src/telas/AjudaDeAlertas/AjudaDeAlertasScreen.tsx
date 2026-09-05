@@ -99,7 +99,7 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
            * verificação que não existe.
            */}
           <Text style={[styles.texto, styles.condicoesParagrafo]}>
-            Alguns aparelhos — sobretudo Xiaomi, Samsung e Motorola — desligam apps em segundo plano
+            Alguns aparelhos, sobretudo Xiaomi, Samsung e Motorola, desligam apps em segundo plano
             para poupar bateria, e isso pode atrasar ou impedir o alarme. Se um aviso não chegar,
             procure o Mapill nas configurações de bateria do seu celular e marque-o como “sem
             restrições”, ou permita o início automático.

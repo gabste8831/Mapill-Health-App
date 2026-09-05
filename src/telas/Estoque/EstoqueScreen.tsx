@@ -575,14 +575,14 @@ function previaDaMudanca(edicao: Edicao, digitado: number | null, unidade: strin
   const atual = edicao.item.inventory.quantity;
   if (digitado === null || !Number.isFinite(digitado)) {
     return edicao.modo === "reposicao"
-      ? "Informe quanto entrou de novo — o app soma ao que já existe."
+      ? "Informe quanto entrou de novo. O app soma ao que já existe."
       : "Conte o que está em casa e informe o total.";
   }
   if (edicao.modo === "reposicao") {
     if (digitado <= 0) return "Informe uma quantidade maior que zero.";
     return `O estoque passa para ${formatarQuantidadeLivre(atual + digitado, unidade)}.`;
   }
-  if (digitado === atual) return "É exatamente o que o app já conta — nada muda.";
+  if (digitado === atual) return "É exatamente o que o app já conta, então nada muda.";
   const diferenca = digitado - atual;
   const verbo = diferenca > 0 ? "a mais" : "a menos";
   return `Diferença de ${formatarNumero(Math.abs(diferenca))} ${verbo}, registrada como recontagem.`;

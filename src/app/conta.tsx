@@ -137,7 +137,7 @@ export default function ContaRoute() {
   function confirmarApagamentoTotal() {
     Alert.alert(
       "Tem certeza?",
-      "O app volta como recém-instalado e a conta é desvinculada. Sua conta do Google não é excluída — só deixa de estar ligada ao Mapill.\n\nNão há como desfazer.",
+      "O app volta como recém-instalado e a conta é desvinculada. Sua conta do Google não é excluída: ela só deixa de estar ligada ao Mapill.\n\nNão há como desfazer.",
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Apagar tudo", style: "destructive", onPress: () => void executarApagamento("tudo") },

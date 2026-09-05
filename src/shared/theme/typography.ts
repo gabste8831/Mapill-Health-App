@@ -102,5 +102,13 @@ export const typography: Record<string, TextStyle> = {
     fontFamily: "Comfortaa_700Bold",
     fontSize: 32,
     lineHeight: 40,
+    /**
+     * Negativo para aproximar as letras do logotipo original.
+     *
+     * A Comfortaa é desenhada com bastante respiro entre caracteres — bom para texto, largo demais
+     * para uma marca de cinco letras, que se lê como uma forma só e não como uma palavra. Fechar o
+     * espaço é o que aproxima a wordmark tipográfica do desenho que ela substituiu.
+     */
+    letterSpacing: -1,
   },
 };

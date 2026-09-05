@@ -329,8 +329,10 @@ try {
   // Decisão 6.4 aplicada ao papel: perdas contadas, nunca uma linha por dose.
   {
     const corrido = montarHtml(relatorio).replace(/\s+/g, " ");
+    // Sem a inicial: a frase virou período próprio quando os travessões saíram dos textos de
+    // interface (05/09), e prender a verificação à maiúscula testaria a pontuação, não o conteúdo.
     checar("explica o que é 'sem registro'",
-      corrido.includes("o aplicativo não presume que ela deixou de ser tomada"));
+      corrido.includes("plicativo não presume que ela deixou de ser tomada"));
     checar("distingue não tomada de sem registro",
       corrido.includes("<strong>Não tomada</strong>") &&
         corrido.includes("<strong>Sem registro</strong>"));

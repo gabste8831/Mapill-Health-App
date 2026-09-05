@@ -58,7 +58,7 @@ export function LoginScreen({
           />
           {googleDisponivel ? null : (
             <Text style={styles.footerCaption}>
-              Esta versão do app saiu sem a configuração do login com Google. Siga sem conta — nada
+              Esta versão do app saiu sem a configuração do login com Google. Siga sem conta: nada
               do Mapill depende dela.
             </Text>
           )}

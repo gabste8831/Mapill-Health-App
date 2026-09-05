@@ -56,8 +56,17 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    * planilha: com o fundo da tela quase da mesma cor do cartão, o contorno de 1px lê como célula
    * desenhada, e não como superfície acima. `superficieDeCartao` traz junto o respiro maior.
    */
+  /**
+   * O cartão do kit com o respiro apertado: `md` (16) no lugar do `gutter` (24) do token.
+   *
+   * Os 24 do `superficieDeCartao` são para o cartão que se lê inteiro — um bloco de conteúdo na
+   * Home, o resumo da adesão. Numa lista, o mesmo respiro se repete a cada item e o custo aparece
+   * somado: são 16px a mais de altura por remédio, que em cinco cadastros já valem um card inteiro
+   * fora da tela.
+   */
   item: {
     ...superficieDeCartao(cores, ajustes),
+    padding: spacing.md,
     gap: spacing.sm,
   },
   itemHeader: {

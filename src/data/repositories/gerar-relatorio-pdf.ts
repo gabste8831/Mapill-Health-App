@@ -94,7 +94,7 @@ function secaoAdesao(relatorio: Relatorio): string {
   // ainda mais, porque ninguém está lá para explicar.
   if (adesao.taxa === null) {
     return `<h2>Adesão ao tratamento</h2>
-      <p class="vazio">Nenhuma dose venceu no período — ainda não há o que medir.</p>`;
+      <p class="vazio">Nenhuma dose venceu no período, então ainda não há o que medir.</p>`;
   }
 
   const linhas = adesao.porMedicamento
@@ -174,7 +174,7 @@ function secaoPerdas(relatorio: Relatorio): string {
     </table>
     <p class="nota">
       <strong>Não tomada</strong> é a dose que o paciente registrou que não tomou.
-      <strong>Sem registro</strong> é a dose cujo horário passou sem resposta — o aplicativo não
+      <strong>Sem registro</strong> é a dose cujo horário passou sem resposta. O aplicativo não
       presume que ela deixou de ser tomada, apenas que não houve registro.
     </p>`;
 }
@@ -212,7 +212,7 @@ export function montarHtml(relatorio: Relatorio): string {
   const recorte = relatorio.recorte
     ? `<p class="recorte">
          Este relatório cobre ${relatorio.recorte.selecionados} de
-         ${relatorio.recorte.total} tratamentos — não o tratamento completo do paciente.
+         ${relatorio.recorte.total} tratamentos, e não o tratamento completo do paciente.
        </p>`
     : "";
 

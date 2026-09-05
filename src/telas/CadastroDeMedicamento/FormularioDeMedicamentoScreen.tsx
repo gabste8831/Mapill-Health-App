@@ -33,6 +33,8 @@ import {
 import { doseFaltanteDoPrazo } from "@/domain/use-cases/dose-faltante-do-prazo";
 import { dosesDeHojeJaPassadas } from "@/domain/use-cases/doses-de-hoje-ja-passadas";
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
+import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
+import { dataPorExtenso } from "@/shared/datas-por-extenso";
 import { summarizeTreatment } from "@/domain/use-cases/summarize-treatment";
 import type { CatalogEntry } from "@/domain/ports/medication-catalog";
 import { ACCEPTED_DOCUMENT_LABEL, useDocumentPicker } from "@/hooks/use-document-picker";
@@ -44,6 +46,7 @@ import {
   lastDayOfTreatment,
   parseDateInput,
   toDateInput,
+  toLocalIsoDay,
   todayIsoDate,
   treatmentDuration,
   type DurationUnit,
@@ -227,6 +230,47 @@ const REMINDER_LABELS: Record<ReminderMode, string> = {
   both: "Alarme e notificação",
   none: "Sem aviso",
 };
+
+/**
+ * A frase de previsão do lembrete: "O alarme tocará **hoje às 12:08**".
+ *
+ * ## O verbo
+ *
+ * Futuro simples, e não "tocaria". O futuro do pretérito soa como hipótese remota — em português
+ * corrente é o que se diz do que **não** vai acontecer. Quem carrega a condição é o "Ao salvar" que
+ * abre a frase: ele já avisa que nada disso vale enquanto o formulário não for salvo.
+ *
+ * ## A data
+ *
+ * `dataEHoraPorExtenso` devolve "Sábado, 5 de setembro, às 12:08" — bom para o cartão de um
+ * compromisso, ilegível encaixado no meio de outra frase, com a maiúscula no miolo e três vírgulas
+ * seguidas. Aqui a data é quase sempre hoje ou amanhã, e é assim que se fala dela.
+ */
+function previsaoDoLembrete(mode: ReminderMode, quando: Date): string {
+  const sujeito =
+    mode === "alarm"
+      ? "O alarme tocará"
+      : mode === "notification"
+        ? "A notificação chegará"
+        : "O alarme e a notificação virão";
+
+  const horas = String(quando.getHours()).padStart(2, "0");
+  const minutos = String(quando.getMinutes()).padStart(2, "0");
+
+  const hoje = new Date();
+  const amanha = new Date(hoje.getTime() + 24 * 60 * 60_000);
+  const mesmoDia = (a: Date, b: Date) => toLocalIsoDay(a) === toLocalIsoDay(b);
+
+  const dia = mesmoDia(quando, hoje)
+    ? "hoje"
+    : mesmoDia(quando, amanha)
+      ? "amanhã"
+      : // Além de amanhã, o dia da semana é o que se confere de relance — "dia 12" não denuncia
+        // nada, "quinta" denuncia quem quis marcar na quarta.
+        dataPorExtenso(quando).toLowerCase();
+
+  return `${sujeito} ${dia} às ${horas}:${minutos}`;
+}
 
 /** Cadastro inteiro numa estrutura só — a mesma tela cria e edita. */
 export type MedicamentoDraft = {
@@ -711,7 +755,7 @@ export function FormularioDeMedicamentoScreen({
   const parsedCustomDoses = Number(customDosesInput);
   const customDosesError =
     isCustomDoses && (parsedCustomDoses < 1 || parsedCustomDoses > MAX_DOSES_PER_DAY)
-      ? `Entre 1 e ${MAX_DOSES_PER_DAY} vezes por dia — de duas em duas horas já é o limite do que se cumpre acordado.`
+      ? `Entre 1 e ${MAX_DOSES_PER_DAY} vezes por dia. De duas em duas horas já é o limite do que se cumpre acordado.`
       : undefined;
 
   const parsedDoseAmount = parseDecimalInput(doseAmount);
@@ -1055,6 +1099,45 @@ export function FormularioDeMedicamentoScreen({
   const antecedenciaConflita =
     esgotamento !== null && wantsLowStockAlert && leadDays !== null &&
     Number(leadDays) >= esgotamento.daysRemaining;
+
+  /**
+   * O primeiro horário que este lembrete alcançaria, calculado sobre o que está na tela agora.
+   *
+   * Existe para responder, ainda no formulário, a pergunta que só o aparelho respondia: "isso que
+   * eu acabei de escolher vai tocar quando?". Sem ela, a única forma de saber era salvar, esperar o
+   * horário e ver se algo acontecia — e quando não acontecia, não havia como distinguir um alarme
+   * mal configurado de um horário que já tinha passado.
+   *
+   * Usa a **mesma função pura** que gera os horários de verdade no salvamento
+   * (`generateDoseSchedules`), e não uma conta paralela: uma segunda implementação poderia divergir
+   * justamente no caso que se quer diagnosticar.
+   *
+   * `null` quando não há horário futuro dentro da janela — que é, em si, a informação mais útil
+   * desta linha: é o caso do horário editado para uma hora de hoje que já passou.
+   */
+  const proximaDoseAgendavel = useMemo(() => {
+    if (schedule === null || reminderMode === null || reminderMode === "none") return null;
+    // A unidade não muda os horários gerados, mas o tipo a exige: sem ela o cadastro ainda está
+    // incompleto, e prever um agendamento a partir de um rascunho pela metade seria adivinhação.
+    if (doseUnit === null) return null;
+
+    const de = new Date();
+    const ate = new Date(de.getTime() + 7 * 24 * 60 * 60_000);
+    const [primeira] = generateDoseSchedules({
+      // `SchedulablePrescription` pede só o que decide horário — o resto do rascunho não entra.
+      prescription: {
+        id: "",
+        schedule,
+        startDate,
+        endDate,
+        doseAmount: parsedDoseAmount,
+        doseUnit,
+      },
+      from: de,
+      until: ate,
+    });
+    return primeira === undefined ? null : new Date(primeira.scheduledFor);
+  }, [schedule, reminderMode, startDate, endDate, parsedDoseAmount, doseUnit]);
 
   /** Só o que foi preenchido — linha com "—" é ruído, e o popup é quem cobra o que falta. */
   const linhasDoEstoque = [
@@ -1592,7 +1675,7 @@ export function FormularioDeMedicamentoScreen({
               <Text style={styles.sectionHint}>
                 {jaTomadosValidos.length === 0
                   ? "Marque só o que você realmente tomou. Deixar em branco não registra nada."
-                  : `${jaTomadosValidos.length === 1 ? "1 dose entra" : `${jaTomadosValidos.length} doses entram`} no seu histórico de hoje. O estoque não muda — o que você informou acima já é o que tem na caixa agora.`}
+                  : `${jaTomadosValidos.length === 1 ? "1 dose entra" : `${jaTomadosValidos.length} doses entram`} no seu histórico de hoje. O estoque não muda: o que você informou acima já é o que tem na caixa agora.`}
               </Text>
             </>
           ) : null}
@@ -1839,7 +1922,31 @@ export function FormularioDeMedicamentoScreen({
                     <Text style={styles.rowValueText}>{REMINDER_LABELS[reminderMode]}</Text>
                     <Text style={styles.rowValueAction}>Editar</Text>
                   </Pressable>
-                ) : (
+                ) : null}
+                {/**
+                 * O que esta configuração produziria, e **no futuro do pretérito**.
+                 *
+                 * "Vai tocar" seria mentira enquanto o formulário não foi salvo: a pessoa pode
+                 * fechar a tela, e nada do que está aqui teria efeito. "Tocaria" diz a mesma coisa
+                 * sem prometer o que ainda não existe.
+                 *
+                 * Quando não há horário futuro, a linha diz isso em vez de sumir — é justamente o
+                 * caso em que alguém editou um horário para uma hora de hoje que já passou, e o
+                 * silêncio depois de salvar seria indistinguível de um defeito.
+                 */}
+                {reminderMode !== null && reminderMode !== "none" ? (
+                  <Text
+                    style={
+                      proximaDoseAgendavel === null
+                        ? styles.previsaoDoLembreteVazia
+                        : styles.previsaoDoLembrete
+                    }>
+                    {proximaDoseAgendavel === null
+                      ? "Não há horário futuro nos próximos 7 dias, então nada seria agendado. Confira os horários e a data de início."
+                      : `Ao salvar: ${previsaoDoLembrete(reminderMode, proximaDoseAgendavel)}.`}
+                  </Text>
+                ) : null}
+                {reminderMode === null ? (
                   <>
                     <Text style={styles.sectionHint}>
                       O Mapill pode te procurar na hora da dose, com notificação ou com alarme de
@@ -1850,7 +1957,7 @@ export function FormularioDeMedicamentoScreen({
                       onPress={() => setReminderSheetOpen(true)}
                     />
                   </>
-                )}
+                ) : null}
               </Card>
             ) : null}
 
@@ -1953,6 +2060,12 @@ export function FormularioDeMedicamentoScreen({
         onAbrirAjuda={() => {
           setReminderSheetOpen(false);
           router.push("/cadastro/ajuda-de-alertas");
+        }}
+        /* `none` é o mesmo valor de quem nunca configurou: o reagendamento já ignora esse modo, e
+           a linha LEMBRETE volta a oferecer "Configurar lembrete". */
+        onRemover={() => {
+          setReminderMode("none");
+          setReminderSheetOpen(false);
         }}
       />
 

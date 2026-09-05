@@ -48,7 +48,9 @@ const STATUS_LABEL: Record<DoseVisualStatus, string> = {
   skipped: "PULADA",
   late: "ATRASADA",
   now: "É AGORA",
-  next: "PRÓXIMA DOSE",
+  // "PRÓXIMA DOSE" não cabia na coluna da hora e quebrava em duas linhas — e "dose" ali é
+  // redundante: a linha inteira é uma dose. O card azul no topo já diz "próxima dose" por extenso.
+  next: "PRÓXIMA",
   upcoming: "A SEGUIR",
 };
 

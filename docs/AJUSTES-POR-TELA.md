@@ -76,6 +76,16 @@ dia. (Sobre o "Confirmar todas": apareceu depois da correção, mas não conside
   Filtro por dia local (`toLocalIsoDay`), senão uma consulta das 21h cairia no dia seguinte. O
   estado vazio da agenda também mudou: com compromisso no dia, "não há nada hoje" seria falso.
 
+o aviso de "Dia completo" não fica por cima da barra de navegação na base.
+- [x] Feito **e confirmado em aparelho (05/09)**: o comentário do estilo prometia "cobre a tela
+  inteira, inclusive a barra de abas", mas `position: absolute` cobre apenas **o pai** — e a Home
+  vive dentro do navegador de abas. A barra ficava por cima, à mostra e tocável durante a animação,
+  exatamente o que aquele comentário dizia estar evitando. Virou `Modal`, que renderiza acima de
+  toda a árvore, com `statusBarTranslucent` para cobrir o topo, `transparent` (quem pinta o fundo é
+  o overlay, que precisa esmaecer junto) e `animationType="none"` (a entrada e a saída são do
+  Reanimated — duas animações se sobreporiam). Beneficia também o cadastro de medicamento e o de
+  compromisso, que usam o mesmo componente.
+
 o card do medicamento na Home não pegava o background branco — várias tentativas sem efeito.
 - [x] Feito: a causa não era o estilo, era o **componente**. O `CardAdesaoSemanal` (que aparecia
   certo) é um `Pressable` comum; o `ItemDeDose` é um `AnimatedPressable` do Reanimated 4 com `style`
@@ -363,6 +373,111 @@ temos que validar isso: quando o usuário aprova a permissão, o botão sai da t
 
 ### Alarme
 `src/telas/Alarme/` — tela cheia do alarme de dose (toca som, pede resposta).
+
+revisão estética: o horário maior, a foto sem cortar e menor, botões "pulei"/"tomei" menores com o
+ícone ao lado do texto, sem verde/vermelho (mesma estética do app, o que também previne o problema
+no modo daltonismo), e o "responder depois" estava ilegível (cinza escuro sobre azul).
+- [x] Feito: hora de 56 → 72 (é o primeiro dado que se procura ao ser acordado), ícone do topo de
+  80 → 56 e o título virou etiqueta. **A foto**: era `width: 100%` com altura fixa e `cover`, que
+  **cortava** a imagem — virou 132×132 com `contain`, então aparece como foi cadastrada (o cadastro
+  já obriga a enquadrar; recortar de novo aqui descartaria o que a pessoa escolheu manter). **O
+  cartão branco em volta do remédio saiu**: o fundo azul já é o cartão, e a moldura competia com o
+  conteúdo. **Botões**: de 88 empilhado para 56 com ícone e texto na mesma linha; "Tomei" é o botão
+  branco cheio e "Pulei" o translúcido — o que separa é o **peso**, não a matiz, exatamente pelo
+  motivo do daltonismo que você levantou. O "Silenciar" virou contorno para não parecer uma terceira
+  resposta (ele não registra desfecho). **"Responder depois"**: usava `Button variant="text"`, que
+  pinta o rótulo com o cinza padrão do app — ilegível sobre o azul; agora é branco translúcido.
+  Achei junto um defeito não pedido: **a tela não tinha rolagem** e, com dois remédios, o "Responder
+  depois" saía da tela sem como alcançá-lo (é o bloco 4.1 do roteiro). Agora rola, com as ações
+  fixas no rodapé.
+
+o "adiar 5 minutos" não estava implementado na tela do alarme.
+- [x] Feito: a função `adiarAviso` existia, testada e com a trava de um adiamento por horário — mas
+  só era chamada pela **ação da notificação**. A tela cheia tinha apenas "Responder depois", que
+  fecha sem prometer volta. Ligada à tela reaproveitando a mesma função (sem duplicar a regra); o
+  botão some quando o horário já gastou o adiamento.
+
+o alarme adiado voltou a tocar sem o nome do remédio, sem a dosagem e sem a foto — e o "tomei" não
+atualizava a Home.
+- [x] Feito: **os dois sintomas eram o mesmo defeito.** A chave do lembrete adiado é
+  `adiado-<instante-do-toque>`, e esse instante ia no `data.scheduledFor`. A tela de alarme localiza
+  as doses por `findBetween(instante, instante + 60s)` — ou seja, procurava doses agendadas para o
+  minuto em que "Adiar" foi tocado (12:13), e as doses eram das 12:08. A lista voltava **vazia**:
+  daí não haver nome/dose/foto, e o "Tomei" não registrar nada. Agrava que a tela não *parece*
+  vazia, porque cabeçalho e botões existem de qualquer forma — ela operava sobre nada. Separei
+  "quando tocar" de "de quando são as doses": o `AvisoDeDose` ganhou `instanteDasDoses`, preenchido
+  só no adiado (nos avisos da grade os dois coincidem e o campo nem aparece).
+
+com mais de uma medicação no mesmo horário, mostrar nome, dose e foto de cada — mas com limite, para
+não poluir nem quebrar. Acima de 3, listar os nomes sem foto e obrigar a entrar no app.
+- [x] Feito como decidido: **1–3** mostra foto, nome e dose de cada, com "Tomei todas"/"Pulei
+  todas"; **4+** esconde as fotos, compacta o nome e troca as respostas por **"Ver e confirmar no
+  app"**, que abre a tela do horário por deep link (a tela de alarme roda fora do expo-router, numa
+  Activity própria — não há navegador a que pedir um `push`). O título passa a contar: "Hora dos
+  seus 5 remédios". Adiar, Silenciar e "Responder depois" continuam nos dois casos. ⚠️ Registrei no
+  código o argumento contrário, como decisão consciente: o custo recai sobre o polimedicado, que é
+  quem mais se beneficiaria do botão direto — o "Ver e confirmar no app" como **primeira** ação é o
+  que torna isso aceitável.
+
+🔬 **VALIDADO EM APARELHO (05/09):** a dose confirmada num caminho **não pode ser confirmada de
+novo** em nenhum outro. Testado nos quatro: alarme → notificação → tela do horário → Home. Confirmou
+pelo alarme e os demais foram mitigados na hora; o estoque de 10 descontou **1**, uma vez só. A
+guarda vive na regra (`resolvesDose` em `responder-aviso.ts`), e não na interface — é o que faz os
+quatro caminhos convergirem em vez de cada tela precisar lembrar de checar.
+
+a tela azul não aparece quando estou usando OUTRO aplicativo — só a notificação no topo. Quero a
+tela azul independente de o celular estar bloqueado ou em uso.
+- [x] Feito, **mas depende de build nova**. O rebaixamento é política do Android e está declarado na
+  documentação do Notifee: com o aparelho em uso, o `fullScreenIntent` vira heads-up e não há API
+  que force o contrário. O app já contornava isso **quando o Mapill era o app aberto** (o listener
+  de `DELIVERED` navega para a tela); em outro aplicativo não havia o que navegar. A saída é
+  `SYSTEM_ALERT_WINDOW` — a permissão que autoriza abrir uma tela a partir do segundo plano, o mesmo
+  mecanismo da tela de chamada do WhatsApp. Adicionada ao `app.json`, com uma quarta linha no painel
+  de permissões que abre a tela certa via `expo-intent-launcher` (instalado agora). ⚠️ **O estado é
+  lembrado, não lido**: confirmei na doc do Expo 57 que nenhum módulo disponível expõe
+  `canDrawOverlays`, então o item some quando é **tocado**, assumindo que quem foi à tela concedeu.
+  Não é leitura de verdade; erra para o lado recuperável (quem não conceder fica com o
+  comportamento atual). No caminho, corrigi um conflito que eu mesmo introduzira: a regra de
+  "encerrar ao perder o primeiro plano" estava fechando também a tela aberta **como rota**, onde um
+  `inactive` passageiro é normal — agora ela vale só para a Activity do full-screen intent.
+
+⏳ **PENDENTE DE BUILD NOVA** (05/09): `SYSTEM_ALERT_WINDOW` no `app.json`. Permissão de manifesto
+não entra por recarga do Metro — **até a build sair, a tela azul continua sem aparecer quando outro
+aplicativo está em primeiro plano**, por mais que o código já esteja pronto. Não há contorno: a
+documentação do Android lista a permissão como uma das exceções que autorizam iniciar uma tela em
+segundo plano, e o app tem como alvo a API 35, onde a regra é ainda mais dura.
+
+⚠️ **Erro cometido no caminho, para não repetir:** cheguei a instalar `expo-intent-launcher` e
+deixar o `import` num arquivo que a Home carrega. Sendo módulo nativo, ele **derrubou o app inteiro**
+no binário atual (`Cannot find native module 'ExpoIntentLauncher'` → Home → layout). Revertido para
+`Linking.sendIntent`, que já vem no React Native e faz o mesmo. Regra que fica: dependência nativa
+nova não pode entrar no caminho de execução antes da build que a contém.
+
+### ⏳ Conferir na próxima build
+
+Correções feitas em 05/09 que **não puderam ser validadas** no binário atual. Testar todas assim que
+a build sair:
+
+1. **Tela azul sobre outro app.** Depende de `SYSTEM_ALERT_WINDOW` no manifesto (a única coisa que
+   exige a build). Hoje, com o Instagram aberto, só o heads-up aparece. Paliativo já no código: tocar
+   no heads-up de um alarme abre a **tela do alarme** (foto, adiar, silenciar) e não a de
+   confirmação — antes caía no caminho da notificação comum.
+2. **Alarme adiado tocando na hora.** O app usava `allowWhileIdle`, que a própria API do Notifee
+   marca como *deprecated*: ele permite disparar em Doze mas deixa o Android **agrupar e adiar**. Em
+   aparelho, o adiado só tocou quando a tela foi ligada. Agora usa `AlarmType.SET_ALARM_CLOCK`, a
+   mesma categoria do despertador nativo. *(Não depende de build — `USE_EXACT_ALARM` já está no
+   binário —, mas só se confirma com o celular bloqueado.)*
+3. **Notificação com som.** O canal omitia `sound`, e o comentário no código afirmava que isso
+   significava "som padrão". A documentação do Notifee diz o oposto: omitir cria o canal **mudo**.
+   Agora é `sound: "default"`, e o `recriarSeDivergente` — que só cuidava do canal de alarme — passou
+   a apagar e recriar o de lembrete, porque canal criado é imutável no Android.
+4. **Notificação chegando com a tela desligada.** Mesma causa do item 2; ela também subiu para
+   `SET_ALARM_CLOCK`. A diferença entre os dois modos continua no **canal** (volume, Não Perturbe,
+   tela cheia), que é onde ela sempre esteve.
+5. **Botões da notificação: Tomei e Pulei.** "Adiar" saiu — ele faz sentido no alarme, que
+   interrompe, não num aviso discreto. "Pulei" preenche uma lacuna real: havia saída para quem tomou
+   e para quem adia, nenhuma para **quem não tomou**, e o relatório distingue "pulada" de "sem
+   registro". Rótulos curtos também ajudam a caber sem a seta de colapso do Android.
 
 -
 

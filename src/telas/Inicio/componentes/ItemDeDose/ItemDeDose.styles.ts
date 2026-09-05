@@ -82,10 +82,15 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * para se centrar dentro dela (com `flex-start` ela encolheria ao próprio texto, e `center`
    * dentro dela não teria o que distribuir).
    */
+  /**
+   * `sm` e não `md` entre a hora e o nome: os 8px que saem daqui vão inteiros para o nome do
+   * remédio, que é o texto que decide se a linha é lida de relance ou soletrada. A coluna da hora
+   * tem largura fixa, então o espaço economizado não some — ele muda de lado.
+   */
   infoAgrupada: {
     flexDirection: "row",
     alignItems: "stretch",
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   /**
    * Guarda `08:00` e o rótulo do estado embaixo, um sob o outro.
@@ -94,8 +99,13 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * linhas, e a hora alinhada pelo topo ficava pendurada no canto. Centrada, ela acompanha o
    * conteúdo qualquer que seja a altura dele.
    */
+  /**
+   * 60: o que "ATRASADA" (o rótulo mais largo depois que "PRÓXIMA DOSE" encurtou) pede em
+   * `caption`, e nada além disso. A coluna é de largura fixa, então cada pixel a menos aqui é um
+   * pixel a mais para o nome do remédio.
+   */
   timeColumn: {
-    width: 68,
+    width: 60,
     gap: 2,
     justifyContent: "center",
   },

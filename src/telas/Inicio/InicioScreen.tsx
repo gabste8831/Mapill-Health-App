@@ -132,7 +132,26 @@ export function InicioScreen() {
   }
   const proximaDose = agenda.doses.find((dose) => dose.status === "next");
   const atrasadas = agenda.doses.filter((dose) => dose.status === "late");
-  const demaisDoses = agenda.doses.filter((dose) => dose.status !== "late");
+
+  /**
+   * O que ainda espera resposta vem antes do que já foi registrado.
+   *
+   * A ordem era cronológica pura, e o efeito aparecia no fim do dia: quem já confirmou as doses da
+   * manhã abria a Home e via primeiro o que **já resolveu** — precisava rolar para achar o que
+   * falta, que é a única coisa que a tela pede dele. Invertido, a primeira linha é sempre uma
+   * pergunta em aberto.
+   *
+   * Dentro de cada grupo a ordem do horário se mantém: ela é a leitura do dia, e embaralhá-la por
+   * ordem de confirmação faria a dose das 8h aparecer depois da de 14h sem explicação.
+   *
+   * As atrasadas ficam de fora dos dois: elas já têm bloco próprio acima, com destaque.
+   */
+  const pendentesDeHoje = agenda.doses.filter(
+    (dose) => dose.status !== "late" && dose.status !== "confirmed" && dose.status !== "skipped",
+  );
+  const registradasDeHoje = agenda.doses.filter(
+    (dose) => dose.status === "confirmed" || dose.status === "skipped",
+  );
 
   /**
    * Os compromissos de hoje, na mesma agenda das doses.
@@ -218,7 +237,8 @@ export function InicioScreen() {
     const listadas = atrasadas.slice(0, MAXIMO_LISTADO_NO_LOTE);
     const restantes = atrasadas.length - listadas.length;
     const lista = listadas
-      .map((dose) => `• ${dose.medicationName} — ${descricaoDaDose(dose)}, das ${dose.time}`)
+      // Dois pontos separando o nome da quantidade, como no corpo do aviso (`planejarAvisosDeDose`).
+      .map((dose) => `• ${dose.medicationName}: ${descricaoDaDose(dose)}, das ${dose.time}`)
       .join("\n");
 
     Alert.alert(
@@ -236,7 +256,7 @@ export function InicioScreen() {
     if (falhas.length === 0) return;
     Alert.alert(
       "Nem todas foram registradas",
-      `Ficaram de fora: ${falhas.join(", ")}. As demais foram confirmadas — tente estas de novo pela lista.`,
+      `Ficaram de fora: ${falhas.join(", ")}. As demais foram confirmadas. Tente estas de novo pela lista.`,
     );
   }
 
@@ -387,10 +407,10 @@ export function InicioScreen() {
 
         {/* Só quando sobra alguma fora do bloco de atrasadas: um cabeçalho "Hoje" sem nada
             embaixo dele lê como lista que falhou em carregar. */}
-        {demaisDoses.length > 0 ? (
+        {pendentesDeHoje.length > 0 ? (
           <View style={styles.doseList}>
             <Text style={styles.sectionLabel}>Hoje</Text>
-            {demaisDoses.map((dose, indice) => (
+            {pendentesDeHoje.map((dose, indice) => (
               <Animated.View
                 key={dose.doseScheduleId}
                 /**
@@ -399,6 +419,34 @@ export function InicioScreen() {
                  * no zero faria a segunda lista brotar junto com o meio da primeira.
                  */
                 entering={semMovimento ? undefined : entradaEscalonada(atrasadas.length + indice)}>
+                <ItemDeDose
+                  time={dose.time}
+                  medicationName={dose.medicationName}
+                  note={descricaoDaDose(dose)}
+                  status={dose.status}
+                  onConfirm={() => confirmar(dose)}
+                  onSkip={() => pular(dose)}
+                  onCorrect={() => corrigir(dose)}
+                />
+              </Animated.View>
+            ))}
+          </View>
+        ) : null}
+
+        {/* O que já foi respondido, depois do que ainda espera. O rótulo próprio é o que explica a
+            quebra na ordem dos horários: sem ele, a dose das 08:00 abaixo da de 14:00 lê como
+            defeito de ordenação em vez de agrupamento. */}
+        {registradasDeHoje.length > 0 ? (
+          <View style={styles.doseList}>
+            <Text style={styles.sectionLabel}>Já registradas</Text>
+            {registradasDeHoje.map((dose, indice) => (
+              <Animated.View
+                key={dose.doseScheduleId}
+                entering={
+                  semMovimento
+                    ? undefined
+                    : entradaEscalonada(atrasadas.length + pendentesDeHoje.length + indice)
+                }>
                 <ItemDeDose
                   time={dose.time}
                   medicationName={dose.medicationName}
@@ -439,7 +487,12 @@ export function InicioScreen() {
                 entering={
                   semMovimento
                     ? undefined
-                    : entradaEscalonada(atrasadas.length + demaisDoses.length + indice)
+                    : entradaEscalonada(
+                        atrasadas.length +
+                          pendentesDeHoje.length +
+                          registradasDeHoje.length +
+                          indice,
+                      )
                 }>
                 <ItemDeCompromisso
                   time={new Date(compromisso.scheduledFor).toLocaleTimeString("pt-BR", {

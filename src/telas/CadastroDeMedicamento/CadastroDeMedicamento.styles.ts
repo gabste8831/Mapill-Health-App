@@ -313,6 +313,27 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     padding: spacing.md,
     borderRadius: radius.md,
   },
+  /**
+   * A previsão do lembrete ("Ao salvar, o alarme tocaria…"), como texto de apoio solto.
+   *
+   * Sem o fundo do `sectionHintDestaque`: logo abaixo da linha do modo e do botão, um bloco pintado
+   * lia como um terceiro elemento clicável — três caixas empilhadas onde só duas respondem ao
+   * toque. Ela é uma nota sobre o que está acima, não uma ação.
+   */
+  previsaoDoLembrete: {
+    ...typography.bodyMd,
+    color: cores.onSurfaceVariant,
+    // O `Card` separa os filhos por `gutter` (24), que é a distância entre assuntos diferentes —
+    // e esta linha é uma nota sobre a linha logo acima, não um assunto novo. A margem negativa
+    // desconta o gap e devolve os 8 que a proximidade pede.
+    marginTop: -spacing.md,
+  },
+  /** A mesma nota quando não há horário futuro: vermelha no texto, e ainda sem fundo. */
+  previsaoDoLembreteVazia: {
+    ...typography.bodyMd,
+    color: cores.error,
+    marginTop: -spacing.md,
+  },
 
   /**
    * O conteúdo do "como funcionam" inteiro, num fundo azul claro. É explicação, não campo nem

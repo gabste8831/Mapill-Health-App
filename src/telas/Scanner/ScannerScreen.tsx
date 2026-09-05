@@ -135,7 +135,7 @@ export function ScannerScreen({ onUsar, onBack }: ScannerScreenProps) {
           <Text style={styles.titulo}>Código não encontrado</Text>
           <Text style={styles.texto}>
             Este código não está na base da Anvisa que o app carrega. Isso é comum em manipulados,
-            importados e produtos novos — você pode cadastrar normalmente à mão.
+            importados e produtos novos. Você pode cadastrar normalmente à mão.
           </Text>
           <Text style={styles.ean}>{estado.ean}</Text>
 
