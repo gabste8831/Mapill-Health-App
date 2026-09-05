@@ -4,6 +4,7 @@ import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-reposi
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
+import { ouvirDosesResolvidas } from "@/notifications/doses-resolvidas";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { gravarDesfecho } from "./use-today-doses";
 
@@ -23,6 +24,13 @@ export type DoseDoAlarme = {
   latestStatus: IntakeStatus | null;
   latestLogId: string | null;
   resolvida: boolean;
+  /**
+   * Quantas vezes este horário já foi adiado — a trava é de **um** por horário.
+   *
+   * A tela usa isto para esconder o botão de adiar quando ele não teria efeito, em vez de oferecer
+   * e recusar: é a mesma regra que governa a ação da notificação (`semAcoesRapidas`).
+   */
+  snoozeCount: number;
 };
 
 /**
@@ -78,6 +86,7 @@ export function useDosesDoAlarme(instanteIso: string) {
           quantidadeFormatada: formatarQuantidade(doseSchedule.amount, prescription.doseUnit),
           amount: doseSchedule.amount,
           intakeNote: prescription.intakeNote,
+          snoozeCount: doseSchedule.snoozeCount,
           latestStatus,
           latestLogId,
           resolvida: resolvesDose(latestStatus),
@@ -94,15 +103,48 @@ export function useDosesDoAlarme(instanteIso: string) {
     }
   }, [instanteIso]);
 
+  /**
+   * Carrega ao montar **e a cada poucos segundos enquanto o alarme está na tela**.
+   *
+   * A tela não recarrega por foco (não há rota a que voltar), mas ela fica aberta tocando enquanto
+   * a pessoa decide — e nesse intervalo a dose pode ser resolvida em outro lugar: pelo botão da
+   * notificação, que continua na bandeja, ou pela Home em outro aparelho depois de sincronizar.
+   *
+   * Sem revalidar, a tela seguia mostrando a dose como pendente e oferecendo "Tomei" para o que já
+   * fora confirmado — e o alarme continuava tocando depois de respondido, que é o oposto do que ele
+   * promete.
+   *
+   * Três segundos: rápido o bastante para o alarme sumir logo após a confirmação, e uma consulta
+   * local a cada três segundos não pesa numa tela que vive minutos, não horas.
+   */
   useEffect(() => {
     void carregar();
+    const intervalo = setInterval(() => void carregar(), 3_000);
+    /**
+     * O anúncio fecha a janela que o intervalo deixa aberta.
+     *
+     * Confirmar a dose pela tela do horário — aberta pelo corpo da notificação, enquanto o alarme
+     * toca — resolvia o registro, mas o som continuava até a próxima revalidação. Alguns segundos
+     * de alarme depois de respondido leem como defeito, e é o que o teste em aparelho apontou.
+     *
+     * O intervalo fica como rede: se o anúncio se perder (esta tela montou depois da gravação),
+     * a revalidação ainda corrige.
+     */
+    const pararDeOuvir = ouvirDosesResolvidas(() => void carregar());
+    return () => {
+      clearInterval(intervalo);
+      pararDeOuvir();
+    };
   }, [carregar]);
 
   const registrar = useCallback(
     async (dose: DoseDoAlarme, status: IntakeStatus) => {
       await gravarDesfecho(dose, status);
+      // Reflete na hora, sem esperar a próxima revalidação: quem acabou de responder precisa ver a
+      // linha sair da lista, e é o que decide se a tela ainda tem o que perguntar.
+      await carregar();
     },
-    [],
+    [carregar],
   );
 
   return { doses, isLoading, registrar };

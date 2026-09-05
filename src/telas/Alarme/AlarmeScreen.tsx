@@ -1,16 +1,32 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createAudioPlayer } from "expo-audio";
 import { useCallback, useEffect, useState } from "react";
-import { Text, Vibration, View } from "react-native";
+import { AppState, Linking, Pressable, ScrollView, Text, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
+import { MINUTOS_DE_ADIAMENTO } from "@/notifications/acoes";
+import { ouvirPedidoDeEncerrarAlarme } from "@/notifications/doses-resolvidas";
 import { dispensarAlarmeAtivo } from "@/notifications/notifee-gateway";
-import { useCores, useEstilos } from "@/shared/theme";
-import { Button, CenteredLoader, FotoLocal } from "@/ui";
+import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
+import { adiarAviso } from "@/notifications/responder-aviso";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { CenteredLoader, FotoLocal } from "@/ui";
 import { criarEstilos } from "./AlarmeScreen.styles";
 
 const SOM_DO_ALARME = require("../../../assets/sounds/alarme_de_dose.wav");
+
+/**
+ * Até quantos remédios o alarme mostra a foto da caixa.
+ *
+ * Três é o que cabe sem a tela virar um álbum. A partir daí a foto deixa de cumprir o papel que
+ * tem aqui — reconhecer a caixa de relance — porque são muitas para olhar de uma vez, e o nome
+ * escrito passa a ser mais rápido que a imagem.
+ */
+const MAXIMO_PARA_MOSTRAR_FOTO = 3;
+
+/** Até quantos remédios se responde pela própria tela do alarme. Ver `podeResponderAqui`. */
+const MAXIMO_PARA_RESPONDER_NO_ALARME = 3;
 
 /**
  * Quanto tempo o alarme toca antes de silenciar sozinho.
@@ -27,6 +43,15 @@ type AlarmeScreenProps = {
   instanteIso: string;
   /** Fecha a tela — no full-screen intent é `notifee.stopForegroundService`/finish da Activity. */
   onFechar: () => void;
+  /**
+   * `true` quando a tela é a **Activity própria** do full-screen intent, e não a rota dentro do app.
+   *
+   * Só a Activity encerra ao perder o primeiro plano: ela existe sozinha, então algo vir para a
+   * frente significa que a pessoa saiu dela. Como rota, o app **é** o primeiro plano, e um
+   * `inactive` passageiro (um heads-up por cima, a barra de notificações puxada) fecharia o alarme
+   * sem ninguém ter saído.
+   */
+  ehActivityDeAlarme?: boolean;
 };
 
 /**
@@ -49,7 +74,11 @@ type AlarmeScreenProps = {
  * faz este alarme ser um alarme é esta tela tocar o áudio em `loop` enquanto estiver aberta. A
  * notificação de tela cheia só a traz até aqui.
  */
-export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
+export function AlarmeScreen({
+  instanteIso,
+  onFechar,
+  ehActivityDeAlarme = false,
+}: AlarmeScreenProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
 
@@ -140,24 +169,170 @@ export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
         if (dose.resolvida) continue;
         await registrar(dose, status);
       }
+      // A dose resolvida deixa de merecer aviso — o mesmo gatilho que a Home dispara ao confirmar.
+      await reagendarTodosOsAvisos();
       await encerrar();
     },
     [doses, registrar, encerrar],
   );
 
+  /**
+   * Leva à tela do horário dentro do app, onde cada dose se resolve individualmente.
+   *
+   * Por deep link, e não pelo roteador: esta tela é um componente registrado no `AppRegistry` (ver
+   * `index.js`) e roda numa Activity própria, fora do `expo-router` — não há navegador a que pedir
+   * um `push`. O `Linking` entrega a rota ao app, que sobe já na tela certa.
+   *
+   * Silencia e dispensa antes de sair, na mesma ordem do `encerrar`: sem isso o som continuaria
+   * tocando por cima do app recém-aberto.
+   */
+  const abrirNoApp = useCallback(async () => {
+    setSilenciado(true);
+    await dispensarAlarmeAtivo();
+    await Linking.openURL(`mapillapp://horario/${encodeURIComponent(instanteIso)}`).catch(() => {});
+    onFechar();
+  }, [instanteIso, onFechar]);
+
+  const adiar = useCallback(async () => {
+    setSilenciado(true);
+    await adiarAviso(doses.filter((dose) => !dose.resolvida).map((dose) => dose.doseScheduleId));
+    await dispensarAlarmeAtivo();
+    onFechar();
+  }, [doses, onFechar]);
+
+  /**
+   * A dose respondida em **outro lugar** também encerra este alarme.
+   *
+   * O `useDosesDoAlarme` revalida a cada poucos segundos, então quando alguém confirma pelo botão
+   * da notificação — que continua na bandeja enquanto o alarme toca — a lista aqui esvazia sozinha.
+   * Sem isto, a tela permanecia tocando e oferecendo "Tomei" para uma dose já registrada: o segundo
+   * toque não gravaria nada (a regra barra), mas o alarme seguiria berrando o que já foi resolvido.
+   *
+   * `isLoading` na condição é o que impede o fechamento no primeiro quadro, antes de a lista chegar.
+   */
+  /**
+   * Tocar no corpo da notificação leva à tela do horário — e o alarme sai de cena no mesmo gesto.
+   *
+   * Escolher outro caminho para responder é uma resposta ao alarme: continuar tocando enquanto a
+   * pessoa decide na outra tela é cobrar algo que ela já foi atender. Equivale a "Responder
+   * depois" — a dose segue pendente, e é lá que ela será resolvida.
+   */
+  useEffect(() => ouvirPedidoDeEncerrarAlarme(onFechar), [onFechar]);
+
+  /**
+   * **Perder o primeiro plano encerra o alarme.** É esta a garantia que funciona.
+   *
+   * O aviso interno (`ouvirPedidoDeEncerrarAlarme`, acima) não alcança esta tela quando o toque na
+   * notificação é processado pelo `onBackgroundEvent`: aquele handler roda num contexto JS separado
+   * da Activity do alarme, e o `Set` de ouvintes vive na memória de cada contexto — o anúncio se
+   * perde no caminho. Foi o que o teste em aparelho mostrou: o app abria por cima e o som
+   * continuava, obrigando a voltar telas para achar o alarme e desligá-lo.
+   *
+   * `AppState` não depende de contexto compartilhado: quando o app sobe por cima, esta Activity vai
+   * para segundo plano e o evento chega aqui. E a regra vale para **qualquer** saída — tocar na
+   * notificação, abrir outro app, atender uma chamada. Em todas, o alarme deixou de ser o que está
+   * na frente, e um despertador que continua tocando fora de cena é o que faz desinstalar o app.
+   *
+   * A dose segue pendente: sair não é responder, e ela reaparece na Home como atrasada.
+   */
+  useEffect(() => {
+    /**
+     * Só vale para a Activity de tela cheia, e não para esta mesma tela aberta como rota.
+     *
+     * Quando o alarme chega com o app já aberto, o Android rebaixa o full-screen intent e quem abre
+     * a tela é o roteador (ver `use-dose-notifications`). Ali o app **é** o primeiro plano, e um
+     * `inactive` passageiro — o heads-up que sobe por cima, a barra de notificações puxada —
+     * fecharia o alarme sem que ninguém tivesse saído dele.
+     *
+     * Na Activity própria a semântica é outra: ela existe sozinha, então perder o primeiro plano
+     * significa que outra coisa veio para a frente.
+     */
+    if (!ehActivityDeAlarme) return;
+
+    /**
+     * Só encerra depois de ter estado em primeiro plano ao menos uma vez.
+     *
+     * A Activity nasce enquanto o aparelho ainda desbloqueia, e nesse intervalo o `AppState` pode
+     * reportar `inactive` — fechar ali mataria o alarme antes de alguém vê-lo, que é o pior defeito
+     * possível nesta tela.
+     */
+    let esteveAtivo = AppState.currentState === "active";
+
+    const assinatura = AppState.addEventListener("change", (estado) => {
+      if (estado === "active") {
+        esteveAtivo = true;
+        return;
+      }
+      if (!esteveAtivo) return;
+      void dispensarAlarmeAtivo().then(onFechar);
+    });
+    return () => assinatura.remove();
+  }, [ehActivityDeAlarme, onFechar]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (doses.length === 0) return;
+    if (doses.some((dose) => !dose.resolvida)) return;
+
+    /**
+     * Fecha sem passar pelo `encerrar`: aquele chama `setSilenciado`, e escrever estado dentro de um
+     * efeito é o que a regra `set-state-in-effect` proíbe — com razão, porque aqui o componente está
+     * saindo e o re-render não teria para quem servir.
+     *
+     * O som já morre com a tela: o player é criado e destruído pelo efeito do áudio, e a limpeza
+     * dele roda na desmontagem.
+     */
+    void dispensarAlarmeAtivo().then(onFechar);
+  }, [doses, isLoading, onFechar]);
+
   if (isLoading) return <CenteredLoader />;
 
   const pendentes = doses.filter((dose) => !dose.resolvida);
   const umaSo = pendentes.length === 1;
+  /**
+   * Acima de três remédios, o alarme lista e **não** responde: a confirmação passa a exigir o app.
+   *
+   * A tela rola (o `ScrollView` cuida disso), então não é o layout que quebra — é a decisão. Marcar
+   * "tomei todas" para cinco remédios de uma vez, no escuro e recém-acordado, é assinar cinco
+   * registros clínicos com um toque só, sem ter olhado nenhum deles. Com um ou dois ainda se lê o
+   * que se está confirmando; com cinco, não.
+   *
+   * ⚠️ O custo é real e recai sobre quem tem mais remédios — o paciente polimedicado, que costuma
+   * ser idoso e é quem mais se beneficia do botão direto. Foi uma escolha consciente do Gabriel
+   * (05/09), e o `Ver e confirmar no app` é o que a torna aceitável: a saída existe, é a primeira
+   * coisa na tela, e leva para a tela do horário onde cada dose se resolve individualmente.
+   */
+  const podeResponderAqui = pendentes.length <= MAXIMO_PARA_RESPONDER_NO_ALARME;
+  /** A foto some antes das ações: com quatro caixas a tela vira álbum, e nenhuma ajuda a decidir. */
+  const mostrarFotos = pendentes.length <= MAXIMO_PARA_MOSTRAR_FOTO;
+  // Um adiamento por horário: basta uma dose já ter gasto o dela para o botão não ter mais efeito.
+  const podeAdiar = pendentes.length > 0 && pendentes.every((dose) => dose.snoozeCount === 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.conteudo}>
+      {/**
+       * O cabeçalho e os remédios rolam; as ações ficam fixas no rodapé.
+       *
+       * A tela cabia justa com **um** remédio — e o bloco 4.1 do roteiro é justamente dois no mesmo
+       * horário, cada um com sua foto. Sem rolagem, o segundo cartão empurrava "Responder depois"
+       * para fora da tela, e não havia como alcançá-lo: numa tela que irrompe sobre o bloqueio e
+       * toca em loop, ficar sem saída visível é o pior defeito possível.
+       *
+       * As ações fora do scroll porque elas nunca podem depender de rolar: quem foi acordado tem
+       * que conseguir responder sem procurar.
+       */}
+      <ScrollView
+        contentContainerStyle={styles.conteudo}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.cabecalho}>
           <View style={styles.icone}>
-            <Ionicons name="alarm" size={40} color={cores.onPrimary} />
+            <Ionicons name="alarm" size={28} color={cores.onPrimary} />
           </View>
-          <Text style={styles.titulo}>Hora do seu remédio</Text>
+          {/* A contagem entra quando há mais de um: é ela que diz, antes de qualquer nome, quantas
+              respostas este horário espera. */}
+          <Text style={styles.titulo}>
+            {umaSo ? "Hora do seu remédio" : `Hora dos seus ${pendentes.length} remédios`}
+          </Text>
           <Text style={styles.hora}>
             {new Date(instanteIso).toLocaleTimeString("pt-BR", {
               hour: "2-digit",
@@ -181,10 +356,17 @@ export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
                * **Só quando existe.** Sem foto, nada ocupa o lugar: esta é a tela que menos pode
                * ter ruído, e um quadrado cinza vazio de madrugada não ajuda ninguém.
                */}
-              {dose.photoUri !== null ? (
-                <FotoLocal uri={dose.photoUri} style={styles.foto} />
+              {/* `contain` e não o `cover` padrão: aqui a foto é para ser **lida**, e cortar a
+                  borda pode cortar a dosagem impressa no canto da caixa. É a mesma razão do
+                  visualizador da receita. */}
+              {mostrarFotos && dose.photoUri !== null ? (
+                <FotoLocal uri={dose.photoUri} style={styles.foto} contentFit="contain" />
               ) : null}
-              <Text style={styles.nome}>{dose.medicationName}</Text>
+              {/* O nome encolhe quando são muitos: em corpo 30, cinco remédios viram cinco títulos
+                  disputando a mesma tela, e a lista deixa de ser lida como uma lista. */}
+              <Text style={mostrarFotos ? styles.nome : styles.nomeCompacto}>
+                {dose.medicationName}
+              </Text>
               <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
               {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
                 <Text style={styles.orientacao}>{dose.intakeNote}</Text>
@@ -192,37 +374,100 @@ export function AlarmeScreen({ instanteIso, onFechar }: AlarmeScreenProps) {
             </View>
           ))}
         </View>
+      </ScrollView>
 
-        <View style={styles.acoes}>
-          {/* Silenciar vem primeiro e sozinho: parar o barulho é o que se quer fazer antes de
-              conseguir decidir qualquer outra coisa. E ele **não** registra desfecho nenhum. */}
+      <View style={styles.acoes}>
+          {/* Acima de três remédios, responder em lote sai e a confirmação vai para o app.
+
+              O botão é o primeiro da tela, e não uma saída escondida: quando ele substitui o
+              "Tomei todas", ele **é** o caminho principal, e precisa parecer isso. Abre a tela do
+              horário, onde cada dose se resolve individualmente. */}
+          {!podeResponderAqui ? (
+            <Pressable
+              style={estadoDePressao(styles.botaoTomei, { escala: true })}
+              onPress={() => void abrirNoApp()}
+              accessibilityRole="button"
+              accessibilityLabel={`Abrir o aplicativo para conferir e confirmar as ${pendentes.length} doses`}>
+              <Ionicons name="open-outline" size={20} color={cores.primary} />
+              <Text style={styles.textoTomei}>Ver e confirmar no app</Text>
+            </Pressable>
+          ) : null}
+
+          {/* As duas respostas na mesma linha, dividindo a largura — e com ícone, porque quem
+              acabou de acordar reconhece o ✓ e o ✗ antes de terminar de ler a palavra. É o mesmo
+              par de "Confirmar"/"Pular" da agenda, no tamanho que esta tela pede. */}
+          {podeResponderAqui ? (
+          <View style={styles.linhaDeResposta}>
+            <Pressable
+              style={estadoDePressao(styles.botaoPulei, { escala: true })}
+              onPress={() => void responderTodas("skipped")}
+              accessibilityRole="button"
+              accessibilityLabel={umaSo ? "Pulei esta dose" : "Pulei todas as doses"}>
+              <Ionicons name="close" size={20} color={cores.onPrimary} />
+              <Text style={styles.textoPulei}>{umaSo ? "Pulei" : "Pulei todas"}</Text>
+            </Pressable>
+            <Pressable
+              style={estadoDePressao(styles.botaoTomei, { escala: true })}
+              onPress={() => void responderTodas("confirmed")}
+              accessibilityRole="button"
+              accessibilityLabel={umaSo ? "Tomei esta dose" : "Tomei todas as doses"}>
+              <Ionicons name="checkmark" size={20} color={cores.primary} />
+              <Text style={styles.textoTomei}>{umaSo ? "Tomei" : "Tomei todas"}</Text>
+            </Pressable>
+          </View>
+          ) : null}
+
+          {/* Silenciar e Adiar dividem a linha: nenhum dos dois registra desfecho, e juntos ocupam
+              a altura de um. O espaço economizado vai para a foto do remédio, que é o que a tela
+              tem de mais útil quando ela existe.
+
+              Silenciar vira aviso quando já foi tocado, e Adiar some quando o horário gastou seu
+              adiamento — então a linha pode ter dois, um ou nenhum botão. */}
           {silenciado ? (
             <Text style={styles.silenciadoAviso}>
               Som desligado. A dose continua esperando sua resposta.
             </Text>
-          ) : (
-            <Button
-              label="Silenciar"
-              variant="outline"
-              onPress={silenciar}
-              accessibilityLabel="Desligar o som do alarme"
-            />
-          )}
+          ) : null}
 
-          <Button
-            label={umaSo ? "Tomei" : "Tomei todas"}
-            onPress={() => void responderTodas("confirmed")}
-          />
-          <Button
-            label={umaSo ? "Pulei" : "Pulei todas"}
-            variant="outline"
-            onPress={() => void responderTodas("skipped")}
-          />
+          {!silenciado || podeAdiar ? (
+            <View style={styles.linhaDeSaidas}>
+              {!silenciado ? (
+                <Pressable
+                  style={estadoDePressao(styles.botaoSilenciar)}
+                  onPress={silenciar}
+                  accessibilityRole="button"
+                  accessibilityLabel="Desligar o som do alarme">
+                  <Ionicons name="volume-mute" size={18} color={cores.onPrimary} />
+                  <Text style={styles.textoSilenciar}>Silenciar</Text>
+                </Pressable>
+              ) : null}
+
+              {/* Adiar promete volta; "Responder depois" só fecha. As duas saídas existem porque
+                  são coisas diferentes: quem vai buscar o remédio agora quer ser lembrado em
+                  minutos, e quem já sabe que vai resolver mais tarde não quer o alarme de novo
+                  daqui a pouco. */}
+              {podeAdiar ? (
+                <Pressable
+                  style={estadoDePressao(styles.botaoSilenciar)}
+                  onPress={() => void adiar()}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Adiar o alarme em ${MINUTOS_DE_ADIAMENTO} minutos`}>
+                  <Ionicons name="time-outline" size={18} color={cores.onPrimary} />
+                  <Text style={styles.textoSilenciar}>Adiar {MINUTOS_DE_ADIAMENTO} min</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
 
           {/* Sair sem responder é legítimo — a pessoa pode querer conferir a caixa antes. A dose
               continua pendente e reaparece na Home, como qualquer atrasada. */}
-          <Button label="Responder depois" variant="text" onPress={() => void encerrar()} />
-        </View>
+          <Pressable
+            style={estadoDePressao(styles.botaoDepois)}
+            onPress={() => void encerrar()}
+            accessibilityRole="button"
+            accessibilityLabel="Responder depois, sem registrar agora">
+            <Text style={styles.textoDepois}>Responder depois</Text>
+          </Pressable>
       </View>
     </SafeAreaView>
   );

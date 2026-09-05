@@ -45,6 +45,19 @@ export type AvisoDeDose = {
    */
   doseScheduleIds: string[];
   /**
+   * O instante das doses, quando ele **não** é a hora de tocar.
+   *
+   * Nos avisos da grade os dois coincidem, e este campo fica ausente. No lembrete adiado eles se
+   * separam: ele toca cinco minutos depois do toque em "Adiar", mas as doses continuam sendo as do
+   * horário original.
+   *
+   * A distinção não é acadêmica. A tela de alarme localiza o que mostrar pelo instante que recebe,
+   * e usar a hora de tocar a fazia procurar doses no minuto do adiamento — onde não há nenhuma. O
+   * alarme adiado voltava a tocar **sem nome, sem dose e sem foto**, e "Tomei" não registrava nada
+   * porque não havia dose a registrar.
+   */
+  instanteDasDoses?: string;
+  /**
    * `alarm` toca alto e atravessa o Não Perturbe; `notification` respeita o silencioso. Os dois
    * são heads-up: a diferença está no canal do Android, e ela é real (ver `canais.ts`).
    *

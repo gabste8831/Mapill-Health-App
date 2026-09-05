@@ -82,6 +82,9 @@ export function AlarmeRaiz() {
     <SafeAreaProvider>
       <AlarmeScreen
         instanteIso={instanteIso}
+        // Esta é a Activity do full-screen intent: perder o primeiro plano aqui significa que outra
+        // coisa veio para a frente, e o alarme deve sair de cena junto.
+        ehActivityDeAlarme
         /**
          * Fechar a tela cheia é **encerrar a Activity**, e não navegar para trás: não há pilha
          * atrás dela — ela nasceu de uma notificação, por cima da tela de bloqueio.
