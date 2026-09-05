@@ -18,7 +18,7 @@ type PainelDePermissoesProps = {
  *
  * ## Por que uma lista, e não um aviso só
  *
- * São três autorizações em três telas diferentes do Android, e elas falham de formas
+ * São quatro autorizações em quatro telas diferentes do Android, e elas falham de formas
  * diferentes: sem notificação nada toca, sem alarme exato toca atrasado, sem Não Perturbe toca
  * mudo, com economia de bateria pode não tocar. Um aviso genérico — "conceda as permissões" —
  * deixaria a pessoa procurando em três lugares sem saber qual resolve o quê.

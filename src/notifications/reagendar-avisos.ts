@@ -11,6 +11,7 @@ import {
   type DoseAAvisar,
 } from "@/domain/use-cases/planejar-avisos-de-dose";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
+import { diagnosticarCanalDeAlarme } from "./canais-notifee";
 import { NotifeeGateway } from "./notifee-gateway";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`), então não há o que agendar. */
@@ -164,6 +165,26 @@ async function executarReagendamento(): Promise<void> {
     for (const aviso of avisos) {
       // O modo decide o canal e se abre tela cheia; quem agenda é o mesmo gateway nos dois casos.
       await gateway.agendar(aviso);
+    }
+
+    /**
+     * O estado real depois de reconstruir, e não só o que se tentou agendar.
+     *
+     * Este bloco já falhou em silêncio mais de uma vez: o agendamento é aceito, nenhum erro
+     * aparece, e o alarme não toca — por um canal que nasceu mudo, uma permissão que o Android não
+     * pede sozinho, ou uma dose que não entrou na janela. Cada uma dessas causas some no mesmo
+     * sintoma, e distingui-las sem este resumo exigia tentativa e erro no aparelho.
+     *
+     * `diagnosticarCanalDeAlarme` existia desde 02/09 e nunca foi chamada — o diagnóstico estava
+     * escrito e desligado.
+     */
+    if (__DEV__) {
+      const alarmes = avisos.filter((aviso) => aviso.modo === "alarm").length;
+      const notificacoes = avisos.length - alarmes;
+      console.log(
+        `[Mapill] janela refeita: ${avisos.length} aviso(s) — ${alarmes} alarme(s), ${notificacoes} notificação(ões); ${doses.length} dose(s) na janela de ${JANELA_DE_AVISOS_EM_DIAS} dias`,
+      );
+      console.log(`[Mapill] canal do alarme → ${await diagnosticarCanalDeAlarme()}`);
     }
   } catch (cause) {
     // Não relança: reagendar é consequência de outra ação (salvar um cadastro, confirmar uma

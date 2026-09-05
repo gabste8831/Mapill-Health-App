@@ -1,4 +1,5 @@
 import notifee, { AndroidNotificationSetting, AuthorizationStatus } from "@notifee/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Linking, Platform } from "react-native";
 
 import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
@@ -8,7 +9,7 @@ import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
  *
  * ## Por que uma central, e não cada tela cuidando da sua
  *
- * O lembrete de dose depende de **três** autorizações diferentes, concedidas em três telas
+ * O lembrete de dose depende de **quatro** autorizações diferentes, concedidas em quatro telas
  * diferentes do Android, e nenhuma delas avisa quando é revogada. Antes disso elas estavam
  * espalhadas — a permissão de notificação no cadastro, o Não Perturbe num link solto — e o
  * resultado era o app prometendo um alarme que o sistema não deixava tocar, sem que ninguém
@@ -27,7 +28,22 @@ import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
  */
 
 /**
- * As três coisas que o sistema precisa autorizar para o alarme funcionar de verdade.
+ * Onde fica registrado que a pessoa foi levada à tela de sobreposição.
+ *
+ * Não é a permissão em si — é a lembrança de tê-la pedido. Ver o item `sobreporApps`.
+ */
+const CHAVE_SOBREPOSICAO = "mapill:sobreposicao-pedida";
+
+async function jaFoiPedidaASobreposicao(): Promise<boolean> {
+  return (await AsyncStorage.getItem(CHAVE_SOBREPOSICAO).catch(() => null)) === "sim";
+}
+
+async function marcarSobreposicaoComoPedida(): Promise<void> {
+  await AsyncStorage.setItem(CHAVE_SOBREPOSICAO, "sim").catch(() => {});
+}
+
+/**
+ * As coisas que o sistema precisa autorizar para o alarme funcionar de verdade.
  *
  * ## A regra que define quem entra nesta lista
  *
@@ -52,7 +68,7 @@ import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
  * como recomendação — que é o lugar de algo que se explica mas não se confere.
  */
 export type ItemDePermissao = {
-  chave: "notificacoes" | "alarmeExato" | "naoPerturbe";
+  chave: "notificacoes" | "alarmeExato" | "naoPerturbe" | "sobreporApps";
   /** O que a pessoa lê. Descreve a consequência, não o nome técnico da permissão. */
   titulo: string;
   descricao: string;
@@ -186,6 +202,56 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
         );
       },
     },
+    {
+      /**
+       * A permissão que faz a tela do alarme aparecer **por cima de outro aplicativo**.
+       *
+       * O `fullScreenAction` sobe sozinho sobre a tela de bloqueio (é o que `showWhenLocked` no
+       * manifesto garante), mas com o aparelho **em uso** o Android o rebaixa para um aviso no topo
+       * — a própria documentação do Notifee diz isso, e não há API que force o contrário. Quando o
+       * Mapill é o app aberto, ele contorna navegando por conta própria; em outro aplicativo, não há
+       * o que navegar.
+       *
+       * `SYSTEM_ALERT_WINDOW` é o que autoriza iniciar uma tela a partir do segundo plano. É o mesmo
+       * mecanismo por trás da tela de chamada do WhatsApp aparecendo sobre qualquer coisa.
+       *
+       * ## O estado é lembrado, e não lido
+       *
+       * Nem o Notifee nem o `expo-intent-launcher` expõem `canDrawOverlays`, então não há como
+       * perguntar ao Android se a permissão está concedida. A alternativa seria o item nunca sair do
+       * painel — o defeito que fez a linha de tela cheia ser removida em 05/09.
+       *
+       * A saída é registrar a ida: quem tocou no item foi levado à tela do sistema, e o app anota
+       * isso. Não é uma leitura de verdade, e assume que quem foi até lá concedeu — mas erra para o
+       * lado recuperável. Quem não conceder continua com o comportamento de hoje (o aviso no topo),
+       * e o item volta a aparecer se o app for reinstalado.
+       */
+      chave: "sobreporApps",
+      titulo: "Abrir o alarme sobre outros apps",
+      descricao:
+        "Sem isto, usando outro aplicativo você recebe só um aviso no topo, sem a tela do alarme.",
+      comoFazer: "Na lista que abrir, procure o Mapill e autorize.",
+      concedida: await jaFoiPedidaASobreposicao(),
+      essencial: false,
+      /**
+       * `Linking.sendIntent`, e **não** `expo-intent-launcher`.
+       *
+       * O pacote faria o mesmo, mas é módulo nativo: importá-lo derruba o app inteiro em qualquer
+       * binário que não o contenha, e foi o que aconteceu em 05/09 — o import quebrou a Home, que
+       * levou o layout junto, num aparelho rodando a build anterior. `sendIntent` já vem no React
+       * Native e é o que os outros itens deste painel usam.
+       */
+      abrir: async () => {
+        await marcarSobreposicaoComoPedida();
+        await Linking.sendIntent("android.settings.action.MANAGE_OVERLAY_PERMISSION").catch(
+          async () => {
+            // Fabricante que não exponha a tela geral: as configurações do app são o lugar mais
+            // próximo de onde a pessoa consegue seguir.
+            await Linking.openSettings();
+          },
+        );
+      },
+    },
   ];
 
   const essenciaisOk = itens.every((item) => !item.essencial || item.concedida);
@@ -200,7 +266,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
 /**
  * Pede as permissões que **ainda podem ser pedidas** por diálogo.
  *
- * Só a de notificações abre diálogo, e só enquanto nunca foi negada. As outras três não têm diálogo
+ * Só a de notificações abre diálogo, e só enquanto nunca foi negada. As outras não têm diálogo
  * nenhum: são telas do sistema, e a pessoa precisa ir até lá. Por isso esta função devolve o
  * diagnóstico completo — quem chama usa o que sobrou para mostrar o que ainda falta.
  */
