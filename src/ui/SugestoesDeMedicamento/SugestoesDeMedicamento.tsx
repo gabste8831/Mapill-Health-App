@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import type { CatalogEntry } from "@/domain/ports/medication-catalog";
 import { capitalizarNome } from "@/shared/rotulos-de-medicamento";
-import { useCores, useEstilos } from "@/shared/theme";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./SugestoesDeMedicamento.styles";
 
 export type SugestoesDeMedicamentoProps = {
@@ -35,8 +35,10 @@ export function SugestoesDeMedicamento({ sugestoes, onEscolher }: SugestoesDeMed
       {sugestoes.map((entrada) => (
         <Pressable
           key={`${entrada.name}-${entrada.strength}`}
-          style={styles.item}
+          style={estadoDePressao(styles.item, { superficie: true })}
           onPress={() => onEscolher(entrada)}
+          // Devolve em área de toque o que a linha perdeu em altura: 40 desenhados, ~48 alcançáveis.
+          hitSlop={{ top: 4, bottom: 4 }}
           accessibilityRole="button"
           accessibilityLabel={`Usar ${capitalizarNome(entrada.name)} ${entrada.strength}`}>
           {/**
@@ -57,7 +59,7 @@ export function SugestoesDeMedicamento({ sugestoes, onEscolher }: SugestoesDeMed
             ) : null}
           </Text>
 
-          <Ionicons name="arrow-forward" size={18} color={cores.corDeDestaque} />
+          <Ionicons name="arrow-forward" size={16} color={cores.corDeDestaque} />
         </Pressable>
       ))}
     </View>

@@ -3,41 +3,43 @@ import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
-   * Gruda no campo, e não flutua como um bloco à parte: mesma borda do `TextField` (cor e
-   * largura), cantos de cima retos — continuam a linha do campo acima — e só os de baixo
-   * arredondados, fechando a lista. `marginTop` negativo funde as duas bordas horizontais numa
-   * só, em vez de duas linhas coladas uma na outra.
+   * Um bloco cinza logo abaixo do campo, sem contorno.
+   *
+   * As bordas (a do bloco e a de cada item) desenhavam uma grade de caixas — a gramática de
+   * formulário HTML que o resto do app já abandonou, e que aqui pesava ainda mais por serem cinco
+   * ou seis linhas contornadas sob o campo que estava sendo digitado. A superfície levemente mais
+   * escura separa a lista do fundo com um gesto só, e o `gap` separa os itens entre si.
    */
   container: {
-    backgroundColor: cores.surfaceContainerLowest,
-    borderWidth: 1,
-    borderColor: cores.outlineVariant,
-    borderTopWidth: 0,
-    borderBottomLeftRadius: radius.md,
-    borderBottomRightRadius: radius.md,
-    marginTop: -1,
+    backgroundColor: cores.surfaceContainerLow,
+    borderRadius: radius.md,
+    marginTop: spacing.xs,
+    paddingVertical: spacing.xs,
     overflow: "hidden",
   },
   titulo: {
     ...typography.caption,
     color: cores.onSurfaceVariant,
     paddingHorizontal: spacing.sm,
-    paddingTop: spacing.xs,
+    paddingBottom: 2,
   },
+  /**
+   * Mais raso que antes (52 → 40): com quatro sugestões, a lista inteira agora ocupa menos altura
+   * que três itens ocupavam, e o campo que está sendo digitado continua à vista sobre o teclado.
+   *
+   * O alvo de dedo não some junto — `hitSlop` no componente devolve a folga que a caixa perdeu, e
+   * tocar a linha errada aqui significa cadastrar o remédio errado.
+   */
   item: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: cores.outlineVariant,
-    // Alvo confortável: a lista aparece sob o dedo de quem está digitando, e um item raso é toque
-    // errado — que aqui significa cadastrar o remédio errado.
-    minHeight: 52,
+    minHeight: 40,
   },
   nome: {
-    ...typography.bodyLg,
+    ...typography.bodyMd,
     color: cores.onSurface,
     flex: 1,
   },

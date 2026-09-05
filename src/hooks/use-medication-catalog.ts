@@ -7,8 +7,15 @@ import type { CatalogEntry } from "@/domain/ports/medication-catalog";
 /** Web não tem SQLite (ver `useDatabaseReady`), então não há catálogo a consultar. */
 const temCatalogo = Platform.OS !== "web";
 
-/** Quantas sugestões aparecem. Mais que isso vira lista para rolar, e a pessoa está digitando. */
-const MAX_SUGESTOES = 6;
+/**
+ * Quantas sugestões aparecem. Mais que isso vira lista para rolar, e a pessoa está digitando.
+ *
+ * Quatro, e não seis: a lista abre logo abaixo do campo, com o teclado ocupando a metade de baixo
+ * da tela. Seis linhas cobriam o próprio campo que estava sendo digitado, e a escolha entre tantos
+ * nomes parecidos — a CMED lista dezenas de variações do mesmo remédio — atrapalhava mais do que
+ * ajudava. Quem não encontra nas quatro primeiras continua digitando, que é o caminho normal.
+ */
+const MAX_SUGESTOES = 4;
 
 /**
  * Espera entre a última tecla e a consulta.

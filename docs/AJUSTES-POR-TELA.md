@@ -49,6 +49,50 @@ Tela de termos está perfeita, tudo ok
 ### Início (Home)
 `src/telas/Inicio/` — agenda do dia, progresso, cards de estoque/adesão.
 
+são 19:35 e três remédios (19:31, 19:33, 19:34) aparecem VERDE marcando "agora" — não é o correto.
+O card azul da próxima dose não aparece. Os botões "Confirmar" e "Pular" devem ficar lado a lado
+(Confirmar à direita). O card do medicamento precisa de espaçamento melhor e um background que o
+diferencie, com detalhe na cor do tema (verde/vermelho). E a Home deveria ter os compromissos do
+dia. (Sobre o "Confirmar todas": apareceu depois da correção, mas não considero necessário.)
+- [x] Feito: (1) **Tolerância de 30 → 5 min.** A janela do "É AGORA" ia até 30 minutos *depois* do
+  horário — por isso as três de 19:31–19:34 ficavam verdes às 19:35, e só virariam vermelhas às
+  20:01. Verde é a cor que menos pode enganar num app de medicação, porque diz "está tudo em ordem".
+  Simulei a progressão: agora às 19:40 as três já estão atrasadas. *(A Home já recarregava a cada
+  minuto — cheguei a suspeitar disso, mas o mecanismo estava certo; era a janela mesmo.)* (2) **Card
+  azul de volta.** Uma dose "now" marcava `proximaMarcada = true`, e aí nenhuma dose futura recebia
+  o status `next` — qualquer dose na janela apagava o card da tela. São perguntas diferentes: a
+  verde já está na agenda pedindo ação, o card do topo responde "e depois desta, o que vem?". (3)
+  **Botões lado a lado**, Pular à esquerda e Confirmar à direita (ordem Cancelar/OK do sistema).
+  Junto: o cartão passou a **empilhar** — ele era `flexDirection: row`, então os botões ficavam ao
+  *lado* do texto e o espaço do nome do remédio dependia da largura da palavra "Confirmar". (4)
+  **Fundo com corpo**: `successSurface`/`errorSurface` são quase brancos e não diferenciavam nada
+  num cartão que já é branco. Mesmo `misturarCores` do painel de permissões, 10% da cor de estado —
+  verde `rgb(210,233,218)`, vermelho `rgb(247,214,213)`. Proporções iguais de propósito: "é agora" e
+  "atrasada" pedem ação igualmente, e pesos diferentes diriam algo que a semântica não diz. Mais
+  `gap` entre hora/status e nome/dose, e alinhamento pelo topo (centralizados, um deslizava em
+  relação ao outro quando o texto crescia). (5) **Compromissos do dia** na Home, em bloco próprio
+  depois das doses — novo `ItemDeCompromisso`. Sem botões e sem cor de urgência: não há o que fazer
+  no app na hora da consulta, e "você foi?" só faz sentido depois, o que já existe no Calendário.
+  Filtro por dia local (`toLocalIsoDay`), senão uma consulta das 21h cairia no dia seguinte. O
+  estado vazio da agenda também mudou: com compromisso no dia, "não há nada hoje" seria falso.
+
+o card do medicamento na Home não pegava o background branco — várias tentativas sem efeito.
+- [x] Feito: a causa não era o estilo, era o **componente**. O `CardAdesaoSemanal` (que aparecia
+  certo) é um `Pressable` comum; o `ItemDeDose` é um `AnimatedPressable` do Reanimated 4 com `style`
+  como **função** — a assinatura que o `Pressable` exige para saber se está pressionado. Nessa
+  combinação o `boxShadow` do `superficieDeCartao` (propriedade CSS-style nova do RN 0.86) não era
+  aplicado, e o cartão saía sem fundo e sem sombra. Por isso trocar cor, token ou limpar cache não
+  resolvia. Separei por responsabilidade: uma `View` comum desenha o cartão (fundo, canto, sombra,
+  faixa de estado) e o `AnimatedPressable` cuida só da opacidade animada e do toque. No caminho
+  apareceu outro defeito: "Confirmar"/"Pular" estavam **dentro** do Pressable do cartão, então numa
+  dose resolvida o toque neles atravessaria para a correção retroativa — agora são irmãos.
+
+diminuir os botões confirmar/pular, e centralizar o horário na vertical.
+- [x] Feito: caixa dos botões de 44 → 36, texto `label` → `caption`, padding menor; os 44 de alvo
+  real voltam por `hitSlop` — encolheu o desenho, não a área que o dedo alcança. O horário exigiu
+  duas mudanças: `justifyContent: center` na coluna só funciona se ela tiver altura para distribuir,
+  então o pai passou de `alignItems: flex-start` para `stretch`. O ganho aparece quando o nome do
+  remédio quebra em duas linhas — antes a hora ficava pendurada no topo.
 -
 
 ### Calendário
@@ -194,6 +238,19 @@ acho que o layout de sugestões ao escrever o nome de um medicamento que consta 
   retos continuando a linha do campo, só os de baixo arredondados). Removido o princípio ativo de
   cada item — só nome e dosagem. Título trocado de "Encontrados na base da Anvisa" para "É algum
   destes?". Em `src/ui/SugestoesDeMedicamento/`.
+
+as sugestões ao digitar o nome do remédio: limitar a três ou quatro opções, deixar o card menor
+para otimizar espaço, e retirar aquelas bordas esquisitas.
+- [x] Feito: (1) **`MAX_SUGESTOES` de 6 → 4** em `use-medication-catalog.ts` — a lista abre logo
+  abaixo do campo com o teclado ocupando metade da tela, e seis linhas cobriam o próprio campo que
+  estava sendo digitado. *(O bloco 12.9-E do roteiro já pedia "4 sugestões, não 6" — a mudança
+  estava prevista e nunca tinha sido aplicada no código.)* (2) **Bordas removidas**: eram duas — o
+  contorno do bloco e uma linha no topo de cada item —, e juntas desenhavam uma grade de caixas, a
+  gramática de formulário HTML que o resto do app já abandonou. Virou um bloco `surfaceContainerLow`
+  sem contorno, com os itens separados por espaçamento. (3) **Card menor**: linha de 52 → 40, texto
+  `bodyLg` → `bodyMd`, ícone 18 → 16 — com quatro sugestões a lista inteira ocupa menos altura que
+  três itens ocupavam antes. O alvo de toque volta aos ~48 por `hitSlop`, e as linhas ganharam
+  feedback de toque, que não tinham.
 
 quebra de layout em ANEXOS: nos textos ("Adicionar foto da caixa" / "Ajuda a reconhecer o remédio
 de relance"), o espaçamento e o alinhamento estão errados. Padronizar o espaçamento entre título e
