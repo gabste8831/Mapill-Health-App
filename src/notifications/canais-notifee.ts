@@ -92,6 +92,12 @@ export async function registrarCanais(): Promise<void> {
   if (Platform.OS !== "android") return;
 
   await recriarSeDivergente(CANAL_ALARME, { bypassDnd: true, sound: "alarme_de_dose" });
+  /**
+   * O de lembrete também: ele nasceu mudo enquanto `sound` era omitido, e canal criado é
+   * **imutável** no Android — mudar o código não conserta o que já existe no aparelho. Sem isto, a
+   * correção só valeria para quem instalasse o app do zero.
+   */
+  await recriarSeDivergente(CANAL_LEMBRETE, { sound: "default" });
 
   await notifee.createChannel({
     id: CANAL_ALARME,
@@ -128,8 +134,18 @@ export async function registrarCanais(): Promise<void> {
     name: "Lembretes de dose",
     description: "Aparece na barra de avisos e respeita o modo silencioso.",
     importance: AndroidImportance.HIGH,
-    // `sound` omitido: ausência significa "som padrão do sistema". É o que separa esta opção da de
-    // cima — aqui o uso é de notificação mesmo, sai pelo volume de avisos e respeita o silencioso.
+    /**
+     * `"default"` explícito — omitir `sound` cria o canal **mudo**.
+     *
+     * O comentário anterior aqui dizia o contrário: que a ausência significava "som padrão do
+     * sistema". A documentação do Notifee diz o oposto ("The default value is to play no sound. To
+     * play the default system sound use 'default'"), e o teste em aparelho (05/09) confirmou — a
+     * notificação aparecia na tela sem emitir som nenhum, com o volume alto.
+     *
+     * É o que separa esta opção do alarme: aqui o som é o do sistema, sai pelo volume de avisos e
+     * respeita o silencioso; lá é um arquivo próprio, no volume de alarme.
+     */
+    sound: "default",
     vibration: true,
     vibrationPattern: [250, 250],
     bypassDnd: false,

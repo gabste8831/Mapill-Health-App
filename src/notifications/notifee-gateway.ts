@@ -1,4 +1,5 @@
 import notifee, {
+  AlarmType,
   AndroidCategory,
   AndroidImportance,
   AndroidVisibility,
@@ -15,7 +16,7 @@ import type {
   NotificationPermission,
 } from "@/domain/ports/notification-gateway";
 import { colors } from "@/shared/theme";
-import { ACAO_ADIAR, ACAO_TOMEI, MINUTOS_DE_ADIAMENTO } from "./acoes";
+import { ACAO_PULEI, ACAO_TOMEI } from "./acoes";
 import {
   CANAL_ALARME,
   CANAL_LEMBRETE,
@@ -140,25 +141,39 @@ async function prepararSistema(): Promise<void> {
 function acoesDoAviso(aviso: AvisoDeDose): AndroidAction[] | undefined {
   if (aviso.doseScheduleIds.length === 0) return undefined;
 
-  const acoes: AndroidAction[] = [
-    {
-      // "Tomei todas" com mais de um remédio listado: o rótulo precisa dizer sobre quais ele fala,
-      // senão a pessoa confirma duas doses achando que confirmou uma.
-      title: aviso.doseScheduleIds.length > 1 ? "Tomei todas" : "Tomei",
-      pressAction: { id: ACAO_TOMEI },
-    },
+  /**
+   * O alarme **não** carrega botões de ação. A resposta dele acontece na tela cheia.
+   *
+   * O Android exibe a mesma notificação de duas formas: a tela cheia, e um heads-up no topo quando
+   * o aparelho está em uso. Com botões anexados, o heads-up virava um segundo caminho para
+   * responder a mesma dose — e foi isso que descontou o estoque duas vezes no teste de 05/09, não a
+   * opção "Os dois" que chegamos a culpar. São a mesma notificação, exibida duas vezes.
+   *
+   * Sem os botões, o heads-up continua aparecendo (é o Android quem decide), mas ele só informa: a
+   * resposta é uma só, na tela que o alarme abre. A notificação comum mantém os seus, porque ali
+   * não há tela cheia — os botões são o único caminho rápido que ela tem.
+   */
+  if (aviso.modo === "alarm") return undefined;
+
+  /**
+   * **Tomei e Pulei** — as duas respostas, e nada além.
+   *
+   * "Adiar 5 min" saiu daqui. Ele fazia sentido no alarme, que interrompe e pode pegar alguém longe
+   * do remédio; a notificação é o modo de quem não quer ser interrompido, e adiar um aviso discreto
+   * é resolver com dois toques o que um toque já resolve. O adiar continua na tela do alarme, onde
+   * a pergunta "agora não posso" tem razão de existir.
+   *
+   * Rótulos curtos também ajudam a caber: o Android colapsa as ações atrás de uma seta quando elas
+   * não cabem na largura, e "Adiar 5 min" era a mais larga das três.
+   *
+   * Os dois pares mudam junto com a contagem — confirmar duas doses achando que confirmou uma é o
+   * tipo de erro que o rótulo tem de impedir.
+   */
+  const varias = aviso.doseScheduleIds.length > 1;
+  return [
+    { title: varias ? "Tomei todas" : "Tomei", pressAction: { id: ACAO_TOMEI } },
+    { title: varias ? "Pulei todas" : "Pulei", pressAction: { id: ACAO_PULEI } },
   ];
-
-  // Sem adiar: o botão some em vez de aparecer e recusar. Oferecer o que não funciona ensina a
-  // desconfiar do que funciona.
-  if (!aviso.semAcoesRapidas) {
-    acoes.push({
-      title: `Adiar ${MINUTOS_DE_ADIAMENTO} min`,
-      pressAction: { id: ACAO_ADIAR },
-    });
-  }
-
-  return acoes;
 }
 
 export class NotifeeGateway implements NotificationGateway {
@@ -214,13 +229,37 @@ export class NotifeeGateway implements NotificationGateway {
     const gatilho: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
       timestamp: aviso.quando.getTime(),
-      /**
-       * `allowWhileIdle` é o que faz o aviso disparar com o aparelho em Doze. Sem isso o Android o
-       * adia para a próxima "janela de manutenção", que pode ser meia hora depois — e uma dose
-       * lembrada trinta minutos atrasada, em silêncio, é pior que um lembrete que não veio: a
-       * pessoa passa a confiar num horário que o app não cumpre.
-       */
-      alarmManager: { allowWhileIdle: true },
+      alarmManager: {
+        /**
+         * `SET_ALARM_CLOCK` para o alarme: é a categoria que o Android trata como **despertador**,
+         * a mesma do relógio nativo.
+         *
+         * Antes eram todos com `allowWhileIdle`, que a própria API já marca como *deprecated* em
+         * favor de `type`. Ele permite disparar em Doze, mas não impede o sistema de **agrupar** o
+         * disparo com outros e adiá-lo até a próxima janela de manutenção. Em aparelho (05/09) o
+         * efeito apareceu no lembrete adiado: com o celular bloqueado, ele só tocou quando a tela
+         * foi ligada de novo. Num despertador de medicação, um alarme que espera a pessoa acordar
+         * para avisar não é um alarme.
+         *
+         * `SET_ALARM_CLOCK` é imune a esse agrupamento, e é o que justifica a permissão
+         * `USE_EXACT_ALARM` que o app já declara. O custo é ser visível ao sistema como alarme
+         * (aparece no ícone de despertador da barra de status), o que aqui é honesto: é o que ele é.
+         *
+         * **A notificação usa a mesma categoria**, e não uma mais fraca.
+         *
+         * Chegou a ficar com `SET_EXACT_AND_ALLOW_WHILE_IDLE`, com o argumento de que ela não
+         * promete acordar ninguém. O teste em aparelho derrubou o argumento: com a tela desligada,
+         * ela simplesmente **não chegava** — o Doze agrupava o disparo, e o lembrete só aparecia
+         * quando o celular era usado de novo. Um lembrete de remédio que espera a pessoa pegar o
+         * aparelho para avisar não lembra de nada.
+         *
+         * A diferença entre os dois modos continua onde ela sempre esteve, e é real: o **canal**.
+         * O alarme atravessa o Não Perturbe, toca alto pelo volume de despertador e abre tela
+         * cheia; a notificação sai pelo volume de avisos e respeita o silencioso. O que os iguala
+         * aqui é só a pontualidade — os dois têm hora marcada, e essa hora é a promessa.
+         */
+        type: AlarmType.SET_ALARM_CLOCK,
+      },
     };
 
     if (__DEV__) {
@@ -237,7 +276,9 @@ export class NotifeeGateway implements NotificationGateway {
         data: {
           chave: aviso.chave,
           doseScheduleIds: JSON.stringify(aviso.doseScheduleIds),
-          scheduledFor: aviso.quando.toISOString(),
+          // O instante **das doses**, e não o de tocar: no lembrete adiado os dois diferem, e é por
+          // este campo que a tela de alarme encontra o que mostrar. Ver `instanteDasDoses`.
+          scheduledFor: aviso.instanteDasDoses ?? aviso.quando.toISOString(),
         },
         android: {
           channelId: aviso.modo === "alarm" ? CANAL_ALARME : CANAL_LEMBRETE,
