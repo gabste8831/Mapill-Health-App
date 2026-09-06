@@ -19,6 +19,13 @@ export type AjustesScreenProps = {
   onOpenAccount: () => void;
   /** Abre a tela de escolha de tema (Padrão, Escuro, Alto contraste, Sem depender de cor). */
   onOpenTheme: () => void;
+  /**
+   * Abre o diagnóstico de avisos. Ausente em produção — a rota nem existe lá.
+   *
+   * Opcional, e não obrigatório com `__DEV__` dentro da tela: a decisão de expor a ferramenta é de
+   * quem monta a rota, e uma prop opcional deixa isso explícito na assinatura.
+   */
+  onOpenDiagnostico?: () => void;
 };
 
 type LinhaProps = {
@@ -65,6 +72,7 @@ export function AjustesScreen({
   onEditProfile,
   onOpenAccount,
   onOpenTheme,
+  onOpenDiagnostico,
 }: AjustesScreenProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
@@ -160,6 +168,28 @@ export function AjustesScreen({
             />
           </Card>
         </View>
+
+        {/* A ferramenta de teste dos avisos.
+
+            Só em desenvolvimento: ela mostra ids internos e canais do Android, e existe para
+            responder "por que o alarme não tocou?" sem cabo e sem Metro. Numa build de produção
+            seria uma porta para o avesso do app.
+
+            `__DEV__` é substituído por `false` no bundle de produção, então a tela inteira sai do
+            binário — não fica escondida atrás de uma condição em tempo de execução. */}
+        {__DEV__ && onOpenDiagnostico ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>DESENVOLVIMENTO</Text>
+            <Card style={styles.cartaoDeLinhas}>
+              <Linha
+                icon={<Ionicons name="pulse-outline" size={22} color={cores.onSurfaceVariant} />}
+                label="Diagnóstico de avisos"
+                hint="O que está agendado agora, e disparo de teste"
+                onPress={onOpenDiagnostico}
+              />
+            </Card>
+          </View>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

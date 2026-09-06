@@ -32,6 +32,9 @@ export default function AjustesRoute() {
       onEditProfile={() => router.push("/ficha")}
       onOpenAccount={() => router.push("/conta")}
       onOpenTheme={() => router.push("/tema")}
+      // Só em desenvolvimento: `__DEV__` vira `false` no bundle de produção, e a linha some junto
+      // com o caminho para a tela.
+      onOpenDiagnostico={__DEV__ ? () => router.push("/diagnostico") : undefined}
     />
   );
 }
