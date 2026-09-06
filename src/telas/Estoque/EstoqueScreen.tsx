@@ -131,10 +131,16 @@ const LEAD_DAYS_OPTIONS: OptionGroupOption<string>[] = [
   { value: "30", label: "30 dias" },
 ];
 
-/** Urgência primeiro: é a pergunta que traz a pessoa a esta tela. */
+/**
+ * Duas ordens, e não três. Urgência primeiro: é a pergunta que traz a pessoa a esta tela.
+ *
+ * "Menos na caixa" saiu. Ela quase sempre produzia a mesma ordem de "Acaba primeiro" — e quando
+ * divergia, era por um motivo que a torna a pior das duas: dez comprimidos de um remédio tomado uma
+ * vez por semana duram mais que trinta de um tomado três vezes ao dia. O que interessa é quando
+ * acaba, não quanto sobrou, e oferecer as duas fazia escolher entre uma resposta certa e uma quase.
+ */
 const ORDENS_DE_ESTOQUE: OpcaoDeOrdem<OrdemDeEstoque>[] = [
   { value: "urgencia", label: "Acaba primeiro", icon: "alarm-outline" },
-  { value: "quantidade", label: "Menos na caixa", icon: "cube-outline" },
   { value: "alfabetica", label: "A–Z", icon: "text-outline" },
 ];
 
@@ -155,32 +161,20 @@ function CartaoDeEstoque({ item, onRecontar, onRepor, onConfigurarAviso }: ItemD
 
   return (
     <View style={styles.item}>
-      {/* O nome ocupa a linha inteira, e abaixo dele um traço separa quem é o remédio do que se
-          sabe sobre o estoque dele — a única divisão do cartão, porque os dados abaixo são todos do
-          mesmo assunto.
+      {/* Nome em cima, quantidade embaixo — e não lado a lado.
 
-          Antes o nome dividia a largura com a quantidade, que na tipografia de título é larga ("30
-          comprimidos"): sobrava pouco para ele, e as três informações quebravam em várias linhas
-          cada. */}
-      <Text style={styles.name} numberOfLines={1}>
-        {medication.name}
-      </Text>
-      <View style={styles.divisor} />
+          Na mesma linha, um nome longo espremia o número contra a borda ou o empurrava para fora.
+          Empilhados, cada um tem a largura inteira, e a hierarquia vem do peso da fonte em vez da
+          posição.
 
-      {/* Local e estoque na mesma estilização: são dois dados do mesmo tipo — o que se sabe sobre
-          aquela caixa —, e dar fundo a um deles fazia o outro parecer secundário.
-
-          O rótulo antes de cada um é o que os torna legíveis sem contexto: "Gaveta da geladeira"
-          solto lia como parte do nome do remédio, e o número sozinho não dizia de quê. */}
-      <View style={styles.dados}>
-        {inventory.storageLocation !== null && inventory.storageLocation.length > 0 ? (
-          <Text style={styles.local} numberOfLines={1}>
-            <Text style={styles.rotulo}>Local: </Text>
-            {inventory.storageLocation}
-          </Text>
-        ) : null}
+          O local saiu do cartão: é dado de quem já foi buscar a caixa, não de quem compara
+          estoques, e continua no cadastro da medicação. O traço divisor saiu junto — nada aqui é de
+          assunto tão diferente que precise de separador. */}
+      <View style={styles.identificacao}>
+        <Text style={styles.name} numberOfLines={2}>
+          {medication.name}
+        </Text>
         <Text style={[styles.quantidade, critico && styles.quantidadeCritica]} numberOfLines={1}>
-          <Text style={styles.rotulo}>Estoque: </Text>
           {formatarQuantidadeLivre(inventory.quantity, inventory.unit)}
         </Text>
       </View>
@@ -189,17 +183,39 @@ function CartaoDeEstoque({ item, onRecontar, onRepor, onConfigurarAviso }: ItemD
           cima do ritmo do tratamento. Junto dos outros dados, a estimativa ganharia o peso de um
           número conferido.
 
-          Três estados, porque a mesma frase pede reações diferentes: cinza enquanto o prazo é
-          confortável, âmbar quando entra na janela de reposição, vermelho quando já acabou. */}
-      <Text
+          Três estados, porque a mesma frase pede reações diferentes: neutro enquanto o prazo é
+          confortável, âmbar quando entra na janela de reposição, vermelho quando já acabou.
+
+          Sempre em selo, e não só nos dois estados de aviso: com o fundo aparecendo apenas quando
+          há problema, o cartão mudava de anatomia conforme o estoque, e a lista ficava com uma
+          coluna irregular. O que muda entre os três é a cor, não a forma — e é a cor que se lê de
+          relance ao varrer a tela.
+
+          O ícone acompanha o estado: relógio quando ainda dá tempo, alerta quando aperta. Cor
+          sozinha não é informação acessível, e aqui ela é a única diferença entre os três. */}
+      <View
         style={[
-          styles.previsao,
-          (alerta || critico) && styles.previsaoEtiqueta,
+          styles.previsaoEtiqueta,
           alerta && styles.previsaoEmAlerta,
           critico && styles.previsaoCritica,
         ]}>
-        {resumirPrevisao(inventory.quantity, depletion)}
-      </Text>
+        <Ionicons
+          name={critico ? "alert-circle" : alerta ? "warning" : "time-outline"}
+          size={14}
+          color={
+            critico ? cores.error : alerta ? cores.onWarningSurface : cores.onSurfaceVariant
+          }
+        />
+        <Text
+          style={[
+            styles.previsao,
+            alerta && styles.previsaoTextoEmAlerta,
+            critico && styles.previsaoTextoCritico,
+          ]}
+          numberOfLines={1}>
+          {resumirPrevisao(inventory.quantity, depletion)}
+        </Text>
+      </View>
 
       {/* Duas ações porque são duas coisas diferentes no mundo: contar o que já está em casa e
           somar o que acabou de chegar. Uma só, "corrigir", faria a pessoa fazer a conta de cabeça
@@ -370,13 +386,11 @@ export function EstoqueScreen() {
               value={busca}
               onChangeText={setBusca}
               placeholder="Buscar por nome ou princípio ativo"
-              style={styles.busca}
             />
-            <Text style={styles.contagem}>
-              {termo.length > 0
-                ? `${visiveis.length} de ${items.length} ${items.length === 1 ? "medicação" : "medicações"}`
-                : `${items.length} ${items.length === 1 ? "medicação com estoque" : "medicações com estoque"}`}
-            </Text>
+
+            {/* A contagem **não** fica aqui: ela desceu para o cabeçalho da lista, encostada no
+                primeiro card. Ela descreve a lista, e entre a busca e o seletor de ordem parecia
+                legenda dos controles — mesma correção feita na lista de medicações. */}
 
             {items.length > 1 ? (
               <SeletorDeOrdem value={ordem} onChange={setOrdem} options={ORDENS_DE_ESTOQUE} />
@@ -417,20 +431,36 @@ export function EstoqueScreen() {
            * tela já está pensando em estoque — é o único momento em que a pergunta chega na hora
            * certa. Some sozinho quando não há nada a perguntar, que é o caso comum.
            */
+          /**
+           * O que rola junto com a lista: o lembrete de recontagem e, por último, a contagem.
+           *
+           * A contagem vem no fim, encostada no primeiro card — é a lista que ela descreve. Fixos
+           * no topo ficam só a busca e o seletor de ordem, que são o que se opera.
+           */
           ListHeaderComponent={
-            aRecontar.length > 0 ? (
-              <View style={styles.lembrete}>
-                <View style={styles.lembreteTopo}>
-                  <Ionicons name="help-circle" size={20} color={cores.onWarningSurface} />
-                  <Text style={styles.lembreteTitulo}>Vale conferir a caixa</Text>
-                </View>
-                {/* Uma frase, não três: quem lê isto está de pé na frente do armário. O "por quê"
-                    (a estimativa envelhece) cabia no texto longo, mas custava a leitura toda vez —
-                    e a ação pedida é a mesma sabendo ou não o motivo. */}
-                <Text style={styles.lembreteTexto}>
-                  {aRecontar.length === 1
-                    ? `${aRecontar[0].medicationName}: ${aRecontar[0].diasSemConferir} dias sem conferir.`
-                    : `${aRecontar.length} medicações há mais de um mês sem conferir.`}
+            items.length > 0 ? (
+              <View style={styles.listHeader}>
+                {aRecontar.length > 0 ? (
+                  <View style={styles.lembrete}>
+                    <View style={styles.lembreteTopo}>
+                      <Ionicons name="help-circle" size={20} color={cores.onWarningSurface} />
+                      <Text style={styles.lembreteTitulo}>Vale conferir a caixa</Text>
+                    </View>
+                    {/* Uma frase, não três: quem lê isto está de pé na frente do armário. O "por
+                        quê" (a estimativa envelhece) cabia no texto longo, mas custava a leitura
+                        toda vez — e a ação pedida é a mesma sabendo ou não o motivo. */}
+                    <Text style={styles.lembreteTexto}>
+                      {aRecontar.length === 1
+                        ? `${aRecontar[0].medicationName}: ${aRecontar[0].diasSemConferir} dias sem conferir.`
+                        : `${aRecontar.length} medicações há mais de um mês sem conferir.`}
+                    </Text>
+                  </View>
+                ) : null}
+
+                <Text style={styles.contagem}>
+                  {termo.length > 0
+                    ? `${visiveis.length} de ${items.length} ${items.length === 1 ? "medicação" : "medicações"}`
+                    : `${items.length} ${items.length === 1 ? "medicação com estoque" : "medicações com estoque"}`}
                 </Text>
               </View>
             ) : null

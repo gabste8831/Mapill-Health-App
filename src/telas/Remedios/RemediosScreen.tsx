@@ -11,6 +11,7 @@ import {
   type ItemDaListaDeRemedios,
   type OrdemDeRemedios,
 } from "@/hooks/use-medication-list";
+import { normalizarBusca } from "@/shared/normalizar-busca";
 import {
   formatarQuantidadeLivre,
   horariosComDose,
@@ -21,7 +22,7 @@ import {
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import {
   BottomSheet,
-  Button,
+  CardEstoque,
   CenteredLoader,
   EstadoDeErro,
   EstadoVazio,
@@ -220,20 +221,8 @@ function DetalheDoRemedio({ item }: { item: ItemDaListaDeRemedios }) {
   );
 }
 
-/**
- * Minúsculas e sem acento, pra "acido folico" achar "Ácido fólico". Quem procura um remédio
- * digita apressado e no teclado do celular, onde o acento custa dois toques.
- */
-function normalizar(texto: string): string {
-  return texto
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
-}
-
 export function RemediosScreen() {
   const styles = useEstilos(criarEstilos);
-  const cores = useCores();
 
   const router = useRouter();
   const { items, isLoading, error, reload } = useMedicationList();
@@ -247,7 +236,7 @@ export function RemediosScreen() {
   // curso não casou com nenhum remédio controlado.
   const temEstoque = items.some((item) => item.inventory !== null);
 
-  const termo = normalizar(busca.trim());
+  const termo = normalizarBusca(busca.trim());
   // O princípio ativo entra na busca junto do nome: quem tem a caixa na mão às vezes lembra do
   // "losartana" e não do nome comercial.
   const encontrados =
@@ -255,8 +244,8 @@ export function RemediosScreen() {
       ? items
       : items.filter(
           (item) =>
-            normalizar(item.medication.name).includes(termo) ||
-            normalizar(item.medication.activeIngredient).includes(termo),
+            normalizarBusca(item.medication.name).includes(termo) ||
+            normalizarBusca(item.medication.activeIngredient).includes(termo),
         );
   const visiveis = ordenarRemedios(encontrados, ordem);
 
@@ -308,13 +297,10 @@ export function RemediosScreen() {
               value={busca}
               onChangeText={setBusca}
               placeholder="Buscar por nome ou princípio ativo"
-              style={styles.busca}
             />
-            <Text style={styles.contagem}>
-              {termo.length > 0
-                ? `${visiveis.length} de ${items.length} ${items.length === 1 ? "medicação" : "medicações"}`
-                : `${items.length} ${items.length === 1 ? "medicação cadastrada" : "medicações cadastradas"}`}
-            </Text>
+            {/* A contagem **não** fica aqui: ela desceu para o cabeçalho da lista, logo acima do
+                primeiro card. Ela descreve a lista, e no bloco fixo do topo ficava colada na busca
+                e no seletor de ordem — parecia legenda dos controles, não da lista. */}
 
             {/* Só com mais de um: ordenar uma lista de um item é oferecer uma escolha sem efeito. */}
             {items.length > 1 ? (
@@ -362,22 +348,35 @@ export function RemediosScreen() {
           )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          // O texto explicativo rola junto com a lista, e só a busca fica fixa: parado no topo ele
-          // custava três linhas de altura em toda rolagem, para dizer algo que se lê uma vez.
-          // Só existe quando há estoque cadastrado: o botão leva a uma tela que, sem isso, abriria
-          // vazia — e oferecer caminho para o vazio é pior que não oferecer.
-          //
-          // `null` e não um `View` vazio: o `gap` da lista conta o header como item, então um
-          // contêiner sem conteúdo ainda abria um vão antes do primeiro card.
+          /**
+           * O que rola junto com a lista: o atalho do estoque e a contagem.
+           *
+           * Só a busca e o seletor de ordem ficam fixos no topo — eles se opera. Estes dois se lê
+           * uma vez, e parados custariam altura em toda rolagem.
+           *
+           * A contagem vem **por último**, encostada no primeiro card: ela descreve a lista, e é
+           * dela que precisa estar perto. Acima, junto da busca, parecia legenda dos controles.
+           *
+           * `null` e não um `View` vazio quando não há nada a mostrar: o `gap` da lista conta o
+           * header como item, então um contêiner sem conteúdo ainda abriria um vão antes do
+           * primeiro card.
+           */
           ListHeaderComponent={
-            temEstoque ? (
+            items.length > 0 ? (
               <View style={styles.listHeader}>
-                <Button
-                  label="Gerenciar estoques"
-                  variant="outline"
-                  icon={<Ionicons name="cube-outline" size={20} color={cores.primary} />}
-                  onPress={() => router.push("/estoque")}
-                />
+                {/* Só com estoque cadastrado: o atalho leva a uma tela que, sem isso, abriria
+                    vazia — e oferecer caminho para o vazio é pior que não oferecer.
+
+                    É o mesmo componente da Home, e não um `Button` próprio: os dois são o mesmo
+                    atalho para a mesma tela, e tê-los com desenhos diferentes fazia o app parecer
+                    ter dois caminhos distintos até o estoque. */}
+                {temEstoque ? <CardEstoque onPress={() => router.push("/estoque")} /> : null}
+
+                <Text style={styles.contagem}>
+                  {termo.length > 0
+                    ? `${visiveis.length} de ${items.length} ${items.length === 1 ? "medicação" : "medicações"}`
+                    : `${items.length} ${items.length === 1 ? "medicação cadastrada" : "medicações cadastradas"}`}
+                </Text>
               </View>
             ) : null
           }

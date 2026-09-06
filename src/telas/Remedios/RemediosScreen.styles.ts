@@ -7,45 +7,60 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     backgroundColor: cores.background,
   },
   /**
-   * Sem `paddingBottom`: ele existia para afastar a contagem do que vem abaixo, mas o
-   * `marginBottom` dela já faz isso, e os dois somavam.
+   * O bloco fixo do topo: só a busca e o seletor de ordem, que são controles que se opera.
+   *
+   * O `paddingBottom` voltou quando a contagem saiu daqui — era a margem dela que separava este
+   * bloco da lista, e sem nada no lugar o seletor de ordem encostava no primeiro card.
    */
   header: {
     paddingHorizontal: screenPadding,
-    paddingTop: spacing.sm,
-  },
-  busca: {
-    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    /**
+     * `md` dentro do bloco, `lg` abaixo dele.
+     *
+     * O `gap` separa a busca do seletor — dois controles do mesmo assunto, e antes eles ficavam
+     * grudados porque só a busca tinha margem, e para cima. O `paddingBottom` maior separa o bloco
+     * inteiro do conteúdo, que é troca de escopo: acima o que se opera, abaixo o que se lê.
+     */
+    paddingBottom: spacing.lg,
+    gap: spacing.md,
   },
   /**
-   * O mesmo respiro (`md` acima, `sm` abaixo) que separa a contagem do resto em Compromissos.
+   * A contagem, encostada na lista que ela descreve.
    *
-   * Era `gutter` (24) em cima e `md` (16) embaixo, e o de baixo somava com o `paddingBottom` do
-   * `header` e com o `paddingTop` do `listHeader` logo abaixo — três espaços empilhados, 48px até o
-   * primeiro card ou o botão de estoque, contra 8px em Compromissos. A diferença nasce de as duas
-   * telas montarem isto de formas diferentes: lá a contagem rola junto com a lista e não tem margem
-   * própria; aqui ela mora no bloco fixo do topo, junto da busca, e precisa das suas.
+   * Sem margem própria: ela é o último filho do `listHeader`, e o espaço acima vem do `gap` dele
+   * (o mesmo que a separa do atalho de estoque). Abaixo, o `gap` do `listContent` a separa do
+   * primeiro card — o mesmo respiro que há entre dois cards, então ela fica na malha da lista em
+   * vez de flutuar.
+   *
+   * Ela **saiu** do bloco fixo do topo, onde vivia junto da busca: ali parecia legenda dos
+   * controles, não da lista.
    */
   contagem: {
     ...typography.label,
     color: cores.onSurfaceVariant,
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
   },
   /**
-   * O acesso ao estoque, que rola junto com a lista.
+   * O que rola junto com a lista: o atalho do estoque e, embaixo dele, a contagem.
    *
-   * Sem padding próprio: o respiro acima já vem do `marginBottom` da contagem, e o de baixo do
-   * `gap` do `listContent` — que é o mesmo espaço entre dois cards, então o botão fica na malha da
-   * lista em vez de flutuar. Quando não há estoque cadastrado este bloco fica vazio, e sem padding
-   * ele também não ocupa altura nenhuma.
+   * `lg` entre os dois porque são assuntos diferentes — um leva a outra tela, a outra descreve o
+   * que vem a seguir. Sem `paddingBottom`: o espaço até o primeiro card já vem do `gap` do
+   * `listContent`, o mesmo que há entre dois cards, então a contagem fica na malha da lista em vez
+   * de flutuar acima dela.
    */
   listHeader: {
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   listContent: {
     paddingHorizontal: screenPadding,
-    paddingTop: spacing.sm,
+    /**
+     * Sem `paddingTop`: quem dá o respiro entre o bloco fixo e o atalho de estoque é o
+     * `paddingBottom` do `header`.
+     *
+     * Com os dois, o espaço ali somava 24 enquanto o da busca para o seletor era 16 — dois vãos
+     * diferentes numa sequência que se lê como uma pilha só de controles. Agora os três degraus do
+     * topo (busca → filtros → estoque) medem o mesmo `md`.
+     */
     gap: listGap,
     paddingBottom: bottomTabInset + spacing.xxl,
   },
