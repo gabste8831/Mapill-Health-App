@@ -384,16 +384,18 @@ async function executarSync(): Promise<ResultadoDaSync> {
   let recebidos = 0;
 
   /**
-   * Espera a importação da CMED, se houver uma em curso.
+   * Espera a importação da CMED terminar, se houver uma em curso.
    *
-   * As duas são escritas pesadas — 21 mil inserções de um lado, o banco inteiro do outro — e na
-   * primeira abertura elas caem no mesmo instante: o catálogo carrega em segundo plano, e a
-   * sincronização roda no login. O WAL e o `busy_timeout` fazem a colisão ser tolerada em vez de
-   * recusada, mas tolerar não é o mesmo que evitar: enfileirar custa nada e deixa cada uma correr
-   * no seu ritmo.
+   * As duas são escritas pesadas, e na primeira abertura caem no mesmo instante: o catálogo carrega
+   * em segundo plano, e a sincronização roda no login. Mesmo com WAL, `busy_timeout` e a importação
+   * fatiada em lotes, deixá-las intercaladas faria cada escrita da sync disputar com o lote em
+   * curso — funcionaria, mas por tolerância, e o comportamento passaria a depender de quem chegou
+   * primeiro.
    *
-   * Resolve imediatamente quando não há importação, que é o caso de toda abertura depois da
-   * primeira.
+   * Enfileirar é mais previsível e custa pouco: o catálogo é conveniência do cadastro, e a
+   * restauração é o que a pessoa está esperando ver na tela.
+   *
+   * Resolve imediatamente quando não há importação — o caso de toda abertura depois da primeira.
    */
   await aguardarCatalogoCmed();
 

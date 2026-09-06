@@ -63,6 +63,19 @@ export async function importarCatalogoCmed(): Promise<void> {
   return importacaoEmCurso;
 }
 
+/**
+ * Divide a importação em lotes, com uma transação cada.
+ *
+ * Uma transação única de 21 mil inserções é mais rápida — cada commit custa disco —, mas segura o
+ * banco do começo ao fim. Enquanto ela corre, qualquer outra escrita espera ou falha, e na primeira
+ * abertura há outra: a sincronização, se a pessoa entrar com o Google nesse intervalo.
+ *
+ * Em lotes o custo é algumas dezenas de commits em vez de um, o que na prática não se percebe — e
+ * entre um lote e outro o banco fica **livre**, então quem precisa escrever encontra a porta aberta
+ * em vez de esperar a fila inteira.
+ */
+const TAMANHO_DO_LOTE = 500;
+
 async function executarImportacao(): Promise<void> {
   const database = getDatabase();
 
@@ -76,35 +89,42 @@ async function executarImportacao(): Promise<void> {
   const registros = require("@/assets/data/cmed.json") as CmedJson[];
 
   /**
-   * Tudo numa transação só. São ~7 mil inserções em `cmed_entries` e ~14 mil em `cmed_eans`: fora
-   * de transação, cada uma pagaria um commit em disco, e o que leva segundos passaria a levar
-   * minutos.
+   * Em lotes transacionados, e não numa transação só.
+   *
+   * Dentro de cada lote a transação continua sendo o que evita pagar um commit em disco por
+   * inserção — sem ela, o que leva segundos levaria minutos. O que muda é o **tamanho do bloqueio**:
+   * entre um lote e outro o banco fica livre, e quem mais precisa escrever não fica esperando 21 mil
+   * inserções terminarem.
    */
-  await database.withTransactionAsync(async () => {
-    for (const registro of registros) {
-      const resultado = await database.runAsync(
-        `INSERT INTO cmed_entries (name, active_ingredient, strength, prescription_requirement, search)
-         VALUES (?, ?, ?, ?, ?)`,
-        [
-          registro.n,
-          registro.s,
-          registro.d,
-          registro.r,
-          // Nome e princípio ativo na mesma coluna: quem procura "losartana" pode estar digitando o
-          // nome comercial ou a substância, e o app não tem como saber qual dos dois.
-          normalizarBusca(`${registro.n} ${registro.s}`),
-        ],
-      );
+  for (let i = 0; i < registros.length; i += TAMANHO_DO_LOTE) {
+    const lote = registros.slice(i, i + TAMANHO_DO_LOTE);
 
-      for (const ean of registro.e) {
-        // `OR IGNORE`: o mesmo EAN pode aparecer em dois registros da base original, e a chave
-        // primária recusaria o segundo. Perder o vínculo duplicado é irrelevante — o primeiro já
-        // leva ao produto certo.
-        await database.runAsync(
-          "INSERT OR IGNORE INTO cmed_eans (ean, entry_id) VALUES (?, ?)",
-          [ean, resultado.lastInsertRowId],
+    await database.withTransactionAsync(async () => {
+      for (const registro of lote) {
+        const resultado = await database.runAsync(
+          `INSERT INTO cmed_entries (name, active_ingredient, strength, prescription_requirement, search)
+           VALUES (?, ?, ?, ?, ?)`,
+          [
+            registro.n,
+            registro.s,
+            registro.d,
+            registro.r,
+            // Nome e princípio ativo na mesma coluna: quem procura "losartana" pode estar digitando
+            // o nome comercial ou a substância, e o app não tem como saber qual dos dois.
+            normalizarBusca(`${registro.n} ${registro.s}`),
+          ],
         );
+
+        for (const ean of registro.e) {
+          // `OR IGNORE`: o mesmo EAN pode aparecer em dois registros da base original, e a chave
+          // primária recusaria o segundo. Perder o vínculo duplicado é irrelevante — o primeiro já
+          // leva ao produto certo.
+          await database.runAsync(
+            "INSERT OR IGNORE INTO cmed_eans (ean, entry_id) VALUES (?, ?)",
+            [ean, resultado.lastInsertRowId],
+          );
+        }
       }
-    }
-  });
+    });
+  }
 }

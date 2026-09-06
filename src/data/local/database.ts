@@ -16,11 +16,14 @@ let migrationsReady: Promise<void> | null = null;
  * com `database is locked`. O WAL separa leitura de escrita: leitores não bloqueiam o escritor, e o
  * banco aguenta concorrência real em vez de recusá-la.
  *
- * ## `busy_timeout = 5000`
+ * ## `busy_timeout = 15000`
  *
  * Mesmo com WAL, duas **escritas** simultâneas ainda disputam. Sem timeout o SQLite falha
- * imediatamente; com ele, a segunda espera até 5 s pela primeira em vez de desistir. Cinco segundos
- * é folgado para o que este app escreve, e curto o bastante para não parecer travamento.
+ * imediatamente; com ele, a segunda espera pela primeira em vez de desistir.
+ *
+ * Quinze segundos, e não cinco: a importação do catálogo é uma transação única de ~21 mil
+ * inserções, e num aparelho lento ela passa de cinco. Esperar mais é sempre melhor que falhar —
+ * quem espera termina a operação, quem falha perde o dado.
  *
  * ## Por que isto apareceu só agora
  *
@@ -36,7 +39,7 @@ let migrationsReady: Promise<void> | null = null;
  */
 const PRAGMAS_DE_ABERTURA = `
 PRAGMA journal_mode = WAL;
-PRAGMA busy_timeout = 5000;
+PRAGMA busy_timeout = 15000;
 `;
 
 /** Sempre passar por um repositório em src/data/repositories — nenhuma tela chama isso direto. */
