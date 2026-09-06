@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
+import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
@@ -18,6 +19,14 @@ export type DoseDoAlarme = {
    * parecidos.
    */
   photoUri: string | null;
+  /**
+   * Onde a caixa está guardada ("armário da cozinha", "na bolsa"), quando preenchido.
+   *
+   * O alarme é o único momento em que essa informação vale de verdade: quem acorda às 6h para tomar
+   * o remédio precisa saber para onde ir, e é justamente aí que ela não está à mão — o campo mora na
+   * tela de estoque, que ninguém abre no meio da noite.
+   */
+  storageLocation: string | null;
   quantidadeFormatada: string;
   amount: number;
   intakeNote: string | null;
@@ -63,14 +72,18 @@ export function useDosesDoAlarme(instanteIso: string) {
       const inicio = new Date(instanteIso);
       const fim = new Date(inicio.getTime() + 60_000);
 
-      const [comStatus, prescriptions, medications] = await Promise.all([
+      const [comStatus, prescriptions, medications, inventories] = await Promise.all([
         new DoseScheduleRepository().findBetween(inicio.toISOString(), fim.toISOString()),
         new PrescriptionRepository().findAll(),
         new MedicationRepository().findAll(),
+        // Só pelo `storageLocation`: a quantidade em estoque não entra na tela de alarme, que
+        // pergunta "você tomou?" e não "quanto ainda resta?".
+        new InventoryRepository().findAll(),
       ]);
 
       const prescricaoPorId = new Map(prescriptions.map((p) => [p.id, p]));
       const medicamentoPorId = new Map(medications.map((m) => [m.id, m]));
+      const estoquePorMedicamento = new Map(inventories.map((i) => [i.medicationId, i]));
 
       const encontradas: DoseDoAlarme[] = [];
       for (const { doseSchedule, latestStatus, latestLogId } of comStatus) {
@@ -83,6 +96,7 @@ export function useDosesDoAlarme(instanteIso: string) {
           medicationId: medication.id,
           medicationName: medication.name,
           photoUri: medication.photoUri,
+          storageLocation: estoquePorMedicamento.get(medication.id)?.storageLocation ?? null,
           quantidadeFormatada: formatarQuantidade(doseSchedule.amount, prescription.doseUnit),
           amount: doseSchedule.amount,
           intakeNote: prescription.intakeNote,

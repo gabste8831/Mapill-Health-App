@@ -133,6 +133,30 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     lineHeight: 26,
     textAlign: "center",
   },
+  /**
+   * Onde a caixa está guardada, no rodapé do bloco do remédio.
+   *
+   * A menor coisa da tela, e é assim que deve ser: às 3h da manhã o que precisa ser lido de longe é
+   * o horário e o nome. Este é o detalhe que se procura depois de já ter levantado — e que, sem
+   * estar aqui, obrigaria a abrir a tela de estoque no meio da noite.
+   *
+   * Com ícone e em linha própria porque a orientação de tomada logo acima também é texto miúdo e
+   * claro: sem o marcador, "armário da cozinha" leria como continuação de "tomar em jejum".
+   */
+  local: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+    // A opacidade no bloco, e não em cada filho: assim o ícone e o texto recuam juntos, em vez de o
+    // marcador ficar mais forte que a palavra que ele marca.
+    opacity: 0.7,
+  },
+  localTexto: {
+    ...typography.bodyMd,
+    color: cores.onPrimary,
+  },
 
   /**
    * Os botões, com respiro entre eles.

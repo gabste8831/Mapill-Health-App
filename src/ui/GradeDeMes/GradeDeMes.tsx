@@ -128,33 +128,39 @@ export function GradeDeMes({
             <Pressable
               key={isoDay}
               style={styles.celula}
+              // Sem o ripple padrão do Android: ele é desenhado no `Pressable`, que é a célula
+              // retangular da grade, e aparecia como um quadrado atrás do círculo do dia. O realce
+              // do toque fica com a opacidade do próprio círculo, que segue a forma dele.
+              android_ripple={null}
               onPress={() => onSelecionar(isoDay)}
               accessibilityRole="button"
               accessibilityState={{ selected: estaSelecionado }}
               accessibilityLabel={`Dia ${data.getDate()}`}>
-              <View
-                style={[
-                  styles.numeroCirculo,
-                  ehHoje && !estaSelecionado && styles.numeroHoje,
-                  estaSelecionado && styles.numeroSelecionado,
-                ]}>
-                <Text
-                  style={[
-                    styles.numero,
-                    estaSelecionado && styles.numeroTextoSelecionado,
-                  ]}>
-                  {data.getDate()}
-                </Text>
-              </View>
+              {({ pressed }) => (
+                <>
+                  <View
+                    style={[
+                      styles.numeroCirculo,
+                      ehHoje && !estaSelecionado && styles.numeroHoje,
+                      estaSelecionado && styles.numeroSelecionado,
+                      // O retorno do toque, no lugar do ripple: escurece o círculo, não a célula.
+                      pressed && styles.numeroPressionado,
+                    ]}>
+                    <Text style={[styles.numero, estaSelecionado && styles.numeroTextoSelecionado]}>
+                      {data.getDate()}
+                    </Text>
+                  </View>
 
-              {/* Altura reservada mesmo sem ponto: sem isso a linha da grade sobe e desce conforme
-                  o mês tem ou não marcação, e o calendário inteiro treme ao trocar de mês. */}
-              <View style={styles.pontos}>
-                {marca?.temCompromisso ? (
-                  <View style={[styles.ponto, styles.pontoDeCompromisso]} />
-                ) : null}
-                {marca?.temDose ? <View style={[styles.ponto, styles.pontoDeDose]} /> : null}
-              </View>
+                  {/* Altura reservada mesmo sem ponto: sem isso a linha da grade sobe e desce
+                      conforme o mês tem ou não marcação, e o calendário treme ao trocar de mês. */}
+                  <View style={styles.pontos}>
+                    {marca?.temCompromisso ? (
+                      <View style={[styles.ponto, styles.pontoDeCompromisso]} />
+                    ) : null}
+                    {marca?.temDose ? <View style={[styles.ponto, styles.pontoDeDose]} /> : null}
+                  </View>
+                </>
+              )}
             </Pressable>
           );
         })}

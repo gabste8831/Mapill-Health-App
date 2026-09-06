@@ -60,7 +60,7 @@ function ItemDeCompromisso({
   const resumoDoAviso = resumirAviso(appointment);
 
   return (
-    <View style={[styles.item, passado && styles.itemPassado]}>
+    <View style={[styles.item, passado && styles.itemPassado, passado && styles.itemBarraPassada]}>
       <View style={styles.itemHeader}>
         {/* A hora à esquerda, alinhada com a das doses logo abaixo: é ela que ordena o dia, e
             repetir a data aqui seria dizer de novo o que o cabeçalho do dia já disse. */}
@@ -153,7 +153,7 @@ function ItemDeCompromisso({
             <Ionicons
               name={appointment.outcome === "attended" ? "checkmark-circle" : "close-circle"}
               size={16}
-              color={appointment.outcome === "attended" ? cores.primary : cores.error}
+              color={appointment.outcome === "attended" ? cores.successVivo : cores.errorVivo}
             />
             <Text
               style={[
@@ -225,7 +225,8 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
         <Ionicons
           name={tomada ? "checkmark-circle" : "close-circle"}
           size={20}
-          color={tomada ? cores.primary : cores.error}
+          // Ícone de desfecho: leva os tons vivos, que é onde a cor **é** a informação.
+          color={tomada ? cores.successVivo : cores.errorVivo}
           accessibilityRole="image"
           accessibilityLabel={tomada ? "Dose tomada" : "Dose não tomada"}
         />

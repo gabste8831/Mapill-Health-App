@@ -371,6 +371,18 @@ export function AlarmeScreen({
               {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
                 <Text style={styles.orientacao}>{dose.intakeNote}</Text>
               ) : null}
+              {/* Onde a caixa está guardada.
+
+                  Pequeno e por último: não é o que se lê primeiro, mas é o que faz a pessoa sair do
+                  lugar. Quem acorda às 6h com o alarme precisa saber para onde ir, e este campo mora
+                  na tela de estoque — que ninguém abre no meio da noite. O ícone evita confundi-lo
+                  com a orientação de tomada logo acima, que também é texto miúdo em cinza. */}
+              {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
+                <View style={styles.local}>
+                  <Ionicons name="location-outline" size={14} color={cores.onPrimary} />
+                  <Text style={styles.localTexto}>{dose.storageLocation}</Text>
+                </View>
+              ) : null}
             </View>
           ))}
         </View>

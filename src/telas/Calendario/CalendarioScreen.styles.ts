@@ -54,11 +54,26 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   },
 
   // --- Item da lista ---
-  /** Só a sombra, sem o contorno — e o `boxShadow` que estava escrito à mão virou token. */
+  /**
+   * A mesma barra lateral do card de compromisso da Home.
+   *
+   * É a assinatura visual do compromisso no app: quem viu o card "Se aproximando" reconhece a linha
+   * aqui sem ler. O bloco de data daquele card **não** vem junto — lá ele responde "quando?", e
+   * aqui o cabeçalho do dia já respondeu.
+   *
+   * As ações (editar, excluir) e a resposta de desfecho continuam sendo só desta tela: a Home
+   * informa, o Calendário administra.
+   */
   item: {
     ...superficieDeCartao(cores, ajustes),
     padding: spacing.md,
     gap: spacing.xs,
+    borderLeftWidth: 4,
+    borderLeftColor: cores.corDeDestaque,
+  },
+  /** Passado perde a cor da barra junto com a opacidade: nada ali ainda vai acontecer. */
+  itemBarraPassada: {
+    borderLeftColor: cores.outlineVariant,
   },
   /** Compromisso que já aconteceu continua legível, mas para de disputar atenção com o que vem. */
   itemPassado: {

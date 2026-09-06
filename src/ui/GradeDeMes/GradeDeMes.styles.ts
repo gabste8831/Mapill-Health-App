@@ -72,6 +72,10 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   numeroSelecionado: {
     backgroundColor: cores.onSuperficieDeDestaque,
   },
+  /** O realce do toque, no círculo — o ripple do Android desenharia na célula, que é quadrada. */
+  numeroPressionado: {
+    opacity: 0.5,
+  },
   numero: {
     ...typography.bodyMd,
     color: cores.onSuperficieDeDestaque,
