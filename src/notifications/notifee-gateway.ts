@@ -7,7 +7,7 @@ import notifee, {
   TriggerType,
   type AndroidAction,
   type TimestampTrigger,
-} from "@notifee/react-native";
+} from "react-native-notify-kit";
 import { Linking, Platform } from "react-native";
 
 import type {
@@ -50,8 +50,18 @@ import {
  * ser processada. Para um botão "Tomei" que promete não abrir o app, essa diferença é a promessa.
  */
 
-/** O lembrete adiado — o único aviso que **sobrevive** a um reagendamento. Ver `cancelarTudo`. */
+/** O lembrete adiado — um dos avisos que **sobrevivem** a um reagendamento. Ver `cancelarTudo`. */
 export const PREFIXO_ADIADO = "adiado-";
+
+/**
+ * O aviso disparado pela tela de diagnóstico.
+ *
+ * Sobrevive ao reagendamento pelo mesmo motivo do adiado, e por um mais imediato: `cancelarTudo`
+ * roda a cada volta do app ao primeiro plano, e testar um alarme exige justamente sair do app. Sem
+ * esta exceção, o aviso de teste seria cancelado no instante em que se faz o gesto que o teste
+ * pede.
+ */
+export const PREFIXO_DE_TESTE = "teste-";
 
 /**
  * Prefixo do alarme de tela cheia, aplicado **aqui** e não no domínio.
@@ -76,9 +86,16 @@ function chaveDoId(id: string): string {
   return id.startsWith(PREFIXO_ALARME) ? id.slice(PREFIXO_ALARME.length) : id;
 }
 
-/** O lembrete adiado, com ou sem prefixo de alarme na frente. */
-function ehAdiado(id: string): boolean {
-  return chaveDoId(id).startsWith(PREFIXO_ADIADO);
+/**
+ * Os avisos que a reconstrução da janela **não** apaga.
+ *
+ * Compara a chave e não o id cru: o lembrete adiado é agendado com `modo: "alarm"` (precisa
+ * interromper como o aviso original), então seu id vem `alarme:adiado-…`. Testar o id inteiro
+ * apagaria justamente o que esta regra existe para preservar.
+ */
+function sobreviveAoReagendamento(id: string): boolean {
+  const chave = chaveDoId(id);
+  return chave.startsWith(PREFIXO_ADIADO) || chave.startsWith(PREFIXO_DE_TESTE);
 }
 
 /**
@@ -347,10 +364,7 @@ export class NotifeeGateway implements NotificationGateway {
     if (Platform.OS !== "android") return;
 
     const pendentes = await notifee.getTriggerNotificationIds();
-    // O teste ignora o prefixo de alarme: o lembrete adiado é agendado com `modo: "alarm"` (ele
-    // precisa interromper como o aviso original), então seu id é `alarme:adiado-…`. Comparar o id
-    // cru apagaria justamente o aviso que esta função existe para preservar.
-    const alvos = pendentes.filter((id) => !ehAdiado(id));
+    const alvos = pendentes.filter((id) => !sobreviveAoReagendamento(id));
     if (alvos.length > 0) await notifee.cancelTriggerNotifications(alvos);
   }
 

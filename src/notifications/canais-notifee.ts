@@ -1,4 +1,4 @@
-import notifee, { AndroidImportance, AndroidVisibility } from "@notifee/react-native";
+import notifee, { AndroidImportance, AndroidVisibility } from "react-native-notify-kit";
 import { Platform } from "react-native";
 
 import { colors } from "@/shared/theme";

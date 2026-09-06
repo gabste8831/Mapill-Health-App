@@ -1,4 +1,4 @@
-import notifee, { AndroidNotificationSetting, AuthorizationStatus } from "@notifee/react-native";
+import notifee, { AndroidNotificationSetting, AuthorizationStatus } from "react-native-notify-kit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Linking, Platform } from "react-native";
 

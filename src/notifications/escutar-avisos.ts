@@ -1,4 +1,4 @@
-import notifee, { EventType, type Event } from "@notifee/react-native";
+import notifee, { EventType, type Event } from "react-native-notify-kit";
 
 import { ACAO_ADIAR, ACAO_PULEI, ACAO_TOMEI } from "./acoes";
 import { pedirParaEncerrarAlarme } from "./doses-resolvidas";
