@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import type { IntakeStatus } from "@/domain/entities/intake-log";
 import { useDosesDoHorario, type DoseDoHorario } from "@/hooks/use-doses-do-horario";
 import { dataEHoraPorExtenso } from "@/shared/datas-por-extenso";
-import { useCores, useEstilos } from "@/shared/theme";
-import { Button, CenteredLoader, EstadoDeErro, Header } from "@/ui";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { Button, CenteredLoader, EstadoDeErro, FotoLocal, Header } from "@/ui";
 import { criarEstilos } from "./HorarioScreen.styles";
 
 type ItemProps = {
@@ -23,6 +22,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
   const cores = useCores();
 
   const confirmada = dose.latestStatus === "confirmed";
+  const pulada = dose.latestStatus === "skipped";
   const adiada = dose.latestStatus === "deferred";
 
   return (
@@ -49,6 +49,16 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
         ]
           .filter((parte) => parte.length > 0)
           .join(", ")}>
+        {/* A foto da caixa ao lado do nome, quando existe.
+
+            Miniatura e não a foto larga do alarme: ali ela é o assunto da tela, aqui é uma
+            confirmação de que a linha é o remédio certo — e há uma por dose, então cada uma que
+            crescesse empurraria as outras para fora. Sem foto, nada ocupa o lugar: o nome usa a
+            largura toda em vez de ficar preso a uma coluna vazia. */}
+        {dose.photoUri !== null ? (
+          <FotoLocal uri={dose.photoUri} style={styles.foto} contentFit="contain" />
+        ) : null}
+
         <View style={styles.cardTexto}>
           <Text style={styles.nome}>{dose.medicationName}</Text>
           <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
@@ -64,7 +74,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
             <Ionicons
               name={confirmada ? "checkmark-circle" : "close-circle"}
               size={22}
-              color={confirmada ? cores.success : cores.onSurfaceVariant}
+              color={confirmada ? cores.successVivo : cores.onSurfaceVariant}
             />
             <Text style={styles.seloTexto}>{confirmada ? "Tomada" : "Pulada"}</Text>
           </View>
@@ -98,33 +108,56 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
           já está registrada, e "azul cheio vs. contornado" não existe para quem usa leitor de tela:
           os dois botões soariam idênticos antes e depois de responder. É a mesma regra que a lista
           de doses perdidas segue — estado nunca só por cor. */}
+      {/* "Pulei" à esquerda e "Tomei" à direita, com ícone ao lado do texto — a mesma ordem e a
+          mesma forma da tela de alarme. Quem responde nos dois lugares não deve precisar reaprender
+          onde fica o quê.
+
+          A cor muda porque o fundo muda: no alarme o cartão é azul, e ali "Tomei" é o botão
+          branco; aqui o fundo é claro, então ele é o azul cheio do app. O que se mantém é a
+          hierarquia — um botão cheio, um neutro — e o par de ícones, que é o que se reconhece antes
+          de ler. */}
       <View style={styles.acoes}>
-        <Button
-          label="Tomei"
+        <Pressable
+          style={estadoDePressao(
+            [styles.botaoPulei, pulada && styles.botaoPuleiMarcado],
+            { escala: true },
+          )}
+          onPress={onPular}
+          accessibilityRole="button"
+          accessibilityState={{ selected: pulada }}
+          accessibilityLabel={
+            pulada
+              ? `Pulei, registrado para ${dose.medicationName}`
+              : `Registrar que não tomou ${dose.medicationName}`
+          }>
+          <Ionicons
+            name="close"
+            size={18}
+            color={pulada ? cores.onPrimary : cores.onSurfaceVariant}
+          />
+          <Text style={[styles.textoPulei, pulada && styles.textoMarcado]}>Pulei</Text>
+        </Pressable>
+
+        <Pressable
+          style={estadoDePressao(
+            [styles.botaoTomei, confirmada && styles.botaoTomeiMarcado],
+            { escala: true },
+          )}
           onPress={onConfirmar}
-          variant={confirmada ? "primary" : "outline"}
+          accessibilityRole="button"
           accessibilityState={{ selected: confirmada }}
           accessibilityLabel={
             confirmada
               ? `Tomei, registrado para ${dose.medicationName}`
               : `Registrar que tomou ${dose.medicationName}`
-          }
-          emFolha
-          style={styles.acao}
-        />
-        <Button
-          label="Pulei"
-          onPress={onPular}
-          variant={dose.latestStatus === "skipped" ? "primary" : "outline"}
-          accessibilityState={{ selected: dose.latestStatus === "skipped" }}
-          accessibilityLabel={
-            dose.latestStatus === "skipped"
-              ? `Pulei, registrado para ${dose.medicationName}`
-              : `Registrar que não tomou ${dose.medicationName}`
-          }
-          emFolha
-          style={styles.acao}
-        />
+          }>
+          <Ionicons
+            name="checkmark"
+            size={18}
+            color={confirmada ? cores.onPrimary : cores.primary}
+          />
+          <Text style={[styles.textoTomei, confirmada && styles.textoMarcado]}>Tomei</Text>
+        </Pressable>
       </View>
 
       {/**
@@ -176,29 +209,6 @@ export function HorarioScreen() {
     else router.replace("/");
   }
 
-  /**
-   * Respondida a última dose, a tela sai sozinha.
-   *
-   * Ela existe para uma pergunta só — "tomou ou não?" —, e depois de respondida não há mais nada a
-   * fazer aqui: o botão "Ver meu dia" era um passo a mais para sair de uma tela que já cumpriu o
-   * que tinha a cumprir.
-   *
-   * **Só quando não sobra pendente.** Com vários remédios no mesmo horário, sair na primeira
-   * resposta levaria embora a chance de responder os outros — e é justamente o horário com vários
-   * remédios que mais precisa desta tela, porque é onde a resposta é parcial ("tomei este, aquele
-   * não").
-   *
-   * O atraso deixa a linha respondida ser vista antes de a tela trocar: sem ele, o toque e a
-   * navegação acontecem no mesmo quadro, e não fica claro o que foi registrado.
-   */
-  async function registrarEsair(dose: DoseDoHorario, status: IntakeStatus) {
-    await registrar(dose, status);
-    const aindaPendentes = doses.filter(
-      (outra) => !outra.resolvida && outra.doseScheduleId !== dose.doseScheduleId,
-    ).length;
-    if (aindaPendentes > 0) return;
-    setTimeout(voltar, 450);
-  }
 
   if (isLoading) return <CenteredLoader />;
 
@@ -243,28 +253,28 @@ export function HorarioScreen() {
               <ItemDeDose
                 key={dose.doseScheduleId}
                 dose={dose}
-                onConfirmar={() => void registrarEsair(dose, "confirmed")}
-                onPular={() => void registrarEsair(dose, "skipped")}
-                /* "Ignorar por agora" **não** sai: ele diz explicitamente que a dose continua
-                   pendente, e levar embora quem acabou de adiar a decisão contradiria isso. */
+                onConfirmar={() => void registrar(dose, "confirmed")}
+                onPular={() => void registrar(dose, "skipped")}
                 onAdiar={() => void registrar(dose, "deferred")}
               />
             ))}
 
-            {/* A saída para quem **não** vai responder agora.
+            {/* A saída, sempre visível.
 
-                Some depois da última resposta, porque ali a tela já sai sozinha — e um botão que
-                aparece no instante em que deixa de ser necessário é ruído. Quem chegou pela
-                notificação entrou direto nesta tela, sem passar pelo app: a seta do topo leva
-                "para trás" numa pilha que pode não ter nada atrás, e este botão é o caminho certo. */}
-            {pendentes > 0 ? (
-              <Button
-                label="Ir para a Home"
-                variant="outline"
-                onPress={() => router.replace("/")}
-                style={styles.irParaHome}
-              />
-            ) : null}
+                Chegou a sair sozinha depois da última resposta, e a ideia foi revertida em 05/09:
+                a dose respondida mostra a dica de correção ("Registrou errado? Toque em Pulei"), e
+                sair antes de ela ser lida torna a dica inútil. Quem responde por engano precisa do
+                tempo de perceber — e é a mesma razão pela qual as duas respostas ficam disponíveis
+                depois de registradas, em vez de virarem um selo fixo.
+
+                Quem chegou pela notificação entrou direto nesta tela, sem passar pelo app: a seta
+                do topo leva "para trás" numa pilha que pode não ter nada atrás, e este botão é o
+                caminho certo. */}
+            <Button
+              label="Ir para a página inicial"
+              onPress={() => router.replace("/")}
+              style={styles.irParaHome}
+            />
           </>
         )}
       </ScrollView>

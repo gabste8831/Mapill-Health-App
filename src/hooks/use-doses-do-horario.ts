@@ -16,6 +16,15 @@ export type DoseDoHorario = {
   doseScheduleId: string;
   medicationId: string;
   medicationName: string;
+  /**
+   * A foto da caixa, quando existe.
+   *
+   * A tela do alarme já a mostrava, e aqui ela faltava — mas esta tela é justamente o destino do
+   * "Ver e confirmar no app" quando há quatro ou mais remédios no mesmo horário, que é o caso em
+   * que reconhecer a caixa mais ajuda. Ler quatro nomes parecidos é mais lento que ver quatro
+   * caixas.
+   */
+  photoUri: string | null;
   quantidadeFormatada: string;
   amount: number;
   /** Orientação de como tomar, quando houver — "com bastante água". */
@@ -70,6 +79,7 @@ export function useDosesDoHorario(instanteIso: string) {
           doseScheduleId: doseSchedule.id,
           medicationId: medication.id,
           medicationName: medication.name,
+          photoUri: medication.photoUri,
           quantidadeFormatada: formatarQuantidade(doseSchedule.amount, prescription.doseUnit),
           amount: doseSchedule.amount,
           intakeNote: prescription.intakeNote,

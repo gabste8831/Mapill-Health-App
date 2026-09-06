@@ -23,8 +23,10 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   },
 
   // --- Cartão de dose ---
+  /** `md` no lugar do `gutter` do token: o mesmo aperto das listas de Remédios e Estoque. */
   card: {
     ...superficieDeCartao(cores, ajustes),
+    padding: spacing.md,
     gap: spacing.md,
   },
   /** Respondida fica esmaecida, mas continua legível: é registro, não lixo. */
@@ -51,6 +53,16 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   orientacao: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
+  },
+  /**
+   * A miniatura da caixa. `contain` pelo mesmo motivo do alarme: cortar a borda pode cortar a
+   * dosagem impressa no canto, e o cadastro já obriga a enquadrar em quadrado.
+   */
+  foto: {
+    width: 52,
+    height: 52,
+    borderRadius: radius.md,
+    backgroundColor: cores.surfaceContainerLow,
   },
   selo: {
     alignItems: "center",
@@ -86,8 +98,53 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     flexDirection: "row",
     gap: spacing.sm,
   },
-  acao: {
+  /**
+   * A mesma forma dos botões do alarme: ícone e rótulo na mesma linha, pílula, altura de alvo.
+   *
+   * A cor é que difere, porque o fundo difere. No alarme o cartão é azul e "Tomei" é branco; aqui o
+   * fundo é claro, então ele é o azul cheio. O que se mantém é o que a pessoa reconhece: a ordem
+   * (Pulei à esquerda, Tomei à direita), o par ✓/✗ e a hierarquia de um cheio contra um neutro.
+   */
+  botaoTomei: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    minHeight: 44,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: cores.primary,
+  },
+  /** Respondido: o botão preenche. É a única pista visual de qual resposta está registrada. */
+  botaoTomeiMarcado: {
+    backgroundColor: cores.primary,
+    borderColor: cores.primary,
+  },
+  textoTomei: {
+    ...typography.label,
+    color: cores.primary,
+  },
+  botaoPulei: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    minHeight: 44,
+    borderRadius: radius.full,
+    backgroundColor: cores.surfaceContainer,
+  },
+  botaoPuleiMarcado: {
+    backgroundColor: cores.onSurfaceVariant,
+  },
+  textoPulei: {
+    ...typography.label,
+    color: cores.onSurfaceVariant,
+  },
+  /** Sobre o botão preenchido, o texto inverte junto com o ícone. */
+  textoMarcado: {
+    color: cores.onPrimary,
   },
   /** Metade do peso das outras: saída legítima, não atalho a ser incentivado. */
   acaoSecundaria: {

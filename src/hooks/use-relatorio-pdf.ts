@@ -32,6 +32,23 @@ export type FiltroDeMedicamentos = string[] | null;
 export type MedicamentoDoRelatorio = { id: string; nome: string };
 
 /**
+ * Quais compromissos entram. `null` = todos do período, e é o padrão.
+ *
+ * Espelha o filtro de medicamentos, e pelo mesmo motivo: quem vai ao cardiologista leva as consultas
+ * do coração, não a agenda inteira.
+ *
+ * **Os dois filtros são independentes de propósito.** O app não guarda vínculo entre consulta e
+ * medicamento, e não é omissão: a relação existe na cabeça de quem monta o relatório, e uma mesma
+ * consulta pode servir a dois tratamentos — um campo fixo no cadastro obrigaria a escolher um deles
+ * no momento errado, quando às vezes nem se sabe. Deixar as duas listas soltas na hora de exportar
+ * é o que respeita como a decisão realmente acontece.
+ */
+export type FiltroDeCompromissos = string[] | null;
+
+/** Um compromisso que o relatório pode cobrir — o que o seletor lista. */
+export type CompromissoDoSeletor = { id: string; descricao: string; quando: string };
+
+/**
  * Gera o PDF do relatório clínico e o entrega à folha de compartilhamento.
  *
  * Lê os mesmos repositórios que a tela de adesão — `findBetween` para as doses, e as listas de
@@ -43,6 +60,7 @@ export function useRelatorioPdf() {
   const [gerando, setGerando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [medicamentos, setMedicamentos] = useState<MedicamentoDoRelatorio[]>([]);
+  const [compromissos, setCompromissos] = useState<CompromissoDoSeletor[]>([]);
 
   /**
    * O universo do seletor: os medicamentos que **têm tratamento**.
@@ -73,12 +91,33 @@ export function useRelatorioPdf() {
           // o botão continua gerando tudo, que é o padrão.
           setMedicamentos([]);
         }
+
+        /**
+         * O universo do seletor de compromissos: **todos** os cadastrados.
+         *
+         * Sem recorte de período aqui, ao contrário do que o PDF faz. Quem abre o seletor está
+         * decidindo o que é relevante para aquela consulta, e esconder um compromisso porque ele
+         * caiu fora da janela escolhida no momento faria a lista mudar sob o dedo a cada troca de
+         * período. O recorte de tempo continua governando o documento — ver `gerar`.
+         */
+        try {
+          const todos = await new AppointmentRepository().findAllOrderedByDate();
+          setCompromissos(
+            todos.map((a) => ({ id: a.id, descricao: a.title, quando: a.scheduledFor })),
+          );
+        } catch {
+          setCompromissos([]);
+        }
       })();
     }, []),
   );
 
   const gerar = useCallback(
-    async (periodoEmDias: number, medicamentos: FiltroDeMedicamentos = null) => {
+    async (
+      periodoEmDias: number,
+      medicamentos: FiltroDeMedicamentos = null,
+      compromissosEscolhidos: FiltroDeCompromissos = null,
+    ) => {
       if (!persistsLocally) {
         setErro("O relatório em PDF está disponível apenas no aplicativo.");
         return;
@@ -145,8 +184,13 @@ export function useRelatorioPdf() {
 
         const inicioIso = inicio.toISOString();
         const agoraIso = agora.toISOString();
+        const compromissosSelecionados =
+          compromissosEscolhidos === null ? null : new Set(compromissosEscolhidos);
         const compromissos: CompromissoDoRelatorio[] = appointments
           .filter((a) => a.scheduledFor >= inicioIso && a.scheduledFor <= agoraIso)
+          // A seleção entra **depois** do período: quem escolheu uma consulta fora da janela não a
+          // vê no PDF, e é o esperado — o recorte de tempo governa o documento inteiro.
+          .filter((a) => compromissosSelecionados === null || compromissosSelecionados.has(a.id))
           .map((a) => ({
             descricao: a.title,
             quando: a.scheduledFor,
@@ -194,5 +238,5 @@ export function useRelatorioPdf() {
     [],
   );
 
-  return { gerar, gerando, erro, medicamentos };
+  return { gerar, gerando, erro, medicamentos, compromissos };
 }

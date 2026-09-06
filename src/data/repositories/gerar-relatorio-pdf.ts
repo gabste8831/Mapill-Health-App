@@ -93,7 +93,7 @@ function secaoAdesao(relatorio: Relatorio): string {
   // paciente; ausência de dados não é — e num documento que vai ao médico a diferença importa
   // ainda mais, porque ninguém está lá para explicar.
   if (adesao.taxa === null) {
-    return `<h2>Adesão ao tratamento</h2>
+    return `<h2>Média de adesão aos medicamentos</h2>
       <p class="vazio">Nenhuma dose venceu no período, então ainda não há o que medir.</p>`;
   }
 
@@ -107,7 +107,15 @@ function secaoAdesao(relatorio: Relatorio): string {
     )
     .join("");
 
-  return `<h2>Adesão ao tratamento</h2>
+  /**
+   * "Média de adesão aos medicamentos", e não "Adesão ao tratamento".
+   *
+   * O documento traz duas coisas que se poderia chamar de adesão: as doses e o comparecimento às
+   * consultas. Um titulo que não diz qual das duas o número mede deixa a leitura ambígua — e este
+   * número é o que decide conduta clínica. O rótulo nomeia o que ele de fato agrega: a média das
+   * doses dos medicamentos incluídos no recorte.
+   */
+  return `<h2>Média de adesão aos medicamentos</h2>
     <div class="taxa">${percentual(adesao.taxa)}</div>
     <p class="taxa-detalhe">
       ${plural(adesao.confirmadas, "dose tomada", "doses tomadas")}
