@@ -2,11 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
-import { criarEstilos } from "./CardEstoque.styles";
+import { criarEstilos } from "./CardDeAtalho.styles";
 
 type CardEstoqueProps = {
-  /** Quantos remédios têm estoque controlado — é o que o card promete mostrar do outro lado. */
-  quantidade: number;
   onPress: () => void;
 };
 
@@ -20,7 +18,7 @@ type CardEstoqueProps = {
  * Diferente do `CardEstoqueBaixo`, este não é alerta: ele não muda de cor nem cobra ação, e some
  * por completo quando não há estoque controlado, em vez de convidar para uma tela vazia.
  */
-export function CardEstoque({ quantidade, onPress }: CardEstoqueProps) {
+export function CardEstoque({ onPress }: CardEstoqueProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
 
@@ -35,18 +33,16 @@ export function CardEstoque({ quantidade, onPress }: CardEstoqueProps) {
         <Ionicons name="cube" size={22} color={cores.primary} />
       </View>
 
-      <View style={styles.texto}>
-        <Text style={styles.titulo}>Estoque</Text>
-        {/* O convite entra no fim da frase: a contagem sozinha diz o que existe, mas não que o card
-            leva a algum lugar — e a seta da direita é a única outra pista disso. */}
-        <Text style={styles.descricao}>
-          {quantidade === 1
-            ? "1 medicação com estoque controlado, toque para gerenciar"
-            : `${quantidade} medicações com estoque controlado, toque para gerenciar`}
-        </Text>
-      </View>
+      {/* Só o título.
 
-      <Ionicons name="chevron-forward" size={18} color={cores.outline} />
+          O subtítulo dizia o que o rótulo da seção acima já diz, e a contagem que ele carregava não
+          muda o que a pessoa faz aqui: com uma medicação ou com seis, o toque leva à mesma tela — e
+          o número exato está do outro lado. Sem ele o card cai de três linhas para uma, e passa a
+          ler como o que é: um atalho, não um aviso. */}
+      <Text style={styles.titulo}>Gerenciar estoque</Text>
+
+      {/* Azul como o texto: num atalho contornado, a seta cinza parecia desligada. */}
+      <Ionicons name="chevron-forward" size={18} color={cores.corDeDestaque} />
     </Pressable>
   );
 }

@@ -20,6 +20,7 @@ export * from "./GoogleLogo/GoogleLogo";
 export * from "./GradeDeMes/GradeDeMes";
 export * from "./Header/Header";
 export * from "./IconButton/IconButton";
+export * from "./CardDeAtalho/CardEstoque";
 export * from "./IndicadorDeSync/IndicadorDeSync";
 export * from "./Accordion/Accordion";
 export * from "./AvisoDePendencias/AvisoDePendencias";

@@ -52,6 +52,22 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     color: cores.onSurfaceVariant,
     opacity: 0.6,
   },
+  /**
+   * A chamada para a tela de adesão, no rodapé do card.
+   *
+   * Parece um botão sem ser um: o toque atravessa para o card, que já navega. Dois alvos para o
+   * mesmo destino seriam dois nós no leitor de tela dizendo a mesma coisa.
+   */
+  chamada: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  chamadaTexto: {
+    ...typography.label,
+    color: cores.corDeDestaque,
+  },
   summary: {
     ...typography.bodyMd,
     color: cores.onSurface,

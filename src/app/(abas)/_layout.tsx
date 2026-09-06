@@ -41,10 +41,22 @@ function AbasNativas() {
         default: { color: cores.outline },
         selected: { color: cores.corDeDestaque },
       }}
-      // Sem isto o Android pinta a pílula da aba ativa com a cor dinâmica do Material You, que
-      // vem do papel de parede do aparelho — no teste ela saiu verde. A cor da marca não pode
-      // depender de qual foto a pessoa colocou no celular.
-      indicatorColor={cores.secondaryContainer}
+      /**
+       * A pílula da aba ativa fica **invisível**.
+       *
+       * Ela ainda precisa ser declarada: sem `indicatorColor`, o Android a pinta com a cor dinâmica
+       * do Material You, que vem do papel de parede do aparelho — no teste saiu verde. A cor da
+       * marca não pode depender de qual foto a pessoa pôs no celular. Transparente resolve os dois:
+       * mata o desenho e trava a cor.
+       *
+       * O que aponta a aba ativa continua sendo o azul do ícone e do rótulo, mais o próprio rótulo
+       * — que só aparece na selecionada. Três pistas para um estado já eram uma a mais, e a pílula
+       * era a que menos dizia: sendo um bloco de cor atrás do ícone, ela competia com o azul da
+       * tinta em vez de reforçá-lo.
+       *
+       * O `rippleColor` fica: ele é o toque, não o estado.
+       */
+      indicatorColor="transparent"
       rippleColor={cores.secondaryContainer}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Icon sf={{ default: "house", selected: "house.fill" }} md={{ default: "home", selected: "home_filled" }} />

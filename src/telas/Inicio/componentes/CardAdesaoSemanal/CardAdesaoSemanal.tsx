@@ -39,6 +39,9 @@ export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesa
       accessibilityRole={onAbrirRelatorio ? "button" : undefined}
       accessibilityLabel={onAbrirRelatorio ? "Ver meu relatório de adesão" : undefined}>
       <View style={styles.header}>
+        {/* Descreve o **gráfico**, e não o destino: quem nomeia o escopo é o rótulo "Minha adesão"
+            da seção, no mesmo nível de "Se aproximando" e "Estoque". Aqui dentro, o que se lê é o
+            recorte que as sete barras mostram. */}
         <Text style={styles.title}>Acompanhamento semanal</Text>
         {onAbrirRelatorio ? (
           <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
@@ -71,6 +74,26 @@ export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesa
         ))}
       </View>
       <Text style={styles.summary}>{summary}</Text>
+
+      {/* Um botão nomeado, além do card inteiro ser tocável.
+
+          A seta no canto diz que **algo** abre, mas não o quê — e o que abre é a tela onde a adesão
+          se lê por dia e o relatório para a consulta se gera. Nenhuma dessas duas coisas se adivinha
+          de um mini-gráfico com uma seta. O card continua clicável para quem já sabe; o botão é
+          para quem ainda não.
+
+          `pointerEvents="none"`: o toque nele atravessa para o card, que já navega para o mesmo
+          lugar. Assim não há dois alvos disputando a mesma área, e o leitor de tela continua
+          anunciando um destino só. */}
+      {onAbrirRelatorio ? (
+        <View style={styles.chamada} pointerEvents="none">
+          {/* "Ver o relatório", e não "Ver minha adesão": o título do card já diz "Minha adesão", e
+              repetir a mesma palavra a dois centímetros dela desperdiça a linha. Aqui ela serve para
+              dizer o que **mais** existe lá — o dia a dia e o PDF da consulta. */}
+          <Text style={styles.chamadaTexto}>Ver o relatório completo</Text>
+          <Ionicons name="arrow-forward" size={16} color={cores.corDeDestaque} />
+        </View>
+      ) : null}
     </Pressable>
   );
 }

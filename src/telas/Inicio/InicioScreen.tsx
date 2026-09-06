@@ -8,15 +8,18 @@ import { useAppointmentList } from "@/hooks/use-appointment-list";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePatientProfile } from "@/hooks/use-patient-profile";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
+import { compromissosAMostrarNaHome } from "@/domain/use-cases/compromissos-a-mostrar-na-home";
 import { dataPorExtenso } from "@/shared/datas-por-extenso";
-import { toLocalIsoDay } from "@/shared/date-input";
 import { spacing, useEstilos } from "@/shared/theme";
 import { useTodayDoses, type DiaDaSemana, type DoseDoDia } from "@/hooks/use-today-doses";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { BarraDeProgresso, CenteredLoader, Fab, Header, SuccessOverlay } from "@/ui";
 import { CardAdesaoSemanal } from "@/telas/Inicio/componentes/CardAdesaoSemanal/CardAdesaoSemanal";
+import { CardCompromissoProximo } from "@/telas/Inicio/componentes/CardCompromissoProximo/CardCompromissoProximo";
+import { ListaDeDosesRegistradas } from "@/telas/Inicio/componentes/ListaDeDosesRegistradas/ListaDeDosesRegistradas";
+import { CardCompromissos } from "@/telas/Inicio/componentes/CardCompromissos/CardCompromissos";
 import { PainelDePermissoes } from "@/ui/PainelDePermissoes/PainelDePermissoes";
-import { CardEstoque } from "@/telas/Inicio/componentes/CardEstoque/CardEstoque";
+import { CardEstoque } from "@/ui/CardDeAtalho/CardEstoque";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
 import { ItemDeCompromisso } from "@/telas/Inicio/componentes/ItemDeCompromisso/ItemDeCompromisso";
@@ -154,19 +157,48 @@ export function InicioScreen() {
   );
 
   /**
-   * Os compromissos de hoje, na mesma agenda das doses.
+   * Os compromissos que a Home mostra: os de hoje, e os que já entraram na janela do lembrete.
    *
    * A Home respondia "o que tomo hoje?" e deixava de fora a consulta das 14h — que é parte do mesmo
    * dia e, muitas vezes, o compromisso de saúde mais importante dele. Quem tinha os dois precisava
    * abrir o Calendário para lembrar de um deles.
    *
-   * Comparação pelo dia local (`toLocalIsoDay`) e não pelo ISO cru: `scheduledFor` é um instante em
-   * UTC, e uma consulta das 21h no Brasil cai no dia seguinte se comparada como texto.
+   * Depois passou a mostrar também o que se aproxima: quem pede aviso de sete dias está pedindo
+   * tempo para se organizar, e antes disso a notificação chegava sem que a Home confirmasse nada.
+   * A antecedência do lembrete é a janela do card, então as duas nunca discordam — a regra inteira,
+   * com os casos de borda, mora em `compromissosAMostrarNaHome`.
    */
-  const hojeIso = toLocalIsoDay(hoje);
-  const compromissosDeHoje = compromissos.filter(
-    (compromisso) => toLocalIsoDay(new Date(compromisso.scheduledFor)) === hojeIso,
-  );
+  const naHome = compromissosAMostrarNaHome({
+    compromissos: compromissos.map((compromisso) => ({
+      appointmentId: compromisso.id,
+      scheduledFor: compromisso.scheduledFor,
+      reminderLeadDays: compromisso.reminderLeadDays,
+      reminderOnDay: compromisso.reminderOnDay,
+      jaRespondido: compromisso.outcome !== null,
+    })),
+    agora: hoje,
+  });
+
+  const compromissoPorId = new Map(compromissos.map((compromisso) => [compromisso.id, compromisso]));
+  /** Os aprovados pela regra, já com a entidade de volta e na ordem que ela definiu. */
+  const compromissosVisiveis = naHome.flatMap((item) => {
+    const compromisso = compromissoPorId.get(item.appointmentId);
+    return compromisso ? [{ ...item, compromisso }] : [];
+  });
+
+  const compromissosDeHoje = compromissosVisiveis.filter((item) => item.ehHoje);
+  const compromissosProximos = compromissosVisiveis.filter((item) => !item.ehHoje);
+
+  /**
+   * Quantos compromissos existem daqui para a frente, dentro da janela do lembrete ou fora dela.
+   *
+   * Conta pelo dia, e não pelo instante: uma consulta às 9h continua sendo compromisso de hoje às
+   * 15h — ela pode ter acontecido, e ainda falta responder o desfecho.
+   */
+  const inicioDeHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString();
+  const compromissosAgendados = compromissos.filter(
+    (compromisso) => compromisso.scheduledFor >= inicioDeHoje,
+  ).length;
 
   /**
    * O painel de permissões aparece quando falta algo **e** existe tratamento esperando aviso.
@@ -439,25 +471,34 @@ export function InicioScreen() {
         {registradasDeHoje.length > 0 ? (
           <View style={styles.doseList}>
             <Text style={styles.sectionLabel}>Já registradas</Text>
-            {registradasDeHoje.map((dose, indice) => (
-              <Animated.View
-                key={dose.doseScheduleId}
-                entering={
-                  semMovimento
-                    ? undefined
-                    : entradaEscalonada(atrasadas.length + pendentesDeHoje.length + indice)
-                }>
-                <ItemDeDose
-                  time={dose.time}
-                  medicationName={dose.medicationName}
-                  note={descricaoDaDose(dose)}
-                  status={dose.status}
-                  onConfirm={() => confirmar(dose)}
-                  onSkip={() => pular(dose)}
-                  onCorrect={() => corrigir(dose)}
-                />
-              </Animated.View>
-            ))}
+            {/* Lista compacta, e não os cartões das pendentes.
+
+                O que já foi respondido é registro, não tarefa: serve para conferir ("já tomei o das
+                8?"), e quem confere varre a coluna de horários em vez de ler cartão por cartão. Em
+                cartões o efeito era perverso — quanto mais em dia a pessoa estivesse, mais cheia
+                ficava a Home, e as doses pendentes iam sendo empurradas para longe pelas resolvidas.
+
+                Mesma forma da agenda do Calendário, onde o enxugamento já tinha funcionado. */}
+            <Animated.View
+              entering={
+                semMovimento
+                  ? undefined
+                  : entradaEscalonada(atrasadas.length + pendentesDeHoje.length)
+              }>
+              <ListaDeDosesRegistradas
+                doses={registradasDeHoje.map((dose) => ({
+                  doseScheduleId: dose.doseScheduleId,
+                  time: dose.time,
+                  medicationName: dose.medicationName,
+                  note: descricaoDaDose(dose),
+                  tomada: dose.status === "confirmed",
+                }))}
+                onCorrigir={(doseScheduleId) => {
+                  const dose = registradasDeHoje.find((d) => d.doseScheduleId === doseScheduleId);
+                  if (dose !== undefined) corrigir(dose);
+                }}
+              />
+            </Animated.View>
           </View>
         ) : null}
 
@@ -477,7 +518,7 @@ export function InicioScreen() {
                 ? "Compromisso de hoje"
                 : `${compromissosDeHoje.length} compromissos de hoje`}
             </Text>
-            {compromissosDeHoje.map((compromisso, indice) => (
+            {compromissosDeHoje.map(({ compromisso }, indice) => (
               <Animated.View
                 key={compromisso.id}
                 /**
@@ -490,7 +531,8 @@ export function InicioScreen() {
                     : entradaEscalonada(
                         atrasadas.length +
                           pendentesDeHoje.length +
-                          registradasDeHoje.length +
+                          // As registradas entram como **um** bloco, não uma por uma.
+                          (registradasDeHoje.length > 0 ? 1 : 0) +
                           indice,
                       )
                 }>
@@ -508,35 +550,108 @@ export function InicioScreen() {
           </View>
         ) : null}
 
+        {/* O que se aproxima, em bloco separado do que é hoje.
+
+            Junto com os de hoje, a consulta de daqui a cinco dias leria como coisa do dia e faria a
+            pessoa se preparar hoje.
+
+            Card, e não linha: aqui cabe o **preparo** ("jejum de 12h"), que é a única informação do
+            compromisso que exige ação antecipada — e descobri-la só ao abrir o detalhe é descobrir
+            tarde. A linha da agenda de hoje não tem onde colocá-lo. */}
+        {compromissosProximos.length > 0 || compromissosAgendados > 0 ? (
+          <View style={styles.doseList}>
+            <Text style={styles.sectionLabel}>
+              {compromissosProximos.length > 0 ? "Se aproximando" : "Compromissos"}
+            </Text>
+            {compromissosProximos.map(({ compromisso, emDias }, indice) => (
+              <Animated.View
+                key={compromisso.id}
+                entering={
+                  semMovimento
+                    ? undefined
+                    : entradaEscalonada(
+                        atrasadas.length +
+                          pendentesDeHoje.length +
+                          (registradasDeHoje.length > 0 ? 1 : 0) +
+                          compromissosDeHoje.length +
+                          indice,
+                      )
+                }>
+                <CardCompromissoProximo
+                  quando={new Date(compromisso.scheduledFor)}
+                  title={compromisso.title}
+                  location={compromisso.location}
+                  notes={compromisso.notes}
+                  emDias={emDias}
+                  // Direto ao detalhe daquele compromisso, e não à lista: quem tocou já escolheu
+                  // qual, e reencontrá-lo lá dentro anularia o atalho.
+                  onPress={() =>
+                    router.push({
+                      pathname: "/compromissos",
+                      params: { detalhe: compromisso.id },
+                    })
+                  }
+                />
+              </Animated.View>
+            ))}
+
+            {/* A agenda inteira, para além do que já entrou na janela do lembrete — e **dentro** da
+                mesma seção dos que se aproximam, porque respondem à mesma pergunta: "o que eu tenho
+                marcado?". Solto no meio dos cards de estoque, ele obrigava a percorrer a tela para
+                juntar duas coisas do mesmo assunto.
+
+                Este responde "e a consulta de novembro, o app guardou?" — sem ele, a janela do
+                lembrete, que é o que mantém a tela do dia enxuta, viraria a sensação de que o
+                compromisso se perdeu. */}
+            {compromissosAgendados > 0 ? (
+              <CardCompromissos onPress={() => router.push("/compromissos")} />
+            ) : null}
+          </View>
+        ) : null}
+
         {/* Só com algum dia medido: um gráfico de sete traços vazios não informa nada. */}
         {agenda.semana.some((dia) => dia.ratio !== null) ? (
-          <CardAdesaoSemanal
-            days={agenda.semana}
-            summary={resumoDaSemana(agenda.semana)}
-            onAbrirRelatorio={() => router.push("/adesao")}
-          />
+          <View style={styles.doseList}>
+            {/* O rótulo nomeia o **escopo**, como "Se aproximando" e "Estoque" — é o que dá à Home
+                uma leitura de índice, em que cada assunto se anuncia antes de aparecer. O título
+                dentro do card segue descrevendo o gráfico, que é outra coisa. */}
+            <Text style={styles.sectionLabel}>Minha adesão</Text>
+            <CardAdesaoSemanal
+              days={agenda.semana}
+              summary={resumoDaSemana(agenda.semana)}
+              onAbrirRelatorio={() => router.push("/adesao")}
+            />
+          </View>
         ) : null}
 
-        {/* Acesso permanente ao estoque, e não só quando algo está acabando: o ícone no topo da
-            aba Medicações passou despercebido no teste em aparelho. Some quando não há estoque
-            controlado — aí a tela do outro lado abriria vazia. */}
-        {agenda.estoquesControlados > 0 ? (
-          <CardEstoque
-            quantidade={agenda.estoquesControlados}
-            onPress={() => router.push("/estoque")}
-          />
-        ) : null}
+        {/* Estoque numa seção só: o alerta do que está acabando e a porta para gerenciar tudo.
 
-        {agenda.estoquesBaixos.map(({ medication, inventory, daysRemaining }) => (
-          <CardEstoqueBaixo
-            key={inventory.id}
-            medicationName={medication.name}
-            daysRemaining={daysRemaining}
-            // Vai pro estoque, não pro cadastro: quem viu "acaba em 3 dias" quer repor, e repor
-            // pelo formulário do remédio obrigaria a reeditar um tratamento que não mudou.
-            onAbrirEstoque={() => router.push("/estoque")}
-          />
-        ))}
+            Antes eram dois cards soltos no fim da rolagem, e quem via "acaba em 3 dias" precisava
+            procurar onde repor. Juntos sob um rótulo, o alerta vem primeiro (é o que pede ação) e o
+            acesso à listagem logo abaixo, que é para onde se vai em seguida. */}
+        {agenda.estoquesControlados > 0 || agenda.estoquesBaixos.length > 0 ? (
+          <View style={styles.doseList}>
+            <Text style={styles.sectionLabel}>Estoque</Text>
+
+            {agenda.estoquesBaixos.map(({ medication, inventory, daysRemaining }) => (
+              <CardEstoqueBaixo
+                key={inventory.id}
+                medicationName={medication.name}
+                daysRemaining={daysRemaining}
+                // Vai pro estoque, não pro cadastro: quem viu "acaba em 3 dias" quer repor, e repor
+                // pelo formulário do remédio obrigaria a reeditar um tratamento que não mudou.
+                onAbrirEstoque={() => router.push("/estoque")}
+              />
+            ))}
+
+            {/* Acesso permanente, e não só quando algo está acabando: o ícone no topo da aba
+                Medicações passou despercebido no teste em aparelho. Some quando não há estoque
+                controlado — aí a tela do outro lado abriria vazia. */}
+            {agenda.estoquesControlados > 0 ? (
+              <CardEstoque onPress={() => router.push("/estoque")} />
+            ) : null}
+          </View>
+        ) : null}
       </ScrollView>
 
       <Fab
