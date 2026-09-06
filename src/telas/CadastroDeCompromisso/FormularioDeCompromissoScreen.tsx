@@ -464,12 +464,20 @@ export function FormularioDeCompromissoScreen({
                 </>
               ) : null}
 
-              {/* Diz **quando** e **como** o aviso chega, agora que ele chega de verdade. A hora
-                  fixa importa: quem pede "3 dias antes" precisa saber que o aviso é de manhã, e não
-                  no mesmo horário da consulta — senão parece atrasado. */}
+              {/* Diz **quando**, **como** e **onde** o aviso aparece, agora que ele chega de
+                  verdade. A hora fixa importa: quem pede "3 dias antes" precisa saber que o aviso é
+                  de manhã, e não no mesmo horário da consulta — senão parece atrasado.
+
+                  A segunda frase é a que explica a Home. A antecedência escolhida aqui governa duas
+                  coisas ao mesmo tempo: quando a notificação chega e a partir de quando o
+                  compromisso aparece na tela inicial. Sem dizer isso, o card que surge sozinho dias
+                  depois parece comportamento aleatório do app. */}
               <Text style={styles.hint}>
                 Os avisos chegam por notificação, às 8 da manhã do dia marcado. Compromisso não toca
                 alarme: só a dose faz isso.
+                {querAntecedencia && leadEscolhido !== null && !leadInvalido
+                  ? ` O compromisso também aparece na tela inicial ${leadEscolhido === 1 ? "no dia anterior" : `nos ${leadEscolhido} dias que antecedem a data`}.`
+                  : " Na tela inicial, o compromisso aparece no próprio dia."}
               </Text>
             </>
           ) : null}

@@ -24,13 +24,66 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * Respiro simétrico em cima e embaixo — o mesmo `md` que separa os cards entre si na lista, e
    * não o `gutter` (24) que ficava grande demais só embaixo, sem nada em cima pra equilibrar.
    */
-  listHeader: {
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+  /**
+   * Sem padding próprio: o respiro vem das margens da busca e da contagem, que são quem precisa
+   * dele. Somando os dois, o topo ganhava um vão que nenhuma das duas telas tem.
+   */
+  listHeader: {},
+  busca: {
+    marginTop: spacing.md,
   },
+  /**
+   * O mesmo respiro da contagem em Remédios: `md` acima, `sm` abaixo.
+   *
+   * As duas telas são a mesma lista em abas diferentes, e a contagem tinha aqui só o espaço que
+   * sobrava do `listHeader` — colada na busca em cima e no primeiro card embaixo.
+   */
   contagem: {
     ...typography.label,
     color: cores.onSurfaceVariant,
+    // `lg`, como em Remédios: são a mesma lista em abas diferentes.
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  /**
+   * O aviso de lista vazia que **não** é o estado vazio da tela.
+   *
+   * Discreto de propósito: ou a busca não achou nada (e some ao limpar), ou só há histórico — nos
+   * dois casos há conteúdo logo abaixo, e um bloco grande de "nada aqui" contradiria o que se vê.
+   */
+  semResultado: {
+    ...typography.bodyMd,
+    color: cores.onSurfaceVariant,
+    paddingVertical: spacing.lg,
+    textAlign: "center",
+  },
+  /** Respiro entre os próximos e o histórico: são dois assuntos, não uma lista contínua. */
+  blocoAnteriores: {
+    marginTop: spacing.lg,
+    gap: spacing.md,
+  },
+  /**
+   * O traço que separa a agenda do histórico, igual ao da tela de adesão.
+   *
+   * O respiro sozinho não bastava: numa lista de cartões iguais, espaço a mais lê como item que
+   * falta, e não como troca de assunto. O traço diz que ali termina "o que vem" e começa "o que
+   * foi" — que é a diferença entre agenda e registro.
+   */
+  divisorDeEscopo: {
+    height: 1,
+    backgroundColor: cores.outlineVariant,
+  },
+  /**
+   * O acordeão com a superfície dos cartões da tela.
+   *
+   * O padrão dele (`surfaceContainerLow`) quase empata com o fundo, e no meio de uma lista de
+   * cartões ele desapareceria — nada diria que ali há histórico a abrir.
+   */
+  acordeaoAnteriores: {
+    backgroundColor: cores.surfaceContainerLowest,
+    ...(ajustes?.contornarSuperficies
+      ? { borderWidth: 1, borderColor: cores.outlineVariant }
+      : null),
   },
 
   // --- Item da lista ---
