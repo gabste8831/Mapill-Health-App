@@ -12,6 +12,22 @@ terminar, marco `[x]` e registro numa linha o que foi feito, para o histórico n
 
 ---
 
+## ⏳ Pendente para o refinamento
+
+**Revisar os quatro temas.** A revisão desta rodada foi feita e aprovada no **tema padrão**. Os
+outros três — escuro, alto contraste e daltonismo — receberam os tokens novos (`successVivo`,
+`errorVivo`, `errorPreenchido`) com valores calculados e conferidos por contraste, mas **não foram
+vistos em aparelho**. Vale percorrer as telas nos três antes de fechar o TCC.
+
+Dois pontos que já se sabe que merecem olhar:
+
+- O **daltonismo** troca verde/vermelho por turquesa/magenta de propósito, então tudo que foi
+  decidido por "cor de semáforo" nesta rodada se comporta de outro jeito lá.
+- O **alto contraste** foi de onde saiu o `#9E0008` que virou o vermelho preenchido do tema padrão.
+  Vale conferir se o tema não ficou com dois vermelhos iguais onde antes havia hierarquia.
+
+---
+
 ## Onboarding
 
 ### Login [x]
@@ -37,7 +53,13 @@ quando eu clico em adicionar contato, abre o "popup de "novo contato de emergên
   padding normal). Aumentado em `src/ui/BottomSheet/BottomSheet.tsx` (`respiroInferior`).
 -
 
-### Termos
+### Termos [x]
+
+**[x] Feito: os acordeões legais ganharam fundo branco.** "Termos de Uso" e "Política de
+Privacidade" usavam o `surfaceContainerLow` padrão do `Accordion`, quase igual ao fundo da tela —
+certo dentro de um fluxo de texto longo, errado aqui, onde eles são os únicos blocos tocáveis abaixo
+de um cartão branco. O único elemento clicável da tela era o que menos parecia clicável. Passou a
+`surfaceContainerLowest`, via a prop `style` que o `LegalAccordion` agora repassa ao `Accordion`.
 `src/telas/Termos/` — texto legal (Termos de Uso / Política de Privacidade).
 Tela de termos está perfeita, tudo ok
 -
@@ -103,10 +125,167 @@ diminuir os botões confirmar/pular, e centralizar o horário na vertical.
   duas mudanças: `justifyContent: center` na coluna só funciona se ela tiver altura para distribuir,
   então o pai passou de `alignItems: flex-start` para `stretch`. O ganho aparece quando o nome do
   remédio quebra em duas linhas — antes a hora ficava pendurada no topo.
--
+
+**[x] Feito: o compromisso passou a aparecer na Home quando o lembrete dispara, e não só no dia.**
+Um compromisso para daqui a 5 dias com lembrete pedido para hoje mandava a notificação e a Home não
+confirmava nada — a pessoa era avisada de algo que o app, na tela principal, fingia não ter.
+
+A regra: **a antecedência do lembrete é a janela do card.** `reminderLeadDays: 7` põe o compromisso
+na Home nos 7 dias que antecedem a consulta. Assim a notificação e a tela nunca discordam, porque
+leem o mesmo número, e uma consulta marcada com três meses de antecedência não ocupa a Home por três
+meses — ela é a tela do **dia**, e o que não é acionável hoje empurra as doses para baixo.
+
+O próprio dia é a exceção e entra sempre, com ou sem lembrete: quem não pediu aviso dispensou a
+*antecedência*, não dispensou ver a própria agenda quando ela chega. Isso preserva o comportamento
+que a tela já tinha. Passada a data o card sai, mesmo sem resposta — a Home mostra o que ainda dá
+para fazer, e cobrar desfecho de ontem competiria com as doses de hoje pelo mesmo espaço.
+
+Os que ainda não são hoje ficam num bloco "Se aproximando", separado do de hoje: juntos, a consulta
+de daqui a cinco dias leria como coisa do dia e faria a pessoa se preparar hoje.
+
+**[x] Feito: "Se aproximando" virou card próprio (`CardCompromissoProximo`), não mais uma linha.** A
+primeira versão reusava a linha da agenda de hoje, e ela não tem onde colocar o **preparo** — que é
+a única informação do compromisso a exigir ação antecipada. Descobrir "jejum de 12h" só ao abrir o
+detalhe é descobrir tarde; um aviso disso cinco dias antes é o que evita a consulta perdida por ter
+tomado café. No card ele tem faixa própria, abaixo de um traço.
+
+Estética própria, e **não** o azul cheio do card de próxima dose: aquele é a única quebra da paleta
+neutra da Home, e um segundo azul não somaria destaque — dividiria o que existe, e a dose perderia a
+vaga que a torna a próxima coisa a fazer. Aqui a presença vem da barra lateral de 4px e do bloco de
+data 52×52, que é a assinatura visual do compromisso na listagem: quem já viu a lista reconhece o
+card antes de ler. No dia, barra e bloco viram **verdes**, o mesmo sinal de "é agora" do cartão de
+dose.
+
+O toque abre a listagem **já com o detalhe daquele compromisso** (`/compromissos?detalhe=<id>`), e
+não a lista inteira: quem tocou já escolheu qual, e reencontrá-lo lá dentro anularia o atalho. Na
+tela, a intenção da rota semeia o mesmo estado que o toque na lista alimenta — com uma trava de "já
+usado", senão fechar o popup e ter a lista recarregada o reabriria, e ele ficaria impossível de
+dispensar.
+
+Regra em `src/domain/use-cases/compromissos-a-mostrar-na-home.ts`, com 13 verificações em
+`scripts/conferir-compromissos-na-home.mjs` (janela exata, consulta a 90 dias, o dia sem lembrete, o
+que já passou, e `emDias` contando dias de calendário e não períodos de 24h).
+
+**[x] Feito: "Minha adesão" virou rótulo de seção.** No mesmo nível de "Se aproximando" e "Estoque",
+para a Home ter uma leitura de índice em que cada assunto se anuncia antes de aparecer. O título
+**dentro** do card continua "Acompanhamento semanal", que descreve o gráfico — são coisas
+diferentes, e cheguei a trocá-lo por engano antes de entender o pedido. A chamada do rodapé virou
+"Ver o relatório completo", dizendo o que mais existe lá dentro (o dia a dia e o PDF da consulta).
+
+**[x] Feito: a pílula azul da aba ativa saiu.** Três pistas para o mesmo estado — ícone azul, rótulo
+azul e um bloco de cor atrás do ícone — eram uma a mais, e a pílula era a que menos dizia: sendo
+área preenchida, competia com o azul da tinta em vez de reforçá-lo. O `indicatorColor` continua
+declarado como `transparent`, e não removido: sem ele o Android pinta a pílula com a cor dinâmica do
+Material You, que vem do papel de parede do aparelho (no teste saiu verde).
+
+**[x] Feito: os atalhos viraram botões de contorno, com só o título.** "Gerenciar estoque" e "Ver
+compromissos" — o subtítulo saiu dos dois porque repetia o rótulo da seção logo acima, e a contagem
+que ele carregava não muda o destino do toque. De três linhas para uma.
+
+O estilo também mudou: fundo branco como os cartões (para o atalho seguir na mesma família visual da
+tela), mas com **borda azul e sem sombra**. Sombra é o que faz uma superfície parecer *conter* algo,
+e aqui não há conteúdo, há um caminho — sem essa distinção, a seção de estoque exibia dois blocos
+idênticos, um que informa e outro que leva a outro lugar. Texto e seta em azul, ícone de 44 para 34
+(numa linha de altura única o círculo grande dominava o texto).
+
+**[x] Feito: marca-d'água nos cards cheios.** Ícone gigante girado e cortado no canto inferior
+direito (opacidade 0.12–0.13), atrás do conteúdo — a pílula no card azul de próxima dose, o triângulo
+de alerta no vermelho de estoque. Some do leitor de tela: repete o ícone do rótulo, e anunciá-la
+seria dizer a mesma coisa duas vezes. Junto veio o selo quadrado do ícone no rótulo e o ícone ao lado
+da orientação de tomada. É composição, não informação — a opacidade é baixa justamente para que o
+horário, que é o que o card existe para mostrar, não tenha com o que competir.
+
+**[x] Feito: os cards soltos viraram seções com rótulo.** "Compromissos agendados" estava no meio
+dos cards de estoque, longe do bloco "Se aproximando" que fala do mesmo assunto; e o alerta de
+estoque baixo ficava separado do acesso à listagem, então quem via "acaba em 3 dias" precisava
+procurar onde repor.
+
+Agora o card de compromissos entra **dentro** de "Se aproximando" (e o rótulo vira só "Compromissos"
+quando não há nada chegando, para não prometer o que a seção não tem), e o estoque ganhou seção
+própria: o alerta primeiro, porque é o que pede ação, e o acesso à listagem logo abaixo, que é para
+onde se vai em seguida.
+
+**[x] Feito: mais respiro no topo.** O cabeçalho ganhou `lg` (32) acima da data — sem isso ela
+nascia colada na barra fixa, como se fosse parte dela. Entre a saudação e o progresso, `gutter` (24)
+no lugar de `md` (16): são duas informações diferentes, e apertadas liam como um bloco só de texto.
+A data subiu para `sm` do nome (era `xs`), e o bloco de progresso para `md` — a barra é o que se lê
+de relance e precisa de ar em volta para funcionar como medidor. O topo é a única parte da tela que
+ninguém precisa procurar, então é onde cabe gastar altura.
+
+**[x] Feito: verde e vermelho de semáforo, em três intensidades.** O verde `#0F7038` parecia
+verde-garrafa e o vermelho `#C4141C` lia como vinho — ele ficava em **357°**, do lado do roxo, e era
+isso (não a saturação) que dava a impressão de rosa.
+
+A saída foi separar por **papel**, porque a régua de contraste muda conforme o uso:
+
+| token | valor | onde | régua |
+|---|---|---|---|
+| `errorVivo` | `#FF0000` | ícones, faixas, bordas | 3:1 (forma) — dá 4.00:1 |
+| `errorPreenchido` | `#E60000` | fundo do card de alerta | o **branco por cima** precisa de 4.5 — dá 4.81:1 |
+| `error` | `#C90000` | texto ("Estoque zerado") | 4.5:1 — dá 6.03:1 |
+| `successVivo` | `#12963F` | ícones e faixas | 3.45:1 na pior superfície |
+| `success` | `#11803E` | texto ("TOMADA") | 5.02:1 |
+
+Os três vermelhos partilham o **matiz 0°**: são a mesma cor em intensidades diferentes, e é o que
+faz o app parecer ter um vermelho só. O `errorSurface` acompanhou (`#FDECEA` → `#FDEAEA`), senão
+puxaria para o salmão sob o vermelho puro.
+
+Três lugares onde o vivo **não** coube, todos medidos: verde grama de catálogo (`#22C55E`) dá 2.28:1
+e some até como ícone; `#FF0000` como fundo deixa o texto branco em 4.00:1; e `#FF0000` como texto
+também reprova. Daí os três tokens.
+
+**[x] Feito: os rótulos de estado passaram a usar os tokens de texto.** "ATRASADA" e "É AGORA" usavam
+`onErrorContainer`/`onSuccessContainer` — tokens calibrados para ficar **sobre o container cheio**,
+quase pretos (9.9:1) e em outro matiz (356°). Sobre o cartão branco davam um vermelho escuro que não
+se parecia com a faixa lateral a um centímetro dali. O mesmo defeito estava na previsão crítica do
+Estoque e no "HOJE" do card de compromisso. Onde o container existe de verdade (selos, painel de
+permissões), o token continua correto.
+
+Só o tema padrão mudou de tom. Os outros três têm razões que não são estéticas: o **daltonismo** usa
+turquesa/magenta de propósito, o **alto contraste** escurece para atingir razões maiores, e o
+**escuro** precisa de tons claros sobre fundo escuro — mas os três ganharam os tokens novos.
+
+**[x] Feito: as doses já registradas viraram lista compacta, no formato do Calendário.** Em cartões,
+o efeito era perverso: quanto mais em dia a pessoa estivesse, **mais cheia** ficava a Home — cinco
+doses tomadas ocupavam mais tela que as que ainda faltam, empurrando o que ainda espera resposta
+para longe.
+
+As duas listas respondem perguntas diferentes. A de cima pergunta "o que falta?" e precisa de
+botões, cor e área de toque generosa. Esta responde "o que eu já fiz?" — é conferência, e quem
+confere varre a coluna de horários em vez de ler cartão por cartão. Então virou um cartão só com
+divisórias internas, hora em coluna fixa de 44, ícone de desfecho à direita e `opacity: 0.55`, tudo
+igual à agenda do Calendário, onde esse enxugamento já tinha dado certo.
+
+O toque em cada linha continua abrindo a correção retroativa: encolher o registro não pode custar a
+chance de corrigir um "pulei" que era "tomei". A cascata de entrada passou a contar o bloco como
+**um** item, e não uma por dose — senão os compromissos abaixo herdavam um atraso proporcional ao
+número de doses já tomadas.
+
+**[x] Feito: card "Compromissos agendados", levando à listagem.** Os cards acima mostram o que está
+próximo; este responde "e a consulta de novembro, o app guardou?". Sem ele, a janela do lembrete —
+que é o que mantém a tela do dia enxuta — viraria a sensação de que o compromisso se perdeu. Some
+quando não há nada à frente, como o card de estoque: um convite para uma tela só com histórico
+promete mais do que entrega. Reusa os estilos do `CardEstoque`, que é a mesma anatomia e a mesma
+função.
+
+**[x] Feito: o cadastro passou a dizer que o lembrete governa o card.** O texto de ajuda da seção de
+avisos ganhou uma frase sobre a tela inicial, variando com o que foi escolhido ("nos 7 dias que
+antecedem a data" / "no próprio dia"). Sem isso, um card que surge sozinho dias depois parece
+comportamento aleatório do app.
 
 ### Calendário
 `src/telas/Calendario/` — grade do mês, agenda por dia.
+
+**[x] Feito: o dia selecionado deixou de ter um quadrado atrás.** O círculo do número sempre esteve
+correto (`radius.full`); o quadrado era o **ripple** do Android, desenhado no `Pressable` — que é a
+célula retangular da grade, não o círculo. Com `android_ripple={null}` ele some, e o retorno do
+toque passa a ser a opacidade do próprio círculo, que segue a forma dele.
+
+**[x] Feito: o card de compromisso ganhou a barra lateral do card da Home.** É a assinatura visual
+do compromisso no app — quem viu o "Se aproximando" reconhece a linha aqui sem ler. O bloco de data
+daquele card **não** veio junto: lá ele responde "quando?", e aqui o cabeçalho do dia já respondeu.
+As ações (editar, excluir) e a resposta de desfecho continuam só desta tela — a Home informa, o
+Calendário administra. Compromisso passado perde a cor da barra junto com a opacidade.
 
 percebi agora que não temos caminho para editar os compromissos... na tela calendário nós temos o calendario e tal, e a listagem dos compromissos do dia... eu queria uma opção que permitisse ver todos os comprmissos cadastrados, e queria tb a opção igual tem no medicamento -> excluir e editar
 - [x] Feito: editar/excluir compromisso já existiam na agenda do dia (lápis/lixeira em cada
@@ -133,6 +312,32 @@ gostei gostei! mas ainda assim, os ícones de editar e excluir ocupam muito espa
   simétrico (`spacing.md` em cima e embaixo, era `marginBottom: gutter` só embaixo).
 
 ### Remédios
+
+**[x] Feito: mais respiro no topo da lista.** `lg` (32) acima da contagem e entre o botão de estoque
+e o primeiro card, no lugar do `md` (16). A busca é um campo que se opera e a lista é conteúdo que
+se lê — com o mesmo espaço de um item de lista, o botão de estoque lia como o primeiro remédio.
+Compromissos recebeu o mesmo, porque são a mesma lista em abas diferentes.
+
+**[x] Feito: a contagem desceu para junto da lista.** Ela vivia no bloco fixo do topo, entre a busca
+e o seletor de ordem — e ali parecia legenda dos **controles**, não da lista. Passou para o
+`ListHeaderComponent`, abaixo do atalho de estoque e encostada no primeiro card, que é o que ela
+descreve. Rola junto com a lista, como o atalho: os dois se lê uma vez, e parados no topo custariam
+altura em toda rolagem. Fixos ficam só a busca e o seletor, que são o que se opera.
+
+**[x] Feito: o botão de estoque virou o mesmo `CardEstoque` da Home.** Eram dois atalhos para a
+mesma tela com desenhos diferentes — um `Button variant="outline"` aqui, um card lá —, e isso fazia
+o app parecer ter dois caminhos distintos até o estoque. O componente saiu de
+`telas/Inicio/componentes/` para `ui/CardDeAtalho/`, que é onde mora o que serve a mais de uma tela.
+
+**[x] Feito: o seletor de ordem mostra todas as opções de uma vez.** A fileira rolava na horizontal,
+e isso escondia opções atrás de um gesto que nada anunciava: quem não arrastasse não sabia que
+"Acabando" existia. Um seletor com opção invisível não é um seletor.
+
+Cabem todas porque duas coisas saíram: o **ícone** (nenhum dos três rótulos tem símbolo que
+signifique algo sozinho — eram largura sem leitura) e um degrau de fonte (`label` 12px → `caption`
+10px). As fichas passaram a dividir a largura em partes iguais com `flex: 1`, então a fileira fica
+alinhada em vez de ter larguras ditadas pelo tamanho de cada palavra. Vale para todas as telas que
+usam o componente.
 `src/telas/Remedios/` — lista de medicações cadastradas.
 Mesma reorganização de card aplicada nessa tela junto com Compromissos — ver histórico acima.
 
@@ -196,7 +401,7 @@ parâmetro, lá o espaçamento está correto.
   `ListHeaderComponent` passa a devolver `null` quando não há estoque — como `View` vazio, o `gap`
   da lista ainda contava um vão antes do primeiro card.
 
-### Compromissos (continuação)
+### Compromissos (continuação) [x]
 
 entrando na listagem de compromissos sem nenhum cadastrado, não há como cadastrar um dali — o ícone
 de + não está presente. Ele precisa estar, e indo direto ao cadastro de compromisso, sem passar
@@ -206,7 +411,47 @@ pela escolha entre compromisso e medicação.
   `/cadastro/escolha`, mesma razão pela qual o + de Remédios pula a pergunta: quem está na lista já
   respondeu o que vai cadastrar. O texto do estado vazio dizia "Toque no + no Calendário", mandando
   a pessoa para outra tela; virou "Toque no + para cadastrar sua primeira consulta ou exame".
--
+
+**[x] Feito: busca por consulta, profissional ou local.** Mesma anatomia da busca de medicamentos
+(`SearchField`, contagem "X de Y" no lugar do total, teclado dispensado ao arrastar). Os três campos
+porque são as três formas de lembrar de uma consulta — pelo que é ("cardiologista"), por quem atende
+("Dra. Helena") ou por onde é ("Clínica São José") — e quem procura raramente lembra qual dos três
+digitou no cadastro. Exigir o campo certo transformaria a busca num quiz.
+
+A função `normalizar` (minúsculas sem acento) saiu de dentro de `RemediosScreen` para
+`src/shared/normalizar-busca.ts`: era a segunda tela a precisar dela, e a terceira cópia é onde
+essas coisas começam a divergir.
+
+**[x] Feito: os passados viraram um acordeão "N anteriores" no fim da lista.** A dúvida era entre
+riscar, sumir ou manter. Nenhuma das três: compromisso concluído é **registro clínico** — "fui ao
+cardiologista em março, ele pediu hemograma" é exatamente o que `outcomeNotes` guarda, e é o que se
+leva à consulta seguinte. Sumindo, o app perde o histórico que promete; riscado, fica ilegível. Mas
+ele também não pode competir com o que ainda vai acontecer, que é o motivo de alguém abrir a tela.
+
+Então próximos abertos em cima, anteriores dobrados embaixo com a contagem no título — o mesmo
+padrão das doses não tomadas na tela de adesão. O acordeão recebe a superfície de cartão pelo mesmo
+motivo de lá: o fundo padrão dele quase empata com o da tela.
+
+**[x] Feito: traço horizontal separando a agenda do histórico.** O respiro sozinho não bastava: numa
+lista de cartões iguais, espaço a mais lê como item que falta, não como troca de assunto. O traço
+diz que ali termina "o que vem" e começa "o que foi". Só aparece quando há algo acima para separar.
+
+**[x] Feito: a contagem do topo conta só os próximos.** Ela descreve a lista logo abaixo dela, e ali
+estão apenas os que ainda não passaram — o histórico tem a própria contagem no título do acordeão.
+Com dois cadastrados sendo um já realizado, "2 compromissos cadastrados" acima de um único cartão
+visível parecia erro. Virou "1 compromisso agendado". Durante a busca o denominador do "X de Y"
+segue a mesma regra, pelo mesmo motivo.
+
+Com isso, a linha "Nenhum compromisso à frente" saiu: a contagem já diz "0 compromissos agendados",
+e repeti-lo num bloco próprio seria dizer duas vezes o mesmo.
+
+**[x] Feito: espaçamento da contagem igualado ao de Remédios** (`md` acima, `sm` abaixo), com o
+`listHeader` perdendo o padding próprio — somados, os dois criavam no topo um vão que nenhuma das
+duas telas tem.
+
+**[x] Feito: placeholder da busca encurtado para caber numa linha.** "Buscar por consulta,
+profissional ou local" quebrava e desalinhava a caixa; virou "Buscar compromisso". A busca continua
+olhando os três campos — o texto é convite, não especificação.
 
 ### Ajustes
 `src/telas/Ajustes/` — aparência, conta e dados.
@@ -352,10 +597,10 @@ temos que validar isso: quando o usuário aprova a permissão, o botão sai da t
   deixou de ser verdade. O painel agora tem **três** itens.
 -
 
-### Scanner
+### Scanner [x]
 `src/telas/Scanner/` — leitura do código de barras da caixa.
 
--
+Revisada em aparelho e aprovada sem alterações.
 
 ### Cadastro de Compromisso
 `src/telas/CadastroDeCompromisso/` — consulta, exame, renovação de receita.
@@ -366,8 +611,37 @@ temos que validar isso: quando o usuário aprova a permissão, o botão sai da t
 
 ## Fluxo de dose e alarme
 
-### Horário
+### Horário [x]
 `src/telas/Horario/` — tela aberta ao tocar numa notificação simples.
+
+o "Tomei" do lado direito, seguindo a mesma estética da tela de alarme (cores e ícones). O botão de
+ir pra home pode ser azul.
+- [x] Feito: **Pulei à esquerda, Tomei à direita**, com ícone (✗/✓) ao lado do texto em pílula — a
+  mesma ordem e forma do alarme, para quem responde nos dois lugares não reaprender onde fica o quê.
+  A cor difere porque o fundo difere: no alarme o cartão é azul e "Tomei" é o branco; aqui o fundo é
+  claro, então ele é o azul cheio. O que se mantém é a hierarquia (um cheio, um neutro) e o par de
+  ícones, que é o que se reconhece antes de ler. O botão respondido **preenche**, invertendo texto e
+  ícone — é a única pista visual de qual resposta está registrada, e o `accessibilityState.selected`
+  cobre quem usa leitor de tela. "Ir para a Home" virou azul cheio.
+
+Antes disso, dois alinhamentos com o resto do app: **padding do cartão** de 24 → 16 (como nas listas
+de Remédios, Compromissos e Estoque) e a **foto da caixa** ao lado do nome (miniatura de 52px com
+`contain`, sem corte). A foto faltava justamente aqui, que é o destino do "Ver e confirmar no app"
+quando há 4+ remédios — o caso em que reconhecer a caixa mais ajuda. Sem foto, nada ocupa o lugar.
+
+Chegou a sair sozinha depois da última resposta, e **a ideia foi revertida na mesma sessão**: a dose
+respondida mostra a dica de correção ("Registrou errado? Toque em 'Pulei' para corrigir"), e sair
+antes de ela ser lida torna a dica inútil. Quem responde por engano precisa do tempo de perceber —
+é a mesma razão pela qual as duas respostas continuam disponíveis depois de registradas, em vez de
+virarem um selo fixo. O botão de saída voltou a ficar sempre visível, agora como "Ir para a página
+inicial".
+
+💬 **Decisão registrada (05/09):** cogitamos remover a tela e mandar direto para a Home, já que com
+**um** remédio ela não acrescenta nada (a dose está na Home em "É AGORA", com os mesmos botões).
+Ficou mantida para todos os casos, por comportamento uniforme — uma notificação, um destino. O caso
+que a justifica é 2+ remédios no mesmo horário: "Tomei todas" resolve o comum, mas quem tomou um e
+não o outro não tem como dizer isso num botão, e na Home aquelas doses ficam espalhadas na agenda do
+dia inteiro.
 
 -
 
@@ -453,6 +727,20 @@ no binário atual (`Cannot find native module 'ExpoIntentLauncher'` → Home →
 `Linking.sendIntent`, que já vem no React Native e faz o mesmo. Regra que fica: dependência nativa
 nova não pode entrar no caminho de execução antes da build que a contém.
 
+**[x] Feito: o local onde a caixa está guardada aparece no alarme.** É a única hora em que essa
+informação vale de verdade: quem acorda às 6h precisa saber para onde ir, e o campo mora na tela de
+estoque, que ninguém abre no meio da noite. O `use-doses-do-alarme` passou a ler o `InventoryItem`
+junto (só pelo `storageLocation` — a quantidade não entra numa tela que pergunta "você tomou?").
+
+Pequeno e por último no bloco do remédio: às 3h o que precisa ser lido de longe é o horário e o
+nome, e este é o detalhe que se procura depois de já ter levantado. Vai com ícone de localização
+porque a orientação de tomada logo acima também é texto miúdo e claro — sem o marcador, "armário da
+cozinha" leria como continuação de "tomar em jejum". A opacidade fica no bloco e não em cada filho,
+para o ícone não ficar mais forte que a palavra que ele marca.
+
+Só no alarme, não na tela de Horário: aquela é consultada com o telefone na mão, e não é o caso de
+alguém recém-acordado procurando a caixa.
+
 ### ⏳ Conferir na próxima build
 
 Correções feitas em 05/09 que **não puderam ser validadas** no binário atual. Testar todas assim que
@@ -481,10 +769,103 @@ a build sair:
 
 -
 
-### Adesão
+### Adesão [x]
 `src/telas/Adesao/` — relatório de adesão ao tratamento.
 
--
+**[x] Feito: doses não tomadas viraram acordeão.** A lista aberta empurrava a tabela por
+medicamento e o botão do PDF para baixo, e quanto pior a adesão, mais longe eles ficavam — a tela
+devolvia um rolo de falhas justamente a quem mais precisa dela. O título carrega a contagem
+("12 doses não tomadas"), então o número, que é a informação, se lê sem abrir; o detalhe de cada
+dose fica para quem foi procurá-lo.
+
+**[x] Feito: seção de exportação separada por linha horizontal, com ícone de PDF.** O relatório
+não é mais um botão solto no fim da rolagem: virou um bloco com título próprio ("Seu relatório de
+adesão", no lugar de "levar para a consulta", que presumia o destino), subtítulo menor, e o divisor
+marcando que ali começa outra tarefa — ler a adesão e gerar o documento são coisas diferentes.
+
+**[x] Feito: seletor de período repetido dentro da seção de exportação.** O período do topo governa
+a leitura da tela; quem chega ao rodapé para gerar o PDF já rolou para longe dele e não sabe qual
+recorte vai sair no arquivo. Repetir o seletor ali responde a pergunta no lugar onde ela nasce.
+
+**[x] Feito: seleção de medicamentos e de compromissos no PDF.** Quem toma seis medicações e vai ao
+médico de uma delas não leva as outras cinco. São duas listas independentes, com setinha de abrir,
+porque o sistema não vincula medicamento a compromisso — quem sabe da relação é o paciente, e a
+escolha é dele. Agrupadas com `gap: spacing.sm` para lerem como um par, e não como dois campos
+distantes.
+
+**[x] Feito: botão de download em azul principal.** É a ação da seção, e estava com o mesmo peso
+visual dos seletores acima dele.
+
+**[x] Feito: "Dia a dia" — a adesão por dia, sempre dos últimos sete.** A taxa do topo descreve o
+conjunto e esconde a forma dele: seis dias perfeitos com um zerado dão quase o mesmo número que
+sete dias irregulares, e as duas situações pedem conversas clínicas diferentes. O mini-gráfico da
+Home mostra isso em barras, mas barra não se lê como número — dá para ver que um dia foi pior, não
+*quanto* pior.
+
+São sete dias fixos, e não o período selecionado acima. Noventa linhas para procurar 12 de julho
+não é leitura, é arquivo; e para essa pergunta existe o **calendário**, que mostra o dia dose por
+dose em vez de porcentagem. Vale registrar por causa de uma dúvida que apareceu no teste: os sete
+dias são **janela de leitura, não retenção** — os registros de dose ficam no banco
+indefinidamente, e é o que permite os relatórios de 30 e 90 dias existirem.
+
+**[x] Feito: o dia a dia virou uma faixa de sete colunas, não uma lista.** Sete linhas empilhadas
+davam peso de registro a uma informação que é um número por dia — e ainda empurravam o resto da
+tela para baixo. A faixa é um cartão só com sete colunas dentro (sigla em cima, número no meio,
+data embaixo), porque a semana é uma coisa só e a leitura que interessa é a **comparação entre os
+dias**, que a lista vertical não dá. É de propósito a mesma forma das sete barras do card da Home:
+quem viu lá reconhece aqui.
+
+O `%` fica **em cada célula**, e não só no título: "86" sozinho obriga a pessoa a procurar a unidade
+em outro canto da tela para saber o que está lendo. Ele vai aninhado no mesmo `Text`, menor e mais
+leve — assim acompanha a linha de base do número e encolhe junto, em vez de quebrar para baixo na
+coluna estreita. O valor usa `bodyLg` e não `headlineSm` porque, com fonte grande do sistema, "100%"
+em headline estoura a coluna, e número cortado é pior que número menor. Hoje se distingue por
+**peso**, não por cor — a cor da coluna já está reservada para a faixa da taxa.
+
+O título passou a dizer a **janela**, não a unidade: "Seus últimos sete dias". Com o `%` de volta às
+células, o que sobrava de dúvida era "sete dias de quando" — ainda mais porque esta faixa não
+acompanha o período escolhido acima.
+
+Sobre as cores: verde ≥ 80%, amarelo 50–79%, vermelho < 50%, iguais às da lista por medicamento. Os
+cortes vêm da literatura de adesão que o artigo cita (80% é o limiar clássico de tratamento
+aderente; abaixo de 50%, adesão pobre), e não de escolha estética.
+
+**[x] Feito: o bloco de doses não tomadas ganhou contraste.** O `Accordion` usa
+`surfaceContainerLow`, que quase empata com o fundo da tela — certo nos textos longos (termos,
+consentimento), onde ele é parágrafo e não cartão. No meio de uma tela de cartões ele sumia, e nada
+indicava que havia algo a abrir. Passou a usar a `surfaceContainerLowest` dos cartões vizinhos, via
+uma prop `style` nova no componente (o padrão dele não mudou, então as outras telas seguem iguais).
+No tema de alto contraste ele também recebe borda, senão seria o único bloco sem contorno
+justamente no tema em que a sombra não se enxerga.
+
+**[x] Feito: a barra do gráfico da Home entrou em cada coluna, agora com o número junto.** No card
+da Home a barra aparece sozinha e não diz o que significa — dá para ver que um dia foi pior, não
+*quanto* pior. Aqui as duas leituras andam juntas: a **forma** se compara de relance entre as sete
+colunas, o **número** é o que se cita ao médico.
+
+**[x] Feito: o gráfico ficou idêntico ao da Home.** Primeira versão tinha desenho próprio (56px,
+trilho cinza atrás, barras verde/amarelo/vermelho). Dois gráficos diferentes para o **mesmo dado**
+fazem o leitor procurar uma diferença que não existe — as sete barras daqui e as de lá saem do mesmo
+cálculo. Agora compartilham altura (80px), cor (`primary` a 0.2, com o dia de hoje em opacidade
+cheia), raio, `gap` e o traço fino de 2px para dia sem dose. O trilho saiu junto: a Home nunca teve,
+e sem ele a leitura ficou mais limpa no aparelho.
+
+O número também virou azul. A faixa clínica (verde/amarelo/vermelho) segue **só na lista por
+medicamento**, e é o lugar onde ela aponta para uma ação: qual remédio está falhando. Na semana ela
+pintava um veredito diário que ninguém trata dia a dia. Barra de 0% mantém 3px de mínimo — um dia
+zerado é informação, e a coluna vazia se confundiria com o traço de "não havia dose".
+
+Dia sem dose agendada mostra um traço, e não "0%": não houve falha, houve ausência de dado. A conta
+só considera doses cujo horário já passou, a mesma regra da taxa geral (RN20) — a dose das 22h não
+pode contar contra alguém às 15h. Regra em `src/domain/use-cases/adesao-por-dia.ts`, com 7
+verificações em `scripts/conferir-adesao-por-dia.mjs` (incluindo o agrupamento por dia **local**:
+com `toISOString`, uma dose das 22h cairia no dia seguinte).
+
+**[x] Feito: "Ver minha adesão" no card de acompanhamento semanal da Home.** A seta no canto dizia
+que algo abria, mas não o quê — e o que abre é a tela onde a adesão se lê por dia e o PDF da
+consulta se gera, nada disso adivinhável de um mini-gráfico. O card inteiro continua tocável para
+quem já sabe; a chamada é para quem não sabe. Ela vai com `pointerEvents="none"`, então o toque
+atravessa para o card: um destino, um alvo, um nó só no leitor de tela.
 
 ---
 
@@ -575,10 +956,64 @@ medicações (mesmo placeholder e tal).
 
 -
 
-### Conta
+### Conta [x]
 `src/telas/Conta/` — dados da conta, sincronização, exclusão.
 
--
+O conteúdo já estava resolvido (seções nomeadas, textos que mudam conforme haja conta vinculada,
+exportar posicionado antes de apagar). Os ajustes foram de estética.
+
+**[x] Feito: o subtítulo das linhas ficou menor.** Estava em `bodyMd` (14px), quase do tamanho do
+`bodyLg` do rótulo, e as duas linhas liam como um parágrafo de duas frases em vez de título e
+explicação. Em `bodySm` (12px) a hierarquia aparece: o rótulo se lê ao varrer a lista, a dica só
+quando o olho para naquela linha.
+
+**[x] Feito: faixa de abertura, com cor.** A tela começava direto num rótulo em maiúsculas, e o
+assunto — conta, privacidade, apagar dados — chegava sem nada que o enquadrasse. Agora abre com uma
+frase dizendo o que se resolve ali, sobre um fundo azul claro com o ícone de escudo. É o mesmo papel
+da faixa do hero em Ajustes: tirar o topo do aspecto de lista uniforme, e dar à tela o tom do que
+ela trata.
+
+**[x] Feito: a exportação virou um pacote de planilhas.** O JSON cumpria a portabilidade da LGPD
+(art. 18, V — "formato de uso comum e leitura por máquina"), mas cumpria só a metade que interessa a
+um programador: quem baixa a própria cópia quer **abrir e olhar**, e um JSON de nove tabelas
+aninhadas não se lê no celular nem se importa em lugar nenhum que o paciente use.
+
+Agora sai um `.zip` com uma planilha CSV por tabela, mais um `LEIA-ME.txt` explicando o que é cada
+uma e por que há linhas que a pessoa não vê mais no app (as com `deleted_at`). Um zip e não nove
+arquivos porque a tela de compartilhar do Android envia um por vez. Uma planilha por tabela e não
+uma só com tudo porque as nove têm colunas diferentes — juntá-las daria uma tabela com dezenas de
+colunas quase todas vazias.
+
+Dois detalhes que decidem se o arquivo é utilizável: **BOM** no início de cada CSV (sem ele o Excel
+no Windows lê como ANSI e "Medicação" vira "MedicaÃ§Ã£o") e escape RFC 4180 nas células (sem ele uma
+observação com vírgula desloca todas as colunas seguintes). Compactação por `fflate` — JS puro, sem
+módulo nativo, então funciona no binário atual.
+
+### Ajustes (continuação)
+
+**[x] Feito: as linhas de menu ficaram mais baixas.** O `Card` padrão tem `gap: gutter` (24) entre
+filhos — medida pensada para blocos de formulário, onde os campos precisam de ar. Numa lista de menu
+isso somava com o `minHeight: 52` de cada linha e dava **76px por item**: cada botão ocupava uma
+faixa de tela sem carregar mais informação por isso. Com `sm` (8) a linha mantém os 52 de alvo de
+toque e a lista volta a ler como lista.
+
+**[x] Feito: menos vão entre as seções.** `gutter` (24) no lugar de `lg` (32). A Home usa 40 porque
+lá cada bloco é um assunto independente que disputa atenção; aqui todas as seções são a mesma coisa
+— opções de configuração —, e o vão grande fazia cada título nascer isolado no meio de um vazio,
+sobretudo depois do indicador de sincronização.
+
+**[x] Feito: o aviso de "alterações não sincronizadas" saiu.** O contador roda **mesmo sem conta
+vinculada** — o comentário no código afirmava o contrário, e o teste em aparelho mostrou o aviso
+aparecendo numa conta local. Ali ele anunciava um problema que não existe e que a pessoa não pode
+resolver: usar o app só localmente é uma escolha legítima, não um estado pendente. Com conta
+vinculada também não se justificava, porque a sincronização é automática a cada volta ao app. O que
+resta de útil é o **estado** da cópia, e isso a tela de Conta já mostra no `IndicadorDeSync` — que,
+ao contrário deste, só aparece com conta. O componente `AvisoDePendencias` ficou no kit, sem uso,
+para o caso de a sincronização evoluir.
+
+**[x] Feito: as opções de tema alinhadas ao mesmo padrão.** O nome de cada tema estava em
+`headlineSm` — mais peso que o rótulo do menu que leva até ali. Virou `bodyLg`, com a descrição em
+`bodySm`: o mesmo par título/subtítulo de Conta e Ajustes.
 
 ---
 

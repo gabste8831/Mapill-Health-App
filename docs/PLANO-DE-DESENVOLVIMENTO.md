@@ -32,28 +32,56 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 0.0 RETOMADA — onde parei (02/09, 17h40)
+## 0.0 RETOMADA — onde parei (05/09)
 
 > **Leia esta seção primeiro se estiver voltando ao projeto, ou abrindo em outra máquina.** Ela diz
 > o que está em andamento agora; o índice do que falta no geral está em [0.1.1](#011-o-que-falta--índice-0209).
 
-### O que está rodando
+### Onde o projeto está
 
-**Build EAS `f9f36c0e`** (perfil `development`, commit `871a50a`) — disparada em 02/09 com o passe
-de design, **cancelada** depois de 1 h+ na fila.
-[Painel](https://expo.dev/accounts/gabsteffens/projects/mapill-app/builds/f9f36c0e-2324-49d7-8ab9-52fda8837d29).
+**A revisão de frontend acabou.** Todas as telas foram percorridas em aparelho, tela por tela, com o
+Gabriel apontando e cada apontamento virando execução exata. O registro completo, com o raciocínio
+de cada decisão, está em [`AJUSTES-POR-TELA.md`](AJUSTES-POR-TELA.md) — que passa a ser um documento
+de consulta, não mais de trabalho.
 
-⚠️ **A fila era um incidente do Expo**, não uma falha do projeto: "Elevated Linux worker queue times"
-(02/09, 14:44 PDT → *Identified* 14:52), causado por caches de pacote sob alta carga. Builds
-canceladas **contam na cota** de 30/mês; builds que o Expo derruba com "lost connection to the
-worker" costumam ser excluídas da cobrança. Conferir consumo com `eas build:list` antes da próxima.
+**O próximo passo é validar em binário.** O roteiro ganhou dois blocos novos para isso:
 
-**A próxima build sai com tudo**: o passe de design completo (14/14) já está commitado e é JS puro,
-então nada dele exigiu esperar por uma build. O que exige build nativa continua sendo só o Notifee.
+- **13.4** — as cinco correções de alarme/notificação que **nunca rodaram em build**. É por onde
+  começar: são do subsistema de maior risco do projeto (C1), e o app que vinha sendo usado é
+  anterior a elas.
+- **13.5** — a revisão tela a tela desta rodada, com os itens 🔬 que dependem de aparelho.
 
-⚠️ **Desinstale a versão anterior antes de instalar esta.** Os canais de notificação subiram para
-**v5**, e canal do Android congela na criação: instalar por cima manteria som e importância antigos,
-e a sessão inteira seria gasta diagnosticando algo que não é defeito.
+### O que saiu nesta rodada (05/09)
+
+Nove commits. Nada disso exigiu build nova exceto onde marcado — é tudo JavaScript, e rodou pelo
+Metro durante a revisão.
+
+| Frente | O que mudou |
+|---|---|
+| **Cores de estado** | Verde e vermelho ganharam tom de semáforo, separados por papel: `errorVivo` (#FF0000) em forma, `errorPreenchido` (#9E0008) em área, `error` (#C90000) em texto. O amarelo saiu do âmbar-terroso, e o texto do aviso virou cinza-quente |
+| **Adesão** | Faixa "Seus últimos sete dias", com a mesma barra do gráfico da Home. Regra pura em `adesao-por-dia.ts`, 7 verificações |
+| **Compromissos** | A antecedência do lembrete passou a governar quando o card aparece na Home. Regra em `compromissos-a-mostrar-na-home.ts`, 13 verificações. Busca e histórico dobrado na listagem |
+| **Home** | Doses registradas em lista compacta, seções com rótulo, marca-d'água nos cards cheios, pílula da aba removida |
+| **Listas** | Seletor de ordem sem rolagem, contagem junto da lista, card de estoque enxugado, ordem "menos na caixa" removida |
+| **Conta** | A exportação virou `.zip` com uma planilha CSV por tabela — o JSON cumpria a LGPD mas não servia a quem quer abrir e olhar |
+| **Alarme** | Mostra onde a caixa está guardada — é a única hora em que essa informação vale |
+
+**Duas regras de domínio novas**, ambas com verificação em Node:
+`src/domain/use-cases/adesao-por-dia.ts` e `compromissos-a-mostrar-na-home.ts`.
+
+**Uma dependência nova**: `fflate`, para compactar o export. JS puro, sem módulo nativo — não exige
+build. *(A regra que ficou do incidente do `expo-intent-launcher`: dependência nativa não entra no
+caminho de execução antes da build que a contém.)*
+
+### Pendência anotada para o refinamento
+
+**Os quatro temas.** A revisão foi feita e aprovada no tema **padrão**. Escuro, alto contraste e
+daltonismo receberam os tokens novos com valores calculados e conferidos por contraste, mas **não
+foram vistos em aparelho**. Detalhes em `AJUSTES-POR-TELA.md`, seção "Pendente para o refinamento".
+
+⚠️ **Desinstale a versão anterior antes de instalar a nova.** Canal do Android congela na criação, e
+o canal de lembrete mudou (era criado **mudo** por um engano de leitura da documentação). Instalar
+por cima manteria o defeito, e a sessão seria gasta diagnosticando algo já corrigido.
 
 ### O passe de design — **14 de 14 frentes entregues** ✅
 
@@ -119,10 +147,19 @@ sobre a build acima. `tsc` e `expo lint` limpos.
 
 ```
 npx tsc --noEmit && npx expo lint
-node scripts/conferir-relatorio.mjs      # 28
-node scripts/conferir-ids-de-aviso.mjs   # 14
-node scripts/conferir-rotulos-cmed.mjs   # 12
+node scripts/conferir-relatorio.mjs               # 28
+node scripts/conferir-ids-de-aviso.mjs            # 14
+node scripts/conferir-rotulos-cmed.mjs            # 12
+node scripts/conferir-edicao-em-cadeia.mjs        # 11
+node scripts/conferir-reagendamento.mjs           #  7
+node scripts/conferir-adesao-por-dia.mjs          #  7
+node scripts/conferir-compromissos-na-home.mjs    # 13
+node scripts/conferir-schemas.mjs                 # 0 tabelas com problema
 ```
+
+Os que dependem de `.ts` do domínio precisam de `node --experimental-strip-types`. Todos rodam em
+Node puro porque as regras são funções sem React nem SQLite — é o que permite testá-las sem
+aparelho.
 
 ---
 
@@ -2191,3 +2228,4 @@ aqui usa TalkBack ligado. Os quatro temas entram na fila de validação em apare
 | 2026-09-02 | Build | Revisão pré-build | **Conferência completa antes de gastar a cota do EAS.** `npx expo prebuild` roda sem erro e o manifesto gerado traz as **sete permissões** do alarme, `showWhenLocked`/`turnScreenOn` na MainActivity (plugin local aplicado), `alarme_de_dose.wav` em `res/raw` e `notification_icon.png` em drawable. Cheguei a suspeitar que o **reboot** não estava coberto — o Notifee não declara `RECEIVE_BOOT_COMPLETED` no manifesto de origem —, mas está dentro do AAR pré-compilado (`RebootBroadcastReceiver`), e o merge acontece na compilação. Falso alarme, mas valia checar: é o bloco 7 do roteiro. Credenciais do Supabase confirmadas no ambiente `development` do EAS. E o **`tsc` ficou limpo pela primeira vez**: o erro da rota `/alarme/[instante]`, que aparecia desde ontem, era **cache de tipos desatualizado** do expo-router e não defeito — a rota sempre existiu. Regenerado. |
 | 2026-09-02 | Design | Passe entregue | **Passe de design — dez frentes, da fundação às telas.** Nasceu de três incômodos que o Gabriel nomeou: o app não parecia "vivo", o azul sumia em metade das telas, e o teclado não saía. O levantamento achou a causa técnica do primeiro, e ela era mais concreta que gosto: **75 `Pressable` e zero feedback de toque** — `grep pressed` devolvia nada. Não era falta de animação, era nada responder ao dedo; e num público que já duvida da própria memória, a resposta a essa dúvida é **tocar de novo** — no botão de confirmar dose, isso registrava duas vezes. Feedback de toque virou a primeira camada da mesma proteção que a guarda de idempotência faz no banco. **Três bugs reais apareceram no caminho**, nenhum visível sem procurar: (a) `typography.bodySm` **não existia** e era espalhado com `...` em dois arquivos — spread de `undefined` não dá erro, os textos herdavam a fonte do sistema em silêncio; (b) o splash usava `#208AEF` com um comentário dizendo que espelhava o `app.json`, que tem `#196FF3` — o pisca de cor que o comentário existia para evitar acontecia a cada abertura; (c) o teclado não tinha o gesto que as pessoas tentam primeiro (tocar em área vazia): zero `TouchableWithoutFeedback` no app, e `returnKeyType` só na busca. **O que mudou de estrutura**: `interaction.ts` (o toque, num lugar só), `bodySm` e `caption` fechando a escala (30 `fontSize` soltos → 10, todos display de instância única e documentados), `RodapeDeFormulario` (que **sai de cena** com o teclado aberto em vez de colar nele), `IconButton` variante `sutil`, e `gapEntreSecoes` para separar assuntos de itens. **O azul entrou por tela, e não por template** — cheguei a extrair um `HeroDeTela` genérico e o Gabriel corrigiu a tempo: ele gostou da *presença* da cor no Ajustes, não do formato. Então cada tela ganhou cor no elemento que importa para ela (o número da adesão, o "Repor" do estoque, o marcador de foto em Remédios), e nenhuma virou cópia de outra. **Os rótulos da CMED** passaram a ser capitalizados **só na exibição** — o dado gravado continua sendo o que a Anvisa publicou, porque a busca por EAN depende dele. Quem escolhe a sugestão também grava capitalizado: antes, cadastrar pelo catálogo e cadastrar à mão produziam nomes diferentes para o mesmo remédio. 54 verificações em Node ao todo (28 relatório, 14 ids de aviso, 12 rótulos CMED). |
 | 2026-09-03 | Design | Sistema de temas entregue | **Dark mode, alto contraste e um modo sem depender de cor — os três escolhíveis em Ajustes, junto do tema Padrão.** Pedido concreto do Gabriel, e a barreira era técnica antes de ser visual: 567 usos de cor em 99 arquivos, todos dentro de `StyleSheet.create`, que roda uma vez na importação e nunca mais — trocar de tema sem migrar não repinta nada. A saída foi um motor onde `PaletaDeTema` é **derivado** da paleta padrão (`shared/theme/temas/tipos.ts`): acrescentar uma cor no tema padrão quebra a compilação de qualquer tema que não a defina, então é impossível um tema ficar pela metade. Migração mecânica (`estilosDoTema` no lugar de `StyleSheet.create`, `useEstilos` no componente) e rastreada por `scripts/tema-pendente.mjs`, que lista por arquivo e linha todo `colors.` fora do motor — resposta à preocupação do Gabriel de não conseguir identificar pontos não mapeados. **Escuro** pensado pro uso real à noite (dose das 22h, alarme de madrugada): sem preto absoluto, elevação por luz e não sombra, cores fortes clareiam em vez de escurecer. **Alto contraste** mira quem tem catarata ou degeneração macular (>50% de incidência acima dos 65, a faixa que mais toma remédio): preto/branco absolutos, contorno no lugar da sombra. **Sem depender de cor** cobre daltonismo (~1 homem em 12): não troca a paleta por completo, obriga todo estado que hoje só usa cor a repetir o sinal em ícone e texto. **Dois bugs reais só a migração revelou**: a wordmark "Mapill" (imagem PNG com texto preto fixo) desaparecia por completo no header escuro — corrigida desenhando a marca com `react-native-svg` e texto de verdade, cor lida do tema; e o card "Nenhum remédio cadastrado" ficava branco sólido no escuro porque quatro arquivos ainda liam a versão **estática** do token de cartão em vez da versão reativa ao tema — mesma classe de erro das varreduras de acessibilidade de 31/08 e 02/09 (valor copiado em vez de importado). Migração foi de 99 para **3 arquivos** pendentes, e os 3 são exceções corretas (cor de canal de notificação Android, e o Splash que roda antes do tema carregar). `tsc` e `expo lint` limpos. Detalhes, tabela de progresso e os dois bugs em [6.7](#67-sistema-de-temas--escuro-alto-contraste-sem-depender-de-cor). ⚠️ Testado no navegador nos temas Padrão e Escuro; Alto contraste e Sem depender de cor tiveram só o motor conferido — os quatro entram na fila de validação em aparelho. |
+| 2026-09-05 | Revisão | Frontend fechado | **A revisão tela a tela terminou — todas as telas percorridas em aparelho, com cada apontamento virando execução exata.** Nove commits. O que mudou de estrutura: **as cores de estado passaram a ser três tokens por cor, e não um**, porque a régua da WCAG muda conforme o papel — `errorVivo` (#FF0000) em ícone e faixa, onde 3:1 basta; `errorPreenchido` (#9E0008) em área grande, onde quem precisa de contraste é o texto branco por cima; `error` (#C90000) em palavra, onde valem 4.5:1. Os três partilham o matiz 0, e é isso que faz o app parecer ter um vermelho só em vez de três parecidos. O tom do preenchido saiu do **tema de alto contraste**: o Gabriel o reconheceu no aparelho como o que procurava, e o contraste confirmou (8.55:1). Três tentativas foram descartadas por medição, não por gosto — verde grama de catálogo dá 2.28:1 e some até como ícone; `#FF0000` como fundo deixa o texto branco em 4.00:1; laranja como aviso fica a 17° do vermelho, e o que separa "acaba em cinco dias" de "acabou" é diferença de espécie, não de grau. **O amarelo de aviso perdeu o marrom**: ele vinha de escurecer o próprio âmbar até passar no contraste, e envelhecia o bloco inteiro — agora a cor vive no fundo e no ícone, e o texto é cinza-quente. **Duas regras de domínio novas**, ambas puras e verificadas em Node: `adesao-por-dia.ts` (7 verificações) e `compromissos-a-mostrar-na-home.ts` (13). A segunda resolve um descompasso real que o teste em aparelho expôs: o lembrete de compromisso disparava a notificação e a Home não confirmava nada — agora **a antecedência pedida é a janela do card**, então as duas leem o mesmo número e não têm como discordar. **A exportação de dados virou `.zip` de planilhas CSV**: o JSON cumpria a portabilidade da LGPD (art. 18, V) mas só a metade que interessa a um programador — quem baixa a própria cópia quer abrir e olhar, e um JSON de nove tabelas aninhadas não se lê no celular. Dois detalhes decidem se o arquivo serve: BOM no início de cada CSV (sem ele o Excel no Windows lê como ANSI) e escape RFC 4180 (sem ele uma observação com vírgula desloca as colunas). `fflate` é JS puro — não exige build, o que importa depois do incidente do `expo-intent-launcher`. **Três defeitos que a revisão revelou sem procurar**: (a) o quadrado atrás do dia selecionado no calendário era o **ripple do Android** desenhado no `Pressable` retangular, não o círculo — o círculo sempre esteve certo; (b) o aviso de "alterações não sincronizadas" aparecia **sem conta vinculada**, contrariando o comentário no próprio código, e ali anunciava um problema que a pessoa não podia resolver; (c) os rótulos de estado ("ATRASADA", "É AGORA") usavam os tokens `on*Container`, calibrados para container cheio — sobre o cartão branco davam um vermelho que não se parecia com a faixa a um centímetro dali. ⚠️ **A revisão foi feita no tema padrão.** Os outros três receberam os tokens novos com valores conferidos por contraste, mas não foram vistos em aparelho — pendência anotada para o refinamento. 92 verificações em Node ao todo. |
