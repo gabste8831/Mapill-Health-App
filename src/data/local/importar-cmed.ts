@@ -33,7 +33,37 @@ type CmedJson = {
  * simplesmente não sugere nada, e o cadastro manual funciona igual. Bloquear a splash por 7 mil
  * inserções seria pagar um preço visível por um ganho opcional.
  */
+/**
+ * A importação em curso, quando há uma.
+ *
+ * Existe para quem **escreve** no banco poder esperar por ela. A importação é assumidamente
+ * demorada e roda fora do caminho crítico, mas enquanto ela acontece o banco tem um escritor
+ * ocupando espaço — e uma segunda escrita pesada no meio (a sincronização do login, por exemplo)
+ * disputa com ela sem necessidade.
+ *
+ * `null` quando não há importação rodando, que é o caso comum: ela só acontece na primeira abertura.
+ */
+let importacaoEmCurso: Promise<void> | null = null;
+
+/**
+ * Espera a importação da CMED terminar, se houver uma.
+ *
+ * Resolve na hora quando não há — então chamar isto nunca custa nada depois da primeira abertura.
+ */
+export function aguardarCatalogoCmed(): Promise<void> {
+  return importacaoEmCurso ?? Promise.resolve();
+}
+
 export async function importarCatalogoCmed(): Promise<void> {
+  // Reusa a execução em curso: duas chamadas concorrentes fariam a mesma importação duas vezes.
+  if (importacaoEmCurso !== null) return importacaoEmCurso;
+  importacaoEmCurso = executarImportacao().finally(() => {
+    importacaoEmCurso = null;
+  });
+  return importacaoEmCurso;
+}
+
+async function executarImportacao(): Promise<void> {
   const database = getDatabase();
 
   const existente = await database.getFirstAsync<{ total: number }>(

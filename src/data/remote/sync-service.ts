@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 
 import { getDatabase } from "../local/database";
+import { aguardarCatalogoCmed } from "../local/importar-cmed";
 import { supabase } from "./supabase-client";
 import {
   COLUNAS_DE_ARQUIVO_LOCAL,
@@ -381,6 +382,20 @@ export async function sincronizar(): Promise<ResultadoDaSync> {
 async function executarSync(): Promise<ResultadoDaSync> {
   let enviados = 0;
   let recebidos = 0;
+
+  /**
+   * Espera a importação da CMED, se houver uma em curso.
+   *
+   * As duas são escritas pesadas — 21 mil inserções de um lado, o banco inteiro do outro — e na
+   * primeira abertura elas caem no mesmo instante: o catálogo carrega em segundo plano, e a
+   * sincronização roda no login. O WAL e o `busy_timeout` fazem a colisão ser tolerada em vez de
+   * recusada, mas tolerar não é o mesmo que evitar: enfileirar custa nada e deixa cada uma correr
+   * no seu ritmo.
+   *
+   * Resolve imediatamente quando não há importação, que é o caso de toda abertura depois da
+   * primeira.
+   */
+  await aguardarCatalogoCmed();
 
   try {
     const { data } = await supabase!.auth.getUser();

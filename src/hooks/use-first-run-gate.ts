@@ -155,10 +155,9 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
            * Só acontece **aqui**, no ramo sem ficha. Quem já tem ficha local nem chega nesta linha
            * (o `return` acima), então a abertura comum do dia a dia não espera por rede nenhuma.
            */
-          try {
-            await sincronizar();
-          } catch (cause) {
-            console.error("Não foi possível restaurar os dados na abertura:", cause);
+          const { erro } = await sincronizar();
+          if (erro !== null) {
+            console.error("Não foi possível restaurar os dados na abertura:", erro);
           }
           if (!ativo) return;
           await continueAfterLogin();
@@ -205,10 +204,13 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
      * é o que ele sabe fazer offline. O pull da próxima abertura reconcilia, e o LWW por
      * `updated_at` resolve o encontro das duas versões.
      */
-    try {
-      await sincronizar();
-    } catch (cause) {
-      console.error("Não foi possível restaurar os dados no login:", cause);
+    const { recebidos, erro } = await sincronizar();
+    if (erro !== null) {
+      // `sincronizar` não relança: ela devolve o erro no resultado, para a UI decidir. Aqui a
+      // decisão é seguir — o onboarding é o que o app sabe fazer offline.
+      console.error("Não foi possível restaurar os dados no login:", erro);
+    } else if (__DEV__) {
+      console.log(`[Mapill] login restaurou ${recebidos} registro(s) da nuvem`);
     }
 
     await continueAfterLogin();
