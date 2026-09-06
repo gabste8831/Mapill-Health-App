@@ -1,7 +1,6 @@
 import { Platform } from "react-native";
 
 import { getDatabase } from "../local/database";
-import { aguardarCatalogoCmed } from "../local/importar-cmed";
 import { supabase } from "./supabase-client";
 import {
   COLUNAS_DE_ARQUIVO_LOCAL,
@@ -39,22 +38,17 @@ export type EstadoDaSync = {
 };
 
 /**
- * Onde fica a marca d'água do pull.
+ * A marca d'água do pull mora em `sync_state`, criada pela **migration 016**.
+ *
+ * Ela nascia aqui, com um `CREATE TABLE IF NOT EXISTS` no começo de cada sincronização, e isso era
+ * um defeito silencioso: **alterar schema exige lock exclusivo do banco**, que nem o WAL dispensa.
+ * Na primeira abertura o comando caía sobre a importação do catálogo da CMED, e a restauração
+ * falhava com `database is locked` logo no login.
  *
  * Uma tabela local comum, e não `AsyncStorage`: a marca precisa ser apagada junto com os dados no
  * "apagar tudo", e o que mora no banco some com o banco. Guardada fora dele, ela sobreviveria ao
  * apagamento e o app concluiria que já baixou dados que não tem mais.
  */
-const SQL_TABELA_DE_CONTROLE = `
-CREATE TABLE IF NOT EXISTS sync_state (
-  table_name TEXT PRIMARY KEY NOT NULL,
-  last_pulled_at TEXT
-);
-`;
-
-async function garantirTabelaDeControle(): Promise<void> {
-  await getDatabase().execAsync(SQL_TABELA_DE_CONTROLE);
-}
 
 async function lerMarcaDagua(tabela: TabelaSincronizavel): Promise<string | null> {
   const row = await getDatabase().getFirstAsync<{ last_pulled_at: string | null }>(
@@ -384,29 +378,24 @@ async function executarSync(): Promise<ResultadoDaSync> {
   let recebidos = 0;
 
   /**
-   * Espera a importação da CMED terminar, se houver uma em curso.
+   * **Não** espera a importação da CMED, e isso é deliberado.
    *
-   * As duas são escritas pesadas, e na primeira abertura caem no mesmo instante: o catálogo carrega
-   * em segundo plano, e a sincronização roda no login. Mesmo com WAL, `busy_timeout` e a importação
-   * fatiada em lotes, deixá-las intercaladas faria cada escrita da sync disputar com o lote em
-   * curso — funcionaria, mas por tolerância, e o comportamento passaria a depender de quem chegou
-   * primeiro.
+   * Uma versão anterior esperava, para evitar duas escritas pesadas ao mesmo tempo. O efeito foi
+   * pior que o problema: numa instalação nova a importação acabara de começar (21 mil inserções), e
+   * o login ficava parado até ela terminar — tempo suficiente para o gate reavaliar, não encontrar
+   * ficha nenhuma e devolver a pessoa à **tela de login**. Ela tentava de novo, e de novo, sem
+   * nunca entrar.
    *
-   * Enfileirar é mais previsível e custa pouco: o catálogo é conveniência do cadastro, e a
-   * restauração é o que a pessoa está esperando ver na tela.
-   *
-   * Resolve imediatamente quando não há importação — o caso de toda abertura depois da primeira.
+   * A contenção que a espera evitava já está resolvida onde devia estar: a importação roda em lotes
+   * transacionados, soltando o banco entre eles, e o `busy_timeout` cobre o resto. Fazer o caminho
+   * crítico do login esperar por uma conveniência do cadastro era a troca errada.
    */
-  await aguardarCatalogoCmed();
-
   try {
     const { data } = await supabase!.auth.getUser();
     const userId = data.user?.id;
     // Sem conta vinculada não há para onde sincronizar, e isso não é erro: é o modo em que o app
     // funciona por padrão.
     if (userId === undefined) return { enviados: 0, recebidos: 0, erro: null };
-
-    await garantirTabelaDeControle();
 
     // Na ordem das dependências: pai antes de filho, para nenhuma linha chegar órfã do outro lado.
     for (const tabela of TABELAS_SINCRONIZAVEIS) {
@@ -456,7 +445,6 @@ export async function estadoDaSync(): Promise<EstadoDaSync> {
   if (!persistsLocally || supabase === null) return { ultimaSync: null, pendentes: 0 };
 
   try {
-    await garantirTabelaDeControle();
     const database = getDatabase();
 
     let pendentes = 0;

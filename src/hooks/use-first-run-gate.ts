@@ -1,5 +1,5 @@
 import * as Crypto from "expo-crypto";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Platform } from "react-native";
 
 import { CURRENT_TERMS_VERSION } from "@/telas/Consentimento/texto-legal";
@@ -104,6 +104,23 @@ async function hasValidConsent(): Promise<boolean> {
 export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   const [step, setStep] = useState<FirstRunStep>("indeciso");
 
+  /**
+   * Se a etapa inicial já foi decidida uma vez.
+   *
+   * O efeito abaixo existe para responder **uma** pergunta, na abertura: onde esta pessoa está no
+   * onboarding. Sem esta trava ele reavaliava a cada mudança de `step` — e como o próprio efeito
+   * chama `setStep`, ele se reexecutava sozinho.
+   *
+   * Isso quebrava o login. Quem entrava com o Google numa instalação nova via a tela de login
+   * **voltar**: a sincronização ainda estava restaurando, `hasCompletedProfile()` respondia não, e o
+   * efeito mandava de volta para `login` por cima da decisão que o login acabara de tomar. Tentar
+   * outra vez dava no mesmo, indefinidamente.
+   *
+   * `useRef` e não estado: mudar isto não deve provocar render, e ele não participa do que a tela
+   * desenha.
+   */
+  const jaDecidiu = useRef(false);
+
   /** Decide o destino depois do login (com ou sem conta), respeitando o que já foi cumprido. */
   const continueAfterLogin = useCallback(async () => {
     if (!(await hasValidConsent())) {
@@ -129,6 +146,11 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
    */
   useEffect(() => {
     if (!isDatabaseReady) return;
+    // Uma decisão por abertura. Depois dela, quem move o gate são as ações da pessoa (entrar,
+    // aceitar, salvar a ficha) e o `restartFirstRun` do "apagar tudo".
+    if (jaDecidiu.current) return;
+    jaDecidiu.current = true;
+
     let ativo = true;
     void (async () => {
       try {
