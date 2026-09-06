@@ -29,6 +29,15 @@ export type GoogleSignInResult = "signed-in" | "not-configured";
 
 export type FirstRunGate = {
   step: FirstRunStep;
+  /**
+   * A restauração da nuvem está em curso.
+   *
+   * A tela usa isto para cobrir a espera. Sem cobrir, quem entra com o Google vê a tela de login
+   * **voltar** por alguns segundos antes de a Home aparecer — o gate ainda não sabe para onde ir,
+   * porque a ficha só chega quando o pull termina. Uma tela de login que reaparece depois de você
+   * ter entrado lê como falha, e não como espera.
+   */
+  restaurando: boolean;
   signInWithGoogle: () => Promise<GoogleSignInResult>;
   continueWithoutLogin: () => Promise<void>;
   acceptConsent: () => Promise<void>;
@@ -103,6 +112,7 @@ async function hasValidConsent(): Promise<boolean> {
  */
 export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   const [step, setStep] = useState<FirstRunStep>("indeciso");
+  const [restaurando, setRestaurando] = useState(false);
 
   /**
    * Se a etapa inicial já foi decidida uma vez.
@@ -177,9 +187,14 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
            * Só acontece **aqui**, no ramo sem ficha. Quem já tem ficha local nem chega nesta linha
            * (o `return` acima), então a abertura comum do dia a dia não espera por rede nenhuma.
            */
-          const { erro } = await sincronizar();
-          if (erro !== null) {
-            console.error("Não foi possível restaurar os dados na abertura:", erro);
+          if (ativo) setRestaurando(true);
+          try {
+            const { erro } = await sincronizar();
+            if (erro !== null) {
+              console.error("Não foi possível restaurar os dados na abertura:", erro);
+            }
+          } finally {
+            if (ativo) setRestaurando(false);
           }
           if (!ativo) return;
           await continueAfterLogin();
@@ -226,13 +241,20 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
      * é o que ele sabe fazer offline. O pull da próxima abertura reconcilia, e o LWW por
      * `updated_at` resolve o encontro das duas versões.
      */
-    const { recebidos, erro } = await sincronizar();
-    if (erro !== null) {
-      // `sincronizar` não relança: ela devolve o erro no resultado, para a UI decidir. Aqui a
-      // decisão é seguir — o onboarding é o que o app sabe fazer offline.
-      console.error("Não foi possível restaurar os dados no login:", erro);
-    } else if (__DEV__) {
-      console.log(`[Mapill] login restaurou ${recebidos} registro(s) da nuvem`);
+    setRestaurando(true);
+    try {
+      const { recebidos, erro } = await sincronizar();
+      if (erro !== null) {
+        // `sincronizar` não relança: ela devolve o erro no resultado, para a UI decidir. Aqui a
+        // decisão é seguir — o onboarding é o que o app sabe fazer offline.
+        console.error("Não foi possível restaurar os dados no login:", erro);
+      } else if (__DEV__) {
+        console.log(`[Mapill] login restaurou ${recebidos} registro(s) da nuvem`);
+      }
+    } finally {
+      // `finally`: se a restauração explodir, o overlay não pode ficar preso na tela por cima de
+      // um app que continua funcionando.
+      setRestaurando(false);
     }
 
     await continueAfterLogin();
@@ -305,6 +327,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
 
   return {
     step,
+    restaurando,
     signInWithGoogle,
     continueWithoutLogin: continueAfterLogin,
     acceptConsent,

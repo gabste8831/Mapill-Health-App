@@ -24,7 +24,7 @@ import { useFirstRunGate } from '@/hooks/use-first-run-gate';
 import { ConsentimentoScreen } from '@/telas/Consentimento/ConsentimentoScreen';
 import { FichaDeSaudeScreen } from '@/telas/FichaDeSaude/FichaDeSaudeScreen';
 import { LoginScreen } from '@/telas/Login/LoginScreen';
-import { SplashOverlay } from '@/ui';
+import { OverlayDeProgresso, SplashOverlay } from '@/ui';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -174,6 +174,15 @@ function ConteudoDaRaiz() {
       <StatusBar style={tema.esquema === 'escuro' ? 'light' : 'dark'} />
       <SplashOverlay />
       {conteudoDoPasso()}
+      {/* Cobre a espera da restauração, e fica **fora do passo** pelo mesmo motivo do
+          `SplashOverlay`: ela acontece entre dois passos, não dentro de um. Sem isto, quem entra
+          com o Google vê a tela de login voltar por alguns segundos antes da Home — o gate ainda
+          não sabe para onde ir, porque a ficha só chega quando o pull termina. */}
+      <OverlayDeProgresso
+        visivel={gate.restaurando}
+        titulo="Restaurando seus dados"
+        descricao="Estamos trazendo seus medicamentos, horários e histórico da sua conta."
+      />
     </ThemeProvider>
   );
 }

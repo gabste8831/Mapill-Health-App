@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import { Platform } from "react-native";
 
 import { getDatabase } from "../local/database";
@@ -280,6 +281,45 @@ async function enviar(tabela: TabelaSincronizavel, userId: string): Promise<numb
  * O empate (mesmo `updated_at`) mantém o local. Não por preferência, mas porque o empate só
  * acontece quando os dois lados já têm a mesma coisa.
  */
+/**
+ * Zera o caminho de foto ou anexo cujo **arquivo não existe neste aparelho**.
+ *
+ * ## Por que é preciso
+ *
+ * Os anexos não sobem para a nuvem (decisão [E9]) — mas o **caminho** deles é uma coluna comum, e
+ * essa sobe. Num aparelho novo o app recebia `file:///data/user/0/…/ficha-foto.jpg`, uma string que
+ * aponta para lugar nenhum, e passava a acreditar que havia foto: a tela oferecia "Trocar foto" e
+ * "Remover" para uma imagem que não existe, e o quadrado ficava vazio sem explicação.
+ *
+ * Ausência de foto é um estado que o app sabe mostrar bem — "Adicionar foto", com o marcador
+ * neutro. O que ele não sabe é lidar com uma foto que diz existir e não abre.
+ *
+ * ## Por que verificar o arquivo, e não limpar sempre
+ *
+ * A sincronização também roda no **mesmo** aparelho, a cada volta ao primeiro plano. Ali o caminho
+ * é válido e o arquivo está lá: limpar sem verificar apagaria a foto de quem nunca trocou de
+ * celular, que é a maioria.
+ */
+function limparArquivosInexistentes(
+  tabela: TabelaSincronizavel,
+  linha: Record<string, unknown>,
+): void {
+  const colunas = COLUNAS_DE_ARQUIVO_LOCAL[tabela];
+  if (colunas === undefined) return;
+
+  for (const coluna of colunas) {
+    const caminho = linha[coluna];
+    if (typeof caminho !== "string" || caminho.length === 0) continue;
+
+    try {
+      if (!new File(caminho).exists) linha[coluna] = null;
+    } catch {
+      // Caminho malformado (de uma versão antiga, ou de outro sistema de arquivos) também não abre.
+      linha[coluna] = null;
+    }
+  }
+}
+
 async function receber(tabela: TabelaSincronizavel): Promise<number> {
   const database = getDatabase();
   const desde = await lerMarcaDagua(tabela);
@@ -317,6 +357,7 @@ async function receber(tabela: TabelaSincronizavel): Promise<number> {
     // Veio do servidor, logo já está sincronizada: sem isto, o próximo push a devolveria de volta
     // num vaivém infinito.
     linha.synced_at = remotaUpdatedAt;
+    limparArquivosInexistentes(tabela, linha);
 
     const colunas = Object.keys(linha);
     const atribuicoes = colunas
