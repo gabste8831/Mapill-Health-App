@@ -320,6 +320,21 @@ export function FichaDeSaudeScreen({
 
   function handleContinue() {
     if (!canContinue) return;
+
+    /**
+     * A alergia digitada e **não adicionada** entra junto ao salvar.
+     *
+     * O campo tem um `+` ao lado, e quem não o toca perde o que escreveu — a ficha salvava e o
+     * texto sumia sem aviso. Num campo de alergias isso é grave por dois motivos: é o dado que
+     * existe justamente para ser lido por outra pessoa numa emergência, e o silêncio faz a pessoa
+     * acreditar que informou.
+     *
+     * Salvar o rascunho é a leitura correta da intenção: quem digitou "Dipirona" e tocou em salvar
+     * quis registrar Dipirona. O botão continua existindo para quem vai adicionar a segunda.
+     */
+    const rascunho = allergyDraft.trim();
+    const alergias = rascunho.length > 0 ? [...allergies, rascunho] : allergies;
+
     onContinue({
       fullName: fullName.trim(),
       photoUri,
@@ -327,7 +342,7 @@ export function FichaDeSaudeScreen({
       dateOfBirth: dateOfBirthIso ?? "",
       biologicalSex,
       bloodType,
-      allergies,
+      allergies: alergias,
       emergencyContacts,
       notes: notes.trim().length > 0 ? notes.trim() : null,
     });

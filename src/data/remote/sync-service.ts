@@ -122,9 +122,51 @@ function paraRemoto(
       saida[coluna] = null;
       continue;
     }
+    /**
+     * As colunas `jsonb` sobem como **objeto**, e não como a string que o SQLite guarda.
+     *
+     * O app serializa alergias, contatos, posologia e instruções num `TEXT` local. Mandar essa
+     * string para uma coluna `jsonb` produz **duplo encoding**: o Postgres guarda *a string*
+     * `"[\"Dipirona\"]"` em vez do array, e na volta o `JSON.parse` do repositório devolve uma
+     * string onde a entidade espera lista.
+     *
+     * Desserializar aqui é o par simétrico do `JSON.stringify` em `paraLocal`: cada lado da
+     * fronteira recebe o formato que ele entende, e a conversão vive num lugar só.
+     */
+    if (COLUNAS_JSON.includes(coluna) && typeof valor === "string") {
+      saida[coluna] = interpretarJson(valor);
+      continue;
+    }
     saida[coluna] = valor;
   }
   return saida;
+}
+
+/**
+ * As colunas que são `jsonb` no Postgres e `TEXT` no SQLite.
+ *
+ * Nenhuma delas tem tabela relacional: são listas e uniões discriminadas que só fazem sentido
+ * inteiras, e quebrá-las em tabelas criaria junções para ler o que sempre se lê junto.
+ */
+const COLUNAS_JSON = [
+  "allergies",
+  "emergency_contacts",
+  "schedule",
+  "intake_instructions",
+];
+
+/**
+ * `'["Dipirona"]'` → `["Dipirona"]`, e texto inválido volta como está.
+ *
+ * O `catch` não é zelo excessivo: se uma linha antiga tiver conteúdo que não seja JSON válido,
+ * derrubar a sincronização inteira por causa dela seria trocar um dado perdido por todos.
+ */
+function interpretarJson(texto: string): unknown {
+  try {
+    return JSON.parse(texto);
+  } catch {
+    return texto;
+  }
 }
 
 function paraLocal(
@@ -142,8 +184,31 @@ function paraLocal(
     }
     // O Postgres devolve `timestamptz` como ISO com offset; o app grava em UTC com `Z`.
     // Normalizar aqui evita duas representações do mesmo instante convivendo no SQLite.
-    saida[coluna] =
-      valor instanceof Date ? valor.toISOString() : (valor as string | number | null);
+    if (valor instanceof Date) {
+      saida[coluna] = valor.toISOString();
+      continue;
+    }
+    /**
+     * As colunas `jsonb` voltam **desserializadas**, e precisam virar texto de novo.
+     *
+     * O app guarda alergias, contatos de emergência, posologia e instruções de tomada como JSON
+     * serializado numa coluna `TEXT` do SQLite — não há tabela relacional para nenhum deles. No
+     * Postgres as mesmas colunas são `jsonb`, então o PostgREST devolve **array/objeto de
+     * verdade**, e não a string que subiu.
+     *
+     * Sem esta conversão o valor chegava ao `runAsync` como objeto: o expo-sqlite não aceita esse
+     * tipo de parâmetro, e o registro inteiro falhava ou gravava algo que o `JSON.parse` do
+     * repositório não conseguia ler de volta. O sintoma aparecia como **dado que não voltou da
+     * nuvem** — no primeiro teste, as alergias.
+     *
+     * Feito por **tipo** e não por lista de colunas: uma coluna `jsonb` nova no futuro passa a ser
+     * tratada sozinha, sem depender de alguém lembrar de cadastrá-la aqui.
+     */
+    if (valor !== null && typeof valor === "object") {
+      saida[coluna] = JSON.stringify(valor);
+      continue;
+    }
+    saida[coluna] = valor as string | number | null;
   }
   return saida;
 }
