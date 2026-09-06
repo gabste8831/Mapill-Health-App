@@ -64,18 +64,32 @@ export const colors = {
    * `#A16207` é o dourado mais claro que ainda passa nos dois papéis — 4.92:1 sobre branco, 4.70:1
    * sobre o próprio `warningSurface`.
    *
-   * ## O texto é cinza-quente, e não âmbar escurecido
+   * ## O amarelo é a **luz**, não a tinta
    *
-   * `onWarningSurface` era `#7C3A06`: o mesmo matiz do âmbar levado até o contraste, e o resultado
-   * lia como marrom queimado — a combinação envelhecia o aviso inteiro. `#4A4436` é um cinza que
-   * puxa para o quente: convive com o fundo amarelo sem repetir o matiz dele, e dá 9.24:1.
+   * Três tentativas antes desta, e o erro era sempre o mesmo: tratar o amarelo como cor de texto.
+   * Ele não serve para isso — `#FFC107` dá **1.63:1** sobre branco, invisível. Escurecê-lo até
+   * passar produz marrom, que foi o `#7C3A06` original; fugir do marrom com cinza-quente produz o
+   * `#4A4436`, que deixou o bloco sem vida.
    *
-   * A cor do aviso passa a viver onde ela funciona — no fundo e no ícone —, e o texto fica neutro,
-   * que é o que texto de aviso precisa ser para ser lido depressa.
+   * O semáforo real resolve isso há um século: o amarelo é a **lâmpada acesa**, e o que se lê
+   * contra ele é escuro. Então `warningSurface` passou a ser o amarelo de verdade (`#FFC107`), e o
+   * texto sobre ele é quase-preto — **10.68:1**, o maior contraste de qualquer estado do app.
+   *
+   * `warning` continua âmbar escuro porque tem outro papel: é a cor do aviso quando ele aparece
+   * **sobre fundo branco**, como texto ou ícone solto, onde o amarelo vivo sumiria.
+   *
+   * ## Três tokens, e não dois
+   *
+   * `warningVivo` é o amarelo aceso, e só serve onde a área é **pequena e o texto é escuro** — o
+   * selo "acaba em 5 dias", uma faixa, um ponto. `warningSurface` continua pastel porque cobre
+   * blocos inteiros (a `Dica`, o painel de permissões, o lembrete de recontagem): amarelo cheio num
+   * painel de quatro linhas não avisa, agride.
    */
   warning: "#A16207",
-  warningSurface: "#FEFAE8",
-  onWarningSurface: "#4A4436",
+  warningVivo: "#FFC107",
+  onWarningVivo: "#231B00",
+  warningSurface: "#FDF3C4",
+  onWarningSurface: "#5C4A0F",
 
   /**
    * O vermelho de "isto falhou" — a dose atrasada, o estoque zerado, o botão de excluir.

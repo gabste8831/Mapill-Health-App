@@ -203,7 +203,8 @@ function CartaoDeEstoque({ item, onRecontar, onRepor, onConfigurarAviso }: ItemD
           name={critico ? "alert-circle" : alerta ? "warning" : "time-outline"}
           size={14}
           color={
-            critico ? cores.error : alerta ? cores.onWarningSurface : cores.onSurfaceVariant
+            // No alerta o fundo é o amarelo aceso, então o ícone escurece junto com o texto.
+            critico ? cores.error : alerta ? cores.onWarningVivo : cores.onSurfaceVariant
           }
         />
         <Text

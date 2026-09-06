@@ -60,6 +60,15 @@ export const temaDaltonismo: Tema = {
     warning: "#8A5A00",
     warningSurface: "#FBF0D9",
     onWarningSurface: "#5C3B00",
+    /**
+     * Aqui o aceso é **laranja**, e não amarelo.
+     *
+     * Amarelo puro é o que a protanopia mais confunde com verde — e neste tema o verde já virou
+     * turquesa justamente para se separar. Puxar o alerta para 38° o afasta dos dois, e a
+     * luminosidade alta mantém o efeito de "lâmpada" que o token existe para dar.
+     */
+    warningVivo: "#F59E0B",
+    onWarningVivo: "#231B00",
 
     /** Magenta-vermelho: separa da faixa do verde mesmo sem percepção de vermelho. */
     error: "#C2185B",

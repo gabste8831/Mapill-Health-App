@@ -83,6 +83,13 @@ export const temaEscuro: Tema = {
     warning: "#F5B54A",
     warningSurface: "#2B2718",
     onWarningSurface: "#F8D89A",
+    /**
+     * O amarelo aceso vale igual no escuro — é a mesma lâmpada, e o texto escuro contra ela
+     * continua sendo o que se lê. Um selo pequeno em amarelo cheio não incomoda à noite; o que
+     * incomodaria é um bloco inteiro, e esse continua com a superfície escura acima.
+     */
+    warningVivo: "#FFC107",
+    onWarningVivo: "#231B00",
 
     error: "#FF9A92",
     onError: "#5C0006",

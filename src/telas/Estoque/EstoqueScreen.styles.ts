@@ -117,7 +117,9 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     color: cores.onSurfaceVariant,
   },
   previsaoTextoEmAlerta: {
-    color: cores.onWarningSurface,
+    // Quase-preto sobre o amarelo aceso: 10.68:1, o maior contraste de qualquer estado do app —
+    // e é o que o semáforo faz, a lâmpada acesa com o desenho escuro contra ela.
+    color: cores.onWarningVivo,
   },
   previsaoTextoCritico: {
     // `error`, e não `onErrorContainer`: este texto fica sobre superfície clara, e o token de
@@ -148,8 +150,14 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    * Entrou na janela de reposição. Âmbar diluído, a mesma linguagem da `Dica` e do lembrete de
    * conferência logo acima — porque é a mesma natureza: apoio, não cobrança.
    */
+  /**
+   * O selo do prazo entrando na janela de reposição: **amarelo aceso**, e não pastel.
+   *
+   * É área pequena com texto curto — o caso em que o amarelo de semáforo funciona. Nos blocos
+   * grandes (a `Dica`, o painel de permissões) ele agrediria, e lá continua o `warningSurface`.
+   */
   previsaoEmAlerta: {
-    backgroundColor: cores.warningSurface,
+    backgroundColor: cores.warningVivo,
   },
   previsaoCritica: {
     backgroundColor: cores.errorSurface,

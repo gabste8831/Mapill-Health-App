@@ -58,6 +58,9 @@ export const temaAltoContraste: Tema = {
     warning: "#7A3D00",
     warningSurface: "#FFEBCC",
     onWarningSurface: "#3D1F00",
+    /** Amarelo cheio com preto absoluto: 12.6:1, e é exatamente o que este tema quer. */
+    warningVivo: "#FFC107",
+    onWarningVivo: "#000000",
 
     error: "#9E0008",
     onError: "#FFFFFF",
