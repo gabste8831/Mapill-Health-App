@@ -102,6 +102,7 @@ function paraRemoto(
   linha: Record<string, unknown>,
   colunasBooleanas: string[],
   colunasOrfas: string[],
+  colunasDeArquivo: string[],
 ): Record<string, unknown> {
   const saida: Record<string, unknown> = {};
   for (const [coluna, valor] of Object.entries(linha)) {
@@ -109,6 +110,24 @@ function paraRemoto(
     // Colunas que a migration seguinte substituiu e o SQLite nunca removeu: enviá-las faz o
     // PostgREST recusar o lote inteiro, porque no servidor elas nunca existiram.
     if (colunasOrfas.includes(coluna)) continue;
+    /**
+     * Caminho de arquivo local sobe como `null`, sempre.
+     *
+     * O arquivo em si **não sobe** (decisão E9), então o caminho descreve algo que só existe neste
+     * aparelho — `file:///data/user/0/…/foto.jpg` não abre em lugar nenhum além daqui. Mandá-lo
+     * fazia o aparelho novo receber um caminho que aponta para nada, acreditar que havia foto, e
+     * oferecer "Trocar foto" e "Remover" para uma imagem inexistente.
+     *
+     * `null` e não omitir a coluna: omitir deixaria o valor **antigo** no servidor, e um caminho de
+     * um aparelho que a pessoa nem usa mais é ainda pior que o do atual.
+     *
+     * A coluna continua existindo dos dois lados — ela é o lugar onde a URL do Storage entraria se
+     * o E9 deixar de estar fora de escopo. Enquanto isso, ela é honestamente vazia na nuvem.
+     */
+    if (colunasDeArquivo.includes(coluna)) {
+      saida[coluna] = null;
+      continue;
+    }
     if (colunasBooleanas.includes(coluna)) {
       saida[coluna] = valor === 1 || valor === true;
       continue;
@@ -238,12 +257,13 @@ async function enviar(tabela: TabelaSincronizavel, userId: string): Promise<numb
 
   const booleanas = COLUNAS_BOOLEANAS[tabela];
   const orfas = COLUNAS_ORFAS[tabela] ?? [];
+  const arquivos = COLUNAS_DE_ARQUIVO_LOCAL[tabela] ?? [];
   let enviados = 0;
 
   for (let i = 0; i < pendentes.length; i += TAMANHO_DO_LOTE) {
     const lote = pendentes.slice(i, i + TAMANHO_DO_LOTE);
     const payload = lote.map((linha) => ({
-      ...paraRemoto(linha, booleanas, orfas),
+      ...paraRemoto(linha, booleanas, orfas, arquivos),
       user_id: userId,
     }));
 

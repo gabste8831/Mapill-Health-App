@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 
 import { initializeDatabase } from "@/data/local/database";
 import { importarCatalogoCmed } from "@/data/local/importar-cmed";
+import { limparAnexosPerdidos } from "@/data/local/limpar-anexos-perdidos";
 
 /**
  * Roda as migrations do SQLite uma única vez na abertura do app e diz quando o banco está
@@ -24,6 +25,17 @@ export function useDatabaseReady(): boolean {
     if (Platform.OS === "web") return;
     initializeDatabase()
       .then(() => {
+        /**
+         * Anexos que a nuvem restaurou mas cujo arquivo não existe aqui.
+         *
+         * Sem `await` pelo mesmo motivo do catálogo: a tela não espera. No caso comum são três
+         * consultas que não retornam nada, e quando há o que limpar, a tela que mostraria a foto
+         * fantasma provavelmente nem foi aberta ainda.
+         */
+        void limparAnexosPerdidos().catch((cause: unknown) => {
+          console.error("Falha ao limpar anexos perdidos:", cause);
+        });
+
         /**
          * O catálogo da CMED carrega **depois** de liberar a tela, e sem `await`.
          *
