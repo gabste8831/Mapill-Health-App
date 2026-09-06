@@ -1,4 +1,4 @@
-# Roteiro de teste em aparelho
+﻿# Roteiro de teste em aparelho
 
 > **Este é o único roteiro de teste do projeto.** Ele tem duas partes, e a ordem importa:
 >
@@ -62,19 +62,32 @@
 >
 > ---
 >
-> ### Ordem sugerida desta rodada
->
-> **12.9 → 2 → 3 → 4 → 5 → 12 → 7 → 13 → 14 → 11**
->
-> | Bloco       | Por que nesta posição                                                                                          |
-> | ----------- | -------------------------------------------------------------------------------------------------------------- |
-> | **12.9**    | Primeiro: é o que acabou de mudar, e é a única build que ninguém viu ainda                                     |
-> | **2, 3, 4** | A troca de biblioteca invalidou o que passou em 01/09                                                          |
-> | **5, 12**   | Nunca rodaram                                                                                                  |
-> | **7**       | Precisa de tempo real correndo (reboot, bateria)                                                               |
-> | **13**      | TalkBack e fonte ampliada — depois que o visual estiver conferido                                              |
-> | **14**      | A varredura de regressão, com o olho já calibrado pelos anteriores                                             |
-> | **11**      | **Por último**: mexe no relógio e reinstala o app, e depois dele o estado do aparelho não serve para mais nada |
+> **A ordem desta rodada está em [Por onde começar](#-por-onde-começar)**, logo depois da preparação
+> — ela mudou em 06/09, quando os blocos de alarme passaram para o fim.
+
+## 📋 O que a rodada de 05/09 já respondeu
+
+> Para não retestar o que passou. **Se algum destes falhar agora, é regressão** — e vale avisar com
+> essa palavra, porque muda o diagnóstico.
+
+| Bloco | Resultado |
+|---|---|
+| **0** — Permissões | ✅ 100% |
+| **8** — Câmera e CMED | ✅ Funciona. Fica um ajuste: o nome do medicamento vem **todo em maiúsculas** e deveria vir capitalizado |
+| **9** — Fonte ampliada | ✅ Funciona, com uma ressalva: **os horários dos cards quebram linha** com a fonte no máximo |
+| **10.1** — Aviso de permissão | ✅ |
+| **10.3** — Adesão e relatório | ✅ Funciona. Um defeito aberto: a adesão só conta doses **cujo horário já passou** — quem confirma às 13h um remédio das 13h05 não aparece até o horário chegar |
+| **10.4 / 10.5** | ✅ |
+| **12** — Relatório em PDF | ✅ Sensacional, funcionando bem |
+| **12.9** — Passe de design | ✅ |
+| **13.5** — Revisão tela a tela | ✅ Estética aprovada. Falta conferir **os quatro temas** |
+| **14** — Regressão | ✅ |
+| **5** e **6** — Sync e export | ❌ **Reprovaram** e foram corrigidos em 05 e 06/09. É por onde a próxima rodada começa |
+| **7** e **11** — Alarme | ❌ **Reprovaram.** Achado: o Notifee foi arquivado, e o boot receiver dele nunca era invocado no Android 12+. Corrigido com migração para o fork mantido |
+
+**Ajustes pequenos ainda não feitos**, anotados dessa rodada: nome do EAN capitalizado, quebra de
+linha dos horários com fonte grande, adesão contando resposta antecipada, e a fonte do nome na
+lista de remédios um pouco menor.
 
 ## Como reportar
 
@@ -93,28 +106,47 @@ resto ok
 
 ## Antes de começar
 
-⚠️ **Build nova, e desinstale a anterior.** Quatro motivos que se somam:
+⚠️ **Build nova, e desinstale a anterior.** Os motivos se somam:
 
-1. Permissões novas no `app.json` (`USE_FULL_SCREEN_INTENT`, `ACCESS_NOTIFICATION_POLICY`), e
-   permissão não entra por recarga do Metro.
-2. **Notifee** é dependência nativa — é ele que abre o alarme em tela cheia.
-3. Os canais subiram para **`v5`** (02/09, com a troca de biblioteca). Um canal já criado fica
-   **congelado** no aparelho: som e importância não mudam por atualização. Instalar por cima
-   manteria o alarme mudo.
+1. Permissões novas no `app.json` — a última foi `RECEIVE_BOOT_COMPLETED` (06/09), e permissão não
+   entra por recarga do Metro.
+2. A biblioteca de avisos é **dependência nativa**, e ela mudou: o Notifee foi arquivado em
+   07/04/2026, e o app migrou para o fork mantido (`react-native-notify-kit`).
+3. Um canal de notificação já criado fica **congelado** no aparelho: som e importância não mudam por
+   atualização. Instalar por cima manteria o alarme mudo — foi assim que o defeito do canal sem som
+   sobreviveu a várias sessões.
 4. `expo-camera` é dependência nativa (bloco 8).
 
-⚠️ **Aparelho físico.** Emulador não serve para os blocos 1, 2 e 3 — o que está em jogo é o
+⚠️ **Aparelho físico.** Emulador não serve para os blocos de alarme — o que está em jogo é o
 comportamento do sistema com o app fechado e sob economia de bateria.
 
 ```bash
 npx expo start --dev-client
 ```
 
-**Confirme em 10 segundos que é a build certa:** abra o app com um remédio já cadastrado com
-lembrete. Deve aparecer o **painel de permissões** na Home, listando o que falta autorizar. Se não
-aparecer nada e o alarme não tocar, a build é antiga.
+**Confirme em 10 segundos que é a build certa:** abra `Ajustes → Desenvolvimento → Diagnóstico de
+avisos`. Se a seção "DESENVOLVIMENTO" não existir, a build é anterior a 06/09.
 
 ---
+
+## 🧭 Por onde começar
+
+A ordem abaixo é deliberada, e vale segui-la: **os blocos de alarme ficam por último** porque o 11
+mexe no relógio do sistema e reinstala o app, e o 7 exige reiniciar o aparelho. Depois deles o
+estado do celular não serve para mais nada.
+
+| Ordem | Blocos | Por quê |
+|---|---|---|
+| **1º** | [5](#5--sincronização-com-a-nuvem--d1) e [6](#6--exportar-e-apagar--d3) | Reprovaram em 05/09 e foram corrigidos. É o que mais interessa saber agora |
+| **2º** | [13.5](#135--a-revisão-tela-a-tela-0509) | A revisão visual. Nada mexe no estado do aparelho |
+| **3º** | [8](#8--câmera-e-base-de-medicamentos-b1-b3), [10](#10--os-menores-c2-c3-d2-b5), [12](#12--o-relatório-em-pdf-d4) | Já passaram em 05/09; reconferir o que mudou desde então |
+| **4º** | [9](#9--o-que-mudou-no-visual-30-e-3108), [13](#13--acessibilidade-com-o-talkback--e1), [14](#14--regressão-todas-as-telas) | Fonte grande, TalkBack, regressão geral |
+| **5º** | [14.5](#145--a-ferramenta-de-diagnóstico-nova-em-0609) → [0](#0--as-permissões-) → [15](#15----as-cinco-correções-que-só-esta-build-pode-provar) → [1](#1--o-alarme-em-tela-cheia-) → [2](#2--os-botões-da-notificação) → [3](#3--nada-de-alarme-órfão) → [4](#4--vários-remédios-no-mesmo-horário) → [7](#7--sobrevivência-) → [11](#11--os-casos-de-borda-do-alarme--c18) | **Todo o subsistema de alarme, junto e no fim.** O 14.5 abre a sequência: é a ferramenta que torna os outros baratos |
+
+**Com a tela de diagnóstico, o bloco de alarme fica mais barato.** `Ajustes → Desenvolvimento →
+Diagnóstico de avisos` mostra o que está agendado **antes** de você esperar o horário: se o aviso
+não aparece na lista, ele nunca ia tocar, e isso se descobre em cinco segundos. Ela também dispara
+um alarme de teste em 30 s, pelo mesmo caminho que o app usa de verdade.
 
 ---
 
@@ -303,10 +335,35 @@ nada**. Feche o app.
 
 > ✅ Volta para **"Tudo salvo na nuvem"** sozinho.
 
-**5.5** 🔬 **O teste que importa:** desinstale o app, instale de novo, entre **com a mesma conta**.
+**5.5** 🔴 **O teste que importa:** desinstale o app, instale de novo, entre **com a mesma conta**.
 
+> ✅ 🔴 **Não pede os termos de novo** — o consentimento válido veio da nuvem.
+> ✅ 🔴 **Não pede para preencher a ficha** — ela veio junto.
 > ✅ Remédios, tratamentos, histórico e compromissos **voltam**.
+> ✅ 🔴 Os **alarmes voltam agendados**: confira no diagnóstico (`Ajustes → Desenvolvimento`) que o
+> número de agendados bate com o esperado. As doses descem para o banco, mas o agendamento vive no
+> sistema operacional — o app tem que refazê-lo ao restaurar.
 > ✅ As **fotos não voltam** — esperado, anexos não sobem.
+
+**5.6** 🔴 **A ficha, campo por campo.** Abra `Ajustes → Ficha de saúde` e confira **todos**:
+
+> ✅ Nome, data de nascimento, sexo, tipo sanguíneo.
+> ✅ 🔴 **Alergias** — devem aparecer como fichinhas cinzas. Foi o campo que sumiu no teste de
+> 06/09, e o defeito atingia quatro colunas ao mesmo tempo.
+> ✅ 🔴 **Contatos de emergência** — mesma família de defeito.
+> ✅ Observações.
+
+**5.7** 🔴 **A posologia sobreviveu?** Abra um remédio cadastrado antes da reinstalação.
+
+> ✅ A frequência e os horários são os mesmos. _(A posologia também é coluna JSON, e viajava pelo
+> mesmo caminho que quebrou nas alergias.)_
+
+> **Por que estes passos ganharam detalhe.** O 5.5 reprovou em 05/09 — nada voltava, e o app pedia
+> termos e ficha de novo. A causa era **ordem**: o app perguntava ao banco local antes de o pull
+> rodar. Corrigido. Em 06/09, com a restauração já funcionando, faltaram **as alergias**: as colunas
+> JSON (`allergies`, `emergency_contacts`, `schedule`, `intake_instructions`) atravessavam sem
+> conversão entre o `TEXT` do SQLite e o `jsonb` do Postgres. Também corrigido, com 10 verificações
+> em Node — mas é em aparelho que se prova.
 
 🔬 **Anote:** quanto tempo até os dados aparecerem?
 
@@ -318,8 +375,16 @@ nada**. Feche o app.
 
 **6.1** **Ajustes** → **Conta e dados** → **MEUS DADOS** → **"Baixar uma cópia dos meus dados"**.
 
-> ✅ Abre o compartilhamento do Android. Salve e abra o arquivo.
-> ✅ É um JSON legível, com seções em português, e **seus dados estão lá**.
+> ✅ Abre o compartilhamento do Android. Salve o arquivo.
+> ✅ 🔴 É um **`.zip`**, não mais um `.json`. Dentro há uma planilha `.csv` por tabela e um
+> `LEIA-ME.txt`.
+> ✅ **Uma ficha de saúde só** no `ficha-de-saude.csv`. Duas significam que a restauração criou uma
+> segunda — foi o rastro que denunciou o defeito de 05/09.
+> 🔬 🔴 **Abra um CSV** (no celular ou mande para o computador). **Os acentos estão certos?**
+> "Medicação", não "MedicaÃ§Ã£o". É o ponto mais provável de falhar, e é o que decide se o arquivo
+> serve para alguma coisa.
+> 🔬 Cadastre um remédio com **vírgula na observação** antes de exportar, e confira que ela não
+> desloca as colunas da planilha.
 
 **6.2** 🔬 **Com a conta vinculada**, **"Apagar meus dados de saúde"** → confirme.
 
@@ -915,57 +980,6 @@ de sobrar, e o mais fácil de ver.
 
 ---
 
-## 13.4 — 🔴 As cinco correções que só esta build pode provar
-
-**Comece por aqui.** Estes cinco defeitos foram corrigidos no código mas **nunca rodaram em
-binário** — o app que você vinha usando é anterior a eles. São todos do subsistema de alarme e
-notificação, que é o coração do TCC: se algum falhar, é o que mais importa saber cedo.
-
-**1. A tela azul sobre outro aplicativo** 🔴. Cadastre um remédio com alarme para daqui a 2 minutos.
-**Abra o Instagram** (ou qualquer outro app) e fique navegando.
-
-> 🔬 A tela azul do alarme aparece **por cima** do outro aplicativo?
->
-> Antes só a notificação no topo aparecia. A correção é a permissão `SYSTEM_ALERT_WINDOW`, que é
-> justamente o que exige build nova — no binário anterior ela nem existia no manifesto. Confirme
-> antes em **Ajustes → alertas** que a permissão de "abrir sobre outros apps" está concedida.
->
-> Se **não** funcionar, teste o paliativo: tocar na notificação abre a **tela do alarme** (com foto,
-> adiar, silenciar) e não a de confirmação.
-
-**2. O alarme adiado toca na hora** 🔴. Deixe um alarme tocar, toque em **"Adiar 5 minutos"** e
-**bloqueie o celular**. Não toque nele.
-
-> 🔬 Ele volta a tocar em 5 minutos, com a tela ainda apagada?
->
-> Antes só tocava quando o celular era desbloqueado — o Android agrupava o alarme no Doze. Agora usa
-> a mesma categoria do despertador nativo.
-
-**3. A notificação tem som** 🔴. Cadastre um remédio com lembrete **de notificação** (não alarme),
-com o volume do celular alto.
-
-> 🔬 A notificação chega **com som**?
->
-> O canal era criado mudo por um engano de leitura da documentação. Como canal no Android é imutável
-> depois de criado, o app agora apaga e recria o canal — então esta é a primeira instalação em que a
-> correção pode valer.
-
-**4. A notificação chega com a tela desligada** 🔴. Mesmo cadastro do item 3, mas **bloqueie o
-celular** e espere.
-
-> 🔬 Ela chega no horário, sem precisar ligar a tela?
-
-**5. Os botões da notificação** 🔴. Arraste a notificação para baixo, se necessário.
-
-> 🔬 Aparecem **"Tomei"** e **"Pulei"** — e não mais "Adiar".
-> 🔬 Tocar em "Pulei" registra a dose como pulada (confira na Home e na tela de adesão).
-
-> **Se algum destes cinco falhar**, anote exatamente o que aconteceu e em que estado estava o
-> celular (bloqueado, em uso, com qual app aberto). São defeitos de plataforma, e o estado é metade
-> do diagnóstico.
-
----
-
 ## 13.5 — A revisão tela a tela (05/09)
 
 **O que este bloco cobre.** Uma rodada inteira de revisão em aparelho, tela por tela, com o Gabriel
@@ -1155,6 +1169,96 @@ não responde e deveria**.
 🔬 **É aqui que altura travada aparece.** Duas varreduras já acharam o mesmo defeito em lugares
 diferentes — sempre onde uma tela desenhou o próprio botão em vez de usar o do kit. Se algum texto
 cortar, anote a tela e o elemento: é o mesmo padrão, e a correção é conhecida.
+
+---
+
+## 14.5 — A ferramenta de diagnóstico (nova em 06/09)
+
+**Faça este bloco antes de qualquer teste de alarme.** Ela é o que torna os demais suportáveis: em
+vez de esperar o horário e adivinhar por que nada tocou, ela mostra o estado real em cinco segundos.
+
+`Ajustes → DESENVOLVIMENTO → Diagnóstico de avisos`.
+
+**14.5.1** Confira as três seções de cima.
+
+> ✅ **Permissões**: "Notificações — Concedida" e "Alarme exato — Permitido", os dois em verde. Se
+> algum estiver vermelho, resolva antes de testar qualquer coisa.
+> ✅ **Canais**: cada canal com **Som** preenchido (nunca "MUDO") e **Importância** 4 ou 5.
+> ✅ **Agendados agora**: o número "no sistema" bate com o "esperado pelo banco".
+
+> **A comparação é o que diagnostica.** Esperados sem agendados = falha ao **agendar**. Agendados
+> que não tocam = falha na **entrega**. São causas diferentes, e sem os dois números não dá para
+> separar uma da outra.
+
+**14.5.2** Toque em **"Alarme em 30s (tela cheia)"**, e **bloqueie o aparelho**.
+
+> ✅ O aviso aparece na lista de agendados, com o horário certo e o selo "Alarme em tela cheia".
+> ✅ 🔴 Em 30 segundos a **tela azul** aparece sobre o bloqueio, com som.
+
+**14.5.3** Repita com **"Notificação em 30s"**, e desta vez **abra outro aplicativo**.
+
+> ✅ Chega como notificação comum, **com som**, sem tomar a tela.
+
+**14.5.4** Toque em **"Refazer a janela de avisos"**.
+
+> ✅ A lista se reconstrói e o número continua batendo com o esperado.
+> ✅ 🔴 O aviso de **teste não some** — ele sobrevive ao reagendamento de propósito, senão morreria
+> no gesto que o próprio teste pede (sair do app).
+
+---
+
+## 15 — 🔴 As cinco correções que só esta build pode provar
+
+Cinco defeitos corrigidos no código que **ainda não passaram em binário**. São o coração do TCC —
+mas ficam no fim da sessão de propósito, junto do resto do alarme, porque os blocos vizinhos mexem
+no relógio e reinstalam o app.
+
+> **Antes de esperar qualquer horário, abra o diagnóstico** (`Ajustes → Desenvolvimento`). Ele diz
+> se o aviso está agendado, para quando, em que canal e com quais permissões. Um alarme que não
+> aparece ali nunca ia tocar — e descobrir isso custa cinco segundos em vez de vinte minutos.
+
+**1. A tela azul sobre outro aplicativo** 🔴. Cadastre um remédio com alarme para daqui a 2 minutos.
+**Abra o Instagram** (ou qualquer outro app) e fique navegando.
+
+> 🔬 A tela azul do alarme aparece **por cima** do outro aplicativo?
+>
+> Antes só a notificação no topo aparecia. A correção é a permissão `SYSTEM_ALERT_WINDOW`, que é
+> justamente o que exige build nova — no binário anterior ela nem existia no manifesto. Confirme
+> antes em **Ajustes → alertas** que a permissão de "abrir sobre outros apps" está concedida.
+>
+> Se **não** funcionar, teste o paliativo: tocar na notificação abre a **tela do alarme** (com foto,
+> adiar, silenciar) e não a de confirmação.
+
+**2. O alarme adiado toca na hora** 🔴. Deixe um alarme tocar, toque em **"Adiar 5 minutos"** e
+**bloqueie o celular**. Não toque nele.
+
+> 🔬 Ele volta a tocar em 5 minutos, com a tela ainda apagada?
+>
+> Antes só tocava quando o celular era desbloqueado — o Android agrupava o alarme no Doze. Agora usa
+> a mesma categoria do despertador nativo.
+
+**3. A notificação tem som** 🔴. Cadastre um remédio com lembrete **de notificação** (não alarme),
+com o volume do celular alto.
+
+> 🔬 A notificação chega **com som**?
+>
+> O canal era criado mudo por um engano de leitura da documentação. Como canal no Android é imutável
+> depois de criado, o app agora apaga e recria o canal — então esta é a primeira instalação em que a
+> correção pode valer.
+
+**4. A notificação chega com a tela desligada** 🔴. Mesmo cadastro do item 3, mas **bloqueie o
+celular** e espere.
+
+> 🔬 Ela chega no horário, sem precisar ligar a tela?
+
+**5. Os botões da notificação** 🔴. Arraste a notificação para baixo, se necessário.
+
+> 🔬 Aparecem **"Tomei"** e **"Pulei"** — e não mais "Adiar".
+> 🔬 Tocar em "Pulei" registra a dose como pulada (confira na Home e na tela de adesão).
+
+> **Se algum destes cinco falhar**, anote exatamente o que aconteceu e em que estado estava o
+> celular (bloqueado, em uso, com qual app aberto). São defeitos de plataforma, e o estado é metade
+> do diagnóstico.
 
 ---
 
