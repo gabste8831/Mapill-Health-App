@@ -10,7 +10,15 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   scrollContent: {
     paddingBottom: spacing.xxl,
-    gap: spacing.lg,
+    /**
+     * `gutter` (24) e não `lg` (32).
+     *
+     * A Home usa 40 entre seções porque lá cada bloco é um assunto independente que disputa
+     * atenção. Aqui todas as seções são a mesma coisa — uma lista de opções de configuração —, e o
+     * vão grande fazia cada título nascer isolado no meio de um vazio, sobretudo depois do
+     * indicador de sincronização, que já tem respiro próprio.
+     */
+    gap: spacing.gutter,
   },
   /**
    * Faixa colorida no topo, com o canto inferior arredondado. É o que tira a tela do aspecto de
@@ -85,6 +93,21 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     justifyContent: "center",
     backgroundColor: cores.primaryContainer,
   },
+  /**
+   * O cartão que agrupa linhas de menu, mais apertado que o `Card` padrão.
+   *
+   * O padrão tem `gap: gutter` (24) entre filhos, pensado para blocos de formulário — campos que
+   * precisam de ar entre si. Numa lista de menu isso soma com o `minHeight: 52` de cada linha e dá
+   * 76px por item: cada botão ocupava uma faixa de tela sem carregar mais informação por isso.
+   *
+   * Com `sm` (8) a linha continua com os 52 de alvo de toque, e a lista lê como lista.
+   */
+  cartaoDeLinhas: {
+    gap: spacing.sm,
+    // O padding vertical do `Card` (16) somava ao alvo de toque da primeira e da última linha, que
+    // já têm 44 próprios. `sm` mantém o texto descolado da borda sem inflar o cartão.
+    paddingVertical: spacing.sm,
+  },
   section: {
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
@@ -94,13 +117,21 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
     paddingLeft: spacing.xs,
   },
+  /**
+   * 44 de altura, e não os 52 dos campos de formulário.
+   *
+   * Os 52 são a altura de interação de `Button`, `TextField` e `SelectField` — controles que se
+   * opera. Estas linhas não têm subtítulo (saiu numa revisão anterior), então o conteúdo é uma
+   * única linha de texto de ~24px: sobravam 28px de folga vertical, e cada botão virava uma faixa.
+   *
+   * 44 continua sendo o alvo de toque mínimo recomendado (WCAG 2.5.5 / Material), e a linha inteira
+   * é clicável — o dedo tem a largura da tela para acertar.
+   */
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    // 52 é a altura padrão de interação do app (Button, TextField, SelectField). A linha
-    // inteira é clicável, o que já dá alvo de sobra pro público idoso.
-    minHeight: 52,
+    minHeight: 44,
   },
   /** Largura fixa pra alinhar os rótulos entre linhas, mesmo com ícones de larguras diferentes. */
   rowIcon: {

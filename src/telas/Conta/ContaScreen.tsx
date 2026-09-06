@@ -120,6 +120,22 @@ export function ContaScreen({
       <Header title="Conta e dados" onBack={onBack} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* A abertura da tela, antes da primeira seção.
+
+            Sem ela a tela começava direto num rótulo de seção em maiúsculas, e o assunto — que é
+            delicado: conta, privacidade, apagar dados — chegava sem uma frase que o enquadrasse.
+            Diz o que se resolve aqui, e a cor tira o topo do aspecto de lista uniforme, como a
+            faixa do hero faz na tela de Ajustes. */}
+        <View style={styles.intro}>
+          <View style={styles.introIcone}>
+            <Ionicons name="shield-checkmark" size={22} color={cores.corDeDestaque} />
+          </View>
+          <Text style={styles.introTexto}>
+            Aqui você cuida da sua conta, lê os termos que aceitou e decide o que fazer com os seus
+            dados: baixar uma cópia ou apagar tudo.
+          </Text>
+        </View>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>CONTA</Text>
           <Card>

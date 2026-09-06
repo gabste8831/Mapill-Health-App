@@ -75,8 +75,19 @@ export function TermosScreen({ acceptedVersion, acceptedAt, onBack }: TermosScre
           </Text>
         </Card>
 
-        <LegalAccordion title="Termos de Uso" sections={TERMS_OF_USE_SECTIONS} />
-        <LegalAccordion title="Política de Privacidade" sections={PRIVACY_POLICY_SECTIONS} />
+        {/* Superfície de cartão nos dois: o fundo padrão do acordeão (`surfaceContainerLow`) quase
+            empata com o da tela, e aqui — onde eles são os únicos blocos abaixo do cartão de
+            versão — nada indicava que havia algo a abrir. */}
+        <LegalAccordion
+          title="Termos de Uso"
+          sections={TERMS_OF_USE_SECTIONS}
+          style={styles.blocoLegal}
+        />
+        <LegalAccordion
+          title="Política de Privacidade"
+          sections={PRIVACY_POLICY_SECTIONS}
+          style={styles.blocoLegal}
+        />
       </ScrollView>
     </SafeAreaView>
   );

@@ -3,9 +3,8 @@ import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useSync } from "@/hooks/use-sync";
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
-import { AvisoDePendencias, Card, FotoLocal } from "@/ui";
+import { Card, FotoLocal } from "@/ui";
 import { criarEstilos } from "./AjustesScreen.styles";
 
 export type AjustesScreenProps = {
@@ -69,7 +68,6 @@ export function AjustesScreen({
 }: AjustesScreenProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
-  const sync = useSync();
 
   const hasProfile = patientName.trim().length > 0;
 
@@ -119,20 +117,21 @@ export function AjustesScreen({
           </Pressable>
         </View>
 
-        {/* Uma linha para a tela inteira, e não um selo por card: a pergunta é "meus dados estão
-            salvos?", e ela se responde uma vez. Some quando não há pendência — que é o caso comum,
-            e sempre o caso de quem não vinculou conta. Morava na lista de Remédios; mudou pra cá
-            porque é sobre a conta, não sobre os remédios em si. */}
-        <View style={styles.section}>
-          <AvisoDePendencias pendentes={sync.estado.pendentes} />
-        </View>
+        {/* O aviso de pendências de sincronização saiu daqui.
+
+            Ele contava as alterações ainda não enviadas à nuvem — mas o contador roda **mesmo sem
+            conta vinculada**, e aí anunciava um problema que não existe e que a pessoa não pode
+            resolver: usar o app só localmente é uma escolha legítima, não um estado pendente. Com
+            conta vinculada ele também não se justificava, porque a sincronização é automática a
+            cada volta ao app; o que resta de útil é o **estado** da cópia, e isso a tela de Conta
+            já mostra no `IndicadorDeSync` — que, ao contrário deste, só aparece com conta. */}
 
         {/* Menu curto de botões — sem texto de instrução abaixo de cada seção. Quem já sabe o
             que quer (conta, tema) reconhece o rótulo e toca; quem não sabe, abre e descobre lá
             dentro. Texto de apoio aqui só repetia o óbvio no caminho de quem já ia direto. */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>CONTA E DADOS</Text>
-          <Card>
+          <Card style={styles.cartaoDeLinhas}>
             {/* Ícone de conta nos dois casos, e não o logo do Google quando vinculado: a linha leva
                 a conta, dados e termos, e o logo prometia que ela era sobre login. O e-mail, quando
                 existe, é a única informação que vale manter como subtítulo — dizer *qual* conta
@@ -153,7 +152,7 @@ export function AjustesScreen({
             de Ajustes, onde a maioria de quem abre a tela está atrás de outra coisa. */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ACESSIBILIDADE</Text>
-          <Card>
+          <Card style={styles.cartaoDeLinhas}>
             <Linha
               icon={<Ionicons name="color-palette-outline" size={22} color={cores.onSurfaceVariant} />}
               label="Configurações de tema"

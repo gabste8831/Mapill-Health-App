@@ -1,5 +1,5 @@
 
-import { estilosDoTema, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
@@ -10,6 +10,35 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xxl,
     gap: spacing.lg,
+  },
+  /**
+   * A faixa de abertura, tingida de azul claro.
+   *
+   * Cor num tom só e sem sombra: ela enquadra o assunto e não compete com os cartões abaixo. O
+   * escudo à esquerda é o que dá o tom da tela de relance — as três seções aqui são sobre
+   * proteção de dados, e o ícone diz isso antes de qualquer palavra ser lida.
+   */
+  intro: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    marginHorizontal: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.lg,
+    backgroundColor: withOpacity(cores.corDeDestaque, 0.08),
+  },
+  introIcone: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.full,
+    backgroundColor: withOpacity(cores.corDeDestaque, 0.12),
+  },
+  introTexto: {
+    ...typography.bodyMd,
+    color: cores.onSurface,
+    flex: 1,
   },
   section: {
     paddingHorizontal: spacing.md,
@@ -54,8 +83,15 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
     paddingHorizontal: spacing.xs,
   },
+  /**
+   * A dica, menor que o rótulo — a ênfase é o que separa os dois.
+   *
+   * Estava em `bodyMd`, quase do tamanho do `bodyLg` do rótulo, e as duas linhas liam como um
+   * parágrafo de duas frases em vez de título e explicação. Em `bodySm` a hierarquia aparece: o
+   * rótulo se lê ao varrer a lista, a dica só quando o olho para naquela linha.
+   */
   rowHint: {
-    ...typography.bodyMd,
+    ...typography.bodySm,
     color: cores.onSurfaceVariant,
   },
 }));

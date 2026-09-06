@@ -56,12 +56,19 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     flex: 1,
     gap: 2,
   },
+  /**
+   * `bodyLg`, o mesmo das linhas de Conta e Ajustes — e não o `headlineSm` de antes.
+   *
+   * Estas opções são itens de uma lista de escolha, não títulos de seção. Em headline elas tinham
+   * mais peso que os rótulos dos menus que levam até aqui, e o par nome/descrição lia como dois
+   * blocos em vez de título e explicação.
+   */
   nome: {
-    ...typography.headlineSmRegular,
+    ...typography.bodyLg,
     color: cores.onSurface,
   },
   nomeSelecionado: {
-    ...typography.headlineSmRegular,
+    ...typography.bodyLg,
     color: cores.onPrimarySurface,
   },
   descricao: {
