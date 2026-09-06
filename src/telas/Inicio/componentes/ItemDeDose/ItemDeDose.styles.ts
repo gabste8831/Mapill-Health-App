@@ -46,7 +46,9 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    */
   late: {
     borderLeftWidth: 4,
-    borderLeftColor: cores.error,
+    // A faixa é forma, não texto: leva o vermelho vivo, que é o que faz o cartão atrasado saltar
+    // de relance na pilha.
+    borderLeftColor: cores.errorVivo,
   },
   /**
    * "É agora" ganha o mesmo peso da atrasada: as duas pedem ação imediata, e é essa diferença —
@@ -55,7 +57,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    */
   now: {
     borderLeftWidth: 4,
-    borderLeftColor: cores.success,
+    borderLeftColor: cores.successVivo,
   },
   /**
    * O escurecimento do toque numa linha já resolvida (a que abre a correção retroativa).
@@ -123,11 +125,26 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     color: cores.onSurfaceVariant,
     opacity: 0.7,
   },
+  /**
+   * "É AGORA" e "ATRASADA" usam os tokens de **texto** (`success` / `error`), e não os `on*Container`.
+   *
+   * Os `on*Container` são calibrados para ficar sobre o container cheio — são quase pretos (9.9:1) e
+   * têm outro matiz (356°, do lado do roxo). Sobre o cartão branco eles davam ao rótulo um vermelho
+   * escuro que não se parecia com o vermelho da faixa logo ao lado, e o cartão exibia dois tons
+   * diferentes da mesma cor a um centímetro de distância.
+   *
+   * Não são os tons **vivos** porque este é texto de 10pt, onde a WCAG exige 4.5:1 sem desconto — o
+   * vermelho vivo dá 4.00:1 e o verde vivo 3.45:1 sobre branco. `error` (6.03:1) e `success`
+   * (5.02:1) passam, e compartilham o matiz dos vivos: mesma cor, intensidade diferente.
+   *
+   * A vivacidade não se perde, porque quem vê o cartão vê a faixa primeiro — ela tem quatro pixels
+   * de largura e a altura toda, contra oito caracteres em corpo 10.
+   */
   statusLabelNow: {
-    color: cores.onSuccessContainer,
+    color: cores.success,
   },
   statusLabelLate: {
-    color: cores.onErrorContainer,
+    color: cores.error,
   },
   /** Nome do remédio e, abaixo, a dose. Ocupa o que sobra da largura depois da coluna da hora. */
   content: {

@@ -51,28 +51,122 @@ export const colors = {
   onTertiaryContainer: "#FFFBFF",
 
   /**
-   * O âmbar de atenção — a dica, o lembrete de recontagem, a permissão que falta.
+   * O amarelo de atenção — a dica, o lembrete de recontagem, a permissão que falta.
    *
-   * Saiu do `#FFE600` (amarelo puro) para `#B45309`. O amarelo puro é invisível como texto e como
-   * ícone: 1.6:1 sobre branco, ou seja, reprovado em qualquer critério. Ele só funcionava porque
-   * era usado como *faixa*, e a faixa acabou (ver `stateAccent`). Como agora a cor precisa
-   * aparecer em ícone e em rótulo, ela tem que ser legível: este âmbar dá 4.8:1 sobre branco e
-   * 4.6:1 sobre o próprio `warningSurface`.
+   * ## Por que amarelo, e não laranja
+   *
+   * O laranja seria o vizinho natural do vermelho, e é justamente o problema: com o erro em 0° e o
+   * alerta em 17°, os dois virariam graus da mesma cor, e o que distingue "acaba em cinco dias" de
+   * "acabou" é uma diferença de **espécie**, não de intensidade. Em 35° o amarelo se separa do
+   * vermelho e continua sendo a cor que todo mundo lê como aviso.
+   *
+   * Amarelo puro (`#FFE600`) não serve: dá 1.6:1 sobre branco, invisível como texto e como ícone.
+   * `#A16207` é o dourado mais claro que ainda passa nos dois papéis — 4.92:1 sobre branco, 4.70:1
+   * sobre o próprio `warningSurface`.
+   *
+   * ## O texto é cinza-quente, e não âmbar escurecido
+   *
+   * `onWarningSurface` era `#7C3A06`: o mesmo matiz do âmbar levado até o contraste, e o resultado
+   * lia como marrom queimado — a combinação envelhecia o aviso inteiro. `#4A4436` é um cinza que
+   * puxa para o quente: convive com o fundo amarelo sem repetir o matiz dele, e dá 9.24:1.
+   *
+   * A cor do aviso passa a viver onde ela funciona — no fundo e no ícone —, e o texto fica neutro,
+   * que é o que texto de aviso precisa ser para ser lido depressa.
    */
-  warning: "#B45309",
-  warningSurface: "#FEF6E7",
-  onWarningSurface: "#7C3A06",
+  warning: "#A16207",
+  warningSurface: "#FEFAE8",
+  onWarningSurface: "#4A4436",
 
-  error: "#C4141C",
+  /**
+   * O vermelho de "isto falhou" — a dose atrasada, o estoque zerado, o botão de excluir.
+   *
+   * Vermelho puro escurecido: matiz 0°, o mesmo do `#FF0000` do `errorVivo`, só que fechado o
+   * bastante para ser **lido**. O `#C4141C` anterior ficava em 357° — do lado do roxo — e era isso
+   * que o fazia parecer vinho ou rosa escuro.
+   *
+   * Os três vermelhos do app compartilham o matiz 0° de propósito: o ícone (`errorVivo`), o cartão
+   * (`errorPreenchido`) e a palavra (este) são a mesma cor em intensidades diferentes, e é o que
+   * faz o app parecer ter um vermelho só em vez de três parecidos.
+   *
+   * 6.03:1 sobre branco e 5.27:1 sobre o `errorSurface` — folga sobre os 4.5:1 exigidos de texto
+   * ("Estoque zerado", "Excluir").
+   */
+  error: "#C90000",
   onError: "#FFFFFF",
   errorContainer: "#FFDAD6",
   onErrorContainer: "#8C0009",
 
-  /** O verde de "está certo agora" — a dose dentro da janela do horário. */
-  success: "#0F7038",
+  /**
+   * O verde de "está certo agora" — a dose dentro da janela do horário, o compromisso de hoje.
+   *
+   * `#11803E` no lugar do `#0F7038`, que era escuro a ponto de parecer verde-garrafa num ícone de
+   * 20px.
+   *
+   * É o mais vivo que ainda passa nos dois fundos em que a cor aparece como **texto** (o rótulo
+   * "TOMADA", a taxa de adesão): 5.02:1 sobre branco e 4.50:1 sobre o próprio `successSurface` —
+   * este último raspando no mínimo da WCAG AA. `#128A42`, um passo acima, cai para 3.97:1 e
+   * reprovaria justamente no fundo onde o rótulo verde mais aparece.
+   */
+  success: "#11803E",
   onSuccess: "#FFFFFF",
   successContainer: "#A6F4C0",
   onSuccessContainer: "#04502A",
+
+  /**
+   * As versões **vivas** de sucesso e erro — verde grama e vermelho fogo, cor de semáforo.
+   *
+   * ## Por que são tokens separados
+   *
+   * `success` e `error` são usados como **texto** ("TOMADA", "Estoque zerado", a taxa de adesão), e
+   * texto precisa de 4.5:1 na WCAG AA. Essa exigência é o que empurra qualquer verde vivo de volta
+   * para o escuro: verde grama dá 2.95:1 sobre a superfície tingida, ilegível.
+   *
+   * Mas a exigência é do texto, não da cor. Ícone, barra de gráfico, borda lateral e ponto de
+   * marcação são **elementos gráficos**, e para eles a WCAG pede 3:1.
+   *
+   * Então a divisão é por papel: o vivo onde o olho bate primeiro e a cor é a informação; o escuro
+   * onde a cor acompanha uma palavra que precisa ser lida. Trocar um pelo outro é como o defeito
+   * volta.
+   *
+   * ## Por que não são ainda mais vivos
+   *
+   * O teto foi medido, e não escolhido. `#22C55E` (o verde grama de catálogo) dá **2.28:1** sobre
+   * branco: some como ícone, não só como texto. `#16A34A` passa sobre branco (3.30:1) mas cai para
+   * 2.95:1 nas superfícies tingidas, onde metade dos ícones vive — e um ícone que some no fundo
+   * verde-claro do próprio card é pior que um ícone escuro.
+   *
+   * O vermelho é o **puro** (`#FF0000`), pedido do Gabriel. Como forma ele passa em toda superfície
+   * do app (4.00:1 sobre branco, 3.50:1 na pior delas, contra os 3:1 exigidos) — mas **só** como
+   * forma: em texto ele dá 4.00:1 e reprova, que é a razão de o `error` existir separado.
+   *
+   * O verde para em `#12963F` (3.45:1 na pior superfície). Verde grama de catálogo (`#22C55E`) dá
+   * 2.28:1 e some até como ícone — o olho perde a forma no fundo, não só a leitura.
+   */
+  successVivo: "#12963F",
+  errorVivo: "#FF0000",
+
+  /**
+   * O vermelho de **área preenchida** — o fundo do alerta de estoque.
+   *
+   * Terceiro tom porque a exigência aqui se inverte: quando a cor é fundo de card, quem precisa de
+   * contraste é o texto branco por cima, e aí quanto mais vivo o vermelho, pior. `errorVivo` como
+   * fundo daria 3.94:1 no branco e reprovaria — o mesmo tom que funciona num ícone de 20px falha
+   * numa área que carrega três linhas de texto.
+   *
+   * ## Por que é escuro, e não o `#FF0000` exato
+   *
+   * Escolhido no aparelho: é o vermelho que o tema de alto contraste já usava, e no card de estoque
+   * da Home ele ficou melhor que qualquer um dos claros que passaram por aqui. Faz sentido — numa
+   * área grande, o vermelho aceso vibra e cansa, enquanto o fechado lê como sangue.
+   *
+   * O contraste confirma: 8.55:1 com o texto branco por cima, contra 4.81:1 do `#E60000` e 4.00:1
+   * do vermelho puro (que reprovaria). Este card carrega quatro linhas brancas, incluindo o nome do
+   * medicamento e o botão.
+   *
+   * Único dos três fora do matiz 0 (fica em 357°), e aqui isso não é defeito: em área grande e
+   * escura o desvio não se percebe como rosa, que era o problema do `#C4141C` em texto pequeno.
+   */
+  errorPreenchido: "#9E0008",
 
   /**
    * As versões **diluídas** de sucesso e erro, para fundo de cartão numa lista.
@@ -83,7 +177,9 @@ export const colors = {
    * bastante para tingir sem chamar mais atenção que o texto que carregam.
    */
   successSurface: "#E8F6EC",
-  errorSurface: "#FDECEA",
+  // Matiz 0°, como os três vermelhos: em 6° ele puxava para o salmão e destoava do vermelho puro
+  // que agora tinge o ícone e a faixa em cima dele.
+  errorSurface: "#FDEAEA",
 
   /**
    * O fundo da tela, e a hierarquia de superfícies acima dele.
@@ -107,9 +203,13 @@ export const colors = {
   onSurfaceVariant: "#4A5160",
 
   /**
-   * Texto de apoio e contorno. Dá 5.1:1 sobre branco e 4.8:1 sobre o fundo da tela — ele não é só
-   * cor de borda: quatro telas o usam como **texto** (o resumo da ficha, a finalidade no
-   * consentimento, o status dos termos), e aí precisa passar como texto.
+   * Texto de apoio e contorno.
+   *
+   * Dá 4.83:1 **sobre branco**, que é onde ele aparece como texto: quatro telas o usam assim (o
+   * resumo da ficha, a finalidade no consentimento, o status dos termos), sempre dentro de cartão.
+   *
+   * ⚠️ Sobre o `background` da tela ele cai para 4.38:1 e **não** passa em AA para texto. Ali só
+   * serve como contorno — para texto recuado direto sobre o fundo existe o `onSurfaceMuted`.
    */
   outline: "#6B7280",
   outlineVariant: "#CBD2DE",

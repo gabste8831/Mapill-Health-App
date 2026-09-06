@@ -76,6 +76,24 @@ export const temaDaltonismo: Tema = {
     successSurface: "#E0F5F6",
     errorSurface: "#FCE8EF",
 
+    /**
+     * Turquesa e magenta mais vivos — **não** verde grama e vermelho fogo.
+     *
+     * O tema inteiro existe para trocar o par verde/vermelho, que é justamente o que a deuteranopia
+     * e a protanopia não separam. Trazer as cores vivas do tema padrão para cá desfaria isso: o
+     * semáforo que fica nítido para quem enxerga as duas cores é exatamente o que some para quem
+     * não enxerga.
+     *
+     * Então o que fica mais vivo é o par deste tema, mantendo a distância de matiz que o faz
+     * funcionar. `#00838A` e `#D81B60` dão 4.02:1 e 4.22:1 na superfície tingida — acima dos 3:1 da
+     * forma, e ainda separados por luminosidade além do matiz, que é a segunda pista para quem lê
+     * as duas como tons de cinza.
+     */
+    successVivo: "#00838A",
+    errorVivo: "#D81B60",
+    /** Magenta preenchido: o mesmo par do tema, com o branco por cima ainda legível. */
+    errorPreenchido: "#C2185B",
+
     background: "#F1F4F8",
     onBackground: "#141719",
     surface: "#F1F4F8",

@@ -74,8 +74,14 @@ export const temaEscuro: Tema = {
     tertiaryContainer: "#6B3000",
     onTertiaryContainer: "#FFDCC4",
 
+    /**
+     * No escuro o aviso já era dourado e não terroso — o problema do tema claro não existe aqui.
+     *
+     * O que muda é a superfície: `#2E2513` puxava para o marrom, e sob o dourado do ícone o bloco
+     * inteiro lia como sépia. `#2B2718` é o mesmo escuro com menos vermelho.
+     */
     warning: "#F5B54A",
-    warningSurface: "#2E2513",
+    warningSurface: "#2B2718",
     onWarningSurface: "#F8D89A",
 
     error: "#FF9A92",
@@ -90,6 +96,25 @@ export const temaEscuro: Tema = {
 
     successSurface: "#12281C",
     errorSurface: "#2E1618",
+
+    /**
+     * No escuro, "vivo" é **mais saturado**, e não mais escuro.
+     *
+     * Aqui a cor já é clara por necessidade — ela vive sobre fundo escuro. O que faltava ao
+     * `#68DE94` e ao `#FF9A92` não era luz, era saturação: os dois são pastéis, quase menta e
+     * salmão. Estes têm o mesmo brilho com o croma que dá o tom de semáforo (9.7:1 e 6.7:1 sobre o
+     * fundo, folgados nos 3:1 que a forma pede).
+     */
+    successVivo: "#2FD66E",
+    errorVivo: "#FF7063",
+    /**
+     * No escuro o alerta preenchido é um vermelho **escuro** com texto claro, e não o contrário.
+     *
+     * Um bloco de vermelho vivo aceso numa tela escura é o que se olha à noite e dói — e este card
+     * aparece na Home, que é a primeira tela do app. `#8C1017` (o `errorContainer` do tema) carrega
+     * o mesmo sinal com o brilho que o resto da interface tem.
+     */
+    errorPreenchido: "#8C1017",
 
     background: "#0F1319",
     onBackground: "#E6E9EE",

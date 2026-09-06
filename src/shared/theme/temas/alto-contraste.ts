@@ -72,6 +72,20 @@ export const temaAltoContraste: Tema = {
     successSurface: "#D6F5E1",
     errorSurface: "#FFDEDA",
 
+    /**
+     * Aqui o vivo quase não se afasta do normal, e é o ponto do tema.
+     *
+     * Quem escolhe alto contraste está dizendo que precisa de separação máxima entre figura e
+     * fundo. Ganhar vivacidade custa contraste — é a mesma troca do tema padrão, só que aqui ela vai
+     * na direção contrária ao que o tema promete. Então o passo é curto: `#046B36` e `#C21118`
+     * ficam em 5.70:1 e 4.93:1 na pior superfície, contra os 8.04 e 6.80 dos escuros. Mais vivo que
+     * isso começaria a desfazer a razão de o tema existir.
+     */
+    successVivo: "#046B36",
+    errorVivo: "#C21118",
+    /** Igual ao `error`: no alto contraste, o fundo preenchido é o mais escuro possível. */
+    errorPreenchido: "#9E0008",
+
     background: "#FFFFFF",
     onBackground: "#000000",
     surface: "#FFFFFF",
