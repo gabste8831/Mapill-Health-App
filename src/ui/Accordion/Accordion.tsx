@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { type ReactNode, useState } from "react";
-import type { LayoutChangeEvent } from "react-native";
+import type { LayoutChangeEvent, StyleProp, ViewStyle } from "react-native";
 import { Pressable, Text, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
@@ -23,6 +23,14 @@ export type AccordionProps = {
   defaultExpanded?: boolean;
   /** Avisa a cada abre/fecha, para o pai lembrar onde a pessoa estava. */
   onToggle?: (isExpanded: boolean) => void;
+  /**
+   * Ajuste do bloco externo, para telas onde o fundo padrão não contrasta.
+   *
+   * O padrão é `surfaceContainerLow`, que fica quase igual ao fundo da tela — de propósito nos
+   * textos longos (termos, consentimento), onde o acordeão é parágrafo e não cartão. Numa tela de
+   * cartões ele desaparece, e aí quem usa passa a superfície de cartão por aqui.
+   */
+  style?: StyleProp<ViewStyle>;
 };
 
 const TIMING = { duration: 260, easing: Easing.out(Easing.cubic) };
@@ -38,6 +46,7 @@ export function Accordion({
   toggleLabel = false,
   defaultExpanded = false,
   onToggle,
+  style,
 }: AccordionProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
@@ -79,7 +88,7 @@ export function Accordion({
   }
 
   return (
-    <View style={[styles.section, isBlue && styles.sectionAzul]}>
+    <View style={[styles.section, isBlue && styles.sectionAzul, style]}>
       <Pressable
         // Sem escala: o cabecalho ocupa a largura toda, e encolher faria o texto ao redor tremer.
         style={estadoDePressao(styles.header)}

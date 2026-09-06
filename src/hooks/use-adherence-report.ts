@@ -5,6 +5,7 @@ import { Platform } from "react-native";
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
+import { adesaoPorDia, type AdesaoDeUmDia } from "@/domain/use-cases/adesao-por-dia";
 import {
   listarDosesPerdidas,
   resumirAdesao,
@@ -43,6 +44,9 @@ const RESUMO_VAZIO: ResumoDeAdesao = {
 /** Quantas doses perdidas a tela lista antes de resumir o resto. */
 const MAX_PERDIDAS_LISTADAS = 30;
 
+/** Quantos dias a lista diária cobre. Fixo, e não o período escolhido — ver `setPorDia`. */
+const DIAS_DETALHADOS = 7;
+
 /**
  * O relatório de adesão de um período.
  *
@@ -53,6 +57,7 @@ const MAX_PERDIDAS_LISTADAS = 30;
 export function useAdherenceReport(periodo: PeriodoDeAdesao) {
   const [resumo, setResumo] = useState<ResumoDeAdesao>(RESUMO_VAZIO);
   const [perdidas, setPerdidas] = useState<DosePerdida[]>([]);
+  const [porDia, setPorDia] = useState<AdesaoDeUmDia[]>([]);
   const [isLoading, setLoading] = useState(persistsLocally);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,6 +104,18 @@ export function useAdherenceReport(periodo: PeriodoDeAdesao) {
 
       setResumo(resumirAdesao({ doses, agora }));
       setPerdidas(listarDosesPerdidas({ doses, agora }).slice(0, MAX_PERDIDAS_LISTADAS));
+      /**
+       * Os últimos sete dias, **independente do período escolhido**.
+       *
+       * A taxa geral responde "como tem sido"; esta lista responde "qual dia falhou" — e essa
+       * segunda pergunta só tem resposta útil enquanto a pessoa lembra do dia. Ninguém reconstrói o
+       * que aconteceu em 12 de julho, então estender a lista até 90 dias daria 90 linhas para
+       * responder uma pergunta que ali já não se faz.
+       *
+       * Os dados existem para qualquer período — não há retenção de sete dias no banco; o que há é
+       * uma janela de leitura, aqui e no gráfico da Home.
+       */
+      setPorDia(adesaoPorDia({ doses, agora, dias: DIAS_DETALHADOS }));
       setError(null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Não foi possível montar o relatório.");
@@ -113,5 +130,5 @@ export function useAdherenceReport(periodo: PeriodoDeAdesao) {
     }, [reload]),
   );
 
-  return { resumo, perdidas, isLoading, error, reload };
+  return { resumo, perdidas, porDia, isLoading, error, reload };
 }
