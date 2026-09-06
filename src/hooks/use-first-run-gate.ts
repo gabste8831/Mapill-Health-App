@@ -8,6 +8,7 @@ import { SupabaseAuthGateway } from "@/data/remote/supabase-auth-gateway";
 import { isSupabaseConfigured } from "@/data/remote/supabase-client";
 import { ConsentRepository } from "@/data/repositories/consent-repository";
 import { PatientProfileRepository } from "@/data/repositories/patient-profile-repository";
+import { sincronizar } from "@/data/remote/sync-service";
 import { savePatientProfileDraft } from "@/hooks/use-patient-profile";
 
 /**
@@ -145,8 +146,23 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
         // A sessão persiste sozinha entre aberturas (AsyncStorage, ver supabase-client.ts).
         const user = await new SupabaseAuthGateway().getCurrentUser();
         if (!ativo) return;
-        if (user) await continueAfterLogin();
-        else setStep("login");
+        if (user) {
+          /**
+           * Há sessão, mas o banco local não tem ficha — é o caminho de quem reinstalou o app com a
+           * sessão ainda válida, ou de quem apagou os dados. Restaurar antes de perguntar, pelo
+           * mesmo motivo do `signInWithGoogle`: perguntar primeiro produz uma ficha duplicada.
+           *
+           * Só acontece **aqui**, no ramo sem ficha. Quem já tem ficha local nem chega nesta linha
+           * (o `return` acima), então a abertura comum do dia a dia não espera por rede nenhuma.
+           */
+          try {
+            await sincronizar();
+          } catch (cause) {
+            console.error("Não foi possível restaurar os dados na abertura:", cause);
+          }
+          if (!ativo) return;
+          await continueAfterLogin();
+        } else setStep("login");
       } catch (cause) {
         /**
          * Qualquer falha aqui **precisa sair de `indeciso`**. Nenhuma tela desenha nesse estado, e
@@ -173,6 +189,28 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     if (!isSupabaseConfigured) return "not-configured";
     const authGateway = new SupabaseAuthGateway();
     await authGateway.signInWithGoogle();
+
+    /**
+     * Baixa os dados **antes** de decidir o que perguntar.
+     *
+     * Sem isto, o app reinstalado perguntava ao banco local "tem ficha? tem consentimento?" — e num
+     * banco vazio a resposta é não, então mandava preencher tudo de novo. Depois o pull rodava (na
+     * volta ao foco) e trazia a ficha antiga: o paciente terminava com **duas**, uma da nuvem e uma
+     * que acabara de digitar. Era o que aparecia no export como duas fichas de saúde.
+     *
+     * O sintoma parecia "a sincronização não funciona", mas era o contrário: ela funcionava e
+     * chegava tarde. Restaurar é a primeira coisa que um login deve fazer, não a última.
+     *
+     * `catch` e não `throw`: sem internet no momento do login, o app segue para o onboarding — que
+     * é o que ele sabe fazer offline. O pull da próxima abertura reconcilia, e o LWW por
+     * `updated_at` resolve o encontro das duas versões.
+     */
+    try {
+      await sincronizar();
+    } catch (cause) {
+      console.error("Não foi possível restaurar os dados no login:", cause);
+    }
+
     await continueAfterLogin();
     return "signed-in";
   }, [continueAfterLogin]);

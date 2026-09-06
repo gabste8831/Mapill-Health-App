@@ -334,6 +334,25 @@ async function executarSync(): Promise<ResultadoDaSync> {
       recebidos += await receber(tabela);
     }
 
+    /**
+     * Chegou tratamento novo do servidor: os avisos precisam ser refeitos.
+     *
+     * As doses descem para o SQLite, mas o **agendamento vive no sistema operacional** — e o
+     * Android do aparelho novo não sabe nada dos alarmes que existiam no antigo. Sem esta linha, o
+     * app reinstalado mostrava os remédios certos na tela e não tocava nenhum: o pior modo de
+     * falhar, porque parece que está tudo bem.
+     *
+     * Só quando algo desceu. Numa passada em que nada mudou, refazer a janela seria reescrever
+     * dezenas de alarmes idênticos a cada volta ao app.
+     *
+     * O `import` é dinâmico para não criar ciclo: `reagendar-avisos` lê os repositórios, que leem o
+     * banco, que é o mesmo módulo que este arquivo importa no topo.
+     */
+    if (recebidos > 0) {
+      const { reagendarTodosOsAvisos } = await import("@/notifications/reagendar-avisos");
+      await reagendarTodosOsAvisos();
+    }
+
     return { enviados, recebidos, erro: null };
   } catch (cause) {
     console.error("Falha ao sincronizar:", cause);
