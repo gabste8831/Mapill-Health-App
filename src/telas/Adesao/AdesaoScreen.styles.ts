@@ -207,8 +207,13 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    * A cor aqui não classifica — só amarra o número à coluna dele. Quem quiser a leitura por faixa a
    * encontra na lista por medicamento, onde ela aponta para uma ação.
    */
+  /**
+   * O número do dia. `bodySm`, e não `bodyLg`: são sete colunas dividindo a largura da tela, e
+   * "100%" é o valor mais largo que pode aparecer — em `bodyLg` ele não cabia e saía cortado, logo
+   * no dia de adesão perfeita, que é justamente o que ninguém quer ver truncado.
+   */
   diaValor: {
-    ...typography.bodyLg,
+    ...typography.bodySm,
     fontWeight: "700",
     color: cores.primary,
   },
@@ -223,9 +228,15 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.caption,
     fontWeight: "600",
   },
-  /** O traço do dia sem dose. Cinza e discreto: não é um resultado ruim, é ausência de resultado. */
+  /**
+   * O traço do dia sem dose. Cinza e discreto: não é um resultado ruim, é ausência de resultado.
+   *
+   * **Mesma tipografia do número**, e não uma menor: as sete colunas dividem a mesma linha, e um
+   * traço mais baixo que o número desalinha as barras logo abaixo dele.
+   */
   diaSemDado: {
-    ...typography.bodyLg,
+    ...typography.bodySm,
+    fontWeight: "700",
     color: cores.onSurfaceVariant,
     opacity: 0.5,
   },
@@ -381,6 +392,16 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     alignItems: "center",
     padding: spacing.md,
     gap: spacing.sm,
+  },
+  /**
+   * A mesma linha, quando não há o que escolher.
+   *
+   * Continua visível para a pessoa saber o que o documento leva, mas sem a seta e sem resposta ao
+   * toque: prometer uma lista que não existe é pior que não oferecer a escolha. O tom mais apagado
+   * é o que separa "informação" de "decisão a tomar".
+   */
+  filtroVazio: {
+    opacity: 0.6,
   },
   filtroTexto: {
     flex: 1,

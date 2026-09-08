@@ -1,5 +1,5 @@
 
-import { estilosDoTema, radius, spacing } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   container: {
@@ -11,11 +11,24 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flex: 1,
   },
   /**
-   * `marginTop` alinha o botão com o input, e não com o rótulo acima dele: sem isso ele sobe e
-   * fica na altura do texto "DATA DE NASCIMENTO", longe do campo que abre.
+   * O rótulo do campo, repetido **invisível** acima do botão para empurrá-lo até a altura do input.
+   *
+   * Já foi um `marginTop: 22` cravado, calculado para a altura de um rótulo — e por isso só
+   * funcionava onde havia um. Em "QUANDO COMEÇA", que rotula a seção por fora e passa `label=""`
+   * ao campo, os 22px empurravam o botão para baixo do input, visivelmente fora de centro.
+   *
+   * Aqui o espaço é o **próprio rótulo**, com a mesma tipografia e o mesmo `gap` do `TextField`.
+   * Ele mede o que precisa medir em vez de adivinhar: rótulo de duas linhas, fonte ampliada pelo
+   * sistema, campo sem rótulo nenhum — nos três o botão acompanha o input, porque é a mesma caixa
+   * que o empurra nos dois lados. `aria-hidden` porque para quem usa leitor de tela o rótulo já foi
+   * anunciado uma vez, e o botão tem o seu próprio.
    */
+  rotuloFantasma: {
+    ...typography.label,
+    marginBottom: fieldLabelGap,
+    opacity: 0,
+  },
   botaoDeCalendario: {
-    marginTop: 22,
     width: 52,
     height: 52,
     alignItems: "center",

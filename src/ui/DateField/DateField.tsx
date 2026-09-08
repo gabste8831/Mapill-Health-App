@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 
 import { formatDateInput, parseDateInput, toDateInput } from "@/shared/date-input";
@@ -83,14 +83,27 @@ export function DateField({
       />
 
       {/* Ao lado do campo, e não no lugar dele: as duas entradas convivem. O alvo tem a altura do
-          input inteiro porque um ícone pequeno ao lado de um campo alto é o toque que erra. */}
-      <Pressable
-        style={styles.botaoDeCalendario}
-        onPress={abrir}
-        accessibilityRole="button"
-        accessibilityLabel={`Escolher ${label} no calendário`}>
-        <Ionicons name="calendar-outline" size={22} color={cores.primary} />
-      </Pressable>
+          input inteiro porque um ícone pequeno ao lado de um campo alto é o toque que erra.
+
+          A coluna existe para o rótulo invisível poder empurrar o botão até a altura do input —
+          ver `rotuloFantasma`. Sem rótulo (`label=""`) ela não desenha nada e o botão já nasce
+          alinhado. */}
+      <View>
+        {label ? (
+          <Text style={styles.rotuloFantasma} aria-hidden>
+            {label}
+          </Text>
+        ) : null}
+        <Pressable
+          style={styles.botaoDeCalendario}
+          onPress={abrir}
+          accessibilityRole="button"
+          accessibilityLabel={
+            label ? `Escolher ${label} no calendário` : "Escolher a data no calendário"
+          }>
+          <Ionicons name="calendar-outline" size={22} color={cores.primary} />
+        </Pressable>
+      </View>
 
       <BottomSheet visible={isSheetOpen} onClose={() => setSheetOpen(false)} title={label}>
         <View style={styles.sheetBody}>

@@ -201,7 +201,9 @@ export function AdesaoScreen() {
   }
 
   const resumoDaSelecao =
-    selecionados.length === 0
+    medicamentos.length === 0
+      ? "Nenhum cadastrado"
+      : selecionados.length === 0
       ? "Todos"
       : selecionados.length === 1
         ? (medicamentos.find((m) => m.id === selecionados[0])?.nome ?? "1 medicamento")
@@ -229,7 +231,11 @@ export function AdesaoScreen() {
   }
 
   const resumoDosCompromissos =
-    compromissosEscolhidos.length === 0
+    // "Nenhum cadastrado", e não "nenhum no período": o seletor lista **todos** os compromissos, sem
+    // recorte de data — quem faz o recorte é o documento, pelo período escolhido logo acima.
+    compromissos.length === 0
+      ? "Nenhum cadastrado"
+      : compromissosEscolhidos.length === 0
       ? "Todos do período"
       : compromissosEscolhidos.length === 1
         ? (compromissos.find((c) => c.id === compromissosEscolhidos[0])?.descricao ??
@@ -431,9 +437,21 @@ export function AdesaoScreen() {
           {/* Os dois seletores num grupo só: respondem à mesma pergunta — o que entra no documento
               — e ficam mais perto entre si do que do período e do botão. */}
           <View style={styles.gruposDoRelatorio}>
-          {/* Só aparece com mais de um medicamento: escolher entre um item é uma decisão que não
-              existe, e a linha a mais só empurraria o botão para baixo. */}
-          {medicamentos.length > 1 ? (
+          {/**
+             * Os dois seletores aparecem **sempre**, mesmo sem nada cadastrado e mesmo com um item
+             * só.
+             *
+             * Já foram condicionais — medicamentos a partir de dois, compromissos a partir de um —,
+             * e o efeito era a pessoa não saber o que o documento leva. Um relatório com um remédio
+             * e nenhuma consulta saía sem nenhuma linha de escolha, e quem o gerava descobria o
+             * conteúdo depois de abrir o PDF.
+             *
+             * Com um item só a escolha existe: "levar" e "não levar" são respostas diferentes, e
+             * quem vai a uma consulta de cardiologia pode não querer o remédio de alergia no papel.
+             * Sem item nenhum a linha vira informação — ela diz que não há o que incluir, que é o
+             * que a pessoa precisa saber antes de gerar.
+             */}
+          {medicamentos.length > 0 ? (
             <Pressable
               // Linha de largura total: escurece sem encolher.
               style={estadoDePressao(styles.filtro)}
@@ -450,12 +468,17 @@ export function AdesaoScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
             </Pressable>
-          ) : null}
+          ) : (
+            // Sem nada cadastrado a linha continua ali, mas não abre nada: não há lista a mostrar.
+            <View style={[styles.filtro, styles.filtroVazio]}>
+              <View style={styles.filtroTexto}>
+                <Text style={styles.filtroRotulo}>MEDICAMENTOS NO RELATÓRIO</Text>
+                <Text style={styles.filtroValor}>{resumoDaSelecao}</Text>
+              </View>
+            </View>
+          )}
 
-          {/* O mesmo seletor, para as consultas. Aparece a partir de um: diferente dos remédios,
-              onde um só torna a escolha vazia, aqui "todos do período" e "só esta" são respostas
-              diferentes mesmo com um compromisso cadastrado — ele pode não pertencer ao assunto da
-              consulta para a qual o relatório está sendo levado. */}
+          {/* O mesmo seletor, para as consultas. */}
           {compromissos.length > 0 ? (
             <Pressable
               style={estadoDePressao(styles.filtro)}
@@ -469,7 +492,14 @@ export function AdesaoScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
             </Pressable>
-          ) : null}
+          ) : (
+            <View style={[styles.filtro, styles.filtroVazio]}>
+              <View style={styles.filtroTexto}>
+                <Text style={styles.filtroRotulo}>COMPROMISSOS NO RELATÓRIO</Text>
+                <Text style={styles.filtroValor}>{resumoDosCompromissos}</Text>
+              </View>
+            </View>
+          )}
           </View>
 
           {/* Azul cheio e com ícone: é a ação que a seção existe para oferecer, e o contorno a

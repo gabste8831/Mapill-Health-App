@@ -152,7 +152,12 @@ export function ContaScreen({
                 label="Vincular uma conta do Google"
                 hint={
                   googleDisponivel
-                    ? "Nada do que já está salvo é perdido, e seus dados passam a ter cópia na nuvem."
+                    ? // Diz o que acontece quando a conta escolhida **já tem** dados, que é o caso
+                      // que a pessoa não tem como prever. Nada é apagado dos dois lados: o que está
+                      // aqui sobe, o que está lá desce, e os dois conjuntos passam a conviver.
+                      // Sem esta frase, quem cadastrou offline e vincula uma conta antiga vê a
+                      // lista dobrar de tamanho sem entender por quê.
+                      "Nada é perdido de nenhum dos lados. Se a conta já tiver dados salvos, eles se juntam aos deste aparelho."
                     : "Indisponível nesta versão do app, que saiu sem a configuração do login."
                 }
                 onPress={onSignIn}
