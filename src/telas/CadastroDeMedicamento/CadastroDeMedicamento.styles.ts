@@ -1,6 +1,9 @@
 
 import { estilosDoTema, fieldLabelGap, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
+/** O lado do quadro da mídia — a mesma decisão da ficha de saúde, pelo mesmo motivo. */
+const TAMANHO_DA_FOTO = 72;
+
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
     flex: 1,
@@ -57,28 +60,33 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.md,
   },
-  photoPlaceholder: {
-    width: 72,
-    height: 72,
+  /**
+   * O quadro da mídia, **igual com e sem imagem** — ver a mesma decisão na ficha de saúde.
+   *
+   * Eram dois estilos trocados no lugar, e a troca recriava o contêiner no instante em que a
+   * `Image` montava: no Android o `overflow: "hidden"` chegava depois do primeiro paint, e a foto
+   * era pintada fora da área visível do pai. Daí a **primeira** foto ficar branca enquanto trocar
+   * uma existente funcionava — trocar não muda de estilo, estrear muda.
+   */
+  photoQuadro: {
+    width: TAMANHO_DA_FOTO,
+    height: TAMANHO_DA_FOTO,
+    // Canto quadrado, diferente do avatar redondo da ficha: aqui é a caixa do remédio, não retrato.
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: cores.outlineVariant,
-    borderStyle: "dashed",
+    overflow: "hidden",
     backgroundColor: cores.surfaceContainerLow,
     alignItems: "center",
     justifyContent: "center",
   },
-  // Canto quadrado, diferente do avatar redondo da ficha: aqui é a caixa do remédio, não retrato.
-  photoFrame: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.md,
-    overflow: "hidden",
-    backgroundColor: cores.surfaceContainerLow,
+  /** Só a borda tracejada do quadro vazio: convida ao toque sem alterar a caixa. */
+  photoVazio: {
+    borderWidth: 1,
+    borderColor: cores.outlineVariant,
+    borderStyle: "dashed",
   },
   photo: {
-    width: "100%",
-    height: "100%",
+    width: TAMANHO_DA_FOTO,
+    height: TAMANHO_DA_FOTO,
   },
   /**
    * As duas maneiras de anexar a receita, lado a lado — são alternativas, não sequência.
@@ -107,8 +115,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.label,
     color: cores.corDeDestaque,
   },
-  /** Remover fica em vermelho ao lado de "Alterar": são ações de peso muito diferente. */
-  photoRemoveLabel: {
+  /** Excluir em vermelho ao lado de "Alterar anexo": são ações de peso muito diferente. */
+  photoExcluirLabel: {
     ...typography.label,
     color: cores.error,
   },

@@ -104,7 +104,10 @@ export function AjustesScreen({
             style={estadoDePressao(styles.identity)}
             onPress={onEditProfile}
             accessibilityRole="button">
-            <View style={styles.avatar}>
+            {/* `key` na presença da foto — a mesma correção da ficha de saúde. O avatar troca as
+                iniciais pela imagem dentro de um `Pressable`, que é a estreia que não recompunha
+                no Android: a foto recém-salva ficava invisível até a tela remontar. */}
+            <View style={styles.avatar} key={photoUri ? "com-foto" : "sem-foto"}>
               {photoUri ? (
                 <FotoLocal uri={photoUri} style={styles.avatarImage} />
               ) : (

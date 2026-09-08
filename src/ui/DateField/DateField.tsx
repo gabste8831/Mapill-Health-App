@@ -88,9 +88,9 @@ export function DateField({
           A coluna existe para o rótulo invisível poder empurrar o botão até a altura do input —
           ver `rotuloFantasma`. Sem rótulo (`label=""`) ela não desenha nada e o botão já nasce
           alinhado. */}
-      <View>
+      <View style={styles.colunaDoBotao}>
         {label ? (
-          <Text style={styles.rotuloFantasma} aria-hidden>
+          <Text style={styles.rotuloFantasma} aria-hidden numberOfLines={1}>
             {label}
           </Text>
         ) : null}

@@ -53,19 +53,9 @@ export function usePhotoPicker(prefix: string) {
             : await ImagePicker.launchImageLibraryAsync(options);
         if (result.canceled || !result.assets[0]) return { status: "failed", reason: "cancelled" };
 
-        const escolhido = result.assets[0];
-        // Instrumentação temporária (06/09) — remover com a da `FotoLocal`. Mostra o que o picker
-        // entregou antes de a cópia acontecer: dimensão zero aqui explicaria uma imagem que existe
-        // em bytes e mesmo assim não tem nada para exibir.
-        if (__DEV__) {
-          console.log(
-            `[Mapill/foto] 0. picker devolveu ${escolhido.width}x${escolhido.height} tipo=${escolhido.mimeType ?? "?"} — ${escolhido.uri}`,
-          );
-        }
-
         return {
           status: "picked",
-          uri: persistPickedFile(escolhido.uri, prefix, "jpg", replacing),
+          uri: persistPickedFile(result.assets[0].uri, prefix, "jpg", replacing),
         };
       } catch (cause) {
         /**

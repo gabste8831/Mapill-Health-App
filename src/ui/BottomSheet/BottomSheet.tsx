@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Keyboard, Modal, Pressable, ScrollView, Text, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -31,25 +31,6 @@ export type BottomSheetProps = {
 export function BottomSheet({ visible, onClose, title, children }: BottomSheetProps) {
   const styles = useEstilos(criarEstilos);
 
-  /**
-   * Instrumentação temporária (08/09) — remover junto com a da `FotoLocal`.
-   *
-   * A miniatura branca sobreviveu a cinco correções, todas feitas no `FotoLocal`, e o log provou
-   * que aquele componente faz tudo certo: recebe a URI, lê o arquivo e completa o ciclo até
-   * `onDisplay`, sem erro. Se ele pinta e a tela não mostra, a suspeita passou para o que está
-   * **em volta** — este `Modal`, que fecha no mesmo instante em que a foto é escolhida.
-   *
-   * O que falta saber é a ordem: se `foto guardada` cai entre `sheet ABRIU` e `sheet FECHOU`, a
-   * imagem nasceu sob uma janela em transição e a causa é esta; se cai bem depois, não é.
-   * O horário em cada linha é o que permite comparar — sem ele, o Metro mostra a sequência mas
-   * não a distância entre uma coisa e outra.
-   */
-  useEffect(() => {
-    if (!__DEV__) return;
-    console.log(
-      `[Mapill/sheet] ${visible ? "ABRIU" : "FECHOU"} "${title ?? "(sem título)"}" — ${new Date().toISOString().slice(11, 23)}`,
-    );
-  }, [visible, title]);
 
   const keyboardHeight = useKeyboardHeight();
   const { height: alturaDaTela } = useWindowDimensions();

@@ -78,23 +78,29 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
            * coluna do nome no mesmo lugar em todos os itens, e o azul claro dá à lista a cor que
            * faltava sem inventar superfície nova.
            */}
-          {medication.photoUri !== null ? (
-            /* A foto da caixa existe para responder "é este o remédio?", e numa miniatura de 56px
-               essa pergunta às vezes não se responde — caixas da mesma família são quase iguais.
-               Ampliar é um toque próprio, dentro do card que abre o detalhe: o `Pressable` de
-               dentro vence o de fora, então tocar a foto amplia e tocar o resto abre o detalhe. */
-            <Pressable
-              style={estadoDePressao(undefined, { escala: true })}
-              onPress={() => onVerFoto(medication.photoUri ?? "", medication.name)}
-              accessibilityRole="button"
-              accessibilityLabel={`Ver a foto de ${medication.name}`}>
-              <FotoLocal uri={medication.photoUri} style={styles.photo} />
-            </Pressable>
-          ) : (
-            <View style={[styles.photo, styles.photoVazia]}>
-              <Ionicons name="medkit-outline" size={24} color={cores.primary} />
-            </View>
-          )}
+          {/* `key` na presença da foto — a mesma correção da ficha de saúde, e aqui ela vale
+              dobrado: numa `FlatList` a view é **reciclada** entre itens, então o quadro que
+              exibe o marcador de um remédio sem foto pode ser reaproveitado para outro que tem.
+              O `key` garante que o React remonte em vez de reaproveitar. */}
+          <View key={medication.photoUri !== null ? "com-foto" : "sem-foto"}>
+            {medication.photoUri !== null ? (
+              /* A foto da caixa existe para responder "é este o remédio?", e numa miniatura de 56px
+                 essa pergunta às vezes não se responde — caixas da mesma família são quase iguais.
+                 Ampliar é um toque próprio, dentro do card que abre o detalhe: o `Pressable` de
+                 dentro vence o de fora, então tocar a foto amplia e tocar o resto abre o detalhe. */
+              <Pressable
+                style={estadoDePressao(undefined, { escala: true })}
+                onPress={() => onVerFoto(medication.photoUri ?? "", medication.name)}
+                accessibilityRole="button"
+                accessibilityLabel={`Ver a foto de ${medication.name}`}>
+                <FotoLocal uri={medication.photoUri} style={styles.photo} />
+              </Pressable>
+            ) : (
+              <View style={[styles.photo, styles.photoVazia]}>
+                <Ionicons name="medkit-outline" size={24} color={cores.primary} />
+              </View>
+            )}
+          </View>
 
           <View style={styles.itemHeaderText}>
             <Text style={styles.name} numberOfLines={1}>

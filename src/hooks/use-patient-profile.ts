@@ -1,5 +1,6 @@
 import * as Crypto from "expo-crypto";
-import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 
 import { PatientProfileRepository } from "@/data/repositories/patient-profile-repository";
@@ -66,12 +67,33 @@ export function usePatientProfile(): PatientProfileState {
   const [isLoading, setLoading] = useState(true);
   const [draft, setDraft] = useState<PatientProfileDraft | null>(null);
 
-  useEffect(() => {
-    loadPatientProfileDraft().then((loaded) => {
-      setDraft(loaded);
-      setLoading(false);
-    });
+  /**
+   * Relê **a cada foco**, e não uma vez na montagem.
+   *
+   * Era um `useEffect` com lista vazia, e isso bastava para a ficha, que é empurrada com `push` e
+   * monta a cada abertura. Mas Ajustes e a Home são **abas**: elas ficam montadas em segundo
+   * plano e não remontam quando se navega até elas — então o efeito não rodava de novo, o `draft`
+   * continuava o de antes, e a foto recém-salva simplesmente não existia para elas.
+   *
+   * O sintoma era a foto da ficha "não aparecer nem depois de salvar" no avatar de Ajustes,
+   * enquanto aparecia normalmente ao reabrir a ficha para editar. Parecia defeito de imagem, e
+   * eram três cópias independentes do mesmo estado: cada tela com o seu `usePatientProfile`, e
+   * nenhuma sabendo que outra salvou.
+   *
+   * `useFocusEffect` é o que os hooks de lista do projeto já fazem (`use-appointment-list`,
+   * `use-calendar-agenda`) pelo mesmo motivo, e a releitura é uma consulta a uma linha só.
+   */
+  const reload = useCallback(async () => {
+    const loaded = await loadPatientProfileDraft();
+    setDraft(loaded);
+    setLoading(false);
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void reload();
+    }, [reload]),
+  );
 
   const save = useCallback(async (updated: PatientProfileDraft) => {
     await savePatientProfileDraft(updated);

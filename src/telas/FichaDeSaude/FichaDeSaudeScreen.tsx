@@ -376,28 +376,61 @@ export function FichaDeSaudeScreen({
           </Text>
         </View>
 
-        <View style={styles.photoRow}>
-          <Pressable
-            // Não responde enquanto a foto está sendo escolhida: o toque já foi aceito, e reagir
-            // de novo sugeriria que o primeiro não pegou.
-            style={estadoDePressao(photoUri ? styles.photoFrame : styles.photoPlaceholder, {
-              escala: !isPicking,
-              opacidade: !isPicking,
-            })}
-            /* Com foto, o toque amplia; sem foto, escolhe a origem. O link ao lado ("Trocar foto")
-               continua sendo o caminho da troca — antes os dois faziam a mesma coisa, e não havia
-               como simplesmente olhar a foto da ficha. */
-            onPress={() => (photoUri ? setVendoFoto(true) : setEscolhendoOrigem(true))}
-            disabled={isPicking}
-            accessibilityRole="button"
-            accessibilityLabel={photoUri ? "Ver a foto da ficha" : "Adicionar foto à ficha"}
-          >
-            {photoUri ? (
-              <FotoLocal uri={photoUri} style={styles.photo} />
-            ) : (
-              <Ionicons name="camera-outline" size={24} color={cores.onSurfaceVariant} />
-            )}
-          </Pressable>
+        {/* `key` na presença da foto: é o que força esta linha a **remontar** quando ela estreia.
+
+            O defeito custou seis correções no `FotoLocal`, e ele nunca esteve lá. Todo o
+            formulário vive dentro do `Pressable` que dispensa o teclado (ver
+            `KeyboardAwareScrollView`), e no Android essa árvore não recompunha esta linha quando
+            `photoUri` deixava de ser `null`: a caixa nativa continuava a que fora medida vazia.
+            Medido em aparelho — o `onLayout` do quadro disparou uma vez, com `foto=false`, e nunca
+            mais, enquanto a imagem dentro dele reportava 72×72 e completava o ciclo até
+            `onDisplay`. Um bloco de cor sólida no lugar da miniatura também não pintava, o que
+            provou que a imagem não era o assunto.
+
+            Trocar uma foto já existente sempre funcionou porque ali não há estreia: a linha já
+            fora montada com foto.
+
+            `"com"`/`"sem"` e não a URI inteira: o que precisa remontar é a passagem entre os dois
+            estados, e trocar de foto (`uri` → outra `uri`) já é resolvido pelo `key` do próprio
+            `FotoLocal`. Remontar a linha a cada troca seria custo sem ganho. */}
+        <View style={styles.photoRow} key={photoUri === null ? "sem-foto" : "com-foto"}>
+          {/* O quadro da foto, refeito em 08/09.
+
+              **A caixa é uma `View` fixa, e o toque mora dentro dela.** Antes o `Pressable` era o
+              próprio quadro, com `style` na forma funcional que `estadoDePressao` devolve — e essa
+              forma custa caro aqui: quando `photoUri` deixava de ser `null`, os irmãos desta linha
+              atualizavam (o texto vira "Trocar foto", "Remover" aparece), mas o `Pressable` não
+              recompunha a própria caixa nativa. O log de aparelho mostrou isso sem margem: o
+              `onLayout` do quadro disparou **uma vez, vazio**, e nunca mais — enquanto a imagem
+              dentro dele reportava 72×72 e completava o ciclo até `onDisplay`.
+
+              O que provou que a imagem nunca foi o assunto foi trocá-la por um bloco de cor sólida:
+              nem o bloco apareceu. Seis correções tinham sido feitas no `FotoLocal`, que sempre
+              esteve certo.
+
+              Com a `View` de fora carregando a medida e a borda, a caixa existe desde o primeiro
+              render e não depende de recomposição para ter área. O `Pressable` interno só recebe
+              toque e opacidade — ele preenche o que já foi medido, em vez de ser o que mede. */}
+          <View style={[styles.photoQuadro, photoUri === null && styles.photoVazio]}>
+            <Pressable
+              // `flex: 1` preenche a caixa já medida pela `View` de fora.
+              style={({ pressed }) => [styles.photoToque, pressed && !isPicking && styles.photoPressionada]}
+              /* Com foto, o toque amplia; sem foto, escolhe a origem. O link ao lado ("Trocar foto")
+                 continua sendo o caminho da troca — antes os dois faziam a mesma coisa, e não havia
+                 como simplesmente olhar a foto da ficha. */
+              onPress={() => (photoUri ? setVendoFoto(true) : setEscolhendoOrigem(true))}
+              // Não responde enquanto a foto está sendo escolhida: o toque já foi aceito, e reagir
+              // de novo sugeriria que o primeiro não pegou.
+              disabled={isPicking}
+              accessibilityRole="button"
+              accessibilityLabel={photoUri ? "Ver a foto da ficha" : "Adicionar foto à ficha"}>
+              {photoUri ? (
+                <FotoLocal uri={photoUri} style={styles.photo} />
+              ) : (
+                <Ionicons name="camera-outline" size={24} color={cores.onSurfaceVariant} />
+              )}
+            </Pressable>
+          </View>
           <Pressable
             style={estadoDePressao(styles.photoAcao, {
               superficie: !isPicking,
@@ -408,6 +441,15 @@ export function FichaDeSaudeScreen({
             accessibilityRole="button">
             <Text style={styles.photoAddLabel}>{photoUri ? "Trocar foto" : "Adicionar foto"}</Text>
           </Pressable>
+          {/* "Excluir", e não "Remover".
+
+              Os dois rótulos lado a lado disputavam a largura que sobra ao lado da miniatura de
+              72px, e com a fonte do sistema ampliada a linha quebrava. A palavra curta resolve
+              isso sem trocar texto por ícone — que exigiria decorar o desenho.
+
+              O vermelho separa das outras ações da linha: apagar é a única daqui que não se
+              desfaz. O `accessibilityLabel` diz o que está sendo excluído, porque "Excluir"
+              sozinho não se explica fora do contexto visual. */}
           {photoUri ? (
             <Pressable
               style={estadoDePressao(styles.photoAcao, { superficie: true })}
@@ -415,8 +457,9 @@ export function FichaDeSaudeScreen({
                 deletePersistedFile(photoUri);
                 setPhotoUri(null);
               }}
-              accessibilityRole="button">
-              <Text style={styles.photoRemoveLabel}>Remover</Text>
+              accessibilityRole="button"
+              accessibilityLabel="Excluir a foto da ficha">
+              <Text style={styles.photoExcluirLabel}>Excluir</Text>
             </Pressable>
           ) : null}
         </View>

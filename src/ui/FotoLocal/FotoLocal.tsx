@@ -1,5 +1,4 @@
 import { Image } from "expo-image";
-import { File } from "expo-file-system";
 import type { StyleProp, ImageStyle } from "react-native";
 
 import { useCores } from "@/shared/theme";
@@ -28,53 +27,35 @@ export type FotoLocalProps = {
  * futura reutilizar um caminho para o bug voltar, e ele volta silencioso — a tela mostra *uma*
  * imagem, só que a errada.
  *
- * `recyclingKey` amarra o componente à URI atual, então trocar a foto descarta a view anterior em
- * vez de reaproveitá-la.
+ * `key` e `recyclingKey` amarram o componente à URI atual: trocar a foto descarta a view anterior
+ * em vez de reaproveitá-la.
  *
- * ## O que a miniatura branca ensinou (06/09)
+ * ## A miniatura branca não era daqui (08/09)
  *
- * O defeito sobreviveu a três correções, e as duas primeiras erraram o alvo porque atacaram o cache
- * como se ele fosse o risco. Ele **era** o risco original — nome de arquivo fixo fazia a foto nova
- * herdar a imagem da anterior —, mas isso já tinha sido resolvido na origem: `persistPickedFile`
- * gera nome único por escolha, então duas fotos nunca compartilham URI.
+ * Seis correções foram feitas neste arquivo por causa de um defeito que nunca esteve nele: a foto
+ * escolhida ficava invisível até a tela remontar. A instrumentação em aparelho mostrou este
+ * componente fazendo tudo certo — URI recebida, arquivo lido com bytes válidos, ciclo completo de
+ * `onLoadStart` a `onDisplay`, sem erro, com JPEG e PNG, de câmera e de galeria — e `onLayout`
+ * reportando 72×72. Trocar a imagem por um bloco de cor sólida foi o que encerrou a questão:
+ * **nem o bloco aparecia**.
  *
- * Com a causa já eliminada, `cachePolicy="none"` deixou de proteger de alguma coisa e passou a
- * custar: sem cache de memória, a imagem recém-escolhida não estava pronta para o primeiro paint, e
- * só aparecia quando a tela remontava. Proteção redundante contra um problema que não existe mais é
- * o que produz o defeito seguinte.
+ * A causa estava na árvore acima. Todo formulário vive dentro do `Pressable` que dispensa o
+ * teclado (ver `KeyboardAwareScrollView`), e no Android essa árvore não recompunha a linha da
+ * mídia quando ela estreava — a caixa nativa continuava a que fora medida vazia. A correção é uma
+ * `key` na linha, em cada tela que exibe mídia, e está documentada em `FichaDeSaudeScreen`.
+ *
+ * Fica o registro para a próxima pessoa: quando o log diz que a imagem carregou, tem tamanho e
+ * exibiu, o problema não é da imagem. Vale trocar por um retângulo colorido antes de mexer aqui —
+ * dois minutos de sonda contra seis correções por hipótese.
  */
-/** Só a hora, com milissegundos — é a distância entre os eventos que diagnostica, não o relógio. */
-function agora(): string {
-  return new Date().toISOString().slice(11, 23);
-}
-
 export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) {
   const cores = useCores();
-
-  /**
-   * Instrumentação temporária (06/09) — remover quando a miniatura branca fechar.
-   *
-   * Quatro correções erraram o alvo porque cada uma partiu de uma hipótese sobre o `expo-image` em
-   * vez de um fato. Estas duas linhas separam o que sobrou: se este log aparece com a URI nova e a
-   * imagem ainda não pinta, o componente **recebeu** o caminho e o problema é da biblioteca; se ele
-   * não aparece, a tela não re-renderizou e o problema é de estado.
-   */
-  if (__DEV__) {
-    let estado = "?";
-    try {
-      const arquivo = new File(uri);
-      estado = arquivo.exists ? `existe, ${arquivo.size ?? "?"} bytes` : "NÃO EXISTE";
-    } catch (cause) {
-      estado = `caminho inválido (${String(cause)})`;
-    }
-    console.log(`[Mapill/foto] render — ${estado} — ${agora()} — ${uri}`);
-  }
 
   return (
     <Image
       /**
        * `key` na URI **remonta o componente** quando a foto muda, e é a segunda camada contra a
-       * miniatura branca.
+       * imagem errada.
        *
        * `recyclingKey` (abaixo) limpa o conteúdo da view antes de carregar a próxima, mas ela
        * continua sendo a mesma view — e no Android isso deixa espaço para o carregador reaproveitar
@@ -96,9 +77,7 @@ export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) 
        *
        * `none` era a terceira proteção contra a mesma coisa que `key` e `recyclingKey` já cobrem —
        * servir a imagem antiga quando a URI muda. Só que ele desliga também o cache de **memória**,
-       * e é dali que sai o primeiro paint: sem ele, a imagem recém-escolhida só aparecia na segunda
-       * montagem da tela. Era exatamente o sintoma que sobrou depois das duas correções anteriores
-       * — miniatura branca ao escolher, foto certa ao sair e voltar.
+       * e é dali que sai o primeiro paint.
        *
        * Servir a imagem errada continua impossível: `persistPickedFile` gera nome único por escolha,
        * então duas fotos nunca compartilham URI, e `key={uri}` remonta o componente quando ela muda.
@@ -110,36 +89,6 @@ export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) 
       cachePolicy="memory"
       recyclingKey={uri}
       transition={150}
-      /**
-       * A falha de carregamento **aparece no console**, em vez de virar um quadrado cinza calado.
-       *
-       * A miniatura branca já foi corrigida duas vezes por hipótese — cache, depois corrida na
-       * cópia — e voltou nas duas. O que faltava era saber se o `expo-image` sequer tentou ler o
-       * arquivo e falhou, ou se ele nunca recebeu URI nenhuma: os dois produzem o mesmo quadrado
-       * vazio na tela e têm causas opostas. Só em `__DEV__`, porque é instrumento de diagnóstico.
-       */
-      onError={({ error }) => {
-        if (__DEV__) console.error(`[Mapill/foto] ERRO — ${error} — ${uri}`);
-      }}
-      /**
-       * O ciclo inteiro, e não só o fim (06/09).
-       *
-       * O log de 06/09 mostrou `render — existe, 142156 bytes` e **mais nada**: nem `onLoad`, nem
-       * `onError`. Um arquivo válido que nem termina de carregar nem falha é um estado que a
-       * biblioteca não deveria produzir — então o que falta saber é se ela chegou a **começar**.
-       *
-       * `onDisplay` é distinto de `onLoad` na API ("rendered the source image" vs "load completes"),
-       * e é ele que corresponde ao pixel na tela.
-       */
-      onLoadStart={() => {
-        if (__DEV__) console.log(`[Mapill/foto] 1. começou a carregar — ${agora()}`);
-      }}
-      onLoad={() => {
-        if (__DEV__) console.log(`[Mapill/foto] 2. carregou — ${agora()}`);
-      }}
-      onDisplay={() => {
-        if (__DEV__) console.log(`[Mapill/foto] 3. exibiu — ${agora()}`);
-      }}
     />
   );
 }
