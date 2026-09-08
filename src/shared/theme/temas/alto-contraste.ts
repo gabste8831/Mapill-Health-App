@@ -51,9 +51,6 @@ export const temaAltoContraste: Tema = {
     secondaryContainer: "#CBD6EA",
     onSecondaryContainer: "#141A24",
 
-    tertiary: "#6B2E00",
-    tertiaryContainer: "#8A3C00",
-    onTertiaryContainer: "#FFFFFF",
 
     warning: "#7A3D00",
     warningSurface: "#FFEBCC",

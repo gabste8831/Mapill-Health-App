@@ -49,11 +49,22 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     padding: spacing.md,
     borderRadius: radius.md,
   },
-  /** Cor de atenção, não de erro: escolher uma antecedência menor resolve, e nada foi perdido. */
+  /**
+   * Cor de atenção, não de erro: escolher outra data resolve, e nada foi perdido.
+   *
+   * **Amarelo, e não o `tertiaryContainer` de antes.** Aquele token é laranja escuro (`#C05400`), e
+   * num bloco de texto ele lê como marrom — uma quinta cor num app que fala quatro: vermelho para o
+   * urgente, verde para o que está na hora, azul para o destaque comum, amarelo para o alerta. Era
+   * o único lugar do app que consumia o terciário, então ele não padronizava nada; só destoava.
+   *
+   * `warningSurface` e não `warningVivo` porque isto é um bloco de várias linhas: o amarelo de
+   * semáforo funciona em selo e ponto, e agride em área grande (ver o cabeçalho de `warningSurface`
+   * em `shared/theme/colors.ts`).
+   */
   aviso: {
     ...typography.bodyMd,
-    color: cores.onTertiaryContainer,
-    backgroundColor: cores.tertiaryContainer,
+    color: cores.onWarningSurface,
+    backgroundColor: cores.warningSurface,
     padding: spacing.md,
     borderRadius: radius.md,
   },

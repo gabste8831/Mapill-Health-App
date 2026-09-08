@@ -22,8 +22,19 @@ export type EstadoDeUmCanal = {
   nome: string;
   /** 0 a 5. Abaixo de 4 o Android não mostra heads-up nem toca som. */
   importancia: number;
-  /** `null` = canal mudo. É o defeito que passou despercebido por semanas. */
+  /** O nome do recurso, como foi pedido na criação. `null` quando o sistema não devolve. */
   som: string | null;
+  /**
+   * A URI que o Android **resolveu** para esse som, e é ela que diz se o canal toca.
+   *
+   * As duas coisas existem porque `sound` sozinho engana: pedindo `"default"`, o Android guarda a
+   * URI do som padrão e pode devolver `sound` vazio — o canal toca, e o diagnóstico dizia "MUDO".
+   * Um canal mudo de verdade vem com **as duas** vazias.
+   *
+   * É a terceira vez que a palavra "default" confunde a leitura neste projeto (ver o topo de
+   * `canais-notifee.ts`). Mostrar o valor resolvido é o que tira a resposta do campo do palpite.
+   */
+  somUri: string | null;
   /** Se a pessoa desligou o canal nas configurações do sistema. */
   bloqueado: boolean;
 };
@@ -102,8 +113,10 @@ export async function diagnosticarAvisos(): Promise<DiagnosticoDeAvisos> {
     id: canal.id,
     nome: canal.name,
     importancia: canal.importance ?? 0,
-    // `sound` ausente é o canal mudo — o defeito que custou semanas para ser encontrado.
+    // As duas leituras, porque só as duas juntas decidem: `sound` é o que pedimos, `soundURI` é o
+    // que o Android resolveu. Mudo de verdade é quando **ambas** estão vazias.
     som: canal.sound ?? null,
+    somUri: canal.soundURI ?? null,
     bloqueado: canal.blocked === true,
   }));
 

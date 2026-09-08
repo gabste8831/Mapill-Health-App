@@ -52,9 +52,6 @@ export const temaDaltonismo: Tema = {
     secondaryContainer: "#D5E0F8",
     onSecondaryContainer: "#3D4757",
 
-    tertiary: "#8A4200",
-    tertiaryContainer: "#A85200",
-    onTertiaryContainer: "#FFFFFF",
 
     /** Âmbar escuro: amarelo claro é o que a protanopia mais confunde com verde. */
     warning: "#8A5A00",

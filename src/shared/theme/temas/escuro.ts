@@ -70,9 +70,6 @@ export const temaEscuro: Tema = {
     secondaryContainer: "#2C374A",
     onSecondaryContainer: "#D6E0F5",
 
-    tertiary: "#FFB782",
-    tertiaryContainer: "#6B3000",
-    onTertiaryContainer: "#FFDCC4",
 
     /**
      * No escuro o aviso já era dourado e não terroso — o problema do tema claro não existe aqui.

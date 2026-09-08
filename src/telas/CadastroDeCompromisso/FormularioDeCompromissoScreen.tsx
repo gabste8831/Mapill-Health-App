@@ -192,20 +192,38 @@ export function FormularioDeCompromissoScreen({
       : new Date(instante.getTime() - leadEscolhido * 24 * 60 * 60_000);
   const avisoJaPassou = avisoChegaEm !== null && avisoChegaEm < agora;
 
-  /**
-   * Compromisso que já aconteceu não tem lembrete a dar, então a seção inteira sai da tela e para
-   * de ser cobrada. Perguntar "deseja ser lembrado?" de uma consulta da semana passada seria pedir
-   * uma resposta que o app não tem como honrar.
-   */
-  const aceitaLembrete = !jaPassou;
+  /** O compromisso é hoje? Comparado por **dia**, e não por instante — é a data que decide. */
+  const ehHoje = dateIso !== null && dateIso === todayIsoDate();
 
   /**
-   * A pessoa configurou o lembrete e **depois** mudou a data para trás. As respostas continuam no
-   * estado, mas a seção sumiu — então elas não são mais visíveis nem editáveis, e `handleSubmit` as
-   * descarta. Guardar isso calado é o que o F5 fazia: dizer que o lembrete some é o que separa
-   * "o app decidiu por mim" de "o app me avisou".
+   * Quando a seção de lembretes existe.
+   *
+   * Duas situações a tiram da tela, e as duas pelo mesmo motivo: **o app não pergunta o que não tem
+   * como honrar.**
+   *
+   * 1. **O compromisso já passou.** Perguntar "deseja ser lembrado?" de uma consulta da semana
+   *    passada seria pedir uma resposta sem destino.
+   *
+   * 2. **O compromisso é hoje.** Todo aviso deste formulário cai às 00:01 do dia — o "no dia", no
+   *    próprio dia; o de antecedência, N dias antes. Cadastrando hoje, **os dois instantes já
+   *    passaram**, e o planejador os descarta (`agendavel`). Não existe lembrete configurável aqui,
+   *    qualquer que seja a resposta.
+   *
+   * Esconder é melhor que oferecer com ressalva. Uma opção que aparece, aceita o toque e não produz
+   * nada transfere para a pessoa a tarefa de descobrir que sua escolha não teve efeito — e o pior
+   * resultado possível num app de lembrete é alguém deixar de anotar em outro lugar porque marcou
+   * aqui. Quem marca uma consulta para hoje já sabe dela hoje; o que serve nesse caso é o
+   * compromisso **aparecer na Home**, e isso continua acontecendo.
    */
-  const lembreteDescartado = jaPassou && querAviso === "sim";
+  const aceitaLembrete = !jaPassou && !ehHoje;
+
+  /**
+   * A pessoa configurou o lembrete e **depois** mudou a data — para trás, ou para hoje. As respostas
+   * continuam no estado, mas a seção sumiu, então elas não são mais visíveis nem editáveis, e
+   * `handleSubmit` as descarta. Guardar isso calado é o que o F5 fazia: dizer que o lembrete some é
+   * o que separa "o app decidiu por mim" de "o app me avisou".
+   */
+  const lembreteDescartado = !aceitaLembrete && querAviso === "sim";
 
   const avisoRespondido =
     !aceitaLembrete ||
@@ -314,20 +332,34 @@ export function FormularioDeCompromissoScreen({
               que existe o "você foi?" —, mas data passada também é o erro de digitação mais comum,
               o ano trocado. Dizer deixa quem errou perceber e quem quis registrar seguir. */}
           {jaPassou ? (
-            <>
-              <Text style={styles.aviso}>
-                Esse compromisso já passou. Ele entra na agenda como registro, e não haverá lembrete
-                — você poderá anotar o que aconteceu.
-              </Text>
-              {/* Só quando havia mesmo algo configurado: dizer "o lembrete foi descartado" para
-                  quem nunca configurou um inventa uma perda que não houve. */}
-              {lembreteDescartado ? (
-                <Text style={styles.aviso}>
-                  O lembrete que você tinha configurado foi descartado. Se voltar a data para o
-                  futuro, é só configurar de novo.
-                </Text>
-              ) : null}
-            </>
+            <Text style={styles.aviso}>
+              Esse compromisso já passou. Ele entra na agenda como registro, e não haverá lembrete.
+              Você poderá anotar o que aconteceu.
+            </Text>
+          ) : null}
+
+          {/* O compromisso é hoje: a seção de lembretes não vai aparecer, e a razão precisa estar
+              **aqui**, junto da data que a causou. Sem isto a seção some do nada, e um formulário
+              que muda de tamanho sem explicação parece defeito — ou pior, faz a pessoa achar que o
+              lembrete foi configurado em algum lugar que ela não viu.
+
+              O texto diz o que **acontece**, não o que falta: o compromisso aparece na Home hoje, e
+              é isso que substitui o aviso que não teria como chegar. */}
+          {ehHoje && !jaPassou ? (
+            <Text style={styles.aviso}>
+              Como é hoje, não há lembrete a configurar. Os avisos deste app chegam no começo do dia,
+              e hoje já começou. O compromisso aparece na tela inicial até a hora dele.
+            </Text>
+          ) : null}
+
+          {/* Só quando havia mesmo algo configurado: dizer "o lembrete foi descartado" para quem
+              nunca configurou um inventa uma perda que não houve. Vale para os dois casos — data
+              movida para o passado, ou para hoje. */}
+          {lembreteDescartado ? (
+            <Text style={styles.aviso}>
+              O lembrete que você tinha configurado foi descartado. Se escolher uma data futura, é
+              só configurar de novo.
+            </Text>
           ) : null}
         </Card>
 
@@ -363,8 +395,9 @@ export function FormularioDeCompromissoScreen({
           />
         </Card>
 
-        {/* A seção inteira some no passado: não há aviso a dar sobre o que já aconteceu, e
-            perguntar seria cobrar resposta que o app não tem como honrar. */}
+        {/* A seção inteira some no passado **e em compromissos de hoje**: nos dois casos todo aviso
+            possível cairia num instante já vencido, e perguntar seria cobrar resposta que o app não
+            tem como honrar. O porquê fica junto do campo de data, onde a escolha foi feita. */}
         {aceitaLembrete ? (
         <Card>
           <View style={styles.sectionHeader}>
@@ -465,16 +498,22 @@ export function FormularioDeCompromissoScreen({
               ) : null}
 
               {/* Diz **quando**, **como** e **onde** o aviso aparece, agora que ele chega de
-                  verdade. A hora fixa importa: quem pede "3 dias antes" precisa saber que o aviso é
-                  de manhã, e não no mesmo horário da consulta — senão parece atrasado.
+                  verdade. A hora importa: quem pede "3 dias antes" precisa saber que o aviso é
+                  do começo do dia, e não no mesmo horário da consulta — senão parece atrasado.
+
+                  "Assim que o dia virar" e não "às 00:01": a hora exata é detalhe de implementação,
+                  e o que a pessoa precisa entender é a **garantia** — o aviso está lá desde o
+                  começo do dia, qualquer que seja o horário da consulta. Era 08:00, e para uma
+                  consulta às 06:00 o aviso chegava depois de ela já ter começado.
 
                   A segunda frase é a que explica a Home. A antecedência escolhida aqui governa duas
                   coisas ao mesmo tempo: quando a notificação chega e a partir de quando o
                   compromisso aparece na tela inicial. Sem dizer isso, o card que surge sozinho dias
                   depois parece comportamento aleatório do app. */}
               <Text style={styles.hint}>
-                Os avisos chegam por notificação, às 8 da manhã do dia marcado. Compromisso não toca
-                alarme: só a dose faz isso.
+                O aviso fica na tela assim que o dia virar, para você encontrá-lo ao pegar o
+                celular, mesmo que o compromisso seja de manhã cedo. Compromisso não toca alarme:
+                só a dose faz isso.
                 {querAntecedencia && leadEscolhido !== null && !leadInvalido
                   ? ` O compromisso também aparece na tela inicial ${leadEscolhido === 1 ? "no dia anterior" : `nos ${leadEscolhido} dias que antecedem a data`}.`
                   : " Na tela inicial, o compromisso aparece no próprio dia."}

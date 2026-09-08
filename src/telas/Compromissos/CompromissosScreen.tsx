@@ -356,7 +356,11 @@ export function CompromissosScreen({ onBack, detalheInicialId }: CompromissosScr
           }
           ListFooterComponent={
             anteriores.length > 0 ? (
-              <View style={styles.blocoAnteriores}>
+              <View
+                style={[
+                  styles.blocoAnteriores,
+                  proximos.length === 0 && styles.blocoAnterioresSozinho,
+                ]}>
                 {/* Só quando há algo acima para separar: com a agenda vazia, um traço solto no topo
                     da tela não divide nada. */}
                 {proximos.length > 0 ? <View style={styles.divisorDeEscopo} /> : null}

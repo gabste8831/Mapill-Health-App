@@ -104,22 +104,8 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  acoes: {
-    flexDirection: "row",
-    gap: spacing.xs,
-  },
-  /**
-   * Mesmo alvo de 44 da lista de remédios. `padding: xs` sobre um ícone de 20 dava 28px de área
-   * real — e um dos dois botões **exclui**, encostado no de editar. Alvo apertado ao lado de ação
-   * destrutiva é onde o erro de toque custa caro.
-   */
-  acaoBotao: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radius.full,
-  },
+  /* `acoes` e `acaoBotao` saíram em 06/09, com o lápis e a lixeira do card. O card inteiro virou o
+     toque, e editar/excluir vivem na listagem de Compromissos. */
 
   detalhe: {
     ...typography.bodyMd,
@@ -154,31 +140,49 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     paddingTop: spacing.sm,
     marginTop: spacing.xs,
   },
+  /** `caption` e não `bodyMd`: é rótulo de uma pergunta curta, não texto de leitura. */
   perguntaTexto: {
-    ...typography.bodyMd,
+    ...typography.caption,
     color: cores.onSurfaceVariant,
   },
   botoesDeDesfecho: {
     flexDirection: "row",
     gap: spacing.sm,
   },
+  /**
+   * Os mesmos botões do card de compromisso da Home, e da linha de dose.
+   *
+   * Antes eram dois retângulos iguais de 44 de altura, e num card que já traz hora, título,
+   * profissional, local, observação e preparo eles pesavam mais que tudo acima. **36 com `hitSlop`
+   * de 4** mantém o alvo real nos 44 e devolve o card ao tamanho de um item de lista — é
+   * exatamente o que a linha de dose faz com "Confirmar"/"Pular", pelo mesmo motivo.
+   */
   botaoDeDesfecho: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.xs,
-    // 44 é o piso de alvo de toque confortável; abaixo disso a linha vira armadilha em tela
-    // pequena, e o público do app inclui quem já não acerta um toque preciso.
-    minHeight: 44,
+    minHeight: 36,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
     borderRadius: radius.full,
-    // Fundo suave no lugar do contorno: dois botões lado a lado dentro de um cartão sem borda,
-    // contornados, voltavam a desenhar a caixinha que o cartão deixou de ter.
+  },
+  /** "Fui": pílula cheia, como "Confirmar". É o desfecho esperado. */
+  botaoFui: {
+    backgroundColor: cores.primary,
+  },
+  botaoFuiTexto: {
+    ...typography.caption,
+    color: cores.onPrimary,
+  },
+  /** "Não fui": fundo suave, como "Pular". Saída legítima, não atalho a incentivar. */
+  botaoNaoFui: {
     backgroundColor: cores.surfaceContainer,
   },
-  botaoDeDesfechoTexto: {
-    ...typography.label,
-    color: cores.onSurface,
+  botaoNaoFuiTexto: {
+    ...typography.caption,
+    color: cores.onSurfaceVariant,
   },
 
   /** O desfecho já respondido, com a cor dizendo qual foi antes de a palavra ser lida. */

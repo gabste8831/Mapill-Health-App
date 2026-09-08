@@ -217,12 +217,23 @@ function secaoCompromissos(relatorio: Relatorio): string {
  * truncado na mão do médico.
  */
 export function montarHtml(relatorio: Relatorio): string {
-  const recorte = relatorio.recorte
-    ? `<p class="recorte">
-         Este relatório cobre ${relatorio.recorte.selecionados} de
-         ${relatorio.recorte.total} tratamentos, e não o tratamento completo do paciente.
-       </p>`
-    : "";
+  /**
+   * O aviso de recorte, e o caso de **nenhum** tratamento tem frase própria.
+   *
+   * "Cobre 0 de 1 tratamentos" é gramaticalmente torto e, pior, faz o médico procurar uma seção de
+   * adesão que o documento não tem. Quando ninguém foi incluído, o que ele precisa saber é o que o
+   * papel **é** — um relatório de compromissos —, e não quantos tratamentos ficaram de fora.
+   */
+  const recorte = !relatorio.recorte
+    ? ""
+    : relatorio.recorte.selecionados === 0
+      ? `<p class="recorte">
+           Este relatório não cobre nenhum tratamento: ele traz apenas os compromissos do período.
+         </p>`
+      : `<p class="recorte">
+           Este relatório cobre ${relatorio.recorte.selecionados} de
+           ${relatorio.recorte.total} tratamentos, e não o tratamento completo do paciente.
+         </p>`;
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">

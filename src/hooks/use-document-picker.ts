@@ -48,7 +48,10 @@ export function useDocumentPicker(prefix: string) {
           name: asset.name,
           isPdf,
         };
-      } catch {
+      } catch (cause) {
+        // Mesmo motivo do `use-photo-picker`: `persistPickedFile` lança com a razão da falha, e
+        // engoli-la deixava o anexo em branco sem nada que explicasse.
+        console.error("[Mapill] falha ao guardar o anexo escolhido:", cause);
         return { status: "failed", reason: "failed" };
       } finally {
         setPicking(false);

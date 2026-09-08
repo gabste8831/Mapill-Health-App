@@ -63,6 +63,17 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     gap: spacing.md,
   },
   /**
+   * Sem nenhum compromisso futuro, o `marginTop` acima não separa nada — só abre um buraco.
+   *
+   * A margem existe para afastar o histórico da lista de próximos. Quando essa lista está vazia, o
+   * que fica acima é a contagem ("0 compromissos agendados"), que já traz o próprio `marginBottom`:
+   * os dois somavam e deixavam um vão do tamanho de um cartão entre a frase e o acordeão, como se
+   * algo tivesse falhado ao carregar.
+   */
+  blocoAnterioresSozinho: {
+    marginTop: 0,
+  },
+  /**
    * O traço que separa a agenda do histórico, igual ao da tela de adesão.
    *
    * O respiro sozinho não bastava: numa lista de cartões iguais, espaço a mais lê como item que

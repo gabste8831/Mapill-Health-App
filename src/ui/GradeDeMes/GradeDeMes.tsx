@@ -125,43 +125,57 @@ export function GradeDeMes({
           const ehHoje = isoDay === hoje;
 
           return (
-            <Pressable
-              key={isoDay}
-              style={styles.celula}
-              // Sem o ripple padrão do Android: ele é desenhado no `Pressable`, que é a célula
-              // retangular da grade, e aparecia como um quadrado atrás do círculo do dia. O realce
-              // do toque fica com a opacidade do próprio círculo, que segue a forma dele.
-              android_ripple={null}
-              onPress={() => onSelecionar(isoDay)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: estaSelecionado }}
-              accessibilityLabel={`Dia ${data.getDate()}`}>
-              {({ pressed }) => (
-                <>
-                  <View
-                    style={[
-                      styles.numeroCirculo,
-                      ehHoje && !estaSelecionado && styles.numeroHoje,
-                      estaSelecionado && styles.numeroSelecionado,
-                      // O retorno do toque, no lugar do ripple: escurece o círculo, não a célula.
-                      pressed && styles.numeroPressionado,
-                    ]}>
-                    <Text style={[styles.numero, estaSelecionado && styles.numeroTextoSelecionado]}>
-                      {data.getDate()}
-                    </Text>
-                  </View>
+            /**
+             * O `Pressable` envolve **só o círculo**, e não a célula inteira.
+             *
+             * Envolvendo a célula, o realce do toque era desenhado na área retangular da grade e
+             * aparecia como um quadrado claro atrás do dia — inclusive com `android_ripple={null}`,
+             * porque o que sobrava não era o ripple e sim o próprio fundo do pressionado, que segue
+             * a forma do componente tocado. Com o toque no círculo, o realce não tem como ser
+             * quadrado: ele herda o `borderRadius` de quem o desenha.
+             *
+             * O `hitSlop` devolve a área de dedo que a célula dava. O alvo continua tendo os 34pt
+             * do círculo mais 6 de folga em volta — o que se perdeu foi só o retângulo do canto,
+             * que ninguém mira.
+             */
+            <View key={isoDay} style={styles.celula}>
+              <Pressable
+                onPress={() => onSelecionar(isoDay)}
+                android_ripple={null}
+                hitSlop={6}
+                accessibilityRole="button"
+                accessibilityState={{ selected: estaSelecionado }}
+                accessibilityLabel={`Dia ${data.getDate()}`}
+                style={({ pressed }) => [
+                  styles.numeroCirculo,
+                  // O contorno só quando hoje **não** é o dia escolhido: selecionado, ele já é o
+                  // círculo cheio, e uma borda branca sobre fundo branco não desenha nada.
+                  ehHoje && !estaSelecionado && styles.numeroHoje,
+                  estaSelecionado && styles.numeroSelecionado,
+                  // O retorno do toque, no lugar do ripple: esmaece o círculo, que já é redondo.
+                  pressed && styles.numeroPressionado,
+                ]}>
+                {/* A cor do número acompanha o fundo do círculo, e é por isso que ela é decidida
+                    aqui e não por acúmulo de estilos: selecionado, o círculo é branco e o número
+                    precisa ser azul; nos demais dias o fundo é a faixa e o número é branco.
 
-                  {/* Altura reservada mesmo sem ponto: sem isso a linha da grade sobe e desce
-                      conforme o mês tem ou não marcação, e o calendário treme ao trocar de mês. */}
-                  <View style={styles.pontos}>
-                    {marca?.temCompromisso ? (
-                      <View style={[styles.ponto, styles.pontoDeCompromisso]} />
-                    ) : null}
-                    {marca?.temDose ? <View style={[styles.ponto, styles.pontoDeDose]} /> : null}
-                  </View>
-                </>
-              )}
-            </Pressable>
+                    Hoje **e** selecionado é o caso que quebrava: `numeroHoje` só desenha o contorno
+                    e não mexe no texto, então a leitura de qual cor usar tem que vir do fundo real
+                    do círculo — que é o `numeroSelecionado`, ganhe ele de quem ganhar. */}
+                <Text style={estaSelecionado ? styles.numeroSelecionadoTexto : styles.numero}>
+                  {data.getDate()}
+                </Text>
+              </Pressable>
+
+              {/* Altura reservada mesmo sem ponto: sem isso a linha da grade sobe e desce
+                  conforme o mês tem ou não marcação, e o calendário treme ao trocar de mês. */}
+              <View style={styles.pontos}>
+                {marca?.temCompromisso ? (
+                  <View style={[styles.ponto, styles.pontoDeCompromisso]} />
+                ) : null}
+                {marca?.temDose ? <View style={[styles.ponto, styles.pontoDeDose]} /> : null}
+              </View>
+            </View>
           );
         })}
       </View>

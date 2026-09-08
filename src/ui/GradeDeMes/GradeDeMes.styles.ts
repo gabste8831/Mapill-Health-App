@@ -80,7 +80,16 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyMd,
     color: cores.onSuperficieDeDestaque,
   },
-  numeroTextoSelecionado: {
+  /**
+   * O número dentro do círculo branco: **estilo completo**, e não só a cor por cima do `numero`.
+   *
+   * Era um `color` solto num array (`[numero, selecionado && numeroTextoSelecionado]`), e no dia
+   * de hoje selecionado o resultado saía branco sobre branco — uma bolinha lisa, sem número. Um
+   * estilo inteiro não depende de qual condição do array venceu: se o círculo está branco, o texto
+   * é azul, e não há combinação de flags que produza outra coisa.
+   */
+  numeroSelecionadoTexto: {
+    ...typography.bodyMd,
     color: cores.superficieDeDestaque,
   },
   pontos: {

@@ -198,12 +198,24 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                 <View key={canal.id} style={styles.agendado}>
                   <Text style={styles.agendadoQuando}>{canal.nome}</Text>
                   {/* Canal sem som é o defeito que passou semanas despercebido: o app agendava, o
-                      Android entregava, e nada tocava. */}
+                      Android entregava, e nada tocava.
+
+                      **Mudo é quando as duas leituras estão vazias.** `sound` é o nome que pedimos
+                      na criação; `soundURI` é o que o Android resolveu e vai tocar. Pedindo
+                      `"default"`, alguns aparelhos devolvem `sound` vazio e a URI preenchida — o
+                      canal toca, e olhar só a primeira dizia "MUDO" num canal saudável. Julgar pelo
+                      campo errado aqui manda consertar o que não está quebrado. */}
                   <Linha
                     rotulo="Som"
-                    valor={canal.som ?? "MUDO"}
-                    estado={canal.som === null ? "ruim" : "ok"}
+                    valor={canal.som ?? canal.somUri ?? "MUDO"}
+                    estado={canal.som === null && canal.somUri === null ? "ruim" : "ok"}
                   />
+                  {/* A URI aparece à parte quando as duas existem: é ela que prova qual arquivo o
+                      sistema vai tocar, e num canal de alarme isso é a diferença entre o som
+                      próprio e o padrão de notificação. */}
+                  {canal.som !== null && canal.somUri !== null ? (
+                    <Linha rotulo="Som resolvido" valor={canal.somUri} estado="ok" />
+                  ) : null}
                   {/* Abaixo de 4 o Android não mostra heads-up nem toca. */}
                   <Linha
                     rotulo="Importância"

@@ -60,13 +60,19 @@ export function IndicadorDeSync({ estado, sincronizando, onSincronizar }: Indica
       </View>
 
       <View style={styles.texto}>
+        {/* Sem o número de pendências.
+
+            Ele contava **linhas de banco**, e um único cadastro produz dezenas: o medicamento, a
+            prescrição, o estoque e um registro por dose gerada. Cadastrar um remédio de 2×/dia por
+            um mês mostrava "62 alterações para enviar", e quem leu isso fez uma coisa só. O número
+            era exato e comunicava errado — sugeria trabalho acumulado, ou perda iminente.
+
+            O que a pessoa precisa saber é binário: está tudo salvo, ou ainda falta subir. */}
         <Text style={styles.titulo}>
           {sincronizando
             ? "Sincronizando…"
             : temPendencias
-              ? estado.pendentes === 1
-                ? "1 alteração para enviar"
-                : `${estado.pendentes} alterações para enviar`
+              ? "Há alterações para enviar"
               : "Tudo salvo na nuvem"}
         </Text>
         <Text style={styles.detalhe}>

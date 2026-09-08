@@ -46,9 +46,15 @@ export const colors = {
   secondaryContainer: "#D5E0F8",
   onSecondaryContainer: "#3D4757",
 
-  tertiary: "#994200",
-  tertiaryContainer: "#C05400",
-  onTertiaryContainer: "#FFFBFF",
+  /* O terciário do Material (laranja `#C05400`) foi removido em 06/09.
+
+     Ele existia porque a paleta nasceu do gerador de temas do Material, e não porque o app
+     precisasse dele. Um único estilo o consumia — o bloco de aviso do cadastro de compromisso —, e
+     num bloco de texto o laranja escuro lê como marrom: uma quinta cor num app que fala quatro.
+
+     O vocabulário é: **vermelho** para o urgente, **verde** para o que está na hora, **azul** para
+     o destaque comum, **amarelo** para o alerta. Um aviso é alerta, então virou `warningSurface`.
+     Manter o token na paleta convidaria a usá-lo de novo por engano. */
 
   /**
    * O amarelo de atenção — a dica, o lembrete de recontagem, a permissão que falta.

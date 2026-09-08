@@ -39,21 +39,37 @@ export type PlanejarAvisosDeCompromissoInput = {
 };
 
 /**
- * A que horas cai o aviso "no dia" e o de antecedência.
+ * A que horas cai o aviso "no dia" e o de antecedência: **um minuto depois da virada**.
  *
- * Cedo, mas não de madrugada. Um aviso de consulta às 3h da manhã acorda para dizer algo que só
- * será útil dez horas depois — e o que ele consegue é que a pessoa desligue os avisos do app.
- * Oito da manhã é quando o dia começa a ser organizado, que é justamente o que este aviso serve
- * para permitir: remarcar o trabalho, arrumar carona.
+ * Era 08:00, e a hora escolhida criava um defeito que só aparecia em compromissos cedo. Uma consulta
+ * às 06:00 recebia o aviso "no dia" duas horas **depois** de já ter começado; uma às 08:05 recebia
+ * cinco minutos antes, o que não é aviso, é constatação. A hora fixa só funcionava para a tarde.
+ *
+ * 00:01 é a única hora que serve para o dia inteiro, porque este aviso **não é para ser ouvido na
+ * hora**. Ele é para já estar na tela quando a pessoa pegar o celular pela primeira vez no dia —
+ * e por isso o que importa é ele existir desde o começo do dia, não interromper em algum momento
+ * dele. É notificação silenciosa e sem ação rápida (`semAcoesRapidas`), não alarme: ela espera.
+ *
+ * Um minuto e não zero: à meia-noite em ponto disputa com a virada de data do próprio sistema, e um
+ * agendamento marcado exatamente no limite do dia é o tipo de coisa que cai do lado errado dele.
  */
-const HORA_DO_AVISO = 8;
+const HORA_DO_AVISO = 0;
+const MINUTO_DO_AVISO = 1;
 
 const PREFIXO_COMPROMISSO = "compromisso-";
 const PREFIXO_RECEITA = "receita-";
 
-/** Um dia específico às 08:00, no fuso do aparelho. */
-function manhaDe(dia: Date): Date {
-  return new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), HORA_DO_AVISO, 0, 0, 0);
+/** Um dia específico às 00:01, no fuso do aparelho. */
+function inicioDoDia(dia: Date): Date {
+  return new Date(
+    dia.getFullYear(),
+    dia.getMonth(),
+    dia.getDate(),
+    HORA_DO_AVISO,
+    MINUTO_DO_AVISO,
+    0,
+    0,
+  );
 }
 
 /** `YYYY-MM-DD` → `Date` local. Sem `new Date(iso)`, que interpretaria como UTC e voltaria um dia. */
@@ -132,7 +148,7 @@ export function planejarAvisosDeCompromisso(
     if (instante <= input.agora) continue;
 
     if (compromisso.reminderLeadDays !== null) {
-      const quando = manhaDe(diasAntes(instante, compromisso.reminderLeadDays));
+      const quando = inicioDoDia(diasAntes(instante, compromisso.reminderLeadDays));
       if (agendavel(quando)) {
         avisos.push({
           chave: `${PREFIXO_COMPROMISSO}${compromisso.appointmentId}-antes`,
@@ -152,7 +168,7 @@ export function planejarAvisosDeCompromisso(
     }
 
     if (compromisso.reminderOnDay) {
-      const quando = manhaDe(instante);
+      const quando = inicioDoDia(instante);
       if (agendavel(quando)) {
         avisos.push({
           chave: `${PREFIXO_COMPROMISSO}${compromisso.appointmentId}-no-dia`,
@@ -171,7 +187,7 @@ export function planejarAvisosDeCompromisso(
     if (receita.renewalReminderLeadDays === null) continue;
 
     const vencimento = diaLocal(receita.validUntil);
-    const quando = manhaDe(diasAntes(vencimento, receita.renewalReminderLeadDays));
+    const quando = inicioDoDia(diasAntes(vencimento, receita.renewalReminderLeadDays));
     if (!agendavel(quando)) continue;
 
     avisos.push({

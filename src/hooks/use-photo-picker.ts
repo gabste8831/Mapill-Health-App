@@ -53,11 +53,33 @@ export function usePhotoPicker(prefix: string) {
             : await ImagePicker.launchImageLibraryAsync(options);
         if (result.canceled || !result.assets[0]) return { status: "failed", reason: "cancelled" };
 
+        const escolhido = result.assets[0];
+        // Instrumentação temporária (06/09) — remover com a da `FotoLocal`. Mostra o que o picker
+        // entregou antes de a cópia acontecer: dimensão zero aqui explicaria uma imagem que existe
+        // em bytes e mesmo assim não tem nada para exibir.
+        if (__DEV__) {
+          console.log(
+            `[Mapill/foto] 0. picker devolveu ${escolhido.width}x${escolhido.height} tipo=${escolhido.mimeType ?? "?"} — ${escolhido.uri}`,
+          );
+        }
+
         return {
           status: "picked",
-          uri: persistPickedFile(result.assets[0].uri, prefix, "jpg", replacing),
+          uri: persistPickedFile(escolhido.uri, prefix, "jpg", replacing),
         };
-      } catch {
+      } catch (cause) {
+        /**
+         * O erro **aparece**, em vez de virar um `failed` mudo.
+         *
+         * `persistPickedFile` lança quando a cópia não chega inteira ao destino, e este `catch`
+         * engolia essa mensagem — o sintoma que chegava era a miniatura branca, sem nada no console
+         * que dissesse por quê. Duas correções da miniatura foram feitas às cegas por causa disto:
+         * o defeito ficava indistinguível de um problema de cache do `expo-image`.
+         *
+         * `console.error` e não um estado novo: quem chama já trata `failed`, e o que faltava era
+         * ter **o motivo** em mãos ao testar em aparelho.
+         */
+        console.error("[Mapill] falha ao guardar a foto escolhida:", cause);
         return { status: "failed", reason: "failed" };
       } finally {
         setPicking(false);

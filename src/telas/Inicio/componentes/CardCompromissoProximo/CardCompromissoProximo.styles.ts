@@ -108,4 +108,79 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     color: cores.onSurface,
     flex: 1,
   },
+
+  /**
+   * "Você foi?", quando o horário já passou.
+   *
+   * Separado por um traço como o preparo, e pelo mesmo motivo: é outra coisa que o card diz, e
+   * colada ao texto acima ela leria como parte do compromisso em vez de uma pergunta sobre ele.
+   */
+  pergunta: {
+    gap: spacing.sm,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: withOpacity(cores.onSurface, 0.1),
+  },
+  perguntaTexto: {
+    ...typography.caption,
+    color: cores.onSurfaceVariant,
+  },
+  /**
+   * Os dois botões, **exatamente os da linha de dose**: mesma pílula, mesma altura de 36, mesma
+   * divisão de largura. Responder "fui" a uma consulta e "tomei" a um remédio são o mesmo gesto no
+   * mesmo lugar da tela, e desenhá-los diferente obrigaria a reaprender o que já se sabe.
+   *
+   * A ordem também é a de lá: **o negativo à esquerda, o positivo à direita** — a ordem de
+   * Cancelar/OK do sistema, com a resposta esperada onde o polegar chega.
+   */
+  botoes: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  botao: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    // 44 continua sendo o alvo real, garantido pelo `hitSlop` no componente — igual à dose.
+    minHeight: 36,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.full,
+  },
+  /** "Fui": pílula cheia, como "Confirmar". É o desfecho esperado. */
+  botaoFui: {
+    backgroundColor: cores.primary,
+  },
+  botaoFuiTexto: {
+    ...typography.caption,
+    color: cores.onPrimary,
+  },
+  /** "Não fui": fundo suave, como "Pular". Saída legítima, não atalho a incentivar. */
+  botaoNaoFui: {
+    backgroundColor: cores.surfaceContainer,
+  },
+  botaoNaoFuiTexto: {
+    ...typography.caption,
+    color: cores.onSurfaceVariant,
+  },
+
+  /** O desfecho já registrado, no canto onde estava o chevron. */
+  selo: {
+    paddingVertical: 2,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.full,
+    backgroundColor: cores.successSurface,
+  },
+  seloAusente: {
+    backgroundColor: cores.errorSurface,
+  },
+  seloTexto: {
+    ...typography.caption,
+    color: cores.onSuccessContainer,
+  },
+  seloTextoAusente: {
+    color: cores.onErrorContainer,
+  },
 }));
