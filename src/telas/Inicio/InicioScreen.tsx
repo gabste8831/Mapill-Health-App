@@ -128,14 +128,29 @@ export function InicioScreen() {
    * ter — e, ao contrário de um ref, nada é escondido do React.
    */
   const diaFechado = total > 0 && agenda.resolvidas === total;
-  const [diaFechadoAntes, setDiaFechadoAntes] = useState(diaFechado);
+
+  /**
+   * `null` enquanto a agenda não chegou — e é isso que separa "o dia fechou" de "a tela montou".
+   *
+   * Era `useState(diaFechado)`, e o valor inicial só vale na **primeira** montagem. Voltar à Home
+   * vindo de outra tela monta a `InicioScreen` de novo, e nesse instante `isLoading` ainda é
+   * verdadeiro: `total` é 0, então `diaFechado` nasce `false`. Quando as doses chegam ele vira
+   * `true`, a comparação abaixo lê isso como transição, e a comemoração aparecia a cada
+   * redirecionamento com o dia já completo — que foi o que o Gabriel viu em aparelho.
+   *
+   * Com `null`, o primeiro valor real apenas **registra** o estado, sem comparar com nada: só há
+   * transição depois de existir um valor anterior de verdade. Quem abre a Home com o dia já
+   * fechado continua sem comemoração, que é a regra que este bloco sempre quis ter.
+   */
+  const [diaFechadoAntes, setDiaFechadoAntes] = useState<boolean | null>(null);
   const [comemorar, setComemorar] = useState(false);
 
-  if (diaFechadoAntes !== diaFechado) {
+  if (!isLoading && diaFechadoAntes !== diaFechado) {
+    const primeiraLeitura = diaFechadoAntes === null;
     setDiaFechadoAntes(diaFechado);
     // Só a passagem para fechado comemora. O caminho de volta (uma correção retroativa reabre o
     // dia) apenas atualiza a memória, sem festejar o desfazer.
-    if (diaFechado) setComemorar(true);
+    if (diaFechado && !primeiraLeitura) setComemorar(true);
   }
   const proximaDose = agenda.doses.find((dose) => dose.status === "next");
   const atrasadas = agenda.doses.filter((dose) => dose.status === "late");

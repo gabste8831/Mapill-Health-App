@@ -341,7 +341,30 @@ export function EstoqueScreen() {
     }
   }
 
-  function voltarParaMedicacoes() {
+  /**
+   * Vai **para a listagem**, e não para trás.
+   *
+   * Era `router.back()` com `/remedios` só de reserva, e por isso o botão cumpria a promessa
+   * apenas para quem tinha chegado ao estoque vindo da própria listagem. Quem veio da Home
+   * tocava em "Ver minhas medicações" e era devolvido à Home — o rótulo nomeia um destino, e o
+   * gesto de voltar não é um destino: ele depende de onde a pessoa esteve antes.
+   *
+   * `navigate` e não `push`: a listagem é uma aba, e empilhar uma segunda cópia dela deixaria o
+   * gesto de voltar preso num vaivém entre duas telas iguais.
+   */
+  function irParaMedicacoes() {
+    router.navigate("/remedios");
+  }
+
+  /**
+   * A seta do cabeçalho, que é outra coisa: ela desfaz o passo que trouxe a pessoa até aqui.
+   *
+   * Voltar e "ver minhas medicações" coincidem para quem veio da listagem, e é por isso que os
+   * dois compartilhavam uma função só. Para quem veio da Home eles divergem — e aí a seta deve
+   * devolver à Home, que é de onde a pessoa veio. `/remedios` fica como reserva para quando não
+   * há histórico (link direto, retomada do app).
+   */
+  function voltar() {
     if (router.canGoBack()) router.back();
     else router.replace("/remedios");
   }
@@ -376,7 +399,7 @@ export function EstoqueScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Header title="Estoque" onBack={voltarParaMedicacoes} />
+      <Header title="Estoque" onBack={voltar} />
 
       <View style={styles.header}>
         {/* A mesma busca da lista de medicações, pelo mesmo motivo: passado um punhado de itens,
@@ -494,7 +517,7 @@ export function EstoqueScreen() {
               <Button
                 label="Ver minhas medicações"
                 variant="outline"
-                onPress={voltarParaMedicacoes}
+                onPress={irParaMedicacoes}
               />
             </View>
           }
