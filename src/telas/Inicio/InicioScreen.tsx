@@ -4,7 +4,9 @@ import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import type { AppointmentOutcome } from "@/domain/entities/appointment";
 import { useAppointmentList } from "@/hooks/use-appointment-list";
+import { useAppointmentRegistration } from "@/hooks/use-appointment-registration";
 import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePatientProfile } from "@/hooks/use-patient-profile";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
@@ -22,7 +24,6 @@ import { PainelDePermissoes } from "@/ui/PainelDePermissoes/PainelDePermissoes";
 import { CardEstoque } from "@/ui/CardDeAtalho/CardEstoque";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
 import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/CardProximaDose";
-import { ItemDeCompromisso } from "@/telas/Inicio/componentes/ItemDeCompromisso/ItemDeCompromisso";
 import { ItemDeDose } from "@/telas/Inicio/componentes/ItemDeDose/ItemDeDose";
 import { criarEstilos } from "./InicioScreen.styles";
 import { mensagemParaAPessoa } from "@/shared/mensagem-de-erro";
@@ -90,9 +91,11 @@ export function InicioScreen() {
   const router = useRouter();
   const { draft } = usePatientProfile();
   const { agenda, isLoading, error, reload, registrarDose, registrarDoses } = useTodayDoses();
-  // Só a lista importa aqui: o carregamento é coberto pelo da agenda, e um erro de compromisso não
-  // pode esconder as doses do dia — a seção simplesmente não aparece.
-  const { items: compromissos } = useAppointmentList();
+  // O carregamento e o erro ficam de fora: aquele é coberto pelo da agenda, e um erro de
+  // compromisso não pode esconder as doses do dia — a seção simplesmente não aparece. `reload` vem
+  // junto porque responder "fui" precisa reler a lista para o cartão refletir a resposta.
+  const { items: compromissos, reload: recarregarCompromissos } = useAppointmentList();
+  const { registrarDesfecho } = useAppointmentRegistration();
   const { permissao, pedir } = useNotificationPermission();
   const permissoesDoAlarme = usePermissoesDeAlarme();
 
@@ -296,6 +299,29 @@ export function InicioScreen() {
   async function executar(dose: DoseDoDia, status: "confirmed" | "skipped") {
     try {
       await registrarDose(dose, status);
+    } catch (cause) {
+      Alert.alert(
+        "Não foi possível registrar",
+        mensagemParaAPessoa(cause),
+      );
+    }
+  }
+
+  /**
+   * "Fui" / "Não fui" gravam na hora, sem diálogo — o mesmo que o Calendário faz.
+   *
+   * É deliberadamente diferente de confirmar uma dose: lá o toque move estoque e entra no cálculo
+   * de adesão. Aqui nada disso acontece, e corrigir é reabrir o compromisso no Calendário. Cobrar
+   * uma confirmação por algo tão reversível só faria a pessoa parar de responder.
+   *
+   * `outcomeNotes` vai `null` porque este cartão não tem onde anotar: a anotação do que o médico
+   * disse é da folha de revisão do Calendário, e um compromisso ainda sem desfecho não tem nota a
+   * preservar.
+   */
+  async function responderCompromisso(id: string, outcome: AppointmentOutcome) {
+    try {
+      await registrarDesfecho(id, outcome, null);
+      await recarregarCompromissos();
     } catch (cause) {
       Alert.alert(
         "Não foi possível registrar",
@@ -537,14 +563,27 @@ export function InicioScreen() {
                           indice,
                       )
                 }>
-                <ItemDeCompromisso
-                  time={new Date(compromisso.scheduledFor).toLocaleTimeString("pt-BR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                {/* O **mesmo** card de "Se aproximando", com `emDias={0}`.
+                    Eram dois desenhos para a mesma coisa na mesma tela, a um scroll de distância um
+                    do outro. O card já tratava o caso de hoje (barra e bloco de data em verde), e
+                    só o de hoje é que não o usava. */}
+                <CardCompromissoProximo
+                  quando={new Date(compromisso.scheduledFor)}
                   title={compromisso.title}
                   location={compromisso.location}
+                  notes={compromisso.notes}
+                  emDias={0}
                   outcome={compromisso.outcome}
+                  // Comparado por instante, e não pelo dia: a consulta das 8h de hoje já aconteceu
+                  // às 15h, e é justamente quando faz sentido perguntar se a pessoa foi.
+                  jaAconteceu={new Date(compromisso.scheduledFor) <= hoje}
+                  onResponder={(outcome) => void responderCompromisso(compromisso.id, outcome)}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/compromissos",
+                      params: { detalhe: compromisso.id },
+                    })
+                  }
                 />
               </Animated.View>
             ))}
@@ -584,6 +623,9 @@ export function InicioScreen() {
                   location={compromisso.location}
                   notes={compromisso.notes}
                   emDias={emDias}
+                  outcome={compromisso.outcome}
+                  // Estes ainda não chegaram — não há o que responder, e a pergunta não aparece.
+                  jaAconteceu={false}
                   // Direto ao detalhe daquele compromisso, e não à lista: quem tocou já escolheu
                   // qual, e reencontrá-lo lá dentro anularia o atalho.
                   onPress={() =>

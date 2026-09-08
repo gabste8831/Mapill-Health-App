@@ -12,7 +12,7 @@ import {
   type DoseDaAgenda,
 } from "@/hooks/use-calendar-agenda";
 import { useAppointmentRegistration } from "@/hooks/use-appointment-registration";
-import { dataEHoraPorExtenso, dataPorExtenso, diaEMesCurto } from "@/shared/datas-por-extenso";
+import { dataPorExtenso, diaEMesCurto } from "@/shared/datas-por-extenso";
 import { toLocalIsoDay } from "@/shared/date-input";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { resumirAviso } from "@/shared/rotulos-de-compromisso";
@@ -37,8 +37,8 @@ import { mensagemParaAPessoa } from "@/shared/mensagem-de-erro";
 type ItemDeCompromissoProps = {
   appointment: Appointment;
   passado: boolean;
-  onEdit: () => void;
-  onDelete: () => void;
+  /** Abre o compromisso na listagem, onde ficam editar e excluir. */
+  onAbrir: () => void;
   /** Responder "foi" / "não foi", ou reabrir o que já foi respondido. */
   onResponder: (outcome: AppointmentOutcome) => void;
   onRevisarDesfecho: () => void;
@@ -47,8 +47,7 @@ type ItemDeCompromissoProps = {
 function ItemDeCompromisso({
   appointment,
   passado,
-  onEdit,
-  onDelete,
+  onAbrir,
   onResponder,
   onRevisarDesfecho,
 }: ItemDeCompromissoProps) {
@@ -61,7 +60,26 @@ function ItemDeCompromisso({
   const resumoDoAviso = resumirAviso(appointment);
 
   return (
-    <View style={[styles.item, passado && styles.itemPassado, passado && styles.itemBarraPassada]}>
+    /**
+     * O card inteiro é o toque, como o de compromisso na Home.
+     *
+     * Antes havia um lápis e uma lixeira no canto. Saíram os dois: numa lista onde se percorre o
+     * mês com o polegar, um alvo destrutivo de 20px ao lado do conteúdo é um erro esperando
+     * acontecer — e ele desenhava dois botões em cima de cada compromisso, o que era metade do peso
+     * visual da lista. Editar e excluir vivem na listagem de Compromissos, que o toque abre já no
+     * compromisso certo.
+     *
+     * O `estadoDePressao` sem `escala`: card de largura total escurece, não encolhe.
+     */
+    <Pressable
+      style={estadoDePressao([
+        styles.item,
+        passado && styles.itemPassado,
+        passado && styles.itemBarraPassada,
+      ])}
+      onPress={onAbrir}
+      accessibilityRole="button"
+      accessibilityLabel={`${appointment.title}, ${horas}:${minutos}. Toque para ver ou editar.`}>
       <View style={styles.itemHeader}>
         {/* A hora à esquerda, alinhada com a das doses logo abaixo: é ela que ordena o dia, e
             repetir a data aqui seria dizer de novo o que o cabeçalho do dia já disse. */}
@@ -76,26 +94,9 @@ function ItemDeCompromisso({
           ) : null}
         </View>
 
-        {/* Duas ações explícitas, igual à lista de remédios: ao lado de um botão de excluir,
-            "toca e abre alguma coisa" não diz o que vai acontecer. */}
-        <View style={styles.acoes}>
-          <Pressable
-            style={estadoDePressao(styles.acaoBotao, { escala: true, superficie: true })}
-            onPress={onEdit}
-            accessibilityRole="button"
-            accessibilityLabel={`Ver ou editar ${appointment.title}`}
-            hitSlop={6}>
-            <Ionicons name="pencil-outline" size={20} color={cores.primary} />
-          </Pressable>
-          <Pressable
-            style={estadoDePressao(styles.acaoBotao, { escala: true, superficie: true })}
-            onPress={onDelete}
-            accessibilityRole="button"
-            accessibilityLabel={`Excluir ${appointment.title}`}
-            hitSlop={6}>
-            <Ionicons name="trash-outline" size={20} color={cores.error} />
-          </Pressable>
-        </View>
+        {/* A seta no lugar dos dois botões: diz que há mais ali sem desenhar duas caixas por
+            compromisso. É o mesmo canto e o mesmo ícone do card da Home. */}
+        <Ionicons name="chevron-forward" size={18} color={cores.outline} />
       </View>
 
       {appointment.location !== null ? (
@@ -120,22 +121,30 @@ function ItemDeCompromisso({
       {passado && appointment.outcome === null ? (
         <View style={styles.perguntaDeDesfecho}>
           <Text style={styles.perguntaTexto}>Você foi?</Text>
+          {/* "Não fui" à esquerda e "Fui" à direita, como "Pular"/"Confirmar" na linha de dose e
+              como o cartão de compromisso da Home: a resposta esperada fica no canto onde o polegar
+              chega, na ordem de Cancelar/OK do sistema. Estava invertido aqui, e era o único lugar
+              do app onde o positivo vinha primeiro. */}
           <View style={styles.botoesDeDesfecho}>
             <Pressable
-              style={estadoDePressao(styles.botaoDeDesfecho, { escala: true })}
-              onPress={() => onResponder("attended")}
-              accessibilityRole="button"
-              accessibilityLabel="Marcar que compareceu">
-              <Ionicons name="checkmark" size={18} color={cores.primary} />
-              <Text style={styles.botaoDeDesfechoTexto}>Fui</Text>
-            </Pressable>
-            <Pressable
-              style={estadoDePressao(styles.botaoDeDesfecho, { escala: true })}
+              style={estadoDePressao([styles.botaoDeDesfecho, styles.botaoNaoFui], {
+                escala: true,
+              })}
               onPress={() => onResponder("missed")}
+              hitSlop={{ top: 4, bottom: 4 }}
               accessibilityRole="button"
               accessibilityLabel="Marcar que não compareceu">
-              <Ionicons name="close" size={18} color={cores.error} />
-              <Text style={styles.botaoDeDesfechoTexto}>Não fui</Text>
+              <Ionicons name="close" size={16} color={cores.onSurfaceVariant} />
+              <Text style={styles.botaoNaoFuiTexto}>Não fui</Text>
+            </Pressable>
+            <Pressable
+              style={estadoDePressao([styles.botaoDeDesfecho, styles.botaoFui], { escala: true })}
+              onPress={() => onResponder("attended")}
+              hitSlop={{ top: 4, bottom: 4 }}
+              accessibilityRole="button"
+              accessibilityLabel="Marcar que compareceu">
+              <Ionicons name="checkmark" size={16} color={cores.onPrimary} />
+              <Text style={styles.botaoFuiTexto}>Fui</Text>
             </Pressable>
           </View>
         </View>
@@ -173,7 +182,7 @@ function ItemDeCompromisso({
           ) : null}
         </>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 
@@ -281,7 +290,7 @@ export function CalendarioScreen() {
 
   const router = useRouter();
   const { dias, isLoading, error, reload, registrarDose } = useCalendarAgenda();
-  const { excluirCompromisso, registrarDesfecho } = useAppointmentRegistration();
+  const { registrarDesfecho } = useAppointmentRegistration();
   /** O compromisso com a folha de revisão aberta. `null` = ninguém está revisando nada. */
   const [revisando, setRevisando] = useState<Appointment | null>(null);
   const [outcomeRascunho, setOutcomeRascunho] = useState<AppointmentOutcome | null>(null);
@@ -408,30 +417,9 @@ export function CalendarioScreen() {
     }
   }
 
-  function confirmarExclusao(appointment: Appointment) {
-    Alert.alert(
-      `Excluir ${appointment.title}?`,
-      `${dataEHoraPorExtenso(new Date(appointment.scheduledFor))}. O compromisso sai da sua agenda e o aviso, se houver, deixa de existir.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await excluirCompromisso(appointment.id);
-              await reload();
-            } catch (cause) {
-              Alert.alert(
-                "Não foi possível excluir",
-                mensagemParaAPessoa(cause),
-              );
-            }
-          },
-        },
-      ],
-    );
-  }
+  /* A exclusão saiu desta tela junto com a lixeira do card (06/09). Ela vive na listagem de
+     Compromissos, que o toque no card abre já no compromisso certo — um só caminho para excluir, e
+     não um alvo destrutivo de 20px dentro de uma lista que se percorre com o polegar. */
 
   if (isLoading) return <CenteredLoader />;
 
@@ -509,13 +497,14 @@ export function CalendarioScreen() {
                   // às 9h, e é justamente aí — saindo do consultório — que a pessoa tem o que
                   // responder. Pelo dia, "Você foi?" só apareceria amanhã.
                   passado={appointment.scheduledFor < agoraIso}
-                  onEdit={() =>
+                  // Para a listagem, e não direto para o formulário: é lá que estão editar **e**
+                  // excluir, e o toque no card não diz qual das duas a pessoa quer.
+                  onAbrir={() =>
                     router.push({
-                      pathname: "/cadastro/editar-compromisso/[id]",
-                      params: { id: appointment.id },
+                      pathname: "/compromissos",
+                      params: { detalhe: appointment.id },
                     })
                   }
-                  onDelete={() => confirmarExclusao(appointment)}
                   onResponder={(outcome) => void responder(appointment, outcome)}
                   onRevisarDesfecho={() => abrirRevisao(appointment)}
                 />

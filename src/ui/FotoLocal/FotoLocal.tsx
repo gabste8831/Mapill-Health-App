@@ -43,6 +43,11 @@ export type FotoLocalProps = {
  * só aparecia quando a tela remontava. Proteção redundante contra um problema que não existe mais é
  * o que produz o defeito seguinte.
  */
+/** Só a hora, com milissegundos — é a distância entre os eventos que diagnostica, não o relógio. */
+function agora(): string {
+  return new Date().toISOString().slice(11, 23);
+}
+
 export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) {
   const cores = useCores();
 
@@ -62,7 +67,7 @@ export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) 
     } catch (cause) {
       estado = `caminho inválido (${String(cause)})`;
     }
-    console.log(`[Mapill/foto] render — ${estado} — ${uri}`);
+    console.log(`[Mapill/foto] render — ${estado} — ${agora()} — ${uri}`);
   }
 
   return (
@@ -127,13 +132,13 @@ export function FotoLocal({ uri, style, contentFit = "cover" }: FotoLocalProps) 
        * e é ele que corresponde ao pixel na tela.
        */
       onLoadStart={() => {
-        if (__DEV__) console.log("[Mapill/foto] 1. começou a carregar");
+        if (__DEV__) console.log(`[Mapill/foto] 1. começou a carregar — ${agora()}`);
       }}
       onLoad={() => {
-        if (__DEV__) console.log("[Mapill/foto] 2. carregou");
+        if (__DEV__) console.log(`[Mapill/foto] 2. carregou — ${agora()}`);
       }}
       onDisplay={() => {
-        if (__DEV__) console.log("[Mapill/foto] 3. exibiu");
+        if (__DEV__) console.log(`[Mapill/foto] 3. exibiu — ${agora()}`);
       }}
     />
   );
