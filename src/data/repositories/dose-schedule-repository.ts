@@ -1,11 +1,10 @@
 import type { DoseSchedule } from "../../domain/entities/dose-schedule";
 import type { IntakeStatus } from "../../domain/entities/intake-log";
 import type {
-  DailyAdherence,
   DoseScheduleRepository as DoseScheduleRepositoryPort,
   DoseScheduleWithStatus,
 } from "../../domain/ports/dose-schedule-repository";
-import { localDayRangeUtc, toLocalIsoDay } from "../../shared/date-input";
+import { localDayRangeUtc } from "../../shared/date-input";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
 /** Colunas calculadas que só a consulta da agenda do dia devolve. */
@@ -105,32 +104,6 @@ export class DoseScheduleRepository
   async findForDay(referenceDate: string): Promise<DoseScheduleWithStatus[]> {
     const dia = localDayRangeUtc(referenceDate);
     return this.findBetween(dia.start, dia.end);
-  }
-
-  async findDailyAdherence(fromDate: string, toDate: string): Promise<DailyAdherence[]> {
-    // Agrupar no SQLite exigiria `date(..., 'localtime')`, que depende de o SQLite conhecer o fuso
-    // do aparelho. A janela é de dias, então trazer as linhas e agrupar aqui é exato e barato —
-    // e usa a mesma regra de dia local do resto do app.
-    const rows = await this.database.getAllAsync<{
-      scheduled_for: string;
-      latest_status: IntakeStatus | null;
-    }>(
-      `SELECT ds.scheduled_for, ${LATEST_LOG_STATUS_SUBQUERY} AS latest_status
-       FROM dose_schedules ds
-       WHERE ds.deleted_at IS NULL AND ds.scheduled_for >= ? AND ds.scheduled_for < ?`,
-      [localDayRangeUtc(fromDate).start, localDayRangeUtc(toDate).end],
-    );
-
-    const porDia = new Map<string, DailyAdherence>();
-    for (const row of rows) {
-      const dia = toLocalIsoDay(new Date(row.scheduled_for));
-      const acumulado = porDia.get(dia) ?? { day: dia, total: 0, confirmed: 0 };
-      acumulado.total += 1;
-      if (row.latest_status === "confirmed") acumulado.confirmed += 1;
-      porDia.set(dia, acumulado);
-    }
-
-    return [...porDia.values()].sort((a, b) => a.day.localeCompare(b.day));
   }
 
   async findPendingForDay(referenceDate: string): Promise<DoseSchedule[]> {

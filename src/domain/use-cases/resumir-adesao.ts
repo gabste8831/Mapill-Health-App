@@ -92,11 +92,18 @@ function taxaDe(contagem: ContagemDeDoses): number | null {
 /**
  * A taxa de adesão de um período, no geral e por medicamento.
  *
- * **Adesão aqui é `confirmadas ÷ previstas`**, e "previstas" são só as doses cujo horário já
- * passou. As três decisões que isso carrega:
+ * **Adesão aqui é `confirmadas ÷ previstas`**, e "previstas" são as doses que já venceram **mais**
+ * as que a pessoa já respondeu. As três decisões que isso carrega:
  *
- * 1. **Dose futura não conta.** Ela ainda pode ser tomada. Incluí-la faria a adesão cair sozinha ao
- *    longo do dia e subir de novo à noite, medindo a hora do relógio em vez do comportamento.
+ * 1. **Dose futura sem resposta não conta.** Ela ainda pode ser tomada. Incluí-la faria a adesão
+ *    cair sozinha ao longo do dia e subir de novo à noite, medindo a hora do relógio em vez do
+ *    comportamento.
+ *
+ *    **Mas dose futura já respondida conta.** Quem toma às 20h a dose marcada para as 22h fez um
+ *    acerto, e o app permite registrar isso de propósito. Descartar essa dose apagava o acerto: com
+ *    duas tomadas hoje (uma antes da hora) e uma pulada ontem, o resumo dizia "1 de 2 doses
+ *    tomadas — 50%", enquanto o gráfico logo acima já mostrava 100% no dia. O que aconteceu foram
+ *    duas doses tomadas e uma pulada, e é isso que a tela precisa dizer.
  *
  * 2. **Pular reduz a adesão.** Pular é uma resposta legítima e o app nunca a trata como erro, mas
  *    adesão mede o que foi *tomado* — e um resumo que contasse a pulada como sucesso mentiria
@@ -109,13 +116,24 @@ function taxaDe(contagem: ContagemDeDoses): number | null {
  * Regra pura, com `agora` injetado — é o que o "pronto quando" do D2 pede: o percentual calculado
  * por um use-case testável, e não dentro da tela (§2.3.3, auditoria clínica).
  */
+/**
+ * O que fica de fora das contas: a dose que ainda não venceu **e** que ninguém respondeu.
+ *
+ * As duas condições juntas, e não só a primeira. Uma dose futura sem resposta é uma promessa — não
+ * diz nada sobre o comportamento de quem a tomaria. Já uma dose futura confirmada ou pulada é um
+ * fato: aconteceu, e some da conta seria esconder o que a pessoa fez.
+ */
+function naoVenceuNemFoiRespondida(dose: DoseDoPeriodo, agoraIso: string): boolean {
+  return dose.scheduledFor > agoraIso && dose.latestStatus === null;
+}
+
 export function resumirAdesao(input: ResumirAdesaoInput): ResumoDeAdesao {
   const agoraIso = input.agora.toISOString();
   const geral = contarVazio();
   const porMedicamento = new Map<string, AdesaoPorMedicamento>();
 
   for (const dose of input.doses) {
-    if (dose.scheduledFor > agoraIso) continue;
+    if (naoVenceuNemFoiRespondida(dose, agoraIso)) continue;
 
     acumular(geral, dose.latestStatus);
 

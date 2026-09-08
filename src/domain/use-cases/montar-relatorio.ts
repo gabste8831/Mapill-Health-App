@@ -101,9 +101,15 @@ export function montarRelatorio(input: RelatorioInput): Relatorio {
   const porMedicamento = new Map<string, PerdaPorMedicamento>();
 
   for (const dose of input.doses) {
-    // Mesmo corte de `resumirAdesao`: dose futura ainda pode ser tomada, e contá-la como perdida
-    // faria o relatório piorar sozinho ao longo do dia.
-    if (dose.scheduledFor > agoraIso) continue;
+    /**
+     * Mesmo corte de `resumirAdesao`: só sai da conta a dose que **ainda não venceu e ninguém
+     * respondeu**. Ela ainda pode ser tomada, e contá-la como perdida faria o relatório piorar
+     * sozinho ao longo do dia.
+     *
+     * Uma dose futura **pulada** fica: a pessoa já disse que não vai tomar, e isso é uma perda
+     * real — some dela seria o papel do médico esconder uma decisão que aconteceu.
+     */
+    if (dose.scheduledFor > agoraIso && dose.latestStatus === null) continue;
     if (dose.latestStatus === "confirmed") continue;
 
     const atual = porMedicamento.get(dose.medicationId) ?? {

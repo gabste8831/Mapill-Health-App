@@ -13,11 +13,12 @@ import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
 import type { Medication, PosologyUnit } from "@/domain/entities/medication";
 import type { Prescription } from "@/domain/entities/prescription";
 import { CorrectIntake } from "@/domain/use-cases/correct-intake";
+import { adesaoPorDia, type DoseParaDia } from "@/domain/use-cases/adesao-por-dia";
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { RegisterIntake } from "@/domain/use-cases/register-intake";
 import { anunciarDosesResolvidas, ouvirDosesResolvidas } from "@/notifications/doses-resolvidas";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
-import { toLocalIsoDay, todayIsoDate } from "@/shared/date-input";
+import { todayIsoDate } from "@/shared/date-input";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`). */
 const persistsLocally = Platform.OS !== "web";
@@ -119,31 +120,32 @@ const AGENDA_VAZIA: AgendaDoDia = {
 /** Iniciais dos dias, indexadas por `Date.getDay()`. */
 const SIGLAS_DOS_DIAS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 
-const DIA_EM_MS = 24 * 60 * 60_000;
-
 /**
- * Os últimos sete dias, do mais antigo até hoje.
+ * Os últimos sete dias, do mais antigo até hoje — pelo **mesmo cálculo** da tela "Minha adesão".
  *
- * Dia sem dose agendada fica com `ratio: null` em vez de zero: barra zerada num dia em que não
- * havia nada a tomar leria como falha, e a adesão que o app mostra deixaria de ser sobre adesão.
+ * Já foi uma consulta própria (`findDailyAdherence`), e as duas divergiam em dois pontos que a
+ * pessoa via lado a lado:
+ *
+ * - a consulta contava **todas** as doses do dia, inclusive as que ainda não venceram — então uma
+ *   dose das 22h derrubava a barra às 15h, e o número subia de novo à noite sozinho;
+ * - ela **não filtrava medicamento excluído**, enquanto a tela de adesão filtra. Depois de excluir
+ *   um remédio, as doses dele continuavam no denominador do gráfico e em nenhum outro lugar da
+ *   tela — a taxa que ninguém consegue explicar.
+ *
+ * Agora as duas telas passam por `adesaoPorDia`, sobre a mesma lista já filtrada. Um cálculo só, e
+ * o gráfico da Home não tem como discordar do da tela de adesão.
+ *
+ * ⚠️ **Isto não é a mesma conta da barra de progresso do topo da Home**, e a diferença é
+ * deliberada: a barra mede *quantas doses você já respondeu* (confirmadas **e** puladas), porque
+ * ela existe para dizer o que ainda falta fazer hoje. O gráfico mede *quantas você tomou* — é
+ * adesão, e pular não é aderir. Duas perguntas diferentes sobre o mesmo dia.
  */
-async function carregarSemana(agora: Date): Promise<DiaDaSemana[]> {
-  const inicio = new Date(agora.getTime() - 6 * DIA_EM_MS);
-  const porDia = new Map(
-    (await new DoseScheduleRepository().findDailyAdherence(toLocalIsoDay(inicio), toLocalIsoDay(agora))).map(
-      (linha) => [linha.day, linha],
-    ),
-  );
-
-  return Array.from({ length: 7 }, (_, indice) => {
-    const dia = new Date(inicio.getTime() + indice * DIA_EM_MS);
-    const linha = porDia.get(toLocalIsoDay(dia));
-    return {
-      label: SIGLAS_DOS_DIAS[dia.getDay()],
-      ratio: linha === undefined || linha.total === 0 ? null : linha.confirmed / linha.total,
-      isToday: indice === 6,
-    };
-  });
+function montarSemana(doses: DoseParaDia[], agora: Date): DiaDaSemana[] {
+  return adesaoPorDia({ doses, agora, dias: 7 }).map((dia) => ({
+    label: SIGLAS_DOS_DIAS[new Date(`${dia.dia}T00:00:00`).getDay()],
+    ratio: dia.taxa,
+    isToday: dia.ehHoje,
+  }));
 }
 
 /** `2026-08-22T14:30:00.000Z` → `"14:30"` no fuso do aparelho. */
@@ -154,16 +156,44 @@ function horaLocal(isoTimestamp: string): string {
 }
 
 async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
-  const [comStatus, prescriptions, medications, inventories, semana] = await Promise.all([
+  // Os sete dias começam à meia-noite do sexto dia atrás: `adesaoPorDia` agrupa por dia local, e
+  // uma janela que começasse "há 6 × 24 h" cortaria o dia mais antigo pela metade.
+  const inicioDaSemana = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() - 6);
+  /**
+   * A janela vai até o **fim de hoje**, e não até agora.
+   *
+   * O dia em andamento se mede inteiro — uma de duas doses é 50%, mesmo que a segunda só vença às
+   * 22h. Parar em `agora` traria só a dose da manhã, e o gráfico marcaria 100% num dia pela metade.
+   */
+  const fimDeHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
+
+  const [comStatus, daSemana, prescriptions, medications, inventories] = await Promise.all([
     new DoseScheduleRepository().findForDay(todayIsoDate()),
+    new DoseScheduleRepository().findBetween(inicioDaSemana.toISOString(), fimDeHoje.toISOString()),
     new PrescriptionRepository().findAll(),
     new MedicationRepository().findAll(),
     new InventoryRepository().findAll(),
-    carregarSemana(agora),
   ]);
 
   const prescricaoPorId = new Map(prescriptions.map((p) => [p.id, p]));
   const medicamentoPorId = new Map(medications.map((m) => [m.id, m]));
+
+  /**
+   * O mesmo filtro de "medicamento excluído" que a agenda de hoje aplica logo abaixo, e que a tela
+   * de adesão aplica no relatório. Sem ele, as doses de um remédio excluído continuavam no
+   * denominador do gráfico e não apareciam em lugar nenhum da tela.
+   */
+  const dosesDaSemana = daSemana
+    .filter(({ doseSchedule }) => {
+      const prescription = prescricaoPorId.get(doseSchedule.prescriptionId);
+      return prescription !== undefined && medicamentoPorId.has(prescription.medicationId);
+    })
+    .map(({ doseSchedule, latestStatus }) => ({
+      scheduledFor: doseSchedule.scheduledFor,
+      latestStatus,
+    }));
+
+  const semana = montarSemana(dosesDaSemana, agora);
 
   const doses: DoseDoDia[] = [];
   for (const { doseSchedule, latestStatus, latestLogId } of comStatus) {

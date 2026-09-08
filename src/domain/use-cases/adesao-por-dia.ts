@@ -45,8 +45,19 @@ function diaLocal(data: Date): string {
  *
  * ## O que conta
  *
- * Só as doses cujo horário **já passou** — a mesma regra da taxa geral (RN20). A dose das 22h não
- * pode contar contra alguém às 15h, e um dia inteiro no futuro não tem taxa, tem ausência de dado.
+ * **Todas as doses do dia**, tenham vencido ou não — e é aqui que esta conta difere da taxa geral.
+ *
+ * A taxa geral olha só o que venceu, porque ela responde "como foi a adesão até agora" sobre um
+ * período inteiro. Esta responde outra coisa: "como está **este dia**". E um dia com duas doses em
+ * que uma foi tomada está pela metade, não completo — mesmo que a segunda só vença às 22h.
+ *
+ * A regra anterior contava só as vencidas, e o efeito em aparelho foi o app se contradizer na mesma
+ * tela: a barra de progresso do topo da Home marcava 50% (uma de duas doses do dia) e o gráfico
+ * logo abaixo marcava 100% (uma de uma dose vencida). Duas barras lado a lado, o mesmo dia, números
+ * diferentes — e quem lê não tem como saber em qual acreditar.
+ *
+ * Dias **inteiramente** no futuro continuam sem taxa: ali não há nem o que ter começado. O que
+ * mudou é só o dia em andamento, que agora se mede pelo que ele tem, e não pelo que já passou.
  *
  * Dias sem dose agendada vêm com `taxa: null`, e não com zero: quem não tinha o que tomar não
  * falhou em nada.
@@ -57,12 +68,19 @@ export function adesaoPorDia(input: AdesaoPorDiaInput): AdesaoDeUmDia[] {
   const previstasPorDia = new Map<string, number>();
   const confirmadasPorDia = new Map<string, number>();
 
+  const hojeLocal = diaLocal(agora);
+
   for (const dose of doses) {
     const quando = new Date(dose.scheduledFor);
-    // Ainda não venceu: não entra em nenhum dos dois lados da conta.
-    if (quando > agora) continue;
-
     const chave = diaLocal(quando);
+    /**
+     * Dose de um dia **futuro** fica de fora; dose de hoje que ainda não venceu, não.
+     *
+     * A distinção é o que faz o gráfico concordar com a barra da Home: hoje é um dia em andamento e
+     * se mede inteiro (uma de duas doses = 50%), enquanto amanhã ainda não começou e não tem taxa
+     * nenhuma a mostrar.
+     */
+    if (quando > agora && chave !== hojeLocal) continue;
     previstasPorDia.set(chave, (previstasPorDia.get(chave) ?? 0) + 1);
     if (dose.latestStatus === "confirmed") {
       confirmadasPorDia.set(chave, (confirmadasPorDia.get(chave) ?? 0) + 1);

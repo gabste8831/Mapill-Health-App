@@ -70,9 +70,20 @@ export function useAdherenceReport(periodo: PeriodoDeAdesao) {
     try {
       const agora = new Date();
       const inicio = new Date(agora.getTime() - periodo * 24 * 60 * 60_000);
+      /**
+       * A janela vai até o **fim de hoje**, e não até agora, por causa da faixa dos sete dias: o dia
+       * em andamento se mede inteiro, então as doses de hoje que ainda não venceram precisam chegar
+       * aqui para entrar no denominador dele.
+       *
+       * Isso **não** afeta o resumo nem a lista de perdidas: `resumirAdesao` e `listarDosesPerdidas`
+       * descartam por conta própria tudo que ainda não venceu (`scheduledFor > agora`), que é a
+       * regra certa para elas — uma taxa de trinta dias não pode cair porque a dose das 22h de hoje
+       * ainda não chegou.
+       */
+      const fimDeHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
 
       const [comStatus, prescriptions, medications] = await Promise.all([
-        new DoseScheduleRepository().findBetween(inicio.toISOString(), agora.toISOString()),
+        new DoseScheduleRepository().findBetween(inicio.toISOString(), fimDeHoje.toISOString()),
         new PrescriptionRepository().findAll(),
         new MedicationRepository().findAll(),
       ]);

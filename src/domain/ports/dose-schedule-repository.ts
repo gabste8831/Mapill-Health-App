@@ -17,14 +17,6 @@ export type DoseScheduleWithStatus = {
   latestLogId: string | null;
 };
 
-/** Quantas doses o dia tinha e quantas foram confirmadas. Pulada conta no total, não no numerador. */
-export type DailyAdherence = {
-  /** ISO `YYYY-MM-DD`. */
-  day: string;
-  total: number;
-  confirmed: number;
-};
-
 export interface DoseScheduleRepository extends Repository<DoseSchedule> {
   findByPrescription(prescriptionId: string): Promise<DoseSchedule[]>;
   /**
@@ -38,12 +30,6 @@ export interface DoseScheduleRepository extends Repository<DoseSchedule> {
    * vez. Uma consulta por dia faria a tela ficar mais lenta a cada dia visível.
    */
   findBetween(startTimestamp: string, endTimestamp: string): Promise<DoseScheduleWithStatus[]>;
-  /**
-   * Doses agendadas e confirmadas por dia, no intervalo (ISO `YYYY-MM-DD`, ambos inclusive).
-   * Dias sem dose nenhuma simplesmente não aparecem — quem chama decide se isso é "100%" ou
-   * "nada a mostrar", porque a resposta muda conforme o gráfico.
-   */
-  findDailyAdherence(fromDate: string, toDate: string): Promise<DailyAdherence[]>;
   /**
    * Doses do dia (`referenceDate`) ainda sem IntakeLog resolutivo (nenhum "confirmed"/"skipped"
    * mais recente) — inclui atrasadas do próprio dia. Alimenta a tela dedicada de gerenciamento
