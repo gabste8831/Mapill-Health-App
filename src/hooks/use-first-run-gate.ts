@@ -6,6 +6,7 @@ import { CURRENT_TERMS_VERSION } from "@/telas/Consentimento/texto-legal";
 import type { PatientProfileDraft } from "@/domain/entities/patient-profile";
 import { SupabaseAuthGateway } from "@/data/remote/supabase-auth-gateway";
 import { isSupabaseConfigured } from "@/data/remote/supabase-client";
+import { importarCatalogoCmed } from "@/data/local/importar-cmed";
 import { ConsentRepository } from "@/data/repositories/consent-repository";
 import { PatientProfileRepository } from "@/data/repositories/patient-profile-repository";
 import { sincronizar } from "@/data/remote/sync-service";
@@ -38,6 +39,8 @@ export type FirstRunGate = {
    * ter entrado lê como falha, e não como espera.
    */
   restaurando: boolean;
+  /** O catálogo de medicamentos sendo carregado, na primeira execução. */
+  preparando: boolean;
   signInWithGoogle: () => Promise<GoogleSignInResult>;
   continueWithoutLogin: () => Promise<void>;
   acceptConsent: () => Promise<void>;
@@ -113,6 +116,8 @@ async function hasValidConsent(): Promise<boolean> {
 export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   const [step, setStep] = useState<FirstRunStep>("indeciso");
   const [restaurando, setRestaurando] = useState(false);
+  /** A carga do catálogo, que acontece uma vez e trava a tela de propósito. */
+  const [preparando, setPreparando] = useState(false);
 
   /**
    * Se a etapa inicial já foi decidida uma vez.
@@ -131,8 +136,32 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
    */
   const jaDecidiu = useRef(false);
 
-  /** Decide o destino depois do login (com ou sem conta), respeitando o que já foi cumprido. */
+  /**
+   * Decide o destino depois do login (com ou sem conta), respeitando o que já foi cumprido.
+   *
+   * **É aqui que o catálogo da CMED entra**, e não na abertura do app. Ele já carregou de três
+   * jeitos diferentes, e os dois primeiros falharam pela mesma razão: escrevia ao mesmo tempo que
+   * outra coisa. Em segundo plano, disputava com a restauração da nuvem — `database is locked` para
+   * quem entra com uma conta que já tinha dados. Antes da tela abrir, disputava consigo mesmo, com
+   * o efeito montado duas vezes em desenvolvimento.
+   *
+   * Este ponto é o único do app em que nada mais escreve: o login já terminou, a restauração
+   * também, e nenhuma tela subiu ainda. São ~20 mil inserções, medidas em ~100 ms fora do aparelho,
+   * e só na primeira execução — depois a função sai na primeira linha, vendo a tabela cheia.
+   *
+   * `catch` e não `throw`: sem catálogo o campo de busca apenas não sugere, e o cadastro manual
+   * funciona igual. Falhar aqui não pode impedir alguém de entrar no app.
+   */
   const continueAfterLogin = useCallback(async () => {
+    setPreparando(true);
+    try {
+      await importarCatalogoCmed();
+    } catch (cause) {
+      console.error("Falha ao importar o catálogo da CMED:", cause);
+    } finally {
+      setPreparando(false);
+    }
+
     if (!(await hasValidConsent())) {
       setStep("consent");
       return;
@@ -328,6 +357,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   return {
     step,
     restaurando,
+    preparando,
     signInWithGoogle,
     continueWithoutLogin: continueAfterLogin,
     acceptConsent,

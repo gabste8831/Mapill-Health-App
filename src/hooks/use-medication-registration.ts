@@ -1,6 +1,7 @@
 import * as Crypto from "expo-crypto";
 import { Platform } from "react-native";
 
+import { escreverEmTransacao } from "@/data/local/database";
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
 import { IntakeLogRepository } from "@/data/repositories/intake-log-repository";
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
@@ -57,77 +58,97 @@ export async function salvarMedicamento(
   const prescriptionId = ids?.prescriptionId ?? Crypto.randomUUID();
   if (!persistsLocally) return { medicationId, prescriptionId };
 
-  const medicationRepository = new MedicationRepository();
-  const existingMedication = await medicationRepository.findById(medicationId);
-  await medicationRepository.save({
-    ...(existingMedication ?? {
-      // A apresentação textual vem da CMED (B1). No manual o paciente já descreve isso no nome,
-      // então gravar vazio é mais honesto que repetir a forma farmacêutica.
-      presentation: "",
-      ean: null,
-      fromCmed: false,
-    }),
-    id: medicationId,
-    name: draft.name,
-    activeIngredient: draft.activeIngredient,
-    form: draft.form,
-    prescriptionRequirement: draft.prescriptionRequirement,
-    photoUri: draft.photoUri,
-    ...syncFields(),
-  });
-
-  const prescription = {
-    id: prescriptionId,
-    medicationId,
-    doseAmount: draft.doseAmount,
-    doseUnit: draft.doseUnit,
-    schedule: draft.schedule,
-    startDate: draft.startDate,
-    endDate: draft.endDate,
-    reminderMode: draft.reminderMode,
-    intakeInstructions: draft.intakeInstructions,
-    intakeNote: draft.intakeNote,
-    notes: draft.notes,
-    attachmentUri: draft.attachmentUri,
-    attachmentKind: draft.attachmentKind,
-    attachmentValidUntil: draft.attachmentValidUntil,
-    renewalReminderLeadDays: draft.renewalReminderLeadDays,
-    attachmentSyncOptOut: false,
-    ...syncFields(),
-  };
-  await new PrescriptionRepository().save(prescription);
-
-  const inventoryRepository = new InventoryRepository();
-  const existingInventory = await inventoryRepository.findByMedication(medicationId);
-  const tracksStock = draft.stockQuantity !== null || draft.storageLocation !== null;
-  if (tracksStock || existingInventory !== null) {
-    await inventoryRepository.save({
-      id: existingInventory?.id ?? Crypto.randomUUID(),
-      medicationId,
-      quantity: draft.stockQuantity ?? 0,
-      unit: draft.stockUnit,
-      lowStockAlertEnabled: draft.lowStockAlertEnabled,
-      lowStockAlertLeadDays: draft.lowStockAlertLeadDays,
-      storageLocation: draft.storageLocation,
+  /**
+   * O cadastro inteiro numa transação só, por duas razões.
+   *
+   * **Atomicidade**: são muitas escritas — medicamento, tratamento, estoque e um horário por dose
+   * de trinta dias (90 numa posologia de 8/8h, 120 numa de 6/6h). Soltas, uma falha no meio deixava
+   * o remédio salvo com metade dos horários, e nada desfazia o que já tinha entrado. É o mesmo
+   * estado inconsistente que a exclusão já evitava — tratamento sem medicamento, dose sem
+   * tratamento —, aqui pelo lado da criação.
+   *
+   * **Custo**: fora de transação, cada escrita é um commit em disco. Noventa commits para gravar um
+   * cadastro é o que fazia a tela demorar a responder, e é a mesma conta que já levou a importação
+   * do catálogo a transacionar seus lotes.
+   *
+   * `reagendarTodosOsAvisos()` fica **fora**: ele fala com o sistema operacional, que não participa
+   * da transação, e é lento. Segurar o banco enquanto o Android agenda alarmes bloquearia toda
+   * outra escrita sem precisar.
+   */
+  await escreverEmTransacao(async () => {
+    const medicationRepository = new MedicationRepository();
+    const existingMedication = await medicationRepository.findById(medicationId);
+    await medicationRepository.save({
+      ...(existingMedication ?? {
+        // A apresentação textual vem da CMED (B1). No manual o paciente já descreve isso no nome,
+        // então gravar vazio é mais honesto que repetir a forma farmacêutica.
+        presentation: "",
+        ean: null,
+        fromCmed: false,
+      }),
+      id: medicationId,
+      name: draft.name,
+      activeIngredient: draft.activeIngredient,
+      form: draft.form,
+      prescriptionRequirement: draft.prescriptionRequirement,
+      photoUri: draft.photoUri,
       ...syncFields(),
     });
-  }
 
-  /**
-   * Numa edição a posologia pode ter mudado, então os horários futuros são regerados. Só os
-   * futuros: apagar os passados destruiria o histórico de quando a dose era pra ter acontecido,
-   * que é justamente o que o registro de ingestão referencia.
-   */
-  const doseScheduleRepository = new DoseScheduleRepository();
-  const from = new Date();
-  if (ids !== undefined) await doseScheduleRepository.deleteUpcoming(prescriptionId, from.toISOString());
+    const prescription = {
+      id: prescriptionId,
+      medicationId,
+      doseAmount: draft.doseAmount,
+      doseUnit: draft.doseUnit,
+      schedule: draft.schedule,
+      startDate: draft.startDate,
+      endDate: draft.endDate,
+      reminderMode: draft.reminderMode,
+      intakeInstructions: draft.intakeInstructions,
+      intakeNote: draft.intakeNote,
+      notes: draft.notes,
+      attachmentUri: draft.attachmentUri,
+      attachmentKind: draft.attachmentKind,
+      attachmentValidUntil: draft.attachmentValidUntil,
+      renewalReminderLeadDays: draft.renewalReminderLeadDays,
+      attachmentSyncOptOut: false,
+      ...syncFields(),
+    };
+    await new PrescriptionRepository().save(prescription);
 
-  const until = new Date(from.getTime() + SCHEDULE_HORIZON_DAYS * 24 * 60 * 60_000);
-  for (const doseSchedule of generateDoseSchedules({ prescription, from, until })) {
-    await doseScheduleRepository.save({ id: Crypto.randomUUID(), ...doseSchedule, ...syncFields() });
-  }
+    const inventoryRepository = new InventoryRepository();
+    const existingInventory = await inventoryRepository.findByMedication(medicationId);
+    const tracksStock = draft.stockQuantity !== null || draft.storageLocation !== null;
+    if (tracksStock || existingInventory !== null) {
+      await inventoryRepository.save({
+        id: existingInventory?.id ?? Crypto.randomUUID(),
+        medicationId,
+        quantity: draft.stockQuantity ?? 0,
+        unit: draft.stockUnit,
+        lowStockAlertEnabled: draft.lowStockAlertEnabled,
+        lowStockAlertLeadDays: draft.lowStockAlertLeadDays,
+        storageLocation: draft.storageLocation,
+        ...syncFields(),
+      });
+    }
 
-  await registrarDosesJaTomadas(draft, prescription, from);
+    /**
+     * Numa edição a posologia pode ter mudado, então os horários futuros são regerados. Só os
+     * futuros: apagar os passados destruiria o histórico de quando a dose era pra ter acontecido,
+     * que é justamente o que o registro de ingestão referencia.
+     */
+    const doseScheduleRepository = new DoseScheduleRepository();
+    const from = new Date();
+    if (ids !== undefined)
+      await doseScheduleRepository.deleteUpcoming(prescriptionId, from.toISOString());
+
+    const until = new Date(from.getTime() + SCHEDULE_HORIZON_DAYS * 24 * 60 * 60_000);
+    for (const doseSchedule of generateDoseSchedules({ prescription, from, until })) {
+      await doseScheduleRepository.save({ id: Crypto.randomUUID(), ...doseSchedule, ...syncFields() });
+    }
+
+    await registrarDosesJaTomadas(draft, prescription, from);
+  });
 
   // A posologia mudou, então a janela de avisos inteira é refeita — é o gatilho nº1 e nº3 do ciclo
   // de vida do C1. Refazer tudo, e não corrigir o que mudou, é o que garante zero alarme órfão.
@@ -184,7 +205,11 @@ async function registrarDosesJaTomadas(
     if (!marcados.has(`${p(at.getHours())}:${p(at.getMinutes())}`)) continue;
 
     const doseScheduleId = Crypto.randomUUID();
-    await doseScheduleRepository.save({ id: doseScheduleId, ...doseSchedule, ...syncFields() });
+    await doseScheduleRepository.save({
+      id: doseScheduleId,
+      ...doseSchedule,
+      ...syncFields(),
+    });
     await intakeLogRepository.save({
       id: Crypto.randomUUID(),
       doseScheduleId,

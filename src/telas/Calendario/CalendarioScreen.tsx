@@ -32,6 +32,7 @@ import {
   type OpcaoDeOrdem,
 } from "@/ui";
 import { criarEstilos } from "./CalendarioScreen.styles";
+import { mensagemParaAPessoa } from "@/shared/mensagem-de-erro";
 
 type ItemDeCompromissoProps = {
   appointment: Appointment;
@@ -357,7 +358,7 @@ export function CalendarioScreen() {
     } catch (cause) {
       Alert.alert(
         "Não foi possível registrar",
-        cause instanceof Error ? cause.message : "Tente novamente em instantes.",
+        mensagemParaAPessoa(cause),
       );
     }
   }
@@ -377,7 +378,7 @@ export function CalendarioScreen() {
     } catch (cause) {
       Alert.alert(
         "Não foi possível registrar",
-        cause instanceof Error ? cause.message : "Tente novamente em instantes.",
+        mensagemParaAPessoa(cause),
       );
     }
   }
@@ -402,7 +403,7 @@ export function CalendarioScreen() {
     } catch (cause) {
       Alert.alert(
         "Não foi possível salvar",
-        cause instanceof Error ? cause.message : "Tente novamente em instantes.",
+        mensagemParaAPessoa(cause),
       );
     }
   }
@@ -423,7 +424,7 @@ export function CalendarioScreen() {
             } catch (cause) {
               Alert.alert(
                 "Não foi possível excluir",
-                cause instanceof Error ? cause.message : "Tente novamente em instantes.",
+                mensagemParaAPessoa(cause),
               );
             }
           },

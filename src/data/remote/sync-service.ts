@@ -439,17 +439,13 @@ async function executarSync(): Promise<ResultadoDaSync> {
   let recebidos = 0;
 
   /**
-   * **Não** espera a importação da CMED, e isso é deliberado.
+   * Nada a coordenar com a importação da CMED: quando isto roda, ela já terminou.
    *
-   * Uma versão anterior esperava, para evitar duas escritas pesadas ao mesmo tempo. O efeito foi
-   * pior que o problema: numa instalação nova a importação acabara de começar (21 mil inserções), e
-   * o login ficava parado até ela terminar — tempo suficiente para o gate reavaliar, não encontrar
-   * ficha nenhuma e devolver a pessoa à **tela de login**. Ela tentava de novo, e de novo, sem
-   * nunca entrar.
-   *
-   * A contenção que a espera evitava já está resolvida onde devia estar: a importação roda em lotes
-   * transacionados, soltando o banco entre eles, e o `busy_timeout` cobre o resto. Fazer o caminho
-   * crítico do login esperar por uma conveniência do cadastro era a troca errada.
+   * As duas já disputaram o banco, e foi a origem do `database is locked` ao entrar com uma conta
+   * que já tinha dados. Houve duas tentativas de conciliá-las — a sincronização esperando a
+   * importação (travava o login) e a importação esperando a sincronização (coordenação frágil). A
+   * saída foi mais simples: a importação passou a rodar **antes** de a tela abrir, então não há
+   * mais duas escritas ao mesmo tempo para administrar. Ver `use-database-ready.ts`.
    */
   try {
     const { data } = await supabase!.auth.getUser();

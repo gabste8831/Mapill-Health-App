@@ -183,6 +183,14 @@ function ConteudoDaRaiz() {
         titulo="Restaurando seus dados"
         descricao="Estamos trazendo seus medicamentos, horários e histórico da sua conta."
       />
+      {/* A carga do catálogo de medicamentos, uma vez por instalação. Overlay próprio e não o
+          mesmo texto: quem entra sem conta nenhuma também espera por isto, e "restaurando seus
+          dados" seria mentira para essa pessoa — não há dados dela em lugar nenhum. */}
+      <OverlayDeProgresso
+        visivel={gate.preparando}
+        titulo="Preparando o aplicativo"
+        descricao="Carregando a base de medicamentos. Isso acontece só desta vez."
+      />
     </ThemeProvider>
   );
 }

@@ -1,5 +1,6 @@
 import type { InventoryAdjustment, InventoryItem } from "../../domain/entities/inventory-item";
 import type { InventoryRepository as InventoryRepositoryPort } from "../../domain/ports/inventory-repository";
+import { escreverEmTransacao } from "../local/database";
 import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
 type InventoryItemRow = SyncableRow & {
@@ -56,8 +57,8 @@ export class InventoryRepository
   }
 
   async applyAdjustment(adjustment: InventoryAdjustment): Promise<void> {
-    await this.database.withTransactionAsync(async () => {
-      await this.database.runAsync(
+    await escreverEmTransacao(async (database) => {
+      await database.runAsync(
         `INSERT INTO inventory_adjustments
            (id, inventory_item_id, delta, reason, updated_at, synced_at, deleted_at)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -73,7 +74,7 @@ export class InventoryRepository
       );
 
       // Nunca deixa quantity ir a negativo (clamp em zero), conforme contrato do port.
-      await this.database.runAsync(
+      await database.runAsync(
         `UPDATE inventory_items
          SET quantity = MAX(0, quantity + ?), updated_at = ?
          WHERE id = ?`,

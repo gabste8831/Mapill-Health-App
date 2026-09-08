@@ -25,6 +25,7 @@ import { CardProximaDose } from "@/telas/Inicio/componentes/CardProximaDose/Card
 import { ItemDeCompromisso } from "@/telas/Inicio/componentes/ItemDeCompromisso/ItemDeCompromisso";
 import { ItemDeDose } from "@/telas/Inicio/componentes/ItemDeDose/ItemDeDose";
 import { criarEstilos } from "./InicioScreen.styles";
+import { mensagemParaAPessoa } from "@/shared/mensagem-de-erro";
 
 /**
  * Quantas doses o diálogo do lote nomeia antes de resumir o resto. Além disso o texto vira uma
@@ -298,7 +299,7 @@ export function InicioScreen() {
     } catch (cause) {
       Alert.alert(
         "Não foi possível registrar",
-        cause instanceof Error ? cause.message : "Tente novamente em instantes.",
+        mensagemParaAPessoa(cause),
       );
     }
   }

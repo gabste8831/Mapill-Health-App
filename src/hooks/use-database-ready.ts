@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 
-import { initializeDatabase } from "@/data/local/database";
-import { importarCatalogoCmed } from "@/data/local/importar-cmed";
+import { prepararBanco } from "@/data/local/database";
 import { limparAnexosPerdidos } from "@/data/local/limpar-anexos-perdidos";
 
 /**
@@ -23,30 +22,19 @@ export function useDatabaseReady(): boolean {
 
   useEffect(() => {
     if (Platform.OS === "web") return;
-    initializeDatabase()
-      .then(() => {
-        /**
-         * Anexos que a nuvem restaurou mas cujo arquivo não existe aqui.
-         *
-         * Sem `await` pelo mesmo motivo do catálogo: a tela não espera. No caso comum são três
-         * consultas que não retornam nada, e quando há o que limpar, a tela que mostraria a foto
-         * fantasma provavelmente nem foi aberta ainda.
-         */
-        void limparAnexosPerdidos().catch((cause: unknown) => {
-          console.error("Falha ao limpar anexos perdidos:", cause);
-        });
-
-        /**
-         * O catálogo da CMED carrega **depois** de liberar a tela, e sem `await`.
-         *
-         * São ~21 mil inserções na primeira abertura. Elas não podem ficar entre a pessoa e a Home:
-         * a busca por nome é conveniência do cadastro, não pré-requisito de nada — enquanto ela não
-         * está pronta, o campo apenas não sugere, e o cadastro manual funciona igual.
-         */
-        void importarCatalogoCmed().catch((cause: unknown) => {
-          console.error("Falha ao importar o catálogo da CMED:", cause);
-        });
-      })
+    prepararBanco(async () => {
+      /**
+       * Anexos que a nuvem restaurou mas cujo arquivo não existe aqui.
+       *
+       * No caso comum são três consultas que não retornam nada, e quando há o que limpar, a tela
+       * que mostraria a foto fantasma provavelmente nem foi aberta ainda. Com `await` mesmo assim:
+       * o que roda solto aqui escreve ao mesmo tempo que a restauração da abertura, e as duas
+       * transações se atropelam na mesma conexão.
+       */
+      await limparAnexosPerdidos().catch((cause: unknown) => {
+        console.error("Falha ao limpar anexos perdidos:", cause);
+      });
+    })
       .catch((cause: unknown) => {
         /**
          * Falhar aqui **também libera a UI**, e não é indiferença ao erro: enquanto isto ficava

@@ -62,3 +62,55 @@ export function initializeDatabase(): Promise<void> {
   }
   return migrationsReady;
 }
+
+/**
+ * A preparação inteira da abertura — migrations e o que mais precisa estar pronto antes da tela.
+ *
+ * Memoizada como um todo, e não só nas partes: `initializeDatabase()` já era, mas o `.then()` que
+ * a segue não. Em desenvolvimento o React monta o efeito duas vezes, e a segunda montagem recebia
+ * a promessa das migrations já cumprida e seguia direto para o `.then()` — duas preparações
+ * correndo juntas, escrevendo no mesmo banco. Memoizar aqui faz a segunda montagem esperar pela
+ * primeira em vez de repeti-la.
+ */
+let preparacaoDaAbertura: Promise<void> | null = null;
+
+export function prepararBanco(depoisDasMigrations: () => Promise<void>): Promise<void> {
+  if (!preparacaoDaAbertura) {
+    preparacaoDaAbertura = initializeDatabase().then(depoisDasMigrations);
+  }
+  return preparacaoDaAbertura;
+}
+
+/**
+ * Roda várias escritas como uma só: ou todas valem, ou nenhuma vale.
+ *
+ * ## Onde usar, e onde não
+ *
+ * Só quando **várias** escritas precisam existir juntas — o cadastro de um medicamento, que grava
+ * remédio, tratamento, estoque e um horário por dose; a baixa de estoque, que insere o ajuste e
+ * atualiza a quantidade. Escrita avulsa **não** entra aqui: o SQLite já a executa atomicamente, e
+ * embrulhá-la em `BEGIN`/`COMMIT` não acrescenta garantia nenhuma.
+ *
+ * Essa distinção não é preciosismo. Toda operação do expo-sqlite — leitura inclusive — é um
+ * statement preparado, executado e finalizado (`prepareAsync` → `executeAsync` → `finalizeAsync`),
+ * e o app dispara operações em paralelo em vários pontos: a Home faz cinco leituras de uma vez, o
+ * reagendamento de avisos faz três. Cada transação aberta é uma janela em que esses statements
+ * podem esbarrar na trava, e o erro sai como
+ * `NativeStatement.finalizeAsync ... database is locked`.
+ *
+ * Uma tentativa anterior transformou **toda** escrita do app em transação, na esperança de
+ * serializar tudo. O efeito foi o oposto: numa base com dados, a sincronização passou a abrir
+ * centenas de transações enquanto a pessoa usava o app, e confirmar uma dose falhava a cada toque.
+ * Menos transações é mais seguro que mais, e é por isso que esta função tem uso restrito.
+ */
+export async function escreverEmTransacao<T>(
+  executar: (database: SQLite.SQLiteDatabase) => Promise<T>,
+): Promise<T> {
+  const conexao = getDatabase();
+  // `withTransactionAsync` devolve void, então o resultado sai pela variável.
+  let resultado: T;
+  await conexao.withTransactionAsync(async () => {
+    resultado = await executar(conexao);
+  });
+  return resultado!;
+}

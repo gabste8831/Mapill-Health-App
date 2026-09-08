@@ -45,6 +45,10 @@ const MIGRATIONS: Migration[] = [
 /**
  * Aplica, em ordem, toda migration com versão maior que `PRAGMA user_version` atual.
  * Idempotente entre execuções: se o banco já está na última versão, não faz nada.
+ *
+ * Cada migration numa transação própria, e a razão é o `PRAGMA user_version` logo abaixo: aplicar
+ * metade do SQL e ainda assim marcar a versão como concluída deixaria o esquema num estado que
+ * nenhuma migration seguinte sabe corrigir.
  */
 export async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
   const row = await database.getFirstAsync<{ user_version: number }>("PRAGMA user_version");

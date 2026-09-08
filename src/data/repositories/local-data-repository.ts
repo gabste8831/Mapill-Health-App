@@ -1,7 +1,7 @@
 import { Directory, File, Paths } from "expo-file-system";
 import { Platform } from "react-native";
 
-import { getDatabase } from "../local/database";
+import { escreverEmTransacao } from "../local/database";
 import { apagarNaNuvem, SQL_LIMPAR_MARCA_DAGUA } from "../remote/apagar-na-nuvem";
 
 /**
@@ -74,8 +74,7 @@ export class LocalDataRepository {
    * tratamento sem medicamento, dose sem tratamento.
    */
   private async eraseTables(tabelas: string[]): Promise<void> {
-    const database = getDatabase();
-    await database.withTransactionAsync(async () => {
+    await escreverEmTransacao(async (database) => {
       for (const tabela of tabelas) {
         await database.runAsync(`DELETE FROM ${tabela}`);
       }
