@@ -26,6 +26,45 @@ Dois pontos que já se sabe que merecem olhar:
 - O **alto contraste** foi de onde saiu o `#9E0008` que virou o vermelho preenchido do tema padrão.
   Vale conferir se o tema não ficou com dois vermelhos iguais onde antes havia hierarquia.
 
+**A miniatura que não aparece na hora.** Reprovou de novo em 08/09 — é o único item do passe de
+design que continua aberto. Escolher a foto, confirmar, e a miniatura fica branca: ela só aparece
+depois de sair e voltar da tela.
+
+A causa conhecida já foi corrigida uma vez e o defeito voltou, então a correção seguinte cobriu as
+duas hipóteses restantes sem conseguir distinguir qual era. **Para a próxima tentativa não ser
+chute, o teste precisa responder duas perguntas** (estão no bloco 8-H do roteiro):
+
+1. A foto era grande? Foto de câmera é maior que de galeria, e o tamanho separa uma hipótese da
+   outra.
+2. Ela aparece sozinha depois de alguns segundos parado na tela, ou só ao sair e voltar? A primeira
+   aponta para carregamento assíncrono; a segunda, para cache de imagem que não invalida.
+
+---
+
+**O detalhe do medicamento, completo e em toda tela que tem card.** Hoje tocar num remédio na aba
+Remédios abre uma folha com princípio ativo, dose, frequência, horários, estoque e local guardado.
+Duas lacunas, e a segunda é a que dá trabalho:
+
+- **Falta informação.** Não aparecem a foto, a receita anexada, as datas de início e fim, as
+  instruções de ingestão, as observações nem a exigência de receita. Somar isso é direto: são
+  linhas novas no mesmo componente.
+- **Só existe na aba Remédios.** `DetalheDoRemedio` é um componente local de `RemediosScreen`, não
+  uma tela — por isso Calendário e Home não o têm. Extrair não basta: a lista trabalha com
+  `medication + prescription + inventory` juntos, enquanto Home e Calendário trabalham com **doses**
+  (`DoseDoDia`, `DoseDaAgenda`), que só carregam nome, horário e quantidade. Abrir o detalhe a
+  partir de uma dose exige uma consulta que hoje não existe nesses hooks.
+
+Duas decisões ficam abertas, e são de produto:
+
+- **O gesto.** Na Home e no Calendário, tocar no card leva à tela do horário, que é onde se confirma
+  a dose. Se o toque passar a abrir o detalhe, confirmar precisa de outro gesto — toque longo, um
+  ícone, ou o inverso. Sobrepor as duas coisas no mesmo toque não dá.
+- **Compromisso é outro detalhe.** Local, profissional e desfecho não têm equivalente em
+  medicamento, então seriam dois componentes e não um.
+
+Sugestão de ordem: enriquecer primeiro o detalhe que já existe (rápido, baixo risco, ganho imediato
+na aba Remédios) e só depois propagar, com o gesto já decidido.
+
 ---
 
 ## Onboarding

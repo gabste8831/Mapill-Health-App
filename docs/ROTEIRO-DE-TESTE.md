@@ -20,27 +20,66 @@ segundos o que antes exigia esperar vinte minutos e adivinhar.
 Os blocos **1 e 2** vêm primeiro porque reprovaram na última rodada e foram corrigidos — é o que
 mais interessa saber agora.
 
-## 📋 O que a rodada de 05/09 já respondeu
+### ⏸️ Alarme e notificação ficam para uma sessão própria (08/09)
+
+**Decisão do Gabriel:** tudo que depende de alarme ou notificação chegar é testado **de uma vez só**,
+numa sessão dedicada, e não agora. Cada um desses passos exige esperar um horário com o app fechado —
+misturá-los com o resto transforma uma revisão de trinta minutos numa tarde inteira de espera.
+
+Ficam para essa sessão os blocos **11 a 19** inteiros, mais os itens espalhados que dependem de um
+aviso chegar: **3-C3** (notificação do compromisso), **3-G1** (o local no alarme), **5/10.4** (o
+aviso do compromisso excluído), **8-F** (a foto no alarme) e **8-K6** (o alarme sem visualizador).
+
+**O que dá para revisar agora é todo o resto** — telas, cadastro, listas, relatório, exportação,
+acessibilidade e regressão visual. É o que esta rodada cobre.
+
+## 📋 O que já foi respondido (05 e 08/09)
 
 > Registrado para não retestar o que passou. **Se algum destes falhar agora é regressão**, e vale
 > usar essa palavra ao reportar: muda o diagnóstico.
 
-| Bloco | Resultado em 05/09 |
+| Bloco | Situação |
 |---|---|
-| **12** — Permissões do alarme | ✅ 100%. Só reconferir que a build nova não regrediu |
-| **4** — Câmera e CMED | ✅ Funciona. Fica um ajuste pendente: o nome do medicamento vem **todo em maiúsculas** |
-| **7** — Fonte ampliada | ✅ Funciona, com uma ressalva: **os horários dos cards quebram linha** no máximo |
-| **5** — Os menores | ✅ Um defeito aberto: a adesão só conta doses **cujo horário já passou** |
-| **6** — Relatório em PDF | ✅ Funcionando bem |
-| **8** — Passe de design | ✅ |
-| **3** — Revisão tela a tela | ✅ Estética aprovada. Falta conferir **os quatro temas** |
-| **10** — Regressão | ✅ |
-| **1** e **2** — Sync e export | ❌ **Reprovaram**, corrigidos em 05 e 06/09 |
+| **1** — Restauração dos dados | ✅ **08/09**, depois das correções de 05 e 06/09 |
+| **2** — Exportar | ✅ **08/09** — só o 6.1. O **6.2 apaga tudo** e ficou para o fim |
+| **3** — Revisão tela a tela | ✅ **08/09** (menos C3 e G1, que dependem de aviso) |
+| **4** — Câmera e CMED | ✅ **08/09**, já com a importação do catálogo reescrita |
+| **5** — Os menores | ✅ **08/09** (menos 10.4, que depende de aviso) |
+| **6** — Relatório em PDF | ✅ **08/09**, depois de três correções feitas na hora (ver abaixo) |
+| **7** — Fonte ampliada | ✅ Ressalva de 05/09: **os horários dos cards quebram linha** no máximo |
+| **8** — Passe de design | ✅ **08/09**, com **uma pendência**: a miniatura da mídia não aparece logo após preencher o campo (item **H**) |
+| **9** — TalkBack | ✅ **08/09**. 📝 **Rende material para o TCC** — a leitura em frase única e o estado anunciado saíram da varredura de 02/09 |
+| **10** — Regressão de telas | ✅ **08/09** |
+| **12** — Permissões do alarme | ✅ 05/09, 100%. Só reconferir que a build nova não regrediu |
 | **18** e **19** — Alarme | ❌ **Reprovaram.** O Notifee foi arquivado, e o boot receiver dele nunca era invocado no Android 12+ |
 
-**Ajustes pequenos ainda não feitos**, anotados dessa rodada: nome do EAN capitalizado, quebra de
-linha dos horários com fonte grande, adesão contando resposta antecipada, e a fonte do nome na lista
-de remédios um pouco menor.
+### O que a rodada de 08/09 corrigiu
+
+Três defeitos apareceram durante a revisão e foram corrigidos na hora, todos no mesmo tema — **os
+números da adesão não concordavam entre si**:
+
+1. **O gráfico dos sete dias não acompanhava a barra da Home.** Eram duas consultas para o mesmo
+   dado, e a do gráfico não filtrava medicamento excluído. Agora as duas passam por `adesaoPorDia`.
+2. **O dia em andamento contava só as doses vencidas.** Uma dose tomada de duas dava 100% no
+   gráfico e 50% na barra. Agora o dia se mede inteiro, e as duas dizem 50%.
+3. **Dose confirmada antes do horário sumia do resumo.** "Duas tomadas e uma pulada" aparecia como
+   "1 de 2 doses tomadas — 50%". Agora conta o que aconteceu: 2 de 3, 67%.
+
+Também nesta rodada: o alinhamento do campo de data (o botão do calendário fora de centro em
+"QUANDO COMEÇA"), os seletores do relatório passando a aparecer sempre, e o `database is locked` da
+importação do catálogo.
+
+**O que falta, e só depende da sessão de alarme:** blocos **11 a 19**, os quatro temas (3-A4) e os
+itens espalhados que dependem de um aviso chegar. Mais o **6.2** (apagar dados de saúde), que ficou
+por último porque é destrutivo.
+
+**Ajustes pequenos ainda abertos:**
+
+- **A miniatura da mídia não aparece logo após preencher o campo** (8-H). Anotado em 08/09 — é o
+  único item do passe de design que continua reprovando, e o roteiro já traz as duas perguntas que
+  distinguem as hipóteses restantes.
+- **Os horários dos cards quebram linha** com a fonte do sistema no máximo (05/09).
+- **A fonte do nome na lista de remédios** um pouco menor (05/09).
 
 ## Como reportar
 
@@ -695,6 +734,25 @@ foto do remédio.
 **Fecha o último item do E1.** A varredura por código (02/09) corrigiu sete defeitos, mas leitor de
 tela não se valida lendo código — só ouvindo. São poucos passos, e cobrem os fluxos onde errar tem
 consequência clínica.
+
+> ✅ **Passou em 08/09**, e passou bem.
+>
+> 📝 **Material para o TCC.** Este bloco é o que dá evidência de acessibilidade real, e não de
+> intenção — a diferença entre citar as heurísticas e mostrar o app sendo usado sem ver a tela.
+> Três coisas valem entrar no texto:
+>
+> - **A dose lida como uma frase só** ("Dipirona, 08:00, atrasada"), e não em quatro paradas
+>   soltas. É `accessibilityLabel` no container em vez de deixar o leitor juntar os pedaços — e a
+>   ordem importa: o nome do remédio vem **antes** do estado, porque quem ouve precisa saber de que
+>   remédio se fala antes de saber o que houve com ele.
+> - **O estado anunciado, e não só colorido.** Depois de responder, "Tomei" é lido como
+>   *selecionado*. Antes os dois botões soavam idênticos e a única diferença era a cor — o caso
+>   clássico de informação transmitida só por cor, que a WCAG 1.4.1 proíbe.
+> - **Os alvos de 32 para 44pt**, que é o mínimo da WCAG 2.5.5 e o que impede tocar "Pular"
+>   querendo "Confirmar" num app onde esse engano é clínico.
+>
+> Vale um print ou uma citação do TalkBack em execução: é a prova que nenhuma varredura de código
+> substitui.
 
 ⚠️ **Ligue o TalkBack** em Configurações → Acessibilidade. Para desligar rápido, segure os dois
 botões de volume por três segundos.
