@@ -137,7 +137,7 @@ export function ContaScreen({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONTA</Text>
+          <Text style={styles.sectionTitle}>Conta</Text>
           <Card>
             {isSignedIn ? (
               <Linha
@@ -184,7 +184,7 @@ export function ContaScreen({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PRIVACIDADE</Text>
+          <Text style={styles.sectionTitle}>Privacidade</Text>
           <Card>
             <Linha
               icon={
@@ -200,7 +200,7 @@ export function ContaScreen({
         {/* Separado da conta de propósito: apagar dado e desvincular conta são coisas diferentes,
             e juntá-las na mesma seção sugeriria que uma implica a outra. */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>MEUS DADOS</Text>
+          <Text style={styles.sectionTitle}>Meus dados</Text>
           <Card>
             {/* Exportar vem **antes** de apagar, e não é ordem arbitrária: é a última chance de
                 levar os dados embora, e quem chega nesta seção decidido a apagar tudo precisa

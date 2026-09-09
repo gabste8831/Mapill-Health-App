@@ -39,7 +39,7 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
         <Text style={styles.abertura}>O alerta organiza a rotina. Ele avisa, e quem toma é você.</Text>
 
         <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>NA HORA DA DOSE</Text>
+          <Text style={styles.secaoTitulo}>Na hora da dose</Text>
           <Text style={styles.texto}>
             O alerta mostra o horário, o remédio, a quantidade daquele horário e a orientação de
             como tomar, se você tiver anotado alguma.
@@ -47,7 +47,7 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
         </View>
 
         <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>CONFIRMAR, ADIAR OU IGNORAR</Text>
+          <Text style={styles.secaoTitulo}>Confirmar, adiar ou ignorar</Text>
           <Text style={styles.texto}>
             Você responde dali mesmo, sem abrir o app, e a resposta define o status da dose.
             Confirmou: o estoque desconta, se você estiver controlando. Ignorou: fica registrado que
@@ -56,7 +56,7 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
         </View>
 
         <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>SE VOCÊ ADIAR</Text>
+          <Text style={styles.secaoTitulo}>Se você adiar</Text>
           <Text style={styles.texto}>
             O alerta volta em 5 minutos, uma vez só, para o app não virar despertador infinito. Se
             você não responder nessa segunda vez, a dose fica registrada como não tomada e continua
@@ -65,7 +65,7 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
         </View>
 
         <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>O QUE O MAPILL NÃO FAZ</Text>
+          <Text style={styles.secaoTitulo}>O que o Mapill não faz</Text>
           {[
             "Não confirma dose sozinho. Quem responde é você, sempre.",
             "Não decide sua posologia nem substitui quem receitou. Ele auxilia o tratamento, não conduz.",

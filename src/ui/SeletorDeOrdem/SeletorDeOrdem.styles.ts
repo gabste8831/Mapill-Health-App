@@ -35,14 +35,18 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     backgroundColor: cores.primary,
   },
   /**
-   * `caption` (10px) e não `label` (12px).
+   * `label` (12px), em caixa de frase.
    *
-   * É o degrau de fonte que, junto com a saída do ícone, faz "Mais recentes" caber numa ficha de um
-   * terço da tela. Continua legível: são duas ou três palavras curtas em maiúsculas, com o estado
-   * também marcado pelo preenchimento da ficha — a leitura não depende só de ler a palavra.
+   * Já foi `caption` (10px), e o degrau a menos existia para "Mais recentes" caber numa ficha de um
+   * terço da tela — o `caption` sobe a caixa, e maiúscula é mais larga. Em caixa de frase a mesma
+   * palavra ocupa menos, então cabe com o tamanho maior: o que era um empréstimo do token de selo
+   * volta a ser rótulo, que é o que estas fichas têm.
+   *
+   * Ficha de filtro não é selo. O selo se reconhece de relance sem ser lido ("ATRASADA"); estas
+   * aqui são escolhas que a pessoa compara antes de tocar, e comparar é leitura.
    */
   rotulo: {
-    ...typography.caption,
+    ...typography.label,
     color: cores.onSurfaceVariant,
   },
   rotuloSelecionado: {

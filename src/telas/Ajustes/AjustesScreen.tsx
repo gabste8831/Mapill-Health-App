@@ -141,7 +141,7 @@ export function AjustesScreen({
             que quer (conta, tema) reconhece o rótulo e toca; quem não sabe, abre e descobre lá
             dentro. Texto de apoio aqui só repetia o óbvio no caminho de quem já ia direto. */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONTA E DADOS</Text>
+          <Text style={styles.sectionTitle}>Conta e dados</Text>
           <Card style={styles.cartaoDeLinhas}>
             {/* Ícone de conta nos dois casos, e não o logo do Google quando vinculado: a linha leva
                 a conta, dados e termos, e o logo prometia que ela era sobre login. O e-mail, quando
@@ -162,7 +162,7 @@ export function AjustesScreen({
             quem os procura — por isso moram atrás de um botão nomeado, e não expandidos no corpo
             de Ajustes, onde a maioria de quem abre a tela está atrás de outra coisa. */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ACESSIBILIDADE</Text>
+          <Text style={styles.sectionTitle}>Acessibilidade</Text>
           <Card style={styles.cartaoDeLinhas}>
             <Linha
               icon={<Ionicons name="color-palette-outline" size={22} color={cores.onSurfaceVariant} />}
@@ -182,7 +182,7 @@ export function AjustesScreen({
             binário — não fica escondida atrás de uma condição em tempo de execução. */}
         {__DEV__ && onOpenDiagnostico ? (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>DESENVOLVIMENTO</Text>
+            <Text style={styles.sectionTitle}>Desenvolvimento</Text>
             <Card style={styles.cartaoDeLinhas}>
               <Linha
                 icon={<Ionicons name="pulse-outline" size={22} color={cores.onSurfaceVariant} />}

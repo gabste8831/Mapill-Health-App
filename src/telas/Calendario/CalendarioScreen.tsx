@@ -247,7 +247,7 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
             onPress={() => onRegistrar("confirmed")}
             accessibilityRole="button"
             accessibilityLabel={`Confirmar ${dose.medicationName} das ${dose.time}`}>
-            <Ionicons name="checkmark" size={18} color={cores.primary} />
+            <Ionicons name="checkmark" size={18} color={cores.corDeDestaque} />
           </Pressable>
           <Pressable
             style={estadoDePressao(styles.botaoDaDose, { escala: true })}
@@ -582,7 +582,7 @@ export function CalendarioScreen() {
           {/* A anotação é o que sobra a longo prazo. O placeholder mostra o tipo de coisa que vale
               a pena guardar, em vez de deixar a pessoa adivinhar o que escrever num campo vazio. */}
           <TextField
-            label="ANOTAÇÃO"
+            label="Anotação"
             placeholder="Ex: médico pediu hemograma, retorno em 3 meses"
             value={notasRascunho}
             onChangeText={setNotasRascunho}

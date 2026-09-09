@@ -23,18 +23,25 @@ import {
   Dica,
   EstadoDeErro,
   Header,
-  OptionGroup,
-  type OptionGroupOption,
+  type OpcaoDeOrdem,
+  SeletorDeOrdem,
 } from "@/ui";
 
 import { alturaDaBarra, criarEstilos } from "./AdesaoScreen.styles";
 
 /**
- * `OptionGroup` e não `SeletorDeOrdem`: período não é ordenação. O seletor de ordem exige um ícone
- * por opção, e "7 dias" não tem ícone que signifique algo — três fichas com o número são o que a
- * pessoa lê de relance.
+ * A mesma fileira do filtro do calendário, e não o `OptionGroup`.
+ *
+ * Período é escolha que governa o que a tela mostra — a mesma natureza do "Tudo / Compromissos /
+ * Remédios" da agenda —, então usa a mesma forma: fichas de altura única, a marcada em azul cheio,
+ * as outras visíveis. Com o `OptionGroup` estas três eram cartões de 48px de altura com o rótulo em
+ * `bodyMd`, do tamanho das opções que se **gravam** no cadastro, e a tela ensinava duas gramáticas
+ * para a mesma decisão.
+ *
+ * O componente já não exige ícone: era o que antes impedia o período de usá-lo, e nenhum dos
+ * rótulos tem símbolo que signifique algo sozinho de qualquer forma.
  */
-const OPCOES_DE_PERIODO: OptionGroupOption<string>[] = PERIODOS_DE_ADESAO.map((periodo) => ({
+const OPCOES_DE_PERIODO: OpcaoDeOrdem<string>[] = PERIODOS_DE_ADESAO.map((periodo) => ({
   value: String(periodo.dias),
   label: periodo.label,
 }));
@@ -115,7 +122,7 @@ function ColunaDeDia({ item }: { item: AdesaoDeUmDia }) {
     <View style={styles.diaColuna}>
       {/* Traço, e não "0%": dia sem dose não é falha, é ausência do que medir. */}
       {item.taxa === null ? (
-        <Text style={styles.diaSemDado}>—</Text>
+        <Text style={styles.diaSemDado}>-</Text>
       ) : (
         <Text style={styles.diaValor} numberOfLines={1}>
           {Math.round(item.taxa * 100)}
@@ -200,13 +207,34 @@ export function AdesaoScreen() {
     });
   }
 
+  /**
+   * O valor ao lado da seta — e o **vazio** quando não há o que dizer.
+   *
+   * Só "Todos" aparece. Já mostrava também o nome do único escolhido ou "2 de 3", e isso duplicava
+   * na linha o que o popup já lista: a linha ficava com duas informações disputando a largura, e o
+   * nome longo empurrava o rótulo para as reticências. "Todos" é diferente porque é o **estado
+   * implícito** — quem nunca abriu o seletor precisa saber que o relatório leva tudo, e é a única
+   * resposta que não se descobre abrindo.
+   */
   const resumoDaSelecao =
     medicamentos.length === 0
-      ? "Nenhum cadastrado"
+      ? "Nenhum"
       : selecionados.length === 0
-      ? "Todos"
-      : selecionados.length === 1
-        ? (medicamentos.find((m) => m.id === selecionados[0])?.nome ?? "1 medicamento")
+        ? "Todos"
+        : "";
+
+  /**
+   * O mesmo estado, dito por extenso para o leitor de tela.
+   *
+   * A linha esconde "2 de 3" porque a largura é curta e o popup logo adiante lista tudo — mas quem
+   * ouve a tela não vê o popup antes de abrir, e "Medicamentos do relatório. Toque para escolher"
+   * sem o estado obrigaria a abrir para descobrir o que já está marcado.
+   */
+  const selecaoFalada =
+    medicamentos.length === 0
+      ? "nenhum medicamento cadastrado"
+      : selecionados.length === 0
+        ? "todos"
         : `${selecionados.length} de ${medicamentos.length}`;
 
   /**
@@ -230,16 +258,19 @@ export function AdesaoScreen() {
     });
   }
 
+  /** Mesma regra da linha de medicamentos, acima. */
   const resumoDosCompromissos =
-    // "Nenhum cadastrado", e não "nenhum no período": o seletor lista **todos** os compromissos, sem
-    // recorte de data — quem faz o recorte é o documento, pelo período escolhido logo acima.
     compromissos.length === 0
-      ? "Nenhum cadastrado"
+      ? "Nenhum"
       : compromissosEscolhidos.length === 0
-      ? "Todos do período"
-      : compromissosEscolhidos.length === 1
-        ? (compromissos.find((c) => c.id === compromissosEscolhidos[0])?.descricao ??
-          "1 compromisso")
+        ? "Todos"
+        : "";
+
+  const compromissosFalados =
+    compromissos.length === 0
+      ? "nenhum compromisso cadastrado"
+      : compromissosEscolhidos.length === 0
+        ? "todos"
         : `${compromissosEscolhidos.length} de ${compromissos.length}`;
 
   function voltar() {
@@ -265,10 +296,11 @@ export function AdesaoScreen() {
       <Header title="Minha adesão" onBack={voltar} />
 
       <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
-        <OptionGroup
+        <SeletorDeOrdem
           value={String(periodo)}
           onChange={(valor) => setPeriodo(Number(valor) as PeriodoDeAdesao)}
           options={OPCOES_DE_PERIODO}
+          descreverOpcao={(label) => `Mostrar os últimos ${label}`}
         />
 
         {/* Sem dose vencida não há taxa a mostrar, e um "0%" seria a leitura errada de quem acabou
@@ -409,16 +441,14 @@ export function AdesaoScreen() {
         <View style={styles.divisorDeEscopo} />
 
         <View style={styles.secaoDeExportar}>
+          {/* Só os textos. O ícone ao lado do título era o cabeçalho de card que todo gerador de
+              site produz, e não acrescentava leitura: "Seu relatório de adesão" já diz do que se
+              trata melhor que um desenho de documento. */}
           <View style={styles.exportarTopo}>
-            <View style={styles.exportarIcone}>
-              <Ionicons name="document-text" size={22} color={cores.onPrimaryContainer} />
-            </View>
-            <View style={styles.linhaTexto}>
-              <Text style={styles.exportarTitulo}>Seu relatório de adesão</Text>
-              <Text style={styles.exportarDescricao}>
-                Um PDF com seus tratamentos, a adesão do período e os compromissos.
-              </Text>
-            </View>
+            <Text style={styles.exportarTitulo}>Seu relatório de adesão</Text>
+            <Text style={styles.exportarDescricao}>
+              Um PDF com seus tratamentos, a adesão do período e os compromissos.
+            </Text>
           </View>
 
           {/* O período aparece de novo aqui, e não só no topo da tela.
@@ -427,12 +457,15 @@ export function AdesaoScreen() {
               relatório sai com o período que estiver escolhido — descobrir isso depois de abrir o
               PDF é tarde. É o mesmo estado dos dois lados: mexer aqui muda a tela toda, e é o que
               se espera de dois controles do mesmo dado. */}
-          <OptionGroup
-            label="PERÍODO DO RELATÓRIO"
-            value={String(periodo)}
-            options={OPCOES_DE_PERIODO}
-            onChange={(valor) => setPeriodo(Number(valor) as PeriodoDeAdesao)}
-          />
+          <View style={styles.periodoDoRelatorio}>
+            <Text style={styles.periodoRotulo}>Período do relatório</Text>
+            <SeletorDeOrdem
+              value={String(periodo)}
+              options={OPCOES_DE_PERIODO}
+              onChange={(valor) => setPeriodo(Number(valor) as PeriodoDeAdesao)}
+              descreverOpcao={(label) => `Relatório dos últimos ${label}`}
+            />
+          </View>
 
           {/* Os dois seletores num grupo só: respondem à mesma pergunta — o que entra no documento
               — e ficam mais perto entre si do que do período e do botão. */}
@@ -457,14 +490,18 @@ export function AdesaoScreen() {
               style={estadoDePressao(styles.filtro)}
               onPress={() => setSelecionando(true)}
               accessibilityRole="button"
-              accessibilityLabel={`Medicamentos do relatório: ${resumoDaSelecao}. Toque para escolher.`}
+              accessibilityLabel={`Medicamentos do relatório: ${selecaoFalada}. Toque para escolher.`}
             >
-              {/* A seta é o que diz que a linha abre algo. Sem ela, "MEDICAMENTOS NO RELATÓRIO"
+              {/* A seta é o que diz que a linha abre algo. Sem ela, "Medicamentos no relatório"
                   com um valor embaixo lê como informação, e não como escolha a fazer — e o seletor
                   de período logo acima, esse sim óbvio, reforçava a leitura errada. */}
               <View style={styles.filtroTexto}>
-                <Text style={styles.filtroRotulo}>MEDICAMENTOS NO RELATÓRIO</Text>
-                <Text style={styles.filtroValor}>{resumoDaSelecao}</Text>
+                <Text style={styles.filtroRotulo} numberOfLines={1}>
+                  Medicamentos no relatório
+                </Text>
+                <Text style={styles.filtroValor} numberOfLines={1}>
+                  {resumoDaSelecao}
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
             </Pressable>
@@ -472,8 +509,12 @@ export function AdesaoScreen() {
             // Sem nada cadastrado a linha continua ali, mas não abre nada: não há lista a mostrar.
             <View style={[styles.filtro, styles.filtroVazio]}>
               <View style={styles.filtroTexto}>
-                <Text style={styles.filtroRotulo}>MEDICAMENTOS NO RELATÓRIO</Text>
-                <Text style={styles.filtroValor}>{resumoDaSelecao}</Text>
+                <Text style={styles.filtroRotulo} numberOfLines={1}>
+                  Medicamentos no relatório
+                </Text>
+                <Text style={styles.filtroValor} numberOfLines={1}>
+                  {resumoDaSelecao}
+                </Text>
               </View>
             </View>
           )}
@@ -484,19 +525,27 @@ export function AdesaoScreen() {
               style={estadoDePressao(styles.filtro)}
               onPress={() => setEscolhendoCompromissos(true)}
               accessibilityRole="button"
-              accessibilityLabel={`Compromissos do relatório: ${resumoDosCompromissos}. Toque para escolher.`}
+              accessibilityLabel={`Compromissos do relatório: ${compromissosFalados}. Toque para escolher.`}
             >
               <View style={styles.filtroTexto}>
-                <Text style={styles.filtroRotulo}>COMPROMISSOS NO RELATÓRIO</Text>
-                <Text style={styles.filtroValor}>{resumoDosCompromissos}</Text>
+                <Text style={styles.filtroRotulo} numberOfLines={1}>
+                  Compromissos no relatório
+                </Text>
+                <Text style={styles.filtroValor} numberOfLines={1}>
+                  {resumoDosCompromissos}
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
             </Pressable>
           ) : (
             <View style={[styles.filtro, styles.filtroVazio]}>
               <View style={styles.filtroTexto}>
-                <Text style={styles.filtroRotulo}>COMPROMISSOS NO RELATÓRIO</Text>
-                <Text style={styles.filtroValor}>{resumoDosCompromissos}</Text>
+                <Text style={styles.filtroRotulo} numberOfLines={1}>
+                  Compromissos no relatório
+                </Text>
+                <Text style={styles.filtroValor} numberOfLines={1}>
+                  {resumoDosCompromissos}
+                </Text>
               </View>
             </View>
           )}
@@ -505,7 +554,11 @@ export function AdesaoScreen() {
           {/* Azul cheio e com ícone: é a ação que a seção existe para oferecer, e o contorno a
               deixava com o mesmo peso do seletor de medicamentos logo acima. */}
           <Button
-            label={`Gerar PDF dos últimos ${periodo} dias`}
+            label="Gerar PDF"
+            // O periodo esta no seletor logo acima, e mudar de 30 para 90 ja reescreve aquela
+            // linha: repeti-lo no botao fazia o rotulo mudar de largura a cada troca, e dizia duas
+            // vezes o que a secao inteira ja combinou. O leitor de tela recebe o periodo abaixo.
+            accessibilityLabel={`Gerar PDF dos últimos ${periodo} dias`}
             icon={<Ionicons name="download-outline" size={20} color={cores.onPrimary} />}
             loading={gerando}
             onPress={() =>

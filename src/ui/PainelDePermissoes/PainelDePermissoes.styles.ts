@@ -49,7 +49,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flex: 1,
   },
   tituloCritico: {
-    color: cores.onErrorContainer,
+    // O par de `errorSurface`, que e o fundo do painel critico. `onErrorContainer` acompanha o
+    // `errorContainer`, outro fundo, e no escuro ele e claro: 1.12:1 sobre a superficie clara.
+    color: cores.onErrorSurface,
   },
   explicacao: {
     ...typography.bodyMd,
@@ -57,7 +59,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     lineHeight: 22,
   },
   explicacaoCritica: {
-    color: cores.onErrorContainer,
+    color: cores.onErrorSurface,
   },
 
   lista: {
@@ -65,24 +67,47 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     marginTop: spacing.xs,
   },
   /**
-   * A linha inteira é o alvo, e não um botão no canto.
+   * A linha inteira é o alvo, e não um botão no canto: cada item leva a uma tela diferente do
+   * sistema, e um alvo grande é o que separa "resolvo agora" de "depois eu vejo" — que, nesta
+   * lista, significa continuar sem alarme.
    *
-   * Cada item leva a uma tela diferente do sistema, e um alvo grande é o que separa "resolvo agora"
-   * de "depois eu vejo" — que, nesta lista, significa continuar sem alarme.
+   * ## A cor
+   *
+   * A linha é uma superfície clara **dentro do painel**, e não o cartão da tela.
+   *
+   * Era `surfaceContainerLowest` — o branco dos cartões —, e isso só funcionava enquanto o tema
+   * fosse claro. No escuro aquele token é escuro: cada linha virava uma caixa preta dentro do
+   * painel âmbar, com o texto escuro do painel por cima. Preto sobre preto.
+   *
+   * Branco resolve nos quatro temas de uma vez, porque ele não é uma cor do tema: é o degrau mais
+   * claro que existe, e a tinta que já serve ao painel continua servindo aqui. A 55% de opacidade
+   * ele ficava creme, quase indistinto do âmbar em volta — a linha precisava parecer uma superfície
+   * **sobre** o painel, e o que dá isso é o branco cheio.
+   *
+   * O `minHeight` saiu: com três linhas de texto ele nunca chegava a valer, e o alvo de toque já
+   * é folgado pelo próprio conteúdo.
    */
   item: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    minHeight: 56,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: cores.surfaceContainerLowest,
+    backgroundColor: "#FFFFFF",
   },
   itemTexto: {
     flex: 1,
-    gap: 2,
+    gap: 1,
+  },
+  /**
+   * O respiro sob o titulo.
+   *
+   * Ele nomeia a permissao; as duas linhas abaixo explicam por que ela importa e o que fazer. Sem
+   * o vao os tres blocos liam como um paragrafo so, e o titulo perdia a funcao de rotulo.
+   */
+  itemTopoComRespiro: {
+    marginBottom: spacing.sm,
   },
   itemTopo: {
     flexDirection: "row",
@@ -93,22 +118,34 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * O título da linha, em semibold.
    *
    * Ele e a descrição eram os dois `400Regular`, separados por 2px de tamanho — diferença que não
-   * se lê como hierarquia, e a linha virava um bloco de texto uniforme onde nada dizia o que era o
-   * assunto e o que era o apoio. O peso faz esse trabalho melhor que o tamanho: dá para ver de
-   * relance qual permissão a linha trata, sem precisar ler a frase inteira.
+   * se lê como hierarquia, e a linha virava um bloco de texto uniforme. O peso faz esse trabalho
+   * melhor que o tamanho: dá para ver de relance qual permissão a linha trata sem ler a frase.
+   *
+   * `bodyMd` e não `bodyLg`: em 16px o título de três linhas de apoio pesava como título de seção,
+   * e as duas linhas juntas ocupavam mais tela que o aviso que as introduz.
+   *
+   * ## A tinta
+   *
+   * Vem da **superfície do painel**, e não do `onSurface` da tela. O painel tem fundo próprio
+   * (âmbar, ou vermelho claro quando falta uma permissão essencial), e `onSurface` é a cor de
+   * texto do fundo **da tela** — os dois só coincidem enquanto ambos forem claros. No tema escuro
+   * `onSurface` é quase branco: sobre o âmbar dava 1.09:1.
    */
   itemTitulo: {
-    ...typography.bodyLg,
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    color: cores.onSurface,
+    ...typography.bodyMd,
+    fontFamily: typography.label.fontFamily,
+    color: cores.onWarningSurface,
   },
   itemDescricao: {
     ...typography.bodyMd,
-    // 13, entre o `bodyMd` (14) e o `bodySm` (12): um degrau abaixo do título sem chegar ao tamanho
-    // que o app reserva a rodapé e legenda — esta frase é a consequência, e precisa ser lida.
-    fontSize: 13,
-    color: cores.onSurfaceVariant,
-    lineHeight: 20,
+    // 12, um degrau abaixo do título: esta frase é a consequência, e é lida depois de o título
+    // dizer de qual permissão se trata.
+    fontSize: 12,
+    // Mesma tinta do titulo, com opacidade no lugar de outra cor: um segundo token "on" para a
+    // mesma superficie seria uma cor a manter em quatro temas para dizer "um pouco mais fraco".
+    color: cores.onWarningSurface,
+    opacity: 0.85,
+    lineHeight: 17,
   },
   /**
    * O passo dentro da tela do sistema, um degrau abaixo da consequência.
@@ -119,8 +156,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    */
   itemComoFazer: {
     ...typography.bodySm,
-    color: cores.corDeDestaque,
-    lineHeight: 18,
+    // `corDeDestaque` e o azul que le sobre a superficie **da tela**; aqui o fundo e ambar, e no
+    // tema escuro aquele azul claro dava 1.93:1. A separacao desta linha vem do peso e do respiro
+    // acima, que ja estavam la.
+    color: cores.onWarningSurface,
+    fontFamily: typography.label.fontFamily,
+    lineHeight: 16,
+    // Descolada da descricao: uma diz por que a permissao importa, a outra o que fazer na tela do
+    // sistema. Sao dois assuntos, e o respiro e o que marca a virada.
     marginTop: spacing.xs,
   },
 
@@ -133,7 +176,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   seloTexto: {
     ...typography.caption,
-    color: cores.error,
+    // O selo vive sobre `errorSurface`, entao a tinta e a do par dela. `error` e o vermelho de
+    // texto sobre a superficie **da tela**, e no escuro ele e claro: 1.76:1 aqui.
+    color: cores.onErrorSurface,
   },
 
   botaoPedir: {

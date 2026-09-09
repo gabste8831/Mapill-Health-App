@@ -142,7 +142,7 @@ const LEAD_DAYS_OPTIONS: OptionGroupOption<string>[] = [
  */
 const ORDENS_DE_ESTOQUE: OpcaoDeOrdem<OrdemDeEstoque>[] = [
   { value: "urgencia", label: "Acaba primeiro", icon: "alarm-outline" },
-  { value: "alfabetica", label: "A–Z", icon: "text-outline" },
+  { value: "alfabetica", label: "A-Z", icon: "text-outline" },
 ];
 
 type ItemDeEstoqueProps = {
@@ -205,7 +205,7 @@ function CartaoDeEstoque({ item, onRecontar, onRepor, onConfigurarAviso }: ItemD
           size={14}
           color={
             // No alerta o fundo é o amarelo aceso, então o ícone escurece junto com o texto.
-            critico ? cores.error : alerta ? cores.onWarningVivo : cores.onSurfaceVariant
+            critico ? cores.onErrorSurface : alerta ? cores.onWarningVivo : cores.onSurfaceVariant
           }
         />
         <Text
@@ -539,7 +539,7 @@ export function EstoqueScreen() {
 
               <TextField
                 label={
-                  edicao.modo === "reposicao" ? "QUANTO VOCÊ ADICIONOU" : "QUANTO VOCÊ TEM AGORA"
+                  edicao.modo === "reposicao" ? "Quanto você adicionou" : "Quanto você tem agora"
                 }
                 placeholder="Ex: 30"
                 value={valor}
@@ -583,7 +583,7 @@ export function EstoqueScreen() {
 
               {aviso.habilitado ? (
                 <OptionGroup
-                  label="COM QUANTA ANTECEDÊNCIA"
+                  label="Com quanta antecedência"
                   value={aviso.dias}
                   options={LEAD_DAYS_OPTIONS}
                   onChange={(dias) => setAviso({ ...aviso, dias })}

@@ -26,7 +26,7 @@ export type EstoqueForm = {
   aviso: string | null;
   /** Cor de atenção em vez de apoio: a antecedência escolhida não cabe no estoque de hoje. */
   avisoEhConflito: boolean;
-  /** Pergunta pronta ("QUANTOS ML VOCÊ TEM") — a concordância é da tela, que conhece a unidade. */
+  /** Pergunta pronta ("Quantos ml você tem") — a concordância é da tela, que conhece a unidade. */
   quantityLabel: string;
   quantity: string;
   onQuantityChange: (value: string) => void;
@@ -87,7 +87,7 @@ export function ConfiguracaoDeEstoque({
         />
 
         <TextField
-          label="ONDE VOCÊ GUARDA"
+          label="Onde você guarda"
           placeholder="Ex: caixa sobre a geladeira"
           value={storageLocation}
           onChangeText={onStorageLocationChange}
@@ -105,7 +105,7 @@ export function ConfiguracaoDeEstoque({
         {alertEnabled ? (
           <>
             <OptionGroup
-              label="AVISAR ANTES TAMBÉM (OPCIONAL)"
+              label="Avisar antes também (opcional)"
               value={leadDays}
               options={LEAD_DAYS_OPTIONS}
               onChange={onLeadDaysChange}

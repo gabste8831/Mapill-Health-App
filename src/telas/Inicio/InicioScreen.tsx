@@ -371,6 +371,46 @@ export function InicioScreen() {
 
   if (isLoading) return <CenteredLoader />;
 
+  /**
+   * O estoque é desenhado em **uma de duas posições**, conforme haja alerta.
+   *
+   * Com algo acabando ele sobe para junto dos outros avisos, acima de "Minha adesão": o alerta
+   * pede ação, e adesão é leitura — quem abre a Home com um remédio prestes a acabar precisa
+   * disso antes do gráfico da semana.
+   *
+   * Sem alerta ele volta ao fim, onde é consulta e não aviso: o atalho permanente no topo
+   * ocuparia espaço nobre sem nada a dizer.
+   *
+   * A seção não se parte entre as duas posições. O "Gerenciar estoque" é para onde se vai depois
+   * de ler "acaba em 3 dias" — separá-los obrigaria a percorrer a tela para completar o gesto que
+   * o alerta acabou de pedir.
+   */
+  const temAlertaDeEstoque = agenda.estoquesBaixos.length > 0;
+  const secaoDeEstoque =
+    agenda.estoquesControlados > 0 || agenda.estoquesBaixos.length > 0 ? (
+      <View style={styles.doseList}>
+        <Text style={styles.sectionLabel}>Estoque</Text>
+
+        {agenda.estoquesBaixos.map(({ medication, inventory, daysRemaining }) => (
+          <CardEstoqueBaixo
+            key={inventory.id}
+            medicationName={medication.name}
+            daysRemaining={daysRemaining}
+            // Vai pro estoque, não pro cadastro: quem viu "acaba em 3 dias" quer repor, e repor
+            // pelo formulário do remédio obrigaria a reeditar um tratamento que não mudou.
+            onAbrirEstoque={() => router.push("/estoque")}
+          />
+        ))}
+
+        {/* Acesso permanente, e não só quando algo está acabando: o ícone no topo da aba
+            Medicações passou despercebido no teste em aparelho. Some quando não há estoque
+            controlado — aí a tela do outro lado abriria vazia. */}
+        {agenda.estoquesControlados > 0 ? (
+          <CardEstoque onPress={() => router.push("/estoque")} />
+        ) : null}
+      </View>
+    ) : null;
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Header onAccount={() => router.push("/ajustes")} />
@@ -385,7 +425,7 @@ export function InicioScreen() {
           {total > 0 ? (
             <View style={styles.progressBlock}>
               <View style={styles.progressHeader}>
-                <Text style={styles.progressLabel}>PROGRESSO DIÁRIO</Text>
+                <Text style={styles.progressLabel}>Progresso diário</Text>
                 <Text style={styles.progressValue}>{Math.round(progresso * 100)}%</Text>
               </View>
               <BarraDeProgresso
@@ -438,7 +478,8 @@ export function InicioScreen() {
         {proximaDose ? (
           <CardProximaDose
             time={proximaDose.time}
-            medicationLabel={`${proximaDose.medicationName} (${formatarQuantidade(proximaDose.amount, proximaDose.doseUnit)})`}
+            medicationName={proximaDose.medicationName}
+            doseLabel={formatarQuantidade(proximaDose.amount, proximaDose.doseUnit)}
             hint={proximaDose.intakeNote}
           />
         ) : null}
@@ -691,6 +732,11 @@ export function InicioScreen() {
           </View>
         ) : null}
 
+        {/* O estoque em alerta vem **antes** da adesão: ele pede uma ida à farmácia hoje, e o
+            gráfico da semana é leitura que espera. Sem alerta esta linha não desenha nada, e a
+            seção aparece no fim, onde sempre esteve. */}
+        {temAlertaDeEstoque ? secaoDeEstoque : null}
+
         {/* Só com algum dia medido: um gráfico de sete traços vazios não informa nada. */}
         {agenda.semana.some((dia) => dia.ratio !== null) ? (
           <View style={styles.doseList}>
@@ -710,30 +756,10 @@ export function InicioScreen() {
 
             Antes eram dois cards soltos no fim da rolagem, e quem via "acaba em 3 dias" precisava
             procurar onde repor. Juntos sob um rótulo, o alerta vem primeiro (é o que pede ação) e o
-            acesso à listagem logo abaixo, que é para onde se vai em seguida. */}
-        {agenda.estoquesControlados > 0 || agenda.estoquesBaixos.length > 0 ? (
-          <View style={styles.doseList}>
-            <Text style={styles.sectionLabel}>Estoque</Text>
+            acesso à listagem logo abaixo, que é para onde se vai em seguida.
 
-            {agenda.estoquesBaixos.map(({ medication, inventory, daysRemaining }) => (
-              <CardEstoqueBaixo
-                key={inventory.id}
-                medicationName={medication.name}
-                daysRemaining={daysRemaining}
-                // Vai pro estoque, não pro cadastro: quem viu "acaba em 3 dias" quer repor, e repor
-                // pelo formulário do remédio obrigaria a reeditar um tratamento que não mudou.
-                onAbrirEstoque={() => router.push("/estoque")}
-              />
-            ))}
-
-            {/* Acesso permanente, e não só quando algo está acabando: o ícone no topo da aba
-                Medicações passou despercebido no teste em aparelho. Some quando não há estoque
-                controlado — aí a tela do outro lado abriria vazia. */}
-            {agenda.estoquesControlados > 0 ? (
-              <CardEstoque onPress={() => router.push("/estoque")} />
-            ) : null}
-          </View>
-        ) : null}
+            Aqui só quando **não** há alerta: com ele, a seção já foi desenhada acima da adesão. */}
+        {!temAlertaDeEstoque ? secaoDeEstoque : null}
       </ScrollView>
 
       <Fab

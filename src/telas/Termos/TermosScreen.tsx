@@ -47,7 +47,7 @@ export function TermosScreen({ acceptedVersion, acceptedAt, onBack }: TermosScre
       <Header title="Termos e privacidade" onBack={onBack} />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Card>
-          <Text style={styles.sectionTitle}>SEU CONSENTIMENTO</Text>
+          <Text style={styles.sectionTitle}>Seu consentimento</Text>
           {acceptedVersion === null ? (
             <Text style={styles.statusText}>Nenhum consentimento registrado neste aparelho.</Text>
           ) : (

@@ -287,7 +287,7 @@ export function FormularioDeCompromissoScreen({
         scrollEventThrottle={16}>
         <Card>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>DADOS DO COMPROMISSO</Text>
+            <Text style={styles.sectionTitle}>Dados do compromisso</Text>
             <Text style={[styles.selo, styles.seloObrigatorio]}>OBRIGATÓRIO</Text>
           </View>
 
@@ -295,7 +295,7 @@ export function FormularioDeCompromissoScreen({
               coleta, terapia, fisioterapia…), e cada opção que falta obriga a escolher a menos
               errada e explicar o resto na observação. */}
           <TextField
-            label="DESCRIÇÃO DO COMPROMISSO"
+            label="Descrição do compromisso"
             required
             placeholder="Ex: Consulta com cardiologista"
             value={title}
@@ -312,7 +312,7 @@ export function FormularioDeCompromissoScreen({
           {/* Sem `minimo`: o passado é escolhível de propósito (E8), para registrar a consulta
               que já aconteceu. Quem avisa é a frase abaixo, não o bloqueio. */}
           <DateField
-            label="DATA"
+            label="Data"
             required
             value={dateInput}
             onChangeText={setDateInput}
@@ -320,7 +320,7 @@ export function FormularioDeCompromissoScreen({
             error={dateError}
           />
 
-          <TimeField label="HORÁRIO" required value={timeInput} onChange={setTimeInput} />
+          <TimeField label="Horário" required value={timeInput} onChange={setTimeInput} />
 
           {/* A data por extenso, e não só o que foi digitado: "dia 27" não denuncia nada, mas
               "sábado" denuncia na hora quem quis marcar na sexta e errou o número. */}
@@ -365,12 +365,12 @@ export function FormularioDeCompromissoScreen({
 
         <Card>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>INFORMAÇÕES COMPLEMENTARES</Text>
+            <Text style={styles.sectionTitle}>Informações complementares</Text>
             <Text style={[styles.selo, styles.seloOpcional]}>OPCIONAL</Text>
           </View>
 
           <TextField
-            label="LOCAL DE ATENDIMENTO"
+            label="Local de atendimento"
             placeholder="Ex: Clínica São José, sala 12"
             value={location}
             onChangeText={setLocation}
@@ -378,7 +378,7 @@ export function FormularioDeCompromissoScreen({
           />
 
           <TextField
-            label="NOME DO PROFISSIONAL"
+            label="Nome do profissional"
             placeholder="Ex: Dra. Ana Martins, cardiologista"
             value={professional}
             onChangeText={setProfessional}
@@ -386,7 +386,7 @@ export function FormularioDeCompromissoScreen({
           />
 
           <TextField
-            label="ORIENTAÇÕES E PREPARO"
+            label="Orientações e preparo"
             placeholder="Ex: jejum de 12h, levar exames anteriores"
             value={notes}
             onChangeText={setNotes}
@@ -401,12 +401,12 @@ export function FormularioDeCompromissoScreen({
         {aceitaLembrete ? (
         <Card>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>LEMBRETES</Text>
+            <Text style={styles.sectionTitle}>Lembretes</Text>
             <Text style={[styles.selo, styles.seloObrigatorio]}>OBRIGATÓRIO</Text>
           </View>
 
           <OptionGroup
-            label="DESEJA SER LEMBRADO DESTE COMPROMISSO?"
+            label="Deseja ser lembrado deste compromisso?"
             value={querAviso}
             options={SIM_NAO}
             onChange={(value) => {
@@ -429,14 +429,14 @@ export function FormularioDeCompromissoScreen({
                   organizar, e no dia serve para não esquecer o que já estava planejado. Quem marca
                   consulta costuma querer os dois, e um campo só obrigaria a escolher. */}
               <OptionGroup
-                label="LEMBRAR NO DIA DO COMPROMISSO?"
+                label="Lembrar no dia do compromisso?"
                 value={avisoNoDia}
                 options={SIM_NAO}
                 onChange={setAvisoNoDia}
               />
 
               <OptionGroup
-                label="LEMBRAR COM ANTECEDÊNCIA?"
+                label="Lembrar com antecedência?"
                 value={avisoAntes}
                 options={SIM_NAO}
                 onChange={(value) => {
@@ -454,7 +454,7 @@ export function FormularioDeCompromissoScreen({
                       "quantas vezes por dia" do cadastro de medicamento: a lista cobre a maioria
                       sem fechar a porta para quem quer 15 ou 30 dias. */}
                   <OptionGroup
-                    label="COM QUANTOS DIAS DE ANTECEDÊNCIA"
+                    label="Com quantos dias de antecedência"
                     value={usaLeadLivre ? null : leadDays}
                     options={LEAD_OPTIONS}
                     onChange={(value) => {
@@ -467,7 +467,7 @@ export function FormularioDeCompromissoScreen({
                       Espremido ao lado deles, ele disputava a largura com três fichas e ficava
                       pequeno demais para o dedo — e é onde se digita 15, 30 ou 45 dias. */}
                   <TextField
-                    label="OUTRO PRAZO, EM DIAS"
+                    label="Outro prazo, em dias"
                     placeholder="Ex: 15"
                     value={leadDaysLivre}
                     onChangeText={(raw) => {

@@ -279,7 +279,7 @@ export function SeletorDeHorarios({
             />
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>PRIMEIRO HORÁRIO</Text>
+              <Text style={styles.fieldLabel}>Primeiro horário</Text>
               <Pressable
                 style={estadoDePressao(styles.botaoDeHorario)}
                 onPress={() => {
@@ -302,7 +302,7 @@ export function SeletorDeHorarios({
                 que é justamente o que a conta de cabeça erra. */}
             {previaDaSerie !== null ? (
               <View style={styles.fieldGroup}>
-                <Text style={styles.fieldLabel}>FICARIA ASSIM</Text>
+                <Text style={styles.fieldLabel}>Ficaria assim</Text>
                 <View style={styles.timeChipRow}>
                   {previaDaSerie.map((horario, index) => (
                     <View key={index} style={styles.timeChip}>
@@ -373,7 +373,7 @@ export function SeletorDeHorarios({
                 </View>
                 {variacao?.ativa === true ? (
                   <TextField
-                    label={variacao.unitNoun.toUpperCase()}
+                    label={variacao.unitNoun}
                     containerStyle={styles.campoDeQuantidade}
                     // Placeholder e não valor: mostra o que vale hoje sem fingir que foi digitado,
                     // então deixar em branco continua significando "o mesmo de sempre".

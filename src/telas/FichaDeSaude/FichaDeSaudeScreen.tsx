@@ -142,7 +142,7 @@ function EmergencyContactsField({
 
   return (
     <View style={styles.fieldGroup}>
-      <Text style={styles.fieldLabel}>CONTATO DE EMERGÊNCIA</Text>
+      <Text style={styles.fieldLabel}>Contato de emergência</Text>
 
       {contacts.length > 0 ? (
         <View style={styles.contactList}>
@@ -188,7 +188,7 @@ function EmergencyContactsField({
             colados uns nos outros — o mesmo `gap` que as outras folhas do app já usam. */}
         <View style={styles.sheetBody}>
         <TextField
-          label="NOME"
+          label="Nome"
           placeholder="Nome do contato"
           value={name}
           onChangeText={setName}
@@ -196,7 +196,7 @@ function EmergencyContactsField({
           maxLength={60}
         />
         <TextField
-          label="TELEFONE"
+          label="Telefone"
           placeholder="(00) 00000-0000"
           value={phone}
           onChangeText={(value) => setPhone(formatPhoneInput(value, phone))}
@@ -205,7 +205,7 @@ function EmergencyContactsField({
           maxLength={15}
         />
         <TextField
-          label="VÍNCULO"
+          label="Vínculo"
           placeholder="Ex: Filha, cônjuge, vizinho..."
           value={relationship}
           onChangeText={setRelationship}
@@ -467,7 +467,7 @@ export function FichaDeSaudeScreen({
         <Card>
           <View style={styles.fieldGroup}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>DADOS BÁSICOS</Text>
+              <Text style={styles.sectionTitle}>Dados básicos</Text>
               <Text style={[styles.selo, styles.seloObrigatorio]}>OBRIGATÓRIO</Text>
             </View>
             <Text style={styles.sectionHint}>
@@ -475,7 +475,7 @@ export function FichaDeSaudeScreen({
             </Text>
           </View>
           <TextField
-            label="NOME COMPLETO"
+            label="Nome completo"
             required
             placeholder="Seu nome completo"
             value={fullName}
@@ -488,7 +488,7 @@ export function FichaDeSaudeScreen({
         <Card>
           <View style={styles.fieldGroup}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>COMPLEMENTAR</Text>
+              <Text style={styles.sectionTitle}>Complementar</Text>
               <Text style={[styles.selo, styles.seloOpcional]}>OPCIONAL</Text>
             </View>
             <Text style={styles.sectionHint}>
@@ -499,7 +499,7 @@ export function FichaDeSaudeScreen({
           {/* Os mesmos limites que `parseDateOfBirth` já cobrava, agora também no calendário: dia
               fora da faixa nasce apagado em vez de virar erro depois do preenchimento. */}
           <DateField
-            label="DATA DE NASCIMENTO"
+            label="Data de nascimento"
             value={dateOfBirthInput}
             onChangeText={setDateOfBirthInput}
             onFocus={scrollToFocusedInput}
@@ -508,7 +508,7 @@ export function FichaDeSaudeScreen({
             maximo={new Date()}
           />
           <SelectField
-            label="SEXO BIOLÓGICO"
+            label="Sexo biológico"
             value={biologicalSex}
             options={BIOLOGICAL_SEX_OPTIONS}
             onChange={setBiologicalSex}
@@ -517,7 +517,7 @@ export function FichaDeSaudeScreen({
 
         <Card>
           <SelectField
-            label="TIPO SANGUÍNEO"
+            label="Tipo sanguíneo"
             value={bloodType}
             options={BLOOD_TYPE_OPTIONS}
             onChange={setBloodType}
@@ -526,7 +526,7 @@ export function FichaDeSaudeScreen({
 
         <Card>
           <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>ALERGIAS</Text>
+            <Text style={styles.fieldLabel}>Alergias</Text>
             <View style={styles.allergyInputRow}>
               <TextField
                 label=""
@@ -570,7 +570,7 @@ export function FichaDeSaudeScreen({
 
         <Card>
           <TextField
-            label="OBSERVAÇÕES"
+            label="Observações"
             placeholder="Qualquer outra informação que você ache relevante..."
             value={notes}
             onChangeText={setNotes}

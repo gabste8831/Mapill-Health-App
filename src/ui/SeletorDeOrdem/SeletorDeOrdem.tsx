@@ -15,17 +15,33 @@ export type OpcaoDeOrdem<T extends string> = {
    * a largura que forçava a fileira a rolar. O campo fica porque as telas já o declaram e ele
    * descreve a intenção de cada opção para quem for lê-las no código.
    */
-  icon: keyof typeof Ionicons.glyphMap;
+  icon?: keyof typeof Ionicons.glyphMap;
 };
 
 export type SeletorDeOrdemProps<T extends string> = {
   value: T;
   options: OpcaoDeOrdem<T>[];
   onChange: (value: T) => void;
+  /**
+   * Como o leitor de tela nomeia cada ficha. O padrão fala de ordenação porque foi para isso que a
+   * fileira nasceu; quem a usa como filtro ou período passa o verbo certo, senão o TalkBack anuncia
+   * "Ordenar por 30 dias" numa escolha que não ordena nada.
+   */
+  descreverOpcao?: (label: string) => string;
 };
 
 /**
- * Fileira de fichas para escolher como a lista é ordenada.
+ * Fileira de fichas para escolher entre poucas opções que **governam o que a tela mostra** —
+ * ordem da lista, filtro da agenda, período da adesão.
+ *
+ * É a forma única dessa escolha no app, e por isso a cor e o tamanho vêm daqui e não de cada
+ * tela: selecionada em azul cheio, as demais em `surfaceContainer`, todas do mesmo tamanho. Uma
+ * tela que desenhasse a própria fileira ensinaria a pessoa a reconhecer duas gramáticas para a
+ * mesma decisão.
+ *
+ * **Não é o `OptionGroup`.** Aquele é para escolha que se grava — a frequência de um remédio, o
+ * tipo de lembrete —, onde a opção é um cartão que pode carregar apoio e ícone. Este é para
+ * escolha que só muda a vista e se desfaz no toque seguinte.
  *
  * Sempre há uma marcada — ordem é estado, não filtro, e "nenhuma ordem" não existe: a lista sai
  * de algum jeito de qualquer forma. Deixar isso implícito é o que fazia a pessoa não entender por
@@ -46,6 +62,7 @@ export function SeletorDeOrdem<T extends string>({
   value,
   options,
   onChange,
+  descreverOpcao = (label) => `Ordenar por ${label}`,
 }: SeletorDeOrdemProps<T>) {
   const styles = useEstilos(criarEstilos);
 
@@ -62,7 +79,7 @@ export function SeletorDeOrdem<T extends string>({
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: selecionada }}
-            accessibilityLabel={`Ordenar por ${option.label}`}>
+            accessibilityLabel={descreverOpcao(option.label)}>
             <Text
               style={[styles.rotulo, selecionada && styles.rotuloSelecionado]}
               numberOfLines={1}>

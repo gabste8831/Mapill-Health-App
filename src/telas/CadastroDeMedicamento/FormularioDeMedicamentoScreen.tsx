@@ -134,7 +134,7 @@ const UNIDADES_FEMININAS: readonly PosologyUnit[] = [
 ];
 
 function quantosDe(unit: PosologyUnit): string {
-  return UNIDADES_FEMININAS.includes(unit) ? "QUANTAS" : "QUANTOS";
+  return UNIDADES_FEMININAS.includes(unit) ? "Quantas" : "Quantos";
 }
 
 /**
@@ -1325,15 +1325,15 @@ export function FormularioDeMedicamentoScreen({
   const linhasDoEstoque = [
     stockQuantity.trim().length > 0 && stockUnit !== null
       ? {
-          rotulo: "QUANTIDADE",
+          rotulo: "Quantidade",
           valor: `${stockQuantity} ${UNIT_NOUNS[stockUnit]}`,
         }
       : null,
     storageLocation.trim().length > 0
-      ? { rotulo: "LOCAL", valor: storageLocation.trim() }
+      ? { rotulo: "Local", valor: storageLocation.trim() }
       : null,
     wantsLowStockAlert && leadDays !== null
-      ? { rotulo: "AVISO", valor: `${leadDays} dias antes de acabar` }
+      ? { rotulo: "Aviso", valor: `${leadDays} dias antes de acabar` }
       : null,
   ].filter(
     (linha): linha is { rotulo: string; valor: string } => linha !== null,
@@ -1514,14 +1514,14 @@ export function FormularioDeMedicamentoScreen({
       >
         <Card>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>O ESSENCIAL</Text>
+            <Text style={styles.sectionTitle}>O essencial</Text>
             <Text style={[styles.selo, styles.seloObrigatorio]}>
               OBRIGATÓRIO
             </Text>
           </View>
 
           <TextField
-            label="NOME DA MEDICAÇÃO"
+            label="Nome da medicação"
             required
             placeholder="Ex: Losartana 50mg"
             value={name}
@@ -1544,7 +1544,7 @@ export function FormularioDeMedicamentoScreen({
             />
           ) : null}
           <SelectField
-            label="COMO VOCÊ TOMA?"
+            label="Como você toma?"
             value={form}
             options={FORM_OPTIONS}
             onChange={semLimpar(handleFormChange)}
@@ -1558,7 +1558,7 @@ export function FormularioDeMedicamentoScreen({
           {showsUnitChoice ? (
             <>
               <OptionGroup
-                label="COMO A DOSE É MEDIDA?"
+                label="Como a dose é medida?"
                 value={doseUnit}
                 options={unitOptions}
                 onChange={handleDoseUnitChange}
@@ -1573,7 +1573,7 @@ export function FormularioDeMedicamentoScreen({
               não significa nada, e é o que fazia "1 injeção ué" parecer a resposta certa. */}
           {doseUnit !== null ? (
             <TextField
-              label={`${quantosDe(doseUnit)} ${UNIT_NOUNS[doseUnit].toUpperCase()} DE CADA VEZ`}
+              label={`${quantosDe(doseUnit)} ${UNIT_NOUNS[doseUnit]} de cada vez`}
               required
               placeholder="Ex: 1"
               value={doseAmount}
@@ -1613,7 +1613,7 @@ export function FormularioDeMedicamentoScreen({
           ) : null}
 
           <OptionGroup
-            label="QUAL A FREQUÊNCIA?"
+            label="Qual a frequência?"
             layout="grade"
             value={frequency}
             options={FREQUENCY_OPTIONS}
@@ -1622,7 +1622,7 @@ export function FormularioDeMedicamentoScreen({
 
           {frequency === "weekly" ? (
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>EM QUAIS DIAS?</Text>
+              <Text style={styles.fieldLabel}>Em quais dias?</Text>
               <View style={styles.weekdayRow}>
                 {WEEKDAYS.map((weekday) => {
                   const isSelected = weekdays.includes(weekday.value);
@@ -1666,7 +1666,7 @@ export function FormularioDeMedicamentoScreen({
           {frequency === "cycle" ? (
             <>
               <TextField
-                label="A CADA QUANTOS DIAS?"
+                label="A cada quantos dias?"
                 required
                 placeholder="Ex: 28 na cartela, 30 na injeção mensal"
                 value={cycleLengthInput}
@@ -1680,7 +1680,7 @@ export function FormularioDeMedicamentoScreen({
                   limite antes dele. Em branco vale 1, que é o caso de quem pensa "de 30 em 30". */}
               {cycleLengthDefinido ? (
                 <TextField
-                  label="POR QUANTOS DIAS SEGUIDOS?"
+                  label="Por quantos dias seguidos?"
                   placeholder="1 dia, se for dose única"
                   value={activeDaysInput}
                   onChangeText={(raw) => apenasDigitos(raw, setActiveDaysInput)}
@@ -1695,7 +1695,7 @@ export function FormularioDeMedicamentoScreen({
                   cadastra no meio da cartela recebe a pausa deslocada — em silêncio. */}
               {cycleLengthDefinido && activeDaysError === undefined ? (
                 <OptionGroup
-                  label="ESTE CICLO COMEÇOU QUANDO?"
+                  label="Este ciclo começou quando?"
                   value={cycleStart}
                   options={opcoesDeInicioDoCiclo(comecaDepoisDeHoje)}
                   onChange={setCycleStart}
@@ -1705,7 +1705,7 @@ export function FormularioDeMedicamentoScreen({
               {cycleStart === "earlier" ? (
                 // "Já comecei antes" é sempre uma data passada — o calendário não oferece o futuro.
                 <DateField
-                  label="PRIMEIRO DIA DESTE CICLO"
+                  label="Primeiro dia deste ciclo"
                   value={cycleStartInput}
                   onChangeText={setCycleStartInput}
                   onFocus={scrollToFocusedInput}
@@ -1733,8 +1733,8 @@ export function FormularioDeMedicamentoScreen({
               <OptionGroup
                 label={
                   frequency === "daily"
-                    ? "QUANTAS VEZES POR DIA?"
-                    : "QUANTAS VEZES NO DIA?"
+                    ? "Quantas vezes por dia?"
+                    : "Quantas vezes no dia?"
                 }
                 value={isCustomDoses ? null : String(doseInputs.length)}
                 options={DOSES_PER_DAY_OPTIONS}
@@ -1763,7 +1763,7 @@ export function FormularioDeMedicamentoScreen({
               {/* Sem quantidade escolhida não há quantos campos abrir — a pergunta ainda não existe. */}
               {doseInputs.length > 0 ? (
                 <SeletorDeHorarios
-                  label="EM QUE HORÁRIOS?"
+                  label="Em que horários?"
                   values={doseInputs}
                   onChange={setDoseInputs}
                   duplicateIndexes={duplicateTimeIndexes}
@@ -1795,7 +1795,7 @@ export function FormularioDeMedicamentoScreen({
               cobraria uma resposta que não muda nada. */}
           {frequency !== null && frequency !== "asNeeded" ? (
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>QUANDO COMEÇA</Text>
+              <Text style={styles.fieldLabel}>Quando começa</Text>
               {alteraInicio ? (
                 // Sem limite: começar hoje, amanhã ou retomar um tratamento antigo são todos
                 // casos legítimos, e o rótulo já vive fora do campo nesta seção.
@@ -1821,7 +1821,7 @@ export function FormularioDeMedicamentoScreen({
           ) : null}
 
           <OptionGroup
-            label="QUAL O TEMPO DO TRATAMENTO?"
+            label="Qual o tempo do tratamento?"
             value={duration}
             options={
               frequency === "asNeeded"
@@ -1837,7 +1837,7 @@ export function FormularioDeMedicamentoScreen({
           {duration === "fixed" ? (
             <View style={styles.fieldGroup}>
               <TextField
-                label="QUANTO TEMPO DURA"
+                label="Quanto tempo dura"
                 placeholder="Ex: 7"
                 value={durationAmount}
                 onChangeText={(raw) =>
@@ -1877,7 +1877,7 @@ export function FormularioDeMedicamentoScreen({
               Sem isso a linha de resumo simplesmente não aparecia, e o silêncio lê como acerto. */}
           {prazoSemDose ? (
             <Text style={styles.avisoDeConflito}>
-              Nesse prazo não sobra nenhuma dose — os horários de hoje já
+              Nesse prazo não sobra nenhuma dose: os horários de hoje já
               passaram. Aumente os dias ou revise os horários.
             </Text>
           ) : null}
@@ -1963,7 +1963,7 @@ export function FormularioDeMedicamentoScreen({
             </View>
 
             <Card>
-              <Text style={styles.sectionTitle}>ESTOQUE</Text>
+              <Text style={styles.sectionTitle}>Estoque</Text>
               {tracksStock ? (
                 <>
                   <Pressable
@@ -2024,7 +2024,7 @@ export function FormularioDeMedicamentoScreen({
             </Card>
 
             <Card>
-              <Text style={styles.sectionTitle}>ANEXOS</Text>
+              <Text style={styles.sectionTitle}>Anexos</Text>
 
               {/* `key` na presença da foto — a mesma correção da ficha de saúde, pelo mesmo
                   motivo: dentro do `Pressable` que dispensa o teclado, esta linha não recompunha
@@ -2121,7 +2121,7 @@ export function FormularioDeMedicamentoScreen({
 
               {/* O campo não dizia para que servia: mostrava só as duas formas de escolher, e
                   quem chegava nele não sabia se era outra foto do remédio ou outra coisa. */}
-              <Text style={styles.fieldLabel}>RECEITA MÉDICA</Text>
+              <Text style={styles.fieldLabel}>Receita médica</Text>
 
               {/* Um gesto só, igual ao da foto da caixa logo acima: toca-se no quadrado (ou no
                   rótulo) e o popup pergunta de onde vem — câmera, galeria ou arquivo. Antes eram
@@ -2268,7 +2268,7 @@ export function FormularioDeMedicamentoScreen({
                      força a remontagem é o valor **mudar**, e aqui ele muda quando se troca um
                      PDF por uma foto sem passar por "sem anexo". */
                   key={`validade-${attachmentKind ?? "sem"}`}
-                  label="RECEITA VÁLIDA ATÉ"
+                  label="Receita válida até"
                   value={validUntilInput}
                   onChangeText={setValidUntilInput}
                   onFocus={scrollToFocusedInput}
@@ -2295,7 +2295,7 @@ export function FormularioDeMedicamentoScreen({
                   {wantsRenewalReminder ? (
                     <>
                       <OptionGroup
-                        label="AVISAR ANTES TAMBÉM (OPCIONAL)"
+                        label="Avisar antes também (opcional)"
                         value={renewalLeadDays}
                         options={RENEWAL_LEAD_OPTIONS}
                         onChange={setRenewalLeadDays}
@@ -2321,7 +2321,7 @@ export function FormularioDeMedicamentoScreen({
 
             {frequency !== "asNeeded" ? (
               <Card>
-                <Text style={styles.sectionTitle}>LEMBRETE</Text>
+                <Text style={styles.sectionTitle}>Lembrete</Text>
                 {reminderMode !== null ? (
                   <Pressable
                     style={estadoDePressao([
@@ -2366,7 +2366,7 @@ export function FormularioDeMedicamentoScreen({
                   <>
                     <Text style={styles.sectionHint}>
                       O Mapill pode te procurar na hora da dose, com notificação
-                      ou com alarme de despertador — você escolhe o quanto ele
+                      ou com alarme de despertador. Você escolhe o quanto ele
                       insiste.
                     </Text>
                     <Button
@@ -2381,7 +2381,7 @@ export function FormularioDeMedicamentoScreen({
             {/* Nada aqui muda horário, dose ou lembrete — é a anotação que o paciente quer ter à
                 mão na hora de tomar. Por isso vem por último e não cobra nada. */}
             <Card>
-              <Text style={styles.sectionTitle}>INFORMAÇÕES ADICIONAIS</Text>
+              <Text style={styles.sectionTitle}>Informações adicionais</Text>
               <Text style={styles.sectionHint}>
                 Só anotação, pra você lembrar depois. Nada aqui altera os
                 horários.
@@ -2390,7 +2390,7 @@ export function FormularioDeMedicamentoScreen({
               {/* Chips no lugar de um terceiro campo de texto: a lista das recomendações comuns é
                   curta e conhecida, e reconhecer custa um toque enquanto escrever custa uma frase. */}
               <ToggleChips
-                label="COMO TOMAR"
+                label="Como tomar"
                 values={
                   mostraOutraOrientacao
                     ? [...intakeInstructions, OUTRA_ORIENTACAO]
@@ -2402,7 +2402,7 @@ export function FormularioDeMedicamentoScreen({
 
               {mostraOutraOrientacao ? (
                 <TextField
-                  label="QUAL ORIENTAÇÃO?"
+                  label="Qual orientação?"
                   placeholder="Ex: diluir em meio copo d'água"
                   value={intakeNote}
                   onChangeText={setIntakeNote}
@@ -2412,7 +2412,7 @@ export function FormularioDeMedicamentoScreen({
               ) : null}
 
               <TextField
-                label="PRINCÍPIO ATIVO"
+                label="Princípio ativo"
                 placeholder="Ex: Losartana potássica"
                 value={activeIngredient}
                 onChangeText={setActiveIngredient}
@@ -2420,7 +2420,7 @@ export function FormularioDeMedicamentoScreen({
                 maxLength={120}
               />
               <TextField
-                label="OBSERVAÇÃO GERAL"
+                label="Observação geral"
                 placeholder="Ex: o azul é o da manhã"
                 value={notes}
                 onChangeText={setNotes}
@@ -2459,8 +2459,8 @@ export function FormularioDeMedicamentoScreen({
         avisoEhConflito={antecedenciaConflita}
         quantityLabel={
           stockUnit === null
-            ? "QUANTAS UNIDADES VOCÊ TEM"
-            : `${quantosDe(stockUnit)} ${UNIT_NOUNS[stockUnit].toUpperCase()} VOCÊ TEM`
+            ? "Quantas unidades você tem"
+            : `${quantosDe(stockUnit)} ${UNIT_NOUNS[stockUnit]} você tem`
         }
         quantity={stockQuantity}
         onQuantityChange={setStockQuantity}

@@ -119,7 +119,7 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
             placeholder="00"
             placeholderTextColor={cores.onSurfaceVariant}
           />
-          <Text style={styles.rotulo}>HORA</Text>
+          <Text style={styles.rotulo}>Hora</Text>
         </View>
 
         <Text style={styles.separador}>:</Text>
@@ -138,13 +138,13 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
             placeholder="00"
             placeholderTextColor={cores.onSurfaceVariant}
           />
-          <Text style={styles.rotulo}>MINUTO</Text>
+          <Text style={styles.rotulo}>Minuto</Text>
         </View>
       </View>
 
       {/* Dito uma vez, embaixo: sem AM/PM na tela, é a única coisa que explica por que "20" basta
           para as oito da noite. */}
-      <Text style={styles.ajuda}>Formato de 24 horas — 20:00 é oito da noite.</Text>
+      <Text style={styles.ajuda}>Formato de 24 horas. 20:00 é oito da noite.</Text>
     </View>
   );
 }
