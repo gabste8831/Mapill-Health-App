@@ -39,10 +39,16 @@ alarme) e **8-K6** (o alarme sem visualizador).
 **O que dá para revisar agora é todo o resto** — telas, cadastro, listas, relatório, exportação,
 acessibilidade e regressão visual. É o que esta rodada cobre.
 
-## 📋 O que já foi respondido (05 e 08/09)
+## 📋 O que já foi respondido (05, 08 e 09/09)
 
 > Registrado para não retestar o que passou. **Se algum destes falhar agora é regressão**, e vale
 > usar essa palavra ao reportar: muda o diagnóstico.
+
+> ⚠️ **A rodada de 09/09 mexeu em quase toda tela.** A caixa alta saiu de 86 rótulos, a altura de
+> linha foi corrigida em três tokens e as cores de estado viraram escolha. A tipografia e as cores
+> **foram validadas em aparelho na hora**; o que não foi é a **regressão com a fonte do sistema no
+> máximo**, que é justamente onde a mudança de largura e de altura de linha aparece. O bloco 10
+> vale a pena de novo, e só ele.
 
 | Bloco | Situação |
 |---|---|
@@ -55,7 +61,7 @@ acessibilidade e regressão visual. É o que esta rodada cobre.
 | **7** — Fonte ampliada | ✅ Ressalva de 05/09: **os horários dos cards quebram linha** no máximo |
 | **8** — Passe de design | ✅ **08/09**, incluindo o item **H** — a miniatura, resolvida no fim do dia depois de seis correções no lugar errado |
 | **9** — TalkBack | ✅ **08/09**. 📝 **Rende material para o TCC** — a leitura em frase única e o estado anunciado saíram da varredura de 02/09 |
-| **10** — Regressão de telas | ✅ **08/09** |
+| **10** — Regressão de telas | ✅ **08/09**. ⚠️ **Vale refazer**: a tipografia mudou em 09/09, e com a fonte do sistema no máximo ainda não foi vista |
 | **12** — Permissões do alarme | ✅ 05/09, 100%. Só reconferir que a build nova não regrediu |
 | **18** e **19** — Alarme | ❌ **Reprovaram.** O Notifee foi arquivado, e o boot receiver dele nunca era invocado no Android 12+ |
 
@@ -1189,6 +1195,33 @@ Repita com o celular no **silencioso** (não o Não perturbe — o botão de vol
 > ✅ 🔴 Toca igual.
 
 🔬 **Anote os dois casos separadamente.** Eles falham por motivos diferentes.
+
+---
+
+**11.4b — 🔴🔬 O tratamento contínuo sobrevive a 30 dias?** _(suspeita, não confirmada)_
+
+Este passo é novo e existe para responder uma dúvida achada por leitura de código, não por teste.
+
+As doses (`DoseSchedule`) são gravadas no banco em blocos de **30 dias**, no cadastro. O comentário
+do `SCHEDULE_HORIZON_DAYS` diz que a janela "é reabastecida depois", mas não foi encontrado nenhum
+código que faça isso. Se a suspeita se confirmar, num uso contínuo **os avisos param por volta do
+30º dia**, mesmo com o app sendo aberto todos os dias, e sem nenhum sinal.
+
+Você já vai estar com a hora automática desligada no passo seguinte, então o custo aqui é pequeno.
+
+Cadastre um remédio **de uso contínuo**, 1x/dia. Abra `Ajustes → Desenvolvimento → Diagnóstico` e
+anote quantas doses o banco espera. Depois adiante o relógio em **31 dias** e volte à Home.
+
+> ✅ 🔴 A Home continua mostrando a dose do dia.
+> ✅ O diagnóstico continua com avisos agendados, e o número não é zero.
+> ❌ Se a Home ficar vazia ou o diagnóstico zerar, a suspeita se confirma — e é o pior modo de
+> falhar deste app, porque nada avisa que parou.
+
+🔬 **Anote o resultado mesmo se passar:** ele decide se é preciso implementar o reabastecimento ou
+se existe um caminho que a leitura do código não encontrou.
+
+**Devolva a hora automática** antes de seguir, ou faça o 11.5 na sequência aproveitando o relógio
+já desligado.
 
 ---
 

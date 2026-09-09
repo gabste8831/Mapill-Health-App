@@ -28,15 +28,19 @@ o som dos canais — na rodada de 09/09 o alarme e as notificações tocaram nor
 ## 09/09 — revisão de tipografia, temas e cores
 
 Rodada longa, tela a tela, sem seguir o roteiro: o Gabriel navegando e apontando o que destoava. O
-que saiu dela está consolidado no histórico. Os pontos que **ainda precisam de aparelho**:
+que saiu dela está consolidado no histórico.
 
-- **Tudo o que mudou hoje** foi visto no Metro, não em build. A troca da caixa alta e os tamanhos de
-  fonte mexem em praticamente toda tela — vale o bloco 10 (regressão) com a fonte do sistema no
-  máximo, que é onde altura de linha apertada aparece.
-- **A escolha de cores de estado** (`Ajustes → Configurações de tema`) nunca foi vista em aparelho.
-  Ela repinta a Home inteira; se algum lugar continuar verde ou vermelho depois de trocar, aquele
-  ponto não está lendo da paleta.
-- **A logo nova** (dois PNGs, 1000×333) é desenhada a 120px de largura no cabeçalho. Se a palavra
+**Validado em aparelho na mesma rodada:**
+
+- ✅ **A caixa de texto** — os 86 rótulos em caixa de frase e os tamanhos novos.
+- ✅ **A escolha de cores de estado** (`Ajustes → Configurações de tema`), que repinta a Home
+  inteira. Nenhum ponto ficou preso no verde/vermelho antigo.
+
+**Ainda sem confirmação em aparelho:**
+
+- **A regressão com a fonte do sistema no máximo.** A caixa de frase mudou a largura de quase todo
+  rótulo, e a altura de linha foi corrigida em três tokens — o bloco 10 é o que fecha isso.
+- **A logo nova** (dois PNGs, 1000×333) é desenhada a 96px de largura no cabeçalho. Se a palavra
   ficar serrilhada nessa redução, o caminho é gerar `@2x`/`@3x` em vez de deixar o sistema reduzir.
 - **`imageWidth` da splash** foi de 160 para 110, e isso é configuração **nativa**: só entra com
   build nova.
@@ -50,9 +54,28 @@ que saiu dela está consolidado no histórico. Os pontos que **ainda precisam de
 | **20 e 21** | Estoque, receita e o que mudou depois de os blocos 1-10 passarem |
 | **2.6.2** | Apagar dados de saúde. Destrutivo, fica por último |
 
-## Uma pendência de código, achada por leitura
+## Uma pendência de código, achada por leitura (não testada)
 
-**As doses podem acabar por volta do 30º dia num tratamento contínuo.** `generateDoseSchedules`
-grava 30 dias no banco **no cadastro**, e não há caminho que reabasteça com o passar do tempo — o
-agendador só agenda dose que existe no banco. Não foi verificado em execução; se confirmado, é uma
-falha silenciosa (os avisos simplesmente param, sem nenhum sinal).
+**Suspeita: as doses podem acabar por volta do 30º dia num tratamento contínuo.**
+
+Existem **duas** janelas no app, com nomes parecidos e destinos diferentes:
+
+| Janela | Onde | Reabastecida? |
+|---|---|---|
+| Avisos agendados no sistema | 7 dias, `reagendar-avisos.ts` | ✅ a cada vez que o app vai a primeiro plano |
+| `DoseSchedule` gravados no banco | 30 dias, `use-medication-registration.ts` | ❓ nenhum código encontrado |
+
+A primeira funciona e está documentada. A segunda é a dúvida: `generateDoseSchedules` grava 30 dias
+**no cadastro**, e o comentário do `SCHEDULE_HORIZON_DAYS` diz que *"a janela é reabastecida depois
+(bloco C1)"* — mas um `grep` por `generateDoseSchedules` mostra que os outros usos são projeções de
+leitura (calendário, previsão de estoque, resumo), que calculam na hora sem gravar.
+
+Se for isso, o encadeamento é: o agendador só agenda dose que existe no banco → o banco tem 30 dias
+a partir do cadastro → ninguém regenera. Num uso contínuo os avisos parariam por volta do 30º dia
+**mesmo com o app sendo aberto todo dia**, e sem nenhum sinal de que pararam.
+
+**Como verificar sem esperar um mês:** cadastrar um remédio contínuo, abrir o diagnóstico
+(`Ajustes → Desenvolvimento`) e comparar "esperado pelo banco" com o total de dias. Ou adiantar o
+relógio do aparelho em 31 dias (o bloco 19 já faz isso) e ver se a Home ainda mostra doses.
+
+⚠️ **Não confirmado em execução.** Pode haver um caminho que eu não encontrei.
