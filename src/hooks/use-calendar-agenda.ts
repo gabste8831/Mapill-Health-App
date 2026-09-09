@@ -4,12 +4,14 @@ import { Platform } from "react-native";
 
 import { AppointmentRepository } from "@/data/repositories/appointment-repository";
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
+import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import type { Appointment } from "@/domain/entities/appointment";
 import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
 import type { PosologyUnit } from "@/domain/entities/medication";
 import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
+import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { gravarDesfecho } from "@/hooks/use-today-doses";
 import { toLocalIsoDay } from "@/shared/date-input";
 
@@ -50,11 +52,32 @@ export type DoseDaAgenda = {
   latestLogId: string | null;
 };
 
+/**
+ * Um marco no dia: a receita que vence, o estoque que acaba.
+ *
+ * Separado de `compromissos` e `doses` porque **não é um evento** — ninguém faz nada às 14h por
+ * causa dele. É uma data que vale a pena ver ao planejar o mês, e por isso entra no calendário;
+ * mas listá-lo junto das doses o faria parecer algo a confirmar, que não é.
+ *
+ * `ehEstimativa` separa o que é fato do que é previsão. A validade da receita está escrita no
+ * papel: 20/09 é 20/09. O fim do estoque é uma projeção que se move a cada dose confirmada e a
+ * cada recontagem — desenhá-la com o mesmo peso de uma consulta marcada daria a ela uma certeza
+ * que ela não tem. A tela usa isto para dizer "por volta de" em vez de afirmar o dia.
+ */
+export type MarcoDoDia = {
+  id: string;
+  tipo: "receita" | "estoque";
+  /** O que vence ou acaba — o nome do medicamento. */
+  titulo: string;
+  ehEstimativa: boolean;
+};
+
 export type DiaDaAgenda = {
   /** ISO `YYYY-MM-DD` local. */
   isoDay: string;
   compromissos: Appointment[];
   doses: DoseDaAgenda[];
+  marcos: MarcoDoDia[];
 };
 
 const AGENDA_VAZIA: DiaDaAgenda[] = [];
@@ -76,11 +99,12 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
   const inicio = new Date(agora.getTime() - DIAS_PARA_TRAS * DIA_EM_MS);
   const fim = new Date(agora.getTime() + DIAS_PARA_FRENTE * DIA_EM_MS);
 
-  const [compromissos, armazenadas, prescriptions, medications] = await Promise.all([
+  const [compromissos, armazenadas, prescriptions, medications, inventories] = await Promise.all([
     new AppointmentRepository().findAllOrderedByDate(),
     new DoseScheduleRepository().findBetween(inicio.toISOString(), fim.toISOString()),
     new PrescriptionRepository().findAll(),
     new MedicationRepository().findAll(),
+    new InventoryRepository().findAll(),
   ]);
 
   const prescricaoPorId = new Map(prescriptions.map((p) => [p.id, p]));
@@ -146,7 +170,7 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
   function diaDe(isoDay: string): DiaDaAgenda {
     const existente = porDia.get(isoDay);
     if (existente !== undefined) return existente;
-    const novo: DiaDaAgenda = { isoDay, compromissos: [], doses: [] };
+    const novo: DiaDaAgenda = { isoDay, compromissos: [], doses: [], marcos: [] };
     porDia.set(isoDay, novo);
     return novo;
   }
@@ -162,11 +186,62 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
     diaDe(toLocalIsoDay(new Date(dose.scheduledFor))).doses.push(dose);
   }
 
+  /**
+   * A validade da receita — um fato com data, como um compromisso.
+   *
+   * Entra mesmo sem pedido de aviso: quem não quis notificação continua querendo ver a data ao
+   * planejar o mês. O aviso é sobre ser interrompido; o calendário é sobre consultar.
+   */
+  for (const prescription of prescriptions) {
+    if (prescription.attachmentValidUntil === null) continue;
+    const medication = medicamentoPorId.get(prescription.medicationId);
+    if (medication === undefined) continue;
+    diaDe(prescription.attachmentValidUntil).marcos.push({
+      id: `receita-${prescription.id}`,
+      tipo: "receita",
+      titulo: medication.name,
+      ehEstimativa: false,
+    });
+  }
+
+  /**
+   * O fim do estoque — uma **previsão**, e o calendário diz isso.
+   *
+   * Só para quem controla estoque: sem quantidade não há o que projetar. A conta vem da mesma
+   * `estimateStockDepletion` que alimenta a Home e a tela de estoque, para as três não
+   * divergirem no dia em que a regra mudar.
+   */
+  for (const inventory of inventories) {
+    const medication = medicamentoPorId.get(inventory.medicationId);
+    if (medication === undefined) continue;
+
+    const prescription = prescriptions
+      .filter((p) => p.medicationId === inventory.medicationId)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+    if (prescription === undefined) continue;
+
+    const depletion = estimateStockDepletion(
+      prescription,
+      { amount: inventory.quantity, unit: inventory.unit as PosologyUnit },
+      agora,
+    );
+    if (depletion === null) continue;
+
+    diaDe(depletion.lastDay).marcos.push({
+      id: `estoque-${inventory.id}`,
+      tipo: "estoque",
+      titulo: medication.name,
+      ehEstimativa: true,
+    });
+  }
+
   return Array.from(porDia.values())
     .map((dia) => ({
       ...dia,
       compromissos: dia.compromissos.sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor)),
       doses: dia.doses.sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor)),
+      // Receita antes de estoque: o que está escrito no papel vem antes do que o app estimou.
+      marcos: dia.marcos.sort((a, b) => a.tipo.localeCompare(b.tipo)),
     }))
     .sort((a, b) => a.isoDay.localeCompare(b.isoDay));
 }

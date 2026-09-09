@@ -287,6 +287,7 @@ function tituloDoDia(isoDay: string, hoje: string, amanha: string, ontem: string
 
 export function CalendarioScreen() {
   const styles = useEstilos(criarEstilos);
+  const cores = useCores();
 
   const router = useRouter();
   const { dias, isLoading, error, reload, registrarDose } = useCalendarAgenda();
@@ -334,8 +335,17 @@ export function CalendarioScreen() {
     isoDay: diaSelecionado,
     compromissos: mostraCompromissos ? (diaEncontrado?.compromissos ?? []) : [],
     doses: mostraDoses ? (diaEncontrado?.doses ?? []) : [],
+    /**
+     * Os marcos ignoram o filtro, de propósito.
+     *
+     * O filtro escolhe entre compromissos e doses, e um marco não é nenhum dos dois — esconder a
+     * validade da receita ao filtrar por "só doses" seria esconder algo que a pessoa não pediu
+     * para esconder. São poucos por mês, e o que eles dizem não compete com a lista.
+     */
+    marcos: diaEncontrado?.marcos ?? [],
   };
-  const vazioNoDia = dia.compromissos.length === 0 && dia.doses.length === 0;
+  const vazioNoDia =
+    dia.compromissos.length === 0 && dia.doses.length === 0 && dia.marcos.length === 0;
 
   /**
    * Trocar de mês leva a seleção junto, para o dia 1º do mês visitado. Sem isso a lista embaixo
@@ -488,6 +498,26 @@ export function CalendarioScreen() {
                       : "Nada marcado para este dia."}
                 </Text>
               ) : null}
+
+              {/* Os marcos vêm primeiro: eles dizem o que este dia **é** (a receita vence aqui,
+                  o estoque acaba aqui), e o resto da lista é o que acontece dentro dele. */}
+              {dia.marcos.map((marco) => (
+                <View key={marco.id} style={styles.marco}>
+                  <Ionicons
+                    name={marco.tipo === "receita" ? "document-text-outline" : "cube-outline"}
+                    size={18}
+                    color={cores.onSurfaceVariant}
+                  />
+                  <Text style={styles.marcoTexto}>
+                    {marco.tipo === "receita"
+                      ? `Receita de ${marco.titulo} vence`
+                      : /* "Por volta de" porque é projeção: a data se move a cada dose confirmada
+                           e a cada recontagem. Afirmar o dia daria a ela a certeza de uma consulta
+                           marcada, que ela não tem. */
+                        `Estoque de ${marco.titulo} deve acabar por volta desta data`}
+                  </Text>
+                </View>
+              ))}
 
               {dia.compromissos.map((appointment) => (
                 <ItemDeCompromisso

@@ -236,6 +236,26 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     paddingVertical: spacing.xl,
     paddingHorizontal: spacing.md,
   },
+  /**
+   * A validade da receita e o fim do estoque — deliberadamente **mais discretos** que uma dose ou
+   * um compromisso.
+   *
+   * Sem fundo próprio e sem alvo de toque: não há o que confirmar nem para onde ir. Um marco
+   * desenhado como cartão pediria uma ação que não existe, e no caso do estoque ainda daria a uma
+   * projeção o mesmo peso de uma consulta marcada.
+   */
+  marco: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  marcoTexto: {
+    ...typography.bodyMd,
+    color: cores.onSurfaceVariant,
+    flex: 1,
+  },
 
   // --- Cabeçalho de dia ---
   /**

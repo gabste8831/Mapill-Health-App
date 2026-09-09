@@ -2273,12 +2273,21 @@ export function FormularioDeMedicamentoScreen({
                     accessibilityLabel="Me avisar antes de a receita vencer"
                   />
                   {wantsRenewalReminder ? (
-                    <OptionGroup
-                      label="COM QUANTA ANTECEDÊNCIA"
-                      value={renewalLeadDays}
-                      options={RENEWAL_LEAD_OPTIONS}
-                      onChange={setRenewalLeadDays}
-                    />
+                    <>
+                      <OptionGroup
+                        label="COM QUANTA ANTECEDÊNCIA"
+                        value={renewalLeadDays}
+                        options={RENEWAL_LEAD_OPTIONS}
+                        onChange={setRenewalLeadDays}
+                      />
+                      {/* São dois avisos, e a frase diz isso: "planeje-se" e "acabou" pedem
+                          ações diferentes, e quem lê só "com quanta antecedência" não tem como
+                          supor que o segundo existe. */}
+                      <Text style={styles.sectionHint}>
+                        Você recebe um lembrete na antecedência escolhida e outro no dia em que a
+                        receita vence.
+                      </Text>
+                    </>
                   ) : null}
                   {avisoDeRenovacao !== null ? (
                     <Text style={styles.sectionHintDestaque}>

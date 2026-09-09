@@ -128,6 +128,20 @@ export async function salvarMedicamento(
         lowStockAlertEnabled: draft.lowStockAlertEnabled,
         lowStockAlertLeadDays: draft.lowStockAlertLeadDays,
         storageLocation: draft.storageLocation,
+        /**
+         * Editar a quantidade **para cima** rearma o aviso de estoque baixo.
+         *
+         * Quem corrige o estoque no cadastro está fazendo o mesmo que "Repor" na tela de estoque:
+         * dizendo que há mais caixa do que o app pensava. Manter a memória do aviso anterior
+         * deixaria a pessoa sem aviso na próxima vez que baixasse — calada justamente porque um
+         * dia já avisou. Ver `planejarAvisosDeEstoque`.
+         */
+        lowStockAlertedAtQuantity:
+          existingInventory !== null &&
+          existingInventory.lowStockAlertedAtQuantity !== null &&
+          (draft.stockQuantity ?? 0) > existingInventory.lowStockAlertedAtQuantity
+            ? null
+            : (existingInventory?.lowStockAlertedAtQuantity ?? null),
         ...syncFields(),
       });
     }

@@ -181,13 +181,42 @@ console.log("\nA receita segue a mesma hora\n");
       },
     ],
   );
-  const [aviso] = avisos;
+  const antes = avisos.find((a) => a.chave.endsWith("-antes"));
   conferir(
     "5 dias antes de 20/09 → 00:01 do dia 15/09",
-    aviso?.quando.getDate() === 15 && aviso?.quando.getHours() === 0 &&
-      aviso?.quando.getMinutes() === 1,
-    aviso ? quandoLegivel(aviso.quando) : "nenhum aviso planejado",
+    antes?.quando.getDate() === 15 && antes?.quando.getHours() === 0 &&
+      antes?.quando.getMinutes() === 1,
+    antes ? quandoLegivel(antes.quando) : "nenhum aviso planejado",
   );
+
+  // O segundo aviso, que entrou em 08/09: "planeje-se" e "acabou" pedem ações diferentes, e quem
+  // não conseguiu renovar a tempo precisa saber antes de chegar à farmácia.
+  const noDia = avisos.find((a) => a.chave.endsWith("-no-dia"));
+  conferir(
+    "e outro no próprio dia do vencimento",
+    noDia?.quando.getDate() === 20 && noDia?.quando.getMinutes() === 1,
+    noDia ? quandoLegivel(noDia.quando) : "nenhum aviso no dia",
+  );
+}
+
+console.log("\nA receita não avisa duas vezes no mesmo instante\n");
+
+{
+  // Antecedência zero: os dois avisos cairiam no mesmo dia, e duas notificações idênticas no
+  // mesmo minuto leem como defeito e não como ênfase.
+  const avisos = planejar(
+    [],
+    [
+      {
+        prescriptionId: "p1",
+        medicationName: "Losartana",
+        validUntil: "2026-09-20",
+        renewalReminderLeadDays: 0,
+      },
+    ],
+  );
+  const instantes = avisos.map((a) => a.quando.getTime());
+  conferir("antecedência zero gera um aviso só", new Set(instantes).size === instantes.length);
 }
 
 console.log(`\n${passou} passaram, ${falhou} falharam\n`);

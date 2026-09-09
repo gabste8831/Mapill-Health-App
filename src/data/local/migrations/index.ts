@@ -16,6 +16,7 @@ import { MIGRATION_013_PRESCRIPTION_INTAKE_NOTE_AND_RENEWAL } from "./013-prescr
 import { MIGRATION_014_APPOINTMENT_PLACE_AND_PROFESSIONAL } from "./014-appointment-place-and-professional";
 import { MIGRATION_015_CMED_CATALOG } from "./015-cmed-catalog";
 import { MIGRATION_016_SYNC_STATE } from "./016-sync-state";
+import { MIGRATION_017_LOW_STOCK_ALERT_STATE } from "./017-low-stock-alert-state";
 
 type Migration = {
   version: number;
@@ -40,6 +41,7 @@ const MIGRATIONS: Migration[] = [
   { version: 14, sql: MIGRATION_014_APPOINTMENT_PLACE_AND_PROFESSIONAL },
   { version: 15, sql: MIGRATION_015_CMED_CATALOG },
   { version: 16, sql: MIGRATION_016_SYNC_STATE },
+  { version: 17, sql: MIGRATION_017_LOW_STOCK_ALERT_STATE },
 ];
 
 /**

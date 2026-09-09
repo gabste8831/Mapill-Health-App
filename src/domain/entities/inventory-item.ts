@@ -10,6 +10,14 @@ export type InventoryItem = SyncableEntity & {
   lowStockAlertLeadDays: number | null;
   /** Onde a caixa está em casa ("na bolsa", "armário da cozinha"). Texto livre do paciente. */
   storageLocation: string | null;
+  /**
+   * Quanto havia na caixa quando o aviso de estoque baixo foi disparado. `null` = nunca avisado.
+   *
+   * É o que impede o aviso de se repetir: a previsão de estoque muda a cada dose confirmada, e
+   * sem esta memória cada confirmação geraria uma notificação nova. Só uma **reposição** (a
+   * quantidade subir acima deste valor) rearma o aviso — ver `planejarAvisosDeEstoque`.
+   */
+  lowStockAlertedAtQuantity: number | null;
 };
 
 export type InventoryAdjustmentReason =

@@ -187,20 +187,49 @@ export function planejarAvisosDeCompromisso(
     if (receita.renewalReminderLeadDays === null) continue;
 
     const vencimento = diaLocal(receita.validUntil);
-    const quando = inicioDoDia(diasAntes(vencimento, receita.renewalReminderLeadDays));
-    if (!agendavel(quando)) continue;
 
-    avisos.push({
-      chave: `${PREFIXO_RECEITA}${receita.prescriptionId}`,
-      quando,
-      titulo: "Receita vencendo",
-      // Diz o remédio e a data, porque a ação que se espera — marcar consulta para renovar —
-      // depende de saber qual receita e quanto tempo ainda há.
-      corpo: `A receita de ${receita.medicationName} vence em ${dataPorExtenso(vencimento)}.`,
-      doseScheduleIds: [],
-      modo: "notification",
-      semAcoesRapidas: true,
-    });
+    /**
+     * Dois avisos, e não um: **"planeje-se" e "acabou" pedem ações diferentes**.
+     *
+     * O antecipado dá tempo de marcar a consulta que renova a receita. O do próprio dia é o que
+     * diz que a partir de agora a receita não vale mais — quem não conseguiu renovar a tempo
+     * precisa saber disso antes de chegar à farmácia, não depois.
+     *
+     * Nenhum dos dois se repete. Um aviso que volta todo dia é o que faz desligar as notificações
+     * do app inteiro, e junto vão os alarmes de dose, que são os que não podem falhar.
+     */
+    const antecipado = inicioDoDia(diasAntes(vencimento, receita.renewalReminderLeadDays));
+    if (agendavel(antecipado)) {
+      avisos.push({
+        chave: `${PREFIXO_RECEITA}${receita.prescriptionId}-antes`,
+        quando: antecipado,
+        titulo: "Receita vencendo",
+        // Diz o remédio e a data, porque a ação que se espera — marcar consulta para renovar —
+        // depende de saber qual receita e quanto tempo ainda há.
+        corpo: `A receita de ${receita.medicationName} vence em ${dataPorExtenso(vencimento)}.`,
+        doseScheduleIds: [],
+        modo: "notification",
+        semAcoesRapidas: true,
+      });
+    }
+
+    const noDia = inicioDoDia(vencimento);
+    /**
+     * Só quando os dois não caem no mesmo dia. Antecedência zero, ou uma receita cadastrada com
+     * a validade já dentro da janela de aviso, faria a mesma notificação chegar duas vezes — e
+     * duas notificações idênticas no mesmo minuto leem como defeito, não como ênfase.
+     */
+    if (agendavel(noDia) && noDia.getTime() !== antecipado.getTime()) {
+      avisos.push({
+        chave: `${PREFIXO_RECEITA}${receita.prescriptionId}-no-dia`,
+        quando: noDia,
+        titulo: "Receita vence hoje",
+        corpo: `Hoje é o último dia de validade da receita de ${receita.medicationName}.`,
+        doseScheduleIds: [],
+        modo: "notification",
+        semAcoesRapidas: true,
+      });
+    }
   }
 
   return avisos.sort((a, b) => a.quando.getTime() - b.quando.getTime());

@@ -103,12 +103,28 @@ export function ConfiguracaoDeEstoque({
         />
 
         {alertEnabled ? (
-          <OptionGroup
-            label="COM QUANTA ANTECEDÊNCIA"
-            value={leadDays}
-            options={LEAD_DAYS_OPTIONS}
-            onChange={onLeadDaysChange}
-          />
+          <>
+            <OptionGroup
+              label="COM QUANTA ANTECEDÊNCIA"
+              value={leadDays}
+              options={LEAD_DAYS_OPTIONS}
+              onChange={onLeadDaysChange}
+            />
+            {/* **Onde o aviso aparece**, e não só que ele existe.
+
+                O rótulo dizia "me avisar quando estiver acabando" e calava sobre o canal. Quem
+                marcava esperava notificação — e até 08/09 o app só mostrava o cartão da tela
+                inicial, uma promessa que o agendador não cumpria.
+
+                Agora cumpre, mas a notificação depende de permissão que pode estar negada, e a
+                estimativa depende de horários fixos. A tela inicial é o único canal que não
+                depende de nada, então é ela que a frase garante — o resto vem como acréscimo. */}
+            <Text style={styles.sectionHint}>
+              O aviso aparece na tela inicial e, se as notificações estiverem ativas, também chega
+              como lembrete no celular — uma vez ao entrar na antecedência escolhida e outra
+              quando o estoque acabar.
+            </Text>
+          </>
         ) : null}
 
         {/* A consequência do que foi digitado, em dias e data. Sem isto, "30 dias de

@@ -2,10 +2,14 @@ import { Platform } from "react-native";
 
 import { AppointmentRepository } from "@/data/repositories/appointment-repository";
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
+import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose } from "@/domain/entities/intake-log";
+import type { PosologyUnit } from "@/domain/entities/medication";
 import { planejarAvisosDeCompromisso } from "@/domain/use-cases/planejar-avisos-de-compromisso";
+import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
+import { planejarAvisosDeEstoque } from "@/domain/use-cases/planejar-avisos-de-estoque";
 import {
   planejarAvisosDeDose,
   type DoseAAvisar,
@@ -146,7 +150,59 @@ async function executarReagendamento(): Promise<void> {
       ate,
     });
 
-    const avisos = [...planejarAvisosDeDose({ doses, agora, ate }), ...avisosDeCompromisso];
+    /**
+     * O estoque, que é o terceiro tipo de aviso — e o único cuja data é uma **previsão**.
+     *
+     * A conta vem de `estimateStockDepletion`, a mesma que alimenta o cartão da Home e a tela de
+     * estoque: refazê-la aqui faria o aviso e a tela discordarem no dia em que a regra mudasse.
+     *
+     * O cartão da Home continua existindo e não depende disto: ele é o canal que funciona mesmo
+     * com as notificações negadas. Estes avisos são o que alcança quem não abriu o app.
+     */
+    const inventories = await new InventoryRepository().findAll();
+    const avisosDeEstoque = planejarAvisosDeEstoque({
+      estoques: inventories.flatMap((inventory) => {
+        const medication = medicamentoPorId.get(inventory.medicationId);
+        if (medication === undefined) return [];
+        if (!inventory.lowStockAlertEnabled || inventory.lowStockAlertLeadDays === null) return [];
+
+        // A mais recente entre as do medicamento: é a que está valendo, e portanto a que dita o
+        // ritmo com que o estoque é consumido. Mesma escolha de `use-today-doses`.
+        const prescription = prescriptions
+          .filter((p) => p.medicationId === inventory.medicationId)
+          .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+        if (prescription === undefined) return [];
+
+        const depletion = estimateStockDepletion(
+          prescription,
+          { amount: inventory.quantity, unit: inventory.unit as PosologyUnit },
+          agora,
+        );
+        // Sem estimativa não há data para agendar — sem horário fixo, unidades incompatíveis, ou
+        // um estoque que dura além do horizonte. Nos três o cartão da Home segue como o canal.
+        if (depletion === null) return [];
+
+        return [
+          {
+            inventoryId: inventory.id,
+            medicationName: medication.name,
+            diasRestantes: depletion.daysRemaining,
+            ultimoDia: depletion.lastDay,
+            avisoLeadDays: inventory.lowStockAlertLeadDays,
+            quantidadeQuandoAvisou: inventory.lowStockAlertedAtQuantity,
+            quantidadeAtual: inventory.quantity,
+          },
+        ];
+      }),
+      agora,
+      ate,
+    });
+
+    const avisos = [
+      ...planejarAvisosDeDose({ doses, agora, ate }),
+      ...avisosDeCompromisso,
+      ...avisosDeEstoque,
+    ];
 
     /**
      * **Cancelar tudo, depois agendar tudo** — a RN14, e agora ela é verdade por construção.
@@ -165,6 +221,37 @@ async function executarReagendamento(): Promise<void> {
     for (const aviso of avisos) {
       // O modo decide o canal e se abre tela cheia; quem agenda é o mesmo gateway nos dois casos.
       await gateway.agendar(aviso);
+    }
+
+    /**
+     * A memória do aviso de estoque, gravada **depois** de ele existir de fato.
+     *
+     * Marcar antes de agendar deixaria o estoque calado por um aviso que talvez não tenha sido
+     * criado — e o próximo reagendamento o consideraria já avisado. Aqui a marca só é gravada
+     * quando o `agendar` acima passou.
+     *
+     * Guarda a quantidade de agora: é ela que `planejarAvisosDeEstoque` compara para saber se
+     * houve reposição desde o último aviso. Reagendar de novo com a mesma caixa não avisa outra
+     * vez; repor e voltar a baixar avisa.
+     *
+     * Só os estoques que entraram nesta rodada — `avisosDeEstoque` já é o resultado da regra,
+     * então nada aqui reinterpreta quem devia ser avisado.
+     */
+    const estoquesAvisados = new Set(
+      avisosDeEstoque.map((aviso) => aviso.chave.replace(/^estoque-/, "").replace(/-(baixo|acabou)$/, "")),
+    );
+    if (estoquesAvisados.size > 0) {
+      const inventoryRepository = new InventoryRepository();
+      for (const inventory of inventories) {
+        if (!estoquesAvisados.has(inventory.id)) continue;
+        if (inventory.lowStockAlertedAtQuantity === inventory.quantity) continue;
+        await inventoryRepository.save({
+          ...inventory,
+          lowStockAlertedAtQuantity: inventory.quantity,
+          updatedAt: new Date().toISOString(),
+          syncedAt: null,
+        });
+      }
     }
 
     /**
