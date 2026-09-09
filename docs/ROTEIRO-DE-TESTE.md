@@ -86,23 +86,11 @@ por último porque é destrutivo.
 
 ### 🔧 O que mudou depois da revisão de 08/09
 
-Mudanças feitas **depois** que os blocos acima foram aprovados. São a área a olhar com atenção na
-próxima rodada — e o que falhar aqui é defeito novo, não regressão.
+Os blocos 1 a 10 foram aprovados e **depois** o app mudou — a miniatura foi resolvida, estoque e
+receita ganharam notificação, o calendário ganhou marcos, e vários rótulos e alinhamentos mudaram.
 
-- **A miniatura da mídia** (8-H) foi resolvida. A causa não era o `FotoLocal`, onde seis correções
-  tinham sido tentadas: era a linha inteira não recompor quando a mídia estreava, dentro do
-  `Pressable` que dispensa o teclado. A correção é uma `key` por presença de mídia, aplicada na
-  ficha, na foto da caixa, no anexo da receita, no avatar de Ajustes e no card da lista de remédios.
-- **A foto da ficha não chegava a Ajustes nem à Home.** `usePatientProfile` lia o banco uma vez na
-  montagem, e aba montada não remonta. Passou a reler no foco.
-- **Estoque e receita ganharam notificação** — ver o bloco **20**, novo.
-- **O calendário ganhou marcos**: validade de receita e fim de estoque.
-- **Rótulos**: "Remover" virou **"Excluir"** (vermelho) nos anexos; a foto da caixa ganhou "Excluir",
-  que não tinha, e "Trocar foto da caixa" virou "Alterar anexo".
-- **O campo de data** ocupava menos que a linha: a coluna do botão de calendário media o rótulo
-  invisível inteiro. Vale reconferir os cinco `DateField` do app.
-- **"Ver minhas medicações"** (Estoque) ia para a Home em vez da listagem.
-- **A tela azul "Dia completo"** aparecia a cada volta à Home com o dia já fechado.
+Isso está nos blocos **20** (avisos de estoque e receita) e **21** (o resto), no fim da Parte 1. O
+que falhar lá é defeito novo, não regressão.
 
 ## Como reportar
 
@@ -1289,13 +1277,49 @@ um segundo aviso no dia em que vence.
 > de hoje já passou. Para ver um aviso chegar, marque para **amanhã** e confira de manhã. Para
 > testar o encanamento sem esperar, use "Notificação em 30s" no bloco 11.
 
-**20.1 — O estoque avisa** 🔴. Cadastre (ou edite) um remédio com estoque que dure poucos dias e
-marque _"Me avisar quando estiver acabando"_ com antecedência que já inclua **amanhã**.
+### As contas, para montar o teste
+
+O aviso **"acabando"** cai em: hoje + (dias que o estoque dura − antecedência escolhida).
+O aviso **"acabou"** cai em: hoje + dias que o estoque dura.
+A **receita** é direta: validade − antecedência, e a validade em si.
+
+As antecedências oferecidas são **3, 7, 15 e 30 dias** (estoque) e **7, 15 e 30** (receita) — não há
+opção de 1 dia, então a quantidade é o que se ajusta.
+
+**Para tudo cair amanhã**, com quatro remédios:
+
+| # | O que cadastrar | Aviso que chega amanhã |
+|---|---|---|
+| 1 | 8 comprimidos, 1x/dia, avisar **7 dias** antes | "está acabando" |
+| 2 | 2 comprimidos, 1x/dia, avisar **7 dias** antes | "acaba hoje" (a janela já passou) |
+| 3 | Receita válida até **16/09**, avisar **7 dias** antes | "vencendo" |
+| 4 | Receita válida até **amanhã**, avisar **7 dias** antes | "vence hoje" (a janela já passou) |
+
+> ⚠️ **A dose precisa ter horário ainda por vir hoje.** Cadastrando à noite com dose às 08:00, a de
+> hoje já passou e a contagem começa amanhã — o que empurra tudo um dia.
+
+**20.1 — O estoque avisa** 🔴. Monte os remédios 1 e 2 da tabela acima.
 
 > ✅ A frase abaixo da antecedência diz que o aviso aparece na tela inicial **e** como notificação,
 > e que são dois — ao entrar na antecedência e quando o estoque acabar.
 > ✅ 🔴 No dia seguinte, a notificação chegou (silenciosa, sem botões de confirmar/pular).
+> ✅ O título diz **o nome do remédio**, e não só "Estoque acabando" — é o que sobrevive quando a
+> tela de bloqueio esconde o conteúdo.
 > ✅ O cartão da tela inicial continua lá, independente da notificação.
+
+**20.1b — Marcar sem escolher prazo** 🔴🔬 — a correção de 08/09.
+
+Marque _"Me avisar quando estiver acabando"_ e **não toque** no seletor de antecedência. O mesmo na
+receita, com _"Me avisar quando a receita vencer"_.
+
+> ✅ 🔴 O aviso **existe**: chega no dia em que o estoque acaba (ou em que a receita vence).
+> ✅ A frase abaixo diz isso — "você será avisado no dia em que...", com o convite a escolher um
+> prazo para saber antes.
+> ✅ Na lista de estoque, a linha do remédio diz **"Avisar quando acabar"**, e não "Sem aviso".
+>
+> 🔬 Até 08/09 este caso produzia **silêncio total**: marcar sem prazo gravava o aviso ligado e
+> nulo, e o planejador descartava o item inteiro. A interface confirmava uma intenção que o app não
+> cumpria.
 
 **20.2 — A trava** 🔴🔬 — **o passo mais importante deste bloco.**
 
@@ -1311,12 +1335,23 @@ Agora **reponha** o estoque (tela de Estoque → "Repor"), e deixe baixar de nov
 
 > ✅ Volta a avisar. Repor é o único gesto que rearma o aviso; consumir mais não.
 
-**20.3 — A receita avisa duas vezes.** Anexe uma receita com validade para **depois de amanhã** e
-marque o aviso com **1 dia** de antecedência.
+**20.3 — A receita avisa duas vezes.** Monte os remédios 3 e 4 da tabela.
 
 > ✅ A frase diz que são dois lembretes: na antecedência e no dia do vencimento.
-> ✅ Amanhã chega "Receita vencendo"; no dia seguinte, "Receita vence hoje".
-> ✅ Com antecedência **zero**, chega **um** aviso só — não dois no mesmo minuto.
+> ✅ Amanhã chegam "Receita de X vencendo" e "Receita de Y vence hoje".
+> ✅ O nome do remédio está no **título** dos dois.
+
+**20.3b — Os quatro avisos sem esperar a madrugada** 🔬. `Ajustes → DESENVOLVIMENTO → Diagnóstico`.
+
+Os quatro botões novos ("Estoque acabando", "Estoque acabou", "Receita vencendo", "Receita vence
+hoje") disparam em 30s, no mesmo canal e com o mesmo texto do aviso real.
+
+> ✅ Cada um chega com **som**, e a frase cabe na barra sem truncar no meio da palavra.
+> ✅ Com o aparelho bloqueado, o comportamento é o esperado — o canal de lembrete é `PRIVATE`, então
+> o conteúdo fica oculto se o aparelho estiver configurado para esconder informação sensível. Isso
+> **não é defeito**: o nome do remédio na tela de bloqueio revela condição clínica.
+> ✅ No painel, "Esperados pelo banco" mostra os quatro tipos separados (doses, compromissos,
+> receitas, estoques), e os números batem com o que foi cadastrado.
 
 **20.4 — O calendário mostra os dois.** Abra o calendário e navegue até os dias acima.
 
@@ -1327,9 +1362,59 @@ marque o aviso com **1 dia** de antecedência.
 > ✅ 🔴 Filtrando por "Compromissos" ou "Remédios", eles **continuam aparecendo** — não são nem um
 > nem outro, e sumir ao filtrar esconderia o que ninguém pediu para esconder.
 
-**20.5 — A migration** 🔬. Este bloco trouxe a `017`, a primeira desde a `016`.
+**20.5 — As migrations** 🔬. Este bloco trouxe a `017` e a `018`, as primeiras desde a `016`.
 
 > ✅ O app abre sem erro de banco, e o estoque cadastrado antes continua lá com os mesmos números.
+> ✅ 🔴 Um remédio que **já tinha** aviso de receita configurado antes de 08/09 continua avisando —
+> a `018` migra as linhas existentes como "quer ser avisado", porque marcar a caixa era o único
+> caminho que produzia aquele estado.
+
+---
+
+## 21 — O que a revisão de 08/09 mudou depois de aprovada 🆕
+
+Estes itens foram alterados **depois** que os blocos 1 a 10 passaram. O que falhar aqui é defeito
+novo, não regressão — vale usar essa palavra ao reportar.
+
+**21.1 — A miniatura da mídia** 🔴. Ficha sem foto → adicione a primeira.
+
+> ✅ 🔴 Aparece **na hora**, sem sair e voltar. O mesmo na foto da caixa e no anexo da receita.
+> ✅ Trocar uma foto existente continua funcionando.
+> ✅ O quadro vazio ainda tem a borda tracejada com o ícone centralizado.
+
+**21.2 — A foto da ficha chega às outras telas.** Ficha → adicione foto → salve → **Ajustes**.
+
+> ✅ A foto está no avatar do topo, sem precisar reabrir o app.
+
+**21.3 — Os rótulos dos anexos.**
+
+> ✅ "Excluir" em vermelho ao lado de "Trocar foto" / "Alterar anexo".
+> ✅ A foto da caixa tem "Excluir", que antes não existia.
+> ✅ Com a fonte do sistema no máximo, a linha **não quebra**.
+
+**21.4 — O campo de data.** Anexe uma receita e olhe "RECEITA VÁLIDA ATÉ".
+
+> ✅ Ocupa a linha inteira, com o calendário encostado na borda direita.
+> ✅ Os outros quatro `DateField` do app seguem alinhados (data de nascimento, DATA do compromisso,
+> "PRIMEIRO DIA DESTE CICLO", "QUANDO COMEÇA").
+
+**21.5 — A navegação do estoque.** Home → Estoque → "Ver minhas medicações".
+
+> ✅ Vai para a **listagem de remédios**, não para a Home.
+> ✅ A seta ⟵ do topo continua voltando para de onde você veio.
+
+**21.6 — A tela azul do dia completo** 🔴.
+
+> ✅ Confirmando a última dose **na Home**: a tela azul aparece e some sozinha em ~3s.
+> ✅ 🔴 Respondendo a última dose **na tela do alarme**: ela **não** aparece ao voltar.
+> ✅ 🔴 Navegando entre telas com o dia já completo: não aparece.
+> ✅ Fechando e reabrindo o app com o dia completo: não aparece.
+
+**21.7 — O amarelo dos alertas** 🔬. Cadastro → LEMBRETE, com alguma permissão faltando.
+
+> ✅ O painel de permissões usa o mesmo amarelo do lembrete de recontagem da tela de estoque.
+> 🔬 Se ele parecer **apagado demais** contra o fundo branco do popup, anote: o token puro é quase
+> branco, e a mistura que o encorpava foi removida em favor da padronização.
 
 ---
 
