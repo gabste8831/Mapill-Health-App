@@ -1,33 +1,34 @@
 
-import { estilosDoTema, misturarCores, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
-   * Âmbar, a mesma linguagem da `Dica` — é apoio, não erro: falta um ajuste do sistema, e o app
-   * funciona. Quem diz de que estado se trata é o par fundo + ícone (ver `estadoVisual` em
-   * shared/theme/cores.ts), e não uma barra de 4px na borda: ela deslocava o painel inteiro em
-   * relação ao card de dose logo abaixo.
+   * Âmbar, a mesma linguagem da `Dica` e do lembrete de recontagem — é apoio, não erro: falta um
+   * ajuste do sistema, e o app funciona. Quem diz de que estado se trata é o par fundo + ícone
+   * (ver `estadoVisual` em shared/theme/cores.ts), e não uma barra de 4px na borda: ela deslocava
+   * o painel inteiro em relação ao card de dose logo abaixo.
    *
-   * ## Por que o fundo não é o `warningSurface` puro
+   * ## O token puro, por decisão de 08/09
    *
-   * Ele é quase branco por natureza (`#FEF6E7`), e dentro de um popup — que já é uma superfície
-   * branca sobre a tela — o bloco sumia: lia como um retângulo desbotado, não como um aviso. Trocar
-   * o token resolveria aqui e estragaria a `Dica`, que o usa sobre fundo cinza, onde ele funciona.
+   * Até aqui o fundo era `warningSurface` com 12% de `onWarningSurface` misturado, porque o token
+   * puro (`#FEF6E7`) é quase branco e dentro de um popup — superfície branca sobre a tela — o
+   * bloco lia desbotado. A mistura resolvia isso, mas ao custo de o painel ser **quase** a cor do
+   * alerta de estoque em vez de ser a mesma: dois amarelos parecidos num app são pior que um só,
+   * porque a diferença sugere significado onde não há.
    *
-   * A saída é misturar um pouco da **cor do texto do próprio estado** no fundo: o âmbar continua
-   * âmbar, só que com corpo suficiente para se sustentar contra o branco. Vindo do token, cada tema
-   * se resolve sozinho — o escuro tem superfícies tingidas em vez de pastel, e o alto contraste já
-   * encorpa `warningSurface` de propósito, então lá a mistura parte de uma base que já é forte.
+   * A padronização venceu o ajuste local. Se o painel voltar a desbotar dentro do popup, o
+   * caminho é encorpar `warningSurface` no tema (o que valeria para `Dica`, estoque e aqui de uma
+   * vez), e não reintroduzir uma mistura que só este componente conhece.
    */
   painel: {
-    backgroundColor: misturarCores(cores.onWarningSurface, cores.warningSurface, 0.12),
+    backgroundColor: cores.warningSurface,
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.sm,
   },
   /** Falta uma essencial: o alarme não toca, e aí é erro mesmo. */
   painelCritico: {
-    backgroundColor: misturarCores(cores.onErrorContainer, cores.errorSurface, 0.12),
+    backgroundColor: cores.errorSurface,
   },
 
   topo: {

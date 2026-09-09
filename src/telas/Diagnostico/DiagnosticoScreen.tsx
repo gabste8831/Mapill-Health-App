@@ -101,8 +101,21 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
     }, [carregar]),
   );
 
-  /** Agenda um aviso daqui a 30 s, pelo caminho de produção. */
-  async function dispararTeste(modo: "alarm" | "notification") {
+  /**
+   * Agenda um aviso daqui a 30 s, pelo caminho de produção.
+   *
+   * `texto` reproduz o que o planejador de verdade escreveria. Não é enfeite: metade do que este
+   * teste responde é se a frase **cabe** e se lê bem na barra de avisos — um corpo que o Android
+   * trunca no meio da palavra só aparece no aparelho, e um "Teste de notificação" genérico nunca
+   * mostraria isso.
+   *
+   * Os avisos de estoque, receita e compromisso caem às 00:01 do dia, então esperá-los custa uma
+   * madrugada. Aqui eles chegam em trinta segundos, no mesmo canal e com o mesmo formato.
+   */
+  async function dispararTeste(
+    modo: "alarm" | "notification",
+    texto?: { rotulo: string; titulo: string; corpo: string },
+  ) {
     if (ocupado) return;
     setOcupado(true);
     try {
@@ -114,8 +127,10 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
         chave: `teste-${modo}-${quando.getTime()}`,
         quando,
         modo,
-        titulo: modo === "alarm" ? "Teste de alarme" : "Teste de notificação",
-        corpo: `Disparado às ${quando.toLocaleTimeString("pt-BR")}. Se você está lendo isto, o agendamento funcionou.`,
+        titulo: texto?.titulo ?? (modo === "alarm" ? "Teste de alarme" : "Teste de notificação"),
+        corpo:
+          texto?.corpo ??
+          `Disparado às ${quando.toLocaleTimeString("pt-BR")}. Se você está lendo isto, o agendamento funcionou.`,
         // Vazio: não é aviso de dose, então o toque abre o app em vez da tela de horário — que
         // procuraria doses inexistentes e abriria vazia.
         doseScheduleIds: [],
@@ -123,7 +138,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
       });
       await carregar();
       Alert.alert(
-        modo === "alarm" ? "Alarme agendado" : "Notificação agendada",
+        `${texto?.rotulo ?? (modo === "alarm" ? "Alarme" : "Notificação")} agendado`,
         `Dispara em ${SEGUNDOS_DO_TESTE} segundos.\n\nBloqueie o aparelho agora, ou abra outro aplicativo, para testar a condição que interessa.`,
       );
     } catch (cause) {
@@ -135,6 +150,37 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
       setOcupado(false);
     }
   }
+
+  /**
+   * Os quatro avisos que caem às 00:01 e por isso não se testam sem esperar a virada do dia.
+   *
+   * Os textos são os mesmos dos planejadores (`planejar-avisos-de-estoque` e
+   * `planejar-avisos-de-compromisso`), com um remédio de exemplo no lugar do nome real. Se a
+   * redação mudar lá e não aqui, este teste deixa de medir o que a pessoa vai receber — vale mais
+   * corrigir os dois do que deixar o de teste "genérico o bastante para nunca desatualizar".
+   */
+  const AVISOS_DE_PLANEJAMENTO = [
+    {
+      rotulo: "Estoque acabando",
+      titulo: "Estoque acabando",
+      corpo: "Losartana dura cerca de 7 dias. Vale repor.",
+    },
+    {
+      rotulo: "Estoque acabou",
+      titulo: "Estoque acabou",
+      corpo: "Hoje é a última dose de Losartana que o estoque cobre.",
+    },
+    {
+      rotulo: "Receita vencendo",
+      titulo: "Receita vencendo",
+      corpo: "A receita de Losartana vence em 20 de setembro.",
+    },
+    {
+      rotulo: "Receita vence hoje",
+      titulo: "Receita vence hoje",
+      corpo: "Hoje é o último dia de validade da receita de Losartana.",
+    },
+  ];
 
   async function refazerJanela() {
     if (ocupado) return;
@@ -149,7 +195,11 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
 
   if (dados === null) return <CenteredLoader />;
 
-  const totalEsperado = dados.esperados.doses + dados.esperados.compromissos;
+  const totalEsperado =
+    dados.esperados.doses +
+    dados.esperados.compromissos +
+    dados.esperados.receitas +
+    dados.esperados.estoques;
   const alarmes = dados.agendados.filter((aviso) => aviso.ehAlarme).length;
 
   return (
@@ -241,10 +291,17 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               valor={`${dados.agendados.length} (${alarmes} em tela cheia)`}
               estado={dados.agendados.length > 0 || totalEsperado === 0 ? "ok" : "ruim"}
             />
-            <Linha
-              rotulo="Esperados pelo banco"
-              valor={`${totalEsperado} (${dados.esperados.doses} doses, ${dados.esperados.compromissos} compromissos)`}
-            />
+            <Linha rotulo="Esperados pelo banco" valor={String(totalEsperado)} />
+            {/* Os quatro tipos separados, e não só o total.
+
+                Quando o agendado não bate com o esperado, saber **qual** tipo falhou é metade do
+                diagnóstico: estoque em zero com receita cheia aponta para a previsão ou para a
+                trava do aviso; todos em zero apontam para permissão ou para o reagendamento
+                inteiro. Um número só obrigaria a descobrir isso por eliminação. */}
+            <Linha rotulo="· doses" valor={String(dados.esperados.doses)} />
+            <Linha rotulo="· compromissos" valor={String(dados.esperados.compromissos)} />
+            <Linha rotulo="· receitas" valor={String(dados.esperados.receitas)} />
+            <Linha rotulo="· estoques" valor={String(dados.esperados.estoques)} />
           </View>
 
           <View style={styles.cartao}>
@@ -272,6 +329,30 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               onPress={() => void dispararTeste("notification")}
               disabled={ocupado}
             />
+
+            {/* Um botão por aviso de planejamento.
+
+                Os quatro caem às 00:01 do dia, então testá-los de verdade custa uma madrugada por
+                tentativa — e é justamente o tipo de espera que fez o diagnóstico existir. Aqui
+                chegam em trinta segundos, no mesmo canal e com o texto que a pessoa receberia.
+
+                Vale conferir três coisas em cada um: se chega com **som**, se a frase cabe sem
+                truncar, e se o que aparece na tela bloqueada é o esperado — o canal de lembrete é
+                `PRIVATE`, então o conteúdo fica oculto se o aparelho estiver configurado para
+                esconder informação sensível. */}
+            <Text style={styles.secaoNota}>
+              Os avisos abaixo normalmente chegam às 00:01 do dia. Aqui eles usam o mesmo canal e o
+              mesmo texto, só que em {SEGUNDOS_DO_TESTE} segundos.
+            </Text>
+            {AVISOS_DE_PLANEJAMENTO.map((aviso) => (
+              <Button
+                key={aviso.rotulo}
+                label={`${aviso.rotulo} em ${SEGUNDOS_DO_TESTE}s`}
+                variant="outline"
+                onPress={() => void dispararTeste("notification", aviso)}
+                disabled={ocupado}
+              />
+            ))}
             <Button
               label="Refazer a janela de avisos"
               variant="outline"

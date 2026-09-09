@@ -39,6 +39,11 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     ...typography.label,
     color: cores.onSurfaceVariant,
   },
+  /** A explicação que antecede um grupo de botões — por que eles existem, não o que fazem. */
+  secaoNota: {
+    ...typography.bodyMd,
+    color: cores.onSurfaceVariant,
+  },
 
   cartao: {
     ...superficieDeCartao(cores, ajustes),
