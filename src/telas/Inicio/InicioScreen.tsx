@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -145,13 +145,37 @@ export function InicioScreen() {
   const [diaFechadoAntes, setDiaFechadoAntes] = useState<boolean | null>(null);
   const [comemorar, setComemorar] = useState(false);
 
+  /**
+   * A comemoração é de quem **fechou o dia aqui**, e não de quem chega com ele já fechado.
+   *
+   * A Home é uma aba: ela fica montada em segundo plano e relê a agenda a cada foco. Sem esta
+   * marca, responder a última dose **na tela do alarme** e voltar produzia uma transição legítima
+   * aos olhos da comparação abaixo — `false` antes de sair, `true` ao voltar — e a tela azul
+   * piscava por cima do alarme que estava se fechando. Foi o que o Gabriel viu em aparelho: o
+   * "Dia completo" aparecendo ao responder "pulei" no alarme.
+   *
+   * `false` a cada foco, `true` no primeiro re-render depois disso: a leitura que chega **junto**
+   * com o foco é a que traz notícia de fora, e essa não comemora. As que vierem depois, com a
+   * pessoa parada na Home confirmando doses, são o momento que a comemoração existe para marcar.
+   */
+  const chegouAgoraNaTela = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      chegouAgoraNaTela.current = true;
+    }, []),
+  );
+
   if (!isLoading && diaFechadoAntes !== diaFechado) {
     const primeiraLeitura = diaFechadoAntes === null;
+    const noticiaDeFora = chegouAgoraNaTela.current;
     setDiaFechadoAntes(diaFechado);
     // Só a passagem para fechado comemora. O caminho de volta (uma correção retroativa reabre o
     // dia) apenas atualiza a memória, sem festejar o desfazer.
-    if (diaFechado && !primeiraLeitura) setComemorar(true);
+    if (diaFechado && !primeiraLeitura && !noticiaDeFora) setComemorar(true);
   }
+  // Depois de a leitura do foco ser considerada, a tela volta a ser "ao vivo": daqui em diante as
+  // mudanças vêm de quem está olhando para ela.
+  if (!isLoading) chegouAgoraNaTela.current = false;
   const proximaDose = agenda.doses.find((dose) => dose.status === "next");
   const atrasadas = agenda.doses.filter((dose) => dose.status === "late");
 
