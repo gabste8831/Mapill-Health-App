@@ -615,7 +615,8 @@ redirecionamento exato, podemos retirar.
   não existe. Agora abre a tela de acesso à política do Não Perturbe
   (`NOTIFICATION_POLICY_ACCESS_SETTINGS`), com fallback para o comportamento antigo. (3) **Os dois
   que ficaram ganharam instrução.** Campo novo `comoFazer` no `ItemDePermissao`, exibido abaixo da
-  consequência em cor de destaque: "Na lista que abrir, procure o Mapill e permita o acesso" e, no
+  consequência em cor de destaque: "Procure o Mapill na lista e permita" (encurtado em 09/09, de
+  "Na lista que abrir, procure o Mapill e permita o acesso", para caber numa linha só) e, no
   da bateria, texto que muda conforme a tela ("sem restrições" nos aparelhos com gerenciador
   próprio — Xiaomi/Samsung/Motorola —, "Permitir" na tela padrão do Android). Em
   `permissoes-de-alarme.ts`, `PainelDePermissoes.tsx` e `.styles.ts`.
