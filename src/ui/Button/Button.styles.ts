@@ -1,7 +1,7 @@
 
-import { estilosDoTema, radius, spacing, surfaceShadow, typography } from "@/shared/theme";
+import { estilosDoTema, fronteiraDeSuperficie, radius, spacing, typography } from "@/shared/theme";
 
-export const criarEstilos = estilosDoTema(({ cores }) => ({
+export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * `minHeight`, e nunca `height`.
    *
@@ -26,10 +26,18 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   primary: {
     backgroundColor: cores.primary,
   },
-  /** Sombra em vez de borda, mesma lógica do Card: lê como superfície, não como contorno. */
+  /**
+   * Sombra em vez de borda, mesma lógica do Card: lê como superfície, não como contorno.
+   *
+   * No alto contraste inverte: a sombra ali não existe, e um botão branco sobre fundo branco perde
+   * a única coisa que dizia que ele era tocável. Ganha contorno de 2px — a intensidade forte,
+   * porque botão é para ser encontrado de relance — e o fundo desce um degrau.
+   */
   outline: {
-    backgroundColor: cores.surfaceContainerLowest,
-    boxShadow: surfaceShadow,
+    backgroundColor: ajustes.contornarSuperficies
+      ? cores.surfaceContainerLow
+      : cores.surfaceContainerLowest,
+    ...fronteiraDeSuperficie(cores, ajustes, 2),
   },
   /**
    * O mesmo botão, mas dentro de um `BottomSheet` — onde a sombra desaparece.
@@ -40,10 +48,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * inteiro, porque sobre o fundo da tela a sombra funciona e a borda contraria a linguagem
    * visual do app (sombra no lugar de borda, decisão de 21/08).
    */
-  outlineEmFolha: {
-    borderWidth: 1,
-    borderColor: cores.outlineVariant,
-  },
+  outlineEmFolha: ajustes.contornarSuperficies
+    ? // No alto contraste o `outline` acima ja traz contorno proprio, e mais forte: sobrescrever
+      // com 1px aqui enfraqueceria justamente o que o tema reforcou.
+      {}
+    : {
+        borderWidth: 1,
+        borderColor: cores.outlineVariant,
+      },
   /**
    * O botão de texto não reserva os 52: ele é uma saída discreta ("Agora não"), e com o piso do
    * `base` ficaria com a mesma presença de uma ação principal.

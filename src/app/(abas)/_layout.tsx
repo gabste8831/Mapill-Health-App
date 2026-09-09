@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { Platform } from "react-native";
@@ -69,8 +69,15 @@ function AbasNativas() {
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="remedios">
-        <NativeTabs.Trigger.Icon sf="pills" md="medication" />
-        <NativeTabs.Trigger.Label>Remédios</NativeTabs.Trigger.Label>
+        {/* `pill` e nao `medication`: o segundo e a caixinha de comprimidos com uma cruz, que le
+            como "farmacia" e nao como "remedio". A capsula e a forma que o app usa em todo lugar —
+            a marca, a marca-d'agua do card de proxima dose, o selo do rotulo —, e no iOS a aba ja
+            era `pills`. Uma aba com desenho diferente do resto do app e a que ninguem associa. */}
+        <NativeTabs.Trigger.Icon sf="pills" md="pill" />
+        {/* "Medicações", como a tela se intitula. A aba dizia "Remédios" e a tela "Medicações" —
+            dois nomes para o mesmo lugar, e quem toca na aba tem que confirmar que chegou onde
+            queria. O rótulo da aba é a promessa; o título da tela, o cumprimento dela. */}
+        <NativeTabs.Trigger.Label>Medicações</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="ajustes">
@@ -117,8 +124,13 @@ function AbasWeb() {
       <Tabs.Screen
         name="remedios"
         options={{
-          title: "Remédios",
-          tabBarIcon: ({ color, size }) => <Ionicons name="medkit" size={size} color={color} />,
+          title: "Medicações",
+          // A mesma capsula da barra nativa. O Ionicons nao tem pilula (`medkit` e uma maleta de
+          // primeiros socorros), entao aqui entra o MaterialCommunityIcons, que ja desenha o
+          // `pill` do card de proxima dose.
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="pill" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen

@@ -95,6 +95,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   },
   agendadoId: {
     ...typography.caption,
+    // O `caption` sobe a caixa para selo; id de agendamento e string tecnica, e maiuscula aqui
+    // atrapalharia comparar com o que o diagnostico imprime.
     textTransform: "none",
     color: cores.onSurfaceVariant,
     opacity: 0.7,

@@ -1,7 +1,7 @@
 
-import { estilosDoTema, radius, spacing, surfaceShadow } from "@/shared/theme";
+import { estilosDoTema, fronteiraDeSuperficie, radius, spacing } from "@/shared/theme";
 
-export const criarEstilos = estilosDoTema(({ cores }) => ({
+export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * Sombra em vez de borda: o fundo da tela e o card são quase da mesma cor, então a borda de
    * 1px fazia o card parecer uma caixa desenhada e não uma superfície acima. A sombra é
@@ -15,6 +15,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.gutter,
-    boxShadow: surfaceShadow,
+    // No alto contraste vira contorno: ali a sombra e invisivel, e este `Card` era o unico que
+    // ficava de fora — o `superficieDeCartao` ja trocava, mas quem usa o componente do kit nao
+    // passava por ele.
+    ...fronteiraDeSuperficie(cores, ajustes),
   },
 }));

@@ -55,13 +55,46 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     opacity: 0.7,
   },
+  /**
+   * O nome e a dose, um sob o outro e longe da hora.
+   *
+   * `xs` entre as duas linhas (sao a mesma resposta, dita em dois degraus) e `lg` acima do bloco,
+   * separando-o do horario: as tres linhas ja dividiram o mesmo espaco pequeno, e o resultado era
+   * uma pilha uniforme onde nada dizia onde uma informacao terminava e a outra comecava.
+   */
+  remedio: {
+    gap: spacing.xs,
+    // 8 somados ao `gap: md` (16) do `conteudo`: 24 entre a hora e o nome, contra os 4 que separam
+    // o nome da dose. A diferenca de seis vezes e o que agrupa as duas ultimas linhas.
+    marginTop: spacing.sm,
+  },
+  /**
+   * O horario em peso **leve**, e nao no `headlineXlBold`.
+   *
+   * O tamanho ja e o que da destaque: em 40px o negrito nao acrescenta hierarquia, so peso visual
+   * — e sobre o azul cheio ele engrossava a ponto de o card parecer um aviso. E o mesmo tratamento
+   * da saudacao da Home ("Ola, gabriel."), que e o outro numero grande do app e le como elegante
+   * justamente por ser leve.
+   */
   time: {
-    ...typography.headlineXlBold,
+    ...typography.headlineXl,
     color: cores.onPrimary,
   },
+  /** O nome do remedio: a segunda coisa que se le, depois da hora. */
   medication: {
-    ...typography.bodyLg,
+    ...typography.headlineSmRegular,
     color: cores.onPrimary,
+  },
+  /**
+   * A dose, abaixo do nome e um degrau mais apagada.
+   *
+   * Ela responde "quanto", que so importa depois de saber "o que" — a opacidade e o que poe as
+   * duas linhas em ordem sem precisar de outro tamanho de fonte.
+   */
+  dose: {
+    ...typography.bodyMd,
+    color: cores.onPrimary,
+    opacity: 0.8,
   },
   hintRow: {
     flexDirection: "row",
@@ -75,7 +108,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   hintText: {
     ...typography.label,
-    textTransform: "none",
     color: cores.onPrimary,
     opacity: 0.85,
     // Para a segunda linha quebrar sob o texto, e não sob o ícone.

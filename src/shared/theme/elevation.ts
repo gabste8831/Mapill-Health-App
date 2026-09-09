@@ -31,6 +31,43 @@ export const surfaceShadowElevada = "0px 2px 8px rgba(25, 28, 30, 0.10)";
 export const surfaceShadowFlutuante = "0px 4px 8px rgba(25, 28, 30, 0.20)";
 
 /**
+ * O par **sombra ou contorno**, para qualquer superfície que não seja o cartão inteiro.
+ *
+ * `superficieDeCartao` já resolvia isso para o cartão, mas ele traz junto `borderRadius`, `padding`
+ * e cor de fundo — o que serve ao cartão e atrapalha a pílula da busca, um botão de contorno ou
+ * uma linha de menu, que têm forma própria. Este devolve **só** a fronteira, e é o que permite a
+ * mesma regra alcançar tudo o mais.
+ *
+ * ## Por que a fronteira é a linguagem do alto contraste
+ *
+ * A regra do app é sombra e nunca borda (21/08), e ela pressupõe enxergar 8% de opacidade. Quem
+ * escolheu alto contraste não enxerga: ali a sombra não é discrição, é a fronteira **apagada**. Um
+ * campo de busca sem contorno vira uma faixa branca sobre fundo branco, e nada diz onde tocar.
+ *
+ * `intensidade` existe porque nem toda superfície pede a mesma ênfase, e ela muda **as duas coisas**
+ * — espessura e tom:
+ *
+ * - `1` é a fronteira que apenas delimita: 1px em `outlineVariant`, para o que já tem fundo próprio
+ *   ou forma reconhecível (o cartão, a pílula da busca). 4.31:1 sobre a superfície tingida do alto
+ *   contraste, folgado nos 3:1 que a WCAG pede de elemento gráfico.
+ * - `2` é a fronteira que **chama**: 2px em `outline`, para o que precisa ser encontrado de relance
+ *   e não tem outra pista de que é tocável — o botão de contorno, que sem ela é texto sobre branco.
+ *
+ * Somar as duas ênfases onde uma basta engorda a peça a ponto de ela pesar mais que o conteúdo: foi
+ * o que aconteceu com a busca em 2px, que passou a disputar atenção com a lista que ela filtra.
+ */
+export function fronteiraDeSuperficie(
+  cores: PaletaDeTema,
+  ajustes?: AjustesDeTema,
+  intensidade: 1 | 2 = 1,
+) {
+  if (!ajustes?.contornarSuperficies) return { boxShadow: surfaceShadow };
+  return intensidade === 2
+    ? { borderWidth: 2, borderColor: cores.outline }
+    : { borderWidth: 1, borderColor: cores.outlineVariant };
+}
+
+/**
  * O cartão padrão do app: fundo branco, cantos arredondados, sombra e respiro interno.
  *
  * Existe como token, e não como cópia em cada arquivo de estilo, porque foi exatamente a cópia que
