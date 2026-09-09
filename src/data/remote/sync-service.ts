@@ -234,7 +234,7 @@ const COLUNAS_BOOLEANAS: Record<TabelaSincronizavel, string[]> = {
   consent_records: [],
   medications: ["from_cmed"],
   appointments: ["reminder_on_day"],
-  prescriptions: ["attachment_sync_opt_out"],
+  prescriptions: ["attachment_sync_opt_out", "renewal_reminder_enabled"],
   inventory_items: ["low_stock_alert_enabled"],
   dose_schedules: [],
   inventory_adjustments: [],

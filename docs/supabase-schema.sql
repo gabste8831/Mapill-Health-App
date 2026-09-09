@@ -8,8 +8,14 @@
 -- -----------------------------------------------------------------------------
 -- O QUE ESTE SCHEMA É, E O QUE NÃO É
 --
--- Ele **espelha** o SQLite local (migrations 001–014), com três diferenças que
+-- Ele **espelha** o SQLite local (migrations 001–018), com três diferenças que
 -- existem por razões específicas:
+--
+-- ⚠️ Quem acrescenta uma migration que cria coluna **tem que acrescentá-la aqui
+-- também**, nos dois lugares: no `create table` e no bloco de `ALTER` no fim. O
+-- SQLite local ganha a coluna sozinho na próxima abertura do app; o Postgres não,
+-- e a sincronização para com `Could not find the 'X' column`. Foi o que aconteceu
+-- com as migrations 017 e 018.
 --
 -- 1. `user_id` em toda tabela. No aparelho não existe: o banco é de uma pessoa
 --    só. No servidor, é o que separa os dados de um paciente dos de outro — e é
@@ -79,6 +85,10 @@ create table if not exists public.prescriptions (
   attachment_kind text,
   attachment_valid_until date,
   renewal_reminder_lead_days integer,
+  -- "Quero ser avisado" separado de "quero ser avisado com N dias" (migration 018).
+  -- Default `true` pelo mesmo motivo de lá: quem chegou aqui com prazo nulo chegou marcando a
+  -- caixa, e migrar para `false` calaria os avisos que a separação existe para restaurar.
+  renewal_reminder_enabled boolean not null default true,
   -- LGPD: quando true, o anexo nunca sobe para o Storage. Hoje nenhum anexo sobe
   -- (E9 ainda não implementado), e a coluna existe para quando subirem.
   attachment_sync_opt_out boolean not null default false,
@@ -131,6 +141,9 @@ create table if not exists public.inventory_items (
   unit text not null,
   low_stock_alert_enabled boolean not null default false,
   low_stock_alert_lead_days integer,
+  -- A quantidade em que o aviso de "está acabando" já foi dado (migration 017). É a trava que
+  -- impede uma notificação por dose confirmada: só repõe o aviso quem repõe o estoque.
+  low_stock_alerted_at_quantity real,
   storage_location text,
   updated_at timestamptz not null,
   deleted_at timestamptz
@@ -264,6 +277,24 @@ begin
     );
   end loop;
 end $$;
+
+-- =============================================================================
+-- COLUNAS ACRESCENTADAS DEPOIS DA PRIMEIRA VERSÃO
+--
+-- `create table if not exists` **não altera** uma tabela que já existe: para quem
+-- já rodou este arquivo alguma vez, os `create table` acima passam batido e as
+-- colunas novas nunca chegam. Daí este bloco, que é o que faz o schema continuar
+-- idempotente depois de o app evoluir.
+--
+-- Sintoma de não ter rodado: o app registra
+-- `Could not find the 'X' column of 'Y' in the schema cache` e a sincronização
+-- para — o dado fica no aparelho e não sobe.
+-- =============================================================================
+alter table public.prescriptions
+  add column if not exists renewal_reminder_enabled boolean not null default true;
+
+alter table public.inventory_items
+  add column if not exists low_stock_alerted_at_quantity real;
 
 -- =============================================================================
 -- CONFERÊNCIA
