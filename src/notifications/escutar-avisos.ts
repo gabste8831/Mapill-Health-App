@@ -8,6 +8,7 @@ import {
   lerDadosDoAviso,
   type DadosDoAviso,
 } from "./notifee-gateway";
+import { destinoDaChave, type DestinoDoAviso } from "./destino-do-aviso";
 import { tratarRespostaAoAviso } from "./responder-aviso";
 
 /**
@@ -33,8 +34,11 @@ type AoDispararAlarme = (scheduledFor: string) => void;
 /** Avisa que o toque no corpo pede a tela do horário. */
 type AoAbrirHorario = (dados: DadosDoAviso) => void;
 
+type AoAbrirDestino = (destino: DestinoDoAviso) => void;
+
 let aoDispararAlarme: AoDispararAlarme | null = null;
 let aoAbrirHorario: AoAbrirHorario | null = null;
+let aoAbrirDestino: AoAbrirDestino | null = null;
 
 /**
  * Horários cuja tela de alarme já foi aberta nesta execução.
@@ -89,6 +93,19 @@ async function tratar(evento: Event): Promise<void> {
   }
 
   if (evento.type !== EventType.ACTION_PRESS && evento.type !== EventType.PRESS) return;
+
+  /**
+   * Aviso que não é de dose: o toque **navega** e não responde nada.
+   *
+   * Sai antes de `tratarRespostaAoAviso` porque não há resposta a tratar — a lista de doses é
+   * vazia, e passar por lá só produziria um "abrirHorario" para um horário que não existe.
+   */
+  const destino = destinoDaChave(dados.chave);
+  if (destino !== null) {
+    await notifee.cancelNotification(id);
+    aoAbrirDestino?.(destino);
+    return;
+  }
 
   /**
    * `PRESS` é o toque no **corpo**: leva à tela do horário, onde a resposta parcial cabe ("tomei
@@ -155,15 +172,18 @@ async function tratar(evento: Event): Promise<void> {
 export function escutarAvisos(opcoes: {
   aoAbrirHorario: AoAbrirHorario;
   aoDispararAlarme: AoDispararAlarme;
+  aoAbrirDestino: AoAbrirDestino;
 }): () => void {
   aoAbrirHorario = opcoes.aoAbrirHorario;
   aoDispararAlarme = opcoes.aoDispararAlarme;
+  aoAbrirDestino = opcoes.aoAbrirDestino;
 
   const parar = notifee.onForegroundEvent((evento) => void tratar(evento));
 
   return () => {
     aoAbrirHorario = null;
     aoDispararAlarme = null;
+    aoAbrirDestino = null;
     parar();
   };
 }
@@ -187,17 +207,29 @@ export function registrarEventosEmSegundoPlano(): void {
  * tocou no corpo de um lembrete com o app fechado precisa chegar na tela do horário, e a rota só
  * existe depois que o app monta.
  */
-export async function consultarRespostaDeAbertura(): Promise<DadosDoAviso | null> {
+export async function consultarRespostaDeAbertura(): Promise<
+  { tipo: "horario"; dados: DadosDoAviso } | { tipo: "destino"; destino: DestinoDoAviso } | null
+> {
   const inicial = await notifee.getInitialNotification();
   if (inicial === null) return null;
 
   const dados = lerDadosDoAviso(inicial.notification.data);
   if (dados === null) return null;
 
+  /**
+   * Estoque, receita e compromisso: o app abre **onde se resolve aquilo**.
+   *
+   * É o caminho que mais importa dos três, porque é o caso típico — a notificação chega às 00:01,
+   * a pessoa vê de manhã com o app fechado, toca, e o app abria na Home. O assunto que a
+   * notificação nomeava ficava para ela reencontrar sozinha.
+   */
+  const destino = destinoDaChave(dados.chave);
+  if (destino !== null) return { tipo: "destino", destino };
+
   // Só o toque no corpo pede navegação. Se veio de um botão, o handler de segundo plano já gravou
   // o que tinha que gravar, e abrir a tela do horário seria mostrar uma dose já resolvida.
   const acao = inicial.pressAction?.id ?? "";
   if (acao === ACAO_TOMEI || acao === ACAO_ADIAR) return null;
 
-  return dados;
+  return { tipo: "horario", dados };
 }

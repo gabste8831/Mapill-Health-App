@@ -2,10 +2,12 @@ import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { AppState } from "react-native";
 
+import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import {
   consultarRespostaDeAbertura,
   escutarAvisos,
 } from "@/notifications/escutar-avisos";
+import type { DestinoDoAviso } from "@/notifications/destino-do-aviso";
 import type { DadosDoAviso } from "@/notifications/notifee-gateway";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 
@@ -38,6 +40,47 @@ export function useDoseNotifications(): void {
       });
     }
 
+    /**
+     * O toque num aviso que não é de dose leva **onde se resolve aquilo**.
+     *
+     * Antes todos caíam na Home, e a pessoa tinha de reencontrar sozinha o assunto que a
+     * notificação acabara de nomear — pior justamente no caso que o aviso existe para cobrir,
+     * quem abriu o celular por causa dele e não estava no app.
+     *
+     * Função única para os dois caminhos (app aberto e app fechado): a regra de para onde ir não
+     * pode divergir conforme o estado do app, e duas cópias são como isso aconteceria.
+     */
+    function abrirDestino(destino: DestinoDoAviso) {
+      if (destino.tela === "estoque") {
+        router.push("/estoque");
+        return;
+      }
+      if (destino.tela === "compromissos") {
+        router.push({ pathname: "/compromissos", params: { detalhe: destino.appointmentId } });
+        return;
+      }
+      /**
+       * A receita: a chave carrega o `prescriptionId`, e a rota de edição espera o
+       * `medicationId` — a tradução exige o banco, então acontece aqui e não no listener.
+       *
+       * Falhar em traduzir não pode deixar o toque sem efeito: cair na listagem de remédios é
+       * pior que a tela exata, e melhor que nada acontecer.
+       */
+      void new PrescriptionRepository()
+        .findById(destino.prescriptionId)
+        .then((prescription) => {
+          if (prescription === null) {
+            router.push("/remedios");
+            return;
+          }
+          router.push({
+            pathname: "/cadastro/editar/[id]",
+            params: { id: prescription.medicationId },
+          });
+        })
+        .catch(() => router.push("/remedios"));
+    }
+
     void reagendarTodosOsAvisos();
 
     const assinaturaDoEstado = AppState.addEventListener("change", (estado) => {
@@ -55,10 +98,13 @@ export function useDoseNotifications(): void {
       aoDispararAlarme: (scheduledFor) => {
         router.push({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
       },
+      aoAbrirDestino: abrirDestino,
     });
 
-    void consultarRespostaDeAbertura().then((dados) => {
-      if (dados !== null) abrirHorario(dados);
+    void consultarRespostaDeAbertura().then((abertura) => {
+      if (abertura === null) return;
+      if (abertura.tipo === "destino") abrirDestino(abertura.destino);
+      else abrirHorario(abertura.dados);
     });
 
     return () => {
