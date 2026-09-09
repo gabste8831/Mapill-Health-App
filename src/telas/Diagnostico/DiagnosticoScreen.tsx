@@ -40,18 +40,27 @@ function Linha({
           styles.valor,
           estado === "ok" && styles.valorOk,
           estado === "ruim" && styles.valorRuim,
-        ]}>
+        ]}
+      >
         {valor}
       </Text>
     </View>
   );
 }
 
-function ItemAgendado({ aviso, primeiro }: { aviso: AvisoAgendado; primeiro: boolean }) {
+function ItemAgendado({
+  aviso,
+  primeiro,
+}: {
+  aviso: AvisoAgendado;
+  primeiro: boolean;
+}) {
   const styles = useEstilos(criarEstilos);
   return (
     <View style={[styles.agendado, !primeiro && styles.agendadoComDivisoria]}>
-      <Text style={styles.agendadoQuando}>{aviso.quando ?? "(sem horário)"}</Text>
+      <Text style={styles.agendadoQuando}>
+        {aviso.quando ?? "(sem horário)"}
+      </Text>
       {aviso.titulo !== null ? (
         <Text style={styles.agendadoTitulo} numberOfLines={1}>
           {aviso.titulo}
@@ -127,7 +136,9 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
         chave: `teste-${modo}-${quando.getTime()}`,
         quando,
         modo,
-        titulo: texto?.titulo ?? (modo === "alarm" ? "Teste de alarme" : "Teste de notificação"),
+        titulo:
+          texto?.titulo ??
+          (modo === "alarm" ? "Teste de alarme" : "Teste de notificação"),
         corpo:
           texto?.corpo ??
           `Disparado às ${quando.toLocaleTimeString("pt-BR")}. Se você está lendo isto, o agendamento funcionou.`,
@@ -162,23 +173,27 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
   const AVISOS_DE_PLANEJAMENTO = [
     {
       rotulo: "Estoque acabando",
-      titulo: "Estoque acabando",
-      corpo: "Losartana dura cerca de 7 dias. Vale repor.",
+      titulo: "Losartana está acabando",
+      corpo:
+        "Seu estoque de Losartana dura cerca de 7 dias. Vale repor antes que acabe.",
     },
     {
       rotulo: "Estoque acabou",
-      titulo: "Estoque acabou",
-      corpo: "Hoje é a última dose de Losartana que o estoque cobre.",
+      titulo: "Losartana acaba hoje",
+      corpo:
+        "Hoje é a última dose de Losartana que você tem. Depois disso, o estoque acaba.",
     },
     {
       rotulo: "Receita vencendo",
-      titulo: "Receita vencendo",
-      corpo: "A receita de Losartana vence em 20 de setembro.",
+      titulo: "Receita de Losartana vencendo",
+      corpo:
+        "Sua receita de Losartana vence em 20 de setembro. Vale marcar a consulta de renovação.",
     },
     {
       rotulo: "Receita vence hoje",
-      titulo: "Receita vence hoje",
-      corpo: "Hoje é o último dia de validade da receita de Losartana.",
+      titulo: "Receita de Losartana vence hoje",
+      corpo:
+        "Hoje é o último dia de validade da sua receita de Losartana. A partir de amanhã ela não vale mais.",
     },
   ];
 
@@ -206,11 +221,15 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Header title="Diagnóstico de avisos" onBack={onBack} />
 
-      <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.conteudo}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.aviso}>
           <Text style={styles.avisoTexto}>
-            Ferramenta de teste. Mostra o que o sistema tem agendado agora e permite disparar um
-            aviso em {SEGUNDOS_DO_TESTE} segundos, pelo mesmo caminho que o app usa de verdade.
+            Ferramenta de teste. Mostra o que o sistema tem agendado agora e
+            permite disparar um aviso em {SEGUNDOS_DO_TESTE} segundos, pelo
+            mesmo caminho que o app usa de verdade.
           </Text>
         </View>
 
@@ -226,7 +245,9 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                     ? "Negada"
                     : "Não pedida"
               }
-              estado={dados.permissaoDeNotificar === "concedida" ? "ok" : "ruim"}
+              estado={
+                dados.permissaoDeNotificar === "concedida" ? "ok" : "ruim"
+              }
             />
             {/* Sem alarme exato o horário escorrega: o Android agrupa o disparo com outros para
                 poupar bateria, e um lembrete de remédio que chega "por volta de" não serve. */}
@@ -258,13 +279,21 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                   <Linha
                     rotulo="Som"
                     valor={canal.som ?? canal.somUri ?? "MUDO"}
-                    estado={canal.som === null && canal.somUri === null ? "ruim" : "ok"}
+                    estado={
+                      canal.som === null && canal.somUri === null
+                        ? "ruim"
+                        : "ok"
+                    }
                   />
                   {/* A URI aparece à parte quando as duas existem: é ela que prova qual arquivo o
                       sistema vai tocar, e num canal de alarme isso é a diferença entre o som
                       próprio e o padrão de notificação. */}
                   {canal.som !== null && canal.somUri !== null ? (
-                    <Linha rotulo="Som resolvido" valor={canal.somUri} estado="ok" />
+                    <Linha
+                      rotulo="Som resolvido"
+                      valor={canal.somUri}
+                      estado="ok"
+                    />
                   ) : null}
                   {/* Abaixo de 4 o Android não mostra heads-up nem toca. */}
                   <Linha
@@ -273,7 +302,11 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                     estado={canal.importancia >= 4 ? "ok" : "ruim"}
                   />
                   {canal.bloqueado ? (
-                    <Linha rotulo="Estado" valor="BLOQUEADO PELO USUÁRIO" estado="ruim" />
+                    <Linha
+                      rotulo="Estado"
+                      valor="BLOQUEADO PELO USUÁRIO"
+                      estado="ruim"
+                    />
                   ) : null}
                 </View>
               ))
@@ -289,9 +322,16 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
             <Linha
               rotulo="No sistema"
               valor={`${dados.agendados.length} (${alarmes} em tela cheia)`}
-              estado={dados.agendados.length > 0 || totalEsperado === 0 ? "ok" : "ruim"}
+              estado={
+                dados.agendados.length > 0 || totalEsperado === 0
+                  ? "ok"
+                  : "ruim"
+              }
             />
-            <Linha rotulo="Esperados pelo banco" valor={String(totalEsperado)} />
+            <Linha
+              rotulo="Esperados pelo banco"
+              valor={String(totalEsperado)}
+            />
             {/* Os quatro tipos separados, e não só o total.
 
                 Quando o agendado não bate com o esperado, saber **qual** tipo falhou é metade do
@@ -299,9 +339,18 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                 trava do aviso; todos em zero apontam para permissão ou para o reagendamento
                 inteiro. Um número só obrigaria a descobrir isso por eliminação. */}
             <Linha rotulo="· doses" valor={String(dados.esperados.doses)} />
-            <Linha rotulo="· compromissos" valor={String(dados.esperados.compromissos)} />
-            <Linha rotulo="· receitas" valor={String(dados.esperados.receitas)} />
-            <Linha rotulo="· estoques" valor={String(dados.esperados.estoques)} />
+            <Linha
+              rotulo="· compromissos"
+              valor={String(dados.esperados.compromissos)}
+            />
+            <Linha
+              rotulo="· receitas"
+              valor={String(dados.esperados.receitas)}
+            />
+            <Linha
+              rotulo="· estoques"
+              valor={String(dados.esperados.estoques)}
+            />
           </View>
 
           <View style={styles.cartao}>
@@ -309,7 +358,11 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               <Text style={styles.vazio}>Nada agendado.</Text>
             ) : (
               dados.agendados.map((aviso, indice) => (
-                <ItemAgendado key={aviso.id} aviso={aviso} primeiro={indice === 0} />
+                <ItemAgendado
+                  key={aviso.id}
+                  aviso={aviso}
+                  primeiro={indice === 0}
+                />
               ))
             )}
           </View>
@@ -341,8 +394,9 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                 `PRIVATE`, então o conteúdo fica oculto se o aparelho estiver configurado para
                 esconder informação sensível. */}
             <Text style={styles.secaoNota}>
-              Os avisos abaixo normalmente chegam às 00:01 do dia. Aqui eles usam o mesmo canal e o
-              mesmo texto, só que em {SEGUNDOS_DO_TESTE} segundos.
+              Os avisos abaixo normalmente chegam às 00:01 do dia. Aqui eles
+              usam o mesmo canal e o mesmo texto, só que em {SEGUNDOS_DO_TESTE}{" "}
+              segundos.
             </Text>
             {AVISOS_DE_PLANEJAMENTO.map((aviso) => (
               <Button
@@ -359,7 +413,11 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               onPress={() => void refazerJanela()}
               disabled={ocupado}
             />
-            <Button label="Atualizar" variant="text" onPress={() => void carregar()} />
+            <Button
+              label="Atualizar"
+              variant="text"
+              onPress={() => void carregar()}
+            />
           </View>
         </View>
 

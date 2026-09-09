@@ -159,7 +159,13 @@ export function planejarAvisosDeCompromisso(
             compromisso.reminderLeadDays === 1
               ? "Compromisso amanhã"
               : `Compromisso em ${compromisso.reminderLeadDays} dias`,
-          corpo: `${compromisso.titulo}\n${quandoPorExtenso(instante)}`,
+          /**
+           * Aqui o título fica com o **prazo** e não com o nome, ao contrário dos avisos de
+           * estoque e receita — e a diferença é proposital: "daqui a 3 dias" é o que responde
+           * sozinho se dá tempo de remarcar o trabalho ou arranjar carona, e o compromisso já
+           * tem nome próprio ("Cardiologista") logo na primeira linha do corpo.
+           */
+          corpo: `Você tem ${compromisso.titulo}\n${quandoPorExtenso(instante)}`,
           doseScheduleIds: [],
           modo: "notification",
           semAcoesRapidas: true,
@@ -174,7 +180,7 @@ export function planejarAvisosDeCompromisso(
           chave: `${PREFIXO_COMPROMISSO}${compromisso.appointmentId}-no-dia`,
           quando,
           titulo: "Compromisso hoje",
-          corpo: `${compromisso.titulo}\n${quandoPorExtenso(instante)}`,
+          corpo: `Você tem ${compromisso.titulo}\n${quandoPorExtenso(instante)}`,
           doseScheduleIds: [],
           modo: "notification",
           semAcoesRapidas: true,
@@ -203,10 +209,11 @@ export function planejarAvisosDeCompromisso(
       avisos.push({
         chave: `${PREFIXO_RECEITA}${receita.prescriptionId}-antes`,
         quando: antecipado,
-        titulo: "Receita vencendo",
-        // Diz o remédio e a data, porque a ação que se espera — marcar consulta para renovar —
-        // depende de saber qual receita e quanto tempo ainda há.
-        corpo: `A receita de ${receita.medicationName} vence em ${dataPorExtenso(vencimento)}.`,
+        titulo: `Receita de ${receita.medicationName} vencendo`,
+        // O remédio sobe para o título pelo mesmo motivo do aviso de estoque: é a parte que
+        // sobrevive ao truncamento e à tela de bloqueio. A data e a ação ficam no corpo, porque
+        // o que se espera — marcar consulta para renovar — depende de saber quanto tempo há.
+        corpo: `Sua receita de ${receita.medicationName} vence em ${dataPorExtenso(vencimento)}. Vale marcar a consulta de renovação.`,
         doseScheduleIds: [],
         modo: "notification",
         semAcoesRapidas: true,
@@ -223,8 +230,10 @@ export function planejarAvisosDeCompromisso(
       avisos.push({
         chave: `${PREFIXO_RECEITA}${receita.prescriptionId}-no-dia`,
         quando: noDia,
-        titulo: "Receita vence hoje",
-        corpo: `Hoje é o último dia de validade da receita de ${receita.medicationName}.`,
+        titulo: `Receita de ${receita.medicationName} vence hoje`,
+        // "A partir de amanhã ela não vale mais" é a consequência prática, e é o que faz a
+        // diferença entre ir à farmácia hoje ou descobrir lá que não dava.
+        corpo: `Hoje é o último dia de validade da sua receita de ${receita.medicationName}. A partir de amanhã ela não vale mais.`,
         doseScheduleIds: [],
         modo: "notification",
         semAcoesRapidas: true,

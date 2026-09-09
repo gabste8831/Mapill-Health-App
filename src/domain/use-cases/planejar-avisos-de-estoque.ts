@@ -107,10 +107,19 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
       avisos.push({
         chave: `${PREFIXO_ESTOQUE}${estoque.inventoryId}-baixo`,
         quando: entradaNaJanela,
-        titulo: "Estoque acabando",
-        // O número de dias é o que decide se dá para esperar a próxima ida à farmácia — mais útil
-        // que a quantidade, que exigiria a pessoa fazer a conta da posologia de cabeça.
-        corpo: `${estoque.medicationName} dura cerca de ${estoque.avisoLeadDays} ${estoque.avisoLeadDays === 1 ? "dia" : "dias"}. Vale repor.`,
+        titulo: `${estoque.medicationName} está acabando`,
+        /**
+         * O nome do remédio no **título**, e a frase começando por "seu estoque".
+         *
+         * Antes o título era "Estoque acabando" e o remédio vinha no corpo — que é a parte que o
+         * Android trunca primeiro, e a que some quando a tela de bloqueio esconde conteúdo. Quem
+         * toma quatro remédios recebia um aviso que não dizia qual, justamente na situação em que
+         * ele tem menos espaço para dizer.
+         *
+         * O número de dias fica: é ele que decide se dá para esperar a próxima ida à farmácia —
+         * mais útil que a quantidade, que exigiria fazer a conta da posologia de cabeça.
+         */
+        corpo: `Seu estoque de ${estoque.medicationName} dura cerca de ${estoque.avisoLeadDays} ${estoque.avisoLeadDays === 1 ? "dia" : "dias"}. Vale repor antes que acabe.`,
         doseScheduleIds: [],
         modo: "notification",
         semAcoesRapidas: true,
@@ -133,8 +142,11 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
       avisos.push({
         chave: `${PREFIXO_ESTOQUE}${estoque.inventoryId}-acabou`,
         quando: fim,
-        titulo: "Estoque acabou",
-        corpo: `Hoje é a última dose de ${estoque.medicationName} que o estoque cobre.`,
+        titulo: `${estoque.medicationName} acaba hoje`,
+        // "Depois de hoje não há mais" diz a consequência, que é o que a frase anterior ("é a
+        // última dose que o estoque cobre") obrigava a deduzir. Num aviso que a pessoa lê de
+        // relance na barra, deduzir é o que não acontece.
+        corpo: `Hoje é a última dose de ${estoque.medicationName} que você tem. Depois disso, o estoque acaba.`,
         doseScheduleIds: [],
         modo: "notification",
         semAcoesRapidas: true,
