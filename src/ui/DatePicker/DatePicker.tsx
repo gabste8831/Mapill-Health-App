@@ -14,15 +14,43 @@ export type DatePickerProps = {
   maximo?: Date;
 };
 
-/** `2026-08-27` → data local à meia-noite. `new Date("...")` leria como UTC e erraria o dia. */
-function paraData(isoDay: string): Date {
+/**
+ * `2026-08-27` → meia-noite **UTC**, que é como o calendário nativo fala de um dia.
+ *
+ * A ida tem que casar com a volta (ver `isoDayDoNativo`). Construir a data no fuso local e
+ * converter com `toISOString` dava 03:00Z no Brasil — o calendário abria no dia certo por sorte,
+ * porque três horas não atravessam a meia-noite para trás. A leste de Greenwich a mesma conta cai
+ * no dia anterior, e o calendário abriria na véspera do que está gravado.
+ */
+function paraDataUtc(isoDay: string): Date {
   const [ano, mes, dia] = isoDay.split("-").map(Number);
-  return new Date(ano, mes - 1, dia);
+  return new Date(Date.UTC(ano, mes - 1, dia));
 }
 
 function paraIsoDay(data: Date): string {
   const p = (valor: number) => String(valor).padStart(2, "0");
   return `${data.getFullYear()}-${p(data.getMonth() + 1)}-${p(data.getDate())}`;
+}
+
+/**
+ * O dia que o calendário nativo devolve, lido em **UTC**.
+ *
+ * ## O defeito que isto conserta
+ *
+ * Escolher 10 gravava 9. O `DateTimePicker` do Material devolve o dia escolhido como meia-noite
+ * **UTC**, e não como meia-noite local — e a leitura anterior usava `getFullYear`/`getMonth`/
+ * `getDate`, que são os campos do fuso de quem está usando. No Brasil (UTC-3), meia-noite UTC do
+ * dia 10 é 21h do dia **9**: o app gravava a véspera de tudo o que se escolhia no calendário.
+ *
+ * O erro é invisível ao norte de Greenwich e sistemático a oeste dele, que é onde este app vive.
+ * E ele não é cosmético: acerta a validade da receita, a data do compromisso e o primeiro dia do
+ * ciclo — datas de que dependem os avisos.
+ *
+ * Ler os campos UTC devolve o dia que a pessoa tocou, sem depender do fuso do aparelho.
+ */
+function isoDayDoNativo(data: Date): string {
+  const p = (valor: number) => String(valor).padStart(2, "0");
+  return `${data.getUTCFullYear()}-${p(data.getUTCMonth() + 1)}-${p(data.getUTCDate())}`;
 }
 
 /**
@@ -75,8 +103,8 @@ export function DatePicker({ initialValue, onChange, minimo, maximo }: DatePicke
               ? { start: minimo, end: maximo }
               : undefined
           }
-          initialDate={paraData(initialValue ?? paraIsoDay(new Date())).toISOString()}
-          onDateSelected={(data) => onChange(paraIsoDay(data))}
+          initialDate={paraDataUtc(initialValue ?? paraIsoDay(new Date())).toISOString()}
+          onDateSelected={(data) => onChange(isoDayDoNativo(data))}
         />
       </Host>
     </View>
