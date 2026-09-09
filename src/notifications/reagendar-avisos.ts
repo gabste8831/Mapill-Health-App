@@ -271,7 +271,7 @@ async function executarReagendamento(): Promise<void> {
       const alarmes = avisos.filter((aviso) => aviso.modo === "alarm").length;
       const notificacoes = avisos.length - alarmes;
       console.log(
-        `[Mapill] janela refeita: ${avisos.length} aviso(s) — ${alarmes} alarme(s), ${notificacoes} notificação(ões); ${doses.length} dose(s) na janela de ${JANELA_DE_AVISOS_EM_DIAS} dias`,
+        `[Mapill] janela refeita: ${avisos.length} aviso(s): ${alarmes} alarme(s), ${notificacoes} notificação(ões); ${doses.length} dose(s) na janela de ${JANELA_DE_AVISOS_EM_DIAS} dias`,
       );
       console.log(`[Mapill] canal do alarme → ${await diagnosticarCanalDeAlarme()}`);
     }

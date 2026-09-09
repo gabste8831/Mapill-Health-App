@@ -165,7 +165,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       chave: "naoPerturbe",
       titulo: "Tocar no silencioso",
       descricao: "Sem isto o alarme fica mudo quando o celular está no “Não perturbe”.",
-      comoFazer: "Na lista que abrir, procure o Mapill e permita o acesso.",
+      comoFazer: "Procure o Mapill na lista e permita.",
       /**
        * Lido do **canal**, e não de uma API de permissão.
        *
@@ -230,7 +230,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       titulo: "Abrir o alarme sobre outros apps",
       descricao:
         "Sem isto, usando outro aplicativo você recebe só um aviso no topo, sem a tela do alarme.",
-      comoFazer: "Na lista que abrir, procure o Mapill e autorize.",
+      comoFazer: "Procure o Mapill na lista e autorize.",
       concedida: await jaFoiPedidaASobreposicao(),
       essencial: false,
       /**

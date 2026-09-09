@@ -22,8 +22,17 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.sm,
   },
+  /**
+   * O título da seção — "Anexos", "O essencial", "Estoque".
+   *
+   * `headlineSmRegular` e não `label`. Enquanto os rótulos eram maiúsculos, o `label` bastava: a
+   * caixa alta dava a ele a presença de um título mesmo sendo o menor tamanho da escala. Em caixa
+   * de frase essa muleta acabou, e o título ficou em 13px **abaixo** da frase de apoio logo
+   * abaixo dele, que é `bodyMd` (14): o cabeçalho da seção era o menor texto do bloco que ele
+   * encabeça.
+   */
   sectionTitle: {
-    ...typography.label,
+    ...typography.headlineSmRegular,
     color: cores.onSurface,
   },
   sectionHint: {
@@ -362,7 +371,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     gap: spacing.xs,
   },
   assuntoDeAjudaTitulo: {
-    ...typography.label,
+    // Titulo acima de um texto `bodyMd`: em `label` (13) ele ficava menor que o proprio
+    // paragrafo. Ver a mesma correcao em `sectionTitle`.
+    ...typography.bodyLg,
     color: cores.onSecondaryContainer,
   },
   assuntoDeAjudaTexto: {
@@ -382,7 +393,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     backgroundColor: withOpacity(cores.secondaryContainer, 0.45),
   },
   avisoDePermissaoTitulo: {
-    ...typography.label,
+    // Titulo acima de um texto `bodyMd`: em `label` (13) ele ficava menor que o proprio
+    // paragrafo. Ver a mesma correcao em `sectionTitle`.
+    ...typography.bodyLg,
     color: cores.onSecondaryContainer,
   },
   avisoDePermissaoTexto: {

@@ -148,7 +148,7 @@ export async function exportarDados(): Promise<DadosExportados> {
    */
   arquivos["LEIA-ME.txt"] = codificador.encode(
     [
-      "Mapill — cópia dos seus dados",
+      "Mapill: cópia dos seus dados",
       `Gerado em ${dataLegivel(geradoEm.toISOString())}`,
       "",
       "Cada arquivo .csv é uma planilha e abre no Excel, no LibreOffice ou no Google Planilhas.",

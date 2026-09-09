@@ -35,7 +35,7 @@ export default function ContaRoute() {
     }
     Alert.alert(
       "Vincular conta do Google",
-      `Ao vincular, você confirma os Termos de Uso e a Política de Privacidade (versão ${CURRENT_TERMS_VERSION}), e o aceite fica registrado com a data de hoje.\n\nSeus dados passam a ter uma cópia na nuvem, na sua conta. As fotos e a receita anexada continuam apenas neste aparelho.\n\nSe a conta escolhida já tiver dados salvos, eles se juntam aos deste aparelho — nada é apagado de nenhum dos dois lados.`,
+      `Ao vincular, você confirma os Termos de Uso e a Política de Privacidade (versão ${CURRENT_TERMS_VERSION}), e o aceite fica registrado com a data de hoje.\n\nSeus dados passam a ter uma cópia na nuvem, na sua conta. As fotos e a receita anexada continuam apenas neste aparelho.\n\nSe a conta escolhida já tiver dados salvos, eles se juntam aos deste aparelho, e nada é apagado de nenhum dos dois lados.`,
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Ler os termos", onPress: () => router.push("/termos") },

@@ -75,7 +75,7 @@ async function recriarSeDivergente(
 
   if (divergente) {
     await notifee.deleteChannel(id);
-    if (__DEV__) console.log(`[Mapill] canal ${id} divergia do pedido — apagado e recriado.`);
+    if (__DEV__) console.log(`[Mapill] canal ${id} divergia do pedido, e foi apagado e recriado.`);
   }
 }
 
@@ -167,7 +167,7 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
 
   const canal = await notifee.getChannel(CANAL_ALARME);
   if (canal === null) {
-    return `❌ Canal ${CANAL_ALARME} NÃO EXISTE — nenhum alarme vai tocar.`;
+    return `❌ Canal ${CANAL_ALARME} NAO EXISTE: nenhum alarme vai tocar.`;
   }
 
   /**
@@ -184,11 +184,11 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
   // `importance` é opcional na tipagem: um canal lido do sistema pode não trazê-la. Ausente conta
   // como problema — não saber a importância é o mesmo que não poder afirmar que o alarme interrompe.
   if ((canal.importance ?? 0) < AndroidImportance.HIGH) {
-    problemas.push(`importance ${canal.importance ?? "?"} < HIGH — não interrompe a tela`);
+    problemas.push(`importance ${canal.importance ?? "?"} < HIGH: nao interrompe a tela`);
   }
   if (!canal.bypassDnd) {
     // Não é defeito do código: depende de permissão que o Android não concede sozinho.
-    problemas.push("bypassDnd desligado — não fura o Não Perturbe (falta a permissão do sistema)");
+    problemas.push("bypassDnd desligado: nao fura o Nao Perturbe (falta a permissão do sistema)");
   }
 
   const estado = problemas.length === 0 ? "✅ OK" : `⚠️ ${problemas.join(" | ")}`;

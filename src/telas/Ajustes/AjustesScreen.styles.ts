@@ -112,8 +112,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
+  /**
+   * Titulo de secao. `headlineSmRegular` e nao `label`: enquanto os rotulos eram maiusculos o
+   * `label` bastava — a caixa alta dava presenca de titulo ao menor tamanho da escala. Em caixa de
+   * frase a muleta acabou, e o cabecalho ficava em 13px abaixo do texto de apoio que ele encabeca.
+   */
   sectionTitle: {
-    ...typography.label,
+    ...typography.headlineSmRegular,
     color: cores.onSurfaceVariant,
     paddingLeft: spacing.xs,
   },

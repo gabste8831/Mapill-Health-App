@@ -34,7 +34,7 @@ export function EstadoDeErro({ mensagem, onTentarDeNovo }: EstadoDeErroProps) {
       <Text style={styles.titulo}>Não foi possível carregar</Text>
       <Text style={styles.mensagem}>{mensagem}</Text>
       <Text style={styles.tranquilizador}>
-        Seus dados continuam salvos no aparelho — isto foi só uma falha ao exibi-los.
+        Seus dados continuam salvos no aparelho. Isto foi só uma falha ao exibi-los.
       </Text>
       <Button label="Tentar de novo" onPress={onTentarDeNovo} style={styles.acao} />
     </View>

@@ -349,7 +349,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     if (Platform.OS !== "android" || !canGoBack) return;
     const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
       goBack();
-      return true; // evento consumido — impede o comportamento padrão de encerrar a activity.
+      return true; // evento consumido: impede o comportamento padrão de encerrar a activity.
     });
     return () => subscription.remove();
   }, [canGoBack, goBack]);

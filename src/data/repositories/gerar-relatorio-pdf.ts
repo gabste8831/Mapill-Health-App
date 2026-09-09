@@ -101,7 +101,7 @@ function secaoAdesao(relatorio: Relatorio): string {
     .map(
       (item) => `<tr>
         <td>${esc(item.medicationName)}</td>
-        <td class="numero">${item.taxa === null ? "—" : percentual(item.taxa)}</td>
+        <td class="numero">${item.taxa === null ? "-" : percentual(item.taxa)}</td>
         <td class="numero">${item.confirmadas} de ${item.previstas}</td>
       </tr>`,
     )
@@ -143,7 +143,7 @@ function secaoTratamentos(relatorio: Relatorio): string {
         <td><strong>${esc(t.nome)}</strong></td>
         <td>${esc(t.dose)}</td>
         <td>${esc(t.frequencia)}</td>
-        <td>${t.horarios.length === 0 ? "—" : esc(t.horarios.join(", "))}</td>
+        <td>${t.horarios.length === 0 ? "-" : esc(t.horarios.join(", "))}</td>
       </tr>`,
     )
     .join("");
