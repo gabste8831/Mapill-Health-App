@@ -1956,12 +1956,19 @@ Button/TextField/SelectField, `hitSlop` nos alvos destrutivos, contraste do plac
 > importar o componente é o que faz a correção não chegar** — e num app cujo público amplia a fonte
 > do sistema, o custo disso é a acessibilidade quebrar exatamente em quem mais depende dela.
 
-### 6.7 Sistema de temas — escuro, alto contraste, sem depender de cor
+### 6.7 Sistema de temas — escuro, alto contraste, e a escolha das cores de estado
 
 Nasceu de um pedido concreto do Gabriel: dark mode como as pessoas conhecem de outros apps, e
 junto dele outras estratégias de acessibilidade ligadas à cor — porque um app de saúde com público
 idoso e polimedicado tem em baixa visão e daltonismo um público real, não hipotético. A escolha de
 implementação não foi "trocar duas cores": foi decidir **onde mora a cor do app inteiro**.
+
+> **Atualizado em 09/09.** O tema "Sem depender de cor" **saiu da lista**: a medição mostrou que a
+> paleta fixa dele (turquesa/magenta) não separava melhor que a que substituía, e que o amarelo de
+> atenção colidia com o vermelho de urgência **no próprio tema padrão** (ΔE 7,8 sob deuteranopia).
+> A escolha do trio de cores virou preferência independente do tema, e vale em qualquer aparência —
+> inclusive no escuro, que antes era inacessível a quem precisava daquele modo. Ver
+> [6.6 do guia do TCC](GUIA-DO-TCC.md) e `scripts/conferir-cores-de-estado.mjs`.
 
 **A barreira técnica, medida antes de começar.** 567 usos de cor em 99 arquivos, todos dentro de
 `StyleSheet.create` — que roda **uma vez**, na importação do módulo, e nunca mais. Trocar de tema

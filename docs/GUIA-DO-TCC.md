@@ -669,7 +669,7 @@ com dado pré-existente, e credenciais fora do repositório.
 
 # 6. As decisões difíceis
 
-Cinco escolhas em que havia um caminho óbvio e eu segui outro. São as que rendem discussão numa
+Seis escolhas em que havia um caminho óbvio e eu segui outro. São as que rendem discussão numa
 defesa.
 
 ## 6.1 Confirmar dose pela notificação pula a confirmação visual — e permiti mesmo assim
@@ -726,6 +726,36 @@ O corte é de **30 dias**, e não de sete: o erro que ele corrige se acumula dev
 toda semana viraria tarefa doméstica com resposta automática.
 
 ---
+
+## 6.6 O modo para daltônicos foi **removido**, e a escolha passou para o usuário
+
+O caminho óbvio da acessibilidade cromática é um "modo daltonismo": o app detecta ou pergunta, e
+troca a paleta por um par sabidamente seguro. Foi o que existiu aqui — um tema inteiro chamado "Sem
+depender de cor", com verde virando turquesa e vermelho virando magenta.
+
+**A medição desmontou a solução.** Simulando as três formas de daltonismo pelo método de
+Viénot-Mollon (1999) e comparando as cores resultantes com a fórmula CIEDE2000 (CIE, 2001), o par
+turquesa/magenta separava **pior** que o verde/vermelho que ele substituía sob deuteranopia
+(ΔE 48,8 contra 35,3 no par afirmativo/negativo, mas ΔE 41,6 contra 27,9 no confronto com o âmbar
+de atenção — e nos dois casos a vantagem some ao considerar protanopia).
+
+A razão é conceitual, não de implementação: **daltonismo não é uma condição única**. Deuteranopia,
+protanopia e tritanopia colapsam pares de cores diferentes, e nenhum conjunto fixo é ótimo para as
+três. Um "modo daltonismo" único é uma resposta média para um problema que não tem média.
+
+**O que ficou no lugar:** cinco conjuntos de três cores (tudo certo / fique atento / urgente), todos
+validados em duas frentes — contraste WCAG AA sobre cada superfície do app, e ΔE CIEDE2000 ≥ 10
+entre os três estados, nas três formas de daltonismo. A pessoa escolhe vendo as amostras lado a
+lado, sem precisar saber o nome da própria condição.
+
+**A descoberta que a medição trouxe de brinde:** o amarelo de atenção **colidia com o vermelho de
+urgência no próprio tema padrão** — ΔE 7,8 sob deuteranopia, praticamente a mesma cor. O defeito
+existia desde sempre e nenhuma varredura de contraste o pegaria, porque contraste mede figura contra
+fundo, e este é um problema de figura contra figura. Por isso o conjunto tem três cores e não duas.
+
+**A limitação, dita:** a escolha depende de a pessoa **encontrar** a tela. Um app que detectasse a
+condição serviria melhor a quem não sabe que a tem — mas detecção exigiria um teste de Ishihara
+embutido, que é diagnóstico médico e não cabe num app de adesão.
 
 # 7. Método de trabalho
 
