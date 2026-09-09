@@ -177,6 +177,7 @@ console.log("\nA receita segue a mesma hora\n");
         prescriptionId: "p1",
         medicationName: "Losartana",
         validUntil: "2026-09-20",
+        querAviso: true,
         renewalReminderLeadDays: 5,
       },
     ],
@@ -211,12 +212,60 @@ console.log("\nA receita não avisa duas vezes no mesmo instante\n");
         prescriptionId: "p1",
         medicationName: "Losartana",
         validUntil: "2026-09-20",
+        querAviso: true,
         renewalReminderLeadDays: 0,
       },
     ],
   );
   const instantes = avisos.map((a) => a.quando.getTime());
   conferir("antecedência zero gera um aviso só", new Set(instantes).size === instantes.length);
+}
+
+console.log("\nQuerer o aviso e escolher a antecedência são duas perguntas\n");
+
+{
+  /**
+   * O caso que motivou a separação: marcar "me avisar" sem escolher prazo produzia **silêncio
+   * total**, porque as duas informações moravam no mesmo campo e o planejador descartava a
+   * receita inteira quando ele era nulo. Quem marcou quer saber que venceu; só não pediu para
+   * ser lembrado antes.
+   */
+  const avisos = planejar(
+    [],
+    [
+      {
+        prescriptionId: "p1",
+        medicationName: "Losartana",
+        validUntil: "2026-09-20",
+        querAviso: true,
+        renewalReminderLeadDays: null,
+      },
+    ],
+  );
+  conferir("sem antecedência, ainda avisa no dia do vencimento", avisos.length === 1);
+  conferir(
+    "e é o aviso do dia, não o antecipado",
+    avisos[0]?.chave.endsWith("-no-dia") === true,
+    avisos[0]?.chave ?? "nenhum",
+  );
+  conferir("no dia certo", avisos[0]?.quando.getDate() === 20);
+}
+
+{
+  // Não marcou: continua sem aviso nenhum. A caixa é a pergunta que decide.
+  const avisos = planejar(
+    [],
+    [
+      {
+        prescriptionId: "p1",
+        medicationName: "Losartana",
+        validUntil: "2026-09-20",
+        querAviso: false,
+        renewalReminderLeadDays: 5,
+      },
+    ],
+  );
+  conferir("sem querer aviso, nenhum é planejado — nem com prazo escolhido", avisos.length === 0);
 }
 
 console.log(`\n${passou} passaram, ${falhou} falharam\n`);

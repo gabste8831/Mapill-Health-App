@@ -116,9 +116,10 @@ function previsaoEhAlerta(item: ItemDeEstoque): boolean {
 
 /** O estado do aviso em uma frase — o que a linha do card mostra sem precisar abrir o popup. */
 function rotuloDoAviso(inventory: InventoryItem): string {
-  if (!inventory.lowStockAlertEnabled || inventory.lowStockAlertLeadDays === null) {
-    return "Sem aviso de estoque baixo";
-  }
+  if (!inventory.lowStockAlertEnabled) return "Sem aviso de estoque baixo";
+  // Sem antecedência escolhida o aviso existe do mesmo jeito, só chega no dia em que acaba — e o
+  // rótulo precisa dizer isso, senão a linha nega um aviso que a pessoa vai receber.
+  if (inventory.lowStockAlertLeadDays === null) return "Avisar quando acabar";
   const dias = inventory.lowStockAlertLeadDays;
   return `Avisar ${dias} ${dias === 1 ? "dia" : "dias"} antes de acabar`;
 }
@@ -573,7 +574,7 @@ export function EstoqueScreen() {
               <Text style={styles.sheetMedicamento}>{aviso.item.medication.name}</Text>
 
               {/* Escolha explícita, nunca ligado sozinho — a mesma regra do cadastro. */}
-              <Checkbox
+                            <Checkbox
                 checked={aviso.habilitado}
                 onChange={(habilitado) => setAviso({ ...aviso, habilitado })}
                 label="Me avisar quando estiver acabando"

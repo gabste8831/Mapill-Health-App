@@ -38,6 +38,7 @@ function estoque(extra) {
     medicationName: "Losartana",
     diasRestantes: 10,
     ultimoDia: "2026-09-11",
+    querAviso: true,
     avisoLeadDays: 7,
     quantidadeQuandoAvisou: null,
     quantidadeAtual: 20,
@@ -61,9 +62,26 @@ console.log("\nQuando o aviso é planejado\n");
   conferir("nenhum carrega dose vinculada", avisos.every((a) => a.doseScheduleIds.length === 0));
 }
 
-console.log("\nQuem não pediu aviso não recebe\n");
+console.log("\nQuerer o aviso e escolher a antecedência são duas perguntas\n");
 {
-  conferir("sem antecedência pedida, nenhum aviso", planejar([estoque({ avisoLeadDays: null })]).length === 0);
+  // Quem não marcou continua sem nada: a caixa é a pergunta que decide.
+  conferir(
+    "sem querer aviso, nenhum é planejado — nem com prazo escolhido",
+    planejar([estoque({ querAviso: false })]).length === 0,
+  );
+
+  /**
+   * O caso que motivou a separação: marcar sem escolher prazo produzia silêncio total, porque as
+   * duas informações moravam no mesmo campo. Quem marcou quer saber que o estoque acabou; só não
+   * pediu para ser avisado antes.
+   */
+  const semPrazo = planejar([estoque({ avisoLeadDays: null })]);
+  conferir("sem antecedência, ainda avisa no dia em que acaba", semPrazo.length === 1);
+  conferir(
+    "e é o aviso do fim, não o antecipado",
+    semPrazo[0]?.chave.endsWith("-acabou") === true,
+    semPrazo[0]?.chave ?? "nenhum",
+  );
 }
 
 console.log("\nA trava: avisado uma vez, calado até haver reposição\n");

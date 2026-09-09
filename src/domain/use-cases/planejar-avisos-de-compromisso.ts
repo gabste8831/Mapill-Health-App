@@ -26,7 +26,17 @@ export type ReceitaAAvisar = {
   medicationName: string;
   /** `YYYY-MM-DD` — a validade é um dia, não um instante. */
   validUntil: string;
-  /** Dias de antecedência. `null` = a pessoa não pediu aviso para esta receita. */
+  /**
+   * Se a pessoa marcou que quer ser avisada. Sozinho, garante o aviso **no dia do vencimento**.
+   *
+   * Separado da antecedência de propósito: enquanto os dois eram a mesma informação, marcar a
+   * caixa sem escolher prazo produzia silêncio total — nem o aviso do dia chegava.
+   */
+  querAviso: boolean;
+  /**
+   * Dias de antecedência, para o aviso **extra** que dá tempo de renovar. `null` = a pessoa quer
+   * saber quando vencer, mas não pediu para ser lembrada antes.
+   */
   renewalReminderLeadDays: number | null;
 };
 
@@ -190,7 +200,7 @@ export function planejarAvisosDeCompromisso(
   }
 
   for (const receita of input.receitas) {
-    if (receita.renewalReminderLeadDays === null) continue;
+    if (!receita.querAviso) continue;
 
     const vencimento = diaLocal(receita.validUntil);
 
@@ -201,11 +211,19 @@ export function planejarAvisosDeCompromisso(
      * diz que a partir de agora a receita não vale mais — quem não conseguiu renovar a tempo
      * precisa saber disso antes de chegar à farmácia, não depois.
      *
+     * **O do dia não depende da antecedência.** Quem pediu para ser avisado e não escolheu prazo
+     * quer saber que a receita venceu; só não pediu para ser lembrado antes. Enquanto os dois
+     * viviam sob o mesmo `null`, marcar a caixa sem tocar no seletor produzia silêncio total —
+     * a interface confirmava uma intenção que o app não cumpria.
+     *
      * Nenhum dos dois se repete. Um aviso que volta todo dia é o que faz desligar as notificações
      * do app inteiro, e junto vão os alarmes de dose, que são os que não podem falhar.
      */
-    const antecipado = inicioDoDia(diasAntes(vencimento, receita.renewalReminderLeadDays));
-    if (agendavel(antecipado)) {
+    const antecipado =
+      receita.renewalReminderLeadDays === null
+        ? null
+        : inicioDoDia(diasAntes(vencimento, receita.renewalReminderLeadDays));
+    if (antecipado !== null && agendavel(antecipado)) {
       avisos.push({
         chave: `${PREFIXO_RECEITA}${receita.prescriptionId}-antes`,
         quando: antecipado,
@@ -226,7 +244,7 @@ export function planejarAvisosDeCompromisso(
      * a validade já dentro da janela de aviso, faria a mesma notificação chegar duas vezes — e
      * duas notificações idênticas no mesmo minuto leem como defeito, não como ênfase.
      */
-    if (agendavel(noDia) && noDia.getTime() !== antecipado.getTime()) {
+    if (agendavel(noDia) && noDia.getTime() !== antecipado?.getTime()) {
       avisos.push({
         chave: `${PREFIXO_RECEITA}${receita.prescriptionId}-no-dia`,
         quando: noDia,

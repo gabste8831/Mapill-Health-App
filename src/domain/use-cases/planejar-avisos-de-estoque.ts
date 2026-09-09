@@ -13,7 +13,17 @@ export type EstoqueAAvisar = {
   diasRestantes: number;
   /** `YYYY-MM-DD` do último dia coberto. */
   ultimoDia: string;
-  /** Antecedência pedida pela pessoa. `null` = não quer aviso. */
+  /**
+   * Se a pessoa quer ser avisada. Sozinho, garante o aviso **no dia em que o estoque acaba**.
+   *
+   * Separado da antecedência pelo mesmo motivo da receita: marcar a caixa sem escolher prazo
+   * produzia silêncio total, quando a intenção declarada era justamente o contrário.
+   */
+  querAviso: boolean;
+  /**
+   * Antecedência do aviso **extra**, o que dá tempo de ir à farmácia. `null` = quer saber quando
+   * acabar, mas não pediu para ser avisada antes.
+   */
   avisoLeadDays: number | null;
   /**
    * O que já foi avisado para este estoque, para o aviso não se repetir.
@@ -88,7 +98,7 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
   const agendavel = (quando: Date) => quando > input.agora && quando <= input.ate;
 
   for (const estoque of input.estoques) {
-    if (estoque.avisoLeadDays === null) continue;
+    if (!estoque.querAviso) continue;
     if (!precisaAvisar(estoque)) continue;
 
     /**
@@ -97,13 +107,22 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
      * Um estoque que dura 20 dias com aviso pedido para 7 tem o seu aviso marcado para daqui a
      * 13 dias. Agendar para hoje seria avisar cedo demais sobre algo que ainda não é problema;
      * agendar para o último dia seria tarde para o que o aviso serve, que é dar tempo de repor.
+     *
+     * `null` quando não há antecedência escolhida: aí só o aviso do fim existe, e quem marcou a
+     * caixa continua sabendo que o estoque acabou.
      */
-    const diasAteAJanela = estoque.diasRestantes - estoque.avisoLeadDays;
-    const entradaNaJanela = inicioDoDia(
-      new Date(input.agora.getFullYear(), input.agora.getMonth(), input.agora.getDate() + diasAteAJanela),
-    );
+    const entradaNaJanela =
+      estoque.avisoLeadDays === null
+        ? null
+        : inicioDoDia(
+            new Date(
+              input.agora.getFullYear(),
+              input.agora.getMonth(),
+              input.agora.getDate() + (estoque.diasRestantes - estoque.avisoLeadDays),
+            ),
+          );
 
-    if (agendavel(entradaNaJanela)) {
+    if (entradaNaJanela !== null && agendavel(entradaNaJanela)) {
       avisos.push({
         chave: `${PREFIXO_ESTOQUE}${estoque.inventoryId}-baixo`,
         quando: entradaNaJanela,
@@ -119,7 +138,10 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
          * O número de dias fica: é ele que decide se dá para esperar a próxima ida à farmácia —
          * mais útil que a quantidade, que exigiria fazer a conta da posologia de cabeça.
          */
-        corpo: `Seu estoque de ${estoque.medicationName} dura cerca de ${estoque.avisoLeadDays} ${estoque.avisoLeadDays === 1 ? "dia" : "dias"}. Vale repor antes que acabe.`,
+        // `diasRestantes` e não `avisoLeadDays`: são iguais no dia em que o aviso dispara, mas o
+        // primeiro é o fato (quanto o estoque dura) e o segundo é a preferência (quando avisar).
+        // Usar a preferência para descrever o fato só funciona por coincidência.
+        corpo: `Seu estoque de ${estoque.medicationName} dura cerca de ${estoque.diasRestantes} ${estoque.diasRestantes === 1 ? "dia" : "dias"}. Vale repor antes que acabe.`,
         doseScheduleIds: [],
         modo: "notification",
         semAcoesRapidas: true,
@@ -138,7 +160,7 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
      * duas notificações iguais no mesmo minuto leem como defeito, não como ênfase. É o caso de
      * quem pede aviso com antecedência maior do que o estoque que tem.
      */
-    if (agendavel(fim) && fim.getTime() !== entradaNaJanela.getTime()) {
+    if (agendavel(fim) && fim.getTime() !== entradaNaJanela?.getTime()) {
       avisos.push({
         chave: `${PREFIXO_ESTOQUE}${estoque.inventoryId}-acabou`,
         quando: fim,

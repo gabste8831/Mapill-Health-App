@@ -218,6 +218,7 @@ async function contarEsperados(): Promise<{
           prescriptionId: prescription.id,
           medicationName: medication.name,
           validUntil: prescription.attachmentValidUntil,
+          querAviso: prescription.renewalReminderEnabled,
           renewalReminderLeadDays: prescription.renewalReminderLeadDays,
         },
       ];
@@ -230,7 +231,7 @@ async function contarEsperados(): Promise<{
     estoques: inventories.flatMap((inventory) => {
       const medication = medicamentoPorId.get(inventory.medicationId);
       if (medication === undefined) return [];
-      if (!inventory.lowStockAlertEnabled || inventory.lowStockAlertLeadDays === null) return [];
+      if (!inventory.lowStockAlertEnabled) return [];
 
       const prescription = prescriptions
         .filter((p) => p.medicationId === inventory.medicationId)
@@ -250,6 +251,7 @@ async function contarEsperados(): Promise<{
           medicationName: medication.name,
           diasRestantes: depletion.daysRemaining,
           ultimoDia: depletion.lastDay,
+          querAviso: inventory.lowStockAlertEnabled,
           avisoLeadDays: inventory.lowStockAlertLeadDays,
           quantidadeQuandoAvisou: inventory.lowStockAlertedAtQuantity,
           quantidadeAtual: inventory.quantity,

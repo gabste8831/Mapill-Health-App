@@ -334,6 +334,8 @@ export type MedicamentoDraft = {
   dosesJaTomadasHoje: string[];
   attachmentValidUntil: string | null;
   renewalReminderLeadDays: number | null;
+  /** Se quer ser avisada. Sozinho, garante o aviso no dia do vencimento. */
+  renewalReminderEnabled: boolean;
 };
 
 /**
@@ -1470,8 +1472,21 @@ export function FormularioDeMedicamentoScreen({
       // Só no cadastro novo: `initialValue` presente significa edição, e ali a pergunta nem aparece.
       dosesJaTomadasHoje: initialValue === undefined ? jaTomadosValidos : [],
       attachmentValidUntil: attachmentUri === null ? null : validUntilIso,
-      // Aviso sem validade não tem de quando contar, e sem antecedência escolhida não dispara —
-      // nos dois casos gravar "ligado" seria mentir sobre um lembrete que nunca chega.
+      /**
+       * **Querer o aviso e escolher a antecedência são duas perguntas.**
+       *
+       * Quem marca a caixa recebe o aviso no dia do vencimento, sempre. A antecedência acrescenta
+       * um lembrete antes disso, e é opcional: sem ela, o app avisa quando vencer em vez de calar.
+       *
+       * Enquanto as duas moravam numa coluna só, marcar sem escolher prazo gravava `null` — e o
+       * planejador descartava a receita inteira, incluindo o aviso do dia. A interface confirmava
+       * uma intenção que o app não cumpria.
+       *
+       * A validade continua sendo condição das duas: sem data não há de quando contar, e aí
+       * gravar "ligado" seria prometer um lembrete que nunca teria quando chegar.
+       */
+      renewalReminderEnabled:
+        attachmentUri !== null && validUntilIso !== null && wantsRenewalReminder,
       renewalReminderLeadDays:
         attachmentUri !== null &&
         validUntilIso !== null &&
@@ -2266,26 +2281,32 @@ export function FormularioDeMedicamentoScreen({
                   antes seria oferecer um lembrete que o app não teria como disparar. */}
               {attachmentUri !== null && validUntilIso !== null ? (
                 <>
+                  {/* Marcar já basta: a antecedência é opcional.
+
+                      Quem marca recebe o aviso **no dia do vencimento**, e escolher um prazo
+                      acrescenta um lembrete antes disso. Antes as duas coisas eram a mesma, e
+                      marcar sem tocar no seletor produzia silêncio total. */}
                   <Checkbox
                     checked={wantsRenewalReminder}
                     onChange={setWantsRenewalReminder}
-                    label="Me avisar antes de a receita vencer"
-                    accessibilityLabel="Me avisar antes de a receita vencer"
+                    label="Me avisar quando a receita vencer"
+                    accessibilityLabel="Me avisar quando a receita vencer"
                   />
                   {wantsRenewalReminder ? (
                     <>
                       <OptionGroup
-                        label="COM QUANTA ANTECEDÊNCIA"
+                        label="AVISAR ANTES TAMBÉM (OPCIONAL)"
                         value={renewalLeadDays}
                         options={RENEWAL_LEAD_OPTIONS}
                         onChange={setRenewalLeadDays}
                       />
-                      {/* São dois avisos, e a frase diz isso: "planeje-se" e "acabou" pedem
-                          ações diferentes, e quem lê só "com quanta antecedência" não tem como
-                          supor que o segundo existe. */}
+                      {/* A frase muda conforme o que está escolhido, porque a promessa muda: sem
+                          prazo é um aviso, com prazo são dois. Uma frase fixa teria de descrever
+                          os dois casos e não descreveria bem nenhum. */}
                       <Text style={styles.sectionHint}>
-                        Você recebe um lembrete na antecedência escolhida e outro no dia em que a
-                        receita vence.
+                        {renewalLeadDays === null
+                          ? "Você será avisado no dia em que a receita vencer. Se quiser saber antes, escolha um prazo acima."
+                          : `Você será avisado ${renewalLeadDays} dias antes e também no dia em que a receita vencer.`}
                       </Text>
                     </>
                   ) : null}

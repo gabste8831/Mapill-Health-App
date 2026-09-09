@@ -105,7 +105,7 @@ export function ConfiguracaoDeEstoque({
         {alertEnabled ? (
           <>
             <OptionGroup
-              label="COM QUANTA ANTECEDÊNCIA"
+              label="AVISAR ANTES TAMBÉM (OPCIONAL)"
               value={leadDays}
               options={LEAD_DAYS_OPTIONS}
               onChange={onLeadDaysChange}
@@ -118,11 +118,14 @@ export function ConfiguracaoDeEstoque({
 
                 Agora cumpre, mas a notificação depende de permissão que pode estar negada, e a
                 estimativa depende de horários fixos. A tela inicial é o único canal que não
-                depende de nada, então é ela que a frase garante — o resto vem como acréscimo. */}
+                depende de nada, então é ela que a frase garante — o resto vem como acréscimo.
+
+                A frase muda com o prazo escolhido, porque a promessa muda: sem prazo é um aviso,
+                com prazo são dois. */}
             <Text style={styles.sectionHint}>
-              O aviso aparece na tela inicial e, se as notificações estiverem ativas, também chega
-              como lembrete no celular — uma vez ao entrar na antecedência escolhida e outra
-              quando o estoque acabar.
+              {leadDays === null
+                ? "O aviso aparece na tela inicial e, se as notificações estiverem ativas, também chega no celular no dia em que o estoque acabar. Escolha um prazo acima para ser avisado antes."
+                : `O aviso aparece na tela inicial e, se as notificações estiverem ativas, também chega no celular: uma vez quando faltarem ${leadDays} dias e outra quando o estoque acabar.`}
             </Text>
           </>
         ) : null}

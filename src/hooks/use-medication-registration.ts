@@ -111,6 +111,7 @@ export async function salvarMedicamento(
       attachmentKind: draft.attachmentKind,
       attachmentValidUntil: draft.attachmentValidUntil,
       renewalReminderLeadDays: draft.renewalReminderLeadDays,
+      renewalReminderEnabled: draft.renewalReminderEnabled,
       attachmentSyncOptOut: false,
       ...syncFields(),
     };
@@ -279,6 +280,7 @@ export async function carregarMedicamento(
       attachmentKind: prescription.attachmentKind,
       attachmentValidUntil: prescription.attachmentValidUntil,
       renewalReminderLeadDays: prescription.renewalReminderLeadDays,
+      renewalReminderEnabled: prescription.renewalReminderEnabled,
       stockQuantity: inventory?.quantity ?? null,
       // Sem estoque cadastrado não há unidade gravada; a da dose é o palpite honesto, e é o mesmo
       // padrão que o formulário usaria num cadastro novo.

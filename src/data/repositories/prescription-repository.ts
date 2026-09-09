@@ -26,6 +26,7 @@ type PrescriptionRow = SyncableRow & {
   attachment_kind: string | null;
   attachment_valid_until: string | null;
   renewal_reminder_lead_days: number | null;
+  renewal_reminder_enabled: number;
   attachment_sync_opt_out: number;
 };
 
@@ -147,6 +148,7 @@ export class PrescriptionRepository
       attachmentKind: row.attachment_kind as PrescriptionAttachmentKind | null,
       attachmentValidUntil: row.attachment_valid_until,
       renewalReminderLeadDays: row.renewal_reminder_lead_days,
+      renewalReminderEnabled: row.renewal_reminder_enabled === 1,
       attachmentSyncOptOut: row.attachment_sync_opt_out === 1,
       updatedAt: row.updated_at,
       syncedAt: row.synced_at,
@@ -171,6 +173,7 @@ export class PrescriptionRepository
       attachment_kind: entity.attachmentKind,
       attachment_valid_until: entity.attachmentValidUntil,
       renewal_reminder_lead_days: entity.renewalReminderLeadDays,
+      renewal_reminder_enabled: entity.renewalReminderEnabled ? 1 : 0,
       attachment_sync_opt_out: entity.attachmentSyncOptOut ? 1 : 0,
       updated_at: entity.updatedAt,
       synced_at: entity.syncedAt,

@@ -142,6 +142,7 @@ async function executarReagendamento(): Promise<void> {
             prescriptionId: prescription.id,
             medicationName: medication.name,
             validUntil: prescription.attachmentValidUntil,
+            querAviso: prescription.renewalReminderEnabled,
             renewalReminderLeadDays: prescription.renewalReminderLeadDays,
           },
         ];
@@ -164,7 +165,7 @@ async function executarReagendamento(): Promise<void> {
       estoques: inventories.flatMap((inventory) => {
         const medication = medicamentoPorId.get(inventory.medicationId);
         if (medication === undefined) return [];
-        if (!inventory.lowStockAlertEnabled || inventory.lowStockAlertLeadDays === null) return [];
+        if (!inventory.lowStockAlertEnabled) return [];
 
         // A mais recente entre as do medicamento: é a que está valendo, e portanto a que dita o
         // ritmo com que o estoque é consumido. Mesma escolha de `use-today-doses`.
@@ -188,6 +189,7 @@ async function executarReagendamento(): Promise<void> {
             medicationName: medication.name,
             diasRestantes: depletion.daysRemaining,
             ultimoDia: depletion.lastDay,
+            querAviso: inventory.lowStockAlertEnabled,
             avisoLeadDays: inventory.lowStockAlertLeadDays,
             quantidadeQuandoAvisou: inventory.lowStockAlertedAtQuantity,
             quantidadeAtual: inventory.quantity,

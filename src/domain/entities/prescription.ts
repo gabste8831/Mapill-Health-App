@@ -156,6 +156,15 @@ export type Prescription = SyncableEntity & {
    */
   renewalReminderLeadDays: number | null;
   /**
+   * Se a pessoa quer ser avisada sobre esta receita vencer.
+   *
+   * Sozinho, garante o aviso **no dia do vencimento**. `renewalReminderLeadDays` acrescenta o
+   * lembrete antecipado quando ela também escolhe um prazo — e são duas perguntas diferentes:
+   * "quero saber" e "quero saber com quanto tempo". Enquanto as duas viviam na mesma coluna,
+   * marcar sem escolher prazo produzia silêncio total.
+   */
+  renewalReminderEnabled: boolean;
+  /**
    * LGPD: receita é dado sensível de saúde. Se true, o anexo nunca sobe pro Supabase Storage
    * mesmo com backup habilitado — fica só no aparelho (decisão nº10).
    */
