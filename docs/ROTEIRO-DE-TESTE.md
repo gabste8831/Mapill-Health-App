@@ -26,9 +26,15 @@ mais interessa saber agora.
 numa sessão dedicada, e não agora. Cada um desses passos exige esperar um horário com o app fechado —
 misturá-los com o resto transforma uma revisão de trinta minutos numa tarde inteira de espera.
 
-Ficam para essa sessão os blocos **11 a 19** inteiros, mais os itens espalhados que dependem de um
-aviso chegar: **3-C3** (notificação do compromisso), **3-G1** (o local no alarme), **5/10.4** (o
-aviso do compromisso excluído), **8-F** (a foto no alarme) e **8-K6** (o alarme sem visualizador).
+Ficam para essa sessão os blocos **11 a 19** inteiros, mais o **20** (estoque e receita, novo em
+08/09) e os itens espalhados que dependem de um aviso chegar: **3-C3** (notificação do compromisso),
+**3-G1** (o local no alarme), **5/10.4** (o aviso do compromisso excluído), **8-F** (a foto no
+alarme) e **8-K6** (o alarme sem visualizador).
+
+> ⏰ **Planeje a véspera.** Compromisso, receita e estoque avisam às **00:01 do dia** — marcar para
+> hoje não dispara nada, porque esse instante já passou. Deixe o que for testar cadastrado **na
+> noite anterior**, com data para o dia seguinte, e a sessão começa com os avisos já chegados em vez
+> de esperando. Só o alarme de dose toca na hora marcada.
 
 **O que dá para revisar agora é todo o resto** — telas, cadastro, listas, relatório, exportação,
 acessibilidade e regressão visual. É o que esta rodada cobre.
@@ -47,7 +53,7 @@ acessibilidade e regressão visual. É o que esta rodada cobre.
 | **5** — Os menores | ✅ **08/09** (menos 10.4, que depende de aviso) |
 | **6** — Relatório em PDF | ✅ **08/09**, depois de três correções feitas na hora (ver abaixo) |
 | **7** — Fonte ampliada | ✅ Ressalva de 05/09: **os horários dos cards quebram linha** no máximo |
-| **8** — Passe de design | ✅ **08/09**, com **uma pendência**: a miniatura da mídia não aparece logo após preencher o campo (item **H**) |
+| **8** — Passe de design | ✅ **08/09**, incluindo o item **H** — a miniatura, resolvida no fim do dia depois de seis correções no lugar errado |
 | **9** — TalkBack | ✅ **08/09**. 📝 **Rende material para o TCC** — a leitura em frase única e o estado anunciado saíram da varredura de 02/09 |
 | **10** — Regressão de telas | ✅ **08/09** |
 | **12** — Permissões do alarme | ✅ 05/09, 100%. Só reconferir que a build nova não regrediu |
@@ -75,11 +81,28 @@ por último porque é destrutivo.
 
 **Ajustes pequenos ainda abertos:**
 
-- **A miniatura da mídia não aparece logo após preencher o campo** (8-H). Anotado em 08/09 — é o
-  único item do passe de design que continua reprovando, e o roteiro já traz as duas perguntas que
-  distinguem as hipóteses restantes.
 - **Os horários dos cards quebram linha** com a fonte do sistema no máximo (05/09).
 - **A fonte do nome na lista de remédios** um pouco menor (05/09).
+
+### 🔧 O que mudou depois da revisão de 08/09
+
+Mudanças feitas **depois** que os blocos acima foram aprovados. São a área a olhar com atenção na
+próxima rodada — e o que falhar aqui é defeito novo, não regressão.
+
+- **A miniatura da mídia** (8-H) foi resolvida. A causa não era o `FotoLocal`, onde seis correções
+  tinham sido tentadas: era a linha inteira não recompor quando a mídia estreava, dentro do
+  `Pressable` que dispensa o teclado. A correção é uma `key` por presença de mídia, aplicada na
+  ficha, na foto da caixa, no anexo da receita, no avatar de Ajustes e no card da lista de remédios.
+- **A foto da ficha não chegava a Ajustes nem à Home.** `usePatientProfile` lia o banco uma vez na
+  montagem, e aba montada não remonta. Passou a reler no foco.
+- **Estoque e receita ganharam notificação** — ver o bloco **20**, novo.
+- **O calendário ganhou marcos**: validade de receita e fim de estoque.
+- **Rótulos**: "Remover" virou **"Excluir"** (vermelho) nos anexos; a foto da caixa ganhou "Excluir",
+  que não tinha, e "Trocar foto da caixa" virou "Alterar anexo".
+- **O campo de data** ocupava menos que a linha: a coluna do botão de calendário media o rótulo
+  invisível inteiro. Vale reconferir os cinco `DateField` do app.
+- **"Ver minhas medicações"** (Estoque) ia para a Home em vez da listagem.
+- **A tela azul "Dia completo"** aparecia a cada volta à Home com o dia já fechado.
 
 ## Como reportar
 
@@ -1248,6 +1271,65 @@ propósito.
 
 **Fecha o quê:** os nove casos do C1.8. Com 11.1 a 11.7 anotados, a caixa _"Checklist de borda
 percorrido"_ do plano fecha — 11.8 é oportunista e pode ficar como "não observado".
+
+---
+
+## 20 — Os avisos de estoque e de receita (08/09) 🆕
+
+Até 08/09 o app prometia quatro lembretes e entregava três: quem marcava _"me avisar quando estiver
+acabando"_ recebia só o cartão da tela inicial. Agora o estoque também notifica, e a receita ganhou
+um segundo aviso no dia em que vence.
+
+> ⏰ **O aviso cai às 00:01 do dia, não na hora em que você cadastra.**
+>
+> Isso vale para compromisso, receita e estoque — os três são avisos de planejamento, não alarmes:
+> a intenção é que já estejam na tela quando a pessoa pegar o celular pela primeira vez no dia.
+>
+> **Consequência para o teste:** marcar qualquer coisa para **hoje** não dispara nada, porque 00:01
+> de hoje já passou. Para ver um aviso chegar, marque para **amanhã** e confira de manhã. Para
+> testar o encanamento sem esperar, use "Notificação em 30s" no bloco 11.
+
+**20.1 — O estoque avisa** 🔴. Cadastre (ou edite) um remédio com estoque que dure poucos dias e
+marque _"Me avisar quando estiver acabando"_ com antecedência que já inclua **amanhã**.
+
+> ✅ A frase abaixo da antecedência diz que o aviso aparece na tela inicial **e** como notificação,
+> e que são dois — ao entrar na antecedência e quando o estoque acabar.
+> ✅ 🔴 No dia seguinte, a notificação chegou (silenciosa, sem botões de confirmar/pular).
+> ✅ O cartão da tela inicial continua lá, independente da notificação.
+
+**20.2 — A trava** 🔴🔬 — **o passo mais importante deste bloco.**
+
+Com o estoque baixo, **confirme várias doses seguidas**.
+
+> ✅ 🔴 Chega **uma** notificação, não uma por confirmação.
+>
+> 🔬 A previsão de estoque é recalculada a cada dose, então sem trava cada toque geraria um aviso
+> novo. Se chegarem várias, a trava falhou — e é o defeito mais grave possível aqui, porque leva a
+> pessoa a desligar as notificações do app e perder junto os alarmes de dose.
+
+Agora **reponha** o estoque (tela de Estoque → "Repor"), e deixe baixar de novo.
+
+> ✅ Volta a avisar. Repor é o único gesto que rearma o aviso; consumir mais não.
+
+**20.3 — A receita avisa duas vezes.** Anexe uma receita com validade para **depois de amanhã** e
+marque o aviso com **1 dia** de antecedência.
+
+> ✅ A frase diz que são dois lembretes: na antecedência e no dia do vencimento.
+> ✅ Amanhã chega "Receita vencendo"; no dia seguinte, "Receita vence hoje".
+> ✅ Com antecedência **zero**, chega **um** aviso só — não dois no mesmo minuto.
+
+**20.4 — O calendário mostra os dois.** Abra o calendário e navegue até os dias acima.
+
+> ✅ A validade da receita aparece como **"Receita de X vence"**.
+> ✅ O fim do estoque aparece como **"Estoque de X deve acabar por volta desta data"** — a redação
+> é diferente de propósito: é projeção, não fato.
+> ✅ Os dois são discretos: sem cartão, sem fundo próprio, sem toque. Não há o que confirmar.
+> ✅ 🔴 Filtrando por "Compromissos" ou "Remédios", eles **continuam aparecendo** — não são nem um
+> nem outro, e sumir ao filtrar esconderia o que ninguém pediu para esconder.
+
+**20.5 — A migration** 🔬. Este bloco trouxe a `017`, a primeira desde a `016`.
+
+> ✅ O app abre sem erro de banco, e o estoque cadastrado antes continua lá com os mesmos números.
 
 ---
 
