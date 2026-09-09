@@ -113,7 +113,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   },
   time: {
     ...typography.label,
-    textTransform: "none",
     fontSize: 16,
     color: cores.onSurface,
   },
@@ -154,6 +153,9 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   medicationName: {
     ...typography.headlineSm,
     fontSize: 16,
+    // O `headlineSm` traz 24, que basta para 18px mas nao para 16 dentro de um bloco com `gap`
+    // apertado: a perna do "p" de "Dipirona" encostava na linha da dose.
+    lineHeight: 21,
     color: cores.onSurface,
   },
   /** Só a pulada é riscada: a tomada não é uma tarefa cancelada, é uma tarefa cumprida. */

@@ -55,6 +55,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   separador: {
     ...typography.headlineSm,
     fontSize: 30,
+    // Sem isto a caixa da linha (24) e menor que a letra (30) e o ":" sobe em relacao aos numeros.
+    lineHeight: 38,
     color: cores.onSurfaceVariant,
     // Sobe o mesmo tanto que a altura do rótulo abaixo empurraria para baixo.
     marginBottom: spacing.md,
