@@ -41,3 +41,4 @@ export * from "./TimeField/TimeField";
 export * from "./TimePicker/TimePicker";
 export * from "./ToggleChips/ToggleChips";
 export * from "./VisualizadorDeMidia/VisualizadorDeMidia";
+export * from "./LogoDoMapill/LogoDoMapill";

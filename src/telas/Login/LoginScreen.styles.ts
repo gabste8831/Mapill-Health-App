@@ -16,10 +16,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.sm,
   },
-  brandLogo: {
-    width: 220,
-    height: 68,
-  },
   brandSubtitle: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
@@ -30,7 +26,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.md,
   },
-  // Largura máxima acompanhando a logo (mesmos 220 de brandLogo) — os dois botões de ação
+  // Largura máxima acompanhando a logo (os mesmos 220 do `LogoDoMapill`) — os dois botões de ação
   // ficam visualmente ancorados à marca em vez de esticar a largura toda da tela.
   actionButtonWidth: {
     width: "100%",

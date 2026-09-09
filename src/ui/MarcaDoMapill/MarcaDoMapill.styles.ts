@@ -9,7 +9,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   wordmark: {
     ...typography.brandWordmark,
     fontSize: 22,
-    lineHeight: 26,
+    // A Comfortaa desce 1.26x o corpo como a Jakarta: com 26 o "p" de "Mapill" encostava no corte.
+    lineHeight: 28,
     /**
      * O `letterSpacing` do token é absoluto (em pixels), e não proporcional ao corpo — então ele
      * precisa acompanhar a redução de 32 para 22. Herdado sem ajuste, o mesmo -1 fecharia as letras

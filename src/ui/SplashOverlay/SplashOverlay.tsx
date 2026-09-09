@@ -1,9 +1,10 @@
-import { Image } from "expo-image";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { Easing, Keyframe } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
+
+import { CapsulaDoMapill } from "@/ui/CapsulaDoMapill/CapsulaDoMapill";
 
 const DURATION = 600;
 
@@ -49,7 +50,18 @@ export function SplashOverlay() {
     100: { opacity: 0, transform: [{ scale: 1 }], easing: Easing.elastic(0.7) },
   });
 
-  const image = <Image style={styles.image} source={require("@/assets/images/brand/mark-transparent-a.png")} />;
+  /**
+   * A capsula desenhada, e nao mais o PNG do lockup.
+   *
+   * `mark-transparent-a.png` e a marca inteira em **1000x333** (a capsula e a palavra ao lado), e
+   * aqui ela era desenhada num quadro de 76x71 — quase quadrado. A imagem entrava espremida e
+   * recortada, e o que aparecia na tela era "Mapi": a palavra cortada no meio.
+   *
+   * A capsula sozinha e quadrada, entao cabe no quadro sem deformar — e e a mesma forma que a
+   * splash nativa mostra, o que faz a troca entre as duas deixar de existir aos olhos de quem
+   * abre o app.
+   */
+  const image = <CapsulaDoMapill tamanho={96} sobreAzul />;
 
   return animate ? (
     <Animated.View
@@ -70,10 +82,6 @@ export function SplashOverlay() {
 }
 
 const styles = StyleSheet.create({
-  image: {
-    width: 76,
-    height: 71,
-  },
   splashOverlay: {
     ...StyleSheet.absoluteFill,
     /**

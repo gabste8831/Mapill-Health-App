@@ -1,8 +1,7 @@
-import { Image } from "expo-image";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button, GoogleLogo } from "@/ui";
+import { Button, GoogleLogo, LogoDoMapill } from "@/ui";
 import { useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./LoginScreen.styles";
 
@@ -36,12 +35,9 @@ export function LoginScreen({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.brand}>
-          <Image
-            source={require("@/assets/images/brand/mark-transparent-a.png")}
-            style={styles.brandLogo}
-            contentFit="contain"
-            accessibilityLabel="Mapill"
-          />
+          {/* O lockup por esquema de tema. O PNG anterior tinha a palavra em preto congelado e
+              sumia no tema escuro. */}
+          <LogoDoMapill largura={220} />
           <Text style={styles.brandSubtitle}>
             Sua saúde organizada em um só lugar.
           </Text>
