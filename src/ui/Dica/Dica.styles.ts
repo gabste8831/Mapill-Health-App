@@ -25,7 +25,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   texto: {
     ...typography.bodyMd,
-    color: cores.onSurface,
+    // A tinta da propria superficie, e nao a da tela: no escuro `onSurface` e quase branco e o
+    // texto sumia sobre o ambar (1.09:1).
+    color: cores.onWarningSurface,
     flex: 1,
   },
 }));

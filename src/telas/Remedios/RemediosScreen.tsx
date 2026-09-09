@@ -38,7 +38,7 @@ import { criarEstilos } from "./RemediosScreen.styles";
 
 /** Alfabética primeiro por ser a que não muda sozinha: a lista fica onde a pessoa deixou. */
 const ORDENS_DE_REMEDIO: OpcaoDeOrdem<OrdemDeRemedios>[] = [
-  { value: "alfabetica", label: "A–Z", icon: "text-outline" },
+  { value: "alfabetica", label: "A-Z", icon: "text-outline" },
   { value: "cadastro", label: "Mais recentes", icon: "time-outline" },
   { value: "estoque", label: "Acabando", icon: "cube-outline" },
 ];
@@ -97,7 +97,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
               </Pressable>
             ) : (
               <View style={[styles.photo, styles.photoVazia]}>
-                <Ionicons name="medkit-outline" size={24} color={cores.primary} />
+                <Ionicons name="medkit-outline" size={24} color={cores.corDeDestaque} />
               </View>
             )}
           </View>

@@ -32,7 +32,7 @@ export function CardEstoqueBaixo({
       <Ionicons
         name="warning"
         size={140}
-        color={cores.onError}
+        color={cores.onErrorPreenchido}
         style={styles.marcaDagua}
         accessibilityElementsHidden
         importantForAccessibility="no"
@@ -41,7 +41,7 @@ export function CardEstoqueBaixo({
       <View style={styles.conteudo}>
         <View style={styles.header}>
           <View style={styles.seloDoRotulo}>
-            <Ionicons name="warning" size={13} color={cores.onError} />
+            <Ionicons name="warning" size={13} color={cores.onErrorPreenchido} />
           </View>
           <Text style={styles.label}>Alerta de estoque</Text>
         </View>

@@ -46,7 +46,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: withOpacity(cores.onError, 0.2),
+    backgroundColor: withOpacity(cores.onErrorPreenchido, 0.2),
   },
   header: {
     flexDirection: "row",
@@ -55,35 +55,39 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   label: {
     ...typography.label,
-    color: cores.onError,
+    color: cores.onErrorPreenchido,
     opacity: 0.85,
   },
   medicationName: {
     ...typography.headlineMd,
-    color: cores.onError,
+    color: cores.onErrorPreenchido,
   },
   daysRemaining: {
     ...typography.bodyMd,
-    color: cores.onError,
+    color: cores.onErrorPreenchido,
     opacity: 0.9,
   },
   primaryButton: {
-    backgroundColor: cores.onError,
+    backgroundColor: cores.onErrorPreenchido,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.sm,
     alignItems: "center",
   },
   /**
-   * O texto do botão fica no `error`, e não no `errorPreenchido` do cartão.
+   * O texto do botão é o **`errorPreenchido`**, a mesma cor do cartão atrás dele.
    *
-   * Aqui a situação vira de novo: é texto pequeno sobre branco, onde vale a régua de 4.5:1 — o
-   * `error` dá 5.24:1 e o `errorPreenchido` 4.83:1. Os dois passam, mas o `error` é o token de
-   * texto, e usá-lo mantém a regra simples: preenchimento com um, palavra com o outro.
+   * Já foi o `error`, com o argumento de que ele é "o token de texto". A regra era boa no tema
+   * claro e falsa no escuro: ali `error` é um salmão claro (`#FF9A92`), e sobre o botão branco
+   * dava **2.04:1** — o rótulo "Repor" praticamente sumia dentro do próprio botão.
+   *
+   * O que decide a cor aqui não é a categoria do token, é o fundo: o botão é uma janela clara
+   * recortada no cartão, então quem se lê dentro dele é a cor do cartão. 9.54:1 no escuro,
+   * 8.55:1 no claro — e a regra passa a valer nos quatro temas em vez de em dois.
    */
   primaryButtonText: {
     ...typography.label,
-    color: cores.error,
+    color: cores.errorPreenchido,
   },
   secondaryButton: {
     paddingVertical: spacing.xs,
@@ -91,7 +95,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   secondaryButtonText: {
     ...typography.label,
-    color: cores.onError,
+    color: cores.onErrorPreenchido,
     opacity: 0.85,
   },
 }));

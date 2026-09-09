@@ -1,5 +1,5 @@
 
-import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   safeArea: {
@@ -37,11 +37,16 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     paddingHorizontal: spacing.lg,
   },
-  /** Fundo escuro atrás do texto: sobre a imagem da câmera, texto sem fundo some. */
+  /**
+   * Fundo escuro atrás do texto: sobre a imagem da câmera, texto sem fundo some.
+   *
+   * Preto fixo, e não `onSurface`: a câmera mostra o mundo, não o tema, e no escuro `onSurface` é
+   * quase branco — a tarja ficaria clara com o texto branco por cima, ilegível.
+   */
   instrucaoTexto: {
     ...typography.bodyLg,
-    color: cores.onPrimary,
-    backgroundColor: withOpacity(cores.onSurface, 0.75),
+    color: "#FFFFFF",
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.full,

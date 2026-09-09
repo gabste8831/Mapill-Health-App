@@ -125,7 +125,8 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     // `error`, e não `onErrorContainer`: este texto fica sobre superfície clara, e o token de
     // container é quase preto (9.9:1) num matiz diferente — dava um vermelho que não combinava com
     // o resto do app.
-    color: cores.error,
+    // O par de `errorSurface`, o fundo deste selo: no escuro `error` e salmao claro (1.76:1).
+    color: cores.onErrorSurface,
   },
   /**
    * O selo do prazo, com ícone. Existe nos **três** estados, e não só nos de aviso.

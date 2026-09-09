@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-import { colors, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { colors, radius, spacing, typography } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
   /**
@@ -11,11 +11,17 @@ export const styles = StyleSheet.create({
   fundo: {
     flex: 1,
     /**
-     * O mesmo cinza-azulado do `BottomSheet`, mas mais fechado (0.75 contra 0.4): lá o scrim só
-     * separa a folha do fundo, e aqui ele é o que faz a foto ser **lida** — uma receita manuscrita
-     * sobre um formulário claro competindo por trás não se decifra.
+     * Preto a 80%, e não `onSurface` a 75%.
+     *
+     * Aqui o véu não separa: ele é o que faz a foto ser **lida** — uma receita manuscrita com um
+     * formulário claro competindo por trás não se decifra. E `onSurface` invertia no tema escuro,
+     * onde ele é quase branco: o fundo do visualizador clareava em vez de sumir, justamente no
+     * tema em que a tela já está escura e a foto deveria dominar.
+     *
+     * Escuro de verdade em todo tema, como qualquer visualizador de imagem: uma foto se olha
+     * contra o escuro, independente do resto do app.
      */
-    backgroundColor: withOpacity(colors.onSurface, 0.75),
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     justifyContent: "center",
     padding: spacing.lg,
     gap: spacing.md,
@@ -60,7 +66,10 @@ export const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: withOpacity(colors.onSurface, 0.35),
+    // Branco translucido, e nao `onSurface` a 35%: o X e branco, e no tema escuro `onSurface`
+    // tambem — o botao virava branco sobre branco. Sobre o fundo preto do visualizador, o disco
+    // claro e o que da forma ao icone.
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
   },
   /** A legenda de apoio, quando há algo a dizer sobre o arquivo (a validade da receita). */
   legenda: {

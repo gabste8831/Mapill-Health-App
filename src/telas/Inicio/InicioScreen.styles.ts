@@ -159,6 +159,7 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   },
   erroAcao: {
     ...typography.label,
-    color: cores.error,
+    // O par de `errorSurface`. `error` le sobre o fundo da tela; no escuro ele e salmao claro.
+    color: cores.onErrorSurface,
   },
 }));

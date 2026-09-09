@@ -35,16 +35,31 @@ export const temaAltoContraste: Tema = {
   descricao: "Preto sobre branco, contornos visíveis. Para baixa visão e uso sob sol.",
   esquema: "claro",
   cores: {
-    primary: "#00337A",
+    /**
+     * `#0044A3`, e não o `#00337A` de antes.
+     *
+     * O anterior dava **11.97:1** sobre branco, quando o teto que este tema persegue é o AAA da
+     * WCAG: **7:1**. Ou seja, ele estava pagando escuridão por um contraste que ninguém exige — e
+     * o preço aparece onde o azul cobre área grande (a faixa do calendário, o card de próxima
+     * dose, a capa do alarme), que num tom quase marinho lê como bloco preto e não como a cor da
+     * ação. Um app inteiro em azul-marinho não é mais legível, é só mais sombrio.
+     *
+     * O novo passa em AAA em **todas** as superfícies do tema, e a folga é medida: 8.91:1 sobre
+     * branco, 7.12:1 no pior caso (o `surfaceContainer`, onde ele tinge chip). O degrau seguinte
+     * (`#004AAD`) cairia para 6.49 ali e perderia o AAA justamente onde a cor vira fundo.
+     */
+    primary: "#0044A3",
     onPrimary: "#FFFFFF",
-    primaryContainer: "#00448F",
+    primaryContainer: "#00539E",
     onPrimaryContainer: "#FFFFFF",
     /** Tema claro: `primary` já lê bem como tinta, então é o mesmo valor. */
-    corDeDestaque: "#00337A",
-    superficieDeDestaque: "#00337A",
+    corDeDestaque: "#0044A3",
+    superficieDeDestaque: "#0044A3",
     onSuperficieDeDestaque: "#FFFFFF",
     primarySurface: "#DCE9FF",
-    onPrimarySurface: "#00274F",
+    // Acompanha o `primary`: em `#00274F` dava 12.22:1 sobre o fundo azul-claro, a mesma folga
+    // excessiva que motivou clarear a cor principal. Aqui fica 9.9:1, ainda AAA com sobra.
+    onPrimarySurface: "#00396E",
 
     secondary: "#2A3242",
     onSecondary: "#FFFFFF",
@@ -71,6 +86,8 @@ export const temaAltoContraste: Tema = {
 
     successSurface: "#D6F5E1",
     errorSurface: "#FFDEDA",
+    /** Mais fechado que o `error`, para o AAA que este tema persegue: 9.4:1 sobre a superficie. */
+    onErrorSurface: "#5C0004",
 
     /**
      * Aqui o vivo quase não se afasta do normal, e é o ponto do tema.
@@ -85,6 +102,7 @@ export const temaAltoContraste: Tema = {
     errorVivo: "#C21118",
     /** Igual ao `error`: no alto contraste, o fundo preenchido é o mais escuro possível. */
     errorPreenchido: "#9E0008",
+    onErrorPreenchido: "#FFFFFF",
 
     background: "#FFFFFF",
     onBackground: "#000000",
@@ -101,6 +119,8 @@ export const temaAltoContraste: Tema = {
     outline: "#3A4049",
     /** O contorno precisa ser visto: cinza-claro viraria a mesma ausência que a sombra era. */
     outlineVariant: "#6B7280",
+    /** Preto a 70%: neste tema o veu tambem separa por contraste, e nao so por escurecimento. */
+    scrim: "rgba(0, 0, 0, 0.7)",
   },
   ajustes: {
     contornarSuperficies: true,

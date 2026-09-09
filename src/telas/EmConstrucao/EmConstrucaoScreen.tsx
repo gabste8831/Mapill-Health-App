@@ -24,7 +24,7 @@ export function EmConstrucaoScreen({ title, description, icon = "hammer-wrench",
     <SafeAreaView style={styles.safeArea}>
       <Header title={title} onBack={onBack} />
       <View style={styles.content}>
-        <MaterialCommunityIcons name={icon} size={40} color={cores.primary} />
+        <MaterialCommunityIcons name={icon} size={40} color={cores.corDeDestaque} />
         <Text style={styles.description}>{description}</Text>
       </View>
     </SafeAreaView>

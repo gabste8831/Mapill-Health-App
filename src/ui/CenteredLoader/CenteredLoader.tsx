@@ -10,7 +10,7 @@ export function CenteredLoader() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator color={cores.primary} />
+      <ActivityIndicator color={cores.corDeDestaque} />
     </View>
   );
 }

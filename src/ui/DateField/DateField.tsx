@@ -101,7 +101,7 @@ export function DateField({
           accessibilityLabel={
             label ? `Escolher ${label} no calendário` : "Escolher a data no calendário"
           }>
-          <Ionicons name="calendar-outline" size={22} color={cores.primary} />
+          <Ionicons name="calendar-outline" size={22} color={cores.corDeDestaque} />
         </Pressable>
       </View>
 

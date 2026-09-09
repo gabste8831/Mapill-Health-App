@@ -53,6 +53,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSuccessContainer,
   },
   seloTextoAusente: {
-    color: cores.onErrorContainer,
+    // O par de `errorSurface`, que e o fundo deste selo. `onErrorContainer` acompanha o
+    // `errorContainer` — outro fundo — e no escuro e claro: 1.12:1 aqui.
+    color: cores.onErrorSurface,
   },
 }));

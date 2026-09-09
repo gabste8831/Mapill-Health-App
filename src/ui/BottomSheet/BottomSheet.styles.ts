@@ -1,12 +1,12 @@
 
-import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   overlay: {
     flex: 1,
-    // O scrim e onSurface a 40%: o mesmo cinza-azulado do texto, e nao um preto que nao existe
-    // no tema.
-    backgroundColor: withOpacity(cores.onSurface, 0.4),
+    // `scrim` e nao `onSurface` a 40%: aquele era o cinza do texto, e no tema escuro o texto e
+    // quase branco — o veu clareava o fundo em vez de escurece-lo. Ver `shared/theme/colors.ts`.
+    backgroundColor: cores.scrim,
     justifyContent: "flex-end",
   },
   sheet: {

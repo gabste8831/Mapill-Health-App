@@ -33,7 +33,7 @@ export function CardCompromissos({ onPress }: CardCompromissosProps) {
       accessibilityRole="button"
       accessibilityLabel="Ver meus compromissos agendados">
       <View style={styles.icone}>
-        <Ionicons name="calendar" size={22} color={cores.primary} />
+        <Ionicons name="calendar" size={22} color={cores.corDeDestaque} />
       </View>
 
       {/* Só o título, como no card de estoque: o rótulo da seção já diz o assunto, e a contagem que

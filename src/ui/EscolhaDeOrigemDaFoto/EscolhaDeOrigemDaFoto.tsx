@@ -44,7 +44,7 @@ export function EscolhaDeOrigemDaFoto({
           style={styles.opcao}
           onPress={() => onEscolher("camera")}
           accessibilityRole="button">
-          <Ionicons name="camera" size={24} color={cores.primary} />
+          <Ionicons name="camera" size={24} color={cores.corDeDestaque} />
           <View style={styles.texto}>
             <Text style={styles.rotulo}>Tirar foto agora</Text>
             <Text style={styles.dica}>Abre a câmera do aparelho.</Text>
@@ -55,7 +55,7 @@ export function EscolhaDeOrigemDaFoto({
           style={styles.opcao}
           onPress={() => onEscolher("galeria")}
           accessibilityRole="button">
-          <Ionicons name="images" size={24} color={cores.primary} />
+          <Ionicons name="images" size={24} color={cores.corDeDestaque} />
           <View style={styles.texto}>
             <Text style={styles.rotulo}>Escolher da galeria</Text>
             <Text style={styles.dica}>Para uma foto que você já tem.</Text>
@@ -69,7 +69,7 @@ export function EscolhaDeOrigemDaFoto({
             style={styles.opcao}
             onPress={onEscolherArquivo}
             accessibilityRole="button">
-            <Ionicons name="document-text" size={24} color={cores.primary} />
+            <Ionicons name="document-text" size={24} color={cores.corDeDestaque} />
             <View style={styles.texto}>
               <Text style={styles.rotulo}>Escolher arquivo</Text>
               <Text style={styles.dica}>PDF ou imagem salvos no aparelho.</Text>

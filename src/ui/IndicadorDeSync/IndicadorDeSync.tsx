@@ -49,7 +49,7 @@ export function IndicadorDeSync({ estado, sincronizando, onSincronizar }: Indica
       accessibilityLabel="Sincronizar agora">
       <View style={styles.icone}>
         {sincronizando ? (
-          <ActivityIndicator size="small" color={cores.primary} />
+          <ActivityIndicator size="small" color={cores.corDeDestaque} />
         ) : (
           <Ionicons
             name={temPendencias ? "cloud-upload-outline" : "cloud-done-outline"}

@@ -42,7 +42,7 @@ export const temaDaltonismo: Tema = {
     corDeDestaque: "#0B5FD9",
     superficieDeDestaque: "#0B5FD9",
     onSuperficieDeDestaque: "#FFFFFF",
-    primaryContainer: "#2B7BF5",
+    primaryContainer: "#1F6FE8",
     onPrimaryContainer: "#FFFFFF",
     primarySurface: "#EAF1FE",
     onPrimarySurface: "#0A3F8F",
@@ -81,6 +81,8 @@ export const temaDaltonismo: Tema = {
 
     successSurface: "#E0F5F6",
     errorSurface: "#FCE8EF",
+    /** Magenta escuro, o par da superficie deste tema. */
+    onErrorSurface: "#7A0033",
 
     /**
      * Turquesa e magenta mais vivos — **não** verde grama e vermelho fogo.
@@ -99,6 +101,7 @@ export const temaDaltonismo: Tema = {
     errorVivo: "#D81B60",
     /** Magenta preenchido: o mesmo par do tema, com o branco por cima ainda legível. */
     errorPreenchido: "#C2185B",
+    onErrorPreenchido: "#FFFFFF",
 
     background: "#F1F4F8",
     onBackground: "#141719",
@@ -113,6 +116,7 @@ export const temaDaltonismo: Tema = {
 
     outline: "#6B7280",
     outlineVariant: "#CBD2DE",
+    scrim: "rgba(20, 23, 25, 0.45)",
   },
   ajustes: {
     contornarSuperficies: false,

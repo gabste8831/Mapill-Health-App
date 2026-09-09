@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 
 import { formatTimeInput, parseTimeInput } from "@/shared/time-input";
@@ -80,14 +80,25 @@ export function TimeField({
       />
 
       {/* Ao lado do campo, e não no lugar dele. O alvo tem a altura do input inteiro porque um
-          ícone pequeno ao lado de um campo alto é o toque que erra. */}
-      <Pressable
-        style={[styles.botaoDeRelogio, semRotulo && styles.botaoDeRelogioSemRotulo]}
-        onPress={abrir}
-        accessibilityRole="button"
-        accessibilityLabel={`Escolher ${label} no relógio`}>
-        <Ionicons name="time-outline" size={22} color={cores.primary} />
-      </Pressable>
+          ícone pequeno ao lado de um campo alto é o toque que erra.
+
+          O rótulo repetido invisível acima é o que empurra o botão até a altura do input — a mesma
+          solução do `DateField`, e pelo mesmo motivo: um `marginTop` cravado só acerta a altura de
+          rótulo para a qual foi medido. */}
+      <View style={styles.colunaDoBotao}>
+        {semRotulo ? null : (
+          <Text style={styles.rotuloFantasma} aria-hidden numberOfLines={1}>
+            {label}
+          </Text>
+        )}
+        <Pressable
+          style={styles.botaoDeRelogio}
+          onPress={abrir}
+          accessibilityRole="button"
+          accessibilityLabel={`Escolher ${label} no relógio`}>
+          <Ionicons name="time-outline" size={22} color={cores.corDeDestaque} />
+        </Pressable>
+      </View>
 
       <BottomSheet visible={isSheetOpen} onClose={() => setSheetOpen(false)} title={label}>
         <View style={styles.sheetBody}>

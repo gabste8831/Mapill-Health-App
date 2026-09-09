@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import { useCores, useEstilos } from "@/shared/theme";
-import { MarcaDoMapill } from "@/ui/MarcaDoMapill/MarcaDoMapill";
+import { LogoDoMapill } from "@/ui/LogoDoMapill/LogoDoMapill";
 import { criarEstilos } from "./Header.styles";
 
 export type HeaderAction = {
@@ -40,7 +40,7 @@ export function Header({ title, onBack, onAccount, action }: HeaderProps) {
       onPress={action.onPress}
       accessibilityRole="button"
       accessibilityLabel={action.label}>
-      <Ionicons name={action.icon} size={24} color={cores.primary} />
+      <Ionicons name={action.icon} size={24} color={cores.corDeDestaque} />
     </Pressable>
   ) : onAccount ? (
     <Pressable
@@ -57,8 +57,10 @@ export function Header({ title, onBack, onAccount, action }: HeaderProps) {
   if (title === undefined) {
     return (
       <View style={styles.header}>
+        {/* 96 de largura -> 32 de altura, pouco mais da metade dos 60 do cabecalho.
+            A marca situa a tela; ela nao e o conteudo dela, e a 40 ocupava dois tercos da faixa. */}
         <View style={styles.brandSlot}>
-          <MarcaDoMapill />
+          <LogoDoMapill largura={96} />
         </View>
         {accountButton}
       </View>

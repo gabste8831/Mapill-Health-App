@@ -14,8 +14,15 @@
 export const colors = {
   primary: "#0B5FD9",
   onPrimary: "#FFFFFF",
-  /** O azul mais claro do gradiente do card-herói, e o estado pressionado de superfície azul. */
-  primaryContainer: "#2B7BF5",
+  /**
+   * O azul mais claro do gradiente do card-herói, e o estado pressionado de superfície azul.
+   *
+   * `#1F6FE8` e não o `#2B7BF5` anterior: com o branco por cima aquele dava **4.00:1** e reprovava
+   * em AA para texto — e ele carrega texto, no selo do diagnóstico e nas iniciais do avatar de
+   * Ajustes. Um degrau mais escuro leva a 4.62:1 e continua sendo o azul mais claro que `primary`,
+   * que é o papel do token no gradiente.
+   */
+  primaryContainer: "#1F6FE8",
   onPrimaryContainer: "#FFFFFF",
   /**
    * O azul **diluído**: fundo de bloco de apoio, chip selecionado leve, tinta de linha ativa.
@@ -187,6 +194,18 @@ export const colors = {
    * escura o desvio não se percebe como rosa, que era o problema do `#C4141C` em texto pequeno.
    */
   errorPreenchido: "#9E0008",
+  /**
+   * O que se lê **sobre** `errorPreenchido`.
+   *
+   * Nasceu tarde, e a falta dele era um defeito: o card de estoque baixo usava `onError`, que
+   * significa "o que se lê sobre `error`" — outro fundo. Nos temas claros os dois calham de ser
+   * branco e ninguém notava; no escuro, `error` é um vermelho **claro** (`#FF9A92`), então `onError`
+   * é quase preto — e o texto do card saía a **1.51:1** contra o fundo, ilegível.
+   *
+   * Um token de preenchimento precisa do seu par de tinta. Sem ele, quem escreve a tela escolhe o
+   * "on" mais parecido e o erro só aparece no tema onde as duas cores divergem.
+   */
+  onErrorPreenchido: "#FFFFFF",
 
   /**
    * As versões **diluídas** de sucesso e erro, para fundo de cartão numa lista.
@@ -200,6 +219,17 @@ export const colors = {
   // Matiz 0°, como os três vermelhos: em 6° ele puxava para o salmão e destoava do vermelho puro
   // que agora tinge o ícone e a faixa em cima dele.
   errorSurface: "#FDEAEA",
+  /**
+   * O que se lê **sobre** `errorSurface` — o par que faltava, como o `onErrorPreenchido`.
+   *
+   * Quem escrevia sobre essa superfície usava `error`, o vermelho de texto da tela. Os dois valem
+   * enquanto o fundo da tela e a superfície tingida forem ambos claros; no tema escuro `error` é
+   * um salmão (`#FF9A92`) e a superfície é clara, e o selo "OBRIGATÓRIO" saía a 1.76:1.
+   *
+   * Toda superfície precisa do seu "on". Sem ele, quem escreve a tela pega o token mais parecido,
+   * e o erro só aparece no tema onde os dois divergem.
+   */
+  onErrorSurface: "#8C0009",
 
   /**
    * O fundo da tela, e a hierarquia de superfícies acima dele.
@@ -233,6 +263,21 @@ export const colors = {
    */
   outline: "#6B7280",
   outlineVariant: "#CBD2DE",
+
+  /**
+   * O véu que cobre a tela quando um popup ou uma folha se abre.
+   *
+   * Existe como token porque a regra de "escurecer o que está atrás" **não sobrevive à troca de
+   * tema sozinha**. O véu era `onSurface` a 40% — o cinza-azulado do texto, escolhido para não ser
+   * um preto que a paleta não tem. Funciona em três temas e inverte no quarto: no escuro
+   * `onSurface` é quase branco (`#E6E9EE`), então o "escurecedor" **clareava** o fundo, de
+   * `#0F1319` para `#65696E`. Abrir um popup à noite acendia a tela atrás dele.
+   *
+   * Aqui a cor é dita para cada tema, e é o único jeito de a intenção ("o que está atrás recua")
+   * sobreviver a uma paleta invertida — derivar de qualquer token de conteúdo repete o erro na
+   * primeira inversão.
+   */
+  scrim: "rgba(20, 23, 25, 0.45)",
 } as const;
 
 export type ColorToken = keyof typeof colors;

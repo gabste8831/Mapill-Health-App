@@ -34,7 +34,12 @@ function montarOpcoes(esquemaDoSistema: "claro" | "escuro"): Opcao[] {
     {
       id: "sistema",
       nome: "Automático",
-      descricao: "Acompanha o claro e escuro do aparelho.",
+      // Diz qual dos dois esta valendo agora: a amostra ao lado mostra a cor, e a frase confirma
+      // em palavras, que e o que o leitor de tela anuncia.
+      descricao:
+        esquemaDoSistema === "escuro"
+          ? "Acompanha o aparelho, que agora está no escuro."
+          : "Acompanha o aparelho, que agora está no claro.",
       amostra: { fundo: doSistema.cores.background, acao: doSistema.cores.primary },
     },
     ...TEMAS_EM_ORDEM.map((tema) => ({
@@ -59,9 +64,11 @@ function montarOpcoes(esquemaDoSistema: "claro" | "escuro"): Opcao[] {
 export function SeletorDeAparencia() {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
-  const { preferencia, escolher, tema } = useTema();
+  const { preferencia, escolher, esquemaDoAparelho } = useTema();
 
-  const opcoes = montarOpcoes(tema.esquema);
+  // O esquema do **aparelho**, e nao o do tema em vigor: a amostra do automatico mostra o que ele
+  // produziria, entao com o celular no escuro ela e escura mesmo que o app esteja em outro tema.
+  const opcoes = montarOpcoes(esquemaDoAparelho);
 
   return (
     <View style={styles.cartao}>
@@ -93,7 +100,7 @@ export function SeletorDeAparencia() {
             {/* O check só na selecionada. Um círculo vazio em cada linha não escolhida é ruído:
                 a ausência do check já diz que ela não está ativa. */}
             {selecionada ? (
-              <Ionicons name="checkmark-circle" size={24} color={cores.primary} />
+              <Ionicons name="checkmark-circle" size={24} color={cores.corDeDestaque} />
             ) : null}
           </Pressable>
         );

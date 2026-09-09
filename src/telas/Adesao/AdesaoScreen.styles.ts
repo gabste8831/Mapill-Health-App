@@ -1,5 +1,5 @@
 
-import { estilosDoTema, listGap, radius, screenPadding, spacing, superficieDeCartao, typography, withOpacity } from "@/shared/theme";
+import { estilosDoTema, fieldLabelGap, listGap, radius, screenPadding, spacing, superficieDeCartao, typography, withOpacity } from "@/shared/theme";
 
 /**
  * Altura da barra diária. Exportada porque a tela calcula a altura preenchida com ela.
@@ -215,7 +215,9 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   diaValor: {
     ...typography.bodySm,
     fontWeight: "700",
-    color: cores.primary,
+    // `corDeDestaque` e nao `primary`: aqui o azul e tinta sobre o cartao branco, e no tema escuro
+    // `primary` e o navy de fundo — 1.6:1 contra a superficie, um numero que nao se le.
+    color: cores.corDeDestaque,
   },
   /**
    * O `%` colado no número, menor e mais leve.
@@ -352,10 +354,23 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    * mais um item da pilha.
    */
   exportarTopo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
+    // Empilhado: sem o icone ao lado, nao ha o que alinhar na horizontal — o titulo e a frase que
+    // o explica sao duas linhas de texto, e o `gap` entre elas e o mesmo dos rotulos de campo.
+    gap: spacing.xs,
     marginBottom: spacing.sm,
+  },
+  /**
+   * O período dentro da seção do relatório: rótulo em cima, fileira embaixo.
+   *
+   * O `fieldLabelGap` é o mesmo dos formulários — o rótulo pertence ao controle logo abaixo, e
+   * qualquer outro valor faria a fileira flutuar longe do que a nomeia.
+   */
+  periodoDoRelatorio: {
+    gap: fieldLabelGap,
+  },
+  periodoRotulo: {
+    ...typography.label,
+    color: cores.onSurfaceVariant,
   },
   /**
    * Os dois seletores andam juntos, com menos espaço entre si que o do resto da seção.
@@ -367,17 +382,25 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   gruposDoRelatorio: {
     gap: spacing.sm,
   },
-  /** O quadrado do ícone, na mesma linguagem dos cards de atalho da Home. */
-  exportarIcone: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.md,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: cores.primaryContainer,
-  },
+  /**
+   * O ícone, **sem o quadrado colorido atrás**.
+   *
+   * Ele já teve fundo `primaryContainer`, e o conjunto — quadradinho de cor com título em negrito
+   * ao lado — é o cabeçalho de card que todo gerador de site produz. Fora isso a cor não fazia
+   * trabalho nenhum: azul aqui não distingue esta seção de nada, porque não há outra seção com
+   * ícone para ela contrastar. O app reserva cor para função (vermelho é atraso, verde é agora), e
+   * um azul decorativo enfraquece essa regra em todo lugar onde ela importa.
+   *
+   * A largura fixa fica, para o texto ao lado alinhar pela mesma coluna.
+   */
+  /**
+   * `headlineSmRegular` e não `headlineSm`: peso normal.
+   *
+   * Este título apresenta a seção, não disputa a tela com o número grande da adesão lá em cima. Em
+   * negrito ele competia com o único dado que a tela existe para entregar.
+   */
   exportarTitulo: {
-    ...typography.headlineSm,
+    ...typography.headlineSmRegular,
     color: cores.onSurface,
   },
   /** `bodySm`: é a linha que explica o título, não um assunto próprio. */
@@ -385,12 +408,22 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodySm,
     color: cores.onSurfaceVariant,
   },
-  /** Em linha, para a seta caber à direita do texto. */
+  /**
+   * Em linha, para a seta caber à direita do texto.
+   *
+   * **Baixa de propósito.** Ela já foi um cartão de duas linhas empilhadas com `padding` de 16 — um
+   * alvo da altura de um card de conteúdo para um toque que só abre um popup. O peso visual
+   * prometia mais do que a linha entrega, e as duas seguidas ocupavam mais tela que o gráfico da
+   * adesão. Agora rótulo e valor dividem a mesma linha, e a altura cai para pouco mais que o alvo
+   * mínimo de toque.
+   */
   filtro: {
     ...superficieDeCartao(cores, ajustes),
     flexDirection: "row",
     alignItems: "center",
-    padding: spacing.md,
+    minHeight: 48,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
   /**
@@ -403,17 +436,32 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   filtroVazio: {
     opacity: 0.6,
   },
+  /**
+   * Rótulo e valor na **mesma linha**, e não empilhados.
+   *
+   * O rótulo diz o assunto e o valor diz o estado ("Todos", "2 de 3"): lado a lado eles se leem
+   * como uma frase, e a linha inteira passa a caber na altura de um toque. Empilhados custavam
+   * duas alturas de texto mais o vão entre elas para dizer o mesmo.
+   */
   filtroTexto: {
     flex: 1,
-    gap: spacing.xs,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
   filtroRotulo: {
-    ...typography.label,
-    color: cores.onSurfaceVariant,
+    ...typography.bodyMd,
+    color: cores.onSurface,
+    // Cede a largura ao valor antes de o valor truncar: o rotulo se adivinha pela metade
+    // ("Medicamentos no relat..."), o estado nao.
+    flexShrink: 1,
   },
   filtroValor: {
-    ...typography.bodyLg,
-    color: cores.onSurface,
+    ...typography.bodyMd,
+    color: cores.onSurfaceVariant,
+    // Encostado na seta, longe do rotulo: e o estado, e o olho o procura junto do que abre a
+    // escolha, nao colado no assunto.
+    marginLeft: "auto",
   },
 
   /** O conteúdo do popup de seleção. */

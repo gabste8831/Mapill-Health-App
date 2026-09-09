@@ -123,7 +123,9 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   },
   textoTomei: {
     ...typography.label,
-    color: cores.primary,
+    // Tinta sobre o botao claro, entao `corDeDestaque`: no escuro o `primary` e o navy de fundo e
+    // o rotulo sumiria dentro do proprio botao.
+    color: cores.corDeDestaque,
   },
   botaoPulei: {
     flex: 1,

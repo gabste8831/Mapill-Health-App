@@ -33,7 +33,7 @@ export function EstadoVazio({ titulo, descricao, icone, semCartao = false, style
     <View style={[semCartao ? styles.containerSolto : styles.container, style]}>
       {icone ? (
         <View style={styles.disco}>
-          <Ionicons name={icone} size={26} color={cores.primary} />
+          <Ionicons name={icone} size={26} color={cores.corDeDestaque} />
         </View>
       ) : null}
       <View style={styles.textos}>

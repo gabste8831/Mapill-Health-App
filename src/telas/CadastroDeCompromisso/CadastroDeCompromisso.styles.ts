@@ -18,8 +18,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     justifyContent: "space-between",
     gap: spacing.sm,
   },
+  /**
+   * Titulo de secao. `headlineSmRegular` e nao `label`: enquanto os rotulos eram maiusculos o
+   * `label` bastava — a caixa alta dava presenca de titulo ao menor tamanho da escala. Em caixa de
+   * frase a muleta acabou, e o cabecalho ficava em 13px abaixo do texto de apoio que ele encabeca.
+   */
   sectionTitle: {
-    ...typography.label,
+    ...typography.headlineSmRegular,
     color: cores.onSurfaceVariant,
   },
   selo: {
@@ -70,7 +75,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   erro: {
     ...typography.bodySm,
-    color: cores.error,
+    // O bloco e ambar, entao a tinta e a do ambar. `error` e o vermelho sobre a superficie da
+    // tela, e no escuro ele e claro: 1.83:1 aqui.
+    color: cores.onWarningSurface,
   },
   /**
    * O último lugar da fileira de antecedências: as opções cobrem o comum e este campo cobre o

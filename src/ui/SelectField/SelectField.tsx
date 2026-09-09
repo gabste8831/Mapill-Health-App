@@ -71,7 +71,7 @@ export function SelectField<TValue extends string>({
             <Text style={option.value === value ? styles.modalOptionTextSelected : styles.modalOptionText}>
               {option.label}
             </Text>
-            {option.value === value ? <Ionicons name="checkmark" size={18} color={cores.primary} /> : null}
+            {option.value === value ? <Ionicons name="checkmark" size={18} color={cores.corDeDestaque} /> : null}
           </Pressable>
         ))}
       </BottomSheet>

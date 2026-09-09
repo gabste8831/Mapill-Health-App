@@ -69,7 +69,7 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
             accessibilityRole="button"
             accessibilityLabel={`${item.titulo}. ${item.descricao}${item.comoFazer ? ` ${item.comoFazer}` : ""} Toque para abrir as configurações.`}>
             <View style={styles.itemTexto}>
-              <View style={styles.itemTopo}>
+              <View style={[styles.itemTopo, styles.itemTopoComRespiro]}>
                 <Text style={styles.itemTitulo}>{item.titulo}</Text>
                 {item.essencial ? (
                   <View style={styles.selo}>
@@ -85,7 +85,10 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
                 <Text style={styles.itemComoFazer}>{item.comoFazer}</Text>
               ) : null}
             </View>
-            <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
+            {/* A tinta do painel, e nao a da tela: `onSurfaceVariant` e o cinza que le sobre o
+                fundo da tela, e no tema escuro ele e claro — sobre a linha branca dava 2.04:1, e a
+                seta, que e o que diz que a linha abre algo, praticamente sumia. */}
+            <Ionicons name="chevron-forward" size={20} color={cores.onWarningSurface} />
           </Pressable>
         ))}
       </View>

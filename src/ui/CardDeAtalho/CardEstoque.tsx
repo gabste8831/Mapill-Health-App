@@ -30,7 +30,7 @@ export function CardEstoque({ onPress }: CardEstoqueProps) {
       accessibilityRole="button"
       accessibilityLabel="Abrir o estoque das suas medicações">
       <View style={styles.icone}>
-        <Ionicons name="cube" size={22} color={cores.primary} />
+        <Ionicons name="cube" size={22} color={cores.corDeDestaque} />
       </View>
 
       {/* Só o título.

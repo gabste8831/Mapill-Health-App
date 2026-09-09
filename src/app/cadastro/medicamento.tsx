@@ -16,13 +16,13 @@ export default function MedicamentoScreen() {
         {
           label: "Cadastro manual",
           description: "Informe nome, dosagem, horários e estoque você mesmo.",
-          icon: <MaterialCommunityIcons name="form-select" size={26} color={cores.primary} />,
+          icon: <MaterialCommunityIcons name="form-select" size={26} color={cores.corDeDestaque} />,
           onPress: () => router.push("/cadastro/manual"),
         },
         {
           label: "Escanear código de barras",
           description: "Aponte a câmera para a caixa e os dados vêm preenchidos.",
-          icon: <MaterialCommunityIcons name="barcode-scan" size={26} color={cores.primary} />,
+          icon: <MaterialCommunityIcons name="barcode-scan" size={26} color={cores.corDeDestaque} />,
           onPress: () => router.push("/cadastro/scanner"),
         },
       ]}
