@@ -86,6 +86,29 @@ async function tratar(evento: Event): Promise<void> {
      * estado. Sem esta trava, cada repetição empilharia outra tela de alarme sobre a anterior.
      */
     if (jaAbertos.has(dados.scheduledFor)) return;
+
+    /**
+     * **A dose já respondida não reabre o alarme** — e este é o caminho do lampejo azul.
+     *
+     * Visto em aparelho em 09/09, e a correção anterior (no toque) não o alcançou porque o gatilho
+     * não é o toque: é o **reagendamento**. Responder na tela do alarme faz, nesta ordem, gravar o
+     * desfecho → `reagendarTodosOsAvisos()` → fechar a tela (ver `responderTodas` em
+     * `AlarmeScreen`). O reagendamento cancela tudo e reagenda a partir do banco, e a dose que
+     * acabou de ser respondida ainda cai dentro da **tolerância de 2 minutos** que existe para o
+     * aviso "que acabou de passar" não se perder (ver `TOLERANCIA_DE_ATRASO_EM_MINUTOS`).
+     *
+     * O aviso reagendado dispara quase na hora, o `DELIVERED` chega, e o app abre a tela do alarme
+     * de novo — que monta, descobre que tudo está resolvido e se fecha sozinha. O lampejo é
+     * exatamente essa tela nascendo e morrendo.
+     *
+     * Ler o banco aqui custa uma consulta por entrega de alarme, o que é raro, e é o que distingue
+     * "há dose esperando" de "isto é o eco de uma resposta que já aconteceu".
+     */
+    if (await todasAsDosesResolvidas(dados.doseScheduleIds)) {
+      await notifee.cancelNotification(id).catch(() => {});
+      return;
+    }
+
     jaAbertos.add(dados.scheduledFor);
 
     aoDispararAlarme?.(dados.scheduledFor);

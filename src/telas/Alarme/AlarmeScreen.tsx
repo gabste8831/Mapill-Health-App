@@ -169,9 +169,26 @@ export function AlarmeScreen({
         if (dose.resolvida) continue;
         await registrar(dose, status);
       }
-      // A dose resolvida deixa de merecer aviso — o mesmo gatilho que a Home dispara ao confirmar.
-      await reagendarTodosOsAvisos();
+
+      /**
+       * **Fecha antes de reagendar**, e a ordem é o que evita o lampejo azul.
+       *
+       * `reagendarTodosOsAvisos` cancela tudo e reagenda a partir do banco. A dose que acabou de
+       * ser respondida ainda cai dentro da tolerância de 2 minutos do "aviso que acabou de passar"
+       * (ver `TOLERANCIA_DE_ATRASO_EM_MINUTOS`), então o aviso volta a ser agendado e dispara quase
+       * na hora — e o `DELIVERED` dele abria esta tela outra vez, que montava, via tudo resolvido e
+       * se fechava. O piscar visto em aparelho em 09/09.
+       *
+       * Com o fechamento antes, a tela já saiu quando o eco chega. O listener também aprendeu a
+       * ignorá-lo (`escutar-avisos`, no `DELIVERED`), e as duas defesas são de camadas diferentes:
+       * aqui o alarme não fica esperando o reagendamento para sair de cena; lá o eco não abre nada
+       * mesmo que chegue por outro caminho.
+       *
+       * O reagendamento continua acontecendo — sem `await`, porque ninguém nesta tela depende do
+       * resultado dele, e ela está saindo.
+       */
       await encerrar();
+      void reagendarTodosOsAvisos();
     },
     [doses, registrar, encerrar],
   );
