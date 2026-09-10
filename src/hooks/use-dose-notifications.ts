@@ -95,8 +95,19 @@ export function useDoseNotifications(): void {
      */
     const pararDeEscutar = escutarAvisos({
       aoAbrirHorario: abrirHorario,
+      /**
+       * `navigate`, e não `push`: **duas telas de alarme nunca se empilham.**
+       *
+       * `push` empilha sempre, mesmo com a rota já aberta — e foi o que fez cada toque na
+       * notificação abrir mais uma tela azul (visto em 10/09, passo 14.5.2). `navigate` reaproveita
+       * a rota quando os parâmetros são os mesmos, então o mesmo horário nunca vira duas telas.
+       *
+       * A guarda de `alarme-em-cena` já evita o caso conhecido; esta é a segunda camada, para o
+       * disparo que escape por um caminho que ninguém previu. Empilhar tela de alarme é o defeito
+       * que mais custou nesta semana, e ele não pode depender de uma trava só.
+       */
       aoDispararAlarme: (scheduledFor) => {
-        router.push({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
+        router.navigate({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
       },
       aoAbrirDestino: abrirDestino,
     });

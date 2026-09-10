@@ -191,8 +191,25 @@ async function tratar(evento: Event): Promise<void> {
      * abre por conta própria o que o sistema não deixou irromper.
      */
     if (ehAlarmeDeTelaCheia(id)) {
-      // Sai da trava do `DELIVERED`: um toque é intenção explícita, e recusá-lo porque a entrega já
-      // foi registrada deixaria o toque sem efeito nenhum.
+      /**
+       * **Com a tela já na frente, o toque não abre outra.**
+       *
+       * Visto em aparelho (10/09, passo 14.5.2): o alarme irrompe e deixa a notificação na bandeja
+       * — ela fica lá de propósito, `ongoing: true`. Cada toque nela empilhava **mais uma** tela
+       * azul, e responder fechava só a de cima: sobravam as outras, uma por toque.
+       *
+       * A linha que causava isso apagava a trava do `DELIVERED` antes de empurrar a rota. Ela foi
+       * escrita quando `jaAbertos` era a única guarda, para o toque não ficar sem efeito depois de
+       * a entrega já ter sido registrada — o raciocínio valia, mas ele pulava a pergunta que
+       * importa: *já existe tela para este horário?*
+       *
+       * `alarme-em-cena` responde isso, e é o registro que a Activity e a rota compartilham. Com
+       * tela em cena, o toque não tem o que fazer: a pessoa já está olhando para ela.
+       */
+      if (jaEstaEmCena(dados.scheduledFor)) return;
+
+      // Sem tela em cena, o toque é intenção explícita e abre — mesmo que a entrega já tenha sido
+      // registrada, porque aí a tela dela foi embora e recusar deixaria o toque sem efeito.
       jaAbertos.delete(dados.scheduledFor);
       aoDispararAlarme?.(dados.scheduledFor);
       return;

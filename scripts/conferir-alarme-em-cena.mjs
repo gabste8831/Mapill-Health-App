@@ -104,6 +104,35 @@ console.log("\nHorários diferentes não se atrapalham\n");
   saiuDeCena(OUTRO, "rota");
 }
 
+console.log("\nToques repetidos na notificação não empilham telas\n");
+{
+  /**
+   * O caso relatado em aparelho (10/09, passo 14.5.2): o alarme irrompe e deixa a notificação na
+   * bandeja (`ongoing: true`, de propósito). Cada toque nela abria **mais uma** tela azul, e
+   * responder fechava só a de cima — sobravam as outras, uma por toque.
+   *
+   * A guarda do listener consulta `jaEstaEmCena` antes de abrir. Estes casos travam a pergunta que
+   * ela faz: com tela em cena, o toque não tem o que fazer.
+   */
+  entrouEmCena(HORARIO, "activity");
+
+  conferir("com a Activity em cena, o toque não abre outra", jaEstaEmCena(HORARIO));
+  conferir("e o segundo toque também não", jaEstaEmCena(HORARIO));
+  conferir("nem o terceiro", jaEstaEmCena(HORARIO));
+
+  // Depois de a tela sair — respondida —, um toque tardio volta a poder abrir. É o caso de quem
+  // responde, a tela fecha, e a notificação ainda está lá.
+  saiuDeCena(HORARIO, "activity");
+  conferir("mas depois de a tela sair, o toque volta a valer", !jaEstaEmCena(HORARIO));
+}
+
+{
+  // O mesmo pela rota: ela também registra em cena, então o toque não empilha uma segunda.
+  entrouEmCena(HORARIO, "rota");
+  conferir("com a rota em cena, o toque não abre outra", jaEstaEmCena(HORARIO));
+  saiuDeCena(HORARIO, "rota");
+}
+
 console.log("\nO que não pode acontecer\n");
 {
   // Sair sem ter entrado não pode explodir nem sujar o registro.
