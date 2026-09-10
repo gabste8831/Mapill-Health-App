@@ -26,8 +26,25 @@ const SOM_DO_ALARME = require("../../../assets/sounds/alarme_de_dose.wav");
  */
 const MAXIMO_PARA_MOSTRAR_FOTO = 3;
 
-/** Até quantos remédios se responde pela própria tela do alarme. Ver `podeResponderAqui`. */
-const MAXIMO_PARA_RESPONDER_NO_ALARME = 3;
+/**
+ * Até quantos remédios se responde pela própria tela do alarme. Ver `podeResponderAqui`.
+ *
+ * **Um, desde 09/09** — antes eram três, com os botões "Tomei todas" e "Pulei todas".
+ *
+ * Decisão do Gabriel, tomada depois de uma sessão inteira caçando um defeito que aparecia
+ * justamente ali: o alarme com mais de um remédio mostrava duas telas e o som saía duplicado. A
+ * causa era outra (ver `alarme-em-cena`) e está corrigida, mas a resposta em lote deixou de valer o
+ * risco — ela é o caminho menos usado do alarme e o que mais custou para manter de pé.
+ *
+ * O que se perde é o atalho de quem toma vários remédios no mesmo horário. O que fica é o
+ * `Ver e confirmar no app`, que já existia e já era a saída para quatro ou mais: leva à tela do
+ * horário, onde cada dose se resolve individualmente. Nenhum caminho desapareceu — o que mudou é
+ * que ele passou a ser o único quando há mais de uma dose.
+ *
+ * A tela cheia continua inteira: ela irrompe, toca em loop, mostra a foto e silencia. Só a resposta
+ * em lote saiu.
+ */
+const MAXIMO_PARA_RESPONDER_NO_ALARME = 1;
 
 /**
  * Quanto tempo o alarme toca antes de silenciar sozinho.
@@ -325,17 +342,16 @@ export function AlarmeScreen({
   const pendentes = doses.filter((dose) => !dose.resolvida);
   const umaSo = pendentes.length === 1;
   /**
-   * Acima de três remédios, o alarme lista e **não** responde: a confirmação passa a exigir o app.
+   * **Com mais de uma dose, o alarme lista e não responde**: a confirmação passa a exigir o app.
    *
-   * A tela rola (o `ScrollView` cuida disso), então não é o layout que quebra — é a decisão. Marcar
-   * "tomei todas" para cinco remédios de uma vez, no escuro e recém-acordado, é assinar cinco
-   * registros clínicos com um toque só, sem ter olhado nenhum deles. Com um ou dois ainda se lê o
-   * que se está confirmando; com cinco, não.
+   * O argumento original valia para cinco remédios e continua valendo para dois: marcar "tomei
+   * todas" no escuro e recém-acordado é assinar vários registros clínicos com um toque só, sem ter
+   * olhado nenhum deles. O que mudou em 09/09 foi onde a linha é traçada — de três para um.
    *
-   * ⚠️ O custo é real e recai sobre quem tem mais remédios — o paciente polimedicado, que costuma
-   * ser idoso e é quem mais se beneficia do botão direto. Foi uma escolha consciente do Gabriel
-   * (05/09), e o `Ver e confirmar no app` é o que a torna aceitável: a saída existe, é a primeira
-   * coisa na tela, e leva para a tela do horário onde cada dose se resolve individualmente.
+   * ⚠️ O custo é real e recai sobre quem tem mais remédios: o paciente polimedicado, que costuma
+   * ser idoso e é quem mais se beneficiaria do botão direto. O `Ver e confirmar no app` é o que
+   * torna isso aceitável — ele é a primeira coisa na tela e leva ao horário, onde cada dose se
+   * resolve individualmente.
    */
   const podeResponderAqui = pendentes.length <= MAXIMO_PARA_RESPONDER_NO_ALARME;
   /** A foto some antes das ações: com quatro caixas a tela vira álbum, e nenhuma ajuda a decidir. */
@@ -424,11 +440,11 @@ export function AlarmeScreen({
       </ScrollView>
 
       <View style={styles.acoes}>
-          {/* Acima de três remédios, responder em lote sai e a confirmação vai para o app.
+          {/* Com mais de uma dose, a confirmação vai para o app.
 
-              O botão é o primeiro da tela, e não uma saída escondida: quando ele substitui o
-              "Tomei todas", ele **é** o caminho principal, e precisa parecer isso. Abre a tela do
-              horário, onde cada dose se resolve individualmente. */}
+              O botão é o primeiro da tela, e não uma saída escondida: quando ele substitui os
+              botões de responder, ele **é** o caminho principal e precisa parecer isso. Abre a
+              tela do horário, onde cada dose se resolve individualmente. */}
           {!podeResponderAqui ? (
             <Pressable
               style={estadoDePressao(styles.botaoTomei, { escala: true })}
@@ -449,17 +465,17 @@ export function AlarmeScreen({
               style={estadoDePressao(styles.botaoPulei, { escala: true })}
               onPress={() => void responderTodas("skipped")}
               accessibilityRole="button"
-              accessibilityLabel={umaSo ? "Pulei esta dose" : "Pulei todas as doses"}>
+              accessibilityLabel="Pulei esta dose">
               <Ionicons name="close" size={20} color={cores.onPrimary} />
-              <Text style={styles.textoPulei}>{umaSo ? "Pulei" : "Pulei todas"}</Text>
+              <Text style={styles.textoPulei}>Pulei</Text>
             </Pressable>
             <Pressable
               style={estadoDePressao(styles.botaoTomei, { escala: true })}
               onPress={() => void responderTodas("confirmed")}
               accessibilityRole="button"
-              accessibilityLabel={umaSo ? "Tomei esta dose" : "Tomei todas as doses"}>
+              accessibilityLabel="Tomei esta dose">
               <Ionicons name="checkmark" size={20} color={cores.primary} />
-              <Text style={styles.textoTomei}>{umaSo ? "Tomei" : "Tomei todas"}</Text>
+              <Text style={styles.textoTomei}>Tomei</Text>
             </Pressable>
           </View>
           ) : null}

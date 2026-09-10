@@ -375,16 +375,35 @@ nada**. Feche o app.
 
 ## 17 — Vários remédios no mesmo horário
 
+> ⚠️ **A resposta em lote saiu do escopo em 09/09.** Os botões "Tomei todas" e "Pulei todas" não
+> existem mais: com **mais de uma dose** no horário, o alarme lista e manda confirmar no app.
+>
+> Decisão do Gabriel, depois de uma sessão inteira caçando um defeito que aparecia justamente ali.
+> A causa era outra e foi corrigida (duas telas do alarme abrindo ao mesmo tempo, ver
+> `alarme-em-cena`), mas a resposta em lote deixou de valer o risco — é o caminho menos usado do
+> alarme e o que mais custou para manter de pé.
+>
+> A tela cheia continua inteira: irrompe, toca em loop, mostra a foto e silencia.
+
 **4.1** Cadastre **dois** para daqui a 4 min: `Losartana` (dose 1) e `Metformina` (dose 2),
 **Alarme** nos dois. Feche o app.
 
 > ✅ 🔴 Abre **UMA tela de alarme só**, não duas.
+> ✅ 🔴 **Um som só** — dois players tocando ao mesmo tempo era o sintoma do defeito de 09/09.
 > ✅ 🔴 Ela lista **os dois remédios**, cada um com sua dose.
-> ✅ Os botões dizem **"Tomei todas"** e **"Pulei todas"**.
+> ✅ 🔴 Os botões de responder **não aparecem**. No lugar deles, **"Ver e confirmar no app"**.
 
-**4.2** Toque em **Tomei todas**. Vá ao estoque.
+**4.2** Toque em **"Ver e confirmar no app"**.
 
-> ✅ 🔴 Os **dois** descontaram.
+> ✅ Abre a tela do horário, com **Tomei** e **Pulei** próprios de cada dose.
+> ✅ O alarme **para de tocar** ao sair — escolher outro caminho para responder é uma resposta a ele.
+> ✅ Respondendo as duas ali, o estoque desconta os **dois**.
+
+**4.2b — Com UM remédio só** 🔴. Cadastre um único para daqui a 3 min, **Alarme**.
+
+> ✅ 🔴 Aí sim os botões **Tomei** e **Pulei** aparecem na própria tela do alarme — é o caso que
+> continua respondendo ali.
+> ✅ 🔴 Ao responder, a tela fecha **sem piscar nenhuma outra**.
 
 **4.3** Repita o cadastro dos dois, agora com **Notificação**, e toque no **corpo** da notificação
 (não nos botões).
