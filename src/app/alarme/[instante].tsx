@@ -41,8 +41,23 @@ export default function AlarmeRoute() {
    */
   useEffect(() => {
     if (quemEstaEmCena(instante) !== "activity") return;
-    if (router.canGoBack()) router.back();
-    else router.replace("/(abas)");
+
+    /**
+     * Navega **depois** do quadro, e não dentro do efeito de montagem.
+     *
+     * Chamar `router.back()` aqui direto produzia o aviso `Can't perform a React state update on a
+     * component that hasn't mounted yet` (visto em aparelho em 10/09): o roteador atualiza estado
+     * ao navegar, e neste ponto a árvore desta rota ainda está montando. `setTimeout(…, 0)` joga a
+     * navegação para o fim da fila, quando a montagem terminou.
+     *
+     * O `clearTimeout` cobre o caso de a tela sair antes do disparo — por resposta na Activity, por
+     * exemplo. Navegar a partir de um componente já desmontado é o mesmo aviso pelo outro lado.
+     */
+    const sair = setTimeout(() => {
+      if (router.canGoBack()) router.back();
+      else router.replace("/(abas)");
+    }, 0);
+    return () => clearTimeout(sair);
   }, [instante, router]);
 
   return (
