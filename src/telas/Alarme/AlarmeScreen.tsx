@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
 import { MINUTOS_DE_ADIAMENTO } from "@/notifications/acoes";
 import { ouvirPedidoDeEncerrarAlarme } from "@/notifications/doses-resolvidas";
+import { entrouEmCena, saiuDeCena } from "@/notifications/alarme-em-cena";
 import { dispensarAlarmeAtivo } from "@/notifications/notifee-gateway";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import { adiarAviso } from "@/notifications/responder-aviso";
@@ -84,6 +85,23 @@ export function AlarmeScreen({
 
   const { doses, isLoading, registrar } = useDosesDoAlarme(instanteIso);
   const [silenciado, setSilenciado] = useState(false);
+
+  /**
+   * Anuncia que esta tela está em cena, para **nenhuma outra** abrir para o mesmo horário.
+   *
+   * Os dois pontos de entrada da tela vivem no mesmo processo JS (ver `alarme-em-cena`), e sem este
+   * registro o alarme que irrompe com o app aberto produzia duas telas: a Activity do
+   * `fullScreenAction` e a rota empurrada pelo listener. Duas telas, **dois players de áudio** — o
+   * som duplicado relatado em aparelho em 09/09.
+   *
+   * Na montagem, e não em quem abre: é a montagem que prova que a tela existe. Quem abre pode
+   * falhar no meio, e marcar antes deixaria a trava presa num alarme que nunca apareceu.
+   */
+  useEffect(() => {
+    const por = ehActivityDeAlarme ? "activity" : "rota";
+    entrouEmCena(instanteIso, por);
+    return () => saiuDeCena(instanteIso, por);
+  }, [instanteIso, ehActivityDeAlarme]);
 
   /**
    * Toca em loop até ser silenciado.

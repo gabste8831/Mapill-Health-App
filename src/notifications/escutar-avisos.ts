@@ -8,6 +8,7 @@ import {
   lerDadosDoAviso,
   type DadosDoAviso,
 } from "./notifee-gateway";
+import { jaEstaEmCena } from "./alarme-em-cena";
 import { destinoDaChave, type DestinoDoAviso } from "./destino-do-aviso";
 import { todasAsDosesResolvidas, tratarRespostaAoAviso } from "./responder-aviso";
 
@@ -108,6 +109,21 @@ async function tratar(evento: Event): Promise<void> {
       await notifee.cancelNotification(id).catch(() => {});
       return;
     }
+
+    /**
+     * **A Activity nativa já está na frente: não empurra a rota.**
+     *
+     * Esta é a causa do som duplicado, e sobreviveu a três correções minhas porque eu tratava o
+     * toque e o eco em vez do disparo. O `fullScreenAction` monta `AlarmeRaiz` numa Activity, e o
+     * `index.js` sobe o app inteiro no **mesmo processo** — então este listener está vivo e recebe
+     * o `DELIVERED` do mesmo alarme que acabou de irromper. Sem esta guarda, ele empurrava a rota
+     * `/alarme/[instante]` por baixo da Activity: duas telas, dois players de áudio.
+     *
+     * O `jaAbertos` não cobria isso: ele só sabe o que **este** listener abriu, e a Activity é
+     * montada pelo Android, sem passar por aqui. `alarme-em-cena` é o registro que as duas telas
+     * compartilham.
+     */
+    if (jaEstaEmCena(dados.scheduledFor)) return;
 
     jaAbertos.add(dados.scheduledFor);
 

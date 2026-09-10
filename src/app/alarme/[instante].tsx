@@ -1,4 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
+
+import { quemEstaEmCena } from "@/notifications/alarme-em-cena";
 
 import { AlarmeScreen } from "@/telas/Alarme/AlarmeScreen";
 
@@ -23,6 +26,24 @@ import { AlarmeScreen } from "@/telas/Alarme/AlarmeScreen";
 export default function AlarmeRoute() {
   const { instante } = useLocalSearchParams<{ instante: string }>();
   const router = useRouter();
+
+  /**
+   * **A rota cede lugar à Activity**, se as duas correrem para o mesmo horário.
+   *
+   * O listener já evita empurrar a rota quando a Activity está em cena (ver `alarme-em-cena`), mas
+   * existe uma corrida: o `DELIVERED` pode chegar **antes** de a Activity terminar de montar, e aí
+   * a guarda de lá não vê nada e a rota entra. Esta é a outra ponta — se a Activity apareceu no
+   * meio, a rota sai.
+   *
+   * A Activity tem precedência porque é ela que o Android colocou na frente, por cima da tela de
+   * bloqueio. A rota é o plano B para quando o sistema rebaixa o full-screen intent, e duas telas
+   * tocando o mesmo alarme é o que produzia o som duplicado.
+   */
+  useEffect(() => {
+    if (quemEstaEmCena(instante) !== "activity") return;
+    if (router.canGoBack()) router.back();
+    else router.replace("/(abas)");
+  }, [instante, router]);
 
   return (
     <AlarmeScreen
