@@ -133,25 +133,6 @@ export function AlarmeScreen({
    * botões — o sistema matando a Activity, por exemplo. Alarme que continua tocando depois da tela
    * fechada é o tipo de defeito que faz desinstalar o app.
    */
-  /**
-   * **A notificação sai de cena assim que a tela sobe** — e é o que acaba com o som dobrado.
-   *
-   * Os dois tocam o mesmo `alarme_de_dose.wav`: o canal toca uma vez quando o aviso chega (é ele
-   * que soa quando o Android rebaixa o full-screen intent e a tela não irrompe), e esta tela toca
-   * em loop enquanto estiver aberta. Com a tela aberta, os dois se sobrepõem — o som duplo
-   * relatado em aparelho em 10/09.
-   *
-   * Quem cala é a **notificação**, e não a tela: o loop é o que faz deste alarme um alarme, e o
-   * som do canal é uma batida só. Cancelar aqui também tira da bandeja o convite ao toque que
-   * empilhava telas, então as duas coisas se resolvem no mesmo gesto.
-   *
-   * Sem `await` e com `catch` vazio: a notificação pode já ter sido cancelada por outro caminho, e
-   * falhar nisso não pode impedir o alarme de tocar.
-   */
-  useEffect(() => {
-    void dispensarAlarmeAtivo().catch(() => {});
-  }, []);
-
   useEffect(() => {
     if (silenciado) return;
 
