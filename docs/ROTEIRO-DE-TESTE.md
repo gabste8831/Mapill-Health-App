@@ -12,12 +12,32 @@
 
 | | O que é | Situação |
 |---|---|---|
-| **10** | Regressão de telas, **só com a fonte no máximo** | Passou em 08/09, mas a tipografia mudou em 09/09 |
-| **11 a 17** | A sessão de alarme | **Nunca rodou** — adiada de propósito em 08/09 |
-| **18 e 19** | Reboot, bateria e casos de borda | ❌ **Reprovaram** na última rodada |
-| **20 e 21** | Avisos de estoque/receita, e o que mudou depois | **Nunca rodou** — nasceram em 08 e 09/09 |
+| **10** | Regressão com a fonte no máximo | ✅ **Passou em 09/09** |
+| **11** | Diagnóstico | Rodada de 09/09 não anotou resultado — refazer |
+| **12** | Permissões do alarme | ✅ **Passou em 09/09** |
+| **13** | As cinco correções | ⚠️ **13.1 falhou** (ver abaixo). Os outros quatro esperam a build |
+| **14** | Alarme em tela cheia | Espera a build nova |
+| **15** | Botões da notificação | ✅ **Passou em 09/09** — ver a nota do "Adiar" |
+| **16 e 17** | Alarme órfão, vários no mesmo horário | **Nunca rodou** |
+| **18 e 19** | Reboot, bateria e casos de borda | ❌ **Reprovaram** na rodada anterior |
+| **20 e 21** | Avisos de estoque/receita, e o que mudou depois | **Nunca rodou** |
 | **22** | Os itens soltos que dependem de um aviso chegar | **Nunca rodou** |
-| **23** | Apagar dados de saúde (6.2) | Guardado para o fim: é destrutivo |
+| **23** | Apagar dados de saúde | Guardado para o fim: é destrutivo |
+
+### O que a rodada de 09/09 encontrou
+
+**13.1 — a tela azul não subia sobre outro app, e piscava ao responder.** São dois defeitos, e só
+um era corrigível sem build:
+
+- **Não subir sozinha** é a permissão `SYSTEM_ALERT_WINDOW`, que está declarada no `app.json` e não
+  entra por recarga do Metro. **Só o binário novo pode provar.**
+- **O lampejo azul** ao tocar em "Tomei"/"Pulei" era a tela do alarme abrindo para uma dose **já
+  respondida** — ela se fecha sozinha quando tudo está resolvido, então abrir nessa situação produz
+  exatamente um piscar. Corrigido em 09/09 (`e715b3c`): o app lê o desfecho no banco antes de
+  navegar. **Reconfira no 13.1 da próxima rodada.**
+
+**15.2 — o "Adiar" não existe mais**, e está certo: os botões são "Tomei" e "Pulei". O passo do
+roteiro descrevia o comportamento antigo e foi reescrito.
 
 **Por que 18 e 19 reprovaram:** o Notifee foi arquivado em 07/04/2026, e o boot receiver dele nunca
 era invocado no Android 12+. O app migrou para o fork mantido (`react-native-notify-kit`), então
@@ -302,19 +322,13 @@ app. Quando chegar, toque em **Tomei**.
 > ✅ Abrindo depois, a dose está **confirmada** na Home.
 > ✅ O estoque caiu **2** (a dose), e não 1.
 
-**2.2** Cadastre outro para daqui a 3 min. Quando chegar, toque em **Adiar 5 min** — e toque
-**várias vezes** se a notificação não sumir na hora.
+**2.2 — Os botões da notificação** ✅ _(passou em 09/09)_.
 
-> ✅ Volta **uma única vez**, 5 min depois. Não cinco.
-> ✅ Na volta, o botão **"Adiar" não existe mais** — só "Tomei".
-
-**2.3** **Antes** de o aviso adiado voltar, abra a Home.
-
-> ✅ A dose continua **pendente** — nem pulada, nem confirmada. Adiar não registra desfecho.
-
-**2.4** Ainda antes de ele voltar, **confirme essa dose pela Home**.
-
-> ✅ O aviso adiado **não menciona esse remédio** (ou não chega, se era o único).
+> ✅ São **"Tomei"** e **"Pulei"** — o "Adiar" **não existe mais** na notificação, e isso está
+> correto. Ele sobrevive só na tela cheia do alarme, onde há espaço para as quatro saídas.
+>
+> ⚠️ Os passos 2.3 e 2.4 testavam o adiamento **pela notificação** e saíram junto: não há mais o
+> botão que os disparava. O adiamento continua coberto pelo bloco 14 (tela do alarme) e pelo 15.6.
 
 **2.5 — 🔴 O ganho da unificação: gravar com o app fechado.** Cadastre outro para daqui a 3 min,
 **Notificação**. Feche o app. Quando o aviso chegar, toque em **Tomei** e **não abra o app**.
