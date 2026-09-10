@@ -210,6 +210,31 @@ export type RespostaAoAviso =
  * janela entre o dedo e o banco; a guarda de idempotência em `confirmarDosesDoAviso` cobre o
  * resto, porque quem protege o dado é a regra, não a interface.
  */
+/**
+ * Se **todas** as doses do aviso já foram respondidas — confirmadas ou puladas.
+ *
+ * Existe para o toque num aviso já resolvido não abrir tela nenhuma. O Android não remove a
+ * notificação sozinho depois que ela é respondida por outro caminho (o botão dela mesma, a Home,
+ * um segundo toque), e o aviso que fica na bandeja convida ao toque tardio — que abria a tela do
+ * alarme só para ela se fechar sozinha no quadro seguinte, produzindo o lampejo azul visto em
+ * aparelho em 09/09.
+ *
+ * Lista vazia devolve `false`: um aviso sem dose vinculada não tem o que resolver, e tratá-lo como
+ * resolvido faria o toque perder o efeito. É o caso dos avisos de estoque e receita, que aliás nem
+ * chegam aqui — o destino deles é decidido antes, em `destinoDaChave`.
+ */
+export async function todasAsDosesResolvidas(doseScheduleIds: string[]): Promise<boolean> {
+  if (doseScheduleIds.length === 0) return false;
+
+  const intakeLogRepository = new IntakeLogRepository();
+  for (const doseScheduleId of doseScheduleIds) {
+    const logs = await intakeLogRepository.findByDoseSchedule(doseScheduleId);
+    const ultimo = logs.at(-1);
+    if (ultimo === undefined || !resolvesDose(ultimo.status)) return false;
+  }
+  return true;
+}
+
 export async function tratarRespostaAoAviso(
   actionIdentifier: string,
   dados: DadosDoAviso,

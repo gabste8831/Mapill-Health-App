@@ -9,7 +9,7 @@ import {
   type DadosDoAviso,
 } from "./notifee-gateway";
 import { destinoDaChave, type DestinoDoAviso } from "./destino-do-aviso";
-import { tratarRespostaAoAviso } from "./responder-aviso";
+import { todasAsDosesResolvidas, tratarRespostaAoAviso } from "./responder-aviso";
 
 /**
  * O único ponto de escuta dos avisos — botões, toque no corpo e entrega com o app aberto.
@@ -117,6 +117,29 @@ async function tratar(evento: Event): Promise<void> {
   const resultado = await tratarRespostaAoAviso(acao, dados);
 
   if (resultado.tipo === "abrirHorario") {
+    /**
+     * **Dose já resolvida não abre tela nenhuma.**
+     *
+     * Visto em aparelho (09/09): tocar no corpo do alarme abria a tela azul, e ao responder ela
+     * piscava — aparecia e sumia. A sequência era essa: a tela do alarme se fecha sozinha quando
+     * todas as doses estão resolvidas (ver `AlarmeScreen`), então abri-la para uma dose que **já**
+     * foi respondida produz exatamente um lampejo.
+     *
+     * Acontece sempre que a resposta chegou por outro caminho antes do toque: pelo botão da própria
+     * notificação, pela Home, ou por um segundo toque enquanto a primeira navegação ainda ia. O
+     * aviso continua na bandeja depois de respondido — o Android não o remove sozinho —, e é ele
+     * que convida ao toque tardio.
+     *
+     * Ler o banco aqui é o que distingue "ainda há o que responder" de "já foi": `dados` carrega os
+     * ids, mas não o desfecho, e o desfecho é o que decide.
+     */
+    if (await todasAsDosesResolvidas(dados.doseScheduleIds)) {
+      await notifee.cancelNotification(id).catch(() => {});
+      await dispensarAlarmeAtivo().catch(() => {});
+      pedirParaEncerrarAlarme();
+      return;
+    }
+
     /**
      * Tocar num **alarme** abre a tela do alarme, e não a do horário.
      *
