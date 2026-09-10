@@ -334,17 +334,40 @@ export class NotifeeGateway implements NotificationGateway {
           color: colors.primary,
           ...(ehAlarme
             ? {
-                // Um alarme de medicação precisa de resposta: sair da bandeja com um deslize é o
-                // mesmo que perder a dose.
+                /**
+                 * `ongoing` **não** garante mais que a notificação fique. Ela ainda vale: sobe o
+                 * aviso acima dos outros, tira o "X" e o protege do "Limpar tudo" — e na **tela de
+                 * bloqueio** o deslize continua barrado, que é onde o alarme mais importa.
+                 *
+                 * Mas o Android 14 passou a permitir dispensar notificações `ongoing` com o gesto
+                 * de arrastar, e confirmamos isso em aparelho (10/09): com o celular desbloqueado,
+                 * ela sai. As exceções que continuam presas são `CallStyle`, mídia e apps de
+                 * política corporativa — nenhuma alcançável por esta biblioteca.
+                 *
+                 * Quem cobre o buraco é o renascimento em `reagendar-avisos`: dispensada, ela
+                 * volta em segundos enquanto houver dose pendente.
+                 */
                 autoCancel: false,
                 ongoing: true,
                 /**
+                 * O som **repete** enquanto a notificação estiver na bandeja.
+                 *
+                 * Isto corrige uma afirmação que morava aqui: "notificação nenhuma toca em loop,
+                 * em biblioteca nenhuma". `loopSound` existe e faz exatamente isso — `FLAG_INSISTENT`
+                 * do Android, que repete o áudio até o aviso ser cancelado ou aberto.
+                 *
+                 * Importa porque a tela cheia **nem sempre sobe**: com o aparelho em uso, o Android
+                 * a rebaixa para heads-up, e aí o único som era uma batida só. Um despertador que
+                 * toca uma vez e cala não desperta ninguém.
+                 *
+                 * A tela continua com o loop dela, em `expo-audio`. Os dois se sobrepõem enquanto
+                 * ambos existem — e é por isso que responder cancela a notificação (ver
+                 * `dispensarAlarmeAtivo`): a partir daí, quem toca é só a tela.
+                 */
+                loopSound: true,
+                /**
                  * A peça que sustenta a promessa central: abre o componente React registrado em
                  * `index.js` **por cima da tela de bloqueio**, sem passar pelo roteador do app.
-                 *
-                 * O som contínuo **não é daqui** — notificação nenhuma toca em loop, em biblioteca
-                 * nenhuma. Quem toca é a tela, depois de aberta, com `expo-audio`. Foi essa
-                 * distinção que faltou no spike original do C1.
                  */
                 fullScreenAction: { id: "alarme", mainComponent: COMPONENTE_DE_ALARME },
                 /**

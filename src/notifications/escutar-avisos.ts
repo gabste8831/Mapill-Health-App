@@ -6,6 +6,7 @@ import {
   dispensarAlarmeAtivo,
   ehAlarmeDeTelaCheia,
   lerDadosDoAviso,
+  NotifeeGateway,
   type DadosDoAviso,
 } from "./notifee-gateway";
 import { jaEstaEmCena } from "./alarme-em-cena";
@@ -52,6 +53,47 @@ let aoAbrirDestino: AoAbrirDestino | null = null;
  * aberto é justamente o defeito que ele evita.
  */
 const jaAbertos = new Set<string>();
+
+/**
+ * Quantos segundos até o alarme dispensado voltar.
+ *
+ * Cinco: curto o bastante para quem dispensou sem querer não achar que perdeu a dose, e longo o
+ * bastante para não parecer que o gesto falhou — uma notificação que reaparece no mesmo instante
+ * lê como travamento, e a pessoa tenta de novo.
+ */
+const SEGUNDOS_ATE_O_ALARME_VOLTAR = 5;
+
+/**
+ * Recoloca na bandeja um alarme que o usuário dispensou com a dose ainda pendente.
+ *
+ * Reagenda em vez de reexibir porque a API só agenda: o `createTriggerNotification` com um
+ * timestamp logo à frente é o caminho para a notificação existir de novo. O conteúdo vem do
+ * próprio evento — título, corpo e `data` são os que já estavam lá, e recalculá-los do banco
+ * arriscaria divergir do que a pessoa acabou de ver.
+ */
+function reagendarAlarmeDispensado(
+  dados: DadosDoAviso,
+  notificacao: { title?: string; body?: string },
+): void {
+  const quando = new Date(Date.now() + SEGUNDOS_ATE_O_ALARME_VOLTAR * 1_000);
+
+  void new NotifeeGateway()
+    .agendar({
+      // A mesma chave: o id derivado dela é o que mantém isto como **o** alarme daquele horário,
+      // e não um segundo aviso empilhado. Reagendar com a mesma chave substitui.
+      chave: dados.chave,
+      quando,
+      titulo: notificacao.title ?? "Hora do seu remédio",
+      corpo: notificacao.body ?? "Toque para responder e desligar o alarme.",
+      doseScheduleIds: dados.doseScheduleIds,
+      instanteDasDoses: dados.scheduledFor,
+      modo: "alarm",
+      semAcoesRapidas: true,
+    })
+    .catch((cause) => {
+      if (__DEV__) console.error("[Mapill] falha ao trazer o alarme de volta:", cause);
+    });
+}
 
 async function tratar(evento: Event): Promise<void> {
   const notificacao = evento.detail.notification;
@@ -128,6 +170,37 @@ async function tratar(evento: Event): Promise<void> {
     jaAbertos.add(dados.scheduledFor);
 
     aoDispararAlarme?.(dados.scheduledFor);
+    return;
+  }
+
+  /**
+   * **O alarme dispensado renasce, enquanto houver dose pendente.**
+   *
+   * `ongoing: true` deixou de garantir que a notificação fique: o Android 14 passou a permitir
+   * dispensá-la com o gesto de arrastar, e confirmamos em aparelho (10/09). As exceções que
+   * continuam presas — `CallStyle`, mídia, política corporativa — não são alcançáveis por esta
+   * biblioteca, e a alternativa completa seria um foreground service, que é código nativo.
+   *
+   * O problema não é a notificação sumir: é o **alarme continuar tocando sem caminho de volta**.
+   * Quem dispensa sem querer fica com o som e nenhuma forma óbvia de pará-lo — teria de abrir o
+   * app e procurar.
+   *
+   * Então ela volta. Poucos segundos depois, com o mesmo conteúdo, enquanto a dose seguir sem
+   * resposta. É reconhecidamente um contorno, e o Gabriel o aceitou como tal: na tela de bloqueio
+   * — onde o alarme mais importa — o deslize continua barrado pelo próprio sistema, e este caminho
+   * cobre o resto.
+   *
+   * `DISMISSED` não é enviado quando o app cancela a notificação (só no gesto do usuário e no
+   * "Limpar tudo"), então responder não dispara isto.
+   */
+  if (evento.type === EventType.DISMISSED) {
+    if (!ehAlarmeDeTelaCheia(id)) return;
+    if (await todasAsDosesResolvidas(dados.doseScheduleIds)) return;
+    // Com a tela na frente, não há alarme perdido: a pessoa está olhando para ele, e o som sai
+    // dali. Ressuscitar a notificação só devolveria o segundo som.
+    if (jaEstaEmCena(dados.scheduledFor)) return;
+
+    reagendarAlarmeDispensado(dados, notificacao);
     return;
   }
 
