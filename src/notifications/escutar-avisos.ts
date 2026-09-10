@@ -194,12 +194,23 @@ async function tratar(evento: Event): Promise<void> {
    * "Limpar tudo"), então responder não dispara isto.
    */
   if (evento.type === EventType.DISMISSED) {
-    if (!ehAlarmeDeTelaCheia(id)) return;
-    if (await todasAsDosesResolvidas(dados.doseScheduleIds)) return;
+    if (__DEV__) console.log("[Mapill] DISMISSED recebido:", id);
+    if (!ehAlarmeDeTelaCheia(id)) {
+      if (__DEV__) console.log("[Mapill] ...ignorado: nao e alarme de tela cheia");
+      return;
+    }
+    if (await todasAsDosesResolvidas(dados.doseScheduleIds)) {
+      if (__DEV__) console.log("[Mapill] ...ignorado: doses ja resolvidas");
+      return;
+    }
     // Com a tela na frente, não há alarme perdido: a pessoa está olhando para ele, e o som sai
     // dali. Ressuscitar a notificação só devolveria o segundo som.
-    if (jaEstaEmCena(dados.scheduledFor)) return;
+    if (jaEstaEmCena(dados.scheduledFor)) {
+      if (__DEV__) console.log("[Mapill] ...ignorado: tela de alarme em cena");
+      return;
+    }
 
+    if (__DEV__) console.log("[Mapill] ...reagendando o alarme dispensado");
     reagendarAlarmeDispensado(dados, notificacao);
     return;
   }
