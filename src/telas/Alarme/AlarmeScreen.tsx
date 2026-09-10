@@ -4,11 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { AppState, Linking, Pressable, ScrollView, Text, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { chaveDoHorario } from "@/domain/use-cases/planejar-avisos-de-dose";
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
 import { MINUTOS_DE_ADIAMENTO } from "@/notifications/acoes";
 import { ouvirPedidoDeEncerrarAlarme } from "@/notifications/doses-resolvidas";
 import { entrouEmCena, saiuDeCena } from "@/notifications/alarme-em-cena";
-import { dispensarAlarmeAtivo } from "@/notifications/notifee-gateway";
+import { dispensarAlarmeAtivo, NotifeeGateway } from "@/notifications/notifee-gateway";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import { adiarAviso } from "@/notifications/responder-aviso";
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
@@ -119,6 +120,26 @@ export function AlarmeScreen({
     entrouEmCena(instanteIso, por);
     return () => saiuDeCena(instanteIso, por);
   }, [instanteIso, ehActivityDeAlarme]);
+
+  /**
+   * **Com a tela aberta, quem toca é a tela** — a notificação daquele horário sai da bandeja.
+   *
+   * O `loopSound` do canal e o `createAudioPlayer` daqui são duas fontes de áudio distintas, e
+   * enquanto as duas existirem elas se sobrepõem: o mesmo arquivo, fora de fase, que é o som
+   * duplicado relatado em aparelho em 10/09. A correção de 09/09 garantiu *uma tela* por horário,
+   * mas este par não é tela+tela — é notificação+tela.
+   *
+   * O `loopSound` continua valendo onde ele importa: quando a tela cheia **não** sobe (aparelho em
+   * uso, full-screen intent rebaixado), a notificação é o único aviso, e precisa insistir.
+   *
+   * `dispensar(chave)` e não `dispensarAlarmeAtivo()`: aquela varre todos os alarmes da bandeja, e
+   * um alarme de outro horário ainda sem resposta não tem por que sumir porque esta tela abriu.
+   * Foi o excesso que fez a notificação sumir antes de dar tempo de tocá-la (revertido em 83135de);
+   * aqui o alvo é só o horário desta tela, e ela já está na frente da pessoa.
+   */
+  useEffect(() => {
+    void new NotifeeGateway().dispensar(chaveDoHorario(instanteIso));
+  }, [instanteIso]);
 
   /**
    * Toca em loop até ser silenciado.

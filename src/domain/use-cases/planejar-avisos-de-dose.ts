@@ -48,8 +48,15 @@ export type PlanejarAvisosInput = {
  */
 const TOLERANCIA_DE_ATRASO_EM_MINUTOS = 2;
 
-/** `2026-08-29T08:00:00.000Z` → chave estável do horário. Mesmo instante, mesma chave. */
-function chaveDoHorario(scheduledFor: string): string {
+/**
+ * `2026-08-29T08:00:00.000Z` → chave estável do horário. Mesmo instante, mesma chave.
+ *
+ * Exportada porque a tela do alarme precisa dispensar da bandeja **o aviso daquele horário**, e
+ * para isso tem de nomeá-lo. Reescrever o formato lá criaria um segundo lugar onde a chave é
+ * construída, e no dia em que um mudasse a dispensa erraria o alvo em silêncio — sem erro de
+ * compilação, sem teste falhando, só o som duplicado voltando.
+ */
+export function chaveDoHorario(scheduledFor: string): string {
   return `dose-${scheduledFor}`;
 }
 

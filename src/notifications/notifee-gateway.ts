@@ -344,8 +344,10 @@ export class NotifeeGateway implements NotificationGateway {
                  * ela sai. As exceções que continuam presas são `CallStyle`, mídia e apps de
                  * política corporativa — nenhuma alcançável por esta biblioteca.
                  *
-                 * Quem cobre o buraco é o renascimento em `reagendar-avisos`: dispensada, ela
-                 * volta em segundos enquanto houver dose pendente.
+                 * Dispensada com o alarme tocando, o som **continua** — é o `loopSound` abaixo, e a
+                 * tela cheia segue acessível pelo app. Tentamos trazer a notificação de volta pelo
+                 * evento `DISMISSED`, mas ele não chega no gesto de arrastar (testado em 10/09), e
+                 * a peça saiu do escopo em vez de ficar como contorno que não cumpre o que promete.
                  */
                 autoCancel: false,
                 ongoing: true,
@@ -360,9 +362,11 @@ export class NotifeeGateway implements NotificationGateway {
                  * a rebaixa para heads-up, e aí o único som era uma batida só. Um despertador que
                  * toca uma vez e cala não desperta ninguém.
                  *
-                 * A tela continua com o loop dela, em `expo-audio`. Os dois se sobrepõem enquanto
-                 * ambos existem — e é por isso que responder cancela a notificação (ver
-                 * `dispensarAlarmeAtivo`): a partir daí, quem toca é só a tela.
+                 * **Uma fonte de áudio por vez.** A tela do alarme tem o loop dela, em `expo-audio`,
+                 * e os dois se sobrepõem enquanto ambos existem — o som duplicado relatado em
+                 * aparelho em 10/09, que este `loopSound` reintroduziu. Por isso a tela dispensa da
+                 * bandeja o aviso do horário dela assim que monta (ver `AlarmeScreen`): quando a
+                 * tela sobe, quem toca é ela; quando ela não sobe, este loop é o único aviso.
                  */
                 loopSound: true,
                 /**
