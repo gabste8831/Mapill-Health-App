@@ -2,31 +2,13 @@
 import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
-  /**
-   * Âmbar, a mesma linguagem da `Dica` e do lembrete de recontagem — é apoio, não erro: falta um
-   * ajuste do sistema, e o app funciona. Quem diz de que estado se trata é o par fundo + ícone
-   * (ver `estadoVisual` em shared/theme/cores.ts), e não uma barra de 4px na borda: ela deslocava
-   * o painel inteiro em relação ao card de dose logo abaixo.
-   *
-   * ## O token puro, por decisão de 08/09
-   *
-   * Até aqui o fundo era `warningSurface` com 12% de `onWarningSurface` misturado, porque o token
-   * puro (`#FEF6E7`) é quase branco e dentro de um popup — superfície branca sobre a tela — o
-   * bloco lia desbotado. A mistura resolvia isso, mas ao custo de o painel ser **quase** a cor do
-   * alerta de estoque em vez de ser a mesma: dois amarelos parecidos num app são pior que um só,
-   * porque a diferença sugere significado onde não há.
-   *
-   * A padronização venceu o ajuste local. Se o painel voltar a desbotar dentro do popup, o
-   * caminho é encorpar `warningSurface` no tema (o que valeria para `Dica`, estoque e aqui de uma
-   * vez), e não reintroduzir uma mistura que só este componente conhece.
-   */
   painel: {
     backgroundColor: cores.warningSurface,
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.sm,
   },
-  /** Falta uma essencial: o alarme não toca, e aí é erro mesmo. */
+  /** Falta uma permissão essencial: o alarme não toca. */
   painelCritico: {
     backgroundColor: cores.errorSurface,
   },
@@ -36,21 +18,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.sm,
   },
-  /**
-   * O texto acompanha o estado em vez de ficar no cinza padrão.
-   *
-   * Com `onSurface`, o conteúdo não pertencia ao bloco que o cerca — o fundo era âmbar e as letras,
-   * do mesmo cinza de qualquer outro texto da tela. Tingir o título e a explicação é o que faz o
-   * painel ler como uma peça só, e é o que sustenta o fundo claro sem precisar escurecê-lo.
-   */
   titulo: {
     ...typography.label,
     color: cores.onWarningSurface,
     flex: 1,
   },
   tituloCritico: {
-    // O par de `errorSurface`, que e o fundo do painel critico. `onErrorContainer` acompanha o
-    // `errorContainer`, outro fundo, e no escuro ele e claro: 1.12:1 sobre a superficie clara.
+    // Par de `errorSurface`. Com `onErrorContainer` daria 1.12:1 no tema escuro.
     color: cores.onErrorSurface,
   },
   explicacao: {
@@ -67,25 +41,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     marginTop: spacing.xs,
   },
   /**
-   * A linha inteira é o alvo, e não um botão no canto: cada item leva a uma tela diferente do
-   * sistema, e um alvo grande é o que separa "resolvo agora" de "depois eu vejo" — que, nesta
-   * lista, significa continuar sem alarme.
-   *
-   * ## A cor
-   *
-   * A linha é uma superfície clara **dentro do painel**, e não o cartão da tela.
-   *
-   * Era `surfaceContainerLowest` — o branco dos cartões —, e isso só funcionava enquanto o tema
-   * fosse claro. No escuro aquele token é escuro: cada linha virava uma caixa preta dentro do
-   * painel âmbar, com o texto escuro do painel por cima. Preto sobre preto.
-   *
-   * Branco resolve nos quatro temas de uma vez, porque ele não é uma cor do tema: é o degrau mais
-   * claro que existe, e a tinta que já serve ao painel continua servindo aqui. A 55% de opacidade
-   * ele ficava creme, quase indistinto do âmbar em volta — a linha precisava parecer uma superfície
-   * **sobre** o painel, e o que dá isso é o branco cheio.
-   *
-   * O `minHeight` saiu: com três linhas de texto ele nunca chegava a valer, e o alvo de toque já
-   * é folgado pelo próprio conteúdo.
+   * Branco cravado, e não um token: o painel tem fundo próprio nos quatro temas, e qualquer token
+   * de superfície vira escuro no tema escuro, deixando texto escuro sobre fundo escuro.
    */
   item: {
     flexDirection: "row",
@@ -100,12 +57,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flex: 1,
     gap: 1,
   },
-  /**
-   * O respiro sob o titulo.
-   *
-   * Ele nomeia a permissao; as duas linhas abaixo explicam por que ela importa e o que fazer. Sem
-   * o vao os tres blocos liam como um paragrafo so, e o titulo perdia a funcao de rotulo.
-   */
   itemTopoComRespiro: {
     marginBottom: spacing.sm,
   },
@@ -115,21 +66,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     gap: spacing.sm,
   },
   /**
-   * O título da linha, em semibold.
-   *
-   * Ele e a descrição eram os dois `400Regular`, separados por 2px de tamanho — diferença que não
-   * se lê como hierarquia, e a linha virava um bloco de texto uniforme. O peso faz esse trabalho
-   * melhor que o tamanho: dá para ver de relance qual permissão a linha trata sem ler a frase.
-   *
-   * `bodyMd` e não `bodyLg`: em 16px o título de três linhas de apoio pesava como título de seção,
-   * e as duas linhas juntas ocupavam mais tela que o aviso que as introduz.
-   *
-   * ## A tinta
-   *
-   * Vem da **superfície do painel**, e não do `onSurface` da tela. O painel tem fundo próprio
-   * (âmbar, ou vermelho claro quando falta uma permissão essencial), e `onSurface` é a cor de
-   * texto do fundo **da tela** — os dois só coincidem enquanto ambos forem claros. No tema escuro
-   * `onSurface` é quase branco: sobre o âmbar dava 1.09:1.
+   * A tinta vem da superfície do painel, não do `onSurface` da tela: no tema escuro `onSurface` é
+   * quase branco e sobre o âmbar daria 1.09:1.
    */
   itemTitulo: {
     ...typography.bodyMd,
@@ -138,36 +76,21 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   itemDescricao: {
     ...typography.bodyMd,
-    // 12, um degrau abaixo do título: esta frase é a consequência, e é lida depois de o título
-    // dizer de qual permissão se trata.
     fontSize: 12,
-    // Mesma tinta do titulo, com opacidade no lugar de outra cor: um segundo token "on" para a
-    // mesma superficie seria uma cor a manter em quatro temas para dizer "um pouco mais fraco".
     color: cores.onWarningSurface,
     opacity: 0.85,
     lineHeight: 17,
   },
-  /**
-   * O passo dentro da tela do sistema, um degrau abaixo da consequência.
-   *
-   * Cor de destaque e não o cinza da descrição: é a única linha do item que diz o que **fazer**, e
-   * precisa se separar do texto que explica por que importa. O respiro em cima marca essa virada de
-   * assunto sem precisar de outro elemento.
-   */
   itemComoFazer: {
     ...typography.bodySm,
-    // `corDeDestaque` e o azul que le sobre a superficie **da tela**; aqui o fundo e ambar, e no
-    // tema escuro aquele azul claro dava 1.93:1. A separacao desta linha vem do peso e do respiro
-    // acima, que ja estavam la.
+    // Tinta do painel, não `corDeDestaque`: aquele azul dá 1.93:1 sobre o âmbar no tema escuro.
     color: cores.onWarningSurface,
     fontFamily: typography.label.fontFamily,
     lineHeight: 16,
-    // Descolada da descricao: uma diz por que a permissao importa, a outra o que fazer na tela do
-    // sistema. Sao dois assuntos, e o respiro e o que marca a virada.
     marginTop: spacing.xs,
   },
 
-  /** Separa o que impede o alarme do que só o degrada — as duas coisas pedem urgências diferentes. */
+  /** Separa o que impede o alarme do que só o degrada. */
   selo: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
@@ -176,8 +99,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   seloTexto: {
     ...typography.caption,
-    // O selo vive sobre `errorSurface`, entao a tinta e a do par dela. `error` e o vermelho de
-    // texto sobre a superficie **da tela**, e no escuro ele e claro: 1.76:1 aqui.
+    // Par de `errorSurface`, o fundo do selo. Com `error` daria 1.76:1 no tema escuro.
     color: cores.onErrorSurface,
   },
 

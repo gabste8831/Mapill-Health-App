@@ -54,11 +54,8 @@ const STATUS_FALADO: Record<DoseVisualStatus, string> = {
 };
 
 /**
- * Uma linha da agenda do dia.
- *
- * Só a próxima e as atrasadas mostram os botões de ação: oferecer "confirmar" numa dose das 22h às
- * 8 da manhã convida a marcar o que ainda não aconteceu, e o app passaria a registrar intenção em
- * vez de ingestão.
+ * Uma linha da agenda do dia. Só a próxima e as atrasadas mostram botões: oferecer "confirmar" numa
+ * dose das 22h às 8 da manhã faria o app registrar intenção em vez de ingestão.
  */
 export function ItemDeDose({
   time,
@@ -72,25 +69,13 @@ export function ItemDeDose({
   const styles = useEstilos(criarEstilos);
 
   const resolvida = status === "confirmed" || status === "skipped";
-  // "Na hora" é o caso mais acionável de todos: é literalmente agora.
   const acionavel = status === "next" || status === "now" || status === "late";
 
-  /**
-   * A linha **se acomoda** quando a dose é resolvida, em vez de trocar de aparência num quadro.
-   *
-   * O `done` já levava a opacidade para 0.5, mas de uma vez: no instante em que o `Alert` fecha, a
-   * linha simplesmente estava diferente. Animar os 0.5 é o que transforma "a tela mudou" em "o que
-   * eu acabei de fazer teve efeito aqui" — e esta é a única confirmação visual que sobra depois que
-   * o diálogo some, já que a Home não navega para lugar nenhum.
-   */
+  // A Home não navega depois de confirmar, então a transição é a única confirmação visual que
+  // sobra quando o diálogo fecha.
   const opacidade = useSharedValue(resolvida ? 0.5 : 1);
 
-  /**
-   * "Reduzir movimento" do sistema desliga a transição, não o resultado.
-   *
-   * Quem liga essa opção costuma fazê-lo por enjoo ou vertigem — e num app de saúde ignorar isso
-   * seria o pior lugar possível para uma escolha estética.
-   */
+  /** "Reduzir movimento" do sistema desliga a transição, não o resultado. */
   const semMovimento = useReducedMotion();
 
   useEffect(() => {
@@ -103,28 +88,16 @@ export function ItemDeDose({
   const estiloAnimado = useAnimatedStyle(() => ({ opacity: opacidade.value }));
 
   /**
-   * A linha inteira lida como **uma frase só**, na ordem em que a pessoa pensa: que remédio, a que
-   * horas, como está.
-   *
-   * Sem agrupar, o TalkBack para quatro vezes numa linha — "08:00", "ATRASADA", "Dipirona", "1
-   * comprimido" — e anuncia o estado antes do nome do remédio, que é o contrário do que se quer
-   * ouvir. O `accessible` junta os filhos num nó só e este rótulo substitui a leitura solta deles.
+   * Sem agrupar, o TalkBack para quatro vezes na linha e anuncia o estado antes do nome do remédio.
+   * O `accessible` junta os filhos num nó só, e este rótulo substitui a leitura solta deles.
    */
   const descricaoFalada = `${medicationName}, ${time}, ${STATUS_FALADO[status]}. ${note}`;
 
   return (
     /**
-     * O cartão (fundo, canto, sombra e faixa de estado) mora numa `View` comum, e **não** no
-     * `AnimatedPressable` de dentro.
-     *
-     * O `boxShadow` do `superficieDeCartao` é a propriedade nova do RN 0.86, e um componente do
-     * Reanimated 4 com `style` **função** — a assinatura que o `Pressable` exige para saber se está
-     * pressionado — não a aplicava: o cartão saía sem fundo e sem sombra, enquanto o
-     * `CardAdesaoSemanal` logo abaixo, um `Pressable` comum com o mesmo token, aparecia certo. Era
-     * a única diferença entre os dois.
-     *
-     * Separar por responsabilidade resolve sem abrir mão de nada: a `View` desenha o cartão, o
-     * `AnimatedPressable` cuida da opacidade animada e do toque.
+     * O cartão fica nesta `View`, e não no `AnimatedPressable` de dentro: o `boxShadow` do RN 0.86
+     * não é aplicado por um componente do Reanimated 4 com `style` função, que é a assinatura que o
+     * `Pressable` exige. O cartão saía sem fundo e sem sombra.
      */
     <View
       style={[

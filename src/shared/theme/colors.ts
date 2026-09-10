@@ -1,50 +1,31 @@
 /**
  * A paleta do Mapill.
  *
- * ## O azul
+ * Azul marca o que é ação e o que é agora, então não pinta fundo de tela, cabeçalho nem barra de
+ * abas: cor que está em toda parte deixa de significar alguma coisa.
  *
- * Azul é a cor focal do app: ele marca o que é ação e o que é agora. Por isso ele **não** pinta
- * fundo de tela, cabeçalho nem barra de abas — cor que está em toda parte deixa de significar
- * alguma coisa, e o azul precisa continuar querendo dizer "toque aqui".
- *
- * `primary` foi para `#0B5FD9`: um degrau mais claro e mais saturado que o `#0057BF` antigo, que
- * puxava para o marinho corporativo. Continua dando 6.4:1 sobre branco (AA folgado para texto,
- * AAA para texto grande), então segue válido como cor de rótulo, não só de fundo.
+ * As razões de contraste anotadas aqui são contra a WCAG AA (4.5:1 para texto, 3:1 para elemento
+ * gráfico). Elas dizem por que cada valor não pode subir nem descer.
  */
 export const colors = {
+  /** 6.4:1 sobre branco. */
   primary: "#0B5FD9",
   onPrimary: "#FFFFFF",
   /**
-   * O azul mais claro do gradiente do card-herói, e o estado pressionado de superfície azul.
-   *
-   * `#1F6FE8` e não o `#2B7BF5` anterior: com o branco por cima aquele dava **4.00:1** e reprovava
-   * em AA para texto — e ele carrega texto, no selo do diagnóstico e nas iniciais do avatar de
-   * Ajustes. Um degrau mais escuro leva a 4.62:1 e continua sendo o azul mais claro que `primary`,
-   * que é o papel do token no gradiente.
+   * O azul mais claro do gradiente, e o pressionado de superfície azul. Carrega texto (selo do
+   * diagnóstico, iniciais do avatar), então precisa dos 4.5:1: este dá 4.62:1, e clarear reprova.
    */
   primaryContainer: "#1F6FE8",
   onPrimaryContainer: "#FFFFFF",
-  /**
-   * O azul **diluído**: fundo de bloco de apoio, chip selecionado leve, tinta de linha ativa.
-   * É o que permite usar a cor da marca numa área grande sem que ela grite.
-   */
+  /** O azul diluído: fundo de bloco de apoio, chip selecionado leve, tinta de linha ativa. */
   primarySurface: "#EAF1FE",
   onPrimarySurface: "#0A3F8F",
   /**
-   * O azul quando ele precisa **se destacar sobre uma superfície já escura** — a aba ativa da
-   * barra de navegação, o horário da próxima dose. No claro é idêntico a `primary`. No escuro
-   * existe porque `primary` de lá é o navy escurecido (pensado para fundo de bloco, não para
-   * ler como tinta): usá-lo como cor de ícone/texto sobre uma barra que já é escura o deixava
-   * quase invisível — o mesmo problema, em miniatura, que motivou escurecer `primary`.
+   * O azul sobre superfície já escura: aba ativa, horário da próxima dose. No claro é igual a
+   * `primary`; no escuro existe porque o `primary` de lá é navy de fundo, e some como tinta.
    */
   corDeDestaque: "#0B5FD9",
-  /**
-   * O fundo de um bloco que domina boa parte da tela sozinho — hoje só a faixa do calendário.
-   * No claro é `primary`, igual sempre foi. No escuro é cinza: pedido do Gabriel depois de ver o
-   * tema escuro de verdade — um bloco tão grande pintado do azul do tema competia com o resto da
-   * paleta escura em vez de se somar a ela, e o calendário é tela onde essa faixa ocupa a maior
-   * fatia da tela de qualquer lugar do app.
-   */
+  /** Fundo de bloco que domina a tela, hoje só a faixa do calendário. No escuro é cinza. */
   superficieDeDestaque: "#0B5FD9",
   onSuperficieDeDestaque: "#FFFFFF",
 
@@ -53,50 +34,22 @@ export const colors = {
   secondaryContainer: "#D5E0F8",
   onSecondaryContainer: "#3D4757",
 
-  /* O terciário do Material (laranja `#C05400`) foi removido em 06/09.
-
-     Ele existia porque a paleta nasceu do gerador de temas do Material, e não porque o app
-     precisasse dele. Um único estilo o consumia — o bloco de aviso do cadastro de compromisso —, e
-     num bloco de texto o laranja escuro lê como marrom: uma quinta cor num app que fala quatro.
-
-     O vocabulário é: **vermelho** para o urgente, **verde** para o que está na hora, **azul** para
-     o destaque comum, **amarelo** para o alerta. Um aviso é alerta, então virou `warningSurface`.
-     Manter o token na paleta convidaria a usá-lo de novo por engano. */
+  /* O vocabulário é vermelho para o urgente, verde para o que está na hora, azul para o destaque
+     comum, amarelo para o alerta. O terciário laranja do Material saiu por ser uma quinta cor num
+     app que fala quatro, e manter o token convidaria a usá-lo de novo. */
 
   /**
-   * O amarelo de atenção — a dica, o lembrete de recontagem, a permissão que falta.
+   * O amarelo de atenção, e ele é a luz, não a tinta.
    *
-   * ## Por que amarelo, e não laranja
+   * Amarelo não serve como cor de texto: `#FFC107` dá 1.63:1 sobre branco. A saída é a do semáforo,
+   * amarelo como lâmpada e o que se lê contra ele escuro, e é o que `warningSurface` faz.
    *
-   * O laranja seria o vizinho natural do vermelho, e é justamente o problema: com o erro em 0° e o
-   * alerta em 17°, os dois virariam graus da mesma cor, e o que distingue "acaba em cinco dias" de
-   * "acabou" é uma diferença de **espécie**, não de intensidade. Em 35° o amarelo se separa do
-   * vermelho e continua sendo a cor que todo mundo lê como aviso.
+   * Três tokens porque os papéis são diferentes: `warning` é âmbar escuro para aviso sobre fundo
+   * branco (4.92:1); `warningVivo` é o amarelo aceso, só em área pequena com texto escuro;
+   * `warningSurface` é pastel porque cobre blocos inteiros, e amarelo cheio num painel agride.
    *
-   * Amarelo puro (`#FFE600`) não serve: dá 1.6:1 sobre branco, invisível como texto e como ícone.
-   * `#A16207` é o dourado mais claro que ainda passa nos dois papéis — 4.92:1 sobre branco, 4.70:1
-   * sobre o próprio `warningSurface`.
-   *
-   * ## O amarelo é a **luz**, não a tinta
-   *
-   * Três tentativas antes desta, e o erro era sempre o mesmo: tratar o amarelo como cor de texto.
-   * Ele não serve para isso — `#FFC107` dá **1.63:1** sobre branco, invisível. Escurecê-lo até
-   * passar produz marrom, que foi o `#7C3A06` original; fugir do marrom com cinza-quente produz o
-   * `#4A4436`, que deixou o bloco sem vida.
-   *
-   * O semáforo real resolve isso há um século: o amarelo é a **lâmpada acesa**, e o que se lê
-   * contra ele é escuro. Então `warningSurface` passou a ser o amarelo de verdade (`#FFC107`), e o
-   * texto sobre ele é quase-preto — **10.68:1**, o maior contraste de qualquer estado do app.
-   *
-   * `warning` continua âmbar escuro porque tem outro papel: é a cor do aviso quando ele aparece
-   * **sobre fundo branco**, como texto ou ícone solto, onde o amarelo vivo sumiria.
-   *
-   * ## Três tokens, e não dois
-   *
-   * `warningVivo` é o amarelo aceso, e só serve onde a área é **pequena e o texto é escuro** — o
-   * selo "acaba em 5 dias", uma faixa, um ponto. `warningSurface` continua pastel porque cobre
-   * blocos inteiros (a `Dica`, o painel de permissões, o lembrete de recontagem): amarelo cheio num
-   * painel de quatro linhas não avisa, agride.
+   * Amarelo e não laranja: com o erro em 0°, o laranja em 17° viraria grau da mesma cor, e o que
+   * separa "acaba em cinco dias" de "acabou" é espécie, não intensidade.
    */
   warning: "#A16207",
   warningVivo: "#FFC107",
@@ -105,18 +58,10 @@ export const colors = {
   onWarningSurface: "#5C4A0F",
 
   /**
-   * O vermelho de "isto falhou" — a dose atrasada, o estoque zerado, o botão de excluir.
+   * O vermelho de "isto falhou", usado como texto: 6.03:1 sobre branco, 5.27:1 sobre `errorSurface`.
    *
-   * Vermelho puro escurecido: matiz 0°, o mesmo do `#FF0000` do `errorVivo`, só que fechado o
-   * bastante para ser **lido**. O `#C4141C` anterior ficava em 357° — do lado do roxo — e era isso
-   * que o fazia parecer vinho ou rosa escuro.
-   *
-   * Os três vermelhos do app compartilham o matiz 0° de propósito: o ícone (`errorVivo`), o cartão
-   * (`errorPreenchido`) e a palavra (este) são a mesma cor em intensidades diferentes, e é o que
-   * faz o app parecer ter um vermelho só em vez de três parecidos.
-   *
-   * 6.03:1 sobre branco e 5.27:1 sobre o `errorSurface` — folga sobre os 4.5:1 exigidos de texto
-   * ("Estoque zerado", "Excluir").
+   * Os três vermelhos do app ficam no matiz 0° de propósito, para o app parecer ter um vermelho só
+   * em intensidades diferentes, e não três parecidos.
    */
   error: "#C90000",
   onError: "#FFFFFF",
@@ -124,15 +69,10 @@ export const colors = {
   onErrorContainer: "#8C0009",
 
   /**
-   * O verde de "está certo agora" — a dose dentro da janela do horário, o compromisso de hoje.
+   * O verde de "está certo agora", usado como texto ("TOMADA", a taxa de adesão).
    *
-   * `#11803E` no lugar do `#0F7038`, que era escuro a ponto de parecer verde-garrafa num ícone de
-   * 20px.
-   *
-   * É o mais vivo que ainda passa nos dois fundos em que a cor aparece como **texto** (o rótulo
-   * "TOMADA", a taxa de adesão): 5.02:1 sobre branco e 4.50:1 sobre o próprio `successSurface` —
-   * este último raspando no mínimo da WCAG AA. `#128A42`, um passo acima, cai para 3.97:1 e
-   * reprovaria justamente no fundo onde o rótulo verde mais aparece.
+   * É o mais vivo que ainda passa nos dois fundos: 5.02:1 sobre branco e 4.50:1 sobre
+   * `successSurface`, raspando no mínimo. Um passo acima (`#128A42`) cai para 3.97:1 e reprova.
    */
   success: "#11803E",
   onSuccess: "#FFFFFF",
@@ -140,58 +80,23 @@ export const colors = {
   onSuccessContainer: "#04502A",
 
   /**
-   * As versões **vivas** de sucesso e erro — verde grama e vermelho fogo, cor de semáforo.
+   * As versões vivas, só para elemento gráfico: ícone, barra, borda lateral, ponto de marcação.
+   * A WCAG pede 3:1 para forma e 4.5:1 para texto, e é essa diferença que separa estes dois tokens
+   * de `success` e `error`. Usar um no lugar do outro é como o defeito volta.
    *
-   * ## Por que são tokens separados
-   *
-   * `success` e `error` são usados como **texto** ("TOMADA", "Estoque zerado", a taxa de adesão), e
-   * texto precisa de 4.5:1 na WCAG AA. Essa exigência é o que empurra qualquer verde vivo de volta
-   * para o escuro: verde grama dá 2.95:1 sobre a superfície tingida, ilegível.
-   *
-   * Mas a exigência é do texto, não da cor. Ícone, barra de gráfico, borda lateral e ponto de
-   * marcação são **elementos gráficos**, e para eles a WCAG pede 3:1.
-   *
-   * Então a divisão é por papel: o vivo onde o olho bate primeiro e a cor é a informação; o escuro
-   * onde a cor acompanha uma palavra que precisa ser lida. Trocar um pelo outro é como o defeito
-   * volta.
-   *
-   * ## Por que não são ainda mais vivos
-   *
-   * O teto foi medido, e não escolhido. `#22C55E` (o verde grama de catálogo) dá **2.28:1** sobre
-   * branco: some como ícone, não só como texto. `#16A34A` passa sobre branco (3.30:1) mas cai para
-   * 2.95:1 nas superfícies tingidas, onde metade dos ícones vive — e um ícone que some no fundo
-   * verde-claro do próprio card é pior que um ícone escuro.
-   *
-   * O vermelho é o **puro** (`#FF0000`), pedido do Gabriel. Como forma ele passa em toda superfície
-   * do app (4.00:1 sobre branco, 3.50:1 na pior delas, contra os 3:1 exigidos) — mas **só** como
-   * forma: em texto ele dá 4.00:1 e reprova, que é a razão de o `error` existir separado.
-   *
-   * O verde para em `#12963F` (3.45:1 na pior superfície). Verde grama de catálogo (`#22C55E`) dá
-   * 2.28:1 e some até como ícone — o olho perde a forma no fundo, não só a leitura.
+   * O teto foi medido: o verde para em `#12963F` (3.45:1 na pior superfície) porque o verde grama
+   * de catálogo (`#22C55E`) dá 2.28:1 e some até como ícone. O vermelho puro passa como forma
+   * (3.50:1 na pior), mas reprova em texto, e é por isso que `error` existe separado.
    */
   successVivo: "#12963F",
   errorVivo: "#FF0000",
 
   /**
-   * O vermelho de **área preenchida** — o fundo do alerta de estoque.
+   * O vermelho de área preenchida, hoje o fundo do alerta de estoque.
    *
-   * Terceiro tom porque a exigência aqui se inverte: quando a cor é fundo de card, quem precisa de
-   * contraste é o texto branco por cima, e aí quanto mais vivo o vermelho, pior. `errorVivo` como
-   * fundo daria 3.94:1 no branco e reprovaria — o mesmo tom que funciona num ícone de 20px falha
-   * numa área que carrega três linhas de texto.
-   *
-   * ## Por que é escuro, e não o `#FF0000` exato
-   *
-   * Escolhido no aparelho: é o vermelho que o tema de alto contraste já usava, e no card de estoque
-   * da Home ele ficou melhor que qualquer um dos claros que passaram por aqui. Faz sentido — numa
-   * área grande, o vermelho aceso vibra e cansa, enquanto o fechado lê como sangue.
-   *
-   * O contraste confirma: 8.55:1 com o texto branco por cima, contra 4.81:1 do `#E60000` e 4.00:1
-   * do vermelho puro (que reprovaria). Este card carrega quatro linhas brancas, incluindo o nome do
-   * medicamento e o botão.
-   *
-   * Único dos três fora do matiz 0 (fica em 357°), e aqui isso não é defeito: em área grande e
-   * escura o desvio não se percebe como rosa, que era o problema do `#C4141C` em texto pequeno.
+   * Terceiro tom porque aqui a exigência se inverte: quem precisa de contraste é o texto branco por
+   * cima, e quanto mais vivo o fundo, pior. Este dá 8.55:1 com branco; o `errorVivo` daria 3.94:1 e
+   * reprovaria, num card que carrega quatro linhas.
    */
   errorPreenchido: "#9E0008",
   /**

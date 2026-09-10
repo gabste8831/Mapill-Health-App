@@ -4,11 +4,7 @@ import { View } from "react-native";
 import { useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./TimePicker.styles";
 
-/**
- * Onde o mostrador começa quando ainda não há resposta. **Não é sugestão**: a posição inicial de um
- * relógio não é um campo preenchido, e nada é gravado enquanto a pessoa não confirmar. Quem garante
- * isso é quem usa este componente — o `onChange` só dispara quando alguém mexe.
- */
+/** Onde o mostrador abre sem resposta. Não é valor gravado: `onChange` só dispara por interação. */
 const HORARIO_NEUTRO = "08:00";
 
 export type TimePickerProps = {
@@ -32,31 +28,11 @@ function paraHorario(data: Date): string {
 }
 
 /**
- * O mostrador redondo nativo do Android (Material 3), atrás do ícone de relógio.
+ * Mostrador redondo nativo do Android (Material 3). É Jetpack Compose: `.ios.tsx` usa a roda do
+ * SwiftUI e `.web.tsx` mantém campos digitáveis para o preview.
  *
- * ## Por que ele voltou (02/09)
- *
- * Este componente já foi o mostrador nativo, virou dois campos digitáveis escritos à mão, e agora
- * volta a ser o mostrador. Vale registrar por quê, porque a ida e a volta **não** se contradizem —
- * o que mudou foi o contexto ao redor.
- *
- * Quando o `TimePicker` era o **único** caminho para escolher horário, o mostrador era um problema
- * real: girar não é gesto óbvio, e o relógio analógico esconde a distinção entre manhã e noite —
- * que é exatamente onde o erro é caro, tomar às 20:00 o que era das 08:00. Foi por isso que a
- * revisão em aparelho pediu digitação duas vezes, e o componente foi reescrito à mão (o
- * `variant="input"` do `@expo/ui` não funciona: `DatePickerView.kt` só lê `props.variant` no
- * caminho da *data*, e ignora no da hora).
- *
- * Hoje o contexto é outro. O `TimeField` tem **o campo de digitação como caminho principal** — a
- * pessoa digita `0800` direto, com máscara que recusa o impossível — e o relógio mora num ícone ao
- * lado, para quem preferir. Como alternativa, e não como obrigação, o mostrador nativo é o certo:
- * é o componente que o sistema oferece, que a pessoa já viu em outros aplicativos, e ninguém é
- * forçado a girar nada.
- *
- * A objeção antiga continua verdadeira sobre o que ela falava; ela só não fala mais deste caso.
- *
- * É componente do Jetpack Compose, ou seja, **Android**. Os irmãos: `.ios.tsx` usa a roda do
- * SwiftUI, e `.web.tsx` mantém os campos digitáveis para o preview do navegador.
+ * Cuidado ao mexer: `variant="input"` do `@expo/ui` é aceito pelo TypeScript mas ignorado no
+ * caminho da hora. `DatePickerView.kt` só lê `props.variant` no caminho da data.
  */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {
   const styles = useEstilos(criarEstilos);
@@ -67,30 +43,14 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
       <Host matchContents={{ vertical: true }} style={styles.host}>
         <DateTimePicker
           displayedComponents="hourAndMinute"
-          /**
-           * `is24Hour` apaga a maior armadilha do mostrador: sem AM/PM, "20" é 20. A confusão entre
-           * manhã e noite era metade do argumento contra este componente, e ela some com o formato
-           * de 24 horas.
-           */
+          // Sem AM/PM, "20" é 20: é onde o erro seria caro, tomar às 20:00 o que era das 08:00.
           is24Hour
-          /**
-           * `picker` é o mostrador redondo, e é o padrão do componente — declarado à vista porque é
-           * justamente a escolha que este arquivo existe para registrar.
-           *
-           * `showVariantToggle` mantém o botão que alterna para digitação dentro do próprio popup:
-           * quem abriu o relógio por engano não fica preso nele.
-           */
+          // `showVariantToggle` deixa alternar para digitação dentro do popup.
           variant="picker"
           showVariantToggle
           initialDate={paraData(initialValue ?? HORARIO_NEUTRO).toISOString()}
-          /**
-           * `elementColors` em vez de só `color`.
-           *
-           * `color` pinta um subconjunto dos elementos, e o resto herda o acento do tema do
-           * sistema — foi o que fez o verde do Material You aparecer no aparelho, mesmo caso da
-           * pílula das abas resolvido em 23/08. Nomear cada peça é o que garante que o popup seja
-           * do Mapill em qualquer aparelho, e o SDK 57 passou a permitir isso.
-           */
+          // `color` sozinho pinta só parte dos elementos: o resto herda o acento do Material You
+          // do aparelho. Cada peça precisa ser nomeada em `elementColors`.
           color={cores.primary}
           elementColors={{
             containerColor: cores.surfaceContainerLowest,

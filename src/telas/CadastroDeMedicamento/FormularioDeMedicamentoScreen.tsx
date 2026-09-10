@@ -105,7 +105,6 @@ import {
   type EntradaDeDose,
 } from "./SeletorDeHorarios";
 
-/** A ordem em que as formas aparecem: da mais comum pra menos, com "Outra" no fim. */
 const FORM_OPTIONS: SelectOption<MedicationForm>[] = (
   Object.keys(MEDICATION_FORM_LABELS) as MedicationForm[]
 ).map((form) => ({ value: form, label: MEDICATION_FORM_LABELS[form] }));
@@ -125,7 +124,7 @@ const UNIT_NOUNS: Record<PosologyUnit, string> = {
   sachet: "sachês",
 };
 
-/** Gênero do substantivo acima — sem isso a pergunta sai "quantos gotas". */
+/** Sem isso a pergunta sai "quantos gotas". */
 const UNIDADES_FEMININAS: readonly PosologyUnit[] = [
   "capsule",
   "drop",
@@ -137,10 +136,7 @@ function quantosDe(unit: PosologyUnit): string {
   return UNIDADES_FEMININAS.includes(unit) ? "Quantas" : "Quantos";
 }
 
-/**
- * Onde ler a unidade no próprio remédio. Não é orientação de dose — é dizer onde está escrito,
- * pra quem tem a caneta ou o frasco na mão copiar em vez de adivinhar.
- */
+/** Onde ler a unidade no próprio remédio. Não é orientação de dose. */
 const DICA_DA_UNIDADE: Partial<Record<MedicationForm, string>> = {
   injection:
     "Caneta de insulina marca em UI; ampola e seringa costumam vir em ml.",
@@ -156,13 +152,10 @@ const FREQUENCY_OPTIONS: OptionGroupOption<FrequencyKind>[] = [
   { value: "asNeeded", label: "Só quando precisar" },
 ];
 
-/** De onde o ciclo conta. Perguntar isso é o que impede a pausa de cair no dia errado. */
+/** De onde o ciclo conta. Sem isso a pausa cai no dia errado. */
 type CycleStartKind = "today" | "earlier";
 
-/**
- * "Hoje" só serve quando o tratamento começa hoje. Marcado para começar adiante, a primeira opção
- * passa a ser o dia do início — dizer "hoje" ali descreveria um ciclo que ainda nem existe.
- */
+/** "Hoje" só serve quando o tratamento começa hoje; adiante, a referência é o dia do início. */
 function opcoesDeInicioDoCiclo(
   comecaDepoisDeHoje: boolean,
 ): OptionGroupOption<CycleStartKind>[] {
@@ -184,11 +177,7 @@ const DURATION_OPTIONS: OptionGroupOption<DurationKind>[] = [
   { value: "fixed", label: "Tem prazo" },
 ];
 
-/**
- * "Uso contínuo" descreve quem toma todo dia sem previsão de parar. Não descreve o Dorflex que
- * mora na mochila — esse não é contínuo, é permanente e sem agenda. Mesma pergunta, palavra que
- * corresponde ao caso.
- */
+/** Sem agenda, "contínuo" não descreve o caso: é permanente e sob demanda. */
 const DURATION_OPTIONS_SEM_AGENDA: OptionGroupOption<DurationKind>[] = [
   { value: "continuous", label: "Sempre disponível" },
   { value: "fixed", label: "Tem prazo" },
@@ -205,10 +194,7 @@ const DOSES_PER_DAY_OPTIONS: OptionGroupOption<string>[] = Array.from(
   (_, index) => ({ value: String(index + 1), label: `${index + 1}×` }),
 );
 
-/**
- * `nome` existe só para o leitor de tela: a ficha mostra "Seg" porque sete nomes inteiros não
- * cabem lado a lado, mas o TalkBack lê a abreviação letra a letra ou como palavra truncada.
- */
+/** `nome` é para o leitor de tela: o TalkBack lê "Seg" letra a letra. */
 const WEEKDAYS: { value: Weekday; label: string; nome: string }[] = [
   { value: 0, label: "Dom", nome: "domingo" },
   { value: 1, label: "Seg", nome: "segunda-feira" },
@@ -228,11 +214,7 @@ const INTAKE_INSTRUCTION_LABELS: Record<IntakeInstruction, string> = {
   avoidAlcohol: "Evitar álcool",
 };
 
-/**
- * A ficha que abre o campo livre. Fica na mesma fileira das outras porque, pra quem está
- * escolhendo, "outra" é mais uma resposta possível — separá-la num campo sempre visível fazia a
- * seção parecer que cobrava um texto de todo mundo.
- */
+/** Ficha que só abre o campo livre; não é valor do domínio. */
 const OUTRA_ORIENTACAO = "other";
 type OrientacaoChip = IntakeInstruction | typeof OUTRA_ORIENTACAO;
 
@@ -244,10 +226,7 @@ const INTAKE_INSTRUCTION_OPTIONS: ToggleChipOption<OrientacaoChip>[] = [
   { value: OUTRA_ORIENTACAO, label: "Outra orientação" },
 ];
 
-/**
- * Conseguir consulta e passar na farmácia leva tempo — por isso a menor opção é uma semana, e
- * não um dia. Antecedência que não dá pra agir com ela é só um susto.
- */
+/** Mínimo de 7 dias: conseguir consulta e passar na farmácia leva tempo. */
 const RENEWAL_LEAD_OPTIONS: OptionGroupOption<string>[] = [
   { value: "7", label: "7 dias" },
   { value: "15", label: "15 dias" },
@@ -261,21 +240,7 @@ const REMINDER_LABELS: Record<ReminderMode, string> = {
   none: "Sem aviso",
 };
 
-/**
- * A frase de previsão do lembrete: "O alarme tocará **hoje às 12:08**".
- *
- * ## O verbo
- *
- * Futuro simples, e não "tocaria". O futuro do pretérito soa como hipótese remota — em português
- * corrente é o que se diz do que **não** vai acontecer. Quem carrega a condição é o "Ao salvar" que
- * abre a frase: ele já avisa que nada disso vale enquanto o formulário não for salvo.
- *
- * ## A data
- *
- * `dataEHoraPorExtenso` devolve "Sábado, 5 de setembro, às 12:08" — bom para o cartão de um
- * compromisso, ilegível encaixado no meio de outra frase, com a maiúscula no miolo e três vírgulas
- * seguidas. Aqui a data é quase sempre hoje ou amanhã, e é assim que se fala dela.
- */
+/** A frase de previsão do lembrete: "O alarme tocará hoje às 12:08". */
 function previsaoDoLembrete(mode: ReminderMode, quando: Date): string {
   const sujeito =
     mode === "alarm"
@@ -295,14 +260,12 @@ function previsaoDoLembrete(mode: ReminderMode, quando: Date): string {
     ? "hoje"
     : mesmoDia(quando, amanha)
       ? "amanhã"
-      : // Além de amanhã, o dia da semana é o que se confere de relance — "dia 12" não denuncia
-        // nada, "quinta" denuncia quem quis marcar na quarta.
-        dataPorExtenso(quando).toLowerCase();
+      : dataPorExtenso(quando).toLowerCase();
 
   return `${sujeito} ${dia} às ${horas}:${minutos}`;
 }
 
-/** Cadastro inteiro numa estrutura só — a mesma tela cria e edita. */
+/** Cadastro inteiro numa estrutura só: a mesma tela cria e edita. */
 export type MedicamentoDraft = {
   name: string;
   activeIngredient: string;
@@ -327,9 +290,8 @@ export type MedicamentoDraft = {
   attachmentUri: string | null;
   attachmentKind: PrescriptionAttachmentKind | null;
   /**
-   * Horários de hoje (`HH:MM`) que o paciente diz já ter tomado antes de cadastrar (E10). Viram
-   * `IntakeLog` confirmado no ato do salvamento, e descontam estoque como qualquer dose. Vazio na
-   * edição — registrar ingestão não é o que aquela tela faz.
+   * Horários de hoje (`HH:MM`) que o paciente diz já ter tomado. Viram `IntakeLog` confirmado no
+   * salvamento. Vazio na edição: registrar ingestão não é o que aquela tela faz.
    */
   dosesJaTomadasHoje: string[];
   attachmentValidUntil: string | null;
@@ -338,10 +300,7 @@ export type MedicamentoDraft = {
   renewalReminderEnabled: boolean;
 };
 
-/**
- * O `SelectField` permite limpar, devolvendo `null`. Nestes campos limpar não é opção que faça
- * sentido — não existe medicamento sem forma nem dose sem unidade —, então o `null` é ignorado.
- */
+/** O `SelectField` devolve `null` ao limpar; aqui limpar não é opção válida, então é ignorado. */
 function semLimpar<TValue extends string>(set: (value: TValue) => void) {
   return (value: TValue | null) => {
     if (value !== null) set(value);
@@ -356,21 +315,17 @@ function diasAntes(isoDate: string, days: number): string {
   return `${alvo.getFullYear()}-${p(alvo.getMonth() + 1)}-${p(alvo.getDate())}`;
 }
 
-/** Frequências que agendam horários fixos ao longo do dia — as que pedem a lista de horários. */
+/** Frequências que pedem lista de horários. */
 function temHorariosFixos(frequency: FrequencyKind | null): boolean {
   return frequency !== null && frequency !== "asNeeded";
 }
 
-/**
- * Se o que está escrito tem parte decimal. Serve para decidir o que fazer com uma quantidade já
- * digitada quando a unidade muda embaixo dela: `2` sobrevive à troca para comprimido, `7,5` não.
- * Olha o texto cru, e não o número, porque é o texto que continua na tela.
- */
+/** Olha o texto cru, e não o número, porque é o texto que continua na tela. */
 function temFracao(valor: string): boolean {
   return /[.,]/.test(valor);
 }
 
-/** "o nome, a dose e os horários" — lista em português, com "e" antes do último. */
+/** Lista em português, com "e" antes do último. */
 function emLista(itens: string[]): string {
   if (itens.length <= 1) return itens.join("");
   return `${itens.slice(0, -1).join(", ")} e ${itens[itens.length - 1]}`;
@@ -392,12 +347,8 @@ type FormularioDeMedicamentoScreenProps = {
   /** Ausente = cadastro novo. Presente = edição, com a tela já preenchida. */
   initialValue?: MedicamentoDraft;
   /**
-   * O que o **scanner** leu da caixa, quando o cadastro veio de lá.
-   *
-   * Separado de `initialValue` porque não é a mesma coisa: aquele é um cadastro que já existe e
-   * está sendo editado; este é um cadastro novo com três campos adiantados pela base pública. A
-   * posologia continua vazia nos dois casos que importam — a CMED sabe qual remédio é, e nunca
-   * quanto a pessoa toma.
+   * O que o scanner leu da caixa. Separado de `initialValue`: aqui é cadastro novo com três campos
+   * adiantados pela CMED, que sabe qual remédio é e nunca quanto a pessoa toma.
    */
   preenchidoDaCmed?: {
     name: string;
@@ -409,17 +360,9 @@ type FormularioDeMedicamentoScreenProps = {
 };
 
 /**
- * Cadastro e edição de medicamento na mesma tela, em dois estados: primeiro só o essencial, e o
- * resto aparece de uma vez quando ele fica completo. A transição é única e anunciada — seções
- * nascendo conforme se digita fariam a tela pular debaixo do dedo, virando um acordeão disfarçado.
- *
- * Dentro de cada seção, a pergunta seguinte é consequência da resposta anterior: a forma decide a
- * unidade, a frequência decide quantos horários existem. É isso que impede o erro clássico de
- * cadastrar 3 doses por dia com um horário só.
- *
- * O que é longo de preencher e curto de rever — horários, estoque, lembrete — mora em popup, e a
- * tela guarda só o resumo. Assim nenhuma decisão empurra a página para baixo debaixo do dedo de
- * quem acabou de tocar nela.
+ * Cadastro e edição na mesma tela. Cada pergunta é consequência da anterior: a forma decide a
+ * unidade, a frequência decide quantos horários existem, e é isso que impede cadastrar 3 doses
+ * por dia com um horário só.
  */
 export function FormularioDeMedicamentoScreen({
   initialValue,
@@ -438,24 +381,15 @@ export function FormularioDeMedicamentoScreen({
   const prescriptionFile = useDocumentPicker("medicamento-receita");
 
   /**
-   * Tudo que descreve a posologia começa **vazio**, sem valor de fábrica. Um seletor já marcado
-   * é indistinguível de uma resposta dada: a pessoa passa por ele sem tocar e o cadastro sai com
-   * uma posologia que o app inventou. Vale para forma, dose, frequência e duração — e é a mesma
-   * razão que tirou os horários sugeridos.
+   * Tudo que descreve a posologia começa vazio: seletor já marcado é indistinguível de resposta
+   * dada, e o cadastro sairia com uma posologia que o app inventou.
    */
   const [name, setName] = useState(
     initialValue?.name ?? preenchidoDaCmed?.name ?? "",
   );
   /**
-   * O que veio da CMED, quando veio.
-   *
-   * `sugestaoAceita` fecha a lista depois da escolha; `requisitoDaCmed` guarda a tarja, que o
-   * formulário não pergunta — quem cadastra à mão não tem como saber, e agora a base responde.
-   * Numa edição já nasce com o valor gravado, senão reabrir o cadastro rebaixaria um controlado
-   * para isento sem ninguém mexer nisso.
-   *
-   * Vindo do scanner, `sugestaoAceita` já começa ligado: o nome foi escolhido na tela anterior, e
-   * abrir o formulário com a lista de sugestões aberta pediria de novo o que já foi respondido.
+   * `requisitoDaCmed` guarda a tarja, que o formulário não pergunta. Numa edição nasce com o valor
+   * gravado, senão reabrir o cadastro rebaixaria um controlado para isento sem ninguém mexer nisso.
    */
   const [sugestaoAceita, setSugestaoAceita] = useState(
     preenchidoDaCmed !== undefined,
@@ -469,29 +403,15 @@ export function FormularioDeMedicamentoScreen({
   const sugestoes = useMedicationCatalog(sugestaoAceita ? "" : name);
 
   /**
-   * Preenche o que a base sabe e **para por aí**.
-   *
-   * Nome, princípio ativo e tarja vêm da CMED. Forma farmacêutica, dose e posologia **não** —
-   * a base traz a apresentação como texto ("500 MG COM REV CT BL AL PLAS INC X 20"), de onde dá
-   * para adivinhar "comprimido", mas adivinhar forma farmacêutica num app de medicação é
-   * exatamente o tipo de palpite que o cadastro inteiro foi desenhado para não dar. O que a
-   * pessoa toma, e quanto, continua sendo resposta de quem tem a caixa e a receita na mão.
+   * Preenche nome, princípio ativo e tarja, e para por aí. Forma e posologia não vêm da CMED: a
+   * apresentação é texto livre, e adivinhar forma farmacêutica é palpite que este app não dá.
    */
   function aceitarSugestao(entrada: CatalogEntry) {
-    /**
-     * O que é **gravado** também vem capitalizado, e não só o que a lista mostra.
-     *
-     * A CMED escreve tudo em maiúsculas. Antes o nome ia para o campo como veio, então quem
-     * escolhia uma sugestão cadastrava "DIPIRONA SÓDICA" e via isso na lista de remédios, no
-     * alarme e no relatório para o médico, para sempre. Quem digitava à mão escrevia normal — dois
-     * cadastros do mesmo remédio ficavam diferentes conforme o caminho.
-     */
+    // A CMED escreve tudo em maiúsculas, e é este valor que fica gravado para sempre.
     const nome = capitalizarNome(entrada.name);
     const nomeComDosagem =
       entrada.strength.length > 0 ? `${nome} ${entrada.strength}` : nome;
     setName(nomeComDosagem);
-    // Capitalizado também: `toLowerCase()` deixava "ácido acetilsalicílico" sem a inicial, o que
-    // num campo de texto corrido lê como digitação apressada.
     setActiveIngredient(capitalizarNome(entrada.activeIngredient));
     setRequisitoDaCmed(entrada.prescriptionRequirement);
     setSugestaoAceita(true);
@@ -519,8 +439,8 @@ export function FormularioDeMedicamentoScreen({
       amount: dose.amount === null ? "" : String(dose.amount),
     })),
   );
-  // Reaberto já ligado se algum horário tem dose própria — senão os números gravados sumiriam
-  // da tela enquanto continuariam valendo no agendamento.
+  // Reaberto já ligado se algum horário tem dose própria: senão os números gravados sumiriam da
+  // tela enquanto continuariam valendo no agendamento.
   const [dosesVariam, setDosesVariam] = useState(() =>
     initialDoses.some((dose) => dose.amount !== null),
   );
@@ -535,7 +455,7 @@ export function FormularioDeMedicamentoScreen({
   const [activeDaysInput, setActiveDaysInput] = useState(
     initialSchedule?.kind === "cycle" ? String(initialSchedule.activeDays) : "",
   );
-  // Onde o ciclo atual começou. `null` = ainda não respondido; "hoje" é resposta, não padrão.
+  // `null` = ainda não respondido. "Hoje" é resposta, não padrão.
   const [cycleStart, setCycleStart] = useState<CycleStartKind | null>(
     initialSchedule?.kind !== "cycle"
       ? null
@@ -555,16 +475,8 @@ export function FormularioDeMedicamentoScreen({
   );
 
   /**
-   * Quando o tratamento começa. Vale hoje, que é o dia em que se está cadastrando — mas a data
-   * fica **dita na tela**, com um atalho pra alterar. Antes ela era fixa e invisível, e quem
-   * cadastrava a cartela que só começa domingo, ou o antibiótico que vai comprar amanhã, saía com
-   * a data errada sem nada denunciar: os horários nasciam a partir de hoje e o prazo terminava
-   * cedo demais.
-   *
-   * Diferente do resto do formulário, aqui "hoje" pode vir preenchido. A regra de não trazer nada
-   * de fábrica existe pra impedir o app de **inventar posologia** — e o dia de hoje não é
-   * invenção, é o único fato que ele realmente sabe. Cobrar um toque de todo mundo por um caso
-   * raro seria pagar caro pela coerência.
+   * Única exceção à regra de não trazer nada de fábrica: hoje não é posologia inventada, é o
+   * único fato que o app sabe. Fica dito na tela, com atalho pra alterar.
    */
   const [startDateInput, setStartDateInput] = useState(() =>
     toDateInput(initialValue?.startDate ?? todayIsoDate()),
@@ -575,10 +487,7 @@ export function FormularioDeMedicamentoScreen({
   const inicioEscolhido = alteraInicio
     ? parseDateInput(startDateInput)
     : todayIsoDate();
-  /**
-   * Data pela metade não pode virar "hoje" por omissão: o cadastro sairia com um início que
-   * ninguém escreveu. Enquanto ela não fecha, o botão fica travado e o rodapé diz o que falta.
-   */
+  // Data pela metade não vira "hoje" por omissão: trava o botão até fechar.
   const inicioIncompleto = inicioEscolhido === null;
   const startDateError =
     alteraInicio && startDateInput.length === 10 && inicioEscolhido === null
@@ -586,8 +495,7 @@ export function FormularioDeMedicamentoScreen({
       : undefined;
   const startDate = inicioEscolhido ?? todayIsoDate();
   const comecaDepoisDeHoje = startDate > todayIsoDate();
-  // Numa edição o `endDate` gravado já é a resposta; num cadastro novo ninguém respondeu ainda,
-  // e "contínuo" pré-marcado seria o app decidindo que o tratamento não acaba.
+  // Num cadastro novo, "contínuo" pré-marcado seria o app decidindo que o tratamento não acaba.
   const [duration, setDuration] = useState<DurationKind | null>(
     initialValue === undefined
       ? null
@@ -611,17 +519,6 @@ export function FormularioDeMedicamentoScreen({
   );
   const [isReminderSheetOpen, setReminderSheetOpen] = useState(false);
 
-  /**
-   * Aqui viviam `voltarParaLembrete` (uma ref) e `ajudaDeAlertasAberta`, com um `useFocusEffect`
-   * para reabrir o popup na volta dos termos.
-   *
-   * Os três existiam por uma razão só: a ajuda morava **dentro** do popup, e ler os termos exigia
-   * fechá-lo para navegar — dois modais empilhados travam a tela no Android. Era preciso lembrar
-   * que ele estava aberto, em que ponto a leitura parou, e remontar tudo no foco seguinte.
-   *
-   * Com a ajuda numa rota própria dentro do mesmo stack do cadastro, não há estado a preservar: a
-   * navegação é um `push` comum e o voltar do Android desfaz sozinho.
-   */
   const [photoUri, setPhotoUri] = useState<string | null>(
     initialValue?.photoUri ?? null,
   );
@@ -677,10 +574,7 @@ export function FormularioDeMedicamentoScreen({
     (initialValue?.intakeNote ?? "").length > 0,
   );
 
-  /**
-   * A ficha "outra orientação" não é um valor do domínio: ela só abre o campo. Desmarcar apaga o
-   * texto junto, senão a anotação seguiria valendo escondida.
-   */
+  /** Desmarcar apaga o texto junto, senão a anotação seguiria valendo escondida. */
   function handleOrientacoesChange(values: OrientacaoChip[]) {
     const querOutra = values.includes(OUTRA_ORIENTACAO);
     setMostraOutraOrientacao(querOutra);
@@ -708,17 +602,9 @@ export function FormularioDeMedicamentoScreen({
       : stockUnitForMedicationForm(form, doseUnit);
 
   /**
-   * Trocar a forma reescreve a unidade: "3 jatos de pomada" não é dose, é combinação sem sentido.
-   * Onde a forma resolve a unidade sozinha, ela é derivada — isso não é chute, é consequência.
-   * Onde há ambiguidade real (líquido, injeção, outra), volta a ficar em branco pra ser escolhida.
-   *
-   * **E reescreve a quantidade junto, quando ela deixa de caber na unidade nova.** A máscara do
-   * campo (`handleDoseAmountChange`) decide entre inteiro e decimal pela unidade **vigente na
-   * digitação**, e só ali: quem digitava `7,5` ml e depois trocava para comprimido ficava com o
-   * `7,5` intacto na tela, agora sob uma unidade que não aceita fração. Nenhuma validação pegava —
-   * `hasDoseAmountError` só pergunta se é número maior que zero — e o cadastro salvava sete
-   * comprimidos e meio. Limpar é a resposta certa, e não converter: `7,5 ml` não tem equivalente em
-   * comprimidos, então o único palpite honesto é nenhum.
+   * Trocar a forma reescreve a unidade e, se preciso, a quantidade: a máscara do campo decide
+   * inteiro ou decimal pela unidade vigente na digitação, então 7,5 ml sobreviveria à troca para
+   * comprimido e salvaria sete comprimidos e meio. Limpar, e não converter: não há equivalência.
    */
   function handleFormChange(nextForm: MedicationForm) {
     setForm(nextForm);
@@ -729,19 +615,15 @@ export function FormularioDeMedicamentoScreen({
     descartarFracaoSeNaoCabe(proximaUnidade);
   }
 
-  /**
-   * Escolher a unidade à mão tem o mesmo problema da troca de forma, dentro da mesma forma: em
-   * Líquido, `7,5` ml é válido e `7,5` mg não é. Passa pela mesma limpeza.
-   */
+  /** Mesmo problema da troca de forma: em Líquido, `7,5` ml é válido e `7,5` mg não é. */
   function handleDoseUnitChange(unit: PosologyUnit) {
     setDoseUnit(unit);
     descartarFracaoSeNaoCabe(unit);
   }
 
   /**
-   * Apaga a quantidade quando ela tem fração e a unidade nova não aceita — em cima e nas doses por
-   * horário, que são o mesmo número repetido. Unidade `null` também apaga: sem unidade não há regra
-   * vigente, e deixar o número esperando por uma que talvez o invalide é o que criava o problema.
+   * Apaga a quantidade fracionada quando a unidade nova não aceita fração. Unidade `null` também
+   * apaga: sem unidade não há regra vigente para o número esperar.
    */
   function descartarFracaoSeNaoCabe(unidade: PosologyUnit | null) {
     if (unidade !== null && allowsFractionalDose(unidade)) return;
@@ -754,10 +636,8 @@ export function FormularioDeMedicamentoScreen({
   }
 
   /**
-   * Desmarcar "a dose muda de um horário para o outro" apaga as doses por horário. Elas só existem
-   * enquanto a variação está ligada — o `schedule` já as descarta com ela desligada —, e mantidas
-   * no estado voltariam preenchidas se a variação fosse remarcada, exibindo como escolha desta vez
-   * números que a pessoa abandonou. Os horários ficam: eles valem nos dois modos.
+   * Desmarcar apaga as doses por horário: mantidas no estado, voltariam preenchidas se a variação
+   * fosse remarcada, exibindo como escolha números que a pessoa abandonou.
    */
   function handleDosesVariamChange(ativa: boolean) {
     setDosesVariam(ativa);
@@ -768,13 +648,7 @@ export function FormularioDeMedicamentoScreen({
     }
   }
 
-  /**
-   * Sair de "prazo definido" apaga o prazo. Os dois campos são filhos dessa escolha e só aparecem
-   * com ela; guardados, reapareceriam preenchidos se a pessoa voltasse atrás — mostrando como
-   * resposta desta vez um número que ela digitou antes de mudar de ideia. O `handleSubmit` já
-   * ignorava os valores fora do `fixed`, então nada de errado era salvo; o que se corrige aqui é a
-   * tela afirmar algo que ninguém respondeu.
-   */
+  /** Sair de "prazo definido" apaga o prazo, senão ele reapareceria preenchido ao voltar atrás. */
   function handleDurationChange(nextDuration: DurationKind) {
     setDuration(nextDuration);
     if (nextDuration !== "fixed") {
@@ -783,7 +657,7 @@ export function FormularioDeMedicamentoScreen({
     }
   }
 
-  /** Mudar a quantidade de doses recomeça a lista: os horários antigos eram de outra posologia. */
+  /** Recomeça a lista: os horários antigos eram de outra posologia. */
   function handleDosesPerDayChange(value: string) {
     setCustomDosesInput("");
     setDoseInputs(entradasVazias(Number(value)));
@@ -815,17 +689,15 @@ export function FormularioDeMedicamentoScreen({
   }
 
   /**
-   * Quando cada horário tem a sua dose, o número de cima deixa de ser usado. Ele continua na
-   * tela porque é ele que volta a valer se a variação for desmarcada, e é dele que a conta de
-   * estoque parte enquanto a lista de horários não existe. O que muda é a tela **dizer isso**,
-   * em vez de deixar dois números se contradizendo em silêncio.
+   * Com dose em todos os horários, o número de cima deixa de ser usado. Continua no estado porque
+   * volta a valer se a variação for desmarcada, e é dele que a conta de estoque parte.
    */
   const todosHorariosComDose =
     dosesVariam &&
     doseInputs.length > 0 &&
     doseInputs.every((dose) => dose.amount.trim().length > 0);
 
-  /** Fração só onde ela existe: meio comprimido sim, meia gota não. */
+  /** Meio comprimido existe, meia gota não. */
   const doseAceitaFracao = doseUnit !== null && allowsFractionalDose(doseUnit);
 
   function handleDoseAmountChange(raw: string) {
@@ -854,10 +726,9 @@ export function FormularioDeMedicamentoScreen({
     duplicateTimeIndexes.length === 0;
 
   const parsedCycleLength = Number(cycleLengthInput);
-  // Ciclo de um dia é "todo dia", que já tem opção própria — daí o mínimo de 2.
+  // Ciclo de um dia é "todo dia", que já tem opção própria, daí o mínimo de 2.
   const cycleLengthDefinido = parsedCycleLength >= 2;
-  // Um dia seguido é o caso comum ("de 30 em 30 dias"), mas continua sendo resposta e não padrão:
-  // o campo só some quando não há o que perguntar, e aí a resposta é 1 por construção.
+  // Campo ausente significa 1 por construção, não por padrão.
   const parsedActiveDays =
     activeDaysInput.length === 0 ? 1 : Number(activeDaysInput);
   const activeDaysError =
@@ -867,8 +738,8 @@ export function FormularioDeMedicamentoScreen({
       ? `Entre 1 e ${parsedCycleLength - 1}. Tomar todos os dias do ciclo é "todo dia".`
       : undefined;
 
-  // Memoizado porque o `schedule` depende dele, e o `schedule` alimenta a geração de doses —
-  // recriar a data a cada tecla faria o tratamento inteiro ser regerado sem nada ter mudado.
+  // Memoizado porque o `schedule` depende dele e alimenta a geração de doses: recriar a data a
+  // cada tecla regeraria o tratamento inteiro sem nada ter mudado.
   const cycleStartIso = useMemo(
     () =>
       cycleStart === "today"
@@ -887,8 +758,7 @@ export function FormularioDeMedicamentoScreen({
         ? "O ciclo não pode começar depois do início do tratamento."
         : undefined;
 
-  // Sem saber onde o ciclo começou, o app agendaria a pausa no lugar errado — então isto é
-  // bloqueio, e não aviso. Mesma severidade dos horários: erra em silêncio se passar.
+  // Bloqueio e não aviso: sem saber onde o ciclo começou, a pausa seria agendada no lugar errado.
   const cicloCompleto =
     cycleLengthDefinido &&
     activeDaysError === undefined &&
@@ -919,10 +789,8 @@ export function FormularioDeMedicamentoScreen({
   const validUntilIso =
     validUntilInput.length === 0 ? null : parseDateInput(validUntilInput);
   /**
-   * Receita vencida é recusada, e não só sinalizada. Aceitar traz dois problemas de uma vez: o
-   * aviso de renovação seria agendado para uma data que já passou (nunca dispara), e a pessoa sai
-   * da tela achando que está coberta por um documento que não vale mais. Quem já perdeu a
-   * validade precisa renovar, não registrar.
+   * Receita vencida é recusada, não só sinalizada: o aviso de renovação seria agendado para uma
+   * data passada e nunca dispararia.
    */
   const receitaVencida =
     validUntilIso !== null && validUntilIso < todayIsoDate();
@@ -933,32 +801,25 @@ export function FormularioDeMedicamentoScreen({
         ? "Essa receita já venceu. Anexe uma receita dentro da validade."
         : undefined;
 
-  /**
-   * A data em que o aviso chega, e não "15 dias antes". O número sozinho não deixa ninguém
-   * conferir se dá tempo de conseguir consulta — a data deixa.
-   */
   const avisoDeRenovacao = (() => {
     if (validUntilIso === null || receitaVencida || !wantsRenewalReminder)
       return null;
     if (renewalLeadDays === null) return null;
 
     const chegaEm = diasAntes(validUntilIso, Number(renewalLeadDays));
-    // Antecedência que cai antes de hoje é aviso que já passou: prometer a data seria mentira, e
-    // o silêncio da versão anterior fazia a pessoa contar com um lembrete que nunca viria.
+    // Antecedência que cai antes de hoje é lembrete que nunca vai disparar.
     return chegaEm < todayIsoDate()
       ? `Com ${renewalLeadDays} dias de antecedência o aviso já teria passado. Escolha um prazo menor para ser avisado a tempo.`
       : `Você será avisado em ${toDateInput(chegaEm)}, com ${renewalLeadDays} dias pra renovar.`;
   })();
 
-  /** `null` enquanto a frequência não foi escolhida — não existe posologia padrão. */
+  /** `null` enquanto a frequência não foi escolhida: não existe posologia padrão. */
   const schedule = useMemo<PosologySchedule | null>(() => {
     if (frequency === null) return null;
     if (frequency === "asNeeded") return { kind: "asNeeded" };
 
-    /**
-     * A dose por horário só é gravada quando a variação está ligada — desmarcar tem que apagar
-     * de fato, senão o número continuaria valendo no agendamento sem aparecer em lugar nenhum.
-     */
+    // Dose por horário só é gravada com a variação ligada, senão valeria no agendamento sem
+    // aparecer em lugar nenhum.
     const doses = [...doseInputs]
       .sort((a, b) => a.at.localeCompare(b.at))
       .map((dose) => ({
@@ -990,8 +851,7 @@ export function FormularioDeMedicamentoScreen({
     cycleStartIso,
   ]);
 
-  // `doseInputs` vazio significa que a quantidade de doses ainda não foi escolhida, e `every`
-  // de lista vazia é `true` — sem este teste, "nada respondido" passaria por completo.
+  // `every` de lista vazia é `true`: sem o teste de tamanho, "nada respondido" passaria por completo.
   const horariosCompletos = doseInputs.length > 0 && areTimesComplete;
   const isScheduleComplete =
     frequency === "asNeeded" ||
@@ -999,10 +859,7 @@ export function FormularioDeMedicamentoScreen({
     (frequency === "weekly" && horariosCompletos && weekdays.length > 0) ||
     (frequency === "cycle" && horariosCompletos && cicloCompleto);
 
-  /**
-   * O essencial completo é o que dispara a revelação do resto e destrava o botão. Não inclui
-   * `endDate`: prazo em branco é "ainda não sei", não erro — só duração inválida trava.
-   */
+  /** Não inclui `endDate`: prazo em branco é "ainda não sei", não erro. */
   const doseCompleta =
     doseUnit !== null && parsedDoseAmount > 0 && !hasDoseAmountError;
   const duracaoCompleta =
@@ -1021,11 +878,7 @@ export function FormularioDeMedicamentoScreen({
     customDosesError === undefined &&
     validUntilError === undefined;
 
-  /**
-   * O que ainda falta, por extenso. Botão cinza sem explicação faz a pessoa varrer a tela
-   * procurando o campo esquecido — e quanto mais a tela encolhe em resumos e popups, mais fácil
-   * é justamente o esquecimento passar batido.
-   */
+  /** O que ainda falta, por extenso, para o rodapé. */
   const pendencias = [
     name.trim().length === 0 ? "o nome" : null,
     form === null ? "como você toma" : null,
@@ -1051,7 +904,7 @@ export function FormularioDeMedicamentoScreen({
     duration === "fixed" && !duracaoCompleta ? "a duração do tratamento" : null,
   ].filter((pendencia): pendencia is string => pendencia !== null);
 
-  /** O tratamento com prazo, dito em doses. Ver `summarizeTreatment` pra por que em doses. */
+  /** O tratamento com prazo, dito em doses. Ver `summarizeTreatment`. */
   const resumoDoTratamento = useMemo(
     () =>
       schedule === null || doseUnit === null
@@ -1077,14 +930,8 @@ export function FormularioDeMedicamentoScreen({
     resumoDoTratamento === null;
 
   /**
-   * Horários de hoje que o cadastro vai descartar por já terem passado. A regra é intencional
-   * (dose vencida não vira compromisso), mas descartar calado faz a pessoa sair achando que
-   * agendou o dia inteiro — daí o aviso.
-   */
-  /**
-   * "3x ao dia por 7 dias" é uma prescrição de 21 doses; cadastrar às 15h entrega 19 e encerra na
-   * mesma data. Em vitamina não muda nada, em antibiótico é ciclo interrompido. A tela mostra a
-   * diferença e oferece estender — decidir sozinha sobrescreveria a data que a pessoa digitou.
+   * Prescrição se conta em doses, não em dias: "3x ao dia por 7 dias" são 21 doses, e cadastrar às
+   * 15h entrega 19. Em antibiótico isso é ciclo interrompido, então a tela mostra a diferença.
    */
   const faltaDeDose = useMemo(
     () =>
@@ -1115,15 +962,12 @@ export function FormularioDeMedicamentoScreen({
   );
 
   /**
-   * Quais dos horários já vencidos de hoje o paciente diz ter tomado (E10). Só existe no cadastro
-   * novo: editar um tratamento antigo não é o momento de registrar ingestão.
+   * Quais dos horários já vencidos de hoje o paciente diz ter tomado. Só no cadastro novo: editar
+   * um tratamento antigo não é o momento de registrar ingestão.
    */
   const [horariosJaTomados, setHorariosJaTomados] = useState<string[]>([]);
 
-  /**
-   * Qual foto está esperando a escolha de origem — `null` quando o popup está fechado. Um estado
-   * só para os dois campos: a pergunta é a mesma, e o que muda é onde o resultado é aplicado.
-   */
+  /** Qual foto espera a escolha de origem; `null` com o popup fechado. */
   const [origemPendente, setOrigemPendente] = useState<
     "caixa" | "receita" | null
   >(null);
@@ -1136,18 +980,15 @@ export function FormularioDeMedicamentoScreen({
       await pick(prescriptionPhoto, guardarFoto, attachmentUri, origin);
   }
 
-  /** A mídia aberta em tela cheia, ou `null`. Só imagens — PDF vai para o leitor do sistema. */
+  /** A mídia aberta em tela cheia. Só imagens: PDF vai para o leitor do sistema. */
   const [midiaAberta, setMidiaAberta] = useState<{
     uri: string;
     titulo: string;
   } | null>(null);
 
   /**
-   * O toque no quadrado da receita, que faz três coisas diferentes conforme o que há lá.
-   *
-   * Sem anexo, pergunta a origem. Com **imagem**, amplia aqui mesmo. Com **PDF**, entrega ao leitor
-   * do aparelho — não dá para renderizá-lo sem dependência nativa, e o leitor do sistema faz melhor
-   * de qualquer forma (zoom, páginas, imprimir, encaminhar ao médico).
+   * Sem anexo pergunta a origem, com imagem amplia aqui, com PDF entrega ao leitor do aparelho:
+   * renderizar PDF exigiria dependência nativa.
    */
   async function verReceita() {
     if (attachmentUri === null) {
@@ -1195,24 +1036,18 @@ export function FormularioDeMedicamentoScreen({
   );
 
   /**
-   * Mudar os horários pode tirar da lista um que estava marcado como tomado. Derivar em vez de
-   * guardar impede o caso silencioso: marcar 06:00, trocar para 18:00 e gravar uma ingestão de um
+   * Derivado, e não guardado: marcar 06:00 e depois trocar para 18:00 gravaria ingestão de um
    * horário que não existe mais no tratamento.
    */
   const jaTomadosValidos = horariosJaTomados.filter((horario) =>
     horariosDeHojeDescartados.includes(horario),
   );
 
-  /**
-   * Só compara quando as unidades batem. Gota se toma em gota e se guarda em ml, e converter
-   * exigiria a concentração do frasco — que o app não tem e não deve chutar num aviso sobre
-   * remédio acabar.
-   */
   const parsedStock = parseDecimalInput(stockQuantity);
   /**
-   * Compara quantidade com quantidade, e não estoque com número de doses: com dose variando de
-   * um horário para outro, "quantas doses o estoque cobre" deixou de ser uma divisão — 10 UI de
-   * manhã e 8 à noite consomem 18 por dia, não 2 × a dose padrão.
+   * Quantidade contra quantidade, não estoque contra número de doses: com dose variando por
+   * horário, 10 UI de manhã e 8 à noite consomem 18 por dia, e não 2 x a dose padrão. Só compara
+   * com as unidades iguais, porque converter exigiria a concentração do frasco.
    */
   const consumoDoTratamento =
     tracksStock && stockUnit === doseUnit
@@ -1223,11 +1058,7 @@ export function FormularioDeMedicamentoScreen({
     parsedStock > 0 &&
     parsedStock < consumoDoTratamento;
 
-  /**
-   * Quantos dias o que ele tem hoje ainda dá. Só faz sentido quando estoque e dose são contados
-   * na mesma unidade: gota se toma em gota e se guarda em ml, e converter exigiria a
-   * concentração do frasco, que o app não tem.
-   */
+  /** Só faz sentido com estoque e dose na mesma unidade: gota se toma em gota e se guarda em ml. */
   const esgotamento = useMemo(
     () =>
       schedule === null ||
@@ -1260,11 +1091,8 @@ export function FormularioDeMedicamentoScreen({
   );
 
   /**
-   * Antecedência maior que a duração do estoque é aviso que já nasceu vencido: pedir "me avise 30
-   * dias antes" com cinco dias de comprimido na gaveta significa que o momento de avisar já
-   * passou. O app aceita mesmo assim, porque comprar mais é o que resolve e ninguém deve ser
-   * impedido de configurar por causa do estoque de hoje. Mas cala seria pior: a pessoa sairia
-   * achando que tem um mês de folga.
+   * Antecedência maior que a duração do estoque é aviso que já nasceu vencido. Avisa mas não
+   * bloqueia: comprar mais é o que resolve, e o estoque de hoje não deve travar a configuração.
    */
   const avisoDeAntecedencia =
     esgotamento === null
@@ -1282,31 +1110,19 @@ export function FormularioDeMedicamentoScreen({
     Number(leadDays) >= esgotamento.daysRemaining;
 
   /**
-   * O primeiro horário que este lembrete alcançaria, calculado sobre o que está na tela agora.
-   *
-   * Existe para responder, ainda no formulário, a pergunta que só o aparelho respondia: "isso que
-   * eu acabei de escolher vai tocar quando?". Sem ela, a única forma de saber era salvar, esperar o
-   * horário e ver se algo acontecia — e quando não acontecia, não havia como distinguir um alarme
-   * mal configurado de um horário que já tinha passado.
-   *
-   * Usa a **mesma função pura** que gera os horários de verdade no salvamento
-   * (`generateDoseSchedules`), e não uma conta paralela: uma segunda implementação poderia divergir
-   * justamente no caso que se quer diagnosticar.
-   *
-   * `null` quando não há horário futuro dentro da janela — que é, em si, a informação mais útil
-   * desta linha: é o caso do horário editado para uma hora de hoje que já passou.
+   * O primeiro horário que este lembrete alcançaria. Usa a mesma `generateDoseSchedules` do
+   * salvamento, e não uma conta paralela que poderia divergir justamente no caso a diagnosticar.
+   * `null` quando não há horário futuro na janela, que é o caso do horário de hoje já passado.
    */
   const proximaDoseAgendavel = useMemo(() => {
     if (schedule === null || reminderMode === null || reminderMode === "none")
       return null;
-    // A unidade não muda os horários gerados, mas o tipo a exige: sem ela o cadastro ainda está
-    // incompleto, e prever um agendamento a partir de um rascunho pela metade seria adivinhação.
+    // A unidade não muda os horários gerados, mas o tipo a exige.
     if (doseUnit === null) return null;
 
     const de = new Date();
     const ate = new Date(de.getTime() + 7 * 24 * 60 * 60_000);
     const [primeira] = generateDoseSchedules({
-      // `SchedulablePrescription` pede só o que decide horário — o resto do rascunho não entra.
       prescription: {
         id: "",
         schedule,
@@ -1321,7 +1137,7 @@ export function FormularioDeMedicamentoScreen({
     return primeira === undefined ? null : new Date(primeira.scheduledFor);
   }, [schedule, reminderMode, startDate, endDate, parsedDoseAmount, doseUnit]);
 
-  /** Só o que foi preenchido — linha com "—" é ruído, e o popup é quem cobra o que falta. */
+  /** Só o que foi preenchido; quem cobra o que falta é o popup. */
   const linhasDoEstoque = [
     stockQuantity.trim().length > 0 && stockUnit !== null
       ? {
@@ -1402,18 +1218,13 @@ export function FormularioDeMedicamentoScreen({
     );
   }
 
-  /**
-   * Apaga a foto da caixa e o arquivo que ela deixou no diretório de documentos.
-   *
-   * Sem nada em volta, ao contrário de `removerReceita`: a foto da caixa não sustenta outros
-   * campos, então tirá-la não invalida mais nada do formulário.
-   */
+  /** Apaga a foto e o arquivo que ela deixou no diretório de documentos. */
   function removerFotoDaCaixa() {
     deletePersistedFile(photoUri);
     setPhotoUri(null);
   }
 
-  /** Tirar a receita leva junto o que só existia por causa dela — validade e aviso. */
+  /** Leva junto o que só existia por causa dela: validade e aviso de renovação. */
   function removerReceita() {
     deletePersistedFile(attachmentUri);
     setAttachmentUri(null);
@@ -1425,17 +1236,14 @@ export function FormularioDeMedicamentoScreen({
   }
 
   function handleSubmit() {
-    // Os três `null` são impossíveis com `canSubmit` verdadeiro; o teste está aqui pro
-    // compilador, e pra que uma mudança futura em `essencialCompleto` quebre alto e não calado.
+    // Os três `null` são impossíveis com `canSubmit` verdadeiro; o teste é para o compilador.
     if (!canSubmit || form === null || doseUnit === null || schedule === null)
       return;
     onSubmit({
       name: name.trim(),
       activeIngredient: activeIngredient.trim(),
       form,
-      // A tarja não é perguntada — quem cadastra à mão não tem como saber. Vem da CMED quando o
-      // medicamento foi escolhido da lista de sugestões (B1), e continua em "none" no cadastro
-      // livre, onde o que comandaria os campos de receita já é decidido pelo paciente anexá-la.
+      // A tarja não é perguntada: vem da CMED, e fica em "none" no cadastro livre.
       prescriptionRequirement: requisitoDaCmed,
       doseAmount: parsedDoseAmount,
       doseUnit,
@@ -1473,17 +1281,8 @@ export function FormularioDeMedicamentoScreen({
       dosesJaTomadasHoje: initialValue === undefined ? jaTomadosValidos : [],
       attachmentValidUntil: attachmentUri === null ? null : validUntilIso,
       /**
-       * **Querer o aviso e escolher a antecedência são duas perguntas.**
-       *
-       * Quem marca a caixa recebe o aviso no dia do vencimento, sempre. A antecedência acrescenta
-       * um lembrete antes disso, e é opcional: sem ela, o app avisa quando vencer em vez de calar.
-       *
-       * Enquanto as duas moravam numa coluna só, marcar sem escolher prazo gravava `null` — e o
-       * planejador descartava a receita inteira, incluindo o aviso do dia. A interface confirmava
-       * uma intenção que o app não cumpria.
-       *
-       * A validade continua sendo condição das duas: sem data não há de quando contar, e aí
-       * gravar "ligado" seria prometer um lembrete que nunca teria quando chegar.
+       * Querer o aviso e escolher a antecedência são duas perguntas: marcado sem prazo, o aviso
+       * sai no dia do vencimento. A validade é condição das duas, senão não há de quando contar.
        */
       renewalReminderEnabled:
         attachmentUri !== null && validUntilIso !== null && wantsRenewalReminder,
@@ -1527,16 +1326,13 @@ export function FormularioDeMedicamentoScreen({
             value={name}
             onChangeText={(valor) => {
               setName(valor);
-              // Digitar de novo reabre as sugestões: quem escolheu errado corrige apagando, e o
-              // catálogo tem que voltar a ajudar em vez de ficar calado até sair da tela.
+              // Digitar de novo reabre as sugestões, senão o catálogo fica calado até sair da tela.
               setSugestaoAceita(false);
             }}
             onFocus={scrollToFocusedInput}
             maxLength={120}
           />
 
-          {/* Some assim que uma sugestão é aceita: manter a lista aberta depois da escolha faria
-              parecer que ainda falta decidir algo. */}
           {!sugestaoAceita ? (
             <SugestoesDeMedicamento
               sugestoes={sugestoes}
@@ -1550,11 +1346,6 @@ export function FormularioDeMedicamentoScreen({
             onChange={semLimpar(handleFormChange)}
           />
 
-          {/* Nas formas ambíguas a unidade vem **antes** da quantidade, e não ao lado dela.
-              "Quanto de cada vez" com uma caixa vazia chamada UNIDADE ao lado são duas perguntas
-              fingindo ser uma — e a primeira não tem resposta enquanto a segunda está em branco.
-              Respondida a unidade, a pergunta seguinte vira a mesma frase única das outras formas.
-              Fichas e não select: são três opções, e escolher entre elas *é* comparar as três. */}
           {showsUnitChoice ? (
             <>
               <OptionGroup
@@ -1569,8 +1360,7 @@ export function FormularioDeMedicamentoScreen({
             </>
           ) : null}
 
-          {/* Só depois da unidade resolvida — perguntar a quantidade de uma unidade indefinida
-              não significa nada, e é o que fazia "1 injeção ué" parecer a resposta certa. */}
+          {/* Só depois da unidade: quantidade de unidade indefinida não significa nada. */}
           {doseUnit !== null ? (
             <TextField
               label={`${quantosDe(doseUnit)} ${UNIT_NOUNS[doseUnit]} de cada vez`}
@@ -1589,10 +1379,7 @@ export function FormularioDeMedicamentoScreen({
             />
           ) : null}
 
-          {/* A pergunta nasce aqui, ao lado da dose, e não escondida dentro do popup de horários:
-              é sobre a dose que ela fala. Quem respondia lá dentro já tinha preenchido o número
-              uma vez achando que era o único, e voltava para refazer. Só aparece com mais de um
-              horário — com um só não há "de um para o outro". */}
+          {/* Com um horário só não há "de um para o outro". */}
           {doseUnit !== null &&
           parsedDoseAmount > 0 &&
           doseInputs.length > 1 ? (
@@ -1629,7 +1416,6 @@ export function FormularioDeMedicamentoScreen({
                   return (
                     <Pressable
                       key={weekday.value}
-                      // Fichinha autocontida, como um chip: encolhe ao toque.
                       style={estadoDePressao(
                         [styles.weekday, isSelected && styles.weekdaySelected],
                         {
@@ -1637,9 +1423,8 @@ export function FormularioDeMedicamentoScreen({
                         },
                       )}
                       onPress={() => toggleWeekday(weekday.value)}
-                      // `checkbox` e não `button`: são sete opções que se acumulam, e o leitor
-                      // anuncia "marcado/desmarcado" em vez de deixar o estado só no preenchimento
-                      // da ficha. Mesmo papel que o `ToggleChips` do kit já usa.
+                      // `checkbox` e não `button`: são opções que se acumulam, e o leitor precisa
+                      // anunciar "marcado/desmarcado" em vez de deixar o estado só na cor da ficha.
                       accessibilityRole="checkbox"
                       accessibilityLabel={weekday.nome}
                       accessibilityState={{ checked: isSelected }}
@@ -1659,10 +1444,7 @@ export function FormularioDeMedicamentoScreen({
             </View>
           ) : null}
 
-          {/* Um mecanismo para três coisas que as pessoas dizem de jeitos diferentes: cartela
-              de anticoncepcional, dia sim dia não e injeção "de 30 em 30 dias". Antes eram duas
-              opções (ciclo e intervalo) que produziam o mesmo agendamento por caminhos
-              diferentes — e escolher entre elas era dúvida, não decisão. */}
+          {/* Um mecanismo só para cartela, dia sim dia não e injeção "de 30 em 30 dias". */}
           {frequency === "cycle" ? (
             <>
               <TextField
@@ -1676,8 +1458,7 @@ export function FormularioDeMedicamentoScreen({
                 maxLength={3}
               />
 
-              {/* Só depois do tamanho do ciclo: "por quantos dias seguidos" não tem escala nem
-                  limite antes dele. Em branco vale 1, que é o caso de quem pensa "de 30 em 30". */}
+              {/* Só depois do tamanho do ciclo, que é quem dá escala e limite. Em branco vale 1. */}
               {cycleLengthDefinido ? (
                 <TextField
                   label="Por quantos dias seguidos?"
@@ -1691,8 +1472,8 @@ export function FormularioDeMedicamentoScreen({
                 />
               ) : null}
 
-              {/* A pergunta que faltava. Sem ela o app assume que o ciclo começa hoje, e quem
-                  cadastra no meio da cartela recebe a pausa deslocada — em silêncio. */}
+              {/* Sem ela o app assumiria hoje, e quem cadastra no meio da cartela receberia a
+                  pausa deslocada em silêncio. */}
               {cycleLengthDefinido && activeDaysError === undefined ? (
                 <OptionGroup
                   label="Este ciclo começou quando?"
@@ -1703,7 +1484,7 @@ export function FormularioDeMedicamentoScreen({
               ) : null}
 
               {cycleStart === "earlier" ? (
-                // "Já comecei antes" é sempre uma data passada — o calendário não oferece o futuro.
+                // "Já comecei antes" é sempre data passada, então o calendário trava o futuro.
                 <DateField
                   label="Primeiro dia deste ciclo"
                   value={cycleStartInput}
@@ -1714,8 +1495,6 @@ export function FormularioDeMedicamentoScreen({
                 />
               ) : null}
 
-              {/* Datas, não a regra: "28 e 21" é o que a pessoa acabou de digitar, e repetir não
-                  confirma nada. O que ela reconhece é o dia em que a cartela dela acaba. */}
               {viradasDoCiclo !== null ? (
                 <Text style={styles.sectionHintDestaque}>
                   {viradasDoCiclo.emPausa
@@ -1749,7 +1528,7 @@ export function FormularioDeMedicamentoScreen({
                     onChangeText={handleCustomDosesChange}
                     onFocus={scrollToFocusedInput}
                     placeholder="Mais"
-                    // Sem opacidade, igual ao TextField: a 0.8 dava 3.41:1, abaixo do AA.
+                    // Sem opacidade: a 0.8 o contraste dava 3.41:1, abaixo do AA.
                     placeholderTextColor={cores.outline}
                     keyboardType="number-pad"
                     maxLength={2}
@@ -1760,15 +1539,13 @@ export function FormularioDeMedicamentoScreen({
               {customDosesError ? (
                 <Text style={styles.fieldErrorText}>{customDosesError}</Text>
               ) : null}
-              {/* Sem quantidade escolhida não há quantos campos abrir — a pergunta ainda não existe. */}
               {doseInputs.length > 0 ? (
                 <SeletorDeHorarios
                   label="Em que horários?"
                   values={doseInputs}
                   onChange={setDoseInputs}
                   duplicateIndexes={duplicateTimeIndexes}
-                  // Dose por horário só é oferecida depois que a dose geral existe: ela é o valor
-                  // que cada horário herda, e sem ela os campos abririam sem referência nenhuma.
+                  // Dose por horário só depois da dose geral: é ela que cada horário herda.
                   variacao={
                     doseUnit !== null && parsedDoseAmount > 0
                       ? {
@@ -1791,14 +1568,12 @@ export function FormularioDeMedicamentoScreen({
             </Text>
           ) : null}
 
-          {/* Só onde existe agenda: em "só quando precisar" não há dia de começar, e o campo ali
-              cobraria uma resposta que não muda nada. */}
+          {/* Em "só quando precisar" não há dia de começar. */}
           {frequency !== null && frequency !== "asNeeded" ? (
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>Quando começa</Text>
               {alteraInicio ? (
-                // Sem limite: começar hoje, amanhã ou retomar um tratamento antigo são todos
-                // casos legítimos, e o rótulo já vive fora do campo nesta seção.
+                // Sem limite: começar adiante ou retomar tratamento antigo são casos legítimos.
                 <DateField
                   label=""
                   value={startDateInput}
@@ -1831,9 +1606,7 @@ export function FormularioDeMedicamentoScreen({
             onChange={handleDurationChange}
           />
 
-          {/* Número + unidade porque "por 90 dias" não é como ninguém pensa um tratamento de
-              três meses. Mês não tem tamanho fixo, então a conta é feita em meses de verdade e
-              não convertida pra dias na entrada. */}
+          {/* Mês não tem tamanho fixo, então a conta é feita em meses e não convertida pra dias. */}
           {duration === "fixed" ? (
             <View style={styles.fieldGroup}>
               <TextField
@@ -1857,9 +1630,7 @@ export function FormularioDeMedicamentoScreen({
               />
             </View>
           ) : null}
-          {/* Diz a primeira dose, e não só a data final: "por 2 dias" começando hoje termina
-              amanhã, o que só faz sentido depois de ver que hoje conta — e conta parcialmente,
-              porque as doses de hoje que já passaram não entram. */}
+          {/* Hoje conta, e conta parcialmente: as doses que já passaram não entram. */}
           {resumoDoTratamento !== null ? (
             <Text style={styles.sectionHint}>
               {resumoDoTratamento.firstDay === todayIsoDate()
@@ -1873,8 +1644,8 @@ export function FormularioDeMedicamentoScreen({
             </Text>
           ) : null}
 
-          {/* "Por 1 dia" cadastrado depois do último horário do dia não alcança dose nenhuma.
-              Sem isso a linha de resumo simplesmente não aparecia, e o silêncio lê como acerto. */}
+          {/* "Por 1 dia" cadastrado depois do último horário não alcança dose nenhuma, e sem este
+              aviso a linha de resumo só sumia. */}
           {prazoSemDose ? (
             <Text style={styles.avisoDeConflito}>
               Nesse prazo não sobra nenhuma dose: os horários de hoje já
@@ -1882,9 +1653,6 @@ export function FormularioDeMedicamentoScreen({
             </Text>
           ) : null}
 
-          {/* Prescrição é contada em doses, não em dias de calendário. Se o prazo não entrega o
-              tratamento inteiro por ter sido cadastrado com o dia em curso, a tela mostra a
-              diferença e oferece a data que completa — em vez de corrigir por conta própria. */}
           {faltaDeDose !== null ? (
             <View style={styles.avisoDePrazo}>
               <Text style={styles.sectionHintDestaque}>
@@ -1900,8 +1668,7 @@ export function FormularioDeMedicamentoScreen({
                     startDate,
                     faltaDeDose.fimQueCompleta,
                   );
-                  // `null` só sairia com data inválida, e a data veio do próprio domínio —
-                  // mas ignorar em silêncio deixaria o botão sem efeito nenhum.
+                  // `null` só sairia com data inválida, e esta veio do próprio domínio.
                   if (nova === null) return;
                   setDurationUnit(nova.unit);
                   setDurationAmount(String(nova.amount));
@@ -1910,9 +1677,8 @@ export function FormularioDeMedicamentoScreen({
             </View>
           ) : null}
 
-          {/* O app não agenda dose que já passou (o controle começa agora, e amanhã o ciclo é
-              normal), mas descartar em silêncio faria a pessoa sair achando que agendou o dia
-              inteiro. Diz quais horários e a partir de quando o acompanhamento vale. */}
+          {/* O app não agenda dose que já passou, mas descartar em silêncio faria a pessoa sair
+              achando que agendou o dia inteiro. */}
           {horariosDeHojeDescartados.length > 0 &&
           !prazoSemDose &&
           initialValue === undefined ? (
@@ -1925,13 +1691,7 @@ export function FormularioDeMedicamentoScreen({
                 entra normalmente.
               </Text>
 
-              {/* A pergunta vale por dois motivos, e o segundo é o maior: ela completa a adesão do
-                  primeiro dia, que nasceria incompleta por decisão do app e não do paciente — e,
-                  antes disso, faz quem cadastra às 12h um remédio das 08h **perceber** que tinha
-                  uma dose hoje. Inclusive quem ainda não tomou.
-
-                  Nada vem marcado: o app não sabe, e marcar por ele seria inventar registro
-                  clínico — que é exatamente o que o histórico não pode ter. */}
+              {/* Nada vem marcado: marcar pelo paciente seria inventar registro clínico. */}
               <Text style={styles.fieldLabel}>
                 VOCÊ JÁ TOMOU ALGUMA DELAS HOJE?
               </Text>
@@ -1973,8 +1733,7 @@ export function FormularioDeMedicamentoScreen({
                     ])}
                     onPress={() => setStockSheetOpen(true)}
                     accessibilityRole="button"
-                    // Sem rótulo, o leitor concatena os filhos e anuncia "Controle ativo Editar",
-                    // que não diz *o que* se edita.
+                    // Sem rótulo, o leitor concatena os filhos e anuncia "Controle ativo Editar".
                     accessibilityLabel="Editar o controle de estoque"
                   >
                     <Text style={styles.rowValueText}>
@@ -1996,8 +1755,7 @@ export function FormularioDeMedicamentoScreen({
                       ))}
                     </View>
                   ) : null}
-                  {/* Aviso, não bloqueio: comprar no meio do tratamento é normal, e o app não
-                      tem como saber o que já está a caminho da farmácia. */}
+                  {/* Aviso, não bloqueio: o app não sabe o que já está a caminho da farmácia. */}
                   {estoqueInsuficiente ? (
                     <Text style={styles.avisoDeConflito}>
                       O tratamento inteiro consome {consumoDoTratamento}{" "}
@@ -2026,17 +1784,13 @@ export function FormularioDeMedicamentoScreen({
             <Card>
               <Text style={styles.sectionTitle}>Anexos</Text>
 
-              {/* `key` na presença da foto — a mesma correção da ficha de saúde, pelo mesmo
-                  motivo: dentro do `Pressable` que dispensa o teclado, esta linha não recompunha
-                  quando a foto estreava, e a miniatura ficava invisível até a tela remontar.
-                  Ver o comentário longo em `FichaDeSaudeScreen`. */}
+              {/* `key` na presença da foto: dentro do `Pressable` que dispensa o teclado esta linha
+                  não recompunha na estreia, e a miniatura ficava invisível. Ver `FichaDeSaudeScreen`. */}
               <View
                 style={styles.photoRow}
                 key={photoUri === null ? "sem-caixa" : "com-caixa"}
               >
                 <Pressable
-                  // Quadro único, com e sem foto — ver `photoQuadro`. A borda tracejada é pintura,
-                  // não geometria: trocar de caixa no meio do render é o que sumia com a imagem.
                   style={estadoDePressao(
                     [
                       styles.photoQuadro,
@@ -2047,9 +1801,6 @@ export function FormularioDeMedicamentoScreen({
                       opacidade: !boxPhoto.isPicking,
                     },
                   )}
-                  /* Com foto, o toque **vê**; sem foto, escolhe a origem. Antes o quadrado abria o
-                     seletor nos dois casos, então não havia como olhar a foto já anexada sem
-                     substituí-la — e o link ao lado ("Trocar foto da caixa") já cobre a troca. */
                   onPress={() =>
                     photoUri
                       ? setMidiaAberta({
@@ -2077,11 +1828,6 @@ export function FormularioDeMedicamentoScreen({
                   )}
                 </Pressable>
                 <View style={styles.photoTextGroup}>
-                  {/* Sem `superficie`: o fundo ao toque foi feito para linha de lista, e num link
-                      curto no meio do texto ele pinta um retângulo do tamanho da frase — lê como
-                      falha de renderização, não como resposta ao dedo. A opacidade basta. */}
-                  {/* Com foto, os dois links dividem a linha — a mesma anatomia da receita logo
-                      abaixo, porque é a mesma decisão: trocar o que está aí, ou apagar. */}
                   {photoUri === null ? (
                     <Pressable
                       style={estadoDePressao(styles.alvoDeLinkRente)}
@@ -2119,23 +1865,11 @@ export function FormularioDeMedicamentoScreen({
                 </View>
               </View>
 
-              {/* O campo não dizia para que servia: mostrava só as duas formas de escolher, e
-                  quem chegava nele não sabia se era outra foto do remédio ou outra coisa. */}
               <Text style={styles.fieldLabel}>Receita médica</Text>
 
-              {/* Um gesto só, igual ao da foto da caixa logo acima: toca-se no quadrado (ou no
-                  rótulo) e o popup pergunta de onde vem — câmera, galeria ou arquivo. Antes eram
-                  dois links lado a lado que já decidiam a origem antes da pergunta, e as duas
-                  seções da mesma tela pediam a mesma coisa de jeitos diferentes. Aqui a câmera
-                  entra junto: quem tem o papel na mão fotografa, e antes precisava fotografar
-                  primeiro pela galeria. */}
-              {/* `key` nos **três** estados do anexo, e não só em "tem ou não tem".
-
-                  Mesma correção da ficha de saúde (ver o comentário longo lá): dentro do
-                  `Pressable` que dispensa o teclado, esta linha não recompunha quando o anexo
-                  estreava. Aqui o quadro tem três conteúdos possíveis — vazio, miniatura da
-                  imagem e ícone de PDF —, e trocar um PDF por uma foto é uma estreia de imagem
-                  como qualquer outra: sem o `kind` no `key`, esse caso continuaria invisível. */}
+              {/* `key` nos três estados do anexo, e não só em "tem ou não tem": trocar um PDF por
+                  uma foto é uma estreia de imagem como as outras, e sem o `kind` ficaria invisível.
+                  Mesma remontagem da ficha de saúde. */}
               <View
                 style={styles.photoRow}
                 key={
@@ -2159,10 +1893,6 @@ export function FormularioDeMedicamentoScreen({
                         !prescriptionFile.isPicking,
                     },
                   )}
-                  /* A receita é o anexo que existe para ser **lido** — e era justamente o único
-                     que não dava para abrir: o toque no quadrado ia direto ao seletor de arquivo.
-                     Imagem abre no visualizador; PDF vai para o leitor do aparelho, que tem zoom e
-                     rolagem de páginas que uma camada nossa não teria. */
                   onPress={() => void verReceita()}
                   disabled={
                     prescriptionPhoto.isPicking || prescriptionFile.isPicking
@@ -2213,9 +1943,7 @@ export function FormularioDeMedicamentoScreen({
                       </Text>
                     </Pressable>
                   ) : (
-                    // Anexado, as ações são **trocar** e remover. Antes só havia remover: quem
-                    // anexou o arquivo errado precisava apagar para poder escolher de novo, e no
-                    // meio disso perdia a validade e o aviso de renovação já preenchidos.
+                    // Trocar existe além de remover porque remover leva junto a validade e o aviso.
                     <View style={styles.acoesDeAnexo}>
                       <Pressable
                         style={estadoDePressao(styles.alvoDeLinkRente)}
@@ -2225,10 +1953,7 @@ export function FormularioDeMedicamentoScreen({
                       >
                         <Text style={styles.photoAddLabel}>Alterar anexo</Text>
                       </Pressable>
-                      {/* "Excluir" — ver a mesma decisão na ficha de saúde. Aqui ela pesa mais:
-                          o rótulo variava entre "Remover receita" e "Remover foto", então a
-                          linha mudava de largura conforme o tipo do anexo. Uma palavra só, igual
-                          nos dois casos, e o `accessibilityLabel` diz qual é qual. */}
+                      {/* Rótulo igual nos dois tipos de anexo; o `accessibilityLabel` diz qual é qual. */}
                       <Pressable
                         style={estadoDePressao(styles.alvoDeLinkRente)}
                         onPress={removerReceita}
@@ -2244,9 +1969,6 @@ export function FormularioDeMedicamentoScreen({
                       </Pressable>
                     </View>
                   )}
-                  {/* Só os formatos. A promessa de que o anexo não sai do aparelho continua nos
-                      Termos, que é onde ela vale — repeti-la aqui custava uma frase em cada
-                      cadastro para dizer algo que não muda de um remédio para o outro. */}
                   <Text style={styles.photoHint}>
                     {attachmentUri !== null && attachmentName.length > 0
                       ? attachmentName
@@ -2257,16 +1979,10 @@ export function FormularioDeMedicamentoScreen({
 
               {/* Validade só depois do anexo: sem receita guardada, não há o que vencer. */}
               {attachmentUri !== null ? (
-                // Receita vencida deixou de ser aceita em 26/08 (F2), e o calendário passa a dizer
-                // o mesmo antes do toque: os dias já passados nem aparecem para escolher.
+                // Receita vencida não é aceita, então o calendário nem oferece os dias passados.
                 <DateField
-                  /* `key` que **muda com o tipo do anexo**, e não uma constante.
-
-                     Este campo estreia quando o anexo chega, dentro do `Pressable` que dispensa o
-                     teclado — a mesma estreia que deixava a miniatura invisível (ver o comentário
-                     longo em `FichaDeSaudeScreen`). Uma `key` fixa não resolveria nada: o que
-                     força a remontagem é o valor **mudar**, e aqui ele muda quando se troca um
-                     PDF por uma foto sem passar por "sem anexo". */
+                  /* `key` que muda com o tipo do anexo: o que força a remontagem é o valor mudar,
+                     e aqui ele muda ao trocar um PDF por uma foto sem passar por "sem anexo". */
                   key={`validade-${attachmentKind ?? "sem"}`}
                   label="Receita válida até"
                   value={validUntilInput}
@@ -2277,15 +1993,10 @@ export function FormularioDeMedicamentoScreen({
                 />
               ) : null}
 
-              {/* E só depois da validade: sem data, o aviso não tem de quando contar. Perguntar
-                  antes seria oferecer um lembrete que o app não teria como disparar. */}
+              {/* Só depois da validade: sem data, o aviso não tem de quando contar. */}
               {attachmentUri !== null && validUntilIso !== null ? (
                 <>
-                  {/* Marcar já basta: a antecedência é opcional.
-
-                      Quem marca recebe o aviso **no dia do vencimento**, e escolher um prazo
-                      acrescenta um lembrete antes disso. Antes as duas coisas eram a mesma, e
-                      marcar sem tocar no seletor produzia silêncio total. */}
+                  {/* Marcar já basta: sem prazo escolhido, o aviso sai no dia do vencimento. */}
                   <Checkbox
                     checked={wantsRenewalReminder}
                     onChange={setWantsRenewalReminder}
@@ -2300,9 +2011,7 @@ export function FormularioDeMedicamentoScreen({
                         options={RENEWAL_LEAD_OPTIONS}
                         onChange={setRenewalLeadDays}
                       />
-                      {/* A frase muda conforme o que está escolhido, porque a promessa muda: sem
-                          prazo é um aviso, com prazo são dois. Uma frase fixa teria de descrever
-                          os dois casos e não descreveria bem nenhum. */}
+                      {/* A promessa muda: sem prazo é um aviso, com prazo são dois. */}
                       <Text style={styles.sectionHint}>
                         {renewalLeadDays === null
                           ? "Você será avisado no dia em que a receita vencer. Se quiser saber antes, escolha um prazo acima."
@@ -2338,17 +2047,8 @@ export function FormularioDeMedicamentoScreen({
                     <Text style={styles.rowValueAction}>Editar</Text>
                   </Pressable>
                 ) : null}
-                {/**
-                 * O que esta configuração produziria, e **no futuro do pretérito**.
-                 *
-                 * "Vai tocar" seria mentira enquanto o formulário não foi salvo: a pessoa pode
-                 * fechar a tela, e nada do que está aqui teria efeito. "Tocaria" diz a mesma coisa
-                 * sem prometer o que ainda não existe.
-                 *
-                 * Quando não há horário futuro, a linha diz isso em vez de sumir — é justamente o
-                 * caso em que alguém editou um horário para uma hora de hoje que já passou, e o
-                 * silêncio depois de salvar seria indistinguível de um defeito.
-                 */}
+                {/* Sem horário futuro a linha diz isso em vez de sumir: é o caso do horário
+                    editado para uma hora de hoje que já passou, e o silêncio pareceria defeito. */}
                 {reminderMode !== null && reminderMode !== "none" ? (
                   <Text
                     style={
@@ -2378,8 +2078,6 @@ export function FormularioDeMedicamentoScreen({
               </Card>
             ) : null}
 
-            {/* Nada aqui muda horário, dose ou lembrete — é a anotação que o paciente quer ter à
-                mão na hora de tomar. Por isso vem por último e não cobra nada. */}
             <Card>
               <Text style={styles.sectionTitle}>Informações adicionais</Text>
               <Text style={styles.sectionHint}>
@@ -2387,8 +2085,6 @@ export function FormularioDeMedicamentoScreen({
                 horários.
               </Text>
 
-              {/* Chips no lugar de um terceiro campo de texto: a lista das recomendações comuns é
-                  curta e conhecida, e reconhecer custa um toque enquanto escrever custa uma frase. */}
               <ToggleChips
                 label="Como tomar"
                 values={
@@ -2477,16 +2173,13 @@ export function FormularioDeMedicamentoScreen({
         value={reminderMode}
         onChange={setReminderMode}
         onClose={() => setReminderSheetOpen(false)}
-        /* Fecha o popup e empurra a ajuda no **mesmo** stack do cadastro: rota dentro do modal que
-           já está aberto, e não um segundo modal por cima (que no Android trava a tela). O botão de
-           voltar traz de volta ao formulário; o popup reabre com um toque, e não há mais estado de
-           leitura para preservar no caminho. */
+        /* Rota no mesmo stack do cadastro, e não um segundo modal por cima: no Android dois modais
+           empilhados travam a tela. */
         onAbrirAjuda={() => {
           setReminderSheetOpen(false);
           router.push("/cadastro/ajuda-de-alertas");
         }}
-        /* `none` é o mesmo valor de quem nunca configurou: o reagendamento já ignora esse modo, e
-           a linha LEMBRETE volta a oferecer "Configurar lembrete". */
+        /* `none` é o mesmo valor de quem nunca configurou, e o reagendamento já ignora esse modo. */
         onRemover={() => {
           setReminderMode("none");
           setReminderSheetOpen(false);
@@ -2499,8 +2192,6 @@ export function FormularioDeMedicamentoScreen({
         onClose={() => setMidiaAberta(null)}
       />
 
-      {/* "Anexo da receita" e não "Foto da receita": desde que o arquivo virou uma das origens, o
-          título prometia menos do que o popup oferece. */}
       <EscolhaDeOrigemDaFoto
         visible={origemPendente !== null}
         title={

@@ -3,31 +3,16 @@ import type { Tema } from "./tipos";
 /**
  * # Alto contraste
  *
- * ## Para quem
+ * Para catarata, degeneração macular, glaucoma, e para o uso sob sol forte. É o tema mais relevante
+ * para o público do app: a incidência de catarata passa de 50% acima dos 65 anos.
  *
- * Catarata, degeneração macular, glaucoma — e também a situação banal de usar o celular sob sol
- * forte. É o tema mais relevante para o público real deste app: a incidência de catarata passa de
- * 50% acima dos 65 anos, que é exatamente a faixa de quem toma vários remédios por dia.
+ * O que muda em relação ao padrão:
  *
- * ## O que muda, e por quê
- *
- * **Preto absoluto sobre branco absoluto: 21:1.** O tema padrão usa `#141719` sobre `#F1F4F8`
- * (14.8:1) porque cinza-escuro sobre off-white é mais confortável para vista saudável. Para vista
- * comprometida, conforto é secundário — o que importa é o degrau máximo possível.
- *
- * **O azul escurece em vez de clarear.** `#0B5FD9` dá 6.4:1, aprovado no AA mas não no AAA. Aqui
- * ele vira `#00337A`, que dá **11.2:1**: continua sendo azul, continua sendo a cor da ação, e
- * passa no AAA com folga para texto pequeno.
- *
- * **Contorno em vez de sombra** (`contornarSuperficies: true`). A regra de "sombra e nunca borda"
- * pressupõe enxergar 8% de opacidade. Quem escolheu este tema não enxerga — e aí a sombra não é
- * discrição, é informação perdida. O contorno devolve a fronteira do cartão.
- *
- * **Forma e ícone reforçados** (`reforcarFormaEIcone: true`). Vista comprometida frequentemente
- * vem junto de percepção de cor reduzida, então vale a mesma regra do tema de daltonismo.
- *
- * **Os estados perdem o pastel.** `errorSurface` (`#FDECEA`) é quase branco: quem tem catarata não
- * distingue aquilo de branco. Aqui as superfícies de estado são nitidamente tingidas.
+ * - Preto sobre branco absolutos, 21:1. O padrão fica em 14.8:1 por conforto, que aqui é secundário.
+ * - O azul escurece em vez de clarear, para passar no AAA (11.2:1) e não só no AA.
+ * - `contornarSuperficies`: a regra de "sombra e nunca borda" pressupõe enxergar 8% de opacidade.
+ * - `reforcarFormaEIcone`: vista comprometida costuma vir com percepção de cor reduzida.
+ * - Superfícies de estado tingidas, porque o pastel do padrão não se distingue de branco.
  */
 export const temaAltoContraste: Tema = {
   id: "altoContraste",

@@ -5,22 +5,11 @@ import { useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./TimePicker.styles";
 
 /**
- * A versão do preview no navegador — dois campos numéricos escritos à mão.
- *
- * O Android usa o mostrador nativo do Material 3 (`TimePicker.tsx`) e o iOS a roda do SwiftUI
- * (`TimePicker.ios.tsx`); os dois são componentes nativos que não existem na web. Sem este irmão o
- * preview quebraria ao abrir qualquer campo de horário — e o preview é o que permite trabalhar
- * layout sem aparelho (§5.1 do plano: web é vitrine, não alvo).
- *
- * Foi o componente principal entre 26/08 e 02/09, quando a digitação era o único caminho. Continua
- * aqui inteiro porque resolve bem o que precisa resolver: em `20` não há AM/PM a interpretar.
+ * Versão do preview no navegador: os irmãos `.tsx` e `.ios.tsx` usam componentes nativos que não
+ * existem na web, e sem este arquivo o preview quebra ao abrir qualquer campo de horário.
  */
 
-/**
- * Onde os campos começam quando ainda não há resposta. **Não é sugestão**: a posição inicial não é
- * um campo preenchido, e nada é gravado enquanto a pessoa não confirmar. Quem garante isso é quem
- * usa este componente — o `onChange` só dispara quando alguém digita.
- */
+/** Onde os campos abrem sem resposta. Não é valor gravado: `onChange` só dispara por digitação. */
 const HORARIO_NEUTRO = "08:00";
 
 export type TimePickerProps = {
@@ -40,24 +29,7 @@ function doisDigitos(valor: number): string {
   return String(valor).padStart(2, "0");
 }
 
-/**
- * Escolha de horário em dois campos numéricos — hora e minuto, em 24 horas.
- *
- * **Escrito à mão, e não com o `DateTimePicker` do `@expo/ui`.** Aquele componente aceita
- * `variant="input"` no TypeScript, mas o Android o ignora para hora: em `DatePickerView.kt`, o
- * `ExpoTimePicker` chama sempre o `TimePicker` do Material 3 (o mostrador redondo) e nunca lê
- * `props.variant` — que só é consultado no caminho da *data*. `showVariantToggle` também não chega
- * lá, e por isso não existia o botão de alternar. As cores funcionavam porque passam por outro
- * caminho (`buildTimePickerColors`), o que fazia o problema parecer build velha quando não era.
- *
- * A revisão em aparelho pediu digitação duas vezes, e a razão é a mesma das duas: girar não é gesto
- * óbvio, e o mostrador esconde a distinção entre manhã e noite — que é exatamente onde o erro é
- * caro, tomar às 20:00 o que era das 08:00. Aqui "20" é 20, sem AM/PM a interpretar.
- *
- * Multiplataforma por consequência: sem dependência nativa, o mesmo arquivo serve Android, iOS e
- * web. Os irmãos `.ios.tsx` e `.web.tsx` continuam existindo para quem prefira o seletor nativo de
- * cada sistema, e o contrato dos três é idêntico.
- */
+/** Hora e minuto em 24 horas, escrito à mão: sem dependência nativa, roda no navegador. */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
@@ -69,9 +41,8 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
   const [emFoco, setEmFoco] = useState<"hora" | "minuto" | null>(null);
 
   /**
-   * Enquanto digita, o texto vale como está — apagar para escrever de novo é o gesto mais comum, e
-   * corrigir a cada tecla impediria o campo de ficar vazio no meio do caminho. O valor é publicado
-   * já normalizado, então quem ouve nunca recebe `"7:5"`.
+   * O texto do campo fica cru enquanto digita, para poder ficar vazio no meio do caminho. Quem
+   * ouve nunca recebe `"7:5"`: o valor sai normalizado daqui.
    */
   function publicar(hora: string, minuto: string) {
     const h = limitar(Number(hora), 23);
@@ -142,8 +113,6 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
         </View>
       </View>
 
-      {/* Dito uma vez, embaixo: sem AM/PM na tela, é a única coisa que explica por que "20" basta
-          para as oito da noite. */}
       <Text style={styles.ajuda}>Formato de 24 horas. 20:00 é oito da noite.</Text>
     </View>
   );

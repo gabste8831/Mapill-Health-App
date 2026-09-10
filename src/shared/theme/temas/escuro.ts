@@ -3,30 +3,15 @@ import type { Tema } from "./tipos";
 /**
  * # Tema escuro
  *
- * ## Para que serve neste app
+ * Um app de remédio é usado no escuro com frequência real: a dose das 22h, o alarme de madrugada.
  *
- * Não é preferência estética: um app de remédio é usado **no escuro** com frequência real — a dose
- * das 22h, o alarme de madrugada, a conferência antes de dormir. Tela branca cheia nessas horas
- * ofusca, e a pessoa que acabou de acordar precisa ler um horário, não se recuperar do clarão.
+ * As quatro regras que qualquer cor nova aqui precisa seguir:
  *
- * ## As regras que este tema segue
- *
- * **Nada de preto puro.** O fundo é `#0F1319`, um cinza-azulado escuro. Preto absoluto ao lado de
- * texto branco produz halo (o texto parece vibrar) em telas OLED, e é cansativo justamente na
- * leitura longa que a ficha de saúde exige.
- *
- * **Elevação por luz, não por sombra.** No claro, um cartão se separa do fundo por uma sombra. No
- * escuro isso não funciona — sombra escura sobre fundo escuro é invisível. Aqui a superfície mais
- * alta é a **mais clara**: fundo `#0F1319` → cartão `#191F27` → bloco interno `#222933`. É a mesma
- * hierarquia, com o sinal invertido.
- *
- * **Cores saturadas são clareadas, não escurecidas.** O azul `#0B5FD9` do tema claro dá 2.1:1
- * contra o fundo escuro — sumiria. Ele vira `#7FB2FF`: mesma família, luminosidade alta o
- * bastante para 8.1:1. A regra vale para todos os estados: no escuro, cor forte se lê pelo brilho.
- *
- * **Superfícies de estado ficam tingidas, não pastel.** `errorSurface` claro (`#FDECEA`) viraria
- * um bloco branco no escuro. Aqui ele é o próprio vermelho rebaixado até virar fundo — mantém a
- * leitura de "isto está errado" sem clarear a tela inteira.
+ * 1. Nada de preto puro. Preto ao lado de texto branco produz halo em OLED.
+ * 2. Elevação por luz, não por sombra: a superfície mais alta é a mais clara, porque sombra escura
+ *    sobre fundo escuro é invisível.
+ * 3. Cor saturada se clareia, não se escurece: no escuro, cor forte se lê pelo brilho.
+ * 4. Superfície de estado fica tingida, não pastel: o pastel do tema claro viraria bloco branco.
  */
 export const temaEscuro: Tema = {
   id: "escuro",
@@ -35,24 +20,11 @@ export const temaEscuro: Tema = {
   esquema: "escuro",
   cores: {
     /**
-     * O **mesmo azul do tema padrão**, e não um navy próprio.
-     *
-     * Aqui já passaram dois extremos. O `#7FB2FF` original pintava áreas grandes (a grade do
-     * calendário, a capa do Alarme, o hero de Ajustes) com um azul claro demais para a paleta
-     * escura. A correção foi para o outro lado — `#1E3A8A`, um navy — e trouxe outro problema: ele
-     * fica em **224°**, oito graus para o roxo, e em área grande lê como violeta apagado em vez de
-     * azul. Pior, o `corDeDestaque` deste mesmo tema está em 216°: eram duas famílias de azul
-     * brigando dentro da mesma tela.
-     *
-     * `#0B5FD9` resolve os dois de uma vez. Tem o matiz do app (216°, o mesmo `corDeDestaque`
-     * daqui e o mesmo azul que a pessoa vê no tema claro — a marca não muda de cor porque
-     * anoiteceu), e é escuro o bastante para não clarear a tela: 3.24:1 contra o fundo, acima dos
-     * 3:1 que a WCAG pede de forma, com texto branco por cima em 5.75:1.
+     * O mesmo azul do tema padrão: a marca não muda de cor porque anoiteceu. Fica no matiz 216° do
+     * app, dá 3.24:1 contra o fundo (acima dos 3:1 de forma) e 5.75:1 com texto branco por cima.
      */
     primary: "#0B5FD9",
     onPrimary: "#FFFFFF",
-    // Acompanha o `primary`: era `#15275C`, o navy escurecido, e continuaria puxando para o roxo
-    // no estado pressionado de qualquer superfície azul.
     primaryContainer: "#0A4CAE",
     onPrimaryContainer: "#FFFFFF",
     primarySurface: "#16233A",

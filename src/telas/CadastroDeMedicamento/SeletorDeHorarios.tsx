@@ -13,7 +13,6 @@ import {
 import { BottomSheet, Button, TextField, TimeField, TimePicker } from "@/ui";
 import { criarEstilos } from "./CadastroDeMedicamento.styles";
 
-/** "1ª dose", "2ª dose"… — dentro do popup há largura pra escrever por extenso. */
 const ORDINALS = ["1ª", "2ª", "3ª", "4ª", "5ª", "6ª", "7ª", "8ª", "9ª", "10ª", "11ª", "12ª"];
 
 /** Uma linha do popup: o horário escolhido e, opcionalmente, a dose só dele. */
@@ -38,13 +37,6 @@ type VariacaoDeDose = {
   aceitaFracao: boolean;
 };
 
-/**
- * Os conteúdos que o popup pode estar mostrando.
- *
- * O relógio de **cada horário** saiu daqui: cada linha virou um `TimeField`, que já traz digitação
- * e relógio juntos — três etapas viraram uma. `relogioDaSerie` fica, porque ali o relógio é de uma
- * pergunta diferente ("a partir de que horas?") e precisa voltar para a série, não para a lista.
- */
 type ModoDoPopup = { tipo: "lista" } | { tipo: "serie" } | { tipo: "relogioDaSerie" };
 
 type SeletorDeHorariosProps = {
@@ -59,17 +51,9 @@ type SeletorDeHorariosProps = {
 };
 
 /**
- * Horários em popup, e não em campos no corpo da tela. Uma grade de doze campos de digitação
- * dominava o formulário inteiro por uma informação que se preenche uma vez e quase nunca se
- * revisita — aqui ela ocupa uma linha de fichinhas, e o preenchimento acontece com espaço.
- *
- * **Nada vem sugerido de propósito.** Horário pré-preenchido é o tipo de campo que a pessoa
- * apressada aceita sem ler, e aí o app passa a lembrar a dose na hora errada — errar em silêncio
- * é pior do que exigir a resposta.
- *
- * O popup tem dois estados: a lista dos horários e o relógio de um deles. O relógio ocupa o
- * **mesmo** popup em vez de abrir outro por cima — modal dentro de modal empilha duas camadas de
- * fundo escurecido e o botão físico de voltar deixa de ter um destino óbvio.
+ * Nada de horário sugerido: campo pré-preenchido é aceito sem ler, e o app passaria a lembrar na
+ * hora errada. O relógio ocupa o mesmo popup, porque modal dentro de modal tira o destino do
+ * botão físico de voltar no Android.
  */
 export function SeletorDeHorarios({
   label,
@@ -82,16 +66,9 @@ export function SeletorDeHorarios({
   const cores = useCores();
 
   const [isSheetOpen, setSheetOpen] = useState(false);
-  /**
-   * O popup tem um conteúdo por vez, e é sempre o mesmo popup. Guardar isso numa união em vez de
-   * três booleanos independentes é o que impede o estado impossível — a série aberta por cima do
-   * relógio, por exemplo — de existir.
-   */
+  // União em vez de três booleanos: assim a série aberta por cima do relógio nem é representável.
   const [modo, setModo] = useState<ModoDoPopup>({ tipo: "lista" });
-  /**
-   * O horário girado na roda, ainda **não** gravado. Enquanto for `null`, ninguém tocou no
-   * relógio — e a posição em que ele abriu não pode virar resposta por um toque em "Confirmar".
-   */
+  // `null` significa que ninguém tocou no relógio: a posição em que ele abriu não é resposta.
   const [rascunho, setRascunho] = useState<string | null>(null);
   const [intervaloInput, setIntervaloInput] = useState("");
   const [primeiroDaSerie, setPrimeiroDaSerie] = useState<string | null>(null);
@@ -127,15 +104,9 @@ export function SeletorDeHorarios({
   }
 
   /**
-   * Os horários são de um mesmo dia, então "1ª" e "2ª" não são escolha de quem preenche: quem
-   * decide a ordem é o relógio. Escolher 04:00 na primeira linha e 02:00 na segunda descreve o
-   * mesmo dia que a ordem inversa — e era isso que acontecia calado, porque a posologia já era
-   * ordenada na hora de salvar enquanto a tela continuava mostrando a ordem digitada.
-   *
-   * Ordenar ao fechar deixa o reordenamento **visível**: a pessoa fecha o popup e vê as fichinhas
-   * na ordem em que o dia vai acontecer. A dose de cada horário viaja junto, senão trocar a ordem
-   * trocaria em silêncio quanto se toma de manhã e à noite — que é o erro que este campo existe
-   * pra evitar. Horário em branco vai pro fim, pra linha vazia não pular debaixo do dedo.
+   * Ordena ao fechar porque a posologia já é ordenada no salvamento, e a tela mostrava a ordem
+   * digitada. A dose viaja junto com o horário, senão reordenar trocaria em silêncio quanto se
+   * toma de manhã e à noite.
    */
   function handleClose() {
     const preenchidos = values
@@ -143,16 +114,14 @@ export function SeletorDeHorarios({
       .sort((a, b) => a.at.localeCompare(b.at));
     const pendentesVazios = values.filter((value) => parseTimeInput(value.at) === null);
     onChange([...preenchidos, ...pendentesVazios]);
-    // O popup fechava e o teclado ficava, cobrindo metade da tela de trás até alguém tocar em
-    // algum lugar. Fechar o campo é parte de concluir, não uma segunda ação.
+    // Sem isto o teclado fica aberto cobrindo a tela de trás.
     Keyboard.dismiss();
     setSheetOpen(false);
   }
 
   /**
-   * Fechar pelo fundo escurecido ou pelo botão físico de voltar. Fora da lista, o destino óbvio é
-   * o conteúdo de trás — e não a tela de cadastro, que faria a pessoa perder os horários que ela
-   * já tinha escolhido nas outras linhas.
+   * Fundo escurecido ou botão físico de voltar. Fora da lista, volta para o conteúdo anterior do
+   * popup, senão a pessoa perderia os horários já escolhidos.
    */
   function handleRequestClose() {
     if (modo.tipo === "serie") {
@@ -193,14 +162,11 @@ export function SeletorDeHorarios({
         />
       ) : (
         <Pressable
-          // A fila de fichinhas ocupa a largura da tela: escurece sem encolher.
           style={estadoDePressao(styles.timeChipRow)}
           onPress={() => setSheetOpen(true)}
           accessibilityRole="button"
           accessibilityLabel={`Editar horários: ${values.map((value) => value.at).join(", ")}`}>
           {values.map((value, index) => {
-            // Horário em branco não pode virar ficha preenchida: quem bate o olho leria uma
-            // hora resolvida e sairia da tela achando que terminou.
             const isPending = parseTimeInput(value.at) === null;
             const duplicado = duplicateIndexes.includes(index);
             return (
@@ -212,11 +178,7 @@ export function SeletorDeHorarios({
                   isPending && styles.timeChipVazio,
                   duplicado && styles.timeChipErro,
                 ]}
-                /**
-                 * O fundo vermelho diz **qual** dos horários está repetido; o texto de erro abaixo
-                 * só diz que existe repetição. Quem não distingue a cor sabe que há um problema e
-                 * não sabe onde — então a informação que a cor carrega vai também no rótulo.
-                 */
+                // Quem não distingue a cor precisa saber qual horário repetiu, então o rótulo diz.
                 accessibilityLabel={
                   duplicado
                     ? `${textoDaFicha(value)}, horário repetido`
@@ -247,9 +209,6 @@ export function SeletorDeHorarios({
                 style={styles.acaoDaLinha}
                 onPress={handleRequestClose}
               />
-              {/* Desabilitado enquanto ninguém escolher: o horário em que o relógio abre é ponto de
-                  partida, não resposta, e confirmá-lo sem tocar seria o mesmo horário sugerido que
-                  este formulário recusa desde o começo. */}
               <Button
                 label="Confirmar"
                 style={styles.acaoDaLinha}
@@ -298,8 +257,6 @@ export function SeletorDeHorarios({
               </Pressable>
             </View>
 
-            {/* A lista inteira antes de aplicar: é ela que deixa a virada da madrugada visível,
-                que é justamente o que a conta de cabeça erra. */}
             {previaDaSerie !== null ? (
               <View style={styles.fieldGroup}>
                 <Text style={styles.fieldLabel}>Ficaria assim</Text>
@@ -313,9 +270,6 @@ export function SeletorDeHorarios({
               </View>
             ) : null}
 
-            {/* A série calcula **horários**, e a dose de cada um é outro eixo — ela é preservada
-                ao aplicar. O que faltava era dizer isso: quem entra pela série nunca vê a lista
-                antes, e saía achando que tinha perdido a dose por horário. */}
             {variacao !== undefined ? (
               <Text style={styles.sectionHint}>
                 {variacao.ativa
@@ -352,11 +306,6 @@ export function SeletorDeHorarios({
                   {values.length > 1 ? (
                     <Text style={styles.fieldLabel}>{`${ORDINALS[index]} DOSE`}</Text>
                   ) : null}
-                  {/* Campo digitável com o relógio ao lado, e não um botão que abre outro popup.
-                      Antes eram três etapas para um horário — tocar em "Definir horários", tocar
-                      na linha da dose, e só então escolher — e a revisão em aparelho apontou que
-                      isso ficou mais trabalhoso que o mostrador que ele veio substituir. Agora
-                      digita-se direto na linha; o relógio continua ali para quem preferir. */}
                   <TimeField
                     label={`${ORDINALS[index]} dose`}
                     semRotulo
@@ -375,8 +324,7 @@ export function SeletorDeHorarios({
                   <TextField
                     label={variacao.unitNoun}
                     containerStyle={styles.campoDeQuantidade}
-                    // Placeholder e não valor: mostra o que vale hoje sem fingir que foi digitado,
-                    // então deixar em branco continua significando "o mesmo de sempre".
+                    // Placeholder e não valor: em branco continua significando "herda a dose geral".
                     placeholder={variacao.defaultAmount}
                     value={value.amount}
                     onChangeText={(raw) => updateAmount(index, raw)}
@@ -387,19 +335,10 @@ export function SeletorDeHorarios({
               </View>
             ))}
 
-            {/* O checkbox de dose variável saiu daqui e foi para junto do campo de dose (E7): é
-                sobre a dose que ele pergunta, e respondê-lo aqui obrigava a preencher o número
-                duas vezes — uma achando que era único, outra por horário. */}
-
-            {/* "De 8 em 8 horas" é como o médico fala, e o formulário só entende horários. Fazer
-                a conta pela pessoa não é sugerir: os dois números são dela, e a lista aparece
-                inteira antes de valer. Com um horário só não há intervalo nenhum a calcular. */}
             {values.length > 1 ? (
               <Button label="Preencher de X em X horas" variant="text" onPress={abrirSerie} />
             ) : null}
 
-            {/* O popup fecha mesmo incompleto — prender a pessoa aqui é pior que deixá-la voltar
-                depois. Quem cobra o que falta é o resumo lá fora e o rodapé da tela. */}
             {pendentes > 0 ? (
               <Text style={styles.sectionHint}>
                 {pendentes === 1

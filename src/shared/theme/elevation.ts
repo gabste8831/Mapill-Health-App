@@ -5,12 +5,8 @@ import { radius, spacing } from "./spacing";
 /**
  * A sombra padrão de uma superfície elevada.
  *
- * **Sombra, e nunca borda.** A decisão é de 21/08 e vale para o app inteiro: o fundo da tela e o
- * cartão são quase da mesma cor, e uma borda de 1px faz o bloco parecer uma caixa desenhada — a
- * gramática de um formulário HTML, que é o que dava às listas o aspecto de planilha. A sombra
- * separa do fundo sem contornar nada.
- *
- * Discreta de propósito. O objetivo é dizer "isto está acima", não empilhar camadas.
+ * Sombra, e nunca borda: vale para o app inteiro. O fundo e o cartão são quase da mesma cor, e uma
+ * borda de 1px faz o bloco parecer caixa desenhada de formulário HTML.
  */
 export const surfaceShadow = "0px 1px 3px rgba(25, 28, 30, 0.08)";
 
@@ -18,15 +14,8 @@ export const surfaceShadow = "0px 1px 3px rgba(25, 28, 30, 0.08)";
 export const surfaceShadowElevada = "0px 2px 8px rgba(25, 28, 30, 0.10)";
 
 /**
- * O que **flutua sobre o conteúdo**, e não apenas acima do fundo — hoje só o FAB.
- *
- * Mais forte que as duas acima porque o trabalho é outro: um cartão se separa do fundo, um botão
- * flutuante precisa se separar de *qualquer coisa* que role por baixo dele, inclusive de outro
- * cartão branco.
- *
- * Nasceu em 02/09 do `shadowColor: "#000"` que o `Fab` usava — preto puro dá um cinza mais frio que
- * o `rgba(25, 28, 30, …)` do resto do app, e a diferença aparece justamente no elemento mais
- * visível da tela.
+ * O que flutua sobre o conteúdo, hoje só o FAB. Mais forte que as de cima porque precisa se separar
+ * de qualquer coisa que role por baixo, inclusive de outro cartão branco.
  */
 export const surfaceShadowFlutuante = "0px 4px 8px rgba(25, 28, 30, 0.20)";
 

@@ -3,32 +3,17 @@ import type { Tema } from "./tipos";
 /**
  * # Modo sem depender de cor (daltonismo)
  *
- * ## O problema que ele resolve
+ * Deuteranopia e protanopia atingem cerca de 1 homem em 12, e as duas confundem vermelho com verde,
+ * que aqui são "dose atrasada" e "é agora, tome". Sem tratamento, os dois cartões mais importantes
+ * da agenda viram o mesmo cartão.
  *
- * Deuteranopia e protanopia — as duas formas mais comuns de daltonismo — atingem cerca de **1 homem
- * em 12**, e ambas confundem justamente **vermelho com verde**. Que são, neste app, as duas cores
- * mais carregadas de significado: vermelho é "dose atrasada", verde é "é agora, tome". Para essas
- * pessoas, os dois cartões mais importantes da agenda são o mesmo cartão bege.
+ * Trocar verde por azul não serve: azul já é a cor da ação, e reusá-lo apagaria a distinção entre
+ * "toque aqui" e "isto está resolvido". A saída é redundância, a cor nunca sozinha, e por isso quem
+ * faz este tema funcionar é `reforcarFormaEIcone`, não os ajustes de tinta.
  *
- * ## Por que a paleta muda pouco
- *
- * A tentação é trocar verde por azul. Não serve: azul já é a cor da ação neste app, e usá-lo
- * também para "está certo" apagaria a distinção entre "toque aqui" e "isto está resolvido".
- *
- * A saída correta é a que a literatura de acessibilidade chama de **redundância**: a cor continua
- * lá, mas nunca sozinha. Quem enxerga as cores lê o app como sempre; quem não enxerga lê o ícone e
- * o rótulo — e é por isso que `reforcarFormaEIcone` é o que realmente faz este tema funcionar, e
- * não os poucos ajustes de tinta abaixo.
- *
- * ## Os ajustes de tinta que sobram
- *
- * O verde puxa para o **azul-esverdeado** (teal) e o vermelho puxa para o **magenta**. Nenhum dos
- * dois vira outra cor aos olhos de quem enxerga normalmente, mas eles se separam em luminosidade
- * e em matiz de um jeito que sobrevive à deuteranopia — enquanto o par verde-grama/vermelho-tijolo
- * original colapsa nos dois em tons quase idênticos.
- *
- * O âmbar de atenção também escurece: amarelo e verde-claro são o par que a protanopia mais
- * confunde.
+ * Nos ajustes, o verde puxa para teal e o vermelho para magenta: eles se separam em luminosidade e
+ * matiz de um jeito que sobrevive à deuteranopia. O âmbar escurece porque amarelo e verde-claro são
+ * o par que a protanopia mais confunde.
  */
 export const temaDaltonismo: Tema = {
   id: "daltonismo",
