@@ -1,13 +1,6 @@
 
 import { estilosDoTema, fieldLabelGap, radius, spacing, typography } from "@/shared/theme";
 
-/**
- * O lado do quadro da foto, em uma constante só.
- *
- * O quadro e a imagem dentro dele precisam da **mesma** medida, e a imagem a usa como número
- * fixo em vez de `100%` — ver `photo`. Dois literais iguais em lugares diferentes é o tipo de
- * coisa que diverge na primeira vez que alguém ajusta um deles.
- */
 const TAMANHO_DA_FOTO = 72;
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
@@ -17,9 +10,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   scrollContent: {
     flexGrow: 1,
-    // `flexGrow: 1` faz o conteúdo ocupar pelo menos a altura da tela; `justifyContent: "center"`
-    // só tem efeito nesse caso (conteúdo mais curto que a tela) — se o formulário crescer (ex:
-    // mais campos, teclado aberto), o ScrollView volta a rolar normalmente sem quebrar isso.
     justifyContent: "center",
     padding: spacing.md,
     gap: spacing.lg,
@@ -34,26 +24,15 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.sm,
   },
-  /**
-   * Titulo de secao. `headlineSmRegular` e nao `label`: enquanto os rotulos eram maiusculos o
-   * `label` bastava — a caixa alta dava presenca de titulo ao menor tamanho da escala. Em caixa de
-   * frase a muleta acabou, e o cabecalho ficava em 13px abaixo do texto de apoio que ele encabeca.
-   */
   sectionTitle: {
     ...typography.headlineSmRegular,
     color: cores.onSurface,
   },
-  /**
-   * As duas seções são marcadas, não só a obrigatória: o contraste entre "obrigatório" e
-   * "opcional" comunica mais rápido do que destacar uma sozinha. Em texto, e não só em cor —
-   * cor sozinha não é sinal legível pra quem não a distingue.
-   */
   selo: {
     ...typography.caption,
     overflow: "hidden",
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm,
-    // paddingVertical: 2,
   },
   seloObrigatorio: {
     backgroundColor: cores.primary,
@@ -86,7 +65,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingHorizontal: spacing.md,
   },
   infoBannerText: {
-    // `bodyMd` inteiro: o 13 era um meio-termo entre dois degraus da escala, sem razão registrada.
     ...typography.bodyMd,
     color: cores.onPrimaryContainer,
     flex: 1,
@@ -121,46 +99,23 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     justifyContent: "center",
   },
-  /** Só a borda tracejada do quadro vazio: convida ao toque sem alterar a caixa. */
   photoVazio: {
     borderWidth: 1,
     borderColor: cores.outlineVariant,
     borderStyle: "dashed",
   },
-  /**
-   * O alvo de toque dentro do quadro: preenche a caixa que a `View` de fora já mediu.
-   *
-   * Ele não define medida própria de propósito — quem carrega os 72px é `photoQuadro`, e foi
-   * justamente um `Pressable` **sendo** o quadro que produziu o defeito da miniatura invisível.
-   */
   photoToque: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  /** O escurecer do toque, que antes vinha de `estadoDePressao`. */
   photoPressionada: {
     opacity: 0.85,
   },
-  /**
-   * Medida **fixa**, e não `100%` do pai.
-   *
-   * O percentual obriga a imagem a resolver contra a caixa de quem a contém, e este quadro trocou
-   * de anatomia mais de uma vez enquanto o defeito era caçado. Com número fixo a imagem não
-   * depende de ninguém ter resolvido nada — e `TAMANHO_DA_FOTO` é o mesmo de `photoQuadro`,
-   * escrito uma vez para os dois não poderem divergir.
-   */
   photo: {
     width: TAMANHO_DA_FOTO,
     height: TAMANHO_DA_FOTO,
   },
-  /**
-   * O alvo em volta dos links de foto ("Trocar foto", "Remover").
-   *
-   * O texto sozinho tinha a altura da própria linha — perto de 20px, menos da metade dos 44 que um
-   * alvo de dedo pede. O padding aqui é o que dá área ao toque **e** o que permite o fundo aparecer
-   * ao pressionar: sem contêiner, não há onde pintar.
-   */
   photoAcao: {
     minHeight: 44,
     justifyContent: "center",
@@ -171,13 +126,10 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.label,
     color: cores.corDeDestaque,
   },
-  /** Excluir em vermelho ao lado de "Trocar foto": são ações de peso muito diferente. */
   photoExcluirLabel: {
     ...typography.label,
     color: cores.error,
   },
-  // Label "solta" usada dentro de um Card quando o campo abaixo não é um TextField com label
-  // própria (ex: título da seção "Alergias"/"Contato de emergência" acima de um grupo de campos).
   fieldLabel: {
     ...typography.label,
     color: cores.onSurfaceVariant,
@@ -199,18 +151,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   fieldGroup: {
     gap: fieldLabelGap,
   },
-  // Sem marginTop extra (diferente de contactList/allergyChipsRow): é só uma legenda simples,
-  // não uma lista dinâmica que precise de respiro a mais — mantém o Card compacto quando ainda
-  // não há nenhum contato cadastrado.
   emptyHint: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  // Mesmo respiro de contactList/allergyChipsRow — separa a ação da lista acima dela.
   addContactButton: {
     marginTop: spacing.sm,
   },
-  /** Respiro entre os campos do popup de contato — o BottomSheet não dá espaçamento próprio. */
   sheetBody: {
     gap: spacing.md,
   },
@@ -241,7 +188,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  /** 44: remover contato de emergência é destrutivo, e alvo de 32 é onde o toque erra. */
   contactRemove: {
     width: 44,
     height: 44,

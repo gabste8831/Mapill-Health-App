@@ -29,18 +29,6 @@ import {
 
 import { alturaDaBarra, criarEstilos } from "./AdesaoScreen.styles";
 
-/**
- * A mesma fileira do filtro do calendário, e não o `OptionGroup`.
- *
- * Período é escolha que governa o que a tela mostra — a mesma natureza do "Tudo / Compromissos /
- * Remédios" da agenda —, então usa a mesma forma: fichas de altura única, a marcada em azul cheio,
- * as outras visíveis. Com o `OptionGroup` estas três eram cartões de 48px de altura com o rótulo em
- * `bodyMd`, do tamanho das opções que se **gravam** no cadastro, e a tela ensinava duas gramáticas
- * para a mesma decisão.
- *
- * O componente já não exige ícone: era o que antes impedia o período de usá-lo, e nenhum dos
- * rótulos tem símbolo que signifique algo sozinho de qualquer forma.
- */
 const OPCOES_DE_PERIODO: OpcaoDeOrdem<string>[] = PERIODOS_DE_ADESAO.map((periodo) => ({
   value: String(periodo.dias),
   label: periodo.label,
@@ -52,12 +40,8 @@ function percentual(taxa: number): string {
 }
 
 /**
- * A faixa em que a taxa cai. Governa só a cor — o número é o mesmo, e nenhuma faixa é apresentada
- * como nota ou julgamento.
- *
- * Os cortes vêm da literatura de adesão que o artigo cita: 80% é o limiar clássico a partir do
- * qual um tratamento é considerado aderente, e abaixo de 50% a adesão é tida como pobre. Não são
- * números escolhidos por estética.
+ * Governa só a cor da taxa. Os cortes vêm da literatura de adesão: 80% é o limiar clássico de
+ * tratamento aderente, abaixo de 50% a adesão é tida como pobre.
  */
 function faixaDaTaxa(taxa: number): "boa" | "media" | "baixa" {
   if (taxa >= 0.8) return "boa";
@@ -99,35 +83,19 @@ function inicialDaSemana(quando: Date): string {
   return quando.toLocaleDateString("pt-BR", { weekday: "short" }).charAt(0).toUpperCase();
 }
 
-/**
- * Um dia da faixa: número em cima, barra no meio, sigla e data embaixo.
- *
- * A barra é a mesma do card semanal da Home — mesma altura, mesma cor, mesma opacidade no dia de
- * hoje — e aqui ela vem **com o número**, que é o que faltava lá. Barra sozinha diz "este dia foi
- * pior"; barra com número diz *quanto* pior. A forma se compara de relance entre as sete colunas, o
- * valor se cita ao médico.
- *
- * Manter os dois desenhos idênticos é deliberado: são o mesmo dado, e dois gráficos diferentes para
- * o mesmo número fariam o leitor procurar uma diferença que não existe.
- *
- * O `%` fica em cada célula, e não só no título: "86" sozinho obriga a pessoa a procurar a unidade
- * em outro lugar da tela para saber o que está lendo. Ele vai menor e colado no número — assim cabe
- * na coluna estreita sem encolher o valor, que é o que de fato se lê.
- */
 function ColunaDeDia({ item }: { item: AdesaoDeUmDia }) {
   const styles = useEstilos(criarEstilos);
   const quando = dataDoDia(item.dia);
 
   return (
     <View style={styles.diaColuna}>
-      {/* Traço, e não "0%": dia sem dose não é falha, é ausência do que medir. */}
+      {/* Traço, e não "0%": dia sem dose é ausência do que medir. */}
       {item.taxa === null ? (
         <Text style={styles.diaSemDado}>-</Text>
       ) : (
         <Text style={styles.diaValor} numberOfLines={1}>
           {Math.round(item.taxa * 100)}
-          {/* Aninhado, e não um segundo `Text` ao lado: assim o `%` acompanha o número na mesma
-              linha de base e encolhe junto, em vez de quebrar para baixo na coluna estreita. */}
+          {/* Aninhado para o `%` seguir a mesma linha de base e encolher junto. */}
           <Text style={styles.diaValorUnidade}>%</Text>
         </Text>
       )}
@@ -135,16 +103,14 @@ function ColunaDeDia({ item }: { item: AdesaoDeUmDia }) {
       {/* `justifyContent: flex-end` na coluna faz a barra crescer de baixo para cima. */}
       <View style={styles.diaTrilho}>
         {item.taxa === null ? (
-          // Traço fino, e não barra rasa: "não havia dose" precisa se distinguir de "não tomei
-          // nenhuma", que é o 0% logo abaixo.
+          // Traço fino distingue "não havia dose" do 0%, que é barra rasa.
           <View style={styles.diaBarraVazia} />
         ) : (
           <View
             style={[
               styles.diaBarra,
               item.ehHoje && styles.diaBarraHoje,
-              // Mínimo de 3px: 0% precisa aparecer como barra rasa em vez de sumir — um dia zerado é
-              // informação, e a coluna vazia leria como o traço de "não havia dose".
+              // Mínimo de 3px: 0% precisa aparecer, senão lê como "não havia dose".
               { height: Math.max(3, item.taxa * alturaDaBarra) },
             ]}
           />
@@ -162,15 +128,10 @@ function ColunaDeDia({ item }: { item: AdesaoDeUmDia }) {
 }
 
 /**
- * Histórico e taxa de adesão — o que o paciente leva ao médico.
+ * Histórico e taxa de adesão, o que o paciente leva ao médico.
  *
- * É a tela que transforma o app de lembrete em **registro clínico** (§2.3.3): sem ela, todo o dado
- * de ingestão que o Mapill acumula fica invisível para quem tomaria decisão a partir dele.
- *
- * O que a tela **não** faz: julgar. Não há "parabéns", não há alerta vermelho por adesão baixa, não
- * há meta. A taxa é um dado a ser levado para a consulta, e um app que elogia ou repreende o
- * paciente pela própria adesão convida a corrigir o registro em vez de corrigir o tratamento — que
- * é exatamente o que destruiria o valor deste número.
+ * A tela não julga: sem "parabéns", sem alerta por adesão baixa, sem meta. Elogiar ou repreender
+ * convida a corrigir o registro em vez do tratamento, e é o que destruiria o valor do número.
  */
 export function AdesaoScreen() {
   const styles = useEstilos(criarEstilos);
@@ -182,39 +143,30 @@ export function AdesaoScreen() {
   const { gerar, gerando, erro: erroDoPdf, medicamentos, compromissos } = useRelatorioPdf();
 
   /**
-   * Quais medicamentos entram no relatório. **Lista vazia = todos**, e é o padrão.
-   *
-   * Guardar a ausência de filtro como lista vazia, em vez de "todos os ids marcados", é o que faz
-   * um remédio cadastrado depois entrar no relatório sozinho — com a lista cheia, ele nasceria
-   * fora e ninguém entenderia por quê.
+   * Quais medicamentos entram no relatório. **Lista vazia = todos**, e é o padrão: guardada assim,
+   * um remédio cadastrado depois entra no relatório sozinho.
    */
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [selecionando, setSelecionando] = useState(false);
 
   function alternar(id: string) {
     setSelecionados((atual) => {
-      // Vazio significa "todos", então o primeiro toque materializa a lista completa para poder
-      // tirar um item dela — senão desmarcar um deixaria a lista com um só, que é o oposto.
+      // Vazio significa "todos": o primeiro toque materializa a lista completa para tirar um item
+      // dela, senão desmarcar um deixaria a lista com um só.
       const base = atual.length === 0 ? medicamentos.map((m) => m.id) : atual;
       const proximo = base.includes(id) ? base.filter((outro) => outro !== id) : [...base, id];
 
-      // Desmarcar o último devolve ao padrão em vez de produzir um relatório sem tratamento
-      // nenhum: um PDF vazio não é uma escolha que alguém queira fazer, é um beco.
+      // Desmarcar o último devolve ao padrão: um PDF sem tratamento nenhum é um beco.
       if (proximo.length === 0) return [];
-      // Marcar todos de volta é a mesma coisa que não filtrar, e precisa ser gravado assim para o
-      // cabeçalho do PDF não declarar um recorte que não existe.
+      // Marcar todos equivale a não filtrar, e precisa ser gravado assim para o cabeçalho do PDF
+      // não declarar um recorte que não existe.
       return proximo.length === medicamentos.length ? [] : proximo;
     });
   }
 
   /**
-   * O valor ao lado da seta — e o **vazio** quando não há o que dizer.
-   *
-   * Só "Todos" aparece. Já mostrava também o nome do único escolhido ou "2 de 3", e isso duplicava
-   * na linha o que o popup já lista: a linha ficava com duas informações disputando a largura, e o
-   * nome longo empurrava o rótulo para as reticências. "Todos" é diferente porque é o **estado
-   * implícito** — quem nunca abriu o seletor precisa saber que o relatório leva tudo, e é a única
-   * resposta que não se descobre abrindo.
+   * Só "Todos" aparece, porque é o estado implícito: quem nunca abriu o seletor precisa saber que
+   * o relatório leva tudo. O resto se descobre abrindo o popup.
    */
   const resumoDaSelecao =
     medicamentos.length === 0
@@ -223,13 +175,7 @@ export function AdesaoScreen() {
         ? "Todos"
         : "";
 
-  /**
-   * O mesmo estado, dito por extenso para o leitor de tela.
-   *
-   * A linha esconde "2 de 3" porque a largura é curta e o popup logo adiante lista tudo — mas quem
-   * ouve a tela não vê o popup antes de abrir, e "Medicamentos do relatório. Toque para escolher"
-   * sem o estado obrigaria a abrir para descobrir o que já está marcado.
-   */
+  /** O mesmo estado por extenso: quem ouve a tela não vê o popup antes de abrir. */
   const selecaoFalada =
     medicamentos.length === 0
       ? "nenhum medicamento cadastrado"
@@ -238,12 +184,8 @@ export function AdesaoScreen() {
         : `${selecionados.length} de ${medicamentos.length}`;
 
   /**
-   * A mesma mecânica para os compromissos, e um estado separado.
-   *
-   * Os dois filtros não se conversam de propósito: o app não guarda vínculo entre consulta e
-   * medicamento, e a relação existe na cabeça de quem monta o relatório. Quem vai ao cardiologista
-   * sabe quais consultas são do coração — o app não tem como saber, e fingir que sabe seria pior
-   * que perguntar.
+   * Estado separado de propósito: o app não guarda vínculo entre consulta e medicamento, e a
+   * relação existe só na cabeça de quem monta o relatório.
    */
   const [compromissosEscolhidos, setCompromissosEscolhidos] = useState<string[]>([]);
   const [escolhendoCompromissos, setEscolhendoCompromissos] = useState(false);
@@ -280,8 +222,8 @@ export function AdesaoScreen() {
 
   if (isLoading) return <CenteredLoader />;
 
-  // Falhou a leitura: a tela inteira vira o erro, com saída. Mostrar o seletor de período sobre uma
-  // taxa que não carregou ofereceria escolhas que não mudam nada.
+  // A tela inteira vira o erro: um seletor de período sobre uma taxa que não carregou ofereceria
+  // escolhas que não mudam nada.
   if (error !== null) {
     return (
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -303,8 +245,7 @@ export function AdesaoScreen() {
           descreverOpcao={(label) => `Mostrar os últimos ${label}`}
         />
 
-        {/* Sem dose vencida não há taxa a mostrar, e um "0%" seria a leitura errada de quem acabou
-            de cadastrar o primeiro remédio. */}
+        {/* Sem dose vencida não há taxa: "0%" seria leitura errada de quem acabou de cadastrar. */}
         {resumo.taxa === null ? (
           <View style={styles.vazio}>
             <Text style={styles.vazioTitulo}>Ainda não há o que medir</Text>
@@ -315,8 +256,6 @@ export function AdesaoScreen() {
         ) : (
           <>
             <View style={styles.destaque}>
-              {/* Branco sobre o azul: as faixas de cor seguem valendo na lista por medicamento,
-                  que está sobre fundo claro e tem contraste para elas. */}
               <Text style={[styles.destaqueTaxa, styles.destaqueTaxaTexto]}>
                 {percentual(resumo.taxa)}
               </Text>
@@ -326,9 +265,8 @@ export function AdesaoScreen() {
               </Text>
             </View>
 
-            {/* Puladas e sem resposta lado a lado, e nunca somadas: para a taxa elas contam igual,
-                mas para a conversa com o médico são opostas — "decidi não tomar" e "esqueci"
-                pedem condutas diferentes. */}
+            {/* Nunca somadas: para a taxa contam igual, mas "decidi não tomar" e "esqueci" pedem
+                condutas diferentes na consulta. */}
             <View style={styles.contagens}>
               <View style={styles.contagem}>
                 <Text style={styles.contagemValor}>{resumo.puladas}</Text>
@@ -347,31 +285,19 @@ export function AdesaoScreen() {
             {resumo.porMedicamento.length > 1 ? (
               <View style={styles.secao}>
                 <Text style={styles.secaoTitulo}>Por medicamento</Text>
-                {/* Do pior para o melhor: a lista existe para achar onde o tratamento está
-                    falhando, e quem está em 100% não precisa ser lido. */}
+                {/* Do pior para o melhor: a lista existe para achar onde o tratamento falha. */}
                 {resumo.porMedicamento.map((item) => (
                   <LinhaDeMedicamento key={item.medicationId} item={item} />
                 ))}
               </View>
             ) : null}
 
-            {/* Sempre os últimos sete dias, mesmo com 30 ou 90 selecionado acima.
-
-                A taxa do topo diz "como tem sido"; esta lista diz "qual dia falhou", e essa segunda
-                pergunta só se responde enquanto a pessoa lembra do dia. Noventa linhas para procurar
-                12 de julho não é leitura, é arquivo — e para isso existe o calendário, que mostra o
-                dia dose por dose em vez de porcentagem.
-
-                Os dados não expiram: a janela é de leitura, não de retenção. */}
+            {/* Sempre sete dias, mesmo com 30 ou 90 escolhido acima: "qual dia falhou" só se
+                responde enquanto a pessoa lembra do dia. A janela é de leitura, não de retenção. */}
             {porDia.some((dia) => dia.previstas > 0) ? (
               <View style={styles.secao}>
-                {/* O título diz a **janela**, não a unidade: o `%` voltou para cada célula, e o que
-                    sobra de dúvida aqui é "sete dias de quando" — ainda mais porque esta faixa não
-                    acompanha o período escolhido acima. */}
                 <Text style={styles.secaoTitulo}>Seus últimos sete dias</Text>
-                {/* Um cartão com sete colunas, e não sete cartões: a semana é uma coisa só, e a
-                    leitura que interessa é a comparação entre os dias. Mesma forma das sete barras
-                    do card da Home, de propósito — quem viu lá reconhece aqui. */}
+                {/* Um cartão com sete colunas: a leitura que interessa é a comparação entre dias. */}
                 <View style={styles.diaFaixa}>
                   {porDia.map((dia) => (
                     <ColunaDeDia key={dia.dia} item={dia} />
@@ -380,21 +306,12 @@ export function AdesaoScreen() {
               </View>
             ) : null}
 
-            {/* Dobrada, e não em lista aberta.
-
-                Quem está com a adesão baixa é quem mais precisa desta tela — e é justamente quem
-                tem mais linhas aqui. Aberta, a lista empurrava a tabela por medicamento e o botão
-                do PDF para longe, e o efeito colateral era desagradável: a tela devolvia um rolo de
-                falhas a quem já sabe que falhou.
-
-                O título carrega a contagem, então o número — que é a informação — se lê sem abrir.
-                O detalhe de cada dose fica para quem foi procurá-lo. */}
+            {/* Dobrada: quem tem adesão baixa é quem tem mais linhas aqui, e aberta a lista
+                empurrava a tabela e o botão do PDF para longe. A contagem fica no título. */}
             {perdidas.length > 0 ? (
               <View style={styles.secao}>
                 <Accordion
-                  // Superfície de cartão: o fundo padrão do acordeão é quase o da tela, e no meio
-                  // de uma tela de cartões ele desaparecia — não dava para ver que ali havia algo
-                  // a abrir.
+                  // Superfície de cartão: o fundo padrão do acordeão some numa tela de cartões.
                   style={styles.perdidasBloco}
                   title={
                     perdidas.length === 1
@@ -419,9 +336,7 @@ export function AdesaoScreen() {
               </View>
             ) : null}
 
-            {/* Diz como o número foi feito. Sem isso, quem leva a tela ao médico não sabe se a dose
-                de hoje à noite já está contando contra ela — e um número que não se explica não
-                serve para decisão clínica. */}
+            {/* Um número que não se explica não serve para decisão clínica. */}
             <Text style={styles.rodape}>
               A adesão considera as doses cujo horário já passou. As de hoje ainda por vir não
               entram na conta.
@@ -429,21 +344,11 @@ export function AdesaoScreen() {
           </>
         )}
 
-        {/* Exportar é outro assunto, e o traço diz isso.
-
-            Tudo acima responde "como tenho ido"; daqui para baixo é levar isso para fora do app. Sem
-            a separação, o botão do PDF lia como mais uma linha do relatório — e quem veio buscar o
-            documento para a consulta precisava caçá-lo no fim da rolagem.
-
-            Fora do `if` da taxa de propósito: um relatório de tratamentos em curso serve na consulta
-            mesmo quando nenhuma dose venceu ainda, e é justamente quem acabou de começar o
-            tratamento que costuma ter a próxima consulta marcada. */}
+        {/* Fora do `if` da taxa de propósito: um relatório de tratamentos em curso serve na
+            consulta mesmo quando nenhuma dose venceu ainda. */}
         <View style={styles.divisorDeEscopo} />
 
         <View style={styles.secaoDeExportar}>
-          {/* Só os textos. O ícone ao lado do título era o cabeçalho de card que todo gerador de
-              site produz, e não acrescentava leitura: "Seu relatório de adesão" já diz do que se
-              trata melhor que um desenho de documento. */}
           <View style={styles.exportarTopo}>
             <Text style={styles.exportarTitulo}>Seu relatório de adesão</Text>
             <Text style={styles.exportarDescricao}>
@@ -451,12 +356,8 @@ export function AdesaoScreen() {
             </Text>
           </View>
 
-          {/* O período aparece de novo aqui, e não só no topo da tela.
-
-              Quem rolou até aqui para gerar o documento não vê mais o seletor lá em cima, e o
-              relatório sai com o período que estiver escolhido — descobrir isso depois de abrir o
-              PDF é tarde. É o mesmo estado dos dois lados: mexer aqui muda a tela toda, e é o que
-              se espera de dois controles do mesmo dado. */}
+          {/* O mesmo estado do seletor do topo: quem rolou até aqui não o vê mais, e o relatório
+              sai com o período escolhido. */}
           <View style={styles.periodoDoRelatorio}>
             <Text style={styles.periodoRotulo}>Período do relatório</Text>
             <SeletorDeOrdem
@@ -467,34 +368,16 @@ export function AdesaoScreen() {
             />
           </View>
 
-          {/* Os dois seletores num grupo só: respondem à mesma pergunta — o que entra no documento
-              — e ficam mais perto entre si do que do período e do botão. */}
           <View style={styles.gruposDoRelatorio}>
-          {/**
-             * Os dois seletores aparecem **sempre**, mesmo sem nada cadastrado e mesmo com um item
-             * só.
-             *
-             * Já foram condicionais — medicamentos a partir de dois, compromissos a partir de um —,
-             * e o efeito era a pessoa não saber o que o documento leva. Um relatório com um remédio
-             * e nenhuma consulta saía sem nenhuma linha de escolha, e quem o gerava descobria o
-             * conteúdo depois de abrir o PDF.
-             *
-             * Com um item só a escolha existe: "levar" e "não levar" são respostas diferentes, e
-             * quem vai a uma consulta de cardiologia pode não querer o remédio de alergia no papel.
-             * Sem item nenhum a linha vira informação — ela diz que não há o que incluir, que é o
-             * que a pessoa precisa saber antes de gerar.
-             */}
+          {/* Os dois seletores aparecem sempre, mesmo com um item só ou nenhum: sem eles a pessoa
+              só descobre o que o documento leva depois de abrir o PDF. */}
           {medicamentos.length > 0 ? (
             <Pressable
-              // Linha de largura total: escurece sem encolher.
               style={estadoDePressao(styles.filtro)}
               onPress={() => setSelecionando(true)}
               accessibilityRole="button"
               accessibilityLabel={`Medicamentos do relatório: ${selecaoFalada}. Toque para escolher.`}
             >
-              {/* A seta é o que diz que a linha abre algo. Sem ela, "Medicamentos no relatório"
-                  com um valor embaixo lê como informação, e não como escolha a fazer — e o seletor
-                  de período logo acima, esse sim óbvio, reforçava a leitura errada. */}
               <View style={styles.filtroTexto}>
                 <Text style={styles.filtroRotulo} numberOfLines={1}>
                   Medicamentos no relatório
@@ -506,7 +389,7 @@ export function AdesaoScreen() {
               <Ionicons name="chevron-forward" size={20} color={cores.onSurfaceVariant} />
             </Pressable>
           ) : (
-            // Sem nada cadastrado a linha continua ali, mas não abre nada: não há lista a mostrar.
+            // Sem nada cadastrado a linha continua, mas não abre: não há lista a mostrar.
             <View style={[styles.filtro, styles.filtroVazio]}>
               <View style={styles.filtroTexto}>
                 <Text style={styles.filtroRotulo} numberOfLines={1}>
@@ -519,7 +402,6 @@ export function AdesaoScreen() {
             </View>
           )}
 
-          {/* O mesmo seletor, para as consultas. */}
           {compromissos.length > 0 ? (
             <Pressable
               style={estadoDePressao(styles.filtro)}
@@ -551,13 +433,10 @@ export function AdesaoScreen() {
           )}
           </View>
 
-          {/* Azul cheio e com ícone: é a ação que a seção existe para oferecer, e o contorno a
-              deixava com o mesmo peso do seletor de medicamentos logo acima. */}
           <Button
             label="Gerar PDF"
-            // O periodo esta no seletor logo acima, e mudar de 30 para 90 ja reescreve aquela
-            // linha: repeti-lo no botao fazia o rotulo mudar de largura a cada troca, e dizia duas
-            // vezes o que a secao inteira ja combinou. O leitor de tela recebe o periodo abaixo.
+            // O rótulo visível não repete o período: mudaria de largura a cada troca. Quem usa
+            // leitor de tela recebe o período aqui.
             accessibilityLabel={`Gerar PDF dos últimos ${periodo} dias`}
             icon={<Ionicons name="download-outline" size={20} color={cores.onPrimary} />}
             loading={gerando}
@@ -578,16 +457,13 @@ export function AdesaoScreen() {
           title="Medicamentos no relatório"
         >
           <View style={styles.folha}>
-            {/* O aviso vem antes da lista, e não depois: quem já desmarcou tudo e está saindo do
-                popup não volta para ler um rodapé. Um relatório parcial afirma menos do que
-                parece, e é o cabeçalho do PDF que vai dizer isso ao médico. */}
+            {/* Antes da lista: quem desmarcou tudo e está saindo não volta para ler um rodapé. */}
             <Dica>
               Um relatório com parte dos tratamentos não descreve a adesão completa. O documento
               declara o recorte no cabeçalho.
             </Dica>
 
-            {/* Um atalho só, e não o par "todos / limpar": desmarcar tudo produz um relatório sem
-                nenhum tratamento, que não é um estado que alguém queira alcançar de propósito. */}
+            {/* Sem o par "limpar": desmarcar tudo produz um relatório sem tratamento nenhum. */}
             {selecionados.length > 0 ? (
               <View style={styles.folhaAcoes}>
                 <View style={styles.folhaAcao}>
@@ -602,9 +478,7 @@ export function AdesaoScreen() {
             ) : null}
 
             {medicamentos.map((medicamento) => {
-              // Lista vazia = todos, então nenhum item aparece desmarcado no estado padrão. É o que
-              // faz "todos" e "cada um marcado à mão" serem a mesma coisa na tela e coisas
-              // diferentes no cabeçalho do PDF.
+              // Lista vazia = todos, então nada aparece desmarcado no estado padrão.
               const marcado =
                 selecionados.length === 0 || selecionados.includes(medicamento.id);
               return (
@@ -623,11 +497,8 @@ export function AdesaoScreen() {
           </View>
         </BottomSheet>
 
-        {/* O seletor de compromissos, com a mesma mecânica do de medicamentos.
-
-            Sem o aviso de recorte que o outro tem: deixar uma consulta de fora não distorce nenhum
-            número — a adesão é das doses, e os compromissos entram como registro do que aconteceu.
-            O aviso do PDF fala de tratamentos, e continua falando só deles. */}
+        {/* Sem o aviso de recorte que o outro tem: deixar uma consulta de fora não distorce
+            nenhum número, já que a adesão é das doses. */}
         <BottomSheet
           visible={escolhendoCompromissos}
           onClose={() => setEscolhendoCompromissos(false)}
@@ -656,8 +527,8 @@ export function AdesaoScreen() {
                   <Checkbox
                     checked={marcado}
                     onChange={() => alternarCompromisso(compromisso.id)}
-                    /* A data entra no rótulo: duas consultas com o mesmo título ("Retorno
-                       cardiologista") só se distinguem por ela. */
+                    /* A data entra no rótulo: duas consultas com o mesmo título só se distinguem
+                       por ela. */
                     label={`${compromisso.descricao} (${diaEMesCurto(new Date(compromisso.quando))})`}
                     accessibilityLabel={`${compromisso.descricao}, ${dataEHoraPorExtenso(new Date(compromisso.quando))}`}
                   />

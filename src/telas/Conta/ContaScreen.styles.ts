@@ -11,13 +11,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingBottom: spacing.xxl,
     gap: spacing.lg,
   },
-  /**
-   * A faixa de abertura, tingida de azul claro.
-   *
-   * Cor num tom só e sem sombra: ela enquadra o assunto e não compete com os cartões abaixo. O
-   * escudo à esquerda é o que dá o tom da tela de relance — as três seções aqui são sobre
-   * proteção de dados, e o ícone diz isso antes de qualquer palavra ser lida.
-   */
   intro: {
     flexDirection: "row",
     alignItems: "center",
@@ -53,11 +46,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    // 52 é a altura padrão de interação do app (Button, TextField, SelectField). A linha
-    // inteira é clicável, o que já dá alvo de sobra pro público idoso.
     minHeight: 52,
   },
-  /** Largura fixa pra alinhar os rótulos entre linhas, mesmo com ícones de larguras diferentes. */
   rowIcon: {
     width: 28,
     alignItems: "center",
@@ -70,26 +60,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyLg,
     color: cores.onSurface,
   },
-  /** Só o rótulo em vermelho, não a dica: a dica explica a consequência e precisa ser lida. */
   rowLabelDestrutiva: {
     color: cores.error,
   },
-  /**
-   * Nota abaixo de um cartão, sobre a seção inteira. É onde o app diz onde os dados moram — dentro
-   * de uma linha essa frase pareceria a descrição de um botão, e ela não é.
-   */
   sectionFooter: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
     paddingHorizontal: spacing.xs,
   },
-  /**
-   * A dica, menor que o rótulo — a ênfase é o que separa os dois.
-   *
-   * Estava em `bodyMd`, quase do tamanho do `bodyLg` do rótulo, e as duas linhas liam como um
-   * parágrafo de duas frases em vez de título e explicação. Em `bodySm` a hierarquia aparece: o
-   * rótulo se lê ao varrer a lista, a dica só quando o olho para naquela linha.
-   */
   rowHint: {
     ...typography.bodySm,
     color: cores.onSurfaceVariant,

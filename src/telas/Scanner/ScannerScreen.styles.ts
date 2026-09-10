@@ -13,12 +13,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   preview: {
     flex: 1,
   },
-  /**
-   * A moldura de mira, centralizada por porcentagem para acompanhar qualquer tela.
-   *
-   * Larga e baixa porque é a proporção de um código de barras — um quadrado convidaria a enquadrar
-   * a caixa inteira, que é justamente onde a leitura falha.
-   */
   alvo: {
     position: "absolute",
     left: "10%",
@@ -37,12 +31,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     paddingHorizontal: spacing.lg,
   },
-  /**
-   * Fundo escuro atrás do texto: sobre a imagem da câmera, texto sem fundo some.
-   *
-   * Preto fixo, e não `onSurface`: a câmera mostra o mundo, não o tema, e no escuro `onSurface` é
-   * quase branco — a tarja ficaria clara com o texto branco por cima, ilegível.
-   */
   instrucaoTexto: {
     ...typography.bodyLg,
     color: "#FFFFFF",
@@ -76,7 +64,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  /** O número lido, em destaque discreto: serve para conferir se a leitura pegou o código certo. */
   ean: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,

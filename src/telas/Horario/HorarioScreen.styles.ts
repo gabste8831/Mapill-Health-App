@@ -12,7 +12,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     gap: listGap,
     paddingBottom: spacing.xxl,
   },
-  /** "Sábado, 29 de agosto às 08:00" — situa quem chegou pela notificação horas depois. */
   quando: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
@@ -29,7 +28,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     padding: spacing.md,
     gap: spacing.md,
   },
-  /** Respondida fica esmaecida, mas continua legível: é registro, não lixo. */
   cardResolvido: {
     opacity: 0.72,
   },
@@ -54,10 +52,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  /**
-   * A miniatura da caixa. `contain` pelo mesmo motivo do alarme: cortar a borda pode cortar a
-   * dosagem impressa no canto, e o cadastro já obriga a enquadrar em quadrado.
-   */
   foto: {
     width: 52,
     height: 52,
@@ -76,11 +70,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  /**
-   * O aviso de dose adiada. Fundo azul claro, e não amarelo: adiar não é problema nem pendência
-   * de erro — é uma resposta legítima que só não encerra a dose. O amarelo está reservado para o
-   * que precisa de ação corretiva.
-   */
   adiadaDica: {
     ...typography.bodyMd,
     color: cores.onSecondaryContainer,
@@ -89,22 +78,10 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     borderRadius: radius.md,
   },
 
-  /**
-   * Os dois botões lado a lado e do mesmo tamanho. "Tomei" e "Pulei" são respostas igualmente
-   * legítimas — dar mais peso a uma delas é sugerir a resposta, e o registro só vale se for o que
-   * de fato aconteceu.
-   */
   acoes: {
     flexDirection: "row",
     gap: spacing.sm,
   },
-  /**
-   * A mesma forma dos botões do alarme: ícone e rótulo na mesma linha, pílula, altura de alvo.
-   *
-   * A cor é que difere, porque o fundo difere. No alarme o cartão é azul e "Tomei" é branco; aqui o
-   * fundo é claro, então ele é o azul cheio. O que se mantém é o que a pessoa reconhece: a ordem
-   * (Pulei à esquerda, Tomei à direita), o par ✓/✗ e a hierarquia de um cheio contra um neutro.
-   */
   botaoTomei: {
     flex: 1,
     flexDirection: "row",
@@ -116,15 +93,12 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     borderWidth: 1,
     borderColor: cores.primary,
   },
-  /** Respondido: o botão preenche. É a única pista visual de qual resposta está registrada. */
   botaoTomeiMarcado: {
     backgroundColor: cores.primary,
     borderColor: cores.primary,
   },
   textoTomei: {
     ...typography.label,
-    // Tinta sobre o botao claro, entao `corDeDestaque`: no escuro o `primary` e o navy de fundo e
-    // o rotulo sumiria dentro do proprio botao.
     color: cores.corDeDestaque,
   },
   botaoPulei: {
@@ -144,16 +118,13 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.label,
     color: cores.onSurfaceVariant,
   },
-  /** Sobre o botão preenchido, o texto inverte junto com o ícone. */
   textoMarcado: {
     color: cores.onPrimary,
   },
-  /** Metade do peso das outras: saída legítima, não atalho a ser incentivado. */
   acaoSecundaria: {
     marginTop: spacing.xs,
   },
 
-  /** Afastado da lista: é saída da tela, não mais uma ação de dose. */
   irParaHome: {
     marginTop: spacing.md,
   },

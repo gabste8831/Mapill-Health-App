@@ -20,14 +20,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     gap: listGap,
     paddingBottom: bottomTabInset + spacing.xxl,
   },
-  /**
-   * Respiro simétrico em cima e embaixo — o mesmo `md` que separa os cards entre si na lista, e
-   * não o `gutter` (24) que ficava grande demais só embaixo, sem nada em cima pra equilibrar.
-   */
-  /**
-   * Sem padding próprio: o respiro vem das margens da busca e da contagem, que são quem precisa
-   * dele. Somando os dois, o topo ganhava um vão que nenhuma das duas telas tem.
-   */
   listHeader: {},
   busca: {
     marginTop: spacing.md,
@@ -45,51 +37,23 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
-  /**
-   * O aviso de lista vazia que **não** é o estado vazio da tela.
-   *
-   * Discreto de propósito: ou a busca não achou nada (e some ao limpar), ou só há histórico — nos
-   * dois casos há conteúdo logo abaixo, e um bloco grande de "nada aqui" contradiria o que se vê.
-   */
   semResultado: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
     paddingVertical: spacing.lg,
     textAlign: "center",
   },
-  /** Respiro entre os próximos e o histórico: são dois assuntos, não uma lista contínua. */
   blocoAnteriores: {
     marginTop: spacing.lg,
     gap: spacing.md,
   },
-  /**
-   * Sem nenhum compromisso futuro, o `marginTop` acima não separa nada — só abre um buraco.
-   *
-   * A margem existe para afastar o histórico da lista de próximos. Quando essa lista está vazia, o
-   * que fica acima é a contagem ("0 compromissos agendados"), que já traz o próprio `marginBottom`:
-   * os dois somavam e deixavam um vão do tamanho de um cartão entre a frase e o acordeão, como se
-   * algo tivesse falhado ao carregar.
-   */
   blocoAnterioresSozinho: {
     marginTop: 0,
   },
-  /**
-   * O traço que separa a agenda do histórico, igual ao da tela de adesão.
-   *
-   * O respiro sozinho não bastava: numa lista de cartões iguais, espaço a mais lê como item que
-   * falta, e não como troca de assunto. O traço diz que ali termina "o que vem" e começa "o que
-   * foi" — que é a diferença entre agenda e registro.
-   */
   divisorDeEscopo: {
     height: 1,
     backgroundColor: cores.outlineVariant,
   },
-  /**
-   * O acordeão com a superfície dos cartões da tela.
-   *
-   * O padrão dele (`surfaceContainerLow`) quase empata com o fundo, e no meio de uma lista de
-   * cartões ele desapareceria — nada diria que ali há histórico a abrir.
-   */
   acordeaoAnteriores: {
     backgroundColor: cores.surfaceContainerLowest,
     ...(ajustes?.contornarSuperficies
@@ -109,11 +73,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     alignItems: "center",
     gap: spacing.md,
   },
-  /**
-   * Um quadrado fixo — largura e altura iguais, sempre 52 — e não uma caixa que respira conforme
-   * o texto. "3 JAN" e "24 DEZ" ocupam o mesmo espaço; sem isso a coluna variava de item pra
-   * item e a lista perdia o alinhamento vertical que faz ela ler como grade.
-   */
   dataColuna: {
     width: 52,
     height: 52,
@@ -132,7 +91,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     ...typography.caption,
     color: cores.onPrimary,
   },
-  /** O texto: título e a linha de horário/local, sem competir por largura com data nem ações. */
   itemTexto: {
     flex: 1,
     gap: 2,
@@ -141,7 +99,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     ...typography.headlineSm,
     color: cores.onSurface,
   },
-  /** Passado recua: já aconteceu, e a tela existe pra planejar o que vem, não pra relembrar. */
   itemPassado: {
     opacity: 0.6,
   },
@@ -149,7 +106,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  /** Editar e excluir dividindo a largura ao meio, abaixo de todo o resto do cartão. */
   acoes: {
     flexDirection: "row",
     alignItems: "stretch",
@@ -161,14 +117,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.xs,
-    // Alvo de toque de sobra: são as duas ações mais tocadas do cartão depois de "ver detalhe".
     minHeight: 40,
   },
-  /**
-   * A linha vertical entre as duas metades — bem discreta de propósito: ela só separa, não
-   * precisa se notar sozinha. `outlineVariant` já é a cor mais clara de contorno do tema, e ainda
-   * assim entra a 50% — o traço na cor cheia competia com o texto das duas ações ao lado.
-   */
   acaoDivisor: {
     width: 1,
     backgroundColor: cores.outlineVariant,

@@ -20,10 +20,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
      */
     gap: spacing.gutter,
   },
-  /**
-   * Faixa colorida no topo, com o canto inferior arredondado. É o que tira a tela do aspecto de
-   * lista uniforme: dá um ponto de entrada com peso visual antes das seções, que seguem neutras.
-   */
   hero: {
     backgroundColor: cores.primary,
     paddingHorizontal: spacing.md,
@@ -38,7 +34,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.sm,
   },
-  /** Alvo de toque de 44px (mínimo recomendado) sem empurrar o título com padding visível. */
   backButton: {
     width: 44,
     height: 44,
@@ -93,15 +88,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     justifyContent: "center",
     backgroundColor: cores.primaryContainer,
   },
-  /**
-   * O cartão que agrupa linhas de menu, mais apertado que o `Card` padrão.
-   *
-   * O padrão tem `gap: gutter` (24) entre filhos, pensado para blocos de formulário — campos que
-   * precisam de ar entre si. Numa lista de menu isso soma com o `minHeight: 52` de cada linha e dá
-   * 76px por item: cada botão ocupava uma faixa de tela sem carregar mais informação por isso.
-   *
-   * Com `sm` (8) a linha continua com os 52 de alvo de toque, e a lista lê como lista.
-   */
   cartaoDeLinhas: {
     gap: spacing.sm,
     // O padding vertical do `Card` (16) somava ao alvo de toque da primeira e da última linha, que
@@ -112,33 +98,17 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
-  /**
-   * Titulo de secao. `headlineSmRegular` e nao `label`: enquanto os rotulos eram maiusculos o
-   * `label` bastava — a caixa alta dava presenca de titulo ao menor tamanho da escala. Em caixa de
-   * frase a muleta acabou, e o cabecalho ficava em 13px abaixo do texto de apoio que ele encabeca.
-   */
   sectionTitle: {
     ...typography.headlineSmRegular,
     color: cores.onSurfaceVariant,
     paddingLeft: spacing.xs,
   },
-  /**
-   * 44 de altura, e não os 52 dos campos de formulário.
-   *
-   * Os 52 são a altura de interação de `Button`, `TextField` e `SelectField` — controles que se
-   * opera. Estas linhas não têm subtítulo (saiu numa revisão anterior), então o conteúdo é uma
-   * única linha de texto de ~24px: sobravam 28px de folga vertical, e cada botão virava uma faixa.
-   *
-   * 44 continua sendo o alvo de toque mínimo recomendado (WCAG 2.5.5 / Material), e a linha inteira
-   * é clicável — o dedo tem a largura da tela para acertar.
-   */
   row: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     minHeight: 44,
   },
-  /** Largura fixa pra alinhar os rótulos entre linhas, mesmo com ícones de larguras diferentes. */
   rowIcon: {
     width: 28,
     alignItems: "center",
@@ -151,7 +121,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyLg,
     color: cores.onSurface,
   },
-  /** Só o rótulo em vermelho, não a dica: a dica é o que explica a consequência e precisa ser lida. */
   rowLabelDestrutiva: {
     color: cores.error,
   },

@@ -13,28 +13,19 @@ import type { DoseVisualStatus } from "@/hooks/use-today-doses";
 import { estadoDePressao, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./ItemDeDose.styles";
 
-/**
- * O tempo que a linha leva para se acomodar no estado resolvido.
- *
- * A confirmação de dose é o gesto mais repetido do app — várias vezes por dia, às vezes três
- * seguidas no bloco de atrasadas. A transição existe para ligar o toque ao efeito, não para ser
- * apreciada: passando disso ela começa a atrasar o toque seguinte.
- */
+/** Passando disso a transição começa a atrasar o toque seguinte. */
 const ACOMODAR_MS = 260;
 
 /**
- * `Pressable` que aceita estilo animado.
- *
  * Fora do componente porque `createAnimatedComponent` produz um tipo novo a cada chamada: criá-lo
- * no corpo faria o React desmontar e remontar a linha inteira a cada render — perdendo justamente
- * a animação que ele existe para permitir.
+ * no corpo remontaria a linha a cada render, perdendo a animação.
  */
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type ItemDeDoseProps = {
   time: string;
   medicationName: string;
-  /** Dose e orientação — "1 comprimido · com bastante água". */
+  /** Dose e orientação: "1 comprimido · com bastante água". */
   note: string;
   status: DoseVisualStatus;
   onConfirm: () => void;
@@ -48,16 +39,11 @@ const STATUS_LABEL: Record<DoseVisualStatus, string> = {
   skipped: "PULADA",
   late: "ATRASADA",
   now: "É AGORA",
-  // "PRÓXIMA DOSE" não cabia na coluna da hora e quebrava em duas linhas — e "dose" ali é
-  // redundante: a linha inteira é uma dose. O card azul no topo já diz "próxima dose" por extenso.
   next: "PRÓXIMA",
   upcoming: "A SEGUIR",
 };
 
-/**
- * O mesmo estado, dito como frase — o rótulo visual é maiúsculo e telegráfico porque cabe num
- * canto de 64px, mas "ATRASADA" lido em voz alta soa como grito e não diz de quê.
- */
+/** O mesmo estado como frase: o rótulo visual é telegráfico demais para ser lido em voz alta. */
 const STATUS_FALADO: Record<DoseVisualStatus, string> = {
   confirmed: "já tomada",
   skipped: "pulada",

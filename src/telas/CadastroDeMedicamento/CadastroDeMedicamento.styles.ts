@@ -1,7 +1,6 @@
 
 import { estilosDoTema, fieldLabelGap, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-/** O lado do quadro da mídia — a mesma decisão da ficha de saúde, pelo mesmo motivo. */
 const TAMANHO_DA_FOTO = 72;
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
@@ -12,8 +11,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   scrollContent: {
     padding: spacing.md,
     gap: spacing.md,
-    // Só respiro: o botão saiu do fim da rolagem e virou rodapé fixo, então não há mais o que
-    // reservar aqui embaixo.
     paddingBottom: spacing.lg,
   },
   sectionHeader: {
@@ -22,15 +19,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.sm,
   },
-  /**
-   * O título da seção — "Anexos", "O essencial", "Estoque".
-   *
-   * `headlineSmRegular` e não `label`. Enquanto os rótulos eram maiúsculos, o `label` bastava: a
-   * caixa alta dava a ele a presença de um título mesmo sendo o menor tamanho da escala. Em caixa
-   * de frase essa muleta acabou, e o título ficou em 13px **abaixo** da frase de apoio logo
-   * abaixo dele, que é `bodyMd` (14): o cabeçalho da seção era o menor texto do bloco que ele
-   * encabeça.
-   */
   sectionTitle: {
     ...typography.headlineSmRegular,
     color: cores.onSurface,
@@ -39,7 +27,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
-  /** Sublinhado além da cor: cor sozinha não diz "clicável" para quem não distingue bem matiz. */
   linkParaTermos: {
     ...typography.bodyMd,
     color: cores.corDeDestaque,
@@ -80,14 +67,12 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   photoQuadro: {
     width: TAMANHO_DA_FOTO,
     height: TAMANHO_DA_FOTO,
-    // Canto quadrado, diferente do avatar redondo da ficha: aqui é a caixa do remédio, não retrato.
     borderRadius: radius.md,
     overflow: "hidden",
     backgroundColor: cores.surfaceContainerLow,
     alignItems: "center",
     justifyContent: "center",
   },
-  /** Só a borda tracejada do quadro vazio: convida ao toque sem alterar a caixa. */
   photoVazio: {
     borderWidth: 1,
     borderColor: cores.outlineVariant,
@@ -109,14 +94,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     columnGap: spacing.md,
     rowGap: spacing.xs,
   },
-  /**
-   * O texto ao lado da mídia: o link que age, e a dica que explica.
-   *
-   * Sem `gap`: o link mora num alvo de 44pt que já centraliza o texto com folga em cima e embaixo,
-   * e somar espaço a essa folga afastava a dica do título que ela explica — os dois liam como dois
-   * assuntos em vez de um. O respiro entre eles é o que sobra do alvo, e é o mesmo em todas as
-   * seções de anexo.
-   */
   photoTextGroup: {
     flex: 1,
   },
@@ -124,7 +101,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.label,
     color: cores.corDeDestaque,
   },
-  /** Excluir em vermelho ao lado de "Alterar anexo": são ações de peso muito diferente. */
   photoExcluirLabel: {
     ...typography.label,
     color: cores.error,
@@ -134,10 +110,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
   },
 
-  /**
-   * Dois campos que se leem juntos numa frase — "08:00, 10 unidades", "21 dias tomando, 7 de
-   * pausa". Separá-los em linhas faria cada metade parecer uma pergunta independente.
-   */
   linhaDeDose: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -153,7 +125,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flex: 1,
   },
 
-  /** Linha "valor atual + ação" — o resumo de uma escolha que se resolve em outro lugar. */
   rowValue: {
     minHeight: 52,
     flexDirection: "row",
@@ -161,10 +132,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     justifyContent: "space-between",
     gap: spacing.md,
   },
-  /**
-   * A mesma linha, quando o que ela resume já está ligado. Fundo só pra separar "isto está
-   * ativo" de "isto é um campo" — a linha nua se confundia com o rótulo da seção logo acima.
-   */
   rowValueAtivo: {
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
@@ -180,7 +147,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.corDeDestaque,
   },
 
-  /** Resumo do que já foi definido no popup — fichinhas, no mesmo cinza dos botões de escolha. */
   timeChipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -208,15 +174,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurface,
   },
 
-  /**
-   * Dentro do popup, o lugar de cada horário. Tem a mesma altura e a mesma borda de um campo de
-   * texto de propósito: é ali que a resposta aparece, e trocar a caixa por um botão de aparência
-   * diferente faria parecer que o horário mora em outro lugar.
-   */
   botaoDeHorario: {
-    // `minHeight` e não `height`: com a fonte do sistema ampliada, altura travada recorta o horário
-    // — o mesmo defeito corrigido em `Button`/`TextField` em 31/08, que escapou aqui por este
-    // botão ser desenhado pela tela em vez de vir do kit.
     minHeight: 52,
     paddingHorizontal: spacing.md,
     justifyContent: "center",
@@ -232,12 +190,10 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyLg,
     color: cores.onSurface,
   },
-  /** "--:--" é lacuna, não valor: fica no cinza de placeholder pra não ser lido como resposta. */
   botaoDeHorarioVazio: {
     color: cores.outline,
   },
 
-  /** Cancelar e confirmar lado a lado, dividindo a largura em partes iguais. */
   linhaDeAcoes: {
     flexDirection: "row",
     gap: spacing.sm,
@@ -246,10 +202,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flex: 1,
   },
 
-  /**
-   * O último lugar da fileira de "quantas vezes por dia": as opções cobrem o comum e este campo
-   * cobre o resto, sem gastar um segundo toque nem uma segunda linha.
-   */
   dosesInput: {
     flexGrow: 1,
     flexBasis: 48,
@@ -265,7 +217,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
   },
 
-  /** Os sete dias numa linha só, ocupando a largura toda — a semana se lê de uma vez ou não se lê. */
   weekdayRow: {
     flexDirection: "row",
     gap: spacing.xs,
@@ -298,14 +249,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyMd,
     color: cores.error,
   },
-  /**
-   * Duas informações que o paciente deu e que não fecham entre si: estoque menor que o
-   * tratamento, prazo que não alcança dose nenhuma, antecedência maior que o estoque.
-   *
-   * Vermelho, e não o laranja de atenção que estava aqui antes. Não porque o campo seja
-   * inválido, mas porque a combinação não funciona do jeito que foi pedida, e laranja no meio de
-   * texto cinza lia como enfeite. O app continua deixando salvar; quem decide é o paciente.
-   */
   avisoDeConflito: {
     ...typography.bodyMd,
     color: cores.error,
@@ -314,15 +257,10 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     borderRadius: radius.md,
   },
 
-  /**
-   * Aviso que vem com uma ação junto (a diferença de doses do prazo, e o botão de estender).
-   * O `gap` mantém o botão colado no texto que o explica, em vez de solto na seção.
-   */
   avisoDePrazo: {
     gap: spacing.sm,
   },
 
-  /** Explicação que não é campo nem erro — texto de apoio que merece peso, tipo regra do sistema. */
   sectionHintDestaque: {
     ...typography.bodyMd,
     color: cores.onSecondaryContainer,
@@ -330,49 +268,27 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     padding: spacing.md,
     borderRadius: radius.md,
   },
-  /**
-   * A previsão do lembrete ("Ao salvar, o alarme tocaria…"), como texto de apoio solto.
-   *
-   * Sem o fundo do `sectionHintDestaque`: logo abaixo da linha do modo e do botão, um bloco pintado
-   * lia como um terceiro elemento clicável — três caixas empilhadas onde só duas respondem ao
-   * toque. Ela é uma nota sobre o que está acima, não uma ação.
-   */
   previsaoDoLembrete: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
-    // O `Card` separa os filhos por `gutter` (24), que é a distância entre assuntos diferentes —
-    // e esta linha é uma nota sobre a linha logo acima, não um assunto novo. A margem negativa
-    // desconta o gap e devolve os 8 que a proximidade pede.
     marginTop: -spacing.md,
   },
-  /** A mesma nota quando não há horário futuro: vermelha no texto, e ainda sem fundo. */
   previsaoDoLembreteVazia: {
     ...typography.bodyMd,
     color: cores.error,
     marginTop: -spacing.md,
   },
 
-  /**
-   * O conteúdo do "como funcionam" inteiro, num fundo azul claro. É explicação, não campo nem
-   * alerta: o fundo separa esse registro do resto do popup sem usar a cor de atenção, que
-   * gritaria por uma leitura tranquila.
-   */
   blocoDeAjuda: {
     gap: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
     backgroundColor: withOpacity(cores.secondaryContainer, 0.45),
   },
-  /**
-   * Um assunto, com título curto e o texto. Título e não lista corrida: quem abre o acordeão
-   * está procurando uma resposta específica, e o título é o que deixa varrer sem ler tudo.
-   */
   assuntoDeAjuda: {
     gap: spacing.xs,
   },
   assuntoDeAjudaTitulo: {
-    // Titulo acima de um texto `bodyMd`: em `label` (13) ele ficava menor que o proprio
-    // paragrafo. Ver a mesma correcao em `sectionTitle`.
     ...typography.bodyLg,
     color: cores.onSecondaryContainer,
   },
@@ -381,11 +297,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
   },
 
-  /**
-   * Azul junto do resto da explicação, e não a cor de conflito: depois que o texto virou
-   * condição ("com permissão e volume, os alertas chegam"), pintá-lo de alerta contradiria o
-   * que ele diz. Vermelho fica reservado para o que realmente não fecha.
-   */
   avisoDePermissao: {
     gap: spacing.xs,
     padding: spacing.md,
@@ -393,8 +304,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     backgroundColor: withOpacity(cores.secondaryContainer, 0.45),
   },
   avisoDePermissaoTitulo: {
-    // Titulo acima de um texto `bodyMd`: em `label` (13) ele ficava menor que o proprio
-    // paragrafo. Ver a mesma correcao em `sectionTitle`.
     ...typography.bodyLg,
     color: cores.onSecondaryContainer,
   },
@@ -403,10 +312,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
   },
 
-  /**
-   * Resumo de uma configuração feita em popup. Rótulo e valor em colunas, porque "50 comprimidos
-   * · em cima da geladeira" numa linha só obriga a decifrar o que é o quê pelo conteúdo.
-   */
   resumoBloco: {
     gap: spacing.sm,
     padding: spacing.md,
@@ -432,15 +337,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     gap: spacing.md,
   },
 
-  /**
-   * A virada de "só o essencial" para "o resto também". Acontece uma vez só, e é anunciada: se
-   * cada seção nascesse conforme o paciente digita, a tela pularia debaixo do dedo e ninguém
-   * perceberia que algo apareceu.
-   *
-   * Respiro maior dos dois lados (`lg`, e não só `sm` no topo) porque este bloco marca a virada
-   * de etapa — precisa de mais ar que o espaço comum entre cartões, senão lê como mais um item
-   * da lista em vez do intervalo que ele é. O traço acima reforça a mesma ideia visualmente.
-   */
   revelacao: {
     gap: spacing.xs,
     paddingTop: spacing.lg,
@@ -460,39 +356,17 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
     textAlign: "center",
   },
-  /** Saída de uma configuração já ligada — discreta, porque desligar é exceção e não atalho. */
   textoDeSaida: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
     textAlign: "center",
   },
-  /**
-   * O alvo em volta de um link de texto solto (a saída do estoque, "Ler os Termos").
-   *
-   * Estes são `Text` dentro de `Pressable` sem contêiner próprio: a área tocável tinha a altura da
-   * linha, e não havia superfície onde pintar o toque. O padding resolve as duas coisas de uma vez
-   * — alvo de dedo, e algo que responda quando o dedo chega.
-   */
   alvoDeLink: {
     minHeight: 44,
     justifyContent: "center",
     paddingHorizontal: spacing.sm,
     borderRadius: radius.md,
   },
-  /**
-   * O mesmo alvo, mas **rente à esquerda** — para o link que encabeça um bloco de texto ao lado de
-   * uma mídia (a foto da caixa, o anexo da receita).
-   *
-   * O `paddingHorizontal` do `alvoDeLink` empurrava o título 8px para dentro enquanto a dica
-   * abaixo, um `Text` solto, começava no zero. As duas linhas do mesmo bloco saíam desalinhadas
-   * entre si e nenhuma ficava rente ao quadrado da mídia, que é a borda que o olho usa como
-   * referência. Aqui o respiro lateral vem do `gap` da linha, não do alvo.
-   *
-   * A área de dedo vem do `hitSlop`, e não de `minHeight`: com 44 de altura fixa sobrava folga
-   * vertical dentro do alvo (o texto tem ~20), e essa folga abria um vão visível entre o link e a
-   * dica logo abaixo. O `hitSlop` estende o alcance do toque para fora da caixa sem ocupar espaço
-   * no layout — mesma proteção, sem o buraco.
-   */
   alvoDeLinkRente: {
     paddingVertical: spacing.xs,
     paddingHorizontal: 0,

@@ -21,7 +21,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     gap: spacing.gutter,
   },
 
-  /** A explicação do topo: esta tela é ferramenta de teste, não função do app. */
   aviso: {
     ...superficieDeCartao(cores, ajustes),
     padding: spacing.md,
@@ -39,7 +38,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     ...typography.label,
     color: cores.onSurfaceVariant,
   },
-  /** A explicação que antecede um grupo de botões — por que eles existem, não o que fazem. */
   secaoNota: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
@@ -51,7 +49,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     gap: spacing.sm,
   },
 
-  /** Uma linha de "rótulo → valor", que é a forma de toda resposta desta tela. */
   linha: {
     flexDirection: "row",
     alignItems: "center",
@@ -68,7 +65,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     color: cores.onSurface,
     fontWeight: "600",
   },
-  /** Verde e vermelho dizem "isto está como deveria" — é a leitura que se faz de relance aqui. */
   valorOk: {
     color: cores.success,
   },
@@ -76,7 +72,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     color: cores.error,
   },
 
-  /** Um aviso agendado na lista. Monoespaçado no id: são strings longas e parecidas entre si. */
   agendado: {
     gap: 2,
     paddingVertical: spacing.sm,
@@ -95,8 +90,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   },
   agendadoId: {
     ...typography.caption,
-    // O `caption` sobe a caixa para selo; id de agendamento e string tecnica, e maiuscula aqui
-    // atrapalharia comparar com o que o diagnostico imprime.
     textTransform: "none",
     color: cores.onSurfaceVariant,
     opacity: 0.7,
@@ -120,7 +113,6 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     textAlign: "center",
   },
 
-  /** Os botões de teste, um por linha: cada um dispara algo diferente e nenhum é o "principal". */
   acoes: {
     gap: spacing.sm,
   },

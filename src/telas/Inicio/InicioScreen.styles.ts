@@ -6,48 +6,19 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     flex: 1,
     backgroundColor: cores.background,
   },
-  /**
-   * `gutter` entre os blocos, e não `lg`: a Home empilha coisas de natureza diferente — saudação,
-   * progresso do dia, agenda —, e é o espaço entre elas que diz que são assuntos separados.
-   */
   scrollContent: {
     paddingHorizontal: screenPadding,
     paddingTop: spacing.sm,
-    // `gapEntreSecoes` (40) e não `gutter` (24): a Home empilha assuntos independentes, e com todos
-    // à mesma distância eles liam como uma pilha só — cada bloco disputando atenção com o vizinho.
     gap: gapEntreSecoes,
     paddingBottom: bottomTabInset + spacing.xxl,
   },
-  /**
-   * O cabeçalho respira mais que o resto da tela.
-   *
-   * `gutter` (24) entre a saudação e o progresso, no lugar de `md` (16): são duas informações
-   * diferentes — quem é você e como está o dia —, e apertadas liam como um bloco só de texto. É o
-   * espaço que as referências de design do projeto dão ao topo, e ele funciona porque o topo é a
-   * única parte da tela que ninguém precisa **procurar**: cabe gastar altura ali.
-   */
   greetingRow: {
     gap: spacing.gutter,
-    // O respiro entre o cabeçalho fixo e a data: sem ele a data nasce colada na barra, como se
-    // fosse parte dela. `gutter` e não `lg` — 32 abria um vão que empurrava o nome para o meio da
-    // tela, e o topo passava a parecer vazio em vez de arejado.
     paddingTop: spacing.gutter,
   },
   greetingText: {
-    // `sm` (8) e não `xs` (4): a data é um rótulo acima do nome, não um subtítulo colado nele.
     gap: spacing.sm,
   },
-  /**
-   * A data, com o mesmo tratamento da legenda do progresso ("3 de 5 doses").
-   *
-   * Era `label` — maiúsculas, espaçadas, o peso de um rótulo de seção — e isso a punha no mesmo
-   * nível do nome logo abaixo. Ela é contexto: ninguém abre o app para descobrir que dia é hoje.
-   *
-   * Como texto simples e recuado ela deixa o nome ser a primeira coisa que se lê, e o cabeçalho
-   * passa a ter duas vozes em vez de duas manchetes. Reusa o par `onSurfaceVariant` + `opacity`
-   * da legenda de propósito: é o padrão de "texto de apoio" que a tela já tinha, e um tom novo só
-   * para a data criaria um terceiro cinza sem razão.
-   */
   dateLabel: {
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
@@ -58,8 +29,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     color: cores.onSurface,
   },
   progressBlock: {
-    // `md` (12→16) entre o rótulo, a barra e a legenda: com `sm` os três encostavam na barra, e ela
-    // é o que se lê de relance — precisa de ar em volta para funcionar como medidor.
     gap: spacing.md,
   },
   progressHeader: {
@@ -75,13 +44,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.headlineSm,
     color: cores.corDeDestaque,
   },
-  /**
-   * A trilha subiu de 4 para 8px e a ponta ficou redonda. Com 4 ela era um fio: some no meio da
-   * tela e não se lê de relance, que é justamente o único jeito como um resumo do dia é lido.
-   *
-   * O trilho vazio também clareou — `outlineVariant` é a cor de contorno, e usada como área cheia
-   * ficava escura demais, dando à barra vazia o peso de uma barra cheia.
-   */
   progressTrack: {
     height: 8,
     backgroundColor: cores.surfaceContainerHigh,
@@ -105,17 +67,12 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.label,
     color: cores.onSurfaceVariant,
   },
-  /** O rótulo da seção e a ação que vale para ela inteira, na mesma linha. */
   sectionHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     gap: spacing.sm,
   },
-  /**
-   * Ação de lote, em texto e não em botão cheio: ela vale para a seção toda, e um botão sólido
-   * ali competiria com os de cada dose — que continuam sendo o caminho normal.
-   */
   bulkAction: {
     ...typography.label,
     color: cores.corDeDestaque,
@@ -142,10 +99,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodyMd,
     color: cores.error,
   },
-  /**
-   * O erro da Home como faixa, e não como tela cheia: a saudação, o progresso e os cards continuam
-   * valendo, e trocar tudo por um aviso apagaria o contexto de quem só queria ver o dia.
-   */
   erroInline: {
     flexDirection: "row",
     alignItems: "center",
@@ -159,7 +112,6 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   },
   erroAcao: {
     ...typography.label,
-    // O par de `errorSurface`. `error` le sobre o fundo da tela; no escuro ele e salmao claro.
     color: cores.onErrorSurface,
   },
 }));
