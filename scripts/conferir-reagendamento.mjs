@@ -149,5 +149,59 @@ function dose(scheduledFor, reminderMode, extras = {}) {
   );
 }
 
+// --- 8. O gatilho nunca no passado --------------------------------------------------------------
+{
+  /**
+   * O defeito visto em aparelho (09/09): o Notifee recusa um timestamp vencido com
+   * `trigger timestamp date must be in the future`, e a exceção derrubava o reagendamento inteiro.
+   *
+   * A dose que **acabou de vencer** entra de propósito — a tolerância existe para o aviso das 08:00
+   * não se perder quando o app é reaberto às 08:00:30 —, mas o instante que vai ao agendador
+   * precisa estar no futuro.
+   */
+  // Local, e não `toISOString()`: o `agora` do script é hora local, e o `dose()` monta o horário do
+  // mesmo jeito. Misturar os dois deslocaria o caso pelo fuso e testaria outra coisa.
+  const p = (v) => String(v).padStart(2, "0");
+  const local = (data) =>
+    `${data.getFullYear()}-${p(data.getMonth() + 1)}-${p(data.getDate())}T${p(data.getHours())}:${p(data.getMinutes())}:${p(data.getSeconds())}`;
+
+  const doisMinutosAtras = local(new Date(agora.getTime() - 2 * 60_000));
+  const avisos = planejarAvisosDeDose({
+    doses: [dose(doisMinutosAtras, "alarm")],
+    agora,
+    ate,
+  });
+
+  conferir(
+    "a dose que acabou de vencer ainda gera aviso (a tolerancia vale)",
+    avisos.length === 1,
+    `gerou ${avisos.length}`,
+  );
+  conferir(
+    "e o instante dele esta no futuro, nao no passado",
+    avisos.every((aviso) => aviso.quando.getTime() > agora.getTime()),
+    avisos[0] ? `${avisos[0].quando.toISOString()} vs agora ${agora.toISOString()}` : "nenhum aviso",
+  );
+  conferir(
+    "sem se afastar mais que alguns segundos do agora",
+    avisos.every((aviso) => aviso.quando.getTime() - agora.getTime() < 10_000),
+  );
+}
+
+{
+  // A dose no futuro não é tocada: o piso só age sobre o que já venceu.
+  const daquiUmaHora = new Date(agora.getTime() + 60 * 60_000);
+  const [aviso] = planejarAvisosDeDose({
+    doses: [dose("2026-09-05T20:50:00", "alarm")],
+    agora,
+    ate,
+  });
+  conferir(
+    "dose no futuro mantem o horario exato",
+    aviso !== undefined && aviso.quando.getTime() === daquiUmaHora.getTime(),
+    aviso ? `${aviso.quando.toISOString()} vs esperado ${daquiUmaHora.toISOString()}` : "nenhum",
+  );
+}
+
 console.log(`\n${passaram} verificações passaram, ${falharam} falharam.`);
 if (falharam > 0) process.exitCode = 1;

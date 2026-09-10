@@ -121,7 +121,27 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
     const modo = modoDoHorario(doses.map((dose) => dose.reminderMode));
     if (modo === null) continue;
 
-    const quando = new Date(scheduledFor);
+    /**
+     * O instante do aviso **nunca é no passado**, mesmo quando a dose já venceu.
+     *
+     * A tolerância acima deixa passar a dose que acabou de vencer — e ela existe por um bom motivo:
+     * reabrir o app às 08:00:30 não pode cancelar o aviso das 08:00 e deixar a dose sem lembrete
+     * nenhum no minuto em que ele importa. Mas o instante cru já venceu, e o Notifee **recusa** um
+     * gatilho no passado com `trigger timestamp date must be in the future`.
+     *
+     * O erro derrubava o reagendamento **inteiro**: uma exceção no meio do laço, e nenhum dos
+     * avisos seguintes era agendado. Foi o que apareceu em aparelho em 09/09, junto do alarme
+     * tocando duas vezes — o app tentava reagendar a dose que acabara de tocar, falhava, e o
+     * estado do sistema ficava pela metade.
+     *
+     * `agora + 1s` é o piso: perto o bastante para o aviso tolerado ainda chegar "agora", e no
+     * futuro o bastante para o sistema aceitar. Um segundo, e não zero, porque o instante gasta
+     * milissegundos entre ser calculado aqui e chegar ao agendador.
+     */
+    const instanteDaDose = new Date(scheduledFor);
+    const pisoDoGatilho = new Date(input.agora.getTime() + 1_000);
+    const quando = instanteDaDose < pisoDoGatilho ? pisoDoGatilho : instanteDaDose;
+
     // Ordem estável dentro do aviso: o mesmo horário sempre lista os remédios na mesma sequência,
     // e uma lista que se reordena sozinha entre um dia e outro obriga a reler o que já se sabia.
     const ordenadas = [...doses].sort((a, b) => a.medicationName.localeCompare(b.medicationName));

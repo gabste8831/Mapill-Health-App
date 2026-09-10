@@ -220,9 +220,28 @@ async function executarReagendamento(): Promise<void> {
      */
     await gateway.cancelarTudo();
 
+    /**
+     * Um aviso que falha **não leva os outros junto**.
+     *
+     * Sem o `catch` por item, uma única rejeição do agendador aborta o laço e a grade do dia fica
+     * pela metade — sem nada indicar quais avisos entraram e quais não. Foi o que aconteceu em
+     * aparelho em 09/09: o Notifee recusou um gatilho no passado
+     * (`trigger timestamp date must be in the future`) e o reagendamento inteiro morreu ali.
+     *
+     * A causa daquele caso está corrigida em dois lugares (`planejarAvisosDeDose` e o piso do
+     * gateway), e este `catch` é a terceira camada: cobre o próximo motivo de falha, que ninguém
+     * previu ainda. Perder um aviso é ruim; perder os vinte seguintes por causa dele é pior.
+     *
+     * O erro aparece no console em desenvolvimento porque um aviso que sumiu em silêncio é
+     * exatamente o defeito que este bloco existe para não ter.
+     */
     for (const aviso of avisos) {
       // O modo decide o canal e se abre tela cheia; quem agenda é o mesmo gateway nos dois casos.
-      await gateway.agendar(aviso);
+      try {
+        await gateway.agendar(aviso);
+      } catch (cause) {
+        if (__DEV__) console.error(`[Mapill] falha ao agendar ${aviso.chave}:`, cause);
+      }
     }
 
     /**

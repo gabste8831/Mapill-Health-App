@@ -243,9 +243,27 @@ export class NotifeeGateway implements NotificationGateway {
 
     const ehAlarme = aviso.modo === "alarm";
 
+    /**
+     * O gatilho **nunca no passado**, aconteça o que acontecer com quem chama.
+     *
+     * O Notifee recusa um timestamp vencido com `trigger timestamp date must be in the future`, e a
+     * exceção derruba o laço inteiro de `reagendarTodosOsAvisos` — um aviso impossível deixa
+     * **todos** os seguintes sem agendar. Foi o que apareceu em aparelho em 09/09.
+     *
+     * `planejarAvisosDeDose` já garante o piso na origem, e esta é a segunda camada: aqui passa
+     * também o lembrete adiado e o aviso de teste do diagnóstico, e um erro de aritmética em
+     * qualquer um deles não pode custar a grade de avisos do dia.
+     *
+     * Cinco segundos, e não um: este ponto é mais tarde no caminho, depois de `prepararSistema`,
+     * que faz I/O.
+     */
+    const agora = Date.now();
+    const pedido = aviso.quando.getTime();
+    const quandoAgendar = pedido > agora ? pedido : agora + 5_000;
+
     const gatilho: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
-      timestamp: aviso.quando.getTime(),
+      timestamp: quandoAgendar,
       alarmManager: {
         /**
          * `SET_ALARM_CLOCK` para o alarme: é a categoria que o Android trata como **despertador**,
