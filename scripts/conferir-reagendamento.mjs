@@ -203,5 +203,41 @@ function dose(scheduledFor, reminderMode, extras = {}) {
   );
 }
 
+// --- 9. O alarme diz como se desliga ------------------------------------------------------------
+{
+  /**
+   * O alarme toca em loop e a resposta mora na tela cheia — que nem sempre irrompe. Quando o
+   * Android rebaixa o full-screen intent, o que aparece é só a notificação, e quem a recebe
+   * precisa saber que tocar nela é o caminho para parar o som.
+   */
+  const [alarme] = planejarAvisosDeDose({
+    doses: [dose("2026-09-05T20:00:00", "alarm")],
+    agora,
+    ate,
+  });
+  conferir(
+    "o alarme diz como responder e desligar",
+    alarme?.corpo.includes("Toque para responder") === true,
+    alarme ? JSON.stringify(alarme.corpo) : "nenhum aviso",
+  );
+  conferir(
+    "e o remédio continua na primeira linha",
+    alarme?.corpo.startsWith("Losartana") === true,
+    alarme ? JSON.stringify(alarme.corpo) : "nenhum aviso",
+  );
+
+  // A notificação comum não leva a frase: ali estão os botões, e o caminho já é visível.
+  const [notificacao] = planejarAvisosDeDose({
+    doses: [dose("2026-09-05T20:00:00", "notification")],
+    agora,
+    ate,
+  });
+  conferir(
+    "a notificação comum não repete a instrução",
+    notificacao?.corpo.includes("Toque para responder") === false,
+    notificacao ? JSON.stringify(notificacao.corpo) : "nenhum aviso",
+  );
+}
+
 console.log(`\n${passaram} verificações passaram, ${falharam} falharam.`);
 if (falharam > 0) process.exitCode = 1;

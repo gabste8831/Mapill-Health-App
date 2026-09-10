@@ -155,6 +155,23 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
      */
     const linhas = ordenadas.map((dose) => `${dose.medicationName}: ${dose.quantidadeFormatada}`);
 
+    /**
+     * O alarme diz **como se desliga**; a notificação comum não precisa.
+     *
+     * O alarme toca em loop até alguém responder, e a resposta mora na tela cheia — que nem sempre
+     * irrompe: com o aparelho em uso, o Android rebaixa o full-screen intent e o que aparece é só
+     * esta notificação. Quem a recebe vê o remédio e a dose, e nada que diga onde parar o som.
+     *
+     * `ongoing: true` já impede que ela saia com um deslize (ver `notifee-gateway`), então ninguém
+     * fica com o alarme tocando e sem caminho. Mas não sair não é o mesmo que **saber o que
+     * fazer** — e essa frase é a diferença entre tocar na notificação e ir procurar no app.
+     *
+     * A notificação comum fica sem ela de propósito: ali estão os botões "Tomei" e "Pulei", e o
+     * caminho já é visível.
+     */
+    const linhasDoAviso =
+      modo === "alarm" ? [...linhas, "Toque para responder e desligar o alarme."] : linhas;
+
     avisos.push({
       chave: chaveDoHorario(scheduledFor),
       quando,
@@ -174,7 +191,7 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
         ordenadas.length === 1
           ? "Hora do seu remédio"
           : `Hora dos seus remédios (${ordenadas.length})`,
-      corpo: linhas.join("\n"),
+      corpo: linhasDoAviso.join("\n"),
       doseScheduleIds: ordenadas.map((dose) => dose.doseScheduleId),
       modo,
       // Basta uma dose já adiada para o horário ter gasto seu adiamento: a trava é do aviso, que
