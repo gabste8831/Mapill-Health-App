@@ -19,8 +19,15 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.sm,
   },
+  /**
+   * `bodyLg` e não `headlineSmRegular`: um degrau abaixo na escala (16 em vez de 18).
+   *
+   * "ESTOQUE", "ANEXOS", "LEMBRETE" nomeiam a seção — não competem com o conteúdo dela. A 18 eles
+   * pesavam como título de tela num formulário que já tem muitos, e o mesmo token servia aos
+   * títulos de Ajustes, onde o efeito era o mesmo.
+   */
   sectionTitle: {
-    ...typography.headlineSmRegular,
+    ...typography.bodyLg,
     color: cores.onSurface,
   },
   sectionHint: {

@@ -25,7 +25,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     gap: spacing.sm,
   },
   sectionTitle: {
-    ...typography.headlineSmRegular,
+    ...typography.bodyLg,
     color: cores.onSurface,
   },
   selo: {

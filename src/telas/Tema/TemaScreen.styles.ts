@@ -24,7 +24,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     gap: spacing.sm,
   },
   rotuloDaSecao: {
-    ...typography.headlineSmRegular,
+    ...typography.bodyLg,
     color: cores.onSurface,
   },
   cartao: {

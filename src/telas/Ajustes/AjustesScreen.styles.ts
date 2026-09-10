@@ -98,8 +98,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
+  /** Um degrau abaixo na escala — a mesma decisão do cadastro de medicação. */
   sectionTitle: {
-    ...typography.headlineSmRegular,
+    ...typography.bodyLg,
     color: cores.onSurfaceVariant,
     paddingLeft: spacing.xs,
   },

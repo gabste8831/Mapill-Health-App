@@ -15,7 +15,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     backgroundColor: cores.surfaceContainerLowest,
   },
   sectionTitle: {
-    ...typography.headlineSmRegular,
+    ...typography.bodyLg,
     color: cores.onSurfaceVariant,
   },
   statusList: {
