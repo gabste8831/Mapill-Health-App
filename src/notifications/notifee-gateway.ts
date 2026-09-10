@@ -329,7 +329,25 @@ export class NotifeeGateway implements NotificationGateway {
                  * distinção que faltou no spike original do C1.
                  */
                 fullScreenAction: { id: "alarme", mainComponent: COMPONENTE_DE_ALARME },
-                pressAction: { id: "alarme", mainComponent: COMPONENTE_DE_ALARME },
+                /**
+                 * O toque no corpo **não** abre o componente nativo — ele abre o app.
+                 *
+                 * Aqui estavam **duas telas de alarme ao mesmo tempo**, e era a causa do lampejo
+                 * azul que sobreviveu a duas correções (09/09). Com `mainComponent` também no
+                 * `pressAction`, tocar na notificação fazia o Notifee subir a Activity nativa
+                 * (`AlarmeRaiz`) **e** o listener receber o `PRESS` e empurrar a rota
+                 * `/alarme/[instante]` — a mesma tela por dois caminhos, uma por cima da outra.
+                 * Responder na de cima a fechava e revelava a de baixo por um quadro, que então
+                 * também se fechava por ver tudo resolvido.
+                 *
+                 * `default` deixa o toque abrir o app, e quem decide para onde ir é o listener em
+                 * `escutar-avisos`: alarme vai para a rota do alarme, notificação comum vai para a
+                 * tela do horário. Uma decisão, num lugar só.
+                 *
+                 * O `fullScreenAction` fica: ele é outra coisa — a Activity que irrompe sobre a
+                 * tela de bloqueio, sem toque nenhum, e é a promessa central do app.
+                 */
+                pressAction: { id: "default" },
                 // Acorda a tela: um alarme que dispara com o celular na mesa precisa ser visto.
                 lightUpScreen: true,
                 // Conteúdo visível na tela de bloqueio: um alarme que aparece como "notificação
