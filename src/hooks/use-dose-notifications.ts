@@ -140,14 +140,6 @@ export function useDoseNotifications(): void {
         abrirTelaDeAlarme(scheduledFor);
         return true;
       },
-      /**
-       * O **toque** na notificação abre sempre, sem a guarda de primeiro plano.
-       *
-       * Aqui o app está em segundo plano justamente porque a pessoa acabou de tocar no aviso para
-       * trazê-lo à frente — recusar por isso deixaria o toque sem efeito nenhum, que foi o defeito
-       * de 10/09: a tela não abria e a notificação continuava na bandeja.
-       */
-      aoAbrirTelaDeAlarme: abrirTelaDeAlarme,
       aoAbrirDestino: abrirDestino,
     });
 

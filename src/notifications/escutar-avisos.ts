@@ -37,22 +37,12 @@ import { todasAsDosesResolvidas, tratarRespostaAoAviso } from "./responder-aviso
  * de "já abriu este horário" depende de saber a diferença.
  */
 type AoDispararAlarme = (scheduledFor: string) => boolean;
-/**
- * Abre a tela do alarme porque a **pessoa tocou** na notificação.
- *
- * Separado de `aoDispararAlarme` porque os dois gestos têm regras opostas: o disparo é automático e
- * recusa em segundo plano (tela escondida vira som sem rosto), enquanto o toque é intenção
- * explícita e abre sempre — é justamente o gesto que traz o app à frente. Eram a mesma função até
- * 10/09, e a guarda do disparo deixava o toque sem efeito nenhum.
- */
-type AoAbrirTelaDeAlarme = (scheduledFor: string) => void;
 /** Avisa que o toque no corpo pede a tela do horário. */
 type AoAbrirHorario = (dados: DadosDoAviso) => void;
 
 type AoAbrirDestino = (destino: DestinoDoAviso) => void;
 
 let aoDispararAlarme: AoDispararAlarme | null = null;
-let aoAbrirTelaDeAlarme: AoAbrirTelaDeAlarme | null = null;
 let aoAbrirHorario: AoAbrirHorario | null = null;
 let aoAbrirDestino: AoAbrirDestino | null = null;
 
@@ -232,48 +222,24 @@ async function tratar(evento: Event): Promise<void> {
      * A tela do alarme existe como rota (`/alarme/[instante]`) exatamente para este caso: o app
      * abre por conta própria o que o sistema não deixou irromper.
      */
-    if (ehAlarmeDeTelaCheia(id)) {
-      /**
-       * **Com a tela já na frente, o toque não abre outra.**
-       *
-       * Visto em aparelho (10/09, passo 14.5.2): o alarme irrompe e deixa a notificação na bandeja
-       * — ela fica lá de propósito, `ongoing: true`. Cada toque nela empilhava **mais uma** tela
-       * azul, e responder fechava só a de cima: sobravam as outras, uma por toque.
-       *
-       * A linha que causava isso apagava a trava do `DELIVERED` antes de empurrar a rota. Ela foi
-       * escrita quando `jaAbertos` era a única guarda, para o toque não ficar sem efeito depois de
-       * a entrega já ter sido registrada — o raciocínio valia, mas ele pulava a pergunta que
-       * importa: *já existe tela para este horário?*
-       *
-       * `alarme-em-cena` responde isso, e é o registro que a Activity e a rota compartilham. Com
-       * tela em cena, o toque não tem o que fazer: a pessoa já está olhando para ela.
-       */
-      if (jaEstaEmCena(dados.scheduledFor)) return;
-
-      /**
-       * Sem tela em cena, o toque é intenção explícita e abre — mesmo que a entrega já tenha sido
-       * registrada, porque aí a tela dela foi embora e recusar deixaria o toque sem efeito.
-       *
-       * **E abre mesmo com o app em segundo plano**, que é o caso normal aqui: tocar na notificação
-       * é justamente o gesto que traz o app à frente. `aoDispararAlarme` recusa em segundo plano
-       * para o *disparo* — tela que monta escondida vira som sem rosto (ver `use-dose-notifications`)
-       * —, e essa guarda vazou para cá em 10/09, deixando o toque sem efeito nenhum: a tela não
-       * abria e a notificação ficava na bandeja. São dois gestos diferentes, e só o disparo é
-       * automático.
-       */
-      jaAbertos.delete(dados.scheduledFor);
-      await notifee.cancelNotification(id).catch(() => {});
-      aoAbrirTelaDeAlarme?.(dados.scheduledFor);
-      return;
-    }
-
     /**
-     * A notificação comum leva à tela do horário, onde a resposta parcial cabe.
+     * **O toque leva à tela de confirmação, e o som para — alarme ou lembrete, sem distinção.**
      *
-     * Se houver um alarme tocando em paralelo, ele sai: escolher outro caminho para responder é uma
-     * resposta a ele, e continuar berrando enquanto a pessoa decide na outra tela é cobrar algo que
-     * ela já foi atender.
+     * O alarme desviava daqui para a tela cheia (`/alarme/[instante]`), pelo argumento de que quem
+     * foi interrompido por um despertador perderia foto, adiamento e silenciar ao cair num
+     * formulário de "tomou ou não?". Decisão do Gabriel em 10/09, testando em aparelho: não é isso
+     * que ele quer do gesto. Tocar no aviso é ir responder, e o lugar de responder é a tela do
+     * horário — a mesma dos dois botões, a que ele reconhece.
+     *
+     * A tela cheia continua existindo para o que ela faz bem: irromper sozinha sobre o bloqueio,
+     * onde não há app aberto para receber ninguém. O que sai é ela ser destino de **toque**.
+     *
+     * Os três passos, nesta ordem, são o que torna o gesto imediato: tirar o aviso da bandeja (e com
+     * ele o `loopSound`), pedir que a tela cheia saia de cena se estiver montada, e só então abrir.
+     * Qualquer um que falte deixa som tocando enquanto a pessoa já está decidindo em outra tela.
      */
+    jaAbertos.delete(dados.scheduledFor);
+    await notifee.cancelNotification(id).catch(() => {});
     await dispensarAlarmeAtivo().catch(() => {});
     pedirParaEncerrarAlarme();
     aoAbrirHorario?.(resultado.dados);
@@ -303,12 +269,10 @@ async function tratar(evento: Event): Promise<void> {
 export function escutarAvisos(opcoes: {
   aoAbrirHorario: AoAbrirHorario;
   aoDispararAlarme: AoDispararAlarme;
-  aoAbrirTelaDeAlarme: AoAbrirTelaDeAlarme;
   aoAbrirDestino: AoAbrirDestino;
 }): () => void {
   aoAbrirHorario = opcoes.aoAbrirHorario;
   aoDispararAlarme = opcoes.aoDispararAlarme;
-  aoAbrirTelaDeAlarme = opcoes.aoAbrirTelaDeAlarme;
   aoAbrirDestino = opcoes.aoAbrirDestino;
 
   const parar = notifee.onForegroundEvent((evento) => void tratar(evento));
@@ -316,7 +280,6 @@ export function escutarAvisos(opcoes: {
   return () => {
     aoAbrirHorario = null;
     aoDispararAlarme = null;
-    aoAbrirTelaDeAlarme = null;
     aoAbrirDestino = null;
     parar();
   };
