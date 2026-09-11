@@ -107,7 +107,27 @@ export function useDoseNotifications(): void {
        * que mais custou nesta semana, e ele não pode depender de uma trava só.
        */
       aoDispararAlarme: (scheduledFor) => {
+        /**
+         * **Tela de alarme só com o app na frente da pessoa.**
+         *
+         * Este é o defeito relatado em 10/09, e o pior do bloco: com o celular desbloqueado e a
+         * pessoa em outro app, o alarme tocava sem nada na tela dizendo de onde vinha o som nem
+         * como pará-lo. O Android rebaixa a tela cheia para heads-up quando o aparelho está em uso,
+         * e o app — vivo no mesmo processo — navegava assim mesmo: a tela azul montava **atrás** do
+         * app aberto, invisível, e o `expo-audio` dela virava uma segunda fonte de som sem rosto.
+         *
+         * `active` é o que distingue "a tela montou" de "a pessoa está vendo a tela". Sem isto, a
+         * tela escondida ainda dispensava a notificação (ver `AlarmeScreen`), apagando o único
+         * aviso visível e deixando som sem origem — trocando o problema barulhento pelo mudo.
+         *
+         * Em segundo plano quem avisa é a notificação, que é o caminho certo: ela se lê, diz que é
+         * do Mapill, toca em loop e responde ao toque. Ao tocar nela o app volta a `active`, e daí
+         * a tela abre por cima — visível, com uma fonte de som só.
+         */
+        if (AppState.currentState !== "active") return false;
+
         router.navigate({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
+        return true;
       },
       aoAbrirDestino: abrirDestino,
     });

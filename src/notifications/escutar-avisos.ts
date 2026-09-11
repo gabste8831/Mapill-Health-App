@@ -30,8 +30,13 @@ import { todasAsDosesResolvidas, tratarRespostaAoAviso } from "./responder-aviso
  * promessa. Um toque no botão com o celular bloqueado agora grava a dose na hora.
  */
 
-/** Avisa quem está ouvindo que um alarme foi entregue com o app aberto. */
-type AoDispararAlarme = (scheduledFor: string) => void;
+/**
+ * Avisa quem está ouvindo que um alarme foi entregue com o app aberto.
+ *
+ * Devolve se a tela **abriu de fato**: quem recebe pode recusar (app em segundo plano), e a trava
+ * de "já abriu este horário" depende de saber a diferença.
+ */
+type AoDispararAlarme = (scheduledFor: string) => boolean;
 /** Avisa que o toque no corpo pede a tela do horário. */
 type AoAbrirHorario = (dados: DadosDoAviso) => void;
 
@@ -125,9 +130,36 @@ async function tratar(evento: Event): Promise<void> {
      */
     if (jaEstaEmCena(dados.scheduledFor)) return;
 
-    jaAbertos.add(dados.scheduledFor);
+    /**
+     * Marca **depois**, e só se a tela tiver mesmo aberto.
+     *
+     * Quem abre agora pode recusar: com o app em segundo plano ele não monta tela nenhuma (ver
+     * `use-dose-notifications`), porque tela invisível só faz som sem rosto. Marcando antes, a
+     * recusa gravava o horário como "já aberto" e a trava passava a barrar a abertura de verdade —
+     * o alarme nunca mais mostraria a tela naquele horário, nem quando a pessoa voltasse ao app.
+     */
+    const abriu = aoDispararAlarme?.(dados.scheduledFor);
+    if (abriu === true) jaAbertos.add(dados.scheduledFor);
+    return;
+  }
 
-    aoDispararAlarme?.(dados.scheduledFor);
+  /**
+   * **Deslizar para o lado encerra o lembrete, e o som para junto.**
+   *
+   * Decisão do Gabriel em 10/09, e é a leitura honesta do gesto: quem arrasta o aviso para fora está
+   * dizendo "já vi, pode parar". O alarme insistir depois disso é o app discutindo com quem ele
+   * deveria servir — e foi o pior sintoma do bloco, som seguindo sem nada na tela para desligá-lo.
+   *
+   * O som da própria notificação (`loopSound`) morre com ela, sem código. O que sobra é a tela
+   * cheia, se estiver montada: `pedirParaEncerrarAlarme` é o que a faz silenciar e sair. A dose
+   * **não** é respondida aqui — dispensar não é "tomei" nem "pulei", e ela segue pendente na Home,
+   * no histórico e no próximo reagendamento.
+   */
+  if (evento.type === EventType.DISMISSED) {
+    if (!ehAlarmeDeTelaCheia(id)) return;
+    // Sem argumento: o pedido é "saia de cena", e existe no máximo uma tela de alarme por vez (ver
+    // `alarme-em-cena`). Nunca há outra tela para acertar por engano.
+    pedirParaEncerrarAlarme();
     return;
   }
 

@@ -122,20 +122,17 @@ export function AlarmeScreen({
   }, [instanteIso, ehActivityDeAlarme]);
 
   /**
-   * **Com a tela aberta, quem toca é a tela** — a notificação daquele horário sai da bandeja.
+   * **Esta tela existe só na frente da pessoa** — então a notificação do horário dela pode sair.
    *
-   * O `loopSound` do canal e o `createAudioPlayer` daqui são duas fontes de áudio distintas, e
-   * enquanto as duas existirem elas se sobrepõem: o mesmo arquivo, fora de fase, que é o som
-   * duplicado relatado em aparelho em 10/09. A correção de 09/09 garantiu *uma tela* por horário,
-   * mas este par não é tela+tela — é notificação+tela.
-   *
-   * O `loopSound` continua valendo onde ele importa: quando a tela cheia **não** sobe (aparelho em
-   * uso, full-screen intent rebaixado), a notificação é o único aviso, e precisa insistir.
+   * As duas fontes de áudio (o `loopSound` do canal e o `createAudioPlayer` abaixo) tocam o mesmo
+   * arquivo e se sobrepõem enquanto coexistem: o som duplicado de 10/09. Aqui a notificação sai sem
+   * ressalva porque quem garante a condição é quem abre a tela, não ela mesma — com o app em
+   * segundo plano a tela **não é mais montada** (ver `use-dose-notifications`), justamente para não
+   * haver tela invisível apagando o único aviso visível.
    *
    * `dispensar(chave)` e não `dispensarAlarmeAtivo()`: aquela varre todos os alarmes da bandeja, e
-   * um alarme de outro horário ainda sem resposta não tem por que sumir porque esta tela abriu.
-   * Foi o excesso que fez a notificação sumir antes de dar tempo de tocá-la (revertido em 83135de);
-   * aqui o alvo é só o horário desta tela, e ela já está na frente da pessoa.
+   * um alarme de outro horário ainda sem resposta não tem por que sumir porque esta tela abriu — foi
+   * o excesso revertido em 83135de.
    */
   useEffect(() => {
     void new NotifeeGateway().dispensar(chaveDoHorario(instanteIso));
