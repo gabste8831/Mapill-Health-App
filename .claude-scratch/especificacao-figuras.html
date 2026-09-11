@@ -1,0 +1,1162 @@
+<title>Especificação das Figuras</title>
+<style>
+  :root {
+    --paper: #F7F6F3;
+    --paper-raised: #FFFFFF;
+    --ink: #1C1A17;
+    --ink-soft: #4A4640;
+    --muted: #7A7468;
+    --line: #E4E0D8;
+    --line-strong: #D2CCC0;
+    --accent: #8B3A2E;
+    --accent-soft: #F3E4DF;
+    --accent-line: #D9B8AF;
+    --good: #2E5A4A;
+    --good-soft: #E4EDE8;
+    --good-line: #BCD3C7;
+    --pending: #9C6E14;
+    --pending-soft: #FBF0D9;
+    --pending-line: #E8CD8C;
+    --code-bg: #EFEBE2;
+    --shadow: 0 1px 2px rgba(28,26,23,0.04), 0 4px 16px rgba(28,26,23,0.05);
+  }
+
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --paper: #171613;
+      --paper-raised: #201E1A;
+      --ink: #EDE9E1;
+      --ink-soft: #C7C1B6;
+      --muted: #8D8779;
+      --line: #322F29;
+      --line-strong: #3E3A33;
+      --accent: #E0A499;
+      --accent-soft: #3A2521;
+      --accent-line: #5C332C;
+      --good: #8FC4AC;
+      --good-soft: #1E2E27;
+      --good-line: #365044;
+      --pending: #E3BB63;
+      --pending-soft: #332B18;
+      --pending-line: #5C4A24;
+      --code-bg: #26241F;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #171613;
+    --paper-raised: #201E1A;
+    --ink: #EDE9E1;
+    --ink-soft: #C7C1B6;
+    --muted: #8D8779;
+    --line: #322F29;
+    --line-strong: #3E3A33;
+    --accent: #E0A499;
+    --accent-soft: #3A2521;
+    --accent-line: #5C332C;
+    --good: #8FC4AC;
+    --good-soft: #1E2E27;
+    --good-line: #365044;
+    --pending: #E3BB63;
+    --pending-soft: #332B18;
+    --pending-line: #5C4A24;
+    --code-bg: #26241F;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding-inline: 20px;
+    padding-block: 0;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    color: var(--ink);
+    text-wrap: balance;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  code, .mono {
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead {
+    padding-block: 56px 36px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .masthead .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .masthead .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .masthead h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 600;
+    max-width: 20ch;
+  }
+
+  .masthead .dek {
+    margin-top: 16px;
+    font-size: 16.5px;
+    color: var(--ink-soft);
+    max-width: 64ch;
+  }
+
+  .masthead .journey {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .journey-step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    padding: 5px 11px;
+    border-radius: 100px;
+  }
+
+  .journey-arrow { color: var(--muted); font-size: 13px; }
+
+  .masthead .meta-row {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    font-size: 13.5px;
+  }
+
+  .masthead .meta-row dt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .masthead .meta-row dd {
+    margin: 3px 0 0;
+    color: var(--ink-soft);
+    font-size: 14.5px;
+  }
+
+  /* ---------- Progress summary ---------- */
+
+  .progress-bar-wrap {
+    margin-top: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--line);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--good);
+    border-radius: 100px;
+    width: 0%;
+  }
+
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ---------- Nav / jump list ---------- */
+
+  .jumpnav {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .jumpnav a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    padding: 4px 9px;
+    border-radius: 100px;
+  }
+
+  .jumpnav a:hover { border-color: var(--accent-line); color: var(--accent); }
+
+  /* ---------- Renamed notice ---------- */
+
+  .rename-notice {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--pending-soft);
+    border: 1px solid var(--pending-line);
+    border-radius: 7px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+
+  .rename-notice strong { color: var(--ink); }
+
+  /* ---------- Section scaffolding ---------- */
+
+  section.group {
+    padding-block: 40px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section.group:last-of-type { border-bottom: none; }
+
+  .group-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 4px;
+  }
+
+  .group-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .group-head h2 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .group-stage {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .group-intro {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 8px;
+    max-width: 68ch;
+  }
+
+  /* ---------- Figure card ---------- */
+
+  .fig-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .fig-card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    scroll-margin-top: 16px;
+  }
+
+  .fig-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 22px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .fig-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--paper-raised);
+    background: var(--ink);
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .fig-num.status-existente { background: var(--muted); }
+
+  .fig-titlewrap { flex: 1; min-width: 0; }
+
+  .fig-title {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .fig-loc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  .fig-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .fig-status.pendente { background: var(--pending-soft); color: var(--pending); }
+  .fig-status.existente { background: var(--line); color: var(--muted); }
+
+  .fig-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--line-strong);
+    background: var(--paper);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--paper-raised);
+  }
+
+  .fig-checkbox.checked {
+    background: var(--good);
+    border-color: var(--good);
+  }
+
+  .fig-checkbox.checked::after { content: "✓"; }
+
+  .fig-chevron {
+    color: var(--muted);
+    font-size: 12px;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .fig-card.open .fig-chevron { transform: rotate(90deg); }
+
+  .fig-body {
+    display: none;
+    padding: 0 22px 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .fig-card.open .fig-body { display: block; }
+
+  .fig-when {
+    margin-top: 16px;
+    font-size: 13.8px;
+    color: var(--ink-soft);
+    padding: 10px 14px;
+    background: var(--code-bg);
+    border-radius: 6px;
+    border-left: 2px solid var(--line-strong);
+  }
+
+  .fig-when .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .subprints {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .subprint {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .subprint-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-radius: 6px;
+    width: 30px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .subprint-text { font-size: 14px; color: var(--ink-soft); padding-top: 2px; }
+  .subprint-text strong { color: var(--ink); }
+
+  /* ---------- Legend ---------- */
+
+  .excluded-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .excluded-item {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    padding: 10px 14px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+
+  .excluded-item .tela {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .excluded-item .motivo { color: var(--muted); }
+
+  footer {
+    padding-block: 32px 60px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 640px) {
+    .subprint { grid-template-columns: 26px 1fr; }
+    .fig-top { padding: 14px 16px; gap: 10px; }
+    .fig-body { padding: 0 16px 18px; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Mapill · TCC — Referência de captura</div>
+    <h1>Especificação das figuras</h1>
+    <p class="dek">16 figuras organizadas pela jornada real do usuário — do primeiro acesso ao
+      acompanhamento de longo prazo — com o título ABNT pronto e o que cada sub-print precisa
+      mostrar.</p>
+
+    <div class="journey">
+      <span class="journey-step">Primeiro acesso</span>
+      <span class="journey-arrow">→</span>
+      <span class="journey-step">Cadastro</span>
+      <span class="journey-arrow">→</span>
+      <span class="journey-step">Agenda</span>
+      <span class="journey-arrow">→</span>
+      <span class="journey-step">Lembrete</span>
+      <span class="journey-arrow">→</span>
+      <span class="journey-step">Acompanhamento</span>
+      <span class="journey-arrow">→</span>
+      <span class="journey-step">Acessibilidade</span>
+    </div>
+
+    <dl class="meta-row">
+      <div><dt>Figuras técnicas</dt><dd>2 (diagramas)</dd></div>
+      <div><dt>Figuras de tela</dt><dd>14</dd></div>
+      <div><dt>Sub-prints ao todo</dt><dd>21</dd></div>
+    </dl>
+    <div class="progress-bar-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-label" id="progressLabel">0 / 16 capturadas</span>
+    </div>
+    <nav class="jumpnav">
+      <a href="#g1">4.6.1 Primeiro acesso</a>
+      <a href="#g2">4.6.2 Cadastro</a>
+      <a href="#g3">4.6.3 Agenda</a>
+      <a href="#g4">4.6.4 Lembrete e resposta</a>
+      <a href="#g5">4.6.5 Acompanhamento</a>
+      <a href="#g6">4.6.6 Acessibilidade</a>
+      <a href="#g7">4.7 LGPD</a>
+      <a href="#excluidas">Fora do escopo</a>
+    </nav>
+
+    <div class="rename-notice">
+      <strong>Renumeração desde a versão anterior:</strong> a seção 4.6 passou de agrupamento
+      teórico (SSoT, gestão temporal, heurísticas...) para a ordem cronológica da jornada do
+      usuário, com o título "4.6 Jornada e Experiência do Usuário". As figuras 3 e 4 antigas
+      (formulário e resposta à dose) foram absorvidas nesta numeração nova — confira o texto do
+      TCC contra este mapa antes de inserir, para não duplicar números.
+    </div>
+  </header>
+
+  <!-- ================= 4.6.1 ================= -->
+  <section class="group" id="g1">
+    <div class="group-head">
+      <span class="group-num">4.6.1</span>
+      <h2>Primeiro acesso</h2>
+    </div>
+    <p class="group-stage">Etapa da jornada: onboarding, antes de qualquer dado clínico existir</p>
+    <p class="group-intro">Login, aceite dos termos, consentimento informado e o preenchimento
+      inicial da ficha de saúde — a sequência que a LGPD exige antes da coleta de dado sensível.</p>
+
+    <div class="fig-list">
+
+      <div class="fig-card" id="fig3">
+        <div class="fig-top" onclick="toggleCard('fig3')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">3</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Consentimento e ficha de saúde</div>
+            <div class="fig-loc">4.6.1 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Após o parágrafo que descreve a sequência de consentimento informado antes de
+            qualquer coleta de dado clínico.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">3a</span>
+              <div class="subprint-text">Tela de <strong>Consentimento</strong>, com o texto de
+                aceite e a versão do termo visível.</div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">3b</span>
+              <div class="subprint-text">Tela da <strong>Ficha de Saúde</strong>, mostrando pelo
+                menos tipo sanguíneo, alergias e um contato de emergência completo — reforça que
+                é dado guardado para leitura humana, não usado em cálculo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 4.6.2 ================= -->
+  <section class="group" id="g2">
+    <div class="group-head">
+      <span class="group-num">4.6.2</span>
+      <h2>Cadastro do tratamento</h2>
+    </div>
+    <p class="group-stage">Etapa da jornada: a ação que habilita tudo o que vem depois</p>
+    <p class="group-intro">Da identificação do medicamento (digitando ou pelo scanner) ao
+      formulário que nasce vazio, passando pelo anexo de receita e pela configuração do
+      lembrete.</p>
+
+    <div class="fig-list">
+
+      <div class="fig-card" id="fig4">
+        <div class="fig-top" onclick="toggleCard('fig4')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">4</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Identificação do medicamento por código de barras</div>
+            <div class="fig-loc">4.6.2 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Abrindo a seção, antes do formulário — mostrando o caminho em que o scanner sugere e
+            a pessoa confirma, nunca salva sem revisão.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">4a</span>
+              <div class="subprint-text">Tela de <strong>Escolha de Cadastro</strong>
+                (bifurcação scanner/manual) ou o <strong>Scanner</strong> com a câmera ativa
+                sobre um código de barras.</div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">4b</span>
+              <div class="subprint-text">Formulário <strong>já preenchido</strong> com nome,
+                princípio ativo e dosagem vindos da base CMED, ainda editável.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fig-card" id="fig5">
+        <div class="fig-top" onclick="toggleCard('fig5')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">5</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Formulário de cadastro de medicação</div>
+            <div class="fig-loc">4.6.2 · 1 print</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            No parágrafo sobre a heurística de prevenção de erros: todo campo relativo à
+            posologia nasce vazio, sem valor pré-selecionado.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">5</span>
+              <div class="subprint-text">Formulário de cadastro em <strong>estado vazio</strong>
+                — nenhuma frequência, unidade ou horário pré-marcado.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fig-card" id="fig6">
+        <div class="fig-top" onclick="toggleCard('fig6')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">6</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Anexo de receita e configuração de lembrete</div>
+            <div class="fig-loc">4.6.2 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Fechando a seção 4.6.2, detalhando as duas rotinas finais do cadastro: anexar a
+            receita (com validade e aviso de renovação) e escolher o tipo de lembrete.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">6a</span>
+              <div class="subprint-text">Bloco de <strong>anexo de receita/foto</strong> no
+                formulário, com a exigência de receita conforme a tarja e o campo de validade
+                visível.</div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">6b</span>
+              <div class="subprint-text">Tela de <strong>Configuração de Lembrete</strong>,
+                mostrando as opções de alarme, notificação comum ou nenhum aviso.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 4.6.3 ================= -->
+  <section class="group" id="g3">
+    <div class="group-head">
+      <span class="group-num">4.6.3</span>
+      <h2>Agenda, compromissos e centralização</h2>
+    </div>
+    <p class="group-stage">Etapa da jornada: uso diário — consultar e planejar</p>
+    <p class="group-intro">A prova visual do SSoT: doses e compromissos convivem na mesma
+      agenda, com dois caminhos de consulta (visão do dia vs. busca pontual) e o planejamento de
+      estoque.</p>
+
+    <div class="fig-list">
+
+      <div class="fig-card" id="fig7">
+        <div class="fig-top" onclick="toggleCard('fig7')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">7</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Calendário com doses e compromissos no mesmo dia</div>
+            <div class="fig-loc">4.6.3 · 1 print</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Abrindo a seção, como prova direta da centralização (SSoT) descrita no parágrafo
+            anterior.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">7</span>
+              <div class="subprint-text"><strong>Calendário</strong> mostrando um dia com pelo
+                menos uma dose de medicamento e um compromisso clínico visíveis ao mesmo tempo,
+                com diferenciação visual clara entre os dois tipos.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fig-card" id="fig8">
+        <div class="fig-top" onclick="toggleCard('fig8')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">8</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">As duas formas de consultar o tratamento</div>
+            <div class="fig-loc">4.6.3 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Logo após a Figura 7, distinguindo "o que fazer agora" (Home) de "qual é a dose
+            daquele remédio" (Lista de Remédios).
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">8a</span>
+              <div class="subprint-text"><strong>Home</strong> com a agenda do dia, a próxima
+                dose destacada e as atrasadas separadas.</div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">8b</span>
+              <div class="subprint-text"><strong>Lista de Remédios</strong> com a busca ativa,
+                mostrando pelo menos um resultado.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fig-card" id="fig9">
+        <div class="fig-top" onclick="toggleCard('fig9')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">9</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Planejamento antecipado de estoque e compromissos</div>
+            <div class="fig-loc">4.6.3 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Fechando a seção 4.6.3, sobre o planejamento logístico de médio prazo (seção 2.3.2
+            do referencial teórico).
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">9a</span>
+              <div class="subprint-text">Tela de <strong>Estoque</strong> com a previsão de
+                duração calculada ("acaba em X dias") visível em pelo menos um item.</div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">9b</span>
+              <div class="subprint-text">Formulário de cadastro de <strong>Compromisso</strong>,
+                mostrando a cascata de lembretes (antecedência + aviso do dia).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 4.6.4 ================= -->
+  <section class="group" id="g4">
+    <div class="group-head">
+      <span class="group-num">4.6.4</span>
+      <h2>O lembrete e a resposta à dose</h2>
+    </div>
+    <p class="group-stage">Etapa da jornada: o momento crítico — ser interrompido e responder</p>
+    <p class="group-intro">Do gatilho de interrupção (notificação ou alarme) até a resposta —
+      inteira ou por dose, quando há mais de um medicamento no mesmo horário.</p>
+
+    <div class="fig-list">
+
+      <div class="fig-card" id="fig10">
+        <div class="fig-top" onclick="toggleCard('fig10')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">10</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Os dois modos de lembrete</div>
+            <div class="fig-loc">4.6.4 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Abrindo a seção, distinguindo notificação comum (discreta) de alarme (interrupção de
+            alta prioridade).
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">10a</span>
+              <div class="subprint-text"><strong>Notificação comum</strong> de dose, na barra do
+                sistema, com os botões "Tomei" / "Pulei" visíveis.</div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">10b</span>
+              <div class="subprint-text">Tela de <strong>Alarme em tela cheia</strong>, com nome
+                do medicamento, dose e os botões de ação.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fig-card" id="fig11">
+        <div class="fig-top" onclick="toggleCard('fig11')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">11</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Resposta por dose em horário com mais de um medicamento</div>
+            <div class="fig-loc">4.6.4 · 1 print</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Após o parágrafo que explica por que a resposta precisa ser por dose, e não por
+            horário inteiro.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">11</span>
+              <div class="subprint-text">Tela do <strong>Horário</strong> mostrando pelo menos
+                dois medicamentos diferentes no mesmo horário, cada um com seus próprios botões
+                "Tomei" / "Pulei" e a opção "Ignorar por agora".</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fig-card" id="fig12">
+        <div class="fig-top" onclick="toggleCard('fig12')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">12</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Tela de resposta à dose</div>
+            <div class="fig-loc">4.6.4 · 1 print</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Fechando a seção, no parágrafo sobre os botões "Tomei"/"Pulei" sem destaque prévio,
+            e a possibilidade de corrigir uma resposta já dada.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">12</span>
+              <div class="subprint-text">Tela de resposta à dose, mostrando os botões
+                <strong>Tomei/Pulei</strong> — se possível, capturar antes e depois da resposta,
+                para evidenciar a mudança de destaque de cor.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 4.6.5 ================= -->
+  <section class="group" id="g5">
+    <div class="group-head">
+      <span class="group-num">4.6.5</span>
+      <h2>Acompanhamento e progresso</h2>
+    </div>
+    <p class="group-stage">Etapa da jornada: depois de usar — olhar pra trás</p>
+    <p class="group-intro">Prova de que o progresso é mostrado sem julgamento — sem meta, sem
+      parabéns, sem alerta por baixa adesão.</p>
+
+    <div class="fig-list">
+
+      <div class="fig-card" id="fig13">
+        <div class="fig-top" onclick="toggleCard('fig13')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">13</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Indicadores de progresso sem julgamento</div>
+            <div class="fig-loc">4.6.5 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Junto do parágrafo que explica que a gamificação se limita a indicadores neutros,
+            sem meta nem punição.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">13a</span>
+              <div class="subprint-text">Card de <strong>progresso do dia</strong> na Home, num
+                estado intermediário (nem 0%, nem 100%).</div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">13b</span>
+              <div class="subprint-text">Tela de <strong>Adesão</strong>, mostrando a taxa do
+                período e a tabela por medicamento, sem nenhum elemento de "parabéns" ou alerta.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 4.6.6 ================= -->
+  <section class="group" id="g6">
+    <div class="group-head">
+      <span class="group-num">4.6.6</span>
+      <h2>Acessibilidade</h2>
+    </div>
+    <p class="group-stage">Configuração — pode acontecer a qualquer momento da jornada</p>
+    <p class="group-intro">A comparação de aparências e a grade de cores validadas por
+      simulação de daltonismo, fechando a seção de jornada e experiência.</p>
+
+    <div class="fig-list">
+
+      <div class="fig-card" id="fig14">
+        <div class="fig-top" onclick="toggleCard('fig14')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">14</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Comparação entre o tema padrão e o tema de alto contraste</div>
+            <div class="fig-loc">4.6.6 · 2 sub-prints</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            Após o parágrafo que descreve as três mudanças técnicas do tema de alto contraste.
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">14a</span>
+              <div class="subprint-text"><strong>Home no tema padrão.</strong></div>
+            </div>
+            <div class="subprint">
+              <span class="subprint-tag">14b</span>
+              <div class="subprint-text">A <strong>mesma tela</strong> (Home) no tema de
+                <strong>alto contraste</strong> — mostrando claramente a diferença de contraste,
+                a cor de destaque escurecida, e um elemento que troca sombra por contorno.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fig-card" id="fig15">
+        <div class="fig-top" onclick="toggleCard('fig15')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">15</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Seletor de cores de estado</div>
+            <div class="fig-loc">4.6.6 · 1 print</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            No parágrafo final da seção, sobre o seletor de pares de cores validados por
+            simulação de daltonismo (Brettel, Viénot e Mollon, 1997).
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">15</span>
+              <div class="subprint-text">Tela de <strong>Tema</strong> → bloco "Preferências
+                visuais", com a grade completa dos <strong>cinco pares de cores</strong> (padrão,
+                azul/laranja, azul/vermelho, roxo/âmbar, turquesa/magenta) visível lado a lado.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 4.7 ================= -->
+  <section class="group" id="g7">
+    <div class="group-head">
+      <span class="group-num">4.7</span>
+      <h2>Privacidade e LGPD aplicada</h2>
+    </div>
+    <p class="group-stage">Direitos do titular — a Ficha de Saúde já foi para 4.6.1</p>
+    <p class="group-intro">Com a Ficha de Saúde migrada para "Primeiro acesso", esta seção fica
+      focada no exercício prático dos direitos do titular.</p>
+
+    <div class="fig-list">
+
+      <div class="fig-card" id="fig16">
+        <div class="fig-top" onclick="toggleCard('fig16')">
+          <div class="fig-checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="fig-num">16</div>
+          <div class="fig-titlewrap">
+            <div class="fig-title">Exercício dos direitos do titular</div>
+            <div class="fig-loc">4.7.2 · 1 print</div>
+          </div>
+          <span class="fig-status pendente">Pendente</span>
+          <span class="fig-chevron">▸</span>
+        </div>
+        <div class="fig-body">
+          <div class="fig-when">
+            <span class="label">Onde entra</span>
+            No ponto sobre exportação e exclusão de dados (4.7.2).
+          </div>
+          <div class="subprints">
+            <div class="subprint">
+              <span class="subprint-tag">16</span>
+              <div class="subprint-text">Tela de <strong>Conta e Dados</strong>, com as opções
+                de exportar e apagar dados visíveis — se possível, incluindo o diálogo de
+                confirmação que explica o que será removido.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= EXCLUÍDAS ================= -->
+  <section class="group" id="excluidas">
+    <div class="group-head">
+      <span class="group-num">—</span>
+      <h2>Fora do escopo</h2>
+    </div>
+    <p class="group-intro">Telas do app deliberadamente sem figura — sem argumento de
+      usabilidade ou arquitetura próprio a sustentar.</p>
+
+    <div class="excluded-list">
+      <div class="excluded-item">
+        <span class="tela">Login, Termos</span>
+        <span class="motivo">— mencionadas em texto na 4.6.1, sem figura própria; o consentimento e a ficha já carregam o argumento visual daquela etapa</span>
+      </div>
+      <div class="excluded-item">
+        <span class="tela">Ajuda de alertas</span>
+        <span class="motivo">— conteúdo explicativo estático, não ilustra decisão de design</span>
+      </div>
+      <div class="excluded-item">
+        <span class="tela">Diagnóstico de avisos</span>
+        <span class="motivo">— ferramenta de desenvolvimento, fora da experiência do paciente</span>
+      </div>
+      <div class="excluded-item">
+        <span class="tela">Ajustes (menu)</span>
+        <span class="motivo">— tela-índice de navegação, sem conteúdo próprio a discutir</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    16 figuras no total (2 diagramas técnicos + 14 de tela), 21 sub-prints ao todo. A seção 4.6
+    passou a se chamar "Jornada e Experiência do Usuário" e segue a ordem cronológica de uso, não
+    mais o agrupamento teórico original — confira o texto do TCC contra este mapa antes de
+    inserir as figuras.
+  </footer>
+
+</div>
+
+<script>
+  function toggleCard(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const boxes = document.querySelectorAll('.fig-checkbox');
+    const checked = document.querySelectorAll('.fig-checkbox.checked').length;
+    const total = boxes.length;
+    const pct = total ? Math.round((checked / total) * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = checked + ' / ' + total + ' capturadas';
+  }
+
+  (function restoreState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('mapill-fig-checklist-v2') || '{}');
+      document.querySelectorAll('.fig-card').forEach(card => {
+        const box = card.querySelector('.fig-checkbox');
+        if (saved[card.id] && box) box.classList.add('checked');
+      });
+    } catch (e) {}
+    updateProgress();
+  })();
+
+  document.querySelectorAll('.fig-checkbox').forEach(box => {
+    box.addEventListener('click', () => {
+      try {
+        const card = box.closest('.fig-card');
+        const saved = JSON.parse(localStorage.getItem('mapill-fig-checklist-v2') || '{}');
+        saved[card.id] = box.classList.contains('checked');
+        localStorage.setItem('mapill-fig-checklist-v2', JSON.stringify(saved));
+      } catch (e) {}
+    });
+  });
+</script>

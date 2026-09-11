@@ -19,12 +19,6 @@ export function resolvesDose(status: IntakeStatus | null): boolean {
 export type IntakeLog = SyncableEntity & {
   doseScheduleId: string;
   status: IntakeStatus;
-  /** Pode divergir do scheduledFor do agendamento (usuário confirma atrasado, por exemplo). */
   occurredAt: string;
-  /**
-   * Preenchido quando este log é uma correção retroativa de um log anterior (ex: paciente
-   * confirma um dia depois que na verdade tomou). O log antigo nunca é apagado/sobrescrito —
-   * isso só marca qual registro este substitui, pra reconstruir o histórico auditável.
-   */
   correctsLogId: string | null;
 };

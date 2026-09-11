@@ -1,0 +1,1171 @@
+<title>Revisão do Capítulo 4</title>
+<style>
+  :root {
+    --paper: #F7F6F3;
+    --paper-raised: #FFFFFF;
+    --ink: #1C1A17;
+    --ink-soft: #4A4640;
+    --muted: #7A7468;
+    --line: #E4E0D8;
+    --line-strong: #D2CCC0;
+    --accent: #8B3A2E;
+    --accent-soft: #F3E4DF;
+    --accent-line: #D9B8AF;
+    --good: #2E5A4A;
+    --good-soft: #E4EDE8;
+    --good-line: #BCD3C7;
+    --pending: #9C6E14;
+    --pending-soft: #FBF0D9;
+    --pending-line: #E8CD8C;
+    --code-bg: #EFEBE2;
+    --shadow: 0 1px 2px rgba(28,26,23,0.04), 0 4px 16px rgba(28,26,23,0.05);
+  }
+
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --paper: #171613;
+      --paper-raised: #201E1A;
+      --ink: #EDE9E1;
+      --ink-soft: #C7C1B6;
+      --muted: #8D8779;
+      --line: #322F29;
+      --line-strong: #3E3A33;
+      --accent: #E0A499;
+      --accent-soft: #3A2521;
+      --accent-line: #5C332C;
+      --good: #8FC4AC;
+      --good-soft: #1E2E27;
+      --good-line: #365044;
+      --pending: #E3BB63;
+      --pending-soft: #332B18;
+      --pending-line: #5C4A24;
+      --code-bg: #26241F;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #171613;
+    --paper-raised: #201E1A;
+    --ink: #EDE9E1;
+    --ink-soft: #C7C1B6;
+    --muted: #8D8779;
+    --line: #322F29;
+    --line-strong: #3E3A33;
+    --accent: #E0A499;
+    --accent-soft: #3A2521;
+    --accent-line: #5C332C;
+    --good: #8FC4AC;
+    --good-soft: #1E2E27;
+    --good-line: #365044;
+    --pending: #E3BB63;
+    --pending-soft: #332B18;
+    --pending-line: #5C4A24;
+    --code-bg: #26241F;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding-inline: 20px;
+    padding-block: 0;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    color: var(--ink);
+    text-wrap: balance;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  code, .mono {
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  /* ---------- Masthead ---------- */
+
+  .masthead {
+    padding-block: 56px 40px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .masthead .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .masthead .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .masthead h1 {
+    font-size: clamp(30px, 5vw, 42px);
+    font-weight: 600;
+    max-width: 16ch;
+  }
+
+  .masthead .dek {
+    margin-top: 16px;
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+  }
+
+  .masthead .meta-row {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+
+  .masthead .meta-row dt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .masthead .meta-row dd {
+    margin: 3px 0 0;
+    color: var(--ink-soft);
+    font-size: 14.5px;
+  }
+
+  /* ---------- Section scaffolding ---------- */
+
+  section {
+    padding-block: 44px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section:last-of-type { border-bottom: none; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .section-head h2 {
+    font-size: 25px;
+    font-weight: 600;
+  }
+
+  .section-intro {
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin-top: 12px;
+    font-size: 15.5px;
+  }
+
+  .section-intro + .section-intro { margin-top: 8px; }
+
+  /* ---------- Divergence cards ---------- */
+
+  .divergences {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .diverg {
+    display: grid;
+    grid-template-columns: 5px 1fr;
+  }
+
+  .diverg-rail { background: var(--sev-color, var(--muted)); }
+  .diverg.sev-alta .diverg-rail { background: var(--accent); }
+  .diverg.sev-media .diverg-rail { background: var(--pending); }
+  .diverg.sev-baixa .diverg-rail { background: var(--good); }
+  .diverg.sev-resolvido .diverg-rail { background: var(--good); }
+  .diverg.sev-resolvido { opacity: 0.92; }
+
+  .diverg-body { padding: 20px 24px; }
+
+  .diverg-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .diverg-title {
+    font-size: 16.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+
+  .pill.alta { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-line); }
+  .pill.media { background: var(--pending-soft); color: var(--pending); border-color: var(--pending-line); }
+  .pill.baixa { background: var(--good-soft); color: var(--good); border-color: var(--good-line); }
+  .pill.resolvido { background: var(--good); color: var(--paper-raised); border-color: var(--good); }
+  .pill.resolvido::before { content: "✓ "; }
+
+  .diff-block {
+    margin: 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .diff-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    line-height: 1.5;
+  }
+
+  .diff-line.old {
+    background: var(--accent-soft);
+    color: var(--ink-soft);
+    text-decoration: line-through;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 1.5px;
+  }
+
+  .diff-line.new {
+    background: var(--good-soft);
+    color: var(--ink);
+  }
+
+  .diff-line .diff-marker {
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  .diff-line.old .diff-marker { color: var(--accent); }
+  .diff-line.new .diff-marker { color: var(--good); }
+
+  .diverg p { margin: 0 0 10px; color: var(--ink-soft); font-size: 14.8px; }
+  .diverg p:last-child { margin-bottom: 0; }
+
+  blockquote.snippet {
+    margin: 10px 0;
+    padding: 10px 14px;
+    background: var(--code-bg);
+    border-left: 2px solid var(--line-strong);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.8px;
+    color: var(--ink-soft);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .fix-line {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+    font-size: 14px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .fix-line .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--good);
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .fix-line .text { color: var(--ink-soft); }
+
+  .field-table {
+    margin-top: 12px;
+    font-size: 13.5px;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .field-table th, .field-table td {
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .field-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .field-table td.field { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--accent); }
+  .field-table td.tbl { color: var(--muted); font-size: 12.8px; }
+
+  /* ---------- Structure tree ---------- */
+
+  .tree {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .tree-node {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+  }
+
+  .tree-node.depth-0 {
+    background: var(--ink);
+    border-color: var(--ink);
+    margin-top: 10px;
+  }
+  .tree-node.depth-0 .tree-label { color: var(--paper); font-weight: 700; }
+  .tree-node.depth-0 .tree-num { color: var(--paper); opacity: 0.6; }
+
+  .tree-node.depth-1 { margin-left: 0; font-weight: 600; }
+  .tree-node.depth-2 { margin-left: 28px; border-style: dashed; }
+
+  .tree-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    min-width: 34px;
+  }
+
+  .tree-label { font-size: 14.5px; color: var(--ink); }
+  .tree-node.depth-2 .tree-label { font-size: 13.8px; color: var(--ink-soft); }
+
+  .tree-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .tree-tag.pronto { background: var(--good-soft); color: var(--good); }
+  .tree-tag.novo { background: var(--accent-soft); color: var(--accent); }
+  .tree-tag.mover { background: var(--pending-soft); color: var(--pending); }
+
+  .rationale {
+    margin-top: 20px;
+    padding: 16px 18px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-radius: 8px;
+    font-size: 14.3px;
+    color: var(--ink-soft);
+  }
+
+  .rationale strong { color: var(--ink); }
+
+  /* ---------- Source mapping table ---------- */
+
+  .source-table {
+    margin-top: 24px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .source-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--line-strong);
+  }
+
+  .source-table td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  .source-table tr:last-child td { border-bottom: none; }
+
+  .source-table .sec-name {
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .source-table .src-file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .source-table .src-note { color: var(--muted); font-size: 12.8px; }
+
+  .table-scroll { overflow-x: auto; }
+
+  /* ---------- Quadros do modelo de dados ---------- */
+
+  .quadros-list {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .quadro-block {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 18px 22px 22px;
+  }
+
+  .quadro-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .quadro-title code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .quadro-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.3px;
+  }
+
+  .quadro-table th {
+    text-align: left;
+    padding: 6px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    border-bottom: 1.5px solid var(--line-strong);
+  }
+
+  .quadro-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+
+  .quadro-table tr:last-child td { border-bottom: none; }
+
+  .quadro-table td.qf {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .quadro-table td.qt {
+    font-style: italic;
+    color: var(--muted);
+    white-space: nowrap;
+    font-size: 12.5px;
+  }
+
+  .quadro-table tr.new-field td {
+    background: var(--good-soft);
+  }
+
+  .quadro-table tr.new-field td.qf {
+    color: var(--good);
+    font-weight: 700;
+  }
+
+  .quadro-table tr.new-field td.qf::after {
+    content: " 🆕";
+  }
+
+  /* ---------- Checklist ---------- */
+
+  .checklist {
+    margin-top: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .check-item {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+  }
+
+  .check-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .check-item h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 14.8px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .check-item p { margin: 0; font-size: 13.6px; color: var(--muted); }
+
+  /* ---------- Footer ---------- */
+
+  footer {
+    padding-block: 36px 60px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ---------- Responsive ---------- */
+
+  @media (max-width: 640px) {
+    .field-table { font-size: 12.5px; }
+    .tree-node.depth-2 { margin-left: 14px; }
+    .source-table { font-size: 13px; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Mapill · TCC — Revisão de integração</div>
+    <h1>Capítulo 4 frente ao código</h1>
+    <p class="dek">Onde o artigo diverge da implementação, e uma proposta de estrutura para as
+      seções que ainda faltam escrever — com a fonte exata de onde puxar cada uma.</p>
+    <dl class="meta-row">
+      <div>
+        <dt>Documento revisado</dt>
+        <dd>TCC Gabriel Steffens — Atualizado 11/09</dd>
+      </div>
+      <div>
+        <dt>Cruzado contra</dt>
+        <dd>código-fonte, schema, docs/tcc/</dd>
+      </div>
+      <div>
+        <dt>Divergências encontradas</dt>
+        <dd>4 · 2 corrigidas</dd>
+      </div>
+    </dl>
+  </header>
+
+  <!-- ================= DIVERGÊNCIAS ================= -->
+  <section id="divergencias">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>Onde o artigo diverge do código</h2>
+    </div>
+    <p class="section-intro">Quatro pontos, do mais para o menos prioritário. Os dois primeiros
+      valem corrigir antes de escrever qualquer seção nova — evitam que você escreva sobre uma
+      base que já vai mudar.</p>
+
+    <div class="divergences">
+
+      <div class="card">
+        <div class="diverg sev-resolvido">
+          <div class="diverg-rail"></div>
+          <div class="diverg-body">
+            <div class="diverg-top">
+              <span class="diverg-title">Metodologia ainda prometia Tailwind CSS</span>
+              <span class="pill resolvido">Corrigido no arquivo</span>
+            </div>
+            <p><strong>Seção 3.2</strong> descrevia a estilização como "estruturada via Tailwind
+              CSS" — a decisão de planejamento, não a que ficou de pé. O próprio capítulo 4
+              (4.4.5) narra o descarte do Tailwind em favor de um sistema de design próprio,
+              como decisão arquitetural deliberada. Um examinador que lesse os dois capítulos em
+              sequência encontraria uma contradição não explicada.</p>
+
+            <p style="margin-top:16px;"><strong>Duas formas de resolver eram possíveis</strong>
+              — trocar a cláusula sem apontar pra frente, ou trocar e adicionar a ponte pro
+              capítulo 4. A segunda foi a escolhida: TCC é justamente o lugar onde mostrar que
+              uma decisão de planejamento foi revisada com justificativa é sinal de maturidade
+              metodológica, e o argumento já estava pronto em 4.4.5 — não usá-lo desperdiçaria
+              um ponto a favor.</p>
+
+            <div class="diff-block">
+              <div class="diff-line old"><span class="diff-marker">−</span>com a linguagem TypeScript para garantir segurança de tipagem e
+estilização estruturada via Tailwind CSS.</div>
+              <div class="diff-line new"><span class="diff-marker">+</span>com a linguagem TypeScript para garantir segurança de tipagem e um
+sistema de design próprio para a estilização das interfaces, decisão
+revista ao longo do desenvolvimento e detalhada na seção 4.4.5.</div>
+            </div>
+
+            <div class="fix-line">
+              <span class="label">Aplicado</span>
+              <span class="text">Alterado diretamente no arquivo do TCC, seção 3.2. Nenhuma
+                outra frase do parágrafo foi tocada — o tempo verbal e o restante da descrição
+                do ecossistema multiplataforma seguem iguais.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="diverg sev-resolvido">
+          <div class="diverg-rail"></div>
+          <div class="diverg-body">
+            <div class="diverg-top">
+              <span class="diverg-title">Modelo de dados incompleto frente ao schema real</span>
+              <span class="pill resolvido">Corrigido no arquivo</span>
+            </div>
+            <p>Levantamento inicial apontou quatro campos ausentes nos Quadros 11–19 (seção
+              4.5). Na conferência linha a linha contra <code>docs/supabase-schema.sql</code>,
+              dois deles já estavam corretos no artigo —
+              <code>attachment_sync_opt_out</code> (Quadro 12) e
+              <code>photo_sync_opt_out</code> (Quadro 18) — engano do levantamento original, não
+              do artigo. A contagem real é <strong>dois campos</strong>, ambos já incluídos.</p>
+
+            <table class="field-table">
+              <thead>
+                <tr><th>Campo</th><th>Quadro</th><th>Situação</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="field">renewal_reminder_enabled</td>
+                  <td class="tbl">12 — prescriptions</td>
+                  <td><span class="pill resolvido" style="font-size:9.5px;">incluído</span></td>
+                </tr>
+                <tr>
+                  <td class="field">low_stock_alerted_at_quantity</td>
+                  <td class="tbl">15 — inventory_items</td>
+                  <td><span class="pill resolvido" style="font-size:9.5px;">incluído</span></td>
+                </tr>
+                <tr>
+                  <td class="field" style="color:var(--muted); text-decoration:line-through;">attachment_sync_opt_out</td>
+                  <td class="tbl">12 — prescriptions</td>
+                  <td style="color:var(--muted); font-size:12.8px;">falso alarme — já constava</td>
+                </tr>
+                <tr>
+                  <td class="field" style="color:var(--muted); text-decoration:line-through;">photo_sync_opt_out</td>
+                  <td class="tbl">18 — patient_profiles</td>
+                  <td style="color:var(--muted); font-size:12.8px;">falso alarme — já constava</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style="margin-top:16px;">Os dois campos reais têm justificativa própria de regra
+              de negócio, não são só preenchimento de lacuna:</p>
+            <ul style="margin:0 0 12px; padding-left: 20px; color: var(--ink-soft); font-size: 14.8px;">
+              <li style="margin-bottom:6px;"><code>renewal_reminder_enabled</code> sustenta a
+                regra "separar querer aviso de escolher prazo" — marcar a caixa sem antecedência
+                escolhida ainda precisa gerar aviso no próprio vencimento.</li>
+              <li><code>low_stock_alerted_at_quantity</code> é a trava anti-repetição do aviso
+                de estoque baixo: sem ela, cada dose confirmada com estoque baixo dispararia um
+                novo aviso.</li>
+            </ul>
+
+            <div class="fix-line">
+              <span class="label">Aplicado</span>
+              <span class="text">Uma linha acrescentada em cada quadro correspondente (12 e 15),
+                mais um pequeno ajuste de clareza no texto do Quadro 18 ("foto" → "foto de
+                perfil"). Os 9 quadros completos, já revisados, estão disponíveis à parte.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="diverg sev-media">
+          <div class="diverg-rail"></div>
+          <div class="diverg-body">
+            <div class="diverg-top">
+              <span class="diverg-title">Biblioteca de notificações — o artigo está certo, mas cuidado ao verificar</span>
+              <span class="pill media">Nota de precisão</span>
+            </div>
+            <p>A seção 4.4.9 já cita corretamente <code>react-native-notify-kit</code>. Nenhum
+              ajuste necessário no texto. Só um aviso para quando você for procurar evidência no
+              código para citar mais coisas de lá.</p>
+            <div class="fix-line">
+              <span class="label">Atenção</span>
+              <span class="text">Os arquivos internos ainda se chamam <code>notifee-gateway.ts</code>
+                e <code>canais-notifee.ts</code> — resquício do fork. Confirme a biblioteca real
+                pelo <code>package.json</code>, não pelo nome dos arquivos.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="diverg sev-baixa">
+          <div class="diverg-rail"></div>
+          <div class="diverg-body">
+            <div class="diverg-top">
+              <span class="diverg-title">Trecho de código pendente em 4.4.8</span>
+              <span class="pill baixa">Você já sabia</span>
+            </div>
+            <p>Marcação sua no próprio texto: <em>"ALTERAR AQUI - VER CERTINHO COMO COLOCAR
+              CÓDIGO"</em>, no bloco do <code>IntakeLog</code>. Conferi o shape contra
+              <code>src/domain/entities/</code> — os campos batem
+              (<code>doseScheduleId</code>, <code>status</code>, <code>occurredAt</code>,
+              <code>correctsLogId</code>). Falta só formatar como bloco de código em vez de
+              lista numerada.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= ESTRUTURA PROPOSTA ================= -->
+  <section id="estrutura">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Estrutura proposta para o capítulo 4</h2>
+    </div>
+    <p class="section-intro">A seção 4.4 (Arquitetura) hoje mistura arquitetura pura com UX e
+      LGPD sob um único título. A proposta promove esse conteúdo a duas seções irmãs — 4.6 e
+      4.7 — deixando 4.4 só com arquitetura técnica.</p>
+
+    <div class="tree">
+      <div class="tree-node depth-0"><span class="tree-num">4</span><span class="tree-label">DESENVOLVIMENTO</span><span></span></div>
+
+      <div class="tree-node depth-1"><span class="tree-num">4.1</span><span class="tree-label">Visão geral e delimitação do escopo</span><span class="tree-tag pronto">pronto</span></div>
+      <div class="tree-node depth-1"><span class="tree-num">4.2</span><span class="tree-label">Levantamento de requisitos</span><span class="tree-tag pronto">pronto</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.2.1</span><span class="tree-label">Requisitos funcionais</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.2.2</span><span class="tree-label">Requisitos não funcionais</span><span></span></div>
+
+      <div class="tree-node depth-1"><span class="tree-num">4.3</span><span class="tree-label">Regras de negócio</span><span class="tree-tag pronto">pronto</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.3.1–6</span><span class="tree-label">Os seis grupos temáticos já escritos</span><span></span></div>
+
+      <div class="tree-node depth-1"><span class="tree-num">4.4</span><span class="tree-label">Arquitetura de software</span><span class="tree-tag pronto">pronto — 4.4.6 sai daqui</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.1</span><span class="tree-label">Decisão estrutural</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.2</span><span class="tree-label">Camada de domínio</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.3</span><span class="tree-label">Camada de dados</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.4</span><span class="tree-label">Camada de apresentação</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.5</span><span class="tree-label">Stack tecnológica</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.6</span><span class="tree-label">Sincronização e consistência eventual <span class="mono" style="color:var(--muted)">(era 4.4.7)</span></span><span class="tree-tag mover">renumerar</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.7</span><span class="tree-label">Trilha de auditoria e os três estados da dose <span class="mono" style="color:var(--muted)">(era 4.4.8)</span></span><span class="tree-tag mover">renumerar</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.4.8</span><span class="tree-label">Garantia de entrega do alarme <span class="mono" style="color:var(--muted)">(era 4.4.9)</span></span><span class="tree-tag mover">renumerar</span></div>
+
+      <div class="tree-node depth-1"><span class="tree-num">4.5</span><span class="tree-label">Modelo de dados</span><span class="tree-tag pronto">pronto — corrigir 4 campos</span></div>
+
+      <div class="tree-node depth-1"><span class="tree-num">4.6</span><span class="tree-label">Usabilidade e experiência do usuário</span><span class="tree-tag novo">nova seção</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.6.1</span><span class="tree-label">Gestão centralizada como SSoT</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.6.2</span><span class="tree-label">Sistema de lembretes e gestão temporal</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.6.3</span><span class="tree-label">Heurísticas aplicadas: cadastro e alarme <span class="mono" style="color:var(--muted)">(era 4.4.6)</span></span><span class="tree-tag mover">realocar</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.6.4</span><span class="tree-label">Gamificação e reforço positivo</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.6.5</span><span class="tree-label">Acessibilidade</span><span></span></div>
+
+      <div class="tree-node depth-1"><span class="tree-num">4.7</span><span class="tree-label">Privacidade e LGPD aplicada</span><span class="tree-tag novo">nova seção</span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.7.1</span><span class="tree-label">Base legal e consentimento versionado</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.7.2</span><span class="tree-label">Direitos do titular (exportação e exclusão)</span><span></span></div>
+      <div class="tree-node depth-2"><span class="tree-num">4.7.3</span><span class="tree-label">Minimização e localidade do dado</span><span></span></div>
+
+      <div class="tree-node depth-0"><span class="tree-num">5</span><span class="tree-label">RESULTADOS</span><span class="tree-tag mover" style="background:transparent;color:var(--paper);opacity:0.7">outra etapa</span></div>
+      <div class="tree-node depth-0"><span class="tree-num">6</span><span class="tree-label">CONCLUSÃO</span><span class="tree-tag mover" style="background:transparent;color:var(--paper);opacity:0.7">outra etapa</span></div>
+    </div>
+
+    <div class="rationale">
+      <strong>Por que essa ordem (4.4 → 4.5 → 4.6 → 4.7):</strong> arquitetura → dados → pessoa
+      → lei. É uma progressão de "como o sistema é construído por dentro" para "como ele se
+      comporta com quem usa" até "sob quais limites legais ele existe" — espelha a lógica do
+      próprio referencial teórico, só que com a LGPD deslocada para o fim, papel tradicional de
+      seção de fechamento de conformidade num capítulo de desenvolvimento.
+    </div>
+  </section>
+
+  <!-- ================= MAPEAMENTO DE FONTES ================= -->
+  <section id="fontes">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>De onde puxar cada seção nova</h2>
+    </div>
+    <p class="section-intro">Nenhuma das seções novas começa do zero total — a maior parte já
+      tem material levantado do código, só falta adaptar o registro para prosa de banca.</p>
+
+    <div class="table-scroll">
+      <table class="source-table">
+        <thead>
+          <tr><th>Seção nova</th><th>Fonte</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sec-name">4.6.1 — SSoT</td>
+            <td>
+              <span class="src-file">docs/tcc/INVENTARIO-FUNCIONAL.md</span>
+              <span class="src-note">§1.1, 1.6, 1.7 — Início, Calendário, Compromissos descritos como um só repositório mestre</span>
+            </td>
+            <td class="src-note">Escrever do zero, curto</td>
+          </tr>
+          <tr>
+            <td class="sec-name">4.6.2 — Lembretes / gestão temporal</td>
+            <td>
+              <span class="src-file">docs/tcc/INVENTARIO-FUNCIONAL.md</span>
+              <span class="src-note">§2 inteiro — catálogo de avisos, já quase prosa pronta</span>
+            </td>
+            <td class="src-note">Mais madura das seções novas</td>
+          </tr>
+          <tr>
+            <td class="sec-name">4.6.3 — Heurísticas</td>
+            <td>
+              <span class="src-file">Capítulo 4 atual, seção 4.4.6</span>
+              <span class="src-note">Já escrita por completo</span>
+            </td>
+            <td class="src-note">Só mover, sem reescrever</td>
+          </tr>
+          <tr>
+            <td class="sec-name">4.6.4 — Gamificação</td>
+            <td>
+              <span class="src-file">Seção 4.1 do artigo</span>
+              <span class="src-note">Menção à ausência de punição já escrita — falta descrever os indicadores de progresso concretos (Home / Adesão)</span>
+            </td>
+            <td class="src-note">Escrever, mas curto</td>
+          </tr>
+          <tr>
+            <td class="sec-name">4.6.5 — Acessibilidade</td>
+            <td>
+              <span class="src-file">docs/tcc/EMBASAMENTO-TECNICO.md</span>
+              <span class="src-note">§1 inteiro — cobertura de API, TalkBack, redução de movimento, os três temas, escala de fonte</span>
+            </td>
+            <td class="src-note">Quase pronta — ver pendências abaixo</td>
+          </tr>
+          <tr>
+            <td class="sec-name">4.7 — LGPD aplicada</td>
+            <td>
+              <span class="src-file">docs/tcc/EMBASAMENTO-TECNICO.md</span>
+              <span class="src-note">§3 inteiro — base legal, versionamento de consentimento, direitos do titular, minimização</span>
+            </td>
+            <td class="src-note">Condensar — hoje tem registro de rascunho técnico, não de prosa de banca</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= ANTES DE ESCREVER ================= -->
+  <!-- ================= QUADROS DO MODELO DE DADOS ================= -->
+  <section id="quadros">
+    <div class="section-head">
+      <span class="section-num">03.1</span>
+      <h2>Os 9 quadros, revisados por completo</h2>
+    </div>
+    <p class="section-intro">Conferência campo a campo contra <code>docs/supabase-schema.sql</code>.
+      Linhas com fundo verde são as duas inclusões reais; o resto já batia.</p>
+
+    <div class="quadros-list">
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 11 — <code>medications</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único do medicamento</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro, referencia o usuário autenticado</td></tr>
+            <tr><td class="qf">name</td><td class="qt">text</td><td>Nome do medicamento</td></tr>
+            <tr><td class="qf">active_ingredient</td><td class="qt">text</td><td>Princípio ativo</td></tr>
+            <tr><td class="qf">presentation</td><td class="qt">text</td><td>Apresentação comercial (ex: caixa com 30 comprimidos)</td></tr>
+            <tr><td class="qf">form</td><td class="qt">text</td><td>Forma farmacêutica (comprimido, líquido, injeção etc)</td></tr>
+            <tr><td class="qf">prescription_requirement</td><td class="qt">text</td><td>Exigência de receita (nenhuma, simples, controlada)</td></tr>
+            <tr><td class="qf">photo_uri</td><td class="qt">text</td><td>Caminho local da foto do medicamento</td></tr>
+            <tr><td class="qf">ean</td><td class="qt">text</td><td>Código de barras, quando disponível</td></tr>
+            <tr><td class="qf">from_cmed</td><td class="qt">boolean</td><td>Indica se os dados vieram do catálogo público da Anvisa (CMED)</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização, usada na sincronização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica, quando aplicável</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 12 — <code>prescriptions</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único da prescrição</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">medication_id</td><td class="qt">uuid (FK)</td><td>Medicamento ao qual a prescrição se refere</td></tr>
+            <tr><td class="qf">dose_amount</td><td class="qt">real</td><td>Quantidade padrão da dose</td></tr>
+            <tr><td class="qf">dose_unit</td><td class="qt">text</td><td>Unidade de medida da dose (comprimido, ml, UI etc)</td></tr>
+            <tr><td class="qf">schedule</td><td class="qt">jsonb</td><td>Estrutura da posologia (frequência, horários, ciclo)</td></tr>
+            <tr><td class="qf">start_date</td><td class="qt">date</td><td>Data de início do tratamento</td></tr>
+            <tr><td class="qf">end_date</td><td class="qt">date</td><td>Data de término do tratamento, quando definida</td></tr>
+            <tr><td class="qf">reminder_mode</td><td class="qt">text</td><td>Modo de lembrete configurado para esta prescrição</td></tr>
+            <tr><td class="qf">intake_instructions</td><td class="qt">jsonb</td><td>Instruções adicionais de ingestão (ex: com alimento)</td></tr>
+            <tr><td class="qf">intake_note</td><td class="qt">text</td><td>Observação livre sobre a forma de tomar</td></tr>
+            <tr><td class="qf">notes</td><td class="qt">text</td><td>Observações gerais sobre o tratamento</td></tr>
+            <tr><td class="qf">attachment_uri</td><td class="qt">text</td><td>Caminho do anexo da receita, quando houver</td></tr>
+            <tr><td class="qf">attachment_kind</td><td class="qt">text</td><td>Tipo do arquivo anexado</td></tr>
+            <tr><td class="qf">attachment_valid_until</td><td class="qt">date</td><td>Validade da receita anexada</td></tr>
+            <tr><td class="qf">renewal_reminder_lead_days</td><td class="qt">integer</td><td>Dias de antecedência para avisar sobre renovação</td></tr>
+            <tr class="new-field"><td class="qf">renewal_reminder_enabled</td><td class="qt">boolean</td><td>Indica se o paciente quer ser avisado no vencimento da receita, independentemente de ter escolhido uma antecedência</td></tr>
+            <tr><td class="qf">attachment_sync_opt_out</td><td class="qt">boolean</td><td>Impede o envio do anexo para a nuvem, por decisão do paciente</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 13 — <code>dose_schedules</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único do horário de dose</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">prescription_id</td><td class="qt">uuid (FK)</td><td>Prescrição à qual este horário pertence</td></tr>
+            <tr><td class="qf">scheduled_for</td><td class="qt">timestamptz</td><td>Data e hora previstas para a dose</td></tr>
+            <tr><td class="qf">amount</td><td class="qt">real</td><td>Quantidade prevista para esta dose específica</td></tr>
+            <tr><td class="qf">notification_id</td><td class="qt">text</td><td>Identificador do alarme agendado no sistema operacional</td></tr>
+            <tr><td class="qf">snooze_count</td><td class="qt">integer</td><td>Quantidade de vezes que o lembrete foi adiado</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 14 — <code>intake_logs</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único do registro de ingestão</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">dose_schedule_id</td><td class="qt">uuid (FK)</td><td>Horário de dose ao qual este registro se refere</td></tr>
+            <tr><td class="qf">status</td><td class="qt">text</td><td>Desfecho da dose (confirmada, pulada, adiada)</td></tr>
+            <tr><td class="qf">occurred_at</td><td class="qt">timestamptz</td><td>Data e hora em que o desfecho foi registrado</td></tr>
+            <tr><td class="qf">corrects_log_id</td><td class="qt">uuid (FK, opcional)</td><td>Aponta para o registro original, em caso de correção retroativa</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 15 — <code>inventory_items</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único do item de estoque</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">medication_id</td><td class="qt">uuid (FK)</td><td>Medicamento ao qual este estoque se refere</td></tr>
+            <tr><td class="qf">quantity</td><td class="qt">real</td><td>Quantidade atual em estoque</td></tr>
+            <tr><td class="qf">unit</td><td class="qt">text</td><td>Unidade de medida do estoque</td></tr>
+            <tr><td class="qf">low_stock_alert_enabled</td><td class="qt">boolean</td><td>Indica se o alerta de estoque baixo está ativo</td></tr>
+            <tr><td class="qf">low_stock_alert_lead_days</td><td class="qt">integer</td><td>Dias de antecedência para o alerta de estoque baixo</td></tr>
+            <tr class="new-field"><td class="qf">low_stock_alerted_at_quantity</td><td class="qt">real</td><td>Quantidade em estoque no momento do último aviso emitido; impede repetição até que o estoque seja reposto</td></tr>
+            <tr><td class="qf">storage_location</td><td class="qt">text</td><td>Local de guarda do medicamento</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 16 — <code>inventory_adjustments</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único do ajuste de estoque</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">inventory_item_id</td><td class="qt">uuid (FK)</td><td>Item de estoque ao qual este ajuste se refere</td></tr>
+            <tr><td class="qf">delta</td><td class="qt">real</td><td>Variação de quantidade (positiva ou negativa)</td></tr>
+            <tr><td class="qf">reason</td><td class="qt">text</td><td>Motivo do ajuste (consumo, reposição, recontagem)</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 17 — <code>appointments</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único do compromisso</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">title</td><td class="qt">text</td><td>Título do compromisso</td></tr>
+            <tr><td class="qf">scheduled_for</td><td class="qt">timestamptz</td><td>Data e hora previstas do compromisso</td></tr>
+            <tr><td class="qf">location</td><td class="qt">text</td><td>Local do compromisso</td></tr>
+            <tr><td class="qf">professional</td><td class="qt">text</td><td>Profissional de saúde responsável</td></tr>
+            <tr><td class="qf">notes</td><td class="qt">text</td><td>Observações gerais</td></tr>
+            <tr><td class="qf">reminder_lead_days</td><td class="qt">integer</td><td>Dias de antecedência para o lembrete</td></tr>
+            <tr><td class="qf">reminder_on_day</td><td class="qt">boolean</td><td>Indica se há lembrete no próprio dia</td></tr>
+            <tr><td class="qf">outcome</td><td class="qt">text</td><td>Desfecho do compromisso (compareceu, faltou etc)</td></tr>
+            <tr><td class="qf">outcome_notes</td><td class="qt">text</td><td>Observações sobre o desfecho</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 18 — <code>patient_profiles</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único da ficha de saúde</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">full_name</td><td class="qt">text</td><td>Nome completo do titular</td></tr>
+            <tr><td class="qf">date_of_birth</td><td class="qt">date</td><td>Data de nascimento</td></tr>
+            <tr><td class="qf">biological_sex</td><td class="qt">text</td><td>Sexo biológico</td></tr>
+            <tr><td class="qf">photo_uri</td><td class="qt">text</td><td>Caminho da foto de perfil</td></tr>
+            <tr><td class="qf">blood_type</td><td class="qt">text</td><td>Tipo sanguíneo</td></tr>
+            <tr><td class="qf">allergies</td><td class="qt">jsonb</td><td>Lista de alergias conhecidas</td></tr>
+            <tr><td class="qf">emergency_contacts</td><td class="qt">jsonb</td><td>Lista de contatos de emergência</td></tr>
+            <tr><td class="qf">notes</td><td class="qt">text</td><td>Observações gerais de saúde</td></tr>
+            <tr><td class="qf">photo_sync_opt_out</td><td class="qt">boolean</td><td>Impede o envio da foto de perfil para a nuvem, por decisão do paciente</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="quadro-block">
+        <h4 class="quadro-title">Quadro 19 — <code>consent_records</code></h4>
+        <div class="table-scroll">
+        <table class="quadro-table">
+          <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th></tr></thead>
+          <tbody>
+            <tr><td class="qf">id</td><td class="qt">uuid (PK)</td><td>Identificador único do registro de consentimento</td></tr>
+            <tr><td class="qf">user_id</td><td class="qt">uuid (FK)</td><td>Proprietário do registro</td></tr>
+            <tr><td class="qf">terms_version</td><td class="qt">text</td><td>Versão do termo de uso aceito</td></tr>
+            <tr><td class="qf">accepted_at</td><td class="qt">timestamptz</td><td>Data e hora do aceite</td></tr>
+            <tr><td class="qf">updated_at</td><td class="qt">timestamptz</td><td>Data e hora da última atualização</td></tr>
+            <tr><td class="qf">deleted_at</td><td class="qt">timestamptz</td><td>Data e hora da exclusão lógica</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="antes-de-escrever">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>Antes de escrever</h2>
+    </div>
+    <p class="section-intro">Três pendências, em ordem de execução.</p>
+
+    <div class="checklist">
+      <div class="check-item" style="border-color:var(--good-line); background:var(--good-soft);">
+        <span class="check-num" style="color:var(--good);">✓</span>
+        <div>
+          <h4>Corrigir a seção 3.2 (Tailwind)</h4>
+          <p>Feito — ver o diff completo na seção 01, acima.</p>
+        </div>
+      </div>
+      <div class="check-item" style="border-color:var(--good-line); background:var(--good-soft);">
+        <span class="check-num" style="color:var(--good);">✓</span>
+        <div>
+          <h4>Completar os campos nos Quadros 11–19</h4>
+          <p>Feito — eram 2 campos reais, não 4. Ver a seção 01, acima.</p>
+        </div>
+      </div>
+      <div class="check-item">
+        <span class="check-num">03</span>
+        <div>
+          <h4>Resolver as duas pendências 🔖 de fonte bibliográfica</h4>
+          <p>Incidência de catarata acima dos 65 anos, e daltonismo em ~1 homem a cada 12 —
+            precisam de fonte real antes de escrever 4.6.5, senão o texto é escrito duas vezes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Levantado do código-fonte, do schema e de <code>docs/tcc/</code> em 11/09. Cada afirmação
+    aqui é rastreável a arquivo e linha.
+  </footer>
+
+</div>
