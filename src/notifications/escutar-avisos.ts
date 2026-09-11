@@ -37,12 +37,22 @@ import { todasAsDosesResolvidas, tratarRespostaAoAviso } from "./responder-aviso
  * de "já abriu este horário" depende de saber a diferença.
  */
 type AoDispararAlarme = (scheduledFor: string) => boolean;
+/**
+ * Abre a tela do alarme porque a **pessoa tocou** na notificação.
+ *
+ * Separado de `aoDispararAlarme` porque os dois gestos têm regras opostas: o disparo é automático e
+ * recusa em segundo plano (tela escondida vira som sem rosto), enquanto o toque é intenção
+ * explícita e abre sempre — é justamente o gesto que traz o app à frente. Eram a mesma função até
+ * 10/09, e a guarda do disparo deixava o toque sem efeito nenhum.
+ */
+type AoAbrirTelaDeAlarme = (scheduledFor: string) => void;
 /** Avisa que o toque no corpo pede a tela do horário. */
 type AoAbrirHorario = (dados: DadosDoAviso) => void;
 
 type AoAbrirDestino = (destino: DestinoDoAviso) => void;
 
 let aoDispararAlarme: AoDispararAlarme | null = null;
+let aoAbrirTelaDeAlarme: AoAbrirTelaDeAlarme | null = null;
 let aoAbrirHorario: AoAbrirHorario | null = null;
 let aoAbrirDestino: AoAbrirDestino | null = null;
 
@@ -240,10 +250,20 @@ async function tratar(evento: Event): Promise<void> {
        */
       if (jaEstaEmCena(dados.scheduledFor)) return;
 
-      // Sem tela em cena, o toque é intenção explícita e abre — mesmo que a entrega já tenha sido
-      // registrada, porque aí a tela dela foi embora e recusar deixaria o toque sem efeito.
+      /**
+       * Sem tela em cena, o toque é intenção explícita e abre — mesmo que a entrega já tenha sido
+       * registrada, porque aí a tela dela foi embora e recusar deixaria o toque sem efeito.
+       *
+       * **E abre mesmo com o app em segundo plano**, que é o caso normal aqui: tocar na notificação
+       * é justamente o gesto que traz o app à frente. `aoDispararAlarme` recusa em segundo plano
+       * para o *disparo* — tela que monta escondida vira som sem rosto (ver `use-dose-notifications`)
+       * —, e essa guarda vazou para cá em 10/09, deixando o toque sem efeito nenhum: a tela não
+       * abria e a notificação ficava na bandeja. São dois gestos diferentes, e só o disparo é
+       * automático.
+       */
       jaAbertos.delete(dados.scheduledFor);
-      aoDispararAlarme?.(dados.scheduledFor);
+      await notifee.cancelNotification(id).catch(() => {});
+      aoAbrirTelaDeAlarme?.(dados.scheduledFor);
       return;
     }
 
@@ -283,10 +303,12 @@ async function tratar(evento: Event): Promise<void> {
 export function escutarAvisos(opcoes: {
   aoAbrirHorario: AoAbrirHorario;
   aoDispararAlarme: AoDispararAlarme;
+  aoAbrirTelaDeAlarme: AoAbrirTelaDeAlarme;
   aoAbrirDestino: AoAbrirDestino;
 }): () => void {
   aoAbrirHorario = opcoes.aoAbrirHorario;
   aoDispararAlarme = opcoes.aoDispararAlarme;
+  aoAbrirTelaDeAlarme = opcoes.aoAbrirTelaDeAlarme;
   aoAbrirDestino = opcoes.aoAbrirDestino;
 
   const parar = notifee.onForegroundEvent((evento) => void tratar(evento));
@@ -294,6 +316,7 @@ export function escutarAvisos(opcoes: {
   return () => {
     aoAbrirHorario = null;
     aoDispararAlarme = null;
+    aoAbrirTelaDeAlarme = null;
     aoAbrirDestino = null;
     parar();
   };

@@ -81,6 +81,17 @@ export function useDoseNotifications(): void {
         .catch(() => router.push("/remedios"));
     }
 
+    /**
+     * `navigate`, e não `push`: **duas telas de alarme nunca se empilham.**
+     *
+     * `push` empilha sempre, mesmo com a rota já aberta — e foi o que fez cada toque na notificação
+     * abrir mais uma tela azul (visto em 10/09, passo 14.5.2). `navigate` reaproveita a rota quando
+     * os parâmetros são os mesmos, então o mesmo horário nunca vira duas telas.
+     */
+    function abrirTelaDeAlarme(scheduledFor: string) {
+      router.navigate({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
+    }
+
     void reagendarTodosOsAvisos();
 
     const assinaturaDoEstado = AppState.addEventListener("change", (estado) => {
@@ -126,9 +137,17 @@ export function useDoseNotifications(): void {
          */
         if (AppState.currentState !== "active") return false;
 
-        router.navigate({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
+        abrirTelaDeAlarme(scheduledFor);
         return true;
       },
+      /**
+       * O **toque** na notificação abre sempre, sem a guarda de primeiro plano.
+       *
+       * Aqui o app está em segundo plano justamente porque a pessoa acabou de tocar no aviso para
+       * trazê-lo à frente — recusar por isso deixaria o toque sem efeito nenhum, que foi o defeito
+       * de 10/09: a tela não abria e a notificação continuava na bandeja.
+       */
+      aoAbrirTelaDeAlarme: abrirTelaDeAlarme,
       aoAbrirDestino: abrirDestino,
     });
 
