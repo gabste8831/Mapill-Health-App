@@ -103,14 +103,13 @@ export function SeletorDeCoresDeEstado() {
                 {ESTADOS.map((estado) => (
                   <View
                     key={estado.chave}
-                    style={[styles.quadrado, { backgroundColor: par[estado.chave] }]}
+                    style={[styles.faixa, { backgroundColor: par[estado.chave] }]}
                   />
                 ))}
               </View>
 
-              <Text
-                style={selecionado ? styles.nomeSelecionado : styles.nome}
-                numberOfLines={2}>
+              {/* O nome traz as **três** cores, na ordem das faixas acima. */}
+              <Text style={selecionado ? styles.nomeSelecionado : styles.nome} numberOfLines={2}>
                 {par.nome}
               </Text>
 

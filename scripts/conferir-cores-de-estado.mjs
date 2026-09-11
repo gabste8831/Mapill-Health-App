@@ -123,11 +123,11 @@ const menorDeltaE = (a, b) =>
 
 // Espelha `src/shared/theme/pares-de-estado.ts`. Se lá mudar, aqui muda junto.
 const CONJUNTOS = [
-  { nome: "Verde e vermelho", afirmativo: "#11803E", negativo: "#C90000", atencao: "#A16207", padrao: true },
-  { nome: "Azul e laranja", afirmativo: "#0B5FD9", negativo: "#C2410C", atencao: "#6D4C00" },
-  { nome: "Azul e vermelho", afirmativo: "#1D4ED8", negativo: "#B91C1C", atencao: "#155E75" },
-  { nome: "Roxo e âmbar", afirmativo: "#6D28D9", negativo: "#96590A", atencao: "#155E75" },
-  { nome: "Turquesa e magenta", afirmativo: "#00696E", negativo: "#C2185B", atencao: "#6D4C00" },
+  { nome: "Verde, amarelo e vermelho", afirmativo: "#11803E", negativo: "#C90000", atencao: "#A16207", padrao: true },
+  { nome: "Azul, marrom e laranja", afirmativo: "#0B5FD9", negativo: "#C2410C", atencao: "#6D4C00" },
+  { nome: "Azul, petróleo e vermelho", afirmativo: "#1D4ED8", negativo: "#B91C1C", atencao: "#155E75" },
+  { nome: "Roxo, petróleo e âmbar", afirmativo: "#6D28D9", negativo: "#96590A", atencao: "#155E75" },
+  { nome: "Turquesa, marrom e magenta", afirmativo: "#00696E", negativo: "#C2185B", atencao: "#6D4C00" },
 ];
 
 const FUNDO_DA_TELA = "#F1F4F8";
@@ -164,15 +164,15 @@ for (const conjunto of CONJUNTOS) {
 
   const resumo = distancias.map(([, v]) => v.toFixed(1)).join(" / ");
   if (problemas.length === 0) {
-    console.log(`  OK    ${nome.padEnd(20)} ΔE ${resumo}`);
+    console.log(`  OK    ${nome.padEnd(27)} ΔE ${resumo}`);
   } else if (padrao) {
     // O conjunto original do app é o **problema** que os outros existem para resolver: ele fica na
     // lista para quem enxerga as cores normalmente, e falhar aqui é o esperado.
-    console.log(`  ~     ${nome.padEnd(20)} ΔE ${resumo}   (esperado: é o conjunto que se troca)`);
+    console.log(`  ~     ${nome.padEnd(27)} ΔE ${resumo}   (esperado: é o conjunto que se troca)`);
     for (const p of problemas) console.log(`          ${p}`);
   } else {
     falhas += problemas.length;
-    console.log(`  FALHA ${nome.padEnd(20)} ΔE ${resumo}`);
+    console.log(`  FALHA ${nome.padEnd(27)} ΔE ${resumo}`);
     for (const p of problemas) console.log(`          ${p}`);
   }
 }

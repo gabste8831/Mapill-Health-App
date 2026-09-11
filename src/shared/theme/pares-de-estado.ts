@@ -31,11 +31,14 @@
 export type ParDeEstado = {
   id: string;
   /**
-   * O nome que a pessoa lê, dito pelas cores e não por uma condição médica.
+   * O nome que a pessoa lê: as **três** cores por extenso, na ordem em que a faixa as desenha.
    *
-   * Cita as **duas que mudam de fato** — a de confirmação e a de urgência. A do meio (atenção) é
-   * consequência delas: ela existe para não colidir com nenhuma das duas, e nomeá-la fazia o
-   * rótulo precisar de duas linhas na grade sem dizer nada que a amostra logo acima já não mostre.
+   * Dito pelas cores, e não por uma condição médica — quem escolhe não precisa saber nomear a
+   * própria visão, só apontar o conjunto que lhe parece mais distinto.
+   *
+   * Eram **duas** cores aqui ("Azul e laranja"), com a do meio só na `descricao`, que a tela não
+   * mostra: a pessoa via três faixas, lia duas cores e tinha de adivinhar qual não estava dita. As
+   * três nomeadas é o que faz o rótulo corresponder ao que está desenhado logo acima.
    */
   nome: string;
   /** "Deu certo": dose tomada, compromisso comparecido, estoque saudável. */
@@ -52,11 +55,12 @@ export type ParDeEstado = {
    */
   atencao: string;
   /**
-   * A frase de apoio: as **três cores por extenso**, e depois o que a medição diz do conjunto.
+   * O que a medição diz do conjunto — lido pelo leitor de tela, junto do nome.
    *
-   * Nomear as cores aqui é o que permite ao rótulo acima ficar curto ("Azul e laranja") sem que a
-   * do meio desapareça — ela está desenhada na amostra e dita nesta linha, e o rótulo não precisa
-   * carregar as três numa coluna de 128dp.
+   * Não repete as cores: elas passaram a viver em `coresPorExtenso`, que a grade mostra. Enquanto o
+   * rótulo citava só duas, esta frase era o único lugar onde as três apareciam; agora ela cuida só
+   * do que a amostra **não** consegue mostrar a quem não distingue as cores — como o conjunto se
+   * comportou na medição.
    */
   descricao: string;
 };
@@ -64,39 +68,39 @@ export type ParDeEstado = {
 export const PARES_DE_ESTADO: readonly ParDeEstado[] = [
   {
     id: "padrao",
-    nome: "Verde e vermelho",
+    nome: "Verde, amarelo e vermelho",
     afirmativo: "#11803E",
     negativo: "#C90000",
     // O âmbar original do app. Com o par padrão ele colide com o vermelho (ΔE 7.8) — é justamente
     // a colisão que motiva os pares abaixo.
     atencao: "#A16207",
-    descricao: "Verde, amarelo e vermelho. As cores originais do app.",
+    descricao: "As cores originais do app.",
   },
   {
     id: "azulLaranja",
-    nome: "Azul e laranja",
+    nome: "Azul, marrom e laranja",
     afirmativo: "#0B5FD9",
     negativo: "#C2410C",
     // ΔE mínimo do trio: 17.6. O âmbar escurece para se afastar do laranja do negativo.
     atencao: "#6D4C00",
     // Separação medida: 217 / 207 / 248 nas três formas. É o par que mais se separa dos cinco,
     // e o recomendado da literatura para deuteranopia e protanopia — as duas mais comuns.
-    descricao: "Azul, marrom e laranja. O conjunto que mais se separa.",
+    descricao: "O conjunto que mais se separa.",
   },
   {
     id: "azulVermelho",
-    nome: "Azul e vermelho",
+    nome: "Azul, petróleo e vermelho",
     afirmativo: "#1D4ED8",
     negativo: "#B91C1C",
     // Petróleo: ΔE mínimo 12.9. Um terceiro âmbar colidiria com o vermelho, como no par padrão.
     atencao: "#155E75",
     // 216 / 207 / 251. Empata com o azul/laranja e mantém o vermelho, que já significa "pare"
     // fora do app — para quem confunde só o verde, trocar apenas ele é a mudança menor.
-    descricao: "Azul, petróleo e vermelho. Mantém o vermelho de alerta.",
+    descricao: "Mantém o vermelho de alerta.",
   },
   {
     id: "roxoAmarelo",
-    nome: "Roxo e âmbar",
+    nome: "Roxo, petróleo e âmbar",
     afirmativo: "#6D28D9",
     // `#96590A` e nao o `#A16207` do `warning`: aquele dava 4.46:1 sobre o fundo da tela e
     // reprovava em AA por 0.04. Um degrau mais fechado leva a 5.10:1 e continua sendo o mesmo
@@ -106,18 +110,18 @@ export const PARES_DE_ESTADO: readonly ParDeEstado[] = [
     atencao: "#155E75",
     // 150 / 161 / 151 — o único par que fica igual nas três, e por isso o mais previsível para
     // tritanopia, que os outros atendem por acaso e não por desenho.
-    descricao: "Roxo, petróleo e âmbar. O mais parelho nos três tipos.",
+    descricao: "O mais parelho nos três tipos.",
   },
   {
     id: "turquesaMagenta",
-    nome: "Turquesa e magenta",
+    nome: "Turquesa, marrom e magenta",
     afirmativo: "#00696E",
     negativo: "#C2185B",
     // ΔE mínimo 18.4, o melhor deste trio.
     atencao: "#6D4C00",
     // 146 / 117 / 178. Era o par fixo do antigo tema "Sem depender de cor"; fica na lista porque
     // alguém pode preferi-lo, mas não é mais o que o app escolhe por conta.
-    descricao: "Turquesa, marrom e magenta. As cores do modo anterior.",
+    descricao: "As cores do modo anterior.",
   },
 ];
 
