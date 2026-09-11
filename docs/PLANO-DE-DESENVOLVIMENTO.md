@@ -32,24 +32,32 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 0.0 RETOMADA — onde parei (05/09)
+## 0.0 RETOMADA — onde parei (11/09)
 
 > **Leia esta seção primeiro se estiver voltando ao projeto, ou abrindo em outra máquina.** Ela diz
-> o que está em andamento agora; o índice do que falta no geral está em [0.1.1](#011-o-que-falta--índice-0209).
+> o que está em andamento agora. O índice de 02/09 logo abaixo ficou como registro histórico —
+> a seção "0.0" é sempre a que manda.
 
 ### Onde o projeto está
 
-**A revisão de frontend acabou.** Todas as telas foram percorridas em aparelho, tela por tela, com o
-Gabriel apontando e cada apontamento virando execução exata. O registro completo, com o raciocínio
-de cada decisão, está em [`AJUSTES-POR-TELA.md`](AJUSTES-POR-TELA.md) — que passa a ser um documento
-de consulta, não mais de trabalho.
+**A revisão de frontend e o passe visual terminaram** (o que era `AJUSTES-POR-TELA.md`, removido em
+11/09 por estar 100% concluído — só sobrava um item de exemplo do template). Os quatro temas foram
+revisados em aparelho e aprovados; a miniatura que não aparecia na hora foi corrigida e confirmada.
 
-**O próximo passo é validar em binário.** O roteiro ganhou dois blocos novos para isso:
+**A validação em aparelho está em andamento, guiada pelo [`ROTEIRO-DE-TESTE.md`](ROTEIRO-DE-TESTE.md)
+— esse é o documento de trabalho agora, não este.** Estado na rodada de 11/09:
 
-- **13.4** — as cinco correções de alarme/notificação que **nunca rodaram em build**. É por onde
-  começar: são do subsistema de maior risco do projeto (C1), e o app que vinha sendo usado é
-  anterior a elas.
-- **13.5** — a revisão tela a tela desta rodada, com os itens 🔬 que dependem de aparelho.
+- A maior parte do roteiro (blocos 10, 12, 13.2–13.5, 15, 16, 21, 22, 23) **passou** e já saiu do
+  roteiro.
+- **Achado novo e não resolvido:** com o app fora dos recentes (removido da lista, não só
+  minimizado), nem o alarme nem a notificação disparam — trava os blocos de reboot/bateria, casos de
+  borda e avisos de estoque/receita até ser investigado (checar se é efeito do dev client ou defeito
+  real numa build preview/produção).
+- **Bug confirmado, a corrigir:** um alarme adiado continuou tocando mesmo depois de apagar todos os
+  dados de saúde — o adiamento é agendado direto no sistema (Notifee), fora da grade normal, e o
+  apagamento de dados não está cancelando os adiamentos pendentes.
+- **Bloco 17** (vários remédios no mesmo horário, resposta em lote) ficou parado por decisão do
+  Gabriel: precisa ser desenvolvido de novo antes de voltar a ser testado.
 
 ### O que saiu nesta rodada (05/09)
 
@@ -75,9 +83,8 @@ caminho de execução antes da build que a contém.)*
 
 ### Pendência anotada para o refinamento
 
-**Os quatro temas.** A revisão foi feita e aprovada no tema **padrão**. Escuro, alto contraste e
-daltonismo receberam os tokens novos com valores calculados e conferidos por contraste, mas **não
-foram vistos em aparelho**. Detalhes em `AJUSTES-POR-TELA.md`, seção "Pendente para o refinamento".
+**Os quatro temas.** ✅ **Resolvido em 11/09** — os quatro temas (padrão, escuro, alto contraste e
+daltonismo) foram revisados em aparelho e aprovados.
 
 ⚠️ **Desinstale a versão anterior antes de instalar a nova.** Canal do Android congela na criação, e
 o canal de lembrete mudou (era criado **mudo** por um engano de leitura da documentação). Instalar
@@ -236,15 +243,10 @@ app, e depois dele o estado do aparelho não serve para os outros:
 
 | O que | Situação |
 |---|---|
-| **Capítulo 4** — argumento → decisão de código | Base pronta em [`GUIA-DO-TCC.md`](./GUIA-DO-TCC.md): RF01–RF44, RNF01–RNF12, 20 regras de negócio, arquitetura, decisões difíceis e o mapa argumento → código (seção 11). **Falta redigir o texto corrido.** |
-| Prints do caminho crítico | A capturar na sessão de validação, seguindo a Parte 2 do roteiro |
-| Limitações e trabalhos futuros | ✅ Escrito — seções 10.1 e 10.2 do guia, com o motivo de cada exclusão na data em que foi decidida |
+| **Capítulo 4** — argumento → decisão de código | Base em [`docs/tcc/`](./tcc/) — `EMBASAMENTO-TECNICO.md`, `INVENTARIO-FUNCIONAL.md` e `ROTEIRO-SECAO-DESENVOLVIMENTO.md` (esta última é a estrutura proposta para o texto, não texto pronto). O antigo `GUIA-DO-TCC.md` foi removido em 11/09 por estar superado por esses três. |
+| Prints do caminho crítico | A capturar na sessão de validação, seguindo a Parte 2 do [`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md) |
+| Limitações e trabalhos futuros | Ver `docs/tcc/EMBASAMENTO-TECNICO.md` |
 | Acessibilidade (E1) | O que foi medido entra no artigo; o passe de front e o TalkBack ficam para o fim |
-
-⚠️ **Duas seções do guia precisam ser atualizadas** com o que mudou em 01 e 02/09: a **6** (o
-spike concluiu "nível A inviável", e o nível A foi entregue — a lição é ter confundido limite da
-biblioteca com limite da plataforma) e a **9.2/10** (o PDF saiu de "trabalho futuro" para
-entregue).
 
 ### ❌ Fora de escopo, com motivo registrado
 
@@ -328,8 +330,8 @@ quatro paletas, e o **passe de design** em catorze frentes.
   confiável de terceiros, e o mecanismo equivalente (AlarmKit) só existe a partir dele. A fronteira
   que permitiria migrar já está no lugar — `NotificationGateway` é porta de domínio, e a biblioteca
   é só uma implementação dela.
-- **Os três temas não-padrão** receberam os tokens novos com valores conferidos por contraste, mas
-  **não foram vistos em aparelho**. Pendência de refinamento, registrada em `AJUSTES-POR-TELA.md`.
+- ~~Os três temas não-padrão não foram vistos em aparelho~~ — ✅ resolvido em 11/09, os quatro
+  temas foram revisados e aprovados.
 - **A adesão conta só doses vencidas** (RN20), e isso esconde resposta antecipada — quem confirma às
   13h um remédio das 13h05 não se vê no acompanhamento até o horário chegar. Achado em 05/09.
 
@@ -1382,7 +1384,7 @@ aplicada ao consentimento.
 
 **Se voltar** (pós-defesa): bucket com política sobre o caminho do arquivo, opt-out por item com
 padrão em não subir, exclusão alcançando o Storage antes do local (RN18), texto 1.3.0 com
-reconsentimento **antes** do primeiro upload, e a seção 8 do `GUIA-DO-TCC.md` reescrita — a
+reconsentimento **antes** do primeiro upload, e o texto do TCC em `docs/tcc/` reescrito — a
 minimização passa a ser "sobem por escolha explícita", que é outra afirmação.
 
 **Rastreabilidade**: LGPD art. 6º III (minimização), art. 11 (dado sensível).
@@ -1425,10 +1427,11 @@ minimização passa a ser "sobem por escolha explícita", que é outra afirmaç�
 - [ ] Prints/roteiro de demonstração das funcionalidades do caminho crítico. — a capturar na
       sessão de validação, seguindo a ordem da Parte 2 do roteiro.
 - [ ] Capítulo 4 (Resultados) mapeando: argumento do artigo → arquivo/decisão de código. — a base
-      está pronta em [`GUIA-DO-TCC.md`](./GUIA-DO-TCC.md), com o mapa argumento → código na seção
-      11. Falta redigir o texto corrido.
-- [x] Limitações e trabalhos futuros (inclui a Fase 2 do agente Anvisa). — seções 10.1 e 10.2 do
-      guia, com o motivo de cada exclusão registrado na data em que foi decidida.
+      está em [`docs/tcc/`](./tcc/) (`EMBASAMENTO-TECNICO.md`, `INVENTARIO-FUNCIONAL.md`,
+      `ROTEIRO-SECAO-DESENVOLVIMENTO.md`). Falta redigir o texto corrido.
+- [x] Limitações e trabalhos futuros (inclui a Fase 2 do agente Anvisa). — ver
+      `docs/tcc/EMBASAMENTO-TECNICO.md`, com o motivo de cada exclusão registrado na data em que foi
+      decidida.
 
 ---
 
@@ -1968,7 +1971,7 @@ implementação não foi "trocar duas cores": foi decidir **onde mora a cor do a
 > atenção colidia com o vermelho de urgência **no próprio tema padrão** (ΔE 7,8 sob deuteranopia).
 > A escolha do trio de cores virou preferência independente do tema, e vale em qualquer aparência —
 > inclusive no escuro, que antes era inacessível a quem precisava daquele modo. Ver
-> [6.6 do guia do TCC](GUIA-DO-TCC.md) e `scripts/conferir-cores-de-estado.mjs`.
+> `docs/tcc/EMBASAMENTO-TECNICO.md` e `scripts/conferir-cores-de-estado.mjs`.
 
 **A barreira técnica, medida antes de começar.** 567 usos de cor em 99 arquivos, todos dentro de
 `StyleSheet.create` — que roda **uma vez**, na importação do módulo, e nunca mais. Trocar de tema

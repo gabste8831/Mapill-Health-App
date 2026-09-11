@@ -1,64 +1,28 @@
 # Roteiro de teste em aparelho
 
-> **Este roteiro tem só o que ainda falta validar.** Os blocos 1 a 9 — integridade, restauração,
-> exportação, revisão tela a tela, câmera, CMED, relatório em PDF, passe de design e TalkBack —
-> foram percorridos em aparelho e aprovados em 08/09, e saíram daqui em 09/09 para o arquivo parar
-> de pedir o que já foi feito.
+> **Este roteiro tem só o que ainda falta validar.** Os blocos 1 a 9 foram aprovados em 08/09, e a
+> maior parte do que restava (10, 11.5.1/2/3/4, 12, 13.2–13.5, 15, 16, 21, 22, 23) passou na rodada
+> de 11/09 e saiu daqui.
 >
-> Eles continuam no histórico do git, no commit anterior a este, caso o TCC precise da lista do que
-> foi validado.
+> O histórico completo, incluindo tudo que já foi validado, continua no git.
 
 ## O que sobrou, e por quê
 
 | | O que é | Situação |
 |---|---|---|
-| **10** | Regressão com a fonte no máximo | ✅ **Passou em 09/09** |
-| **11** | Diagnóstico | Rodada de 09/09 não anotou resultado — refazer |
-| **12** | Permissões do alarme | ✅ **Passou em 09/09** |
-| **13** | As cinco correções | ⚠️ **13.1 falhou** (ver abaixo). Os outros quatro esperam a build |
-| **14** | Alarme em tela cheia | Espera a build nova |
-| **15** | Botões da notificação | ✅ **Passou em 09/09** — ver a nota do "Adiar" |
-| **16 e 17** | Alarme órfão, vários no mesmo horário | **Nunca rodou** |
-| **18 e 19** | Reboot, bateria e casos de borda | ❌ **Reprovaram** na rodada anterior |
-| **20 e 21** | Avisos de estoque/receita, e o que mudou depois | **Nunca rodou** |
-| **22** | Os itens soltos que dependem de um aviso chegar | **Nunca rodou** |
-| **23** | Apagar dados de saúde | Guardado para o fim: é destrutivo |
+| **13.1** | Tela azul sobre outro app | ✅ Confirmado em 11/09, mas ver a ressalva junto do 14.1.2 |
+| **14.1.2** | Alarme/notificação com o app fora dos recentes | ❌ **Nada dispara.** Investigar antes de tudo abaixo |
+| **17** | Vários remédios no mesmo horário | **Parado** — precisa ser desenvolvido de novo |
+| **18, 19, 20** | Reboot/bateria, casos de borda, avisos de estoque/receita | **Suspensos**, dependem do 14.1.2 ser resolvido |
+| 🔴 | Alarme adiado toca mesmo após apagar todos os dados | **Bug confirmado em 11/09** — resolver |
 
-### O que a rodada de 09/09 encontrou
+## A ordem agora
 
-**13.1 — a tela azul não subia sobre outro app, e piscava ao responder.** São dois defeitos, e só
-um era corrigível sem build:
-
-- **Não subir sozinha** é a permissão `SYSTEM_ALERT_WINDOW`, que está declarada no `app.json` e não
-  entra por recarga do Metro. **Só o binário novo pode provar.**
-- **O lampejo azul** ao tocar em "Tomei"/"Pulei" era a tela do alarme abrindo para uma dose **já
-  respondida** — ela se fecha sozinha quando tudo está resolvido, então abrir nessa situação produz
-  exatamente um piscar. Corrigido em 09/09 (`e715b3c`): o app lê o desfecho no banco antes de
-  navegar. **Reconfira no 13.1 da próxima rodada.**
-
-**15.2 — o "Adiar" não existe mais**, e está certo: os botões são "Tomei" e "Pulei". O passo do
-roteiro descrevia o comportamento antigo e foi reescrito.
-
-**Por que 18 e 19 reprovaram:** o Notifee foi arquivado em 07/04/2026, e o boot receiver dele nunca
-era invocado no Android 12+. O app migrou para o fork mantido (`react-native-notify-kit`), então
-esta é a primeira build em que a correção pode valer.
-
-## A ordem, e ela não é preferência
-
-**Os blocos 18 e 19 ficam por último.** O 19 mexe no relógio do sistema e reinstala o app; o 18
-exige reiniciar o aparelho. Depois deles o estado do celular não serve para mais nada.
-
-Dentro do alarme, o **11 abre a sequência**: é a tela de diagnóstico, e ela responde em cinco
-segundos o que antes exigia esperar vinte minutos e adivinhar.
-
-1. **11** — diagnóstico *(primeiro: habilita julgar todo o resto)*
-2. **12** — permissões *(rápido, e sem elas nada abaixo funciona)*
-3. **20 e 21** — o mais novo, e o que tem mais chance de defeito
-4. **13 a 17** — o alarme propriamente
-5. **22** — os itens soltos, aproveitando os alarmes já cadastrados
-6. **10** — regressão com a fonte no máximo
-7. **18 e 19** — por último, pelo motivo acima
-8. **23** — apagar tudo, no fim de tudo
+1. **Investigar o 14.1.2** — é o que trava 18, 19 e 20. Testar numa build de produção/preview, não
+   só no dev client, para saber se é efeito da build ou defeito real de agendamento.
+2. **Corrigir o adiamento sobrevivendo ao apagamento de dados** (ver a seção dedicada abaixo).
+3. Com os dois resolvidos, rodar **18, 19 e 20**.
+4. **17** fica para quando a funcionalidade for refeita — não depende dos itens acima.
 
 > ⏰ **Planeje a véspera.** Compromisso, receita e estoque avisam às **00:01 do dia** — marcar para
 > hoje não dispara nada, porque esse instante já passou. Deixe o que for testar cadastrado **na
@@ -109,50 +73,6 @@ avisos`. Se a seção "DESENVOLVIMENTO" não existir, a build é antiga.
 
 # PARTE 1 — O que falta
 
-## 10 — Regressão com a fonte no máximo
-
-> ⚠️ **Este bloco passou em 08/09 e volta por um motivo só: a tipografia mudou em 09/09.** A caixa
-> alta saiu de 86 rótulos, a altura de linha foi corrigida em três tokens, e as cores de estado
-> viraram escolha de quem usa.
->
-> **A tipografia e as cores foram validadas em aparelho na hora.** O que não foi é a regressão
-> **com a fonte do sistema no máximo** — justamente onde mudança de largura e de altura de linha
-> aparece. Então: percorra a tabela **direto no tamanho máximo**, e não em uso normal.
-
-**Configurações do Android → Tela → Tamanho da fonte → máximo.** Depois percorra as telas
-procurando **texto cortado**, **botão espremido**, **linha sobreposta** e **layout quebrado**.
-
-| Tela                               | O que olhar em especial                                                                                   |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Home**                           | Seções com rótulo, lista compacta das registradas, marca-d'água nos cards cheios, atalhos de uma linha    |
-| **Remédios**                       | Seletor sem rolagem, contagem junto da lista, atalho de estoque igual ao da Home, miniatura que **amplia** |
-| **Estoque**                        | Card sem local e sem divisor, selo de prazo nos três estados, botões menores, duas ordens (não três)      |
-| **Calendário**                     | Dia selecionado **redondo, sem quadrado ao tocar**; barra lateral no card de compromisso; pontos visíveis |
-| **Adesão**                         | Faixa "Seus últimos sete dias", bloco azul do número, tabela por medicamento, os dois seletores do PDF    |
-| **Compromissos**                   | 🆕 busca, acordeão de anteriores, traço separando, contagem só dos próximos                               |
-| **Cadastro de medicamento**        | ⚠️ o mais longo: revelação progressiva, popups, rodapé, sugestões, dias da semana, **anexos que abrem**   |
-| **Ajuda de alertas**               | 🆕 tela nova: os quatro assuntos, "Depende do seu aparelho", link dos termos, voltar                      |
-| **Cadastro de compromisso**        | Campos, cascata de lembretes, data no passado                                                             |
-| **Ficha de saúde**                 | Foto (que **amplia**), contatos de emergência, selos, banner azul, links com alvo de 44pt                 |
-| **Horário**                        | Cartão, Tomei/Pulei com estado marcado, "Ignorar por agora"                                               |
-| **Alarme**                         | Tela cheia azul, **foto do remédio**, som em loop, as quatro saídas — e a foto **não** amplia             |
-| **Ajustes / Conta**                | O hero original — ele inspirou o resto e **não pode ter regredido**; as linhas respondem                  |
-| **Login / Consentimento / Termos** | Não foram tocados de propósito: confirmar que continuam iguais                                            |
-| **Scanner**                        | Câmera, moldura, entrada manual                                                                           |
-
-🔬 **É aqui que altura travada aparece.** Duas varreduras já acharam o mesmo defeito em lugares
-diferentes — sempre onde uma tela desenhou o próprio botão em vez de usar o do kit. Se algum texto
-cortar, anote a tela e o elemento: é o mesmo padrão, e a correção é conhecida.
-
-**Dois já anotados em 05/09, que valem reconferir aqui:**
-
-> ⚠️ Os **horários dos cards quebram linha** no máximo.
-> ⚠️ A **fonte do nome na lista de remédios** ficou um pouco menor do que deveria.
-
-**Devolva a fonte ao normal ao terminar** — os blocos seguintes não dependem dela.
-
----
-
 ## 11 — A ferramenta de diagnóstico
 
 **Faça este bloco antes de qualquer teste de alarme.** Ela é o que torna os demais suportáveis: em
@@ -171,44 +91,9 @@ vez de esperar o horário e adivinhar por que nada tocou, ela mostra o estado re
 > que não tocam = falha na **entrega**. São causas diferentes, e sem os dois números não dá para
 > separar uma da outra.
 
-**14.5.2** Toque em **"Alarme em 30s (tela cheia)"**, e **bloqueie o aparelho**.
-
-> ✅ O aviso aparece na lista de agendados, com o horário certo e o selo "Alarme em tela cheia".
-> ✅ 🔴 Em 30 segundos a **tela azul** aparece sobre o bloqueio, com som.
-
-**14.5.3** Repita com **"Notificação em 30s"**, e desta vez **abra outro aplicativo**.
-
-> ✅ Chega como notificação comum, **com som**, sem tomar a tela.
-
-**14.5.4** Toque em **"Refazer a janela de avisos"**.
-
-> ✅ A lista se reconstrói e o número continua batendo com o esperado.
-> ✅ 🔴 O aviso de **teste não some** — ele sobrevive ao reagendamento de propósito, senão morreria
-> no gesto que o próprio teste pede (sair do app).
-
 ---
 
-## 12 — As permissões do alarme
-
-**Faça primeiro.** Sem elas nada abaixo funciona, e o app agora conduz o processo inteiro.
-
-**0.1** Abra o app com pelo menos um remédio cadastrado com lembrete.
-
-> ✅ 🔴 Painel na Home listando o que falta autorizar, **antes da agenda**.
-> ✅ Cada linha diz a **consequência** ("Sem isto o aviso pode atrasar dezenas de minutos"), e não o
-> nome técnico da permissão.
-> ✅ As que impedem o alarme de tocar trazem o selo **OBRIGATÓRIO**.
-
-**0.2** Toque em cada linha e conceda.
-
-> ✅ 🔴 Cada uma abre a **tela certa** do Android — não a tela genérica do app.
-> ✅ 🔴 Voltando ao Mapill, a linha concedida **some sozinha** do painel.
-
-**0.3** Com tudo concedido:
-
-> ✅ 🔴 O painel **desaparece por completo**.
-
-🔬 **Anote:** quantas das quatro seu aparelho pediu? (Depende da versão do Android e do fabricante.)
+## 12 — As permissões do alarme ✅ _(passou totalmente em 11/09)_
 
 ---
 
@@ -233,188 +118,48 @@ no relógio e reinstalam o app.
 >
 > Se **não** funcionar, teste o paliativo: tocar na notificação abre a **tela do alarme** (com foto,
 > adiar, silenciar) e não a de confirmação.
-
-**2. O alarme adiado toca na hora** 🔴. Deixe um alarme tocar, toque em **"Adiar 5 minutos"** e
-**bloqueie o celular**. Não toque nele.
-
-> 🔬 Ele volta a tocar em 5 minutos, com a tela ainda apagada?
 >
-> Antes só tocava quando o celular era desbloqueado — o Android agrupava o alarme no Doze. Agora usa
-> a mesma categoria do despertador nativo.
-
-**3. A notificação tem som** 🔴. Cadastre um remédio com lembrete **de notificação** (não alarme),
-com o volume do celular alto.
-
-> 🔬 A notificação chega **com som**?
->
-> O canal era criado mudo por um engano de leitura da documentação. Como canal no Android é imutável
-> depois de criado, o app agora apaga e recria o canal — então esta é a primeira instalação em que a
-> correção pode valer.
-
-**4. A notificação chega com a tela desligada** 🔴. Mesmo cadastro do item 3, mas **bloqueie o
-celular** e espere.
-
-> 🔬 Ela chega no horário, sem precisar ligar a tela?
-
-**5. Os botões da notificação** 🔴. Arraste a notificação para baixo, se necessário.
-
-> 🔬 Aparecem **"Tomei"** e **"Pulei"** — e não mais "Adiar".
-> 🔬 Tocar em "Pulei" registra a dose como pulada (confira na Home e na tela de adesão).
-
-> **Se algum destes cinco falhar**, anote exatamente o que aconteceu e em que estado estava o
-> celular (bloqueado, em uso, com qual app aberto). São defeitos de plataforma, e o estado é metade
-> do diagnóstico.
+> ⚠️ **11/09:** confirmado funcionando dentro do que foi testado até aqui, com o esquema atual da
+> notificação. Mas o achado do bloco 14.1.2 (tirar o app dos recentes) ainda não foi cruzado com
+> este passo — revisitar se aparecer o mesmo padrão.
 
 ---
 
 ## 14 — O alarme em tela cheia 🔴🔬
 
-**O diferencial do app, e o que motivou esta build.** Até aqui o "alarme" era uma notificação de
-alta prioridade — tocava uma vez e parava. Agora é um despertador de verdade: abre a tela, toca em
-loop, e alguém precisa vir desligar.
+**1.2 — App fora dos recentes** ⚠️ **investigar.** Cadastre `Teste Alarme`, alarme para daqui a
+3 min. **Feche o app completamente (recentes, deslize para fora)** e **bloqueie o celular**. Espere.
 
-**1.1** Cadastre `Teste Alarme`, dose `1`, Todo dia, 1×, horário **daqui a 3 min**, uso contínuo,
-lembrete **Alarme**.
-
-**1.2** **Feche o app** completamente (recentes, deslize para fora) e **bloqueie o celular**. Espere.
-
-> ✅ 🔴 **Uma tela azul ocupa o aparelho inteiro**, por cima da tela de bloqueio.
-> ✅ 🔴 **O som toca em loop** e não para sozinho.
-> ✅ 🔴 Mostra a hora em número grande e o nome do remédio com a dose.
-> ✅ 🔴 Tem os botões **Silenciar**, **Tomei**, **Pulei** e **Responder depois**.
-> ❌ Se vier só uma notificação na barra, a tela cheia não subiu — anote e siga para o 1.5.
-
-🔬 **Anote:** a tela apareceu com o celular **bloqueado**, ou só depois de desbloquear?
-
-**1.3** 🔴 Toque em **Silenciar**.
-
-> ✅ 🔴 O som **para na hora**.
-> ✅ 🔴 A tela **continua aberta**, dizendo que a dose ainda espera resposta.
-> ✅ O botão some — não há o que silenciar duas vezes.
-
-**1.4** 🔴 Toque em **Tomei**.
-
-> ✅ 🔴 A tela fecha.
-> ✅ 🔴 Abrindo o app, a dose aparece **confirmada** na Home.
-> ✅ 🔴 O estoque descontou.
-
-**1.5** Cadastre outro para daqui a 3 min, com lembrete **Notificação** (não alarme). Feche o app.
-
-> ✅ 🔴 Chega uma **notificação comum** na barra — **sem** tela cheia.
-> ✅ É a diferença entre as duas opções: uma avisa, a outra acorda.
-
-🔬 **Anote:** a diferença entre os dois modos ficou clara?
-
----
-
-## 15 — Os botões da notificação
-
-Aqui estavam dois defeitos de 29/08: cinco toques em "Adiar" geravam **cinco** lembretes, e o
-estoque descontava 1 em vez da dose.
-
-⚠️ **Use lembrete `Notificação` neste bloco inteiro.** Os botões de ação vivem na notificação, e o
-modo `Alarme` agora abre a tela cheia em vez de mostrar uma — o que ele faz está no bloco 14.
-
-**2.1** Cadastre `Teste Botao`, dose **2**, daqui a 3 min, estoque **20**, **Notificação**. Feche o
-app. Quando chegar, toque em **Tomei**.
-
-> ✅ A notificação some e o app **não abre**.
-> ✅ Abrindo depois, a dose está **confirmada** na Home.
-> ✅ O estoque caiu **2** (a dose), e não 1.
-
-**2.2 — Os botões da notificação** ✅ _(passou em 09/09)_.
-
-> ✅ São **"Tomei"** e **"Pulei"** — o "Adiar" **não existe mais** na notificação, e isso está
-> correto. Ele sobrevive só na tela cheia do alarme, onde há espaço para as quatro saídas.
+> ❌ **11/09: nada acontece.** Nem tela cheia, nem som.
+> ✅ Deixando o app **nos recentes** (sem deslizar para fora) e bloqueando a tela, o alarme funciona
+> normalmente — tela azul, som em loop, botões.
+> Mesmo padrão no modo **Notificação**: com o app fora dos recentes, a notificação também não chega.
 >
-> ⚠️ Os passos 2.3 e 2.4 testavam o adiamento **pela notificação** e saíram junto: não há mais o
-> botão que os disparava. O adiamento continua coberto pelo bloco 14 (tela do alarme) e pelo 15.6.
-
-**2.5 — 🔴 O ganho da unificação: gravar com o app fechado.** Cadastre outro para daqui a 3 min,
-**Notificação**. Feche o app. Quando o aviso chegar, toque em **Tomei** e **não abra o app**.
-
-Espere um minuto, e só então abra.
-
-> ✅ 🔴 A dose **já está confirmada** ao abrir — a gravação aconteceu no toque, não na abertura.
-> ✅ 🔴 O estoque **já tinha descontado**.
-> ❌ Se a dose só aparecer confirmada _depois_ de abrir o app, o handler de segundo plano não está
-> registrado. É o que o `index.js` faz antes de o roteador subir.
-
-**2.6 — O adiado sobrevive ao reagendamento.** Cadastre um para daqui a 3 min. Quando chegar, toque
-em **Adiar 5 min**. Em seguida **abra o app** (o que dispara um reagendamento completo) e feche.
-
-> ✅ 🔴 O aviso adiado **ainda chega**, ~5 min depois do toque.
-> ❌ Se não chegar, o `cancelarTudo` o apagou junto com a grade — era exatamente o defeito que a
-> migração introduziria se o filtro de id olhasse só o prefixo `adiado-`, já que o adiado é agendado
-> como alarme e seu id fica `alarme:adiado-…`.
-
----
-
-## 16 — Nada de alarme órfão
-
-**O pior defeito possível: lembrete de um remédio que a pessoa já parou de tomar.**
-
-Este bloco ficou **mais importante** nesta build: agora existem dois agendadores (o Notifee para o
-alarme, o `expo-notifications` para o resto), e cada um só enxerga a própria lista. Se o
-cancelamento esquecer um dos dois lados, o alarme de um tratamento excluído continua tocando.
-
-**3.1** Cadastre `Vai Sumir`, daqui a 5 min, **Alarme**. **Exclua o medicamento.** Feche o app.
-
-> ✅ 🔴 **Nada acontece no horário** — nem tela cheia, nem notificação.
-
-**3.2** Cadastre `Vai Mudar`, daqui a 4 min, Alarme. **Edite** para daqui a 10 min. Feche o app.
-
-> ✅ Nada no horário antigo; chega no novo.
-
-**3.3** Cadastre `Vai Desligar`, daqui a 4 min. Edite e **feche o popup de lembrete sem escolher
-nada**. Feche o app.
-
-> ✅ Nada chega. Não configurar já é recusar.
+> Suspeita do Gabriel: efeito da build (dev client). **Confirmar numa build de produção/preview
+> antes de tratar como defeito real** — se persistir lá, é o app sendo morto pelo sistema antes de
+> disparar o alarme, e vira o assunto do bloco 18/20.
 
 ---
 
 ## 17 — Vários remédios no mesmo horário
 
-> ⚠️ **A resposta em lote saiu do escopo em 09/09.** Os botões "Tomei todas" e "Pulei todas" não
-> existem mais: com **mais de uma dose** no horário, o alarme lista e manda confirmar no app.
+> ⚠️ **Fica por último — precisa ser desenvolvido de novo.** Decisão do Gabriel em 11/09: este bloco
+> vai ficar parado até a funcionalidade ser refeita, então não adianta testar em cima do que existe
+> hoje.
 >
-> Decisão do Gabriel, depois de uma sessão inteira caçando um defeito que aparecia justamente ali.
-> A causa era outra e foi corrigida (duas telas do alarme abrindo ao mesmo tempo, ver
-> `alarme-em-cena`), mas a resposta em lote deixou de valer o risco — é o caminho menos usado do
-> alarme e o que mais custou para manter de pé.
->
-> A tela cheia continua inteira: irrompe, toca em loop, mostra a foto e silencia.
-
-**4.1** Cadastre **dois** para daqui a 4 min: `Losartana` (dose 1) e `Metformina` (dose 2),
-**Alarme** nos dois. Feche o app.
-
-> ✅ 🔴 Abre **UMA tela de alarme só**, não duas.
-> ✅ 🔴 **Um som só** — dois players tocando ao mesmo tempo era o sintoma do defeito de 09/09.
-> ✅ 🔴 Ela lista **os dois remédios**, cada um com sua dose.
-> ✅ 🔴 Os botões de responder **não aparecem**. No lugar deles, **"Ver e confirmar no app"**.
-
-**4.2** Toque em **"Ver e confirmar no app"**.
-
-> ✅ Abre a tela do horário, com **Tomei** e **Pulei** próprios de cada dose.
-> ✅ O alarme **para de tocar** ao sair — escolher outro caminho para responder é uma resposta a ele.
-> ✅ Respondendo as duas ali, o estoque desconta os **dois**.
-
-**4.2b — Com UM remédio só** 🔴. Cadastre um único para daqui a 3 min, **Alarme**.
-
-> ✅ 🔴 Aí sim os botões **Tomei** e **Pulei** aparecem na própria tela do alarme — é o caso que
-> continua respondendo ali.
-> ✅ 🔴 Ao responder, a tela fecha **sem piscar nenhuma outra**.
-
-**4.3** Repita o cadastro dos dois, agora com **Notificação**, e toque no **corpo** da notificação
-(não nos botões).
-
-> ✅ Chega **uma notificação só**, título **"Hora dos seus remédios (2)"**, uma linha por remédio.
-> ✅ Abre a tela **"Hora do remédio"**, com **Tomei** e **Pulei** próprios de cada um.
-> ✅ **Tomei** só na Losartana e **Pulei** na Metformina: só a Losartana desconta.
+> Contexto anterior (09/09): a resposta em lote tinha saído do escopo — os botões "Tomei todas" e
+> "Pulei todas" foram removidos depois de uma sessão caçando um defeito que aparecia ali (duas telas
+> do alarme abrindo ao mesmo tempo, corrigido, ver `alarme-em-cena`), porque a resposta em lote não
+> valia o risco de manter.
 
 ---
 
 ## 18 — Sobrevivência a reboot e bateria 🔬
+
+> ⚠️ **Suspenso em 11/09.** O achado do bloco 14 (tirar o app dos recentes derruba alarme e
+> notificação) ataca a mesma coisa que este bloco mede — testar reboot/bateria agora só reconfirmaria
+> o mesmo problema. Retomar depois de investigar o 14.1.2 (e, se for efeito de build, numa build de
+> produção/preview).
 
 **Decide se o app precisa de uma tela orientando a desativar a otimização de bateria.**
 
@@ -434,6 +179,8 @@ celular **sem carregador**, app fechado, economia de bateria do fabricante ativa
 ---
 
 ## 19 — Os casos de borda do alarme 🔬 (C1.8)
+
+> ⚠️ **Pendente, mesmo motivo do bloco 18.** Fica suspenso até o achado do 14.1.2 ser investigado.
 
 **É o bloco que fecha o C1 no plano.** Os blocos 13 a 17 provam que o alarme funciona quando tudo
 está normal; este prova que ele não **mente** quando não está. Num app de medicação, os dois modos
@@ -606,6 +353,10 @@ percorrido"_ do plano fecha — 11.8 é oportunista e pode ficar como "não obse
 
 ## 20 — Os avisos de estoque e de receita (08/09) 🆕
 
+> ⚠️ **Não dá para testar ainda (11/09).** Mesma causa dos blocos 18 e 19: com o app fora dos
+> recentes nem alarme nem notificação persistem, e este bloco depende de notificação sobrevivendo com
+> o app fechado. Retomar junto dos outros dois.
+
 Até 08/09 o app prometia quatro lembretes e entregava três: quem marcava _"me avisar quando estiver
 acabando"_ recebia só o cartão da tela inicial. Agora o estoque também notifica, e a receita ganhou
 um segundo aviso no dia em que vence.
@@ -713,114 +464,16 @@ hoje") disparam em 30s, no mesmo canal e com o mesmo texto do aviso real.
 
 ---
 
-## 21 — O que a revisão de 08/09 mudou depois de aprovada 🆕
+## 🔴 Achado de 11/09 — alarme adiado sobrevive ao apagamento total dos dados
 
-Estes itens foram alterados **depois** que os blocos 1 a 10 passaram. O que falhar aqui é defeito
-novo, não regressão — vale usar essa palavra ao reportar.
+Cadastro com alarme, deixado tocar, adiado 5 min. **Antes dos 5 min vencerem**, o Gabriel apagou
+todos os dados de saúde. O alarme **tocou mesmo assim**, no fim dos 5 minutos.
 
-**21.1 — A miniatura da mídia** 🔴. Ficha sem foto → adicione a primeira.
-
-> ✅ 🔴 Aparece **na hora**, sem sair e voltar. O mesmo na foto da caixa e no anexo da receita.
-> ✅ Trocar uma foto existente continua funcionando.
-> ✅ O quadro vazio ainda tem a borda tracejada com o ícone centralizado.
-
-**21.2 — A foto da ficha chega às outras telas.** Ficha → adicione foto → salve → **Ajustes**.
-
-> ✅ A foto está no avatar do topo, sem precisar reabrir o app.
-
-**21.3 — Os rótulos dos anexos.**
-
-> ✅ "Excluir" em vermelho ao lado de "Trocar foto" / "Alterar anexo".
-> ✅ A foto da caixa tem "Excluir", que antes não existia.
-> ✅ Com a fonte do sistema no máximo, a linha **não quebra**.
-
-**21.4 — O campo de data.** Anexe uma receita e olhe "RECEITA VÁLIDA ATÉ".
-
-> ✅ Ocupa a linha inteira, com o calendário encostado na borda direita.
-> ✅ Os outros quatro `DateField` do app seguem alinhados (data de nascimento, DATA do compromisso,
-> "PRIMEIRO DIA DESTE CICLO", "QUANDO COMEÇA").
-
-**21.5 — A navegação do estoque.** Home → Estoque → "Ver minhas medicações".
-
-> ✅ Vai para a **listagem de remédios**, não para a Home.
-> ✅ A seta ⟵ do topo continua voltando para de onde você veio.
-
-**21.6 — A tela azul do dia completo** 🔴.
-
-> ✅ Confirmando a última dose **na Home**: a tela azul aparece e some sozinha em ~3s.
-> ✅ 🔴 Respondendo a última dose **na tela do alarme**: ela **não** aparece ao voltar.
-> ✅ 🔴 Navegando entre telas com o dia já completo: não aparece.
-> ✅ Fechando e reabrindo o app com o dia completo: não aparece.
-
-**21.7 — O amarelo dos alertas** 🔬. Cadastro → LEMBRETE, com alguma permissão faltando.
-
-> ✅ O painel de permissões usa o mesmo amarelo do lembrete de recontagem da tela de estoque.
-> 🔬 Se ele parecer **apagado demais** contra o fundo branco do popup, anote: o token puro é quase
-> branco, e a mistura que o encorpava foi removida em favor da padronização.
-
----
-
-
-## 22 — Os itens soltos que dependem de um aviso
-
-Estes cinco moravam nos blocos 3, 5 e 8, que já passaram. Ficaram de fora porque cada um exige um
-aviso chegar — e foram reunidos aqui para caberem numa sessão só, aproveitando os alarmes que os
-blocos 13 a 17 já pedem cadastrados.
-
-**22.1 — A notificação do compromisso** 🔬🔴 _(era 3-C3)_. **Nunca funcionou em binário.** Cadastre
-um compromisso com lembrete "no dia" e espere a virada.
-
-> 🔬 🔴 **A notificação chega?** Se não chegar, é o mesmo defeito do canal mudo dos remédios — a
-> correção está no código desde a build anterior.
-> ⚠️ O aviso cai às **00:01**, não às 8h: o texto antigo do roteiro dizia 8h, e mudou em 08/09.
-> Uma consulta às 06:00 recebia o aviso "no dia" duas horas **depois** de ela já ter começado.
-
-**22.2 — O local no alarme** 🔬 _(era 3-G1)_. Cadastre um remédio com estoque e preencha **onde ele
-fica guardado**. Dispare o alarme.
-
-> 🔬 Abaixo da dose aparece um ícone de localização com o texto ("armário da cozinha").
-> ✅ Ele é pequeno — o horário e o nome continuam sendo o que se lê de longe.
-
-**22.3 — O aviso do compromisso excluído** 🔴 _(era 5/10.4)_. Calendário → **+** → compromisso para
-amanhã, com lembrete. Depois **exclua o compromisso**.
-
-> ✅ 🔴 O aviso dele **não chega**. _(Órfão, agora para compromisso.)_
-> ✅ O texto do cadastro diz que os avisos chegam **às 00:01**, e não "às 8 da manhã".
-> ❌ Se disser que os lembretes "ainda estão sendo desenvolvidos", o texto é antigo.
-
-**22.4 — A foto no alarme** _(era 8-F)_. Cadastre um remédio **com foto** da caixa e alarme para
-+3 min.
-
-> ✅ 🔴 A foto aparece na tela do alarme, larga, acima do nome.
-> ✅ Um remédio **sem** foto não deixa espaço vazio nem quebra o layout.
-
-**22.5 — O alarme não tem visualizador** 🔬 _(era 8-K6)_, **e isso é de propósito.** Com um alarme
-tocando, toque na foto do remédio.
-
-> ✅ 🔴 **Nada acontece.** Abrir uma camada por cima de um alarme daria uma saída que não responde a
-> dose nenhuma.
-
-**22.6 — Os quatro temas** 🔬 _(era 3-A4)_. Ajustes → Configurações de tema. Percorra Home e Estoque
-em cada um.
-
-> 🔬 **Só o tema padrão foi revisado em aparelho.** Escuro, alto contraste e daltonismo receberam os
-> tokens novos com valores conferidos por contraste, mas não foram vistos. Anote o que destoar — está
-> registrado como pendência de refinamento.
-> ⚠️ A rodada de 09/09 mexeu nas cores de estado (viraram escolha de quem usa) e na tipografia, o
-> que torna este item mais relevante do que era.
-
----
-
-## 23 — Apagar os dados de saúde 🔬
-
-⚠️ **Por último. Este passo apaga tudo.**
-
-**23.1** **Com a conta vinculada**: Ajustes → Conta e dados → **"Apagar meus dados de saúde"** →
-confirme.
-
-> ✅ Os remédios somem.
-> ✅ 🔬 **O que importa:** feche o app, abra e espere sincronizar. Eles **não voltam**.
-> ❌ Se voltarem, o apagamento na nuvem falhou — avise.
+> ❌ O adiamento é agendado direto no sistema (Notifee), fora da grade normal — o mesmo padrão do
+> risco já anotado no antigo 15.6 (`cancelarTudo` e o prefixo `alarme:adiado-…`). Apagar os dados
+> precisa cancelar também os adiamentos pendentes, não só a grade principal.
+>
+> **Resolver antes da próxima rodada.**
 
 ---
 
