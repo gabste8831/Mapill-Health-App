@@ -30,6 +30,23 @@ function atMidnight(date: Date): Date {
 }
 
 /**
+ * Se a vigência do tratamento termina dentro da janela de busca — ou seja, se foi o **fim do
+ * tratamento** que interrompeu a geração de doses, e não o horizonte de 730 dias.
+ *
+ * É o que separa "o estoque dá conta até o último dia do tratamento" (fato, com data) de "o estoque
+ * dura mais do que o app projeta" (desconhecido). Sem `endDate` o tratamento é contínuo e nunca
+ * acaba antes do horizonte; data mal formada cai no mesmo lugar, porque não dá para afirmar o fim.
+ */
+function tratamentoAcabaAntesDe(prescription: SchedulablePrescription, until: Date): boolean {
+  if (prescription.endDate === null) return false;
+  const match = prescription.endDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  // O dia seguinte à meia-noite do último dia: `endDate` é inclusivo, igual em `generateDoseSchedules`.
+  const fim = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]) + 1);
+  return fim < until;
+}
+
+/**
  * Quando o estoque acaba, no ritmo da posologia.
  *
  * Percorre as doses de verdade em vez de dividir quantidade pela dose: com dose variando por
@@ -38,6 +55,12 @@ function atMidnight(date: Date): Date {
  *
  * `null` quando não há o que estimar: sem horário agendado ("só quando precisar"), sem estoque,
  * ou quando ele dura mais que o horizonte de busca.
+ *
+ * **Estoque que cobre o tratamento inteiro não é `null`.** Um tratamento com data de fim tem um
+ * último dia conhecido, e é ele que a previsão devolve. Até 12/09 os dois casos caíam no mesmo
+ * `null` — o que fazia o aviso de estoque desaparecer por completo em qualquer tratamento de
+ * duração definida cujo estoque dava conta, enquanto o aviso de receita, que parte de uma data
+ * pronta, sempre chegava.
  *
  * **Também `null` quando estoque e dose não são contados na mesma unidade.** Gota se toma em gota
  * e se compra em ml, e converter exigiria a concentração do frasco, que o app não tem. Subtrair
@@ -70,8 +93,23 @@ export function estimateStockDepletion(
 
   // Nenhuma dose cabe: o que sobrou é menos que uma dose, então o estoque já acabou na prática.
   if (ultima === null) return { lastDay: toIsoDay(from), daysRemaining: 0, dosesCovered: 0 };
-  // Sobrou estoque depois do horizonte inteiro: dizer uma data aqui seria inventar precisão.
-  if (cobertas === doses.length) return null;
+  /**
+   * Cobriu todas as doses geradas — e aqui há **dois** casos que não podem ser confundidos.
+   *
+   * O gerador para no menor entre o fim do tratamento e o horizonte de 730 dias. Se ele parou no
+   * horizonte, o estoque dura mais do que o app consegue projetar, e dizer uma data seria inventar
+   * precisão: `null` é a resposta certa. Era só esse caso que esta linha queria pegar.
+   *
+   * Mas se ele parou no **fim do tratamento**, a data da última dose é um fato conhecido, e não uma
+   * estimativa truncada. Devolvê-la como `null` descartava o estoque inteiro antes de ele chegar ao
+   * planejador — e o aviso não saía, nem o da antecedência nem o do dia em que acaba. Um tratamento
+   * de 7 dias com 7 comprimidos ficava sem aviso algum, o que o Gabriel encontrou em 12/09 ao
+   * comparar com o aviso de receita, que nunca desaparece porque a validade dela já é uma data.
+   *
+   * O `daysRemaining` que sai daqui é o dia da última dose que o estoque cobre, igual ao dos outros
+   * casos. Quem decide o que fazer com ele é `planejarAvisosDeEstoque`.
+   */
+  if (cobertas === doses.length && !tratamentoAcabaAntesDe(prescription, until)) return null;
 
   const dias = Math.round(
     (atMidnight(ultima).getTime() - atMidnight(from).getTime()) / (24 * 60 * 60_000),
