@@ -367,8 +367,10 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
         chave: "inicioAutomatico",
         titulo: "Permitir o início automático",
         descricao:
-          "Sem isto o seu aparelho impede o Mapill de abrir sozinho, e nenhum aviso chega — nem alarme, nem notificação.",
-        comoFazer: "Procure o Mapill na lista e ligue a chave.",
+          "Sem isto o seu aparelho impede o Mapill de abrir sozinho, e nenhum aviso chega: nem alarme, nem notificação.",
+        // A lista é geral em alguns fabricantes e a página do app em outros, porque a cascata de
+        // intents cai no que existir (ver `abrirPrimeiraTelaQueExistir`). O texto cobre os dois.
+        comoFazer: 'Ligue o "início automático" do Mapill.',
         concedida: await jaFoiPedida(CHAVES_DE_IDA.autostart),
         verificavel: false,
         // Essencial: é a única linha deste painel que, sozinha, silencia o app por completo.
@@ -382,25 +384,28 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
         chave: "bateria",
         titulo: "Tirar a restrição de bateria",
         descricao: "Com a economia ativa, o aviso pode atrasar dezenas de minutos ou não chegar.",
-        comoFazer: 'Escolha "Sem restrições" para o Mapill.',
+        // O nome exato da opção, porque a tela oferece quatro e a padrão é outra: o Android marca
+        // "Economia de bateria (recomendado)" por conta, e é ela que atrasa o aviso.
+        comoFazer: 'Em "Economia de bateria", escolha "Nenhuma restrição".',
         concedida: await jaFoiPedida(CHAVES_DE_IDA.bateria),
         verificavel: false,
         essencial: false,
         abrir: async () => {
           await marcarComoPedida(CHAVES_DE_IDA.bateria);
           /**
-           * A tela de otimização de bateria do **Android puro**, e as configurações do app como
-           * reserva.
+           * As **configurações do próprio app**, e não a lista geral de otimização.
            *
-           * `IGNORE_BATTERY_OPTIMIZATION_SETTINGS` é a lista geral, e existe na maioria dos
-           * aparelhos — inclusive nos que têm gerenciador próprio, onde ela coexiste com o do
-           * fabricante. O `openSettings` cobre quem a removeu.
+           * Era `IGNORE_BATTERY_OPTIMIZATION_SETTINGS`, a lista de todos os apps do Android puro.
+           * O Gabriel apontou em 12/09 que no aparelho dele a restrição que importa não fica ali:
+           * mora **dentro dos detalhes do app**, na linha de economia de bateria — e a MIUI trata as
+           * duas como ajustes independentes, então a lista geral abria uma tela onde mexer não
+           * resolvia nada.
+           *
+           * `openSettings` cai na página do Mapill, onde a linha de bateria está a um toque e o
+           * `comoFazer` acima diz qual é. Vale para o Android puro também: lá a mesma página tem o
+           * item "Bateria" que leva à otimização.
            */
-          await Linking.sendIntent("android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS").catch(
-            async () => {
-              await Linking.openSettings();
-            },
-          );
+          await Linking.openSettings();
         },
       },
     );
