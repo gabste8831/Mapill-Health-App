@@ -93,23 +93,6 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
         ))}
       </View>
 
-      {/**
-       * O ajuste que o painel **não** consegue listar.
-       *
-       * As linhas acima são as permissões que o app lê de volta, e é essa a regra que decide quem
-       * entra. O início automático dos fabricantes não expõe estado a nenhuma API — como item, ele
-       * ficaria vermelho para sempre, inclusive depois de concedido, e um painel que cobra o que já
-       * foi feito ensina a ignorar o painel inteiro.
-       *
-       * Mas ele é, em aparelhos Xiaomi, a diferença entre o alarme tocar e não tocar: testado em
-       * 11/09, com ele desligado nenhum aviso chegava, e o Diagnóstico mostrava tudo agendado. Uma
-       * nota ao pé é o meio-termo — diz o que fazer sem prometer que verifica.
-       */}
-      <Text style={[styles.explicacao, styles.notaDoFabricante]}>
-        Em aparelhos Xiaomi, Samsung e Motorola, ligue também o início automático do Mapill nas
-        configurações de apps. Sem ele o sistema não deixa o app avisar, e isso não aparece aqui.
-      </Text>
-
       {/* Só quando o diálogo ainda pode abrir. Depois de negada, este botão não faria nada — e um
           botão que não faz nada é pior que botão nenhum. */}
       {onPedirTudo !== undefined ? (

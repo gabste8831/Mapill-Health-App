@@ -35,17 +35,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   explicacaoCritica: {
     color: cores.onErrorSurface,
   },
-  /**
-   * A nota sobre o início automático: menor que as linhas, e depois delas.
-   *
-   * Hierarquia de propósito — as linhas acima são acionáveis e o app sabe quando somem; esta é
-   * orientação que ele não consegue verificar. Com o mesmo peso das outras, ela competiria com o
-   * que tem botão; menor e ao pé, ela é o "se ainda assim não chegar, veja isto".
-   */
-  notaDoFabricante: {
-    ...typography.bodySm,
-    marginTop: spacing.xs,
-  },
 
   lista: {
     gap: spacing.sm,

@@ -28,18 +28,86 @@ import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
  */
 
 /**
- * Onde fica registrado que a pessoa foi levada à tela de sobreposição.
+ * As autorizações cujo estado o Android **não deixa ler** — só dá para registrar a ida até a tela.
  *
- * Não é a permissão em si — é a lembrança de tê-la pedido. Ver o item `sobreporApps`.
+ * Três itens caem aqui, e o mecanismo é o mesmo do `sobreporApps` original: o app anota que levou a
+ * pessoa até a tela do sistema e considera atendido. Não é uma leitura de verdade, e assume que quem
+ * foi lá concedeu — mas erra para o lado recuperável. Quem não conceder fica com o comportamento de
+ * antes, e o item volta se o app for reinstalado.
+ *
+ * A alternativa seria o item nunca sair do painel, e um painel que cobra o que já foi feito ensina a
+ * ignorar o painel inteiro — inclusive as linhas que de fato impedem o alarme de tocar.
  */
-const CHAVE_SOBREPOSICAO = "mapill:sobreposicao-pedida";
+const CHAVES_DE_IDA = {
+  sobreposicao: "mapill:sobreposicao-pedida",
+  bateria: "mapill:bateria-pedida",
+  autostart: "mapill:autostart-pedido",
+} as const;
 
-async function jaFoiPedidaASobreposicao(): Promise<boolean> {
-  return (await AsyncStorage.getItem(CHAVE_SOBREPOSICAO).catch(() => null)) === "sim";
+async function jaFoiPedida(chave: string): Promise<boolean> {
+  return (await AsyncStorage.getItem(chave).catch(() => null)) === "sim";
 }
 
-async function marcarSobreposicaoComoPedida(): Promise<void> {
-  await AsyncStorage.setItem(CHAVE_SOBREPOSICAO, "sim").catch(() => {});
+async function marcarComoPedida(chave: string): Promise<void> {
+  await AsyncStorage.setItem(chave, "sim").catch(() => {});
+}
+
+/**
+ * Os fabricantes que matam apps em segundo plano por conta própria.
+ *
+ * Não é uma lista de marcas por preconceito: são os que implementam gerenciadores próprios de
+ * inicialização automática, e nos quais o alarme não toca sem autorização manual. O catálogo de
+ * referência é o dontkillmyapp.com, que existe só para documentar isto fabricante por fabricante.
+ *
+ * Em aparelho fora da lista (Pixel, Nokia, Sony) as duas linhas não aparecem: cobrar um ajuste que
+ * não existe naquele sistema é pedir para a pessoa procurar algo que ela não vai achar.
+ */
+const FABRICANTES_AGRESSIVOS = ["xiaomi", "redmi", "poco", "samsung", "motorola", "oppo", "vivo", "realme", "huawei", "honor"];
+
+function fabricanteMataApps(): boolean {
+  const marca = (Platform.constants as { Manufacturer?: string })?.Manufacturer ?? "";
+  return FABRICANTES_AGRESSIVOS.some((nome) => marca.toLowerCase().includes(nome));
+}
+
+/**
+ * As telas de início automático são **proprietárias**, e cada fabricante nomeia a sua.
+ *
+ * A intent é tentada na ordem: a específica do fabricante primeiro, e as configurações do app como
+ * último recurso. `sendIntent` rejeita quando a Activity não existe, e é isso que faz a cascata
+ * funcionar — não há como perguntar antes se ela está lá.
+ *
+ * Os nomes vêm do dontkillmyapp.com e mudam entre versões da MIUI/One UI, e é justamente por isso
+ * que existe o fallback: uma Activity renomeada faz o toque cair nas configurações do app, onde a
+ * instrução do item ainda orienta a busca.
+ */
+const TELAS_DE_AUTOSTART = [
+  // MIUI / HyperOS (Xiaomi, Redmi, Poco)
+  "miui.intent.action.OP_AUTO_START",
+  // Coloros (Oppo, Realme)
+  "com.coloros.safecenter.permission.startup.StartupAppListActivity",
+  // Huawei / Honor
+  "huawei.intent.action.HSM_BOOTAPP_MANAGER",
+];
+
+/**
+ * Tenta cada intent em ordem, e cai nas configurações do app quando nenhuma existe.
+ *
+ * Um `for` com `await` de propósito, e não `Promise.all`: a ordem **é** a regra — a tela do
+ * fabricante primeiro, a genérica no fim. Disparar em paralelo abriria duas telas em quem tem as
+ * duas.
+ */
+async function abrirPrimeiraTelaQueExistir(intents: readonly string[]): Promise<void> {
+  for (const intent of intents) {
+    try {
+      await Linking.sendIntent(intent);
+      return;
+    } catch {
+      // Activity inexistente neste aparelho: segue para a próxima da lista.
+    }
+  }
+  // Nenhuma das proprietárias respondeu. As configurações do app são o lugar mais próximo de onde a
+  // pessoa consegue seguir, e a instrução do item continua orientando a busca.
+  await Linking.openSettings();
 }
 
 /**
@@ -47,28 +115,37 @@ async function marcarSobreposicaoComoPedida(): Promise<void> {
  *
  * ## A regra que define quem entra nesta lista
  *
- * **Só entra o que o app consegue ler de volta.** Um item cujo estado não se lê nunca sai do
- * painel: ele continua cobrando depois de atendido, e um painel que cobra o que já foi feito ensina
- * a ignorar o painel inteiro — inclusive as duas linhas que de fato impedem o alarme de tocar.
+ * **Só entra o que o app consegue acompanhar.** Um item que continua cobrando depois de atendido
+ * ensina a ignorar o painel inteiro — inclusive as linhas que de fato impedem o alarme de tocar.
  *
- * Eram cinco, e duas saíram por essa regra:
+ * Há duas formas de acompanhar, e a diferença importa:
  *
- * - **Tela cheia** (`USE_FULL_SCREEN_INTENT`, Android 14+): não há API de leitura, então o item
- *   vivia com `concedida: false` fixo. A intent que abre a tela também não existe em todo aparelho,
- *   caindo num `openSettings()` genérico que não leva a lugar reconhecível.
- * - **Economia de bateria**: aqui o problema era mais sutil, e pior. Nos aparelhos com gerenciador
- *   próprio (Xiaomi, Samsung, Motorola) o item **abria uma tela e verificava outra** — mandava para
- *   o "início automático" do fabricante, mas lia `isBatteryOptimizationEnabled()`, a otimização do
- *   Android. São ajustes independentes: autorizar o autostart não muda o que estava sendo lido, e o
- *   item ficava pendente para sempre mesmo com tudo concedido. Não há API para o autostart — essas
- *   telas são proprietárias e não expõem estado.
+ * 1. **Lendo o estado** — notificações, alarme exato, Não Perturbe. O Android responde se estão
+ *    concedidas, então a linha some quando de fato foram.
+ * 2. **Registrando a ida** — sobreposição, início automático, bateria. Essas telas não expõem
+ *    estado a nenhuma API, e o app anota que levou a pessoa até lá (ver `CHAVES_DE_IDA`). Não é
+ *    leitura de verdade, mas erra para o lado recuperável: quem não conceder fica com o
+ *    comportamento de antes, e a linha volta se o app for reinstalado.
  *
- * As duas permissões continuam valendo no aparelho; o que saiu foi a cobrança que ninguém conseguia
- * satisfazer nem verificar. A economia de bateria segue documentada na tela de ajuda de alertas,
- * como recomendação — que é o lugar de algo que se explica mas não se confere.
+ * ## O que já saiu daqui, e por quê
+ *
+ * A **tela cheia** (`USE_FULL_SCREEN_INTENT`, Android 14+) saiu em 05/09 e não voltou: além de não
+ * ter leitura, a intent que a abre não existe em todo aparelho, caindo num `openSettings()` que não
+ * leva a lugar reconhecível. Sem uma tela de destino confiável, não há o que oferecer.
+ *
+ * A **economia de bateria** saiu pelo motivo errado e voltou em 12/09. O defeito da versão antiga
+ * era **abrir uma tela e verificar outra** — mandava para o início automático do fabricante e lia
+ * `isBatteryOptimizationEnabled()`, a otimização do Android, que é ajuste independente. Com as duas
+ * separadas em linhas próprias, cada uma abre a sua tela e registra a sua ida.
  */
 export type ItemDePermissao = {
-  chave: "notificacoes" | "alarmeExato" | "naoPerturbe" | "sobreporApps";
+  chave:
+    | "notificacoes"
+    | "alarmeExato"
+    | "naoPerturbe"
+    | "sobreporApps"
+    | "inicioAutomatico"
+    | "bateria";
   /** O que a pessoa lê. Descreve a consequência, não o nome técnico da permissão. */
   titulo: string;
   descricao: string;
@@ -231,7 +308,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       descricao:
         "Sem isto, usando outro aplicativo você recebe só um aviso no topo, sem a tela do alarme.",
       comoFazer: "Procure o Mapill na lista e autorize.",
-      concedida: await jaFoiPedidaASobreposicao(),
+      concedida: await jaFoiPedida(CHAVES_DE_IDA.sobreposicao),
       essencial: false,
       /**
        * `Linking.sendIntent`, e **não** `expo-intent-launcher`.
@@ -242,7 +319,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        * Native e é o que os outros itens deste painel usam.
        */
       abrir: async () => {
-        await marcarSobreposicaoComoPedida();
+        await marcarComoPedida(CHAVES_DE_IDA.sobreposicao);
         await Linking.sendIntent("android.settings.action.MANAGE_OVERLAY_PERMISSION").catch(
           async () => {
             // Fabricante que não exponha a tela geral: as configurações do app são o lugar mais
@@ -253,6 +330,64 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       },
     },
   ];
+
+  /**
+   * As duas linhas que **só aparecem em fabricante que mata apps**.
+   *
+   * Elas entram no painel por decisão do Gabriel em 12/09, depois de o Autostart desligado ter
+   * impedido **qualquer** aviso de chegar num Xiaomi — nem alarme, nem notificação, nem com o app
+   * nos recentes. O agendamento existia e o sistema recusava acordar o processo.
+   *
+   * Ficaram fora até aqui pela regra do painel: só entra o que o app lê de volta, e estas telas são
+   * proprietárias e não expõem estado. O que muda é o mecanismo — elas usam a mesma lembrança do
+   * `sobreporApps`, que registra a ida em vez de ler a permissão. Assim a linha some depois de
+   * atendida, que é o que a regra protegia.
+   *
+   * **Só em aparelho da lista.** Num Pixel não existe Autostart a ligar, e cobrar isso seria mandar
+   * a pessoa procurar um ajuste que o sistema dela não tem.
+   */
+  if (fabricanteMataApps()) {
+    itens.push(
+      {
+        chave: "inicioAutomatico",
+        titulo: "Permitir o início automático",
+        descricao:
+          "Sem isto o seu aparelho impede o Mapill de abrir sozinho, e nenhum aviso chega — nem alarme, nem notificação.",
+        comoFazer: "Procure o Mapill na lista e ligue a chave.",
+        concedida: await jaFoiPedida(CHAVES_DE_IDA.autostart),
+        // Essencial: é a única linha deste painel que, sozinha, silencia o app por completo.
+        essencial: true,
+        abrir: async () => {
+          await marcarComoPedida(CHAVES_DE_IDA.autostart);
+          await abrirPrimeiraTelaQueExistir(TELAS_DE_AUTOSTART);
+        },
+      },
+      {
+        chave: "bateria",
+        titulo: "Tirar a restrição de bateria",
+        descricao: "Com a economia ativa, o aviso pode atrasar dezenas de minutos ou não chegar.",
+        comoFazer: 'Escolha "Sem restrições" para o Mapill.',
+        concedida: await jaFoiPedida(CHAVES_DE_IDA.bateria),
+        essencial: false,
+        abrir: async () => {
+          await marcarComoPedida(CHAVES_DE_IDA.bateria);
+          /**
+           * A tela de otimização de bateria do **Android puro**, e as configurações do app como
+           * reserva.
+           *
+           * `IGNORE_BATTERY_OPTIMIZATION_SETTINGS` é a lista geral, e existe na maioria dos
+           * aparelhos — inclusive nos que têm gerenciador próprio, onde ela coexiste com o do
+           * fabricante. O `openSettings` cobre quem a removeu.
+           */
+          await Linking.sendIntent("android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS").catch(
+            async () => {
+              await Linking.openSettings();
+            },
+          );
+        },
+      },
+    );
+  }
 
   const essenciaisOk = itens.every((item) => !item.essencial || item.concedida);
 
