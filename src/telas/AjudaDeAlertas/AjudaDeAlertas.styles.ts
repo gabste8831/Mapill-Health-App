@@ -139,22 +139,30 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     gap: 2,
   },
   /**
-   * O nome da permissão: corpo de leitura com peso de rótulo.
+   * O nome da permissão: corpo de leitura com um peso acima do texto comum.
    *
    * Cheguei a subir para 18px, e com a superfície discreta ficou desproporcional — texto grande em
-   * caixa leve lê como título de seção, não como botão. `bodyMd` em semibold dá a mesma hierarquia
-   * dentro da linha sem competir com o rótulo da seção acima.
+   * caixa leve lê como título de seção, não como botão.
+   *
+   * `500Medium` e não `600SemiBold`: com a linha agora sobre superfície branca e elevada, é a
+   * própria superfície que diz "isto é um botão", e o semibold em cima virava ênfase repetida. Um
+   * degrau abaixo mantém a hierarquia dentro da linha sem o peso que o Gabriel apontou em 12/09.
    */
   linhaTitulo: {
     ...typography.bodyMd,
-    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontFamily: "PlusJakartaSans_500Medium",
     color: cores.onSurface,
   },
-  /** O passo dentro da tela do sistema — onde procurar depois que ela abrir. */
+  /**
+   * O passo dentro da tela do sistema — onde procurar depois que ela abrir.
+   *
+   * Sem itálico (pedido do Gabriel em 12/09): em bloco pequeno ele custa legibilidade justamente
+   * para quem mais precisa desta instrução, e o que separa esta linha do título já é o tamanho e a
+   * cor. Itálico aqui era decoração sobre distinção que já existia.
+   */
   linhaComoFazer: {
     ...typography.bodySm,
     color: cores.onSurfaceVariant,
-    fontStyle: "italic",
   },
   /**
    * O estado em palavra, e não só em cor.
