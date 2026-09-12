@@ -19,13 +19,25 @@ import { criarEstilos } from "./AlarmeScreen.styles";
 const SOM_DO_ALARME = require("../../../assets/sounds/alarme_de_dose.wav");
 
 /**
- * Até quantos remédios o alarme mostra a foto da caixa.
+ * A tela tem **três formas**, e o número de doses escolhe qual.
  *
- * Três é o que cabe sem a tela virar um álbum. A partir daí a foto deixa de cumprir o papel que
- * tem aqui — reconhecer a caixa de relance — porque são muitas para olhar de uma vez, e o nome
- * escrito passa a ser mais rápido que a imagem.
+ * A de uma dose é a que o alarme foi desenhado para ser: foto grande, nome em corpo 30, tudo o que
+ * ajuda a reconhecer a caixa sem óculos e recém-acordado. Ela funciona, e não muda.
+ *
+ * O problema aparecia ao repetir esse bloco. Com três remédios eram três fotos de 132dp, três nomes
+ * em corpo 30, três quantidades e três orientações empilhadas — cada um desenhado como se fosse o
+ * único. Visto em aparelho em 12/09: a tela vira uma parede de texto, e uma lista que não se lê como
+ * lista é pior que nenhuma.
+ *
+ * Então:
+ *
+ * - **1 dose** — a tela cheia de sempre, com foto e nome grande.
+ * - **2 ou 3** — uma lista enxuta: nome, quantidade e onde está, em corpo de leitura. Sem foto, sem
+ *   título gigante. Dá para ler as três de relance e decidir se levanta.
+ * - **4 ou mais** — nem lista. Só quantos remédios são, e o caminho para o app. Acima de três, a
+ *   pessoa não decide olhando a tela do alarme: ela vai conferir onde cada dose se resolve.
  */
-const MAXIMO_PARA_MOSTRAR_FOTO = 3;
+const MAXIMO_PARA_LISTAR = 3;
 
 /**
  * Até quantos remédios se responde pela própria tela do alarme. Ver `podeResponderAqui`.
@@ -372,8 +384,13 @@ export function AlarmeScreen({
    * resolve individualmente.
    */
   const podeResponderAqui = pendentes.length <= MAXIMO_PARA_RESPONDER_NO_ALARME;
-  /** A foto some antes das ações: com quatro caixas a tela vira álbum, e nenhuma ajuda a decidir. */
-  const mostrarFotos = pendentes.length <= MAXIMO_PARA_MOSTRAR_FOTO;
+  /**
+   * Se a tela lista os remédios ou só diz quantos são. Ver `MAXIMO_PARA_LISTAR`.
+   *
+   * A outra forma — detalhada contra enxuta — é decidida por `umaSo`, e não por uma terceira
+   * variável: é a mesma pergunta ("há uma dose só?") que já governa o título e os botões.
+   */
+  const listar = pendentes.length <= MAXIMO_PARA_LISTAR;
   // Um adiamento por horário: basta uma dose já ter gasto o dela para o botão não ter mais efeito.
   const podeAdiar = pendentes.length > 0 && pendentes.every((dose) => dose.snoozeCount === 0);
 
@@ -412,9 +429,21 @@ export function AlarmeScreen({
 
         {/* Os remédios, em letra grande: é o que a pessoa precisa ler antes de responder, e ela
             pode estar sem óculos, no escuro, recém-acordada. */}
+        {/**
+         * Acima de três, a tela **não lista**.
+         *
+         * Listar cinco nomes numa tela que irrompe de madrugada é dar trabalho a quem acabou de
+         * acordar, sem ajudar a decidir nada: a resposta já não acontece aqui (ver
+         * `podeResponderAqui`), e quem vai conferir cinco doses vai fazê-lo no app, onde cada uma
+         * tem seu botão. A contagem no título já diz o tamanho do que espera.
+         */}
+        {!listar ? (
+          <Text style={styles.resumo}>Toque abaixo para ver quais são e confirmar cada uma.</Text>
+        ) : null}
+
         <View style={styles.lista}>
-          {pendentes.map((dose) => (
-            <View key={dose.doseScheduleId} style={styles.item}>
+          {(listar ? pendentes : []).map((dose) => (
+            <View key={dose.doseScheduleId} style={umaSo ? styles.item : styles.itemEnxuto}>
               {/**
                * A foto da caixa, quando existe.
                *
@@ -428,16 +457,48 @@ export function AlarmeScreen({
               {/* `contain` e não o `cover` padrão: aqui a foto é para ser **lida**, e cortar a
                   borda pode cortar a dosagem impressa no canto da caixa. É a mesma razão do
                   visualizador da receita. */}
-              {mostrarFotos && dose.photoUri !== null ? (
-                <FotoLocal uri={dose.photoUri} style={styles.foto} contentFit="contain" />
-              ) : null}
-              {/* O nome encolhe quando são muitos: em corpo 30, cinco remédios viram cinco títulos
-                  disputando a mesma tela, e a lista deixa de ser lida como uma lista. */}
-              <Text style={mostrarFotos ? styles.nome : styles.nomeCompacto}>
-                {dose.medicationName}
-              </Text>
-              <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
-              {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
+              {umaSo ? (
+                <>
+                  {dose.photoUri !== null ? (
+                    <FotoLocal uri={dose.photoUri} style={styles.foto} contentFit="contain" />
+                  ) : null}
+                  <Text style={styles.nome}>{dose.medicationName}</Text>
+                  <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
+                </>
+              ) : (
+                /**
+                 * Na lista, a foto vira **miniatura ao lado do texto**.
+                 *
+                 * Ela fica porque reconhecer a caixa vale igual com três remédios — é até mais útil
+                 * ali, onde a pessoa precisa distinguir uma caixa das outras. O que não cabe é o
+                 * tamanho: três fotos de 132dp empilhadas não deixam espaço para mais nada, e a tela
+                 * de 12/09 já estava poluída **sem** elas.
+                 *
+                 * 48dp é o que se reconhece de relance sem tomar a linha, e `cover` porque nesse
+                 * tamanho a moldura inteira da caixa não se lê de qualquer forma — o que resta é a
+                 * cor e a forma, que é justamente o que distingue uma da outra.
+                 */
+                <View style={styles.linhaDoItem}>
+                  {dose.photoUri !== null ? (
+                    <FotoLocal uri={dose.photoUri} style={styles.miniatura} contentFit="cover" />
+                  ) : null}
+                  <View style={styles.textoDoItem}>
+                    <Text style={styles.nomeCompacto}>{dose.medicationName}</Text>
+                    <Text style={styles.quantidadeCompacta}>{dose.quantidadeFormatada}</Text>
+                    {/* O local fecha a coluna de texto, alinhado com o nome — com ou sem foto. */}
+                    {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
+                      <View style={styles.localEnxuto}>
+                        <Ionicons name="location-outline" size={14} color={cores.onPrimary} />
+                        <Text style={styles.localTexto}>{dose.storageLocation}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </View>
+              )}
+              {/* A orientação de tomada só na tela de uma dose: com três, ela é a linha que mais
+                  cresce (costuma ser uma frase inteira) e a que menos decide se a pessoa levanta —
+                  ela se lê na hora de tomar, no app, não no instante do despertar. */}
+              {umaSo && dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
                 <Text style={styles.orientacao}>{dose.intakeNote}</Text>
               ) : null}
               {/* Onde a caixa está guardada.
@@ -446,7 +507,7 @@ export function AlarmeScreen({
                   lugar. Quem acorda às 6h com o alarme precisa saber para onde ir, e este campo mora
                   na tela de estoque — que ninguém abre no meio da noite. O ícone evita confundi-lo
                   com a orientação de tomada logo acima, que também é texto miúdo em cinza. */}
-              {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
+              {umaSo && dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
                 <View style={styles.local}>
                   <Ionicons name="location-outline" size={14} color={cores.onPrimary} />
                   <Text style={styles.localTexto}>{dose.storageLocation}</Text>

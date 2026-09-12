@@ -76,10 +76,71 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     textAlign: "center",
   },
+  /**
+   * O item da lista enxuta: alinhado à esquerda, com uma linha de separação acima.
+   *
+   * Centralizado como o de uma dose, três remédios viravam três blocos flutuando no meio da tela,
+   * sem eixo comum para o olho seguir. À esquerda eles se leem como lista — que é o que são.
+   */
+  itemEnxuto: {
+    alignItems: "stretch",
+    paddingVertical: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.18)",
+  },
+  /** Miniatura à esquerda, texto à direita — a forma de uma linha de lista. */
+  linhaDoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  /**
+   * 48dp: o tamanho em que a caixa ainda se reconhece pela cor e pela forma, sem tomar a linha.
+   *
+   * Os 132dp da tela de uma dose não cabem aqui — três deles empilhados não deixam espaço para mais
+   * nada, e a tela vista em 12/09 já estava cheia sem foto nenhuma.
+   */
+  miniatura: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
+  },
+  /** A coluna de texto ocupa o que sobra, e é o eixo com que o local se alinha. */
+  textoDoItem: {
+    flex: 1,
+    gap: 2,
+  },
+  /**
+   * O nome na lista enxuta.
+   *
+   * 18px e não os 30 da tela de uma dose: com três remédios, três títulos em corpo grande disputam
+   * a tela e nenhum se destaca — o tamanho deixa de significar importância quando tudo é grande.
+   * Aqui o nome precisa ser lido, não anunciado.
+   */
   nomeCompacto: {
     ...typography.headlineSm,
     color: cores.onPrimary,
+    textAlign: "left",
+  },
+  /** A quantidade acompanha o nome: um degrau abaixo, e alinhada com ele. */
+  quantidadeCompacta: {
+    ...typography.bodyMd,
+    color: cores.onPrimary,
+    opacity: 0.85,
+    textAlign: "left",
+  },
+  /**
+   * A frase que substitui a lista acima de três remédios.
+   *
+   * Diz o que fazer, e não o que há: o "quantos" já está no título, e repetir o número aqui seria
+   * dizer duas vezes a única coisa que a tela sabe antes de a pessoa tocar.
+   */
+  resumo: {
+    ...typography.bodyLg,
+    color: cores.onPrimary,
+    opacity: 0.85,
     textAlign: "center",
+    lineHeight: 26,
   },
   quantidade: {
     ...typography.headlineSm,
@@ -100,6 +161,19 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     justifyContent: "center",
     gap: spacing.xs,
     marginTop: spacing.xs,
+    opacity: 0.7,
+  },
+  /**
+   * O mesmo local, à esquerda e sem o respiro de cima.
+   *
+   * Mora **dentro** da coluna de texto (ver `textoDoItem`), e não como irmão do item: assim ele
+   * alinha com o nome quer haja miniatura ou não, sem depender de um recuo fixo que quebraria no
+   * remédio sem foto.
+   */
+  localEnxuto: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
     opacity: 0.7,
   },
   localTexto: {
