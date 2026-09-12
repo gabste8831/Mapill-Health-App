@@ -66,11 +66,17 @@ export function AvisoDePermissoes({
       accessibilityRole="button"
       accessibilityLabel={`Confira as permissões do aparelho. Sem elas ${oQueNaoFunciona} não funciona. Toque para ver quais são.`}
     >
-      <Ionicons
-        name="shield-checkmark"
-        size={20}
-        color={cores.onPrimarySurface}
-      />
+      {/**
+       * O ícone dentro de um selo redondo, como o da tela de Conta e dados.
+       *
+       * Pedido do Gabriel em 12/09, e o padrão é o mesmo `introIcone` de lá: círculo de 40dp com o
+       * azul a 12%, e o `shield-checkmark` em `corDeDestaque`. Solto, o ícone flutuava ao lado do
+       * texto; no selo ele ganha peso de marca visual e o bloco passa a ler como uma peça, não como
+       * uma linha de lista com um símbolo à esquerda.
+       */}
+      <View style={styles.selo}>
+        <Ionicons name="shield-checkmark" size={22} color={cores.corDeDestaque} />
+      </View>
       <View style={styles.texto}>
         <Text style={styles.titulo}>Confira as permissões</Text>
         {/**

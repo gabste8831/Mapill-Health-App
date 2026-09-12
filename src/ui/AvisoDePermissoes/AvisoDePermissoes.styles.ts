@@ -23,11 +23,13 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   aviso: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
-    minHeight: 48,
+    // `gap` e altura acompanham o selo de 40dp: com os 8 de antes ele encostava no texto, e 48 de
+    // altura não dava respiro acima e abaixo dele.
+    gap: spacing.md,
+    minHeight: 64,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     backgroundColor: cores.primarySurface,
     /**
      * A borda do `CardDeAtalho`, e pelo mesmo motivo: **isto é um caminho, não um conteúdo.**
@@ -44,7 +46,22 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
       ? { borderWidth: 2, borderColor: cores.corDeDestaque }
       : { borderWidth: 1, borderColor: withOpacity(cores.corDeDestaque, 0.35) }),
   },
-  /** Ocupa o que sobra entre o escudo e a seta. */
+  /**
+   * O selo redondo do ícone, igual ao `introIcone` da tela de Conta e dados.
+   *
+   * 40dp com o azul a 12% sobre a superfície do bloco. `corDeDestaque` e não `primary` pelo mesmo
+   * motivo da borda: no tema escuro `primary` é o navy de fundo, e 12% dele sobre superfície escura
+   * não se distingue do fundo.
+   */
+  selo: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.full,
+    backgroundColor: withOpacity(cores.corDeDestaque, 0.12),
+  },
+  /** Ocupa o que sobra entre o selo e a seta. */
   texto: {
     flex: 1,
     gap: 2,

@@ -56,15 +56,22 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     flex: 1,
   },
+  /**
+   * A seção de autorizações: **sem fundo próprio**, como as outras seções desta tela.
+   *
+   * Tinha `secondaryContainer` a 45%, e com as linhas ganhando superfície branca por dentro o
+   * resultado era caixa dentro de caixa — três níveis de fundo em quatro pixels. É o que fazia a
+   * tela parecer pesada apesar de cada peça estar correta (apontado em 12/09).
+   *
+   * Sem o bloco, o que separa a seção é o mesmo que separa as de texto: o rótulo e o espaço. As
+   * linhas passam a ser os únicos elementos com contorno, que é o que as faz ler como botões.
+   */
   condicoes: {
     gap: spacing.xs,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: withOpacity(colors.secondaryContainer, 0.45),
   },
   condicoesTitulo: {
     ...typography.label,
-    color: colors.onSecondaryContainer,
+    color: colors.onSurfaceVariant,
   },
   condicoesParagrafo: {
     marginTop: spacing.sm,
@@ -99,8 +106,11 @@ export const styles = StyleSheet.create({
     marginTop: spacing.sm,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
+    // **35%, e não a borda cheia.** Cheia em cinco linhas empilhadas fica gritante — o Gabriel
+    // apontou em 12/09, e é o mesmo valor que o `CardDeAtalho` e o `AvisoDePermissoes` usam: a
+    // diluição separa sem berrar, e é o contorno que o app já tem em toda parte.
+    borderWidth: 1,
+    borderColor: withOpacity(colors.primary, 0.35),
   },
   /**
    * A linha já autorizada: **sem borda azul**, porque não há o que fazer nela.
@@ -110,10 +120,14 @@ export const styles = StyleSheet.create({
    * cinco itens parecer cinco tarefas quando três já estão prontas.
    */
   linhaResolvida: {
-    backgroundColor: colors.successSurface,
-    // `success` cheio, e não diluído: a 45% ele dava 1,57:1 contra o branco (medido), abaixo dos
-    // 3:1 que a WCAG 1.4.11 pede para a borda de um componente. Cheio dá 5,02.
-    borderColor: colors.success,
+    /**
+     * Sem fundo, e a borda no mesmo peso da azul.
+     *
+     * O que distingue esta linha é o ícone verde e a palavra "Autorizada" — dois sinais
+     * independentes, que é o que a acessibilidade pede. Somar fundo e borda cheia a isso seria o
+     * quarto sinal para a mesma informação, e faria o resolvido pesar mais na tela que o pendente.
+     */
+    borderColor: withOpacity(colors.success, 0.35),
   },
   /** Ocupa o que sobra entre o ícone de estado e a seta. */
   linhaTexto: {
@@ -121,13 +135,15 @@ export const styles = StyleSheet.create({
     gap: 2,
   },
   /**
-   * O nome da permissão em corpo de leitura, com peso de rótulo de botão.
+   * O nome da permissão: corpo de leitura com peso de rótulo.
    *
-   * `headlineSm` e não `bodyMd`: é o que se lê primeiro na linha, e num público que pode estar sem
-   * óculos 18px é o degrau que separa "consigo ler" de "vou aproximar o celular".
+   * Cheguei a subir para 18px, e com a borda discreta ficou desproporcional — texto grande em caixa
+   * leve lê como título de seção, não como botão. `bodyMd` em semibold dá a mesma hierarquia dentro
+   * da linha sem competir com o rótulo da seção acima.
    */
   linhaTitulo: {
-    ...typography.headlineSm,
+    ...typography.bodyMd,
+    fontFamily: "PlusJakartaSans_600SemiBold",
     color: colors.onSurface,
   },
   linhaDescricao: {

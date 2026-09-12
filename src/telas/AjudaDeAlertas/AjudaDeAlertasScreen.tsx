@@ -74,7 +74,7 @@ export function AjudaDeAlertasScreen({
             } Toque para abrir as configurações.`}>
             <Ionicons
               name={permissao.concedida ? "checkmark-circle" : "close-circle"}
-              size={28}
+              size={24}
               color={permissao.concedida ? cores.success : cores.error}
             />
             <View style={styles.linhaTexto}>
@@ -93,7 +93,7 @@ export function AjudaDeAlertasScreen({
                 {permissao.concedida ? "Autorizada" : "Toque para autorizar"}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={22} color={cores.primary} />
+            <Ionicons name="chevron-forward" size={18} color={cores.primary} />
           </Pressable>
         ))}
       </View>
@@ -103,9 +103,10 @@ export function AjudaDeAlertasScreen({
           <Text style={styles.condicoesTitulo}>
             Você precisa conferir estas
           </Text>
+          {/* Uma frase, e curta: o parágrafo de três linhas que estava aqui somava ao peso que o
+              Gabriel apontou em 12/09. O essencial é que o app não sabe o estado delas. */}
           <Text style={styles.texto}>
-            O Android não deixa o Mapill ver se estão ligadas. Abra cada uma e
-            confirme, mesmo que você já tenha passado por elas antes.
+            O Android não deixa o Mapill ver se estão ligadas.
           </Text>
 
           {naoVerificaveis.map((permissao) => (
@@ -117,7 +118,7 @@ export function AjudaDeAlertasScreen({
               accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} ${permissao.comoFazer ?? ""} O app não consegue verificar esta. Toque para abrir as configurações.`}>
               {/* Sem verde nem vermelho: um ícone de estado aqui seria afirmar o que o app não
                   sabe, e é justamente o engano que esta seção existe para corrigir. */}
-              <Ionicons name="help-circle" size={28} color={cores.onSurfaceVariant} />
+              <Ionicons name="help-circle" size={24} color={cores.onSurfaceVariant} />
               <View style={styles.linhaTexto}>
                 <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
                 {/* Aqui o `comoFazer` fica, e a `descricao` sai: a instrução é o que a pessoa
@@ -127,7 +128,7 @@ export function AjudaDeAlertasScreen({
                   {permissao.comoFazer ?? "Toque para abrir e conferir"}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={22} color={cores.primary} />
+              <Ionicons name="chevron-forward" size={18} color={cores.primary} />
             </Pressable>
           ))}
         </View>
