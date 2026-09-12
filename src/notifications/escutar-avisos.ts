@@ -58,6 +58,26 @@ let aoAbrirDestino: AoAbrirDestino | null = null;
  */
 const jaAbertos = new Set<string>();
 
+/**
+ * Esquece tudo o que já foi aberto — chamado a cada reconstrução da janela de avisos.
+ *
+ * A trava existe para o mesmo `DELIVERED` não abrir duas telas, e isso vale **dentro de um
+ * disparo**, não para sempre. Editar um tratamento apaga as doses futuras e gera outras: o horário
+ * das 20:00 de amanhã volta a existir com o mesmo `scheduledFor` e outro `doseScheduleId`, e para a
+ * trava é o mesmo horário de antes.
+ *
+ * Foi o defeito visto em aparelho em 12/09: alarme testado (o horário fica marcado), editado para
+ * notificação, salvo, e editado de volta para alarme. Da segunda vez a tela azul não subia mais — o
+ * som tocava, e o `DELIVERED` morria na trava. Um estado de memória sobrevivendo a uma mudança de
+ * dados é o tipo de defeito que não aparece em teste nenhum, porque exige a sequência exata.
+ *
+ * O reagendamento é o lugar certo de limpar: ele é chamado sempre que o banco muda o que deve
+ * tocar, que é exatamente quando a trava deixa de valer.
+ */
+export function esquecerAlarmesAbertos(): void {
+  jaAbertos.clear();
+}
+
 async function tratar(evento: Event): Promise<void> {
   const notificacao = evento.detail.notification;
   const id = notificacao?.id;
@@ -112,6 +132,17 @@ async function tratar(evento: Event): Promise<void> {
      */
     if (await todasAsDosesResolvidas(dados.doseScheduleIds)) {
       await notifee.cancelNotification(id).catch(() => {});
+      /**
+       * E **esquece** o horário: resolvido o que havia, a próxima entrega para este instante é um
+       * alarme novo, não a repetição do que já abriu.
+       *
+       * Sem isto o horário ficava marcado para sempre. Visto em aparelho em 12/09 pelo caminho da
+       * edição: testar com alarme (a tela abre, o horário é marcado), editar para notificação,
+       * salvar, e voltar para alarme recria **o mesmo `scheduledFor`** — mesma chave, já na lista.
+       * O `DELIVERED` seguinte batia na trava acima e a tela azul não subia mais, sobrando só a
+       * notificação. O alarme tocava, e o que o app prometia não acontecia.
+       */
+      jaAbertos.delete(dados.scheduledFor);
       return;
     }
 

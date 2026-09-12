@@ -17,6 +17,7 @@ import {
 import { diaEMesDoIso } from "@/shared/datas-por-extenso";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { diagnosticarCanalDeAlarme } from "./canais-notifee";
+import { esquecerAlarmesAbertos } from "./escutar-avisos";
 import { NotifeeGateway } from "./notifee-gateway";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`), então não há o que agendar. */
@@ -77,6 +78,10 @@ export async function reagendarTodosOsAvisos(): Promise<void> {
 
 async function executarReagendamento(): Promise<void> {
   try {
+    // A grade vai ser reconstruída: o que o listener lembra de ter aberto deixa de valer, porque os
+    // horários que voltarem serão outros registros com o mesmo instante. Ver `esquecerAlarmesAbertos`.
+    esquecerAlarmesAbertos();
+
     // Sem permissão não há aviso a agendar, e pedir aqui seria pedir fora de contexto — quem pede
     // é a tela, no momento em que a pessoa liga o lembrete.
     if ((await gateway.consultarPermissao()) !== "concedida") {
