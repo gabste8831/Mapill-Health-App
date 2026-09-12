@@ -16,7 +16,7 @@
 | **19.2** | Alarme com o app aberto | ✅ **Passou em 12/09** |
 | **18.3** | Bateria (8–12h, sem carregador) | Falta rodar — dá para fazer na build atual |
 | **19** | Os outros casos de borda | Falta rodar — dá para fazer na build atual |
-| **20** | Compromisso e receita | Agendados; conferir amanhã de manhã |
+| **20** | Compromisso e receita | ✅ **Passou em 12/09** — chegaram às 00:01, com o app fechado |
 | 🔧 | **Estoque, cartão da Home, tela azul após editar** | **Corrigidos — só a próxima build valida** |
 | 🔴 | Alarme adiado toca mesmo após apagar todos os dados | Bug confirmado em 11/09 |
 | 🔴 | Responder o alarme abre o app sem desbloquear | Bug confirmado em 12/09 — privacidade |
@@ -29,7 +29,12 @@ Com o Autostart ligado, e ponta a ponta:
 - **Alarme:** app fora dos recentes, celular bloqueado. A tela azul irrompeu e "Tomei" gravou a
   dose. É o caso principal do app, e fecha o 13.1, o 14.1.2 e o 19.2.
 - **Notificação:** chegou no modo certo, sem tela cheia, e "Pulei" registrou o desfecho.
-- **Compromisso e receita** aparecem no Diagnóstico como agendados para as 00:01.
+- **Compromisso e receita:** as três notificações estavam no celular na manhã seguinte — duas de
+  receita e uma de compromisso, entregues às 00:01 com o app fechado. Fecha o bloco 20 para os dois.
+
+> 📌 **O que isso prova além do bloco 20:** o encanamento inteiro funciona com o app fechado a noite
+> toda — agendar, sobreviver, e entregar na hora marcada. O estoque que falta não é limitação de
+> infraestrutura: é o defeito corrigido em `4cc90e6`, esperando build.
 
 ### 🔧 O que só a próxima build valida
 
@@ -81,11 +86,10 @@ Android fazem: detectar o fabricante por `Build.MANUFACTURER` e mostrar a instru
 
 **Com a build atual (12/09):**
 
-1. **Amanhã de manhã** — conferir se o compromisso e a receita chegaram às 00:01.
-2. **18.3** — um alarme para daqui a 8–12 h, sem carregador. É o teste da noite: cadastre e durma.
-3. **19.1, 19.3 e 19.4** — rápidos, cinco a dez minutos cada.
-4. **19.4b a 19.7** — numa sessão só, porque mexem no relógio e o 19.7 reinstala o app. Religue o
+1. **19.1, 19.3 e 19.4** — rápidos, cinco a dez minutos cada.
+2. **19.4b a 19.7** — numa sessão só, porque mexem no relógio e o 19.7 reinstala o app. Religue o
    Autostart depois do 19.7, ou ele reprova pelo motivo errado.
+3. **18.3** — um alarme para daqui a 8–12 h, sem carregador. É o teste da noite: cadastre e durma.
 
 **Com a próxima build:**
 
