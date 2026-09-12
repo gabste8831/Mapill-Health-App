@@ -265,22 +265,24 @@ async function executarReagendamento(): Promise<void> {
      * Só os estoques que entraram nesta rodada — `avisosDeEstoque` já é o resultado da regra,
      * então nada aqui reinterpreta quem devia ser avisado.
      */
-    const estoquesAvisados = new Set(
-      avisosDeEstoque.map((aviso) => aviso.chave.replace(/^estoque-/, "").replace(/-(baixo|acabou)$/, "")),
-    );
-    if (estoquesAvisados.size > 0) {
-      const inventoryRepository = new InventoryRepository();
-      for (const inventory of inventories) {
-        if (!estoquesAvisados.has(inventory.id)) continue;
-        if (inventory.lowStockAlertedAtQuantity === inventory.quantity) continue;
-        await inventoryRepository.save({
-          ...inventory,
-          lowStockAlertedAtQuantity: inventory.quantity,
-          updatedAt: new Date().toISOString(),
-          syncedAt: null,
-        });
-      }
-    }
+    /**
+     * ⚠️ A marca do aviso de estoque **não é gravada aqui**, e este comentário existe para a
+     * tentação não voltar.
+     *
+     * Marcar no agendamento foi o defeito que sumia com o aviso de estoque, visto em aparelho em
+     * 11/09: o Diagnóstico listava compromisso e receita para as 00:01, e nenhum estoque.
+     *
+     * Reagendar é "cancela tudo e planeja de novo", e roda a cada volta do app ao primeiro plano.
+     * Com a marca gravada no planejamento, a sequência era: planeja o aviso para daqui a dois dias
+     * → grava a quantidade de agora → o app volta ao primeiro plano → `precisaAvisar` compara a
+     * quantidade consigo mesma, conclui que já avisou, e descarta o estoque. O aviso vivia até o
+     * reagendamento seguinte, que era questão de segundos.
+     *
+     * A trava existe para o aviso não se repetir a cada dose confirmada, e isso só faz sentido
+     * depois de ele **ter chegado** — quem grava é o listener, ao receber a entrega (ver
+     * `marcarEstoqueComoAvisado` em `escutar-avisos`). Aqui não há o que marcar: nada chegou a
+     * ninguém ainda.
+     */
 
     /**
      * O estado real depois de reconstruir, e não só o que se tentou agendar.

@@ -1,5 +1,6 @@
 import notifee, { EventType, type Event } from "react-native-notify-kit";
 
+import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { ACAO_ADIAR, ACAO_PULEI, ACAO_TOMEI } from "./acoes";
 import { pedirParaEncerrarAlarme } from "./doses-resolvidas";
 import {
@@ -78,6 +79,41 @@ export function esquecerAlarmesAbertos(): void {
   jaAbertos.clear();
 }
 
+/**
+ * Grava que o estoque **já foi avisado**, com a quantidade que havia no momento.
+ *
+ * É a trava que impede uma notificação por dose confirmada: a previsão de estoque é recalculada a
+ * cada ingestão, e sem isto cada toque em "confirmar" geraria um aviso novo. Só repor a caixa
+ * rearma (ver `precisaAvisar` em `planejar-avisos-de-estoque`).
+ *
+ * **Na entrega, e não no agendamento.** Era gravada ao planejar, e isso matava o próprio aviso que
+ * acabara de criar: reagendar roda a cada volta ao primeiro plano, e o segundo reagendamento
+ * comparava a quantidade consigo mesma e concluía que já avisara. O aviso vivia segundos, e o
+ * Diagnóstico mostrava compromisso e receita às 00:01 sem nenhum estoque.
+ *
+ * Falhar aqui é aceitável: o pior caso é o aviso repetir uma vez, e repetir é melhor que calar.
+ */
+async function marcarEstoqueComoAvisado(chave: string): Promise<void> {
+  const inventoryId = chave.replace(/^estoque-/, "").replace(/-(baixo|acabou)$/, "");
+  if (inventoryId === chave) return;
+
+  try {
+    const repositorio = new InventoryRepository();
+    const inventory = await repositorio.findById(inventoryId);
+    if (inventory === null) return;
+    if (inventory.lowStockAlertedAtQuantity === inventory.quantity) return;
+
+    await repositorio.save({
+      ...inventory,
+      lowStockAlertedAtQuantity: inventory.quantity,
+      updatedAt: new Date().toISOString(),
+      syncedAt: null,
+    });
+  } catch (cause) {
+    if (__DEV__) console.error("[Mapill] falha ao marcar o estoque como avisado:", cause);
+  }
+}
+
 async function tratar(evento: Event): Promise<void> {
   const notificacao = evento.detail.notification;
   const id = notificacao?.id;
@@ -85,6 +121,12 @@ async function tratar(evento: Event): Promise<void> {
 
   const dados = lerDadosDoAviso(notificacao.data);
   if (dados === null) return;
+
+  // O aviso de estoque chegou: a partir de agora ele fica calado até haver reposição.
+  if (evento.type === EventType.DELIVERED && dados.chave.startsWith("estoque-")) {
+    await marcarEstoqueComoAvisado(dados.chave);
+    return;
+  }
 
   /**
    * **O alarme chegou com o app aberto: o app abre a tela ele mesmo.**

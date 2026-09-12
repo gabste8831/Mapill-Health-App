@@ -342,7 +342,7 @@ function estoquesQueVaoAcabar(
       avisos.push({ medication, inventory, daysRemaining: 0, lastDay: null });
       continue;
     }
-    if (!inventory.lowStockAlertEnabled || inventory.lowStockAlertLeadDays === null) continue;
+    if (!inventory.lowStockAlertEnabled) continue;
 
     // A mais recente entre as do medicamento: é a que está valendo, e portanto a que dita o ritmo
     // com que o estoque é consumido.
@@ -360,7 +360,20 @@ function estoquesQueVaoAcabar(
     // em unidades diferentes. Nos três casos não há o que avisar, e inventar um aviso seria pior
     // que ficar calado.
     if (depletion === null) continue;
-    if (depletion.daysRemaining > inventory.lowStockAlertLeadDays) continue;
+    /**
+     * **Sem prazo escolhido, o cartão aparece na semana do fim.**
+     *
+     * A antecedência é opcional desde 08/09 — quem marca a caixa sem escolher prazo quer ser
+     * avisado no dia em que o estoque acabar. Aqui ela era exigida (`leadDays === null` pulava o
+     * item), e o efeito era a pessoa marcar o aviso e não ver cartão nenhum: nem o antecipado, nem
+     * o do fim.
+     *
+     * Sete dias é a mesma janela que a tela de estoque usa para o selo de prazo, e é o intervalo em
+     * que uma ida à farmácia ainda cabe sem pressa. O cartão é informação na tela, não notificação:
+     * aparecer alguns dias antes não interrompe ninguém, e some sozinho quando o estoque é reposto.
+     */
+    const janela = inventory.lowStockAlertLeadDays ?? 7;
+    if (depletion.daysRemaining > janela) continue;
 
     avisos.push({
       medication,
