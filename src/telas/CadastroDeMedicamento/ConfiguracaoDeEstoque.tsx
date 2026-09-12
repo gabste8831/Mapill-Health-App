@@ -32,9 +32,10 @@ export type EstoqueForm = {
   onQuantityChange: (value: string) => void;
   alertEnabled: boolean;
   onAlertEnabledChange: (enabled: boolean) => void;
-  /** `null` = ainda não escolhida. Sem antecedência, o alerta não dispara e não é gravado ligado. */
+  /** `null` = sem prazo. O aviso continua existindo, e chega no dia em que o estoque acabar. */
   leadDays: string | null;
-  onLeadDaysChange: (days: string) => void;
+  /** `null` quando a pessoa toca na opção já escolhida, voltando ao aviso só no dia do fim. */
+  onLeadDaysChange: (days: string | null) => void;
   storageLocation: string;
   onStorageLocationChange: (value: string) => void;
 };
@@ -108,7 +109,10 @@ export function ConfiguracaoDeEstoque({
               label="Avisar antes também (opcional)"
               value={leadDays}
               options={LEAD_DAYS_OPTIONS}
-              onChange={onLeadDaysChange}
+              // Tocar na opção já marcada desmarca — a mesma regra dos outros dois seletores de
+              // antecedência (receita, e este mesmo aviso na tela de estoque). Onde o vazio é um
+              // estado válido, ele precisa ser alcançável pelo mesmo gesto que o abandonou.
+              onChange={(dias) => onLeadDaysChange(dias === leadDays ? null : dias)}
             />
             {/* **Onde o aviso aparece**, e não só que ele existe.
 

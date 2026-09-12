@@ -2009,7 +2009,18 @@ export function FormularioDeMedicamentoScreen({
                         label="Avisar antes também (opcional)"
                         value={renewalLeadDays}
                         options={RENEWAL_LEAD_OPTIONS}
-                        onChange={setRenewalLeadDays}
+                        /**
+                         * Tocar na opção já marcada desmarca — a mesma regra da antecedência de
+                         * estoque.
+                         *
+                         * O rótulo diz "(opcional)" e o texto abaixo descreve os dois estados, mas
+                         * não havia como **voltar** ao sem prazo: escolhido um, a única saída era
+                         * desmarcar o aviso inteiro e marcar de novo. Onde o vazio é um estado
+                         * válido, ele precisa ser alcançável pelo mesmo gesto que o abandonou.
+                         */
+                        onChange={(dias) =>
+                          setRenewalLeadDays(dias === renewalLeadDays ? null : dias)
+                        }
                       />
                       {/* A promessa muda: sem prazo é um aviso, com prazo são dois. */}
                       <Text style={styles.sectionHint}>
