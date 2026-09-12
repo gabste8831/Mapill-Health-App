@@ -12,24 +12,43 @@
 |---|---|---|
 | **13.1** | Tela azul sobre outro app | ✅ Aceito como está (11/09) |
 | **14.1.2** | Alarme com o app fora dos recentes | ✅ **Resolvido em 12/09** — era o Autostart da MIUI |
-| **17** | Vários remédios no mesmo horário | **Parado** — precisa ser desenvolvido de novo |
 | **18.2** | Alarme sobrevive ao reboot | ✅ **Passou em 12/09** — tocou ao desbloquear |
-| **18.3** | Bateria (8–12h, sem carregador) | Falta rodar |
-| **19** | Casos de borda | **Liberado** — 19.2 passou; faltam os outros |
-| **20** | Avisos de estoque/receita | **Agendados e confirmados no Diagnóstico** — falta amanhã de manhã |
+| **19.2** | Alarme com o app aberto | ✅ **Passou em 12/09** |
+| **18.3** | Bateria (8–12h, sem carregador) | Falta rodar — dá para fazer na build atual |
+| **19** | Os outros casos de borda | Falta rodar — dá para fazer na build atual |
+| **20** | Compromisso e receita | Agendados; conferir amanhã de manhã |
+| 🔧 | **Estoque, cartão da Home, tela azul após editar** | **Corrigidos — só a próxima build valida** |
+| 🔴 | Alarme adiado toca mesmo após apagar todos os dados | Bug confirmado em 11/09 |
+| 🔴 | Responder o alarme abre o app sem desbloquear | Bug confirmado em 12/09 — privacidade |
+| **17** | Vários remédios no mesmo horário | Parado — a resposta em lote precisa ser refeita |
 
 ### O que a build de 12/09 validou em aparelho
 
-Testado com o Autostart ligado, e as duas coisas passaram ponta a ponta:
+Com o Autostart ligado, e ponta a ponta:
 
-- **Alarme:** cadastrado, app fora dos recentes, celular bloqueado. A tela azul irrompeu, "Tomei"
-  gravou a dose. É o caso principal do app, e fecha o 13.1, o 14.1.2 e o 19.2.
-- **Notificação:** chegou no modo correto, sem tela cheia, e "Pulei" registrou o desfecho com o
-  redirecionamento certo.
-- **Os avisos de estoque e receita** aparecem no Diagnóstico como agendados — o que confirma a
-  correção do checkbox (`8e85dfb`) sem precisar esperar a madrugada.
-| 🔴 | Alarme adiado toca mesmo após apagar todos os dados | **Bug confirmado em 11/09** — resolver |
-| 🔴 | Responder o alarme abre o app sem desbloquear o celular | **Bug confirmado em 12/09** — privacidade |
+- **Alarme:** app fora dos recentes, celular bloqueado. A tela azul irrompeu e "Tomei" gravou a
+  dose. É o caso principal do app, e fecha o 13.1, o 14.1.2 e o 19.2.
+- **Notificação:** chegou no modo certo, sem tela cheia, e "Pulei" registrou o desfecho.
+- **Compromisso e receita** aparecem no Diagnóstico como agendados para as 00:01.
+
+### 🔧 O que só a próxima build valida
+
+Quatro correções entraram **depois** do APK de 12/09. Nada disso adianta testar agora — o binário
+instalado ainda tem os defeitos.
+
+| Commit | O que corrige | Como validar |
+|---|---|---|
+| `a3aa220` | Editar o tratamento impedia a tela azul de voltar | Alarme → editar para notificação → salvar → voltar para alarme. A tela azul tem de subir nas duas vezes |
+| `4cc90e6` | O aviso de estoque se matava no reagendamento seguinte | Marcar o aviso, abrir o Diagnóstico: o estoque tem de aparecer entre os agendados **e continuar lá** depois de sair e voltar ao app |
+| `4cc90e6` | O cartão da Home exigia antecedência | Marcar o aviso **sem escolher prazo**: o cartão tem de aparecer na semana do fim |
+| `358e55c` | O painel de permissões só valia para lembrete de dose | Cadastrar só aviso de estoque ou compromisso, sem alarme de dose, e negar a permissão: o painel tem de aparecer |
+| `358e55c` | Autostart não era explicado | `Ajustes → como funcionam os alertas`: tem de haver parágrafo próprio sobre o início automático |
+
+**O que o estoque revelou, e vale para o TCC:** compromisso e receita têm data fixa e nenhuma trava;
+o estoque depende de um cálculo e tem a trava que impede repetir aviso a cada dose. Ela era gravada
+no **agendamento**, e como reagendar é "cancela tudo e planeja de novo" — a cada volta do app ao
+primeiro plano —, o segundo reagendamento comparava a quantidade consigo mesma, concluía que já
+avisara e descartava o estoque. O aviso vivia segundos. Agora quem grava é o listener, na entrega.
 
 ### O que o 14.1.2 revelou (12/09)
 
@@ -59,10 +78,23 @@ Android fazem: detectar o fabricante por `Build.MANUFACTURER` e mostrar a instru
 
 ## A ordem agora
 
-1. **Rodar 18, 20 e 19**, nessa ordem — o 19 por último, porque mexe no relógio do aparelho e
-   reinstala o app; depois dele o estado do celular não serve para os outros.
-2. **Corrigir o adiamento sobrevivendo ao apagamento de dados** (ver a seção dedicada abaixo).
-3. **17** fica para quando a funcionalidade for refeita — não depende dos itens acima.
+**Com a build atual (12/09):**
+
+1. **Amanhã de manhã** — conferir se o compromisso e a receita chegaram às 00:01.
+2. **18.3** — um alarme para daqui a 8–12 h, sem carregador. É o teste da noite: cadastre e durma.
+3. **19.1, 19.3 e 19.4** — rápidos, cinco a dez minutos cada.
+4. **19.4b a 19.7** — numa sessão só, porque mexem no relógio e o 19.7 reinstala o app. Religue o
+   Autostart depois do 19.7, ou ele reprova pelo motivo errado.
+
+**Com a próxima build:**
+
+5. As cinco validações da tabela 🔧 acima.
+6. **20 inteiro**, agora com o estoque.
+
+**Depois, e não antes:**
+
+7. Os dois bugs 🔴 — o de privacidade primeiro, por ser dado de saúde exposto.
+8. **17**, quando a resposta em lote for refeita.
 
 > ⚠️ **O Autostart tem de estar ligado em todos os blocos abaixo**, e **reinstalar o app o desliga
 > de novo**. Isso afeta o 19 diretamente: o passo 11.7 reinstala o Mapill, então religue o Autostart

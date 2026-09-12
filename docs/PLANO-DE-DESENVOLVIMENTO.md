@@ -32,7 +32,7 @@ Nenhum bloco fecha sem estes seis itens:
 
 ---
 
-## 0.0 RETOMADA — onde parei (11/09)
+## 0.0 RETOMADA — onde parei (12/09)
 
 > **Leia esta seção primeiro se estiver voltando ao projeto, ou abrindo em outra máquina.** Ela diz
 > o que está em andamento agora. O índice de 02/09 logo abaixo ficou como registro histórico —
@@ -45,19 +45,39 @@ Nenhum bloco fecha sem estes seis itens:
 revisados em aparelho e aprovados; a miniatura que não aparecia na hora foi corrigida e confirmada.
 
 **A validação em aparelho está em andamento, guiada pelo [`ROTEIRO-DE-TESTE.md`](ROTEIRO-DE-TESTE.md)
-— esse é o documento de trabalho agora, não este.** Estado na rodada de 11/09:
+— esse é o documento de trabalho agora, não este.** Estado na rodada de 12/09:
 
-- A maior parte do roteiro (blocos 10, 12, 13.2–13.5, 15, 16, 21, 22, 23) **passou** e já saiu do
-  roteiro.
-- **Achado novo e não resolvido:** com o app fora dos recentes (removido da lista, não só
-  minimizado), nem o alarme nem a notificação disparam — trava os blocos de reboot/bateria, casos de
-  borda e avisos de estoque/receita até ser investigado (checar se é efeito do dev client ou defeito
-  real numa build preview/produção).
-- **Bug confirmado, a corrigir:** um alarme adiado continuou tocando mesmo depois de apagar todos os
-  dados de saúde — o adiamento é agendado direto no sistema (Notifee), fora da grade normal, e o
-  apagamento de dados não está cancelando os adiamentos pendentes.
-- **Bloco 17** (vários remédios no mesmo horário, resposta em lote) ficou parado por decisão do
-  Gabriel: precisa ser desenvolvido de novo antes de voltar a ser testado.
+**O alarme passou ponta a ponta.** Cadastrado, app fora dos recentes, celular bloqueado: a tela azul
+irrompeu e "Tomei" gravou a dose. A notificação também, com "Pulei" registrando o desfecho. É o caso
+principal do app, e fecha os blocos 13.1, 14.1.2 e 19.2.
+
+**O que travava tudo era o Autostart da MIUI**, não o app. Sem ele o sistema recusa acordar o
+processo, e o `AlarmManager` nunca executa — o agendamento fica registrado e não é entregue. Não há
+API para consultar nem conceder; a mitigação é orientar, e a tela de ajuda de alertas passou a
+fazê-lo. Para o TCC isto é conteúdo da seção de limitações de plataforma, com evidência dos dois
+lados: o Diagnóstico mostrando o aviso agendado, e o alarme não tocando.
+
+**Quatro defeitos encontrados e corrigidos nesta rodada**, todos esperando a próxima build para
+serem validados:
+
+| Commit | O defeito |
+|---|---|
+| `8e85dfb` | Marcar "me avisar" sem escolher prazo gravava `false` — a interface confirmava o que o banco negava |
+| `a3aa220` | Editar o tratamento impedia a tela azul de voltar: a trava `jaAbertos` guardava o horário e nunca era limpa |
+| `4cc90e6` | O aviso de estoque se matava no reagendamento seguinte — a trava era gravada no agendamento, não na entrega |
+| `358e55c` | O painel de permissões só aparecia para quem tinha lembrete de dose, ignorando estoque, receita e compromisso |
+
+**Dois bugs seguem abertos:**
+
+- 🔴 **Responder o alarme com o celular bloqueado dá acesso ao app** sem pedir desbloqueio. O
+  `showWhenLocked` vale para a MainActivity inteira, e o `index.js` monta o app junto do alarme —
+  fechar a tela azul revela a Home. É exposição de dado de saúde, e a correção certa é uma Activity
+  nativa só para o alarme. **Prioridade sobre o resto.**
+- 🔴 **Alarme adiado sobrevive ao apagamento de dados.** Investigado em 12/09: `eraseHealthData`
+  apaga tabelas e arquivos e **não cancela agendamento nenhum** — então não é só o adiamento, as
+  doses da grade também continuam. É o alarme órfão por um caminho que o bloco 16 não testa.
+
+**Bloco 17** (resposta em lote) segue parado por decisão do Gabriel.
 
 ### O que saiu nesta rodada (05/09)
 
