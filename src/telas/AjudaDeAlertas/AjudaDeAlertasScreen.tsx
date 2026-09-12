@@ -91,18 +91,33 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
             você ao ajuste certo.
           </Text>
           {/**
-           * A economia de bateria fica aqui, e **não** no painel de permissões.
+           * O início automático e a economia de bateria ficam aqui, e **não** no painel de
+           * permissões.
            *
-           * O painel só lista o que o app consegue ler de volta — e o "início automático" dos
-           * fabricantes não expõe estado nenhuma API. Cobrado lá, o item nunca sumia, nem depois de
-           * autorizado. Como recomendação escrita ele diz a mesma coisa sem prometer uma
-           * verificação que não existe.
+           * O painel só lista o que o app consegue ler de volta — e essas duas telas são
+           * proprietárias de cada fabricante, sem API que exponha estado. Cobradas lá, as linhas
+           * nunca sumiam, nem depois de autorizadas. Como orientação escrita elas dizem a mesma
+           * coisa sem prometer uma verificação que não existe.
+           *
+           * O texto ficou **específico** depois do teste de 11/09, em que o Autostart desligado
+           * impediu qualquer aviso de chegar num Xiaomi: nem alarme, nem notificação, nem com o app
+           * nos recentes. O agendamento existia e o sistema recusava acordar o app — e o texto
+           * anterior mencionava "permita o início automático" no fim de uma frase sobre bateria,
+           * onde ninguém procuraria a causa de um alarme mudo.
            */}
           <Text style={[styles.texto, styles.condicoesParagrafo]}>
-            Alguns aparelhos, sobretudo Xiaomi, Samsung e Motorola, desligam apps em segundo plano
-            para poupar bateria, e isso pode atrasar ou impedir o alarme. Se um aviso não chegar,
-            procure o Mapill nas configurações de bateria do seu celular e marque-o como “sem
-            restrições”, ou permita o início automático.
+            Alguns aparelhos, sobretudo Xiaomi, Samsung e Motorola, impedem que apps sejam iniciados
+            sozinhos — e é o que faz o alarme não tocar mesmo com tudo configurado. Procure o Mapill
+            em Configurações, Apps, e ligue o “início automático” (também chamado de autostart).
+          </Text>
+          <Text style={[styles.texto, styles.condicoesParagrafo]}>
+            Na mesma tela, marque o Mapill como “sem restrições” na economia de bateria. Sem isso o
+            sistema pode atrasar os avisos quando o celular fica parado por muito tempo.
+          </Text>
+          <Text style={[styles.texto, styles.condicoesParagrafo]}>
+            Esses dois ajustes ficam fora do alcance do app: o Android não permite que ele os
+            consulte nem os altere, então não há como avisar aqui se estão pendentes. Vale conferir
+            se algum aviso deixar de chegar.
           </Text>
         </View>
 

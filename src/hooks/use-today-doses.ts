@@ -3,6 +3,7 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 
+import { AppointmentRepository } from "@/data/repositories/appointment-repository";
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
 import { IntakeLogRepository } from "@/data/repositories/intake-log-repository";
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
@@ -106,11 +107,16 @@ export type AgendaDoDia = {
   /** Se existe pelo menos um medicamento cadastrado — separa "dia vazio" de "app vazio". */
   temMedicamentos: boolean;
   /**
-   * Quantos tratamentos ativos pediram para ser avisados (`reminderMode` diferente de `none`).
+   * Quantos avisos a pessoa pediu, somando **as quatro fontes**: lembrete de dose, renovação de
+   * receita, estoque acabando e compromisso marcado.
    *
    * Existe para a Home saber se vale avisar que a permissão de notificações está desligada. Sem
    * isso, o aviso apareceria para quem nunca pediu lembrete nenhum — cobrando uma permissão que
    * não muda nada na vida dessa pessoa, que é o jeito mais rápido de ensinar a ignorar avisos.
+   *
+   * Contava só o lembrete de dose até 12/09, e isso deixava sem painel quem usa o app de outro
+   * jeito — sem alarme de dose, mas com aviso de estoque ou de consulta. Os avisos dessa pessoa
+   * dependiam da mesma permissão e sumiam em silêncio, sem nada na tela explicando por quê.
    */
   tratamentosComLembrete: number;
 };
@@ -175,13 +181,20 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
    */
   const fimDeHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
 
-  const [comStatus, daSemana, prescriptions, medications, inventories] = await Promise.all([
-    new DoseScheduleRepository().findForDay(todayIsoDate()),
-    new DoseScheduleRepository().findBetween(inicioDaSemana.toISOString(), fimDeHoje.toISOString()),
-    new PrescriptionRepository().findAll(),
-    new MedicationRepository().findAll(),
-    new InventoryRepository().findAll(),
-  ]);
+  const [comStatus, daSemana, prescriptions, medications, inventories, appointments] =
+    await Promise.all([
+      new DoseScheduleRepository().findForDay(todayIsoDate()),
+      new DoseScheduleRepository().findBetween(
+        inicioDaSemana.toISOString(),
+        fimDeHoje.toISOString(),
+      ),
+      new PrescriptionRepository().findAll(),
+      new MedicationRepository().findAll(),
+      new InventoryRepository().findAll(),
+      // Os compromissos entram só para contar quem espera aviso: eles não aparecem na agenda do
+      // dia, mas pedem a mesma permissão de notificação que as doses (ver `tratamentosComLembrete`).
+      new AppointmentRepository().findAll(),
+    ]);
 
   const prescricaoPorId = new Map(prescriptions.map((p) => [p.id, p]));
   const medicamentoPorId = new Map(medications.map((m) => [m.id, m]));
@@ -268,13 +281,40 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
     ).length,
     resolvidas: doses.filter((dose) => resolvesDose(dose.latestStatus)).length,
     temMedicamentos: medications.length > 0,
-    // Só os de medicamento que ainda existe, pelo mesmo motivo do estoque: a prescrição de um
-    // remédio excluído continua no banco como histórico, mas não espera aviso nenhum.
-    tratamentosComLembrete: prescriptions.filter(
-      (prescription) =>
-        prescription.reminderMode !== "none" &&
-        medicamentoPorId.get(prescription.medicationId) !== undefined,
-    ).length,
+    /**
+     * **Qualquer aviso conta, e não só o de dose.**
+     *
+     * Eram só as prescrições com `reminderMode`, e isso deixava sem painel de permissões quem usa o
+     * app de outro jeito: sem lembrete de dose, mas com aviso de estoque acabando ou de compromisso
+     * marcado. Esses avisos precisam da mesma permissão de notificação, e sem ela sumiam em
+     * silêncio — o app prometia avisar, não avisava, e não havia nada na tela explicando por quê.
+     *
+     * Relatado em 12/09. As três fontes entram porque as três dependem da mesma autorização; o que
+     * a segunda condição do painel evita é cobrar permissão de quem não pediu aviso **nenhum**.
+     *
+     * Só os de medicamento que ainda existe, pelo mesmo motivo do estoque: a prescrição de um
+     * remédio excluído continua no banco como histórico, mas não espera aviso nenhum.
+     */
+    tratamentosComLembrete:
+      prescriptions.filter(
+        (prescription) =>
+          prescription.reminderMode !== "none" &&
+          medicamentoPorId.get(prescription.medicationId) !== undefined,
+      ).length +
+      prescriptions.filter(
+        (prescription) =>
+          prescription.renewalReminderEnabled &&
+          medicamentoPorId.get(prescription.medicationId) !== undefined,
+      ).length +
+      inventories.filter(
+        (inventory) =>
+          inventory.lowStockAlertEnabled &&
+          medicamentoPorId.get(inventory.medicationId) !== undefined,
+      ).length +
+      appointments.filter(
+        (appointment) =>
+          appointment.reminderOnDay || appointment.reminderLeadDays !== null,
+      ).length,
   };
 }
 
