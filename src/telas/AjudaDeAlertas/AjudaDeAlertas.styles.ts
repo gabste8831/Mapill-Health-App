@@ -123,44 +123,14 @@ export const styles = StyleSheet.create({
     color: colors.error,
   },
   /**
-   * O placar do topo: quantas faltam, num bloco que se lê de relance.
+   * O placar de progresso saiu em 12/09, junto dos seus estilos.
    *
-   * É o primeiro elemento da tela por decisão de 12/09 — quem abre aqui está tentando fazer o
-   * alarme funcionar, e atravessar quatro seções de texto antes de achar o que resolve é desistir no
-   * meio. Ícone grande, uma frase, e o que fazer.
+   * Ele dizia "2 de 3 ainda faltam", e o denominador era o número de autorizações **verificáveis** —
+   * as únicas que o app sabe contar. Quem lia concluía que três era o total, e que zerar aquele
+   * número deixava o app pronto; o total honesto é cinco. É o mesmo engano que tirou a lista de
+   * permissões da Home no mesmo dia, e qualquer progresso aqui o repetiria.
    */
-  placarPendente: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: withOpacity(colors.error, 0.1),
-    borderWidth: 1,
-    borderColor: withOpacity(colors.error, 0.35),
-  },
-  placarOk: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: withOpacity(colors.success, 0.1),
-    borderWidth: 1,
-    borderColor: withOpacity(colors.success, 0.35),
-  },
-  placarTexto: {
-    flex: 1,
-    gap: 2,
-  },
-  placarTitulo: {
-    ...typography.headlineSm,
-    color: colors.onSurface,
-  },
-  placarDescricao: {
-    ...typography.bodySm,
-    color: colors.onSurfaceVariant,
-  },
+
   alvoDeLink: {
     minHeight: 44,
     justifyContent: "center",

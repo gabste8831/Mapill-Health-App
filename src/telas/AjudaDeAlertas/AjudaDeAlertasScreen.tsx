@@ -46,10 +46,6 @@ export function AjudaDeAlertasScreen({
 
   const verificaveis = itens.filter((item) => item.verificavel);
   const naoVerificaveis = itens.filter((item) => !item.verificavel);
-  const pendentesVerificaveis = verificaveis.filter(
-    (item) => !item.concedida,
-  ).length;
-  const faltamVerificaveis = pendentesVerificaveis > 0;
 
   /**
    * As duas seções de autorização, montadas aqui e renderizadas **antes** das explicações.
@@ -176,30 +172,17 @@ export function AjudaDeAlertasScreen({
          * funcionar, e atravessar quatro seções de texto antes de achar o que resolve é desistir no
          * meio. O público inclui idosos, e permissão de Android é o assunto mais difícil do app.
          *
-         * O placar no topo é o que se lê sem ler: um número, uma cor, e o que fazer.
+         * ⚠️ **Não há placar de progresso aqui, e isso é deliberado.**
+         *
+         * Havia um — "2 de 3 ainda faltam", em vermelho, no topo. Ele contava só as verificáveis,
+         * porque são as únicas que o app sabe contar, e por isso mentia sobre o total: quem lia "de
+         * 3" concluía que três era o que havia, e que zerar aquele número deixava o app pronto. É
+         * exatamente o engano que tirou a lista de permissões da Home no mesmo dia.
+         *
+         * Qualquer progresso mostrado aqui teria o mesmo defeito, porque o denominador honesto é
+         * cinco e o app só conhece três. A frase de abertura de cada seção diz o que ela é, e é isso
+         * que substitui o placar.
          */}
-        <View
-          style={faltamVerificaveis ? styles.placarPendente : styles.placarOk}
-        >
-          <Ionicons
-            name={faltamVerificaveis ? "alert-circle" : "checkmark-circle"}
-            size={32}
-            color={faltamVerificaveis ? cores.error : cores.success}
-          />
-          <View style={styles.placarTexto}>
-            <Text style={styles.placarTitulo}>
-              {faltamVerificaveis
-                ? `${pendentesVerificaveis} de ${verificaveis.length} ainda faltam`
-                : "As que o app confere estão prontas"}
-            </Text>
-            <Text style={styles.placarDescricao}>
-              {faltamVerificaveis
-                ? "Sem todas elas o alarme não toca. Toque em cada uma abaixo para autorizar."
-                : "Confira abaixo as três que o app não consegue verificar sozinho."}
-            </Text>
-          </View>
-        </View>
-
         {SECOES_DE_PERMISSAO}
 
         {/* A explicação vem **depois** das autorizações: quem abre esta tela está tentando fazer o
