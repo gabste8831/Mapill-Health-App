@@ -473,6 +473,11 @@ export function InicioScreen() {
                   }
                 : undefined
             }
+            /**
+             * O caminho para a lista completa. O painel mostra só o que impede o alarme de existir;
+             * lá estão as cinco, com a seção do que o app não consegue verificar.
+             */
+            onAbrirDetalhes={() => router.push("/cadastro/ajuda-de-alertas")}
           />
         ) : null}
 

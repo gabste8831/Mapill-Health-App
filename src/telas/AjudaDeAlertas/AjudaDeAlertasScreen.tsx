@@ -1,7 +1,9 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { estadoDePressao } from "@/shared/theme";
+import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
+import { estadoDePressao, useCores } from "@/shared/theme";
 import { Header } from "@/ui";
 import { styles } from "./AjudaDeAlertas.styles";
 
@@ -31,6 +33,17 @@ type AjudaDeAlertasScreenProps = {
  * A tela não conhece rota: quem navega é quem a monta (§2.6.1).
  */
 export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasScreenProps) {
+  const cores = useCores();
+  /**
+   * O hook relê as permissões **a cada volta ao primeiro plano**, e é isso que faz esta tela
+   * funcionar como página de conferência: a pessoa toca numa linha, vai à tela do sistema, concede,
+   * e ao voltar o estado já está atualizado — sem precisar sair e entrar de novo.
+   */
+  const { itens } = usePermissoesDeAlarme();
+
+  const verificaveis = itens.filter((item) => item.verificavel);
+  const naoVerificaveis = itens.filter((item) => !item.verificavel);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Header title="Como funcionam os alertas" onBack={onBack} />
@@ -83,43 +96,96 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
         {/* O texto que era o aviso "Depende do seu aparelho" dentro do popup. Ali ele competia com
             o painel de permissões, que diz a mesma coisa e ainda leva à tela de cada ajuste; aqui
             ele é o que sempre foi — uma condição explicada, não um alerta. */}
+        {/**
+         * A lista completa das autorizações, **sempre visível** — e é isto que diferencia esta tela
+         * do painel da Home.
+         *
+         * O painel é um alerta: ele aparece quando há algo a fazer e some quando não há. Três das
+         * cinco autorizações não expõem estado a nenhuma API (sobrepor apps, início automático,
+         * bateria), e para essas o painel marca a **ida** à tela do sistema, não a permissão.
+         *
+         * O furo que isso abria, apontado pelo Gabriel em 12/09: quem abre a tela do Autostart e sai
+         * sem ligar a chave vê a linha desaparecer do painel — e fica sem aviso nenhum, com o app
+         * silencioso e nada explicando por quê. O lugar onde ele orientava deixou de existir.
+         *
+         * Aqui as cinco estão sempre listadas, com o botão que leva à tela de cada uma. Não é um
+         * alerta: é a página de consulta de "por que o aviso não chegou?", e ela não pode sumir
+         * justamente quando a resposta é necessária.
+         */}
+        {/**
+         * **Duas seções, e a divisão é por quem sabe a resposta** — não por importância.
+         *
+         * A primeira lista o que o Android responde quando perguntado: o app afirma com certeza, em
+         * verde ou vermelho. A segunda lista o que nenhuma API expõe, e onde só a pessoa pode
+         * verificar abrindo a tela.
+         *
+         * Separar foi decisão do Gabriel em 12/09, e resolve o furo que a versão anterior tinha:
+         * lá as três não-verificáveis eram marcadas como concedidas ao serem **visitadas**, então
+         * quem abria o Autostart e saía sem ligar a chave via a linha desaparecer — e ficava com o
+         * app silencioso e nada explicando por quê. Aqui elas nunca desaparecem, porque o app nunca
+         * soube se foram atendidas.
+         */}
         <View style={styles.condicoes}>
-          <Text style={styles.condicoesTitulo}>Depende do seu aparelho</Text>
+          <Text style={styles.condicoesTitulo}>Autorizações confirmadas pelo app</Text>
           <Text style={styles.texto}>
-            Com a permissão de avisos ativa e o volume ligado, os alertas chegam na hora marcada.
-            Quando falta uma dessas autorizações, o app avisa na tela de escolha do alerta e leva
-            você ao ajuste certo.
+            Estas o Android informa, e o Mapill confere sozinho a cada vez que você abre o app.
           </Text>
-          {/**
-           * O início automático e a economia de bateria ficam aqui, e **não** no painel de
-           * permissões.
-           *
-           * O painel só lista o que o app consegue ler de volta — e essas duas telas são
-           * proprietárias de cada fabricante, sem API que exponha estado. Cobradas lá, as linhas
-           * nunca sumiam, nem depois de autorizadas. Como orientação escrita elas dizem a mesma
-           * coisa sem prometer uma verificação que não existe.
-           *
-           * O texto ficou **específico** depois do teste de 11/09, em que o Autostart desligado
-           * impediu qualquer aviso de chegar num Xiaomi: nem alarme, nem notificação, nem com o app
-           * nos recentes. O agendamento existia e o sistema recusava acordar o app — e o texto
-           * anterior mencionava "permita o início automático" no fim de uma frase sobre bateria,
-           * onde ninguém procuraria a causa de um alarme mudo.
-           */}
-          <Text style={[styles.texto, styles.condicoesParagrafo]}>
-            Alguns aparelhos, sobretudo Xiaomi, Samsung e Motorola, impedem que apps sejam iniciados
-            sozinhos — e é o que faz o alarme não tocar mesmo com tudo configurado. Procure o Mapill
-            em Configurações, Apps, e ligue o “início automático” (também chamado de autostart).
-          </Text>
-          <Text style={[styles.texto, styles.condicoesParagrafo]}>
-            Na mesma tela, marque o Mapill como “sem restrições” na economia de bateria. Sem isso o
-            sistema pode atrasar os avisos quando o celular fica parado por muito tempo.
-          </Text>
-          <Text style={[styles.texto, styles.condicoesParagrafo]}>
-            Esses dois ajustes ficam fora do alcance do app: o Android não permite que ele os
-            consulte nem os altere, então não há como avisar aqui se estão pendentes. Vale conferir
-            se algum aviso deixar de chegar.
-          </Text>
+
+          {verificaveis.map((permissao) => (
+            <Pressable
+              key={permissao.chave}
+              style={estadoDePressao(styles.linhaDePermissao, { superficie: true })}
+              onPress={() => void permissao.abrir()}
+              accessibilityRole="button"
+              accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} ${
+                permissao.concedida ? "Concedida." : "Pendente."
+              } Toque para abrir as configurações.`}>
+              <Ionicons
+                name={permissao.concedida ? "checkmark-circle" : "close-circle"}
+                size={22}
+                color={permissao.concedida ? cores.success : cores.error}
+              />
+              <View style={styles.linhaTexto}>
+                <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
+                <Text style={styles.linhaDescricao}>
+                  {permissao.concedida ? "Concedida" : permissao.descricao}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
+            </Pressable>
+          ))}
         </View>
+
+        {naoVerificaveis.length > 0 ? (
+          <View style={styles.condicoes}>
+            <Text style={styles.condicoesTitulo}>Você mesmo precisa conferir</Text>
+            <Text style={styles.texto}>
+              O Android não deixa o Mapill consultar estas três, então ele não sabe se estão ligadas.
+              Se algum aviso deixar de chegar, comece por aqui: abra cada uma e confirme.
+            </Text>
+
+            {naoVerificaveis.map((permissao) => (
+              <Pressable
+                key={permissao.chave}
+                style={estadoDePressao(styles.linhaDePermissao, { superficie: true })}
+                onPress={() => void permissao.abrir()}
+                accessibilityRole="button"
+                accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} O app não consegue verificar esta. Toque para abrir as configurações.`}>
+                {/* Sem verde nem vermelho: um ícone de estado aqui seria afirmar o que o app não
+                    sabe, e é justamente o engano que esta seção existe para corrigir. */}
+                <Ionicons name="help-circle-outline" size={22} color={cores.onSurfaceVariant} />
+                <View style={styles.linhaTexto}>
+                  <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
+                  <Text style={styles.linhaDescricao}>{permissao.descricao}</Text>
+                  {permissao.comoFazer !== undefined ? (
+                    <Text style={styles.linhaComoFazer}>{permissao.comoFazer}</Text>
+                  ) : null}
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
 
         <Pressable
           style={estadoDePressao(styles.alvoDeLink, { superficie: true })}

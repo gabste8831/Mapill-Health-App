@@ -162,6 +162,17 @@ export type ItemDePermissao = {
   comoFazer?: string;
   concedida: boolean;
   /**
+   * Se `concedida` é uma **leitura** do sistema ou só a lembrança de ter aberto a tela.
+   *
+   * `false` nas três que nenhuma API expõe (sobrepor apps, início automático, bateria). Quem mostra
+   * o item usa isto para não afirmar o que o app não sabe: na tela de ajuda elas aparecem sem ícone
+   * de concedido, com o convite a abrir e olhar.
+   *
+   * Sem esta distinção, o painel dizia "concedida" para quem abriu a tela do Autostart e saiu sem
+   * ligar a chave — e o app ficava silencioso sem nada que explicasse por quê (achado de 12/09).
+   */
+  verificavel: boolean;
+  /**
    * Sem ela o alarme **não toca de jeito nenhum**. As demais degradam a experiência (toca em
    * silêncio, toca atrasado), mas esta é a diferença entre existir e não existir.
    */
@@ -212,6 +223,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       titulo: "Mostrar avisos",
       descricao: "Sem isto o Mapill não consegue avisar de nenhuma dose.",
       concedida: notificacoes,
+      verificavel: true,
       essencial: true,
       abrir: async () => {
         await notifee.openNotificationSettings();
@@ -233,6 +245,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        * para sempre uma autorização que não há onde conceder.
        */
       concedida: settings.android.alarm !== AndroidNotificationSetting.DISABLED,
+      verificavel: true,
       essencial: true,
       abrir: async () => {
         await notifee.openAlarmPermissionSettings();
@@ -256,6 +269,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        * a ignorar o painel inteiro.
        */
       concedida: canal?.bypassDnd === true,
+      verificavel: true,
       essencial: false,
       /**
        * A tela de **acesso à política do Não Perturbe**, e não as notificações do app.
@@ -309,6 +323,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
         "Sem isto, usando outro aplicativo você recebe só um aviso no topo, sem a tela do alarme.",
       comoFazer: "Procure o Mapill na lista e autorize.",
       concedida: await jaFoiPedida(CHAVES_DE_IDA.sobreposicao),
+      verificavel: false,
       essencial: false,
       /**
        * `Linking.sendIntent`, e **não** `expo-intent-launcher`.
@@ -355,6 +370,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
           "Sem isto o seu aparelho impede o Mapill de abrir sozinho, e nenhum aviso chega — nem alarme, nem notificação.",
         comoFazer: "Procure o Mapill na lista e ligue a chave.",
         concedida: await jaFoiPedida(CHAVES_DE_IDA.autostart),
+        verificavel: false,
         // Essencial: é a única linha deste painel que, sozinha, silencia o app por completo.
         essencial: true,
         abrir: async () => {
@@ -368,6 +384,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
         descricao: "Com a economia ativa, o aviso pode atrasar dezenas de minutos ou não chegar.",
         comoFazer: 'Escolha "Sem restrições" para o Mapill.',
         concedida: await jaFoiPedida(CHAVES_DE_IDA.bateria),
+        verificavel: false,
         essencial: false,
         abrir: async () => {
           await marcarComoPedida(CHAVES_DE_IDA.bateria);

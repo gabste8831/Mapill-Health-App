@@ -25,6 +25,8 @@ export type AjustesScreenProps = {
    * Opcional, e não obrigatório com `__DEV__` dentro da tela: a decisão de expor a ferramenta é de
    * quem monta a rota, e uma prop opcional deixa isso explícito na assinatura.
    */
+  /** Abre a ajuda de alertas, onde as cinco autorizações do aparelho estão sempre listadas. */
+  onOpenAjudaDeAlertas: () => void;
   onOpenDiagnostico?: () => void;
 };
 
@@ -72,6 +74,7 @@ export function AjustesScreen({
   onEditProfile,
   onOpenAccount,
   onOpenTheme,
+  onOpenAjudaDeAlertas,
   onOpenDiagnostico,
 }: AjustesScreenProps) {
   const styles = useEstilos(criarEstilos);
@@ -154,6 +157,35 @@ export function AjustesScreen({
               label="Conta e dados"
               hint={accountEmail ?? undefined}
               onPress={onOpenAccount}
+            />
+          </Card>
+        </View>
+
+        {/**
+         * O caminho fixo para conferir as autorizações.
+         *
+         * O painel da Home é um alerta: aparece quando há algo a fazer e some quando não há. Três
+         * das cinco autorizações não expõem estado a nenhuma API, e para elas o painel marca a ida
+         * à tela do sistema — então quem abre o Autostart e sai sem ligar a chave vê a linha
+         * desaparecer, e fica sem aviso nenhum com o app silencioso.
+         *
+         * Aqui a entrada não depende de haver pendência: é a página de consulta de "por que o aviso
+         * não chegou?", e o lugar onde se procura isso é Ajustes.
+         */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Avisos e alarmes</Text>
+          <Card style={styles.cartaoDeLinhas}>
+            <Linha
+              icon={
+                <Ionicons
+                  name="notifications-outline"
+                  size={22}
+                  color={cores.onSurfaceVariant}
+                />
+              }
+              label="Como funcionam os alertas"
+              hint="Autorizações do aparelho e o que cada uma faz"
+              onPress={onOpenAjudaDeAlertas}
             />
           </Card>
         </View>

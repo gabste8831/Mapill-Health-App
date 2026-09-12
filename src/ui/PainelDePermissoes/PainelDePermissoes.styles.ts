@@ -35,6 +35,25 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   explicacaoCritica: {
     color: cores.onErrorSurface,
   },
+  /**
+   * A linha que resume as secundárias e leva aos detalhes.
+   *
+   * Sem superfície própria, ao contrário dos itens: ela não é uma permissão, é um caminho. Dar-lhe o
+   * mesmo peso visual das linhas faria parecer a sexta autorização da lista.
+   */
+  linkDeDetalhes: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    minHeight: 44,
+    borderRadius: radius.md,
+  },
+  linkDeDetalhesTexto: {
+    ...typography.bodySm,
+    color: cores.onWarningSurface,
+    textDecorationLine: "underline",
+  },
 
   lista: {
     gap: spacing.sm,

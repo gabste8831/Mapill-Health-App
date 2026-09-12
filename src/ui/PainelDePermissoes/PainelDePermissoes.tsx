@@ -11,6 +11,13 @@ type PainelDePermissoesProps = {
   vaiTocar: boolean;
   /** Só aparece quando o diálogo do sistema ainda pode abrir. */
   onPedirTudo?: () => void;
+  /**
+   * Leva à tela de ajuda de alertas, onde as cinco autorizações estão sempre listadas.
+   *
+   * O painel mostra **só as essenciais** — as que impedem o alarme de existir. As outras vivem lá,
+   * junto da seção do que o app não consegue verificar, e é esse link que abre o caminho.
+   */
+  onAbrirDetalhes?: () => void;
 };
 
 /**
@@ -33,12 +40,34 @@ type PainelDePermissoesProps = {
  * à tela exata do sistema é a única coisa que funciona, e é por isso que a linha inteira é
  * tocável em vez de haver um botão genérico de "configurações".
  */
-export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePermissoesProps) {
+export function PainelDePermissoes({
+  itens,
+  vaiTocar,
+  onPedirTudo,
+  onAbrirDetalhes,
+}: PainelDePermissoesProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
 
   const pendentes = itens.filter((item) => !item.concedida);
   if (pendentes.length === 0) return null;
+
+  /**
+   * **Só as essenciais viram linha aqui**, e o resto vira uma frase.
+   *
+   * O painel ocupava a tela inteira da Home com cinco linhas, cada uma com título, consequência e
+   * instrução — relatado pelo Gabriel em 12/09: "o cliente tem cem por cento da tela útil ocupada
+   * por essa listagem". Num aviso que mora acima da agenda do dia, isso inverte a prioridade da
+   * tela: o que a pessoa abriu o app para ver fica abaixo do que ela talvez vá configurar.
+   *
+   * A régua é a consequência, e ela já existia no tipo: `essencial` marca o que impede o alarme de
+   * **existir**. As outras degradam (toca atrasado, toca mudo) e cabem numa linha de resumo com o
+   * caminho para os detalhes.
+   */
+  const essenciais = pendentes.filter((item) => item.essencial);
+  const secundarias = pendentes.filter((item) => !item.essencial);
+  const emDestaque = essenciais.length > 0 ? essenciais : pendentes;
+  const resumidas = essenciais.length > 0 ? secundarias : [];
 
   return (
     <View style={[styles.painel, !vaiTocar && styles.painelCritico]}>
@@ -60,7 +89,7 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
       </Text>
 
       <View style={styles.lista}>
-        {pendentes.map((item) => (
+        {emDestaque.map((item) => (
           <Pressable
             key={item.chave}
             // Linha de largura total que abre uma tela do sistema: escurece sem encolher.
@@ -92,6 +121,28 @@ export function PainelDePermissoes({ itens, vaiTocar, onPedirTudo }: PainelDePer
           </Pressable>
         ))}
       </View>
+
+      {/**
+       * As secundárias em **uma linha**, com o caminho para os detalhes.
+       *
+       * Listá-las aqui é o que fazia o painel tomar a tela: cinco blocos de três linhas cada, acima
+       * da agenda do dia. Elas continuam existindo, na tela de ajuda de alertas, onde há espaço para
+       * dizer o que cada uma faz — e onde ficam junto da seção do que o app não consegue verificar.
+       */}
+      {resumidas.length > 0 && onAbrirDetalhes !== undefined ? (
+        <Pressable
+          style={estadoDePressao(styles.linkDeDetalhes)}
+          onPress={onAbrirDetalhes}
+          accessibilityRole="button"
+          accessibilityLabel={`Mais ${resumidas.length} ${resumidas.length === 1 ? "ajuste" : "ajustes"} podem melhorar os avisos. Toque para ver todos.`}>
+          <Text style={styles.linkDeDetalhesTexto}>
+            {resumidas.length === 1
+              ? "Mais 1 ajuste pode melhorar os avisos"
+              : `Mais ${resumidas.length} ajustes podem melhorar os avisos`}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color={cores.onWarningSurface} />
+        </Pressable>
+      ) : null}
 
       {/* Só quando o diálogo ainda pode abrir. Depois de negada, este botão não faria nada — e um
           botão que não faz nada é pior que botão nenhum. */}

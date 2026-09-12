@@ -69,6 +69,42 @@ export const styles = StyleSheet.create({
   condicoesParagrafo: {
     marginTop: spacing.sm,
   },
+  /**
+   * A linha de uma permissão: ícone de estado, texto, e a seta que diz que ela abre algo.
+   *
+   * Fundo próprio sobre o bloco, e não separador: são alvos de toque, e o que distingue "linha
+   * tocável" de "parágrafo" aqui é ter superfície. 48dp de altura mínima pelo alvo de toque.
+   */
+  linhaDePermissao: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    minHeight: 48,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    marginTop: spacing.xs,
+    borderRadius: radius.sm,
+    backgroundColor: withOpacity(colors.surface, 0.6),
+  },
+  /** Ocupa o que sobra entre o ícone de estado e a seta. */
+  linhaTexto: {
+    flex: 1,
+    gap: 2,
+  },
+  linhaTitulo: {
+    ...typography.bodyMd,
+    color: colors.onSurface,
+  },
+  linhaDescricao: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
+  /** O passo dentro da tela do sistema — onde procurar depois que ela abrir. */
+  linhaComoFazer: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+    fontStyle: "italic",
+  },
   alvoDeLink: {
     minHeight: 44,
     justifyContent: "center",
