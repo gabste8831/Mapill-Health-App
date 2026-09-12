@@ -135,21 +135,35 @@ export function AlarmeScreen({
   }, [instanteIso, ehActivityDeAlarme]);
 
   /**
-   * **Esta tela existe só na frente da pessoa** — então a notificação do horário dela pode sair.
+   * A notificação do horário sai da bandeja — mas **só com a tela de fato visível**.
    *
    * As duas fontes de áudio (o `loopSound` do canal e o `createAudioPlayer` abaixo) tocam o mesmo
-   * arquivo e se sobrepõem enquanto coexistem: o som duplicado de 10/09. Aqui a notificação sai sem
-   * ressalva porque quem garante a condição é quem abre a tela, não ela mesma — com o app em
-   * segundo plano a tela **não é mais montada** (ver `use-dose-notifications`), justamente para não
-   * haver tela invisível apagando o único aviso visível.
+   * arquivo e se sobrepõem enquanto coexistem: o som duplicado de 10/09. Quando esta tela está na
+   * frente, ela é quem toca, e a notificação pode sair.
+   *
+   * ## Por que a condição virou explícita em 12/09
+   *
+   * Ela era garantida por quem abre: `use-dose-notifications` recusava montar a tela com o app fora
+   * do primeiro plano, então chegar aqui já significava estar visível. Isso mudou — agora, com o
+   * aparelho bloqueado e a Activity nativa ausente, o app abre a rota assim mesmo, porque era esse
+   * o defeito que fazia a tela azul não aparecer com o Mapill nos recentes.
+   *
+   * A condição continua valendo, mas deixou de ser garantida lá fora. Se a tela montar sem estar
+   * visível — o caso que a espera tenta evitar, e nenhuma heurística acerta sempre —, dispensar a
+   * notificação apagaria o **único** aviso visível e deixaria o som sem rosto nem forma de parar.
+   * Trocar o problema barulhento pelo mudo é o pior desfecho possível aqui.
+   *
+   * Então a tela pergunta por si: como Activity do full-screen intent ela está na frente por
+   * definição (o Android a colocou lá); como rota, ela só dispensa se o app estiver `active`.
    *
    * `dispensar(chave)` e não `dispensarAlarmeAtivo()`: aquela varre todos os alarmes da bandeja, e
    * um alarme de outro horário ainda sem resposta não tem por que sumir porque esta tela abriu — foi
    * o excesso revertido em 83135de.
    */
   useEffect(() => {
+    if (!ehActivityDeAlarme && AppState.currentState !== "active") return;
     void new NotifeeGateway().dispensar(chaveDoHorario(instanteIso));
-  }, [instanteIso]);
+  }, [instanteIso, ehActivityDeAlarme]);
 
   /**
    * Toca em loop até ser silenciado.

@@ -80,6 +80,21 @@ export function esquecerAlarmesAbertos(): void {
 }
 
 /**
+ * Marca que a tela deste horário foi aberta — para quem abre **depois** de `aoDispararAlarme`.
+ *
+ * O caminho normal marca sozinho, pelo retorno do callback: abriu, marca. Mas desde 12/09 existe um
+ * caminho tardio, em `use-dose-notifications`: com o app fora do primeiro plano, ele espera um
+ * instante para ver se a Activity nativa assume o alarme e, se ela não vier, abre a rota ele mesmo.
+ *
+ * Quando isso acontece o callback já respondeu `false` há muito — ele não podia esperar, porque o
+ * retorno é síncrono. Sem esta função, o horário ficaria aberto e **não** marcado, e o `DELIVERED`
+ * seguinte do mesmo alarme empilharia uma segunda tela.
+ */
+export function marcarAlarmeComoAberto(scheduledFor: string): void {
+  jaAbertos.add(scheduledFor);
+}
+
+/**
  * Grava que o estoque **já foi avisado**, com a quantidade que havia no momento.
  *
  * É a trava que impede uma notificação por dose confirmada: a previsão de estoque é recalculada a
@@ -206,10 +221,14 @@ async function tratar(evento: Event): Promise<void> {
     /**
      * Marca **depois**, e só se a tela tiver mesmo aberto.
      *
-     * Quem abre agora pode recusar: com o app em segundo plano ele não monta tela nenhuma (ver
-     * `use-dose-notifications`), porque tela invisível só faz som sem rosto. Marcando antes, a
-     * recusa gravava o horário como "já aberto" e a trava passava a barrar a abertura de verdade —
-     * o alarme nunca mais mostraria a tela naquele horário, nem quando a pessoa voltasse ao app.
+     * Quem abre pode não abrir agora: fora do primeiro plano, `use-dose-notifications` espera um
+     * instante para ver se a Activity nativa assume o alarme, e só então decide (ver
+     * `RESPIRO_DA_ACTIVITY_EM_MS`). Marcando antes, a recusa gravava o horário como "já aberto" e a
+     * trava passava a barrar a abertura de verdade — o alarme nunca mais mostraria a tela naquele
+     * horário, nem quando a pessoa voltasse ao app.
+     *
+     * O caminho tardio marca por conta própria, com `marcarAlarmeComoAberto`: o retorno daqui é
+     * síncrono e já respondeu quando ele age.
      */
     const abriu = aoDispararAlarme?.(dados.scheduledFor);
     if (abriu === true) jaAbertos.add(dados.scheduledFor);
