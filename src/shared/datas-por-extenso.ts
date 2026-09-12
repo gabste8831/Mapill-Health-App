@@ -56,3 +56,34 @@ export function diaEMesCurto(date: Date): string {
   const mes = String(date.getMonth() + 1).padStart(2, "0");
   return `${dia}/${mes}`;
 }
+
+const MESES_CURTOS = [
+  "jan",
+  "fev",
+  "mar",
+  "abr",
+  "mai",
+  "jun",
+  "jul",
+  "ago",
+  "set",
+  "out",
+  "nov",
+  "dez",
+];
+
+/**
+ * "19 de set" — a partir de um dia ISO (`YYYY-MM-DD`), sem passar por `Date`.
+ *
+ * Sem `Date` de propósito: `new Date("2026-09-19")` é interpretado como UTC, e num fuso a oeste isso
+ * volta o dia 18. O dia aqui não é um instante, é uma data de calendário — partir a string é o que
+ * mantém o 19 sendo 19.
+ *
+ * Vive aqui, e não na tela de estoque onde nasceu, porque a Home passou a dizer a mesma data no
+ * cartão de estoque baixo. Duas cópias da tabela de meses é como "19 de set" viraria "19 de Set"
+ * num dos dois lugares sem nada denunciar — o motivo deste arquivo existir.
+ */
+export function diaEMesDoIso(isoDay: string): string {
+  const [, mes, dia] = isoDay.split("-").map(Number);
+  return `${dia} de ${MESES_CURTOS[mes - 1]}`;
+}

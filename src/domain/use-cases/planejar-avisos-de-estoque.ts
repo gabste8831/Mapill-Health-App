@@ -14,6 +14,15 @@ export type EstoqueAAvisar = {
   /** `YYYY-MM-DD` do último dia coberto. */
   ultimoDia: string;
   /**
+   * O mesmo dia escrito como se fala — "19 de set" —, para entrar no texto do aviso.
+   *
+   * Chega formatado, como `quantidadeFormatada` em `planejar-avisos-de-dose`: quem sabe escrever
+   * data por extenso é `shared/`, e `shared/` importa **do** domínio. Chamá-lo daqui inverteria a
+   * direção da dependência da Clean Architecture, e reimplementar a tabela de meses criaria um
+   * segundo lugar onde "set" pode virar "Set".
+   */
+  ultimoDiaFormatado: string;
+  /**
    * Se a pessoa quer ser avisada. Sozinho, garante o aviso **no dia em que o estoque acaba**.
    *
    * Separado da antecedência pelo mesmo motivo da receita: marcar a caixa sem escolher prazo
@@ -141,7 +150,14 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
         // `diasRestantes` e não `avisoLeadDays`: são iguais no dia em que o aviso dispara, mas o
         // primeiro é o fato (quanto o estoque dura) e o segundo é a preferência (quando avisar).
         // Usar a preferência para descrever o fato só funciona por coincidência.
-        corpo: `Seu estoque de ${estoque.medicationName} dura cerca de ${estoque.diasRestantes} ${estoque.diasRestantes === 1 ? "dia" : "dias"}. Vale repor antes que acabe.`,
+        // A data junto dos dias: é ela que responde "dá para esperar a próxima ida à farmácia?".
+        // Com só o número, a pessoa tem de contar no calendário — e a notificação existe justamente
+        // para ser lida de relance, sem abrir o app.
+        //
+        // `ultimoDiaFormatado` chega pronto de quem chama, como `quantidadeFormatada` em
+        // `planejar-avisos-de-dose`: quem sabe escrever data por extenso é `shared/`, e `shared/`
+        // importa **do** domínio — chamá-lo aqui inverteria a direção da dependência.
+        corpo: `Seu estoque de ${estoque.medicationName} dura cerca de ${estoque.diasRestantes} ${estoque.diasRestantes === 1 ? "dia" : "dias"}, até ${estoque.ultimoDiaFormatado}. Vale repor antes que acabe.`,
         doseScheduleIds: [],
         modo: "notification",
         semAcoesRapidas: true,

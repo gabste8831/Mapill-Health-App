@@ -15,6 +15,7 @@ import {
   type ItemDeEstoque,
   type OrdemDeEstoque,
 } from "@/hooks/use-inventory-list";
+import { diaEMesDoIso } from "@/shared/datas-por-extenso";
 import { formatDecimalInput, formatIntegerInput, parseDecimalInput } from "@/shared/number-input";
 import { formatarNumero, formatarQuantidadeLivre } from "@/shared/rotulos-de-medicamento";
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
@@ -46,26 +47,6 @@ function normalizar(texto: string): string {
     .replace(/[̀-ͯ]/g, "");
 }
 
-const MESES_CURTOS = [
-  "jan",
-  "fev",
-  "mar",
-  "abr",
-  "mai",
-  "jun",
-  "jul",
-  "ago",
-  "set",
-  "out",
-  "nov",
-  "dez",
-];
-
-/** `"2026-09-12"` → `"12 de set"`. Escrito à mão porque `new Date(iso)` leria como UTC. */
-function diaEMesDoIso(isoDay: string): string {
-  const [, mes, dia] = isoDay.split("-").map(Number);
-  return `${dia} de ${MESES_CURTOS[mes - 1]}`;
-}
 
 /**
  * A frase que o número de estoque vira. O que interessa não é a quantidade — é quanto tempo ela
@@ -583,10 +564,24 @@ export function EstoqueScreen() {
 
               {aviso.habilitado ? (
                 <OptionGroup
-                  label="Com quanta antecedência"
+                  label="Com quanta antecedência (opcional)"
                   value={aviso.dias}
                   options={LEAD_DAYS_OPTIONS}
-                  onChange={(dias) => setAviso({ ...aviso, dias })}
+                  /**
+                   * **Tocar na opção já marcada desmarca.**
+                   *
+                   * A antecedência é opcional — sem ela o aviso existe e chega no dia em que o
+                   * estoque acaba —, mas até aqui não havia como voltar a esse estado: escolhido um
+                   * prazo, a única saída era desligar o aviso inteiro e ligar de novo, o que não é
+                   * óbvio e apaga junto o que a pessoa não queria mudar.
+                   *
+                   * Um grupo de opções normalmente não desmarca, e a diferença aqui é o "opcional"
+                   * no rótulo: quando o vazio é um estado válido, ele precisa ser alcançável pelo
+                   * mesmo gesto que o abandonou.
+                   */
+                  onChange={(dias) =>
+                    setAviso({ ...aviso, dias: dias === aviso.dias ? null : dias })
+                  }
                 />
               ) : null}
 

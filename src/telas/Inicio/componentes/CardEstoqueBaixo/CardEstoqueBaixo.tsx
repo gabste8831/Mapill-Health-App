@@ -1,14 +1,33 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
+import { diaEMesDoIso } from "@/shared/datas-por-extenso";
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./CardEstoqueBaixo.styles";
 
 type CardEstoqueBaixoProps = {
   medicationName: string;
   daysRemaining: number;
+  /** O dia da última dose que o estoque cobre, ISO. `null` quando ele já acabou. */
+  lastDay: string | null;
   onAbrirEstoque: () => void;
 };
+
+/**
+ * A previsão em uma frase: quanto tempo dura, **e até quando**.
+ *
+ * A data vem junto dos dias porque é ela que responde a pergunta real — "dá para esperar a próxima
+ * ida à farmácia?". Com "8 dias" a pessoa tem de abrir o calendário e contar; com "até 19 de set"
+ * ela já sabe. A tela de estoque sempre disse as duas coisas, e aqui faltava.
+ *
+ * Zero não ganha data: não há dia futuro a prometer quando o remédio já acabou.
+ */
+function resumirPrevisao(daysRemaining: number, lastDay: string | null): string {
+  if (daysRemaining <= 0) return "Acabou";
+  const ate = lastDay === null ? "" : ` · até ${diaEMesDoIso(lastDay)}`;
+  if (daysRemaining === 1) return `Acaba amanhã${ate}`;
+  return `Dura ${daysRemaining} dias${ate}`;
+}
 
 /**
  * Alerta de estoque baixo — só aparece se o paciente ativou o lembrete pro medicamento
@@ -17,10 +36,12 @@ type CardEstoqueBaixoProps = {
 export function CardEstoqueBaixo({
   medicationName,
   daysRemaining,
+  lastDay,
   onAbrirEstoque,
 }: CardEstoqueBaixoProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
+  const previsao = resumirPrevisao(daysRemaining, lastDay);
 
   return (
     <View style={styles.container}>
@@ -47,9 +68,9 @@ export function CardEstoqueBaixo({
         </View>
         {/* Agrupado para o alerta ser lido como uma frase — "Losartana, 3 dias restantes" — em vez
             de dois nós soltos que só fazem sentido juntos. */}
-        <View accessible accessibilityLabel={`${medicationName}, ${daysRemaining} dias restantes`}>
+        <View accessible accessibilityLabel={`${medicationName}. ${previsao}`}>
           <Text style={styles.medicationName}>{medicationName}</Text>
-          <Text style={styles.daysRemaining}>{daysRemaining} dias restantes</Text>
+          <Text style={styles.daysRemaining}>{previsao}</Text>
         </View>
 
         {/* Só o caminho que resolve o aviso. O "ignorar lembrete" que existia aqui não tinha para

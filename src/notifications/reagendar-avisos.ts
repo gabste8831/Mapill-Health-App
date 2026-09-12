@@ -14,6 +14,7 @@ import {
   planejarAvisosDeDose,
   type DoseAAvisar,
 } from "@/domain/use-cases/planejar-avisos-de-dose";
+import { diaEMesDoIso } from "@/shared/datas-por-extenso";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { diagnosticarCanalDeAlarme } from "./canais-notifee";
 import { NotifeeGateway } from "./notifee-gateway";
@@ -189,6 +190,7 @@ async function executarReagendamento(): Promise<void> {
             medicationName: medication.name,
             diasRestantes: depletion.daysRemaining,
             ultimoDia: depletion.lastDay,
+            ultimoDiaFormatado: diaEMesDoIso(depletion.lastDay),
             querAviso: inventory.lowStockAlertEnabled,
             avisoLeadDays: inventory.lowStockAlertLeadDays,
             quantidadeQuandoAvisou: inventory.lowStockAlertedAtQuantity,

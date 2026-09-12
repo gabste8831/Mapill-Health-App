@@ -6,6 +6,7 @@ import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { AppointmentRepository } from "@/data/repositories/appointment-repository";
+import { diaEMesDoIso } from "@/shared/datas-por-extenso";
 import { estimateStockDepletion } from "@/domain/use-cases/estimate-stock-depletion";
 import { planejarAvisosDeCompromisso } from "@/domain/use-cases/planejar-avisos-de-compromisso";
 import { planejarAvisosDeEstoque } from "@/domain/use-cases/planejar-avisos-de-estoque";
@@ -251,6 +252,7 @@ async function contarEsperados(): Promise<{
           medicationName: medication.name,
           diasRestantes: depletion.daysRemaining,
           ultimoDia: depletion.lastDay,
+          ultimoDiaFormatado: diaEMesDoIso(depletion.lastDay),
           querAviso: inventory.lowStockAlertEnabled,
           avisoLeadDays: inventory.lowStockAlertLeadDays,
           quantidadeQuandoAvisou: inventory.lowStockAlertedAtQuantity,

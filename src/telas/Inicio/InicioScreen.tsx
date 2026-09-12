@@ -391,11 +391,12 @@ export function InicioScreen() {
       <View style={styles.doseList}>
         <Text style={styles.sectionLabel}>Estoque</Text>
 
-        {agenda.estoquesBaixos.map(({ medication, inventory, daysRemaining }) => (
+        {agenda.estoquesBaixos.map(({ medication, inventory, daysRemaining, lastDay }) => (
           <CardEstoqueBaixo
             key={inventory.id}
             medicationName={medication.name}
             daysRemaining={daysRemaining}
+            lastDay={lastDay}
             // Vai pro estoque, não pro cadastro: quem viu "acaba em 3 dias" quer repor, e repor
             // pelo formulário do remédio obrigaria a reeditar um tratamento que não mudou.
             onAbrirEstoque={() => router.push("/estoque")}

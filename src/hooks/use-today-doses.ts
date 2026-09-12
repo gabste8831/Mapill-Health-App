@@ -72,6 +72,14 @@ export type EstoqueBaixo = {
   inventory: InventoryItem;
   /** Dias até o estoque acabar, no ritmo da posologia. `0` = acaba ainda hoje. */
   daysRemaining: number;
+  /**
+   * O dia da última dose que o estoque cobre, ISO `YYYY-MM-DD`. `null` quando ele já zerou.
+   *
+   * Vem junto dos dias porque "8 dias" obriga a pessoa a fazer a conta no calendário para saber se
+   * dá para esperar a próxima ida à farmácia — e é essa a decisão que o aviso existe para apoiar.
+   * A tela de estoque já mostrava as duas coisas; aqui só os dias apareciam.
+   */
+  lastDay: string | null;
 };
 
 /** Um dia do mini-gráfico de adesão. `ratio: null` = não havia dose agendada. */
@@ -290,7 +298,8 @@ function estoquesQueVaoAcabar(
     if (medication === undefined) continue;
 
     if (inventory.quantity <= 0) {
-      avisos.push({ medication, inventory, daysRemaining: 0 });
+      // Sem data: o estoque já acabou, e não há dia futuro a prometer.
+      avisos.push({ medication, inventory, daysRemaining: 0, lastDay: null });
       continue;
     }
     if (!inventory.lowStockAlertEnabled || inventory.lowStockAlertLeadDays === null) continue;
@@ -313,7 +322,12 @@ function estoquesQueVaoAcabar(
     if (depletion === null) continue;
     if (depletion.daysRemaining > inventory.lowStockAlertLeadDays) continue;
 
-    avisos.push({ medication, inventory, daysRemaining: depletion.daysRemaining });
+    avisos.push({
+      medication,
+      inventory,
+      daysRemaining: depletion.daysRemaining,
+      lastDay: depletion.lastDay,
+    });
   }
 
   return avisos.sort((a, b) => a.daysRemaining - b.daysRemaining);
