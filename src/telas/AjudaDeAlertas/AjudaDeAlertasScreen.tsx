@@ -63,47 +63,37 @@ export function AjudaDeAlertasScreen({
         {verificaveis.map((permissao) => (
           <Pressable
             key={permissao.chave}
-            style={estadoDePressao(styles.linhaDePermissao, {
-              superficie: true,
-            })}
+            style={estadoDePressao(
+              [styles.linhaDePermissao, permissao.concedida && styles.linhaResolvida],
+              { escala: true },
+            )}
             onPress={() => void permissao.abrir()}
             accessibilityRole="button"
             accessibilityLabel={`${permissao.titulo}. ${
-              permissao.concedida
-                ? "Autorizada."
-                : `Falta autorizar. ${permissao.descricao}`
-            } Toque para abrir as configurações.`}
-          >
+              permissao.concedida ? "Autorizada." : `Falta autorizar. ${permissao.descricao}`
+            } Toque para abrir as configurações.`}>
             <Ionicons
               name={permissao.concedida ? "checkmark-circle" : "close-circle"}
-              size={26}
+              size={28}
               color={permissao.concedida ? cores.success : cores.error}
             />
             <View style={styles.linhaTexto}>
               <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
               {/**
-               * Concedida diz **"Autorizada"**, e não a consequência de não ter.
+               * **Uma linha de estado, e nada mais** — a consequência saiu daqui.
                *
-               * A descrição existe para convencer quem ainda não autorizou ("sem isto o aviso pode
-               * atrasar"). Mantê-la depois de resolvido faria a linha verde continuar descrevendo um
-               * problema que não existe mais, e é o tipo de texto que se lê como pendência.
+               * A descrição ("sem isto o aviso pode atrasar dezenas de minutos") existe para
+               * convencer, e ela já está na Home, no painel que trouxe a pessoa até aqui. Repetida
+               * dentro de cada botão, transformava cinco alvos de toque em cinco parágrafos — e foi
+               * o que o Gabriel apontou em 12/09: denso demais para se ler como botão.
+               *
+               * O que fica é o que decide a ação: o nome da permissão e se ela falta.
                */}
-              <Text
-                style={
-                  permissao.concedida ? styles.linhaOk : styles.linhaPendente
-                }
-              >
-                {permissao.concedida ? "Autorizada" : "Falta autorizar"}
+              <Text style={permissao.concedida ? styles.linhaOk : styles.linhaPendente}>
+                {permissao.concedida ? "Autorizada" : "Toque para autorizar"}
               </Text>
-              {!permissao.concedida ? (
-                <Text style={styles.linhaDescricao}>{permissao.descricao}</Text>
-              ) : null}
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={cores.onSurfaceVariant}
-            />
+            <Ionicons name="chevron-forward" size={22} color={cores.primary} />
           </Pressable>
         ))}
       </View>
@@ -121,34 +111,23 @@ export function AjudaDeAlertasScreen({
           {naoVerificaveis.map((permissao) => (
             <Pressable
               key={permissao.chave}
-              style={estadoDePressao(styles.linhaDePermissao, {
-                superficie: true,
-              })}
+              style={estadoDePressao(styles.linhaDePermissao, { escala: true })}
               onPress={() => void permissao.abrir()}
               accessibilityRole="button"
-              accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} ${permissao.comoFazer ?? ""} O app não consegue verificar esta. Toque para abrir as configurações.`}
-            >
+              accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} ${permissao.comoFazer ?? ""} O app não consegue verificar esta. Toque para abrir as configurações.`}>
               {/* Sem verde nem vermelho: um ícone de estado aqui seria afirmar o que o app não
                   sabe, e é justamente o engano que esta seção existe para corrigir. */}
-              <Ionicons
-                name="help-circle"
-                size={26}
-                color={cores.onSurfaceVariant}
-              />
+              <Ionicons name="help-circle" size={28} color={cores.onSurfaceVariant} />
               <View style={styles.linhaTexto}>
                 <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
-                <Text style={styles.linhaDescricao}>{permissao.descricao}</Text>
-                {permissao.comoFazer !== undefined ? (
-                  <Text style={styles.linhaComoFazer}>
-                    {permissao.comoFazer}
-                  </Text>
-                ) : null}
+                {/* Aqui o `comoFazer` fica, e a `descricao` sai: a instrução é o que a pessoa
+                    precisa na mão ao chegar numa tela do sistema que não explica nada. Nas
+                    verificáveis não há instrução, porque a tela de destino já é a resposta. */}
+                <Text style={styles.linhaComoFazer}>
+                  {permissao.comoFazer ?? "Toque para abrir e conferir"}
+                </Text>
               </View>
-              <Ionicons
-                name="chevron-forward"
-                size={18}
-                color={cores.onSurfaceVariant}
-              />
+              <Ionicons name="chevron-forward" size={22} color={cores.primary} />
             </Pressable>
           ))}
         </View>

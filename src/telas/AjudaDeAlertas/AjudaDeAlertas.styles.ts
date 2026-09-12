@@ -70,29 +70,64 @@ export const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   /**
-   * A linha de uma permissão: ícone de estado, texto, e a seta que diz que ela abre algo.
+   * A linha de uma permissão — desenhada como **botão**, e não como item de lista.
    *
-   * Fundo próprio sobre o bloco, e não separador: são alvos de toque, e o que distingue "linha
-   * tocável" de "parágrafo" aqui é ter superfície. 48dp de altura mínima pelo alvo de toque.
+   * ## Por que borda, e não fundo
+   *
+   * Ela tinha `surface` a 60% sobre o bloco, e isso dava **1,11:1** de contraste (medido). Branco
+   * cravado daria 1,18. Nenhum dos dois se distingue do bloco: as duas superfícies são claras, e
+   * empilhar clarinho sobre clarinho não produz contorno nenhum. Era por isso que a linha não lia
+   * como algo clicável, apontado pelo Gabriel em 12/09.
+   *
+   * A borda azul resolve porque ela não depende de diferença entre fundos: `primary` contra branco
+   * dá **4,56:1**, acima dos 3:1 que a WCAG 1.4.11 pede para componente de interface. É o mesmo
+   * azul dos outros botões do app, então ela também diz *que tipo* de coisa é.
+   *
+   * ## As medidas
+   *
+   * 56dp de altura mínima, acima dos 44 do projeto: esta é a tela mais difícil do app para o
+   * público mais velho, e o alvo maior é a acomodação mais baratas que existe. `gap` maior pelo
+   * mesmo motivo — dedo grosso em alvo apertado erra a linha vizinha.
    */
   linhaDePermissao: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
-    minHeight: 48,
+    gap: spacing.md,
+    minHeight: 56,
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    marginTop: spacing.xs,
-    borderRadius: radius.sm,
-    backgroundColor: withOpacity(colors.surface, 0.6),
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  /**
+   * A linha já autorizada: **sem borda azul**, porque não há o que fazer nela.
+   *
+   * Ela continua tocável (a pessoa pode querer conferir ou revogar), mas não convida. Borda de
+   * botão em algo resolvido competiria com as que ainda pedem ação, e é isso que faz uma lista de
+   * cinco itens parecer cinco tarefas quando três já estão prontas.
+   */
+  linhaResolvida: {
+    backgroundColor: colors.successSurface,
+    // `success` cheio, e não diluído: a 45% ele dava 1,57:1 contra o branco (medido), abaixo dos
+    // 3:1 que a WCAG 1.4.11 pede para a borda de um componente. Cheio dá 5,02.
+    borderColor: colors.success,
   },
   /** Ocupa o que sobra entre o ícone de estado e a seta. */
   linhaTexto: {
     flex: 1,
     gap: 2,
   },
+  /**
+   * O nome da permissão em corpo de leitura, com peso de rótulo de botão.
+   *
+   * `headlineSm` e não `bodyMd`: é o que se lê primeiro na linha, e num público que pode estar sem
+   * óculos 18px é o degrau que separa "consigo ler" de "vou aproximar o celular".
+   */
   linhaTitulo: {
-    ...typography.bodyMd,
+    ...typography.headlineSm,
     color: colors.onSurface,
   },
   linhaDescricao: {

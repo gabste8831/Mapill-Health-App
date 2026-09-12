@@ -2,12 +2,20 @@ import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
-   * O amarelo do lembrete, e não o vermelho de erro.
+   * **Azul informativo, e não o amarelo de atenção.**
    *
-   * É o mesmo tom do alerta de recontagem do estoque e do painel de permissões — padronizado em
-   * 09/09. Aqui ele importa mais do que em outros lugares: este aviso **nunca desaparece**, porque o
-   * app não consegue saber se as três autorizações foram atendidas. Em vermelho, ele leria como
-   * erro permanente, e um erro que não sai de tela ensina a ignorar os que saem.
+   * Era `warningSurface`, o mesmo amarelo do alerta de recontagem de estoque e do painel de
+   * permissões. O Gabriel apontou o problema em 12/09: no vocabulário do app, amarelo significa
+   * "algo está pendente" — e aqui não há pendência conhecida. Este aviso aparece **sempre**, porque
+   * o app não consegue saber se as três autorizações foram atendidas.
+   *
+   * Amarelo permanente numa tela de cadastro lê como "você deixou algo em branco", inclusive para
+   * quem preencheu tudo. A cor estava afirmando um estado que o app não tem como verificar, que é o
+   * mesmo erro do placar e da lista da Home, em outra forma.
+   *
+   * `primarySurface` é a superfície de informação do app, e o par `onPrimarySurface` dá **8,73:1**
+   * sobre ela (medido) — folgado para AA. Azul aqui também diz a coisa certa: é a cor dos caminhos,
+   * e este bloco é um caminho.
    *
    * 48dp de altura mínima pelo alvo de toque, e uma linha só de conteúdo: ele mora em telas cheias
    * de campos, e o lugar dele é lembrar, não tomar a tela.
@@ -20,7 +28,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: cores.warningSurface,
+    backgroundColor: cores.primarySurface,
   },
   /** Ocupa o que sobra entre o escudo e a seta. */
   texto: {
@@ -29,11 +37,11 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   titulo: {
     ...typography.bodyMd,
-    color: cores.onWarningSurface,
+    color: cores.onPrimarySurface,
   },
   descricao: {
     ...typography.bodySm,
-    color: cores.onWarningSurface,
+    color: cores.onPrimarySurface,
     opacity: 0.85,
   },
 }));

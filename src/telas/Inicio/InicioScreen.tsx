@@ -783,10 +783,13 @@ export function InicioScreen() {
          * é o tipo de alerta que ensina a ignorar os próximos (mesma régua do `cobrarPermissoes`).
          */}
         {agenda.tratamentosComLembrete > 0 ? (
-          <AvisoDePermissoes
-            oQueNaoFunciona="seus alarmes e notificações"
-            onAbrir={() => router.push("/cadastro/ajuda-de-alertas")}
-          />
+          <View style={styles.doseList}>
+            <Text style={styles.sectionLabel}>Autorizações do aparelho</Text>
+            <AvisoDePermissoes
+              oQueNaoFunciona="seus alarmes e notificações"
+              onAbrir={() => router.push("/cadastro/ajuda-de-alertas")}
+            />
+          </View>
         ) : null}
       </ScrollView>
 

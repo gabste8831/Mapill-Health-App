@@ -59,9 +59,9 @@ export function AvisoDePermissoes({
       accessibilityLabel={`Confira as permissões do aparelho. Sem elas ${oQueNaoFunciona} não funciona. Toque para ver quais são.`}
     >
       <Ionicons
-        name="shield-checkmark-outline"
+        name="shield-checkmark"
         size={20}
-        color={cores.onWarningSurface}
+        color={cores.onPrimarySurface}
       />
       <View style={styles.texto}>
         <Text style={styles.titulo}>Confira as permissões</Text>
@@ -72,7 +72,7 @@ export function AvisoDePermissoes({
       <Ionicons
         name="chevron-forward"
         size={18}
-        color={cores.onWarningSurface}
+        color={cores.onPrimarySurface}
       />
     </Pressable>
   );
