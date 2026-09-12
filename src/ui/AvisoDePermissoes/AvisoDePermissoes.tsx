@@ -13,6 +13,13 @@ type AvisoDePermissoesProps = {
    * e é ela que faz alguém interromper o que está fazendo para ir às configurações.
    */
   oQueNaoFunciona: string;
+  /**
+   * Esconde a linha da consequência, para quem já a diz logo acima.
+   *
+   * É o caso da Home, onde a seção tem uma frase própria. Nas telas de cadastro fica visível: ali
+   * este bloco é o único lugar que explica por que o lembrete recém-configurado pode não chegar.
+   */
+  semDescricao?: boolean;
   onAbrir: () => void;
 };
 
@@ -46,6 +53,7 @@ type AvisoDePermissoesProps = {
  */
 export function AvisoDePermissoes({
   oQueNaoFunciona,
+  semDescricao = false,
   onAbrir,
 }: AvisoDePermissoesProps) {
   const styles = useEstilos(criarEstilos);
@@ -65,9 +73,17 @@ export function AvisoDePermissoes({
       />
       <View style={styles.texto}>
         <Text style={styles.titulo}>Confira as permissões</Text>
-        <Text style={styles.descricao}>
-          Sem elas {oQueNaoFunciona} não funciona.
-        </Text>
+        {/**
+         * A consequência só quando não há texto acima dizendo a mesma coisa.
+         *
+         * Na Home a seção tem uma frase própria ("se algum alarme não chegou como devia..."), e
+         * repeti-la dentro do bloco daria a mesma informação duas vezes em duas linhas seguidas.
+         * Nas telas de cadastro não há essa frase, e aqui é o único lugar que explica por que o
+         * lembrete que a pessoa acabou de configurar pode não chegar.
+         */}
+        {semDescricao ? null : (
+          <Text style={styles.descricao}>Sem elas {oQueNaoFunciona} não funciona.</Text>
+        )}
       </View>
       <Ionicons
         name="chevron-forward"

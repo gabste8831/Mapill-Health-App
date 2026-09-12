@@ -785,8 +785,27 @@ export function InicioScreen() {
         {agenda.tratamentosComLembrete > 0 ? (
           <View style={styles.doseList}>
             <Text style={styles.sectionLabel}>Autorizações do aparelho</Text>
+            {/**
+             * A frase que dá o **gancho**: o rótulo acima diz o assunto, e esta diz quando ele
+             * importa.
+             *
+             * Pedida pelo Gabriel em 12/09, e resolve o que faltava aqui. Três das cinco
+             * autorizações o app não consegue verificar, então esta seção nunca sabe se há algo
+             * errado — e sem uma condição escrita, ela é um bloco permanente sem motivo aparente,
+             * do tipo que se aprende a pular.
+             *
+             * Condicional e não imperativa: "se algum aviso não chegou" só interpela quem está com
+             * o problema. Quem não está, lê e segue para a agenda, que é o que veio ver.
+             */}
+            <Text style={styles.avisoDePermissoesTexto}>
+              Se algum alarme ou notificação não chegou como devia, confira as autorizações do seu
+              aparelho.
+            </Text>
             <AvisoDePermissoes
               oQueNaoFunciona="seus alarmes e notificações"
+              // A frase acima já diz a consequência: repeti-la aqui seria a mesma informação em
+              // duas linhas seguidas.
+              semDescricao
               onAbrir={() => router.push("/cadastro/ajuda-de-alertas")}
             />
           </View>

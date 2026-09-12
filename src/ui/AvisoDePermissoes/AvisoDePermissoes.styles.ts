@@ -1,6 +1,6 @@
-import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
+import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/shared/theme";
 
-export const criarEstilos = estilosDoTema(({ cores }) => ({
+export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * **Azul informativo, e não o amarelo de atenção.**
    *
@@ -29,6 +29,20 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
     backgroundColor: cores.primarySurface,
+    /**
+     * A borda do `CardDeAtalho`, e pelo mesmo motivo: **isto é um caminho, não um conteúdo.**
+     *
+     * Pedida pelo Gabriel em 12/09, comparando com o atalho de estoque. Sem ela o bloco lia como
+     * um aviso a ser lido, e não como algo a ser tocado — o mesmo problema que as linhas da tela de
+     * permissões tinham, em outra escala.
+     *
+     * `corDeDestaque` e não `primary`: no tema escuro `primary` é o navy de fundo, e uma borda dele
+     * sobre superfície escura não se distingue de nada. No alto contraste ela vira azul cheio de
+     * 2px, junto com os demais contornos do tema (ver `contornarSuperficies`).
+     */
+    ...(ajustes.contornarSuperficies
+      ? { borderWidth: 2, borderColor: cores.corDeDestaque }
+      : { borderWidth: 1, borderColor: withOpacity(cores.corDeDestaque, 0.35) }),
   },
   /** Ocupa o que sobra entre o escudo e a seta. */
   texto: {
