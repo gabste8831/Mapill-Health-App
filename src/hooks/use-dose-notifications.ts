@@ -134,6 +134,20 @@ export function useDoseNotifications(): void {
          * Em segundo plano quem avisa é a notificação, que é o caminho certo: ela se lê, diz que é
          * do Mapill, toca em loop e responde ao toque. Ao tocar nela o app volta a `active`, e daí
          * a tela abre por cima — visível, com uma fonte de som só.
+         *
+         * ## A recusa é um "não" para o React, e não para o alarme
+         *
+         * Recusar aqui **não** cancela nada: o `fullScreenAction` já foi entregue ao Android junto
+         * do agendamento, e é ele que irrompe sobre a tela de bloqueio, por fora do roteador. As
+         * duas vias são independentes de propósito — esta cobre o app em uso, aquela cobre o
+         * aparelho parado —, e devolver `false` só diz que **esta** não vai agir.
+         *
+         * Foi o que o Gabriel isolou em 12/09, com um padrão que nomeou o problema: com o celular
+         * bloqueado e o Mapill **fora** dos recentes, a tela azul aparecia; com o app **nos
+         * recentes**, não. A diferença é o processo estar vivo — vivo, este listener recebe o
+         * `DELIVERED` e recusava, e o horário seguia marcado em `jaAbertos` como se algo tivesse
+         * acontecido. Ver a nota de `esquecerAlarmesAbertos` em `escutar-avisos`, que é a outra
+         * metade desta mesma trava.
          */
         if (AppState.currentState !== "active") return false;
 

@@ -256,6 +256,14 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               valor={dados.alarmeExato ? "Permitido" : "Bloqueado"}
               estado={dados.alarmeExato ? "ok" : "ruim"}
             />
+            {/* A permissão que faz a tela azul irromper sozinha. Bloqueada, o Android rebaixa todo
+                full-screen intent para um aviso no topo — o alarme toca e a tela não sobe, que é o
+                sintoma investigado em 12/09. Ver a nota em `diagnostico-de-avisos`. */}
+            <Linha
+              rotulo="Tela cheia"
+              valor={dados.telaCheia ? "Permitida" : "Bloqueada"}
+              estado={dados.telaCheia ? "ok" : "ruim"}
+            />
           </View>
         </View>
 

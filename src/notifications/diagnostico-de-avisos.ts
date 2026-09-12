@@ -53,6 +53,22 @@ export type DiagnosticoDeAvisos = {
   /** Se o app pode agendar alarme exato. Sem isso o horário escorrega. */
   alarmeExato: boolean;
   /**
+   * Se o sistema autoriza a **tela cheia** — a permissão que faz a tela azul irromper sozinha.
+   *
+   * Entrou em 12/09, e é a única leitura que responde o relato do Gabriel: com o celular bloqueado,
+   * a tela azul aparecia quando o Mapill **não** estava nos recentes, e não aparecia quando estava.
+   * Sem esta linha, "a tela não subiu" tem meia dúzia de causas possíveis e nenhuma forma de
+   * distingui-las — que é exatamente o tipo de adivinhação que este diagnóstico existe para acabar.
+   *
+   * Negada, o Android rebaixa **todo** `fullScreenAction` para heads-up, e a tela azul depende
+   * inteiramente do caminho JavaScript — que por sua vez só age com o app em primeiro plano. É a
+   * combinação que produz o alarme sem tela.
+   *
+   * Não vira linha de permissão no painel: a tela de destino não existe em todo aparelho (ver a nota
+   * em `permissoes-de-alarme`). Aqui é relatório, não cobrança.
+   */
+  telaCheia: boolean;
+  /**
    * Quantos avisos deveriam existir na janela, por tipo — o número esperado.
    *
    * Os quatro separados, e não um total: quando o agendado não bate com o esperado, saber **qual**
@@ -96,6 +112,7 @@ export async function diagnosticarAvisos(): Promise<DiagnosticoDeAvisos> {
       canais: [],
       permissaoDeNotificar: "nao-perguntada",
       alarmeExato: false,
+      telaCheia: false,
       esperados: { doses: 0, compromissos: 0, receitas: 0, estoques: 0 },
       geradoEm,
     };
@@ -146,6 +163,9 @@ export async function diagnosticarAvisos(): Promise<DiagnosticoDeAvisos> {
     canais,
     permissaoDeNotificar,
     alarmeExato: configuracoes.android.alarm === AndroidNotificationSetting.ENABLED,
+    telaCheia:
+      configuracoes.android.fullScreenIntent === undefined ||
+      configuracoes.android.fullScreenIntent === AndroidNotificationSetting.ENABLED,
     esperados: await contarEsperados(),
     geradoEm,
   };
