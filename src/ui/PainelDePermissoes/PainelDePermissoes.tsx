@@ -9,9 +9,9 @@ type PainelDePermissoesProps = {
   /**
    * As pendentes que o app **consegue verificar**. Quem filtra é quem monta (ver `InicioScreen`).
    *
-   * O painel não recebe as três não-verificáveis porque não sabe se elas foram atendidas: com elas
-   * na lista, ele nunca desapareceria da Home — nem para quem configurou tudo. Elas vivem na ajuda
-   * de alertas, onde a seção "você mesmo precisa conferir" diz isso em vez de fingir saber.
+   * Elas não são exibidas: servem para decidir se o painel aparece. Com as três não-verificáveis
+   * aqui, ele nunca sairia da Home — nem para quem configurou tudo —, e um aviso que nunca sai
+   * ensina a ignorar o aviso.
    */
   itens: ItemDePermissao[];
   /** Falso quando falta alguma essencial. Hoje muda só a cor: o texto é o mesmo nos dois casos. */
@@ -21,24 +21,26 @@ type PainelDePermissoesProps = {
 };
 
 /**
- * O que falta para o alarme tocar, item por item, com o caminho de cada um.
+ * O aviso, na Home, de que o alarme não vai tocar — e o caminho único para resolver.
  *
- * ## Por que uma lista, e não um aviso só
+ * ## Por que ele não lista as permissões
  *
- * São autorizações em telas diferentes do Android, e elas falham de formas diferentes: sem
- * notificação nada toca, sem alarme exato toca atrasado, sem Não Perturbe toca mudo. Um aviso
- * genérico — "conceda as permissões" — deixaria a pessoa procurando em três lugares sem saber qual
- * resolve o quê.
+ * Listava, até 12/09: uma linha por autorização pendente, cada uma abrindo a tela do sistema. O
+ * problema é que só as **verificáveis** podiam estar ali, porque as outras três (sobrepor apps,
+ * início automático, bateria) não expõem estado a nenhuma API — e uma lista parcial de itens
+ * obrigatórios define o escopo errado do que falta fazer.
  *
- * Cada linha diz **a consequência** ("Sem isto o aviso pode atrasar dezenas de minutos"), e não o
- * nome técnico da permissão. É a consequência que faz alguém decidir se vale ir até as
- * configurações.
+ * O efeito, apontado pelo Gabriel: quem atendia as duas ou três listadas via o painel desaparecer e
+ * concluía que terminara. As três restantes seguiam intocadas, e o alarme seguia mudo, sem nada na
+ * tela explicando por quê.
  *
- * ## Por que cada item abre a tela direto
+ * Com um caminho único, a pessoa chega a uma tela onde as cinco estão visíveis, separadas entre o
+ * que o app confere e o que ela precisa conferir. Nenhuma delas desaparece por engano.
  *
- * No Android, permissão negada não pode ser pedida de novo — o diálogo simplesmente não abre. Levar
- * à tela exata do sistema é a única coisa que funciona, e é por isso que a linha inteira é
- * tocável em vez de haver um botão genérico de "configurações".
+ * ## O que ele decide, então
+ *
+ * Só se aparece. E aparece enquanto alguma das verificáveis estiver pendente — é o sinal mais
+ * confiável que o app tem de que algo está errado com os avisos.
  */
 export function PainelDePermissoes({
   itens,
@@ -76,60 +78,24 @@ export function PainelDePermissoes({
        * não tocar, e o painel não tem como dizer qual delas vai ser o problema.
        */}
       <Text style={[styles.explicacao, !vaiTocar && styles.explicacaoCritica]}>
-        Para que seus lembretes funcionem, você precisa autorizar algumas
-        permissões. <Text style={styles.enfase}>Todas são necessárias</Text>,
-        faltando uma, o aviso não chega.
+        Para que seus lembretes funcionem, o seu aparelho precisa autorizar cinco permissões.{" "}
+        <Text style={styles.enfase}>Todas são necessárias</Text>, faltando uma, o aviso não chega.
       </Text>
 
-      <View style={styles.lista}>
-        {pendentes.map((item) => (
-          <Pressable
-            key={item.chave}
-            // Linha de largura total que abre uma tela do sistema: escurece sem encolher.
-            style={estadoDePressao(styles.item)}
-            onPress={() => void item.abrir()}
-            accessibilityRole="button"
-            accessibilityLabel={`${item.titulo}. ${item.descricao}${item.comoFazer ? ` ${item.comoFazer}` : ""} Toque para abrir as configurações.`}
-          >
-            <View style={styles.itemTexto}>
-              <View style={[styles.itemTopo, styles.itemTopoComRespiro]}>
-                <Text style={styles.itemTitulo}>{item.titulo}</Text>
-                {item.essencial ? (
-                  <View style={styles.selo}>
-                    <Text style={styles.seloTexto}>OBRIGATÓRIO</Text>
-                  </View>
-                ) : null}
-              </View>
-              <Text style={styles.itemDescricao}>{item.descricao}</Text>
-              {/* O passo dentro da tela do sistema, para o toque não terminar num lugar onde nada
-                  indica o que fazer. Vem depois da consequência: primeiro por que importa, depois
-                  o que fazer a respeito. */}
-              {item.comoFazer !== undefined ? (
-                <Text style={styles.itemComoFazer}>{item.comoFazer}</Text>
-              ) : null}
-            </View>
-            {/* A tinta do painel, e nao a da tela: `onSurfaceVariant` e o cinza que le sobre o
-                fundo da tela, e no tema escuro ele e claro — sobre a linha branca dava 2.04:1, e a
-                seta, que e o que diz que a linha abre algo, praticamente sumia. */}
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={cores.onWarningSurface}
-            />
-          </Pressable>
-        ))}
-      </View>
-
       {/**
-       * **Um botão só, e ele leva à página de conferência** — não concede nada.
+       * **O painel não lista mais as permissões** — ele avisa e leva ao lugar onde estão todas.
        *
-       * Saiu daqui o "Permitir avisos", que abria o diálogo de **uma** permissão das cinco. Decisão
-       * do Gabriel em 12/09, e o argumento é direto: um botão com nome de resolver tudo que resolve
-       * um quinto engana. As linhas acima já levam cada uma à sua tela, e são elas que resolvem.
+       * As linhas que ficavam aqui mostravam só as que o app consegue verificar, e isso enganava:
+       * quem atendia as duas ou três listadas via o painel desaparecer e concluía que terminara,
+       * enquanto as três não-verificáveis (sobrepor apps, início automático, bateria) seguiam
+       * intocadas e o alarme seguia mudo. Apontado pelo Gabriel em 12/09.
        *
-       * O texto também mudou de "podem melhorar os avisos" para o que é verdade: sem as
-       * autorizações o alarme não funciona, e três delas o app nem consegue verificar. O caminho
-       * para conferir precisa estar aqui, porque é aqui que a pessoa descobre que há o que conferir.
+       * Uma lista parcial de itens obrigatórios é pior que nenhuma: ela define o escopo errado do
+       * que falta fazer. Com um caminho único, a pessoa vê as cinco de uma vez, e o que ela não
+       * autorizar continua visível lá.
+       *
+       * É também o que devolve a tela à agenda do dia: era este bloco que ocupava a área útil da
+       * Home inteira.
        */}
       {onAbrirDetalhes !== undefined ? (
         <Pressable

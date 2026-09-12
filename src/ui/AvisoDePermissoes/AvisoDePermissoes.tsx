@@ -64,7 +64,7 @@ export function AvisoDePermissoes({
         color={cores.onWarningSurface}
       />
       <View style={styles.texto}>
-        <Text style={styles.titulo}>Confira as permissões do aparelho</Text>
+        <Text style={styles.titulo}>Confira as permissões</Text>
         <Text style={styles.descricao}>
           Sem elas {oQueNaoFunciona} não funciona.
         </Text>

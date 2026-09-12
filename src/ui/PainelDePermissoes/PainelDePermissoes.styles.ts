@@ -46,73 +46,18 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     fontFamily: "PlusJakartaSans_600SemiBold",
   },
 
-  lista: {
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
   /**
-   * Branco cravado, e não um token: o painel tem fundo próprio nos quatro temas, e qualquer token
-   * de superfície vira escuro no tema escuro, deixando texto escuro sobre fundo escuro.
+   * Os estilos da lista de itens saíram em 12/09, com a lista.
+   *
+   * Eram dez (`lista`, `item`, `itemTexto`, `itemTopo`, `itemTitulo`, `itemDescricao`,
+   * `itemComoFazer`, `selo`, `seloTexto` e o respiro do topo), e carregavam decisões de contraste
+   * que valem registro caso a lista volte: a tinta era sempre `onWarningSurface`, porque no tema
+   * escuro o `onSurface` é quase branco e sobre o âmbar dava 1.09:1. O fundo do item era branco
+   * cravado pelo mesmo motivo — token de superfície vira escuro no tema escuro.
+   *
+   * O histórico completo está no git; aqui fica só a razão de não existirem mais: uma lista parcial
+   * de permissões obrigatórias enganava sobre o que faltava fazer (ver `PainelDePermissoes`).
    */
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: "#FFFFFF",
-  },
-  itemTexto: {
-    flex: 1,
-    gap: 1,
-  },
-  itemTopoComRespiro: {
-    marginBottom: spacing.sm,
-  },
-  itemTopo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  /**
-   * A tinta vem da superfície do painel, não do `onSurface` da tela: no tema escuro `onSurface` é
-   * quase branco e sobre o âmbar daria 1.09:1.
-   */
-  itemTitulo: {
-    ...typography.bodyMd,
-    fontFamily: typography.label.fontFamily,
-    color: cores.onWarningSurface,
-  },
-  itemDescricao: {
-    ...typography.bodyMd,
-    fontSize: 12,
-    color: cores.onWarningSurface,
-    opacity: 0.85,
-    lineHeight: 17,
-  },
-  itemComoFazer: {
-    ...typography.bodySm,
-    // Tinta do painel, não `corDeDestaque`: aquele azul dá 1.93:1 sobre o âmbar no tema escuro.
-    color: cores.onWarningSurface,
-    fontFamily: typography.label.fontFamily,
-    lineHeight: 16,
-    marginTop: spacing.xs,
-  },
-
-  /** Separa o que impede o alarme do que só o degrada. */
-  selo: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: radius.full,
-    backgroundColor: cores.errorSurface,
-  },
-  seloTexto: {
-    ...typography.caption,
-    // Par de `errorSurface`, o fundo do selo. Com `error` daria 1.76:1 no tema escuro.
-    color: cores.onErrorSurface,
-  },
-
   botaoPedir: {
     minHeight: 48,
     alignItems: "center",

@@ -7,7 +7,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { AppointmentOutcome } from "@/domain/entities/appointment";
 import { useAppointmentList } from "@/hooks/use-appointment-list";
 import { useAppointmentRegistration } from "@/hooks/use-appointment-registration";
-import { useNotificationPermission } from "@/hooks/use-notification-permission";
 import { usePatientProfile } from "@/hooks/use-patient-profile";
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
 import { compromissosAMostrarNaHome } from "@/domain/use-cases/compromissos-a-mostrar-na-home";
@@ -97,7 +96,14 @@ export function InicioScreen() {
   // junto porque responder "fui" precisa reler a lista para o cartão refletir a resposta.
   const { items: compromissos, reload: recarregarCompromissos } = useAppointmentList();
   const { registrarDesfecho } = useAppointmentRegistration();
-  const { permissao, pedir } = useNotificationPermission();
+  /**
+   * O `useNotificationPermission` saiu daqui com o botão "Permitir avisos", em 12/09.
+   *
+   * Ele servia para decidir se o diálogo do sistema ainda podia abrir. Sem o botão, a Home não pede
+   * permissão nenhuma: ela avisa e leva à ajuda de alertas, onde cada linha abre a tela do sistema.
+   * O diálogo continua sendo pedido onde faz sentido — na folha de lembrete, no instante em que a
+   * pessoa escolhe ser avisada.
+   */
   const permissoesDoAlarme = usePermissoesDeAlarme();
 
   const hoje = new Date();
