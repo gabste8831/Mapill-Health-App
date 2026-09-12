@@ -10,19 +10,49 @@
 
 | | O que é | Situação |
 |---|---|---|
-| **13.1** | Tela azul sobre outro app | ✅ Confirmado em 11/09, mas ver a ressalva junto do 14.1.2 |
-| **14.1.2** | Alarme/notificação com o app fora dos recentes | ❌ **Nada dispara.** Investigar antes de tudo abaixo |
+| **13.1** | Tela azul sobre outro app | ✅ Aceito como está (11/09) |
+| **14.1.2** | Alarme com o app fora dos recentes | ✅ **Resolvido em 12/09** — era o Autostart da MIUI |
 | **17** | Vários remédios no mesmo horário | **Parado** — precisa ser desenvolvido de novo |
-| **18, 19, 20** | Reboot/bateria, casos de borda, avisos de estoque/receita | **Suspensos**, dependem do 14.1.2 ser resolvido |
+| **18, 19, 20** | Reboot/bateria, casos de borda, avisos de estoque/receita | **Liberados** — é o que falta rodar |
 | 🔴 | Alarme adiado toca mesmo após apagar todos os dados | **Bug confirmado em 11/09** — resolver |
+| 🔴 | Responder o alarme abre o app sem desbloquear o celular | **Bug confirmado em 12/09** — privacidade |
+
+### O que o 14.1.2 revelou (12/09)
+
+Testado na build `preview` (APK, bundle embutido), num Xiaomi. Duas descobertas, e a ordem importa:
+
+**Sem o Autostart, nada dispara** — nem alarme, nem notificação, nem com o app nos recentes. **Com o
+Autostart ligado, funciona.**
+
+A MIUI trata o deslize dos recentes como *force stop* e nasce com o **Autostart desligado** para todo
+app instalado. Sem ele, o sistema recusa acordar o processo, e o `AlarmManager` nunca chega a
+executar — o agendamento continua registrado e simplesmente não é entregue. Foi o que o Diagnóstico
+mostrou em 11/09: o aviso estava agendado e não tocou.
+
+Não é defeito do app, e nenhum código o contorna: o Autostart não tem API pública — não há permissão
+a pedir, nem estado a consultar (é por isso que ele não está no painel de permissões, ver
+`permissoes-de-alarme.ts`). A mitigação possível é **orientar**, que é o que Alarmy e Sleep as
+Android fazem: detectar o fabricante por `Build.MANUFACTURER` e mostrar a instrução específica.
+
+> 📌 **Pendência de implementação:** a tela de ajuda de alertas precisa mencionar o Autostart em
+> Xiaomi, Samsung e Motorola. É orientação, não verificação — nunca marcar como "concedido" algo que
+> o app não consegue ler. Fica para o refinamento, junto dos outros itens de código.
+
+> 📌 **Para o TCC:** isto é conteúdo, não pendência. Limitação de plataforma documentada, com
+> evidência dos dois lados (o Diagnóstico mostrando o aviso agendado + o alarme não tocando) e
+> mitigação por orientação. Mostra com precisão a fronteira entre o que o app controla e o que o
+> sistema operacional decide.
 
 ## A ordem agora
 
-1. **Investigar o 14.1.2** — é o que trava 18, 19 e 20. Testar numa build de produção/preview, não
-   só no dev client, para saber se é efeito da build ou defeito real de agendamento.
+1. **Rodar 18, 20 e 19**, nessa ordem — o 19 por último, porque mexe no relógio do aparelho e
+   reinstala o app; depois dele o estado do celular não serve para os outros.
 2. **Corrigir o adiamento sobrevivendo ao apagamento de dados** (ver a seção dedicada abaixo).
-3. Com os dois resolvidos, rodar **18, 19 e 20**.
-4. **17** fica para quando a funcionalidade for refeita — não depende dos itens acima.
+3. **17** fica para quando a funcionalidade for refeita — não depende dos itens acima.
+
+> ⚠️ **O Autostart tem de estar ligado em todos os blocos abaixo**, e **reinstalar o app o desliga
+> de novo**. Isso afeta o 19 diretamente: o passo 11.7 reinstala o Mapill, então religue o Autostart
+> antes de esperar qualquer horário — senão o passo falha pelo motivo errado.
 
 > ⏰ **Planeje a véspera.** Compromisso, receita e estoque avisam às **00:01 do dia** — marcar para
 > hoje não dispara nada, porque esse instante já passou. Deixe o que for testar cadastrado **na
@@ -127,13 +157,15 @@ no relógio e reinstalam o app.
 
 ## 14 — O alarme em tela cheia 🔴🔬
 
-**1.2 — App fora dos recentes** ⚠️ **investigar.** Cadastre `Teste Alarme`, alarme para daqui a
-3 min. **Feche o app completamente (recentes, deslize para fora)** e **bloqueie o celular**. Espere.
+**1.2 — App fora dos recentes** ✅ **passou em 12/09, com o Autostart ligado.**
 
-> ❌ **11/09: nada acontece.** Nem tela cheia, nem som.
-> ✅ Deixando o app **nos recentes** (sem deslizar para fora) e bloqueando a tela, o alarme funciona
-> normalmente — tela azul, som em loop, botões.
-> Mesmo padrão no modo **Notificação**: com o app fora dos recentes, a notificação também não chega.
+> ❌ **11/09 e 12/09, Autostart desligado:** nada dispara. Nem alarme, nem notificação — e nem com o
+> app **nos** recentes.
+> ✅ **12/09, Autostart ligado:** funciona. Tela azul, som em loop, botões.
+>
+> A causa está detalhada no topo deste arquivo. Resumo: a MIUI nasce com o Autostart desligado e
+> recusa acordar o processo, então o `AlarmManager` nunca executa — o aviso fica agendado e não é
+> entregue. Não é defeito do app, e não há API para contornar.
 >
 > Suspeita do Gabriel: efeito da build (dev client). **Confirmar numa build de produção/preview
 > antes de tratar como defeito real** — se persistir lá, é o app sendo morto pelo sistema antes de
@@ -156,12 +188,13 @@ no relógio e reinstalam o app.
 
 ## 18 — Sobrevivência a reboot e bateria 🔬
 
-> ⚠️ **Suspenso em 11/09.** O achado do bloco 14 (tirar o app dos recentes derruba alarme e
-> notificação) ataca a mesma coisa que este bloco mede — testar reboot/bateria agora só reconfirmaria
-> o mesmo problema. Retomar depois de investigar o 14.1.2 (e, se for efeito de build, numa build de
-> produção/preview).
+> ✅ **Liberado em 12/09**, com o 14.1.2 resolvido. Rode com o **Autostart ligado** — senão este
+> bloco só reconfirma o achado do 14, e não mede o que veio medir.
 
 **Decide se o app precisa de uma tela orientando a desativar a otimização de bateria.**
+
+> 📌 O 14.1.2 já decidiu metade disso: a tela é necessária, e o Autostart entra nela. O que este
+> bloco acrescenta é se **reboot** e **economia de bateria** exigem instruções próprias além dele.
 
 **7.1** Cadastre um remédio com **4 horários/dia**, uso contínuo, Alarme. Abra o app, deixe
 carregar, feche. _(Isso agenda ~28 avisos.)_
@@ -180,7 +213,11 @@ celular **sem carregador**, app fechado, economia de bateria do fabricante ativa
 
 ## 19 — Os casos de borda do alarme 🔬 (C1.8)
 
-> ⚠️ **Pendente, mesmo motivo do bloco 18.** Fica suspenso até o achado do 14.1.2 ser investigado.
+> ✅ **Liberado em 12/09**, com o 14.1.2 resolvido.
+>
+> ⚠️ **O passo 11.7 reinstala o app, e isso desliga o Autostart.** Religue antes de esperar o
+> horário, ou o passo reprova pelo motivo errado — e é justamente o passo que mede o pior modo de
+> falhar do app.
 
 **É o bloco que fecha o C1 no plano.** Os blocos 13 a 17 provam que o alarme funciona quando tudo
 está normal; este prova que ele não **mente** quando não está. Num app de medicação, os dois modos
@@ -353,9 +390,8 @@ percorrido"_ do plano fecha — 11.8 é oportunista e pode ficar como "não obse
 
 ## 20 — Os avisos de estoque e de receita (08/09) 🆕
 
-> ⚠️ **Não dá para testar ainda (11/09).** Mesma causa dos blocos 18 e 19: com o app fora dos
-> recentes nem alarme nem notificação persistem, e este bloco depende de notificação sobrevivendo com
-> o app fechado. Retomar junto dos outros dois.
+> ✅ **Liberado em 12/09**, com o 14.1.2 resolvido. Este bloco depende de notificação sobrevivendo
+> com o app fechado, então o **Autostart precisa estar ligado** — era ele que derrubava tudo.
 
 Até 08/09 o app prometia quatro lembretes e entregava três: quem marcava _"me avisar quando estiver
 acabando"_ recebia só o cartão da tela inicial. Agora o estoque também notifica, e a receita ganhou
@@ -461,6 +497,42 @@ hoje") disparam em 30s, no mesmo canal e com o mesmo texto do aviso real.
 > ✅ 🔴 Um remédio que **já tinha** aviso de receita configurado antes de 08/09 continua avisando —
 > a `018` migra as linhas existentes como "quer ser avisado", porque marcar a caixa era o único
 > caminho que produzia aquele estado.
+
+---
+
+## 🔴 Achado de 12/09 — responder o alarme dá acesso ao app sem desbloquear o celular
+
+Tela bloqueada, o alarme toca, a tela azul sobe. Ao tocar em **Tomei**, o app abre na Home — **sem
+pedir o desbloqueio**. O celular continua tecnicamente bloqueado, mas o Mapill está acessível.
+
+> ❌ **É falha de privacidade, e num app de saúde ela é séria.** Qualquer pessoa com o aparelho na
+> mão pode esperar (ou disparar) um alarme, tocar em "Tomei", e chegar aos medicamentos, ao
+> histórico de doses e à ficha de saúde — alergias, tipo sanguíneo, contatos de emergência. Sem
+> senha, sem digital.
+>
+> **A causa** está em `plugins/alarme-em-tela-cheia.js`: o `showWhenLocked="true"` é aplicado à
+> **MainActivity**, isto é, ao app inteiro, e não a uma Activity exclusiva do alarme. O
+> `fullScreenAction` do Notifee monta o componente dentro da própria MainActivity (ver `index.js`),
+> então não havia onde mais colocá-lo. Quando a tela do alarme fecha, quem está atrás é o app — que
+> herdou a mesma permissão de aparecer sobre o bloqueio.
+>
+> **O comportamento correto** é o do despertador nativo: a tela do alarme aparece sobre o bloqueio,
+> a pessoa responde, e o bloqueio **volta**. Entrar no app exige desbloquear.
+>
+> **Duas saídas, nenhuma trivial:**
+> 1. Uma Activity nativa própria para o alarme, com `showWhenLocked` só nela. É a correção certa, e
+>    é código nativo.
+> 2. O app recusar a navegação enquanto o aparelho estiver bloqueado, lendo
+>    `KeyguardManager.isKeyguardLocked()`. Mais viável em JS, mas ainda exige um módulo nativo
+>    pequeno — não há API do Expo que exponha esse estado.
+>
+> **Não bloqueia os testes:** os blocos 18, 19 e 20 rodam normalmente. Mas isto é privacidade de
+> dado de saúde, não polimento — decidir antes da defesa se entra.
+
+> 📌 **Para o TCC:** cabe na seção 4.7 (Privacidade e LGPD). É um caso em que a funcionalidade
+> exigida pelo domínio (o alarme tem de irromper sobre o bloqueio, senão não é alarme) entra em
+> tensão direta com a minimização de exposição do dado sensível — e a resolução dessa tensão é
+> decisão de projeto, não detalhe de implementação.
 
 ---
 
