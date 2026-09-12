@@ -212,16 +212,24 @@ async function tratar(evento: Event): Promise<void> {
     }
 
     /**
-     * Tocar num **alarme** abre a tela do alarme, e não a do horário.
+     * **A tela cheia já está na frente: o toque não a derruba.**
      *
-     * Os dois avisos caem aqui, mas pedem telas diferentes. Com o aparelho em uso o Android rebaixa
-     * o alarme para um heads-up, e tocá-lo levava à tela de confirmação — que não tem foto do
-     * remédio, nem adiar, nem silenciar. Quem foi interrompido por um despertador perdia justamente
-     * o que faz dele um despertador, e ficava com um formulário de "tomou ou não?".
+     * Esta guarda existia (`46eee55`) e eu a removi ao fazer o toque ir para a tela de confirmação
+     * (`8336aec`), sem notar que ela cobria outro caso. O resultado apareceu em aparelho em 12/09:
+     * com o celular **bloqueado**, o alarme tocava, a tela azul subia — e era imediatamente trocada
+     * pela tela do horário. De tão rápido, parecia que a azul nunca tinha aparecido.
      *
-     * A tela do alarme existe como rota (`/alarme/[instante]`) exatamente para este caso: o app
-     * abre por conta própria o que o sistema não deixou irromper.
+     * A sequência era esta: o `fullScreenAction` monta a tela azul, o Android mostra **a mesma
+     * notificação** também como aviso na bandeja, um `PRESS` chega daí (a MIUI gera esse evento por
+     * conta na tela de bloqueio), e o `pedirParaEncerrarAlarme()` abaixo fechava a tela que estava
+     * certa para abrir outra.
+     *
+     * Com a tela em cena não há o que fazer: a pessoa já está diante da tela onde se responde, com
+     * foto, adiar e silenciar. Ignorar o toque também fecha o caminho que abria o app **sobre a tela
+     * de bloqueio** — ver o achado de privacidade de 12/09.
      */
+    if (jaEstaEmCena(dados.scheduledFor)) return;
+
     /**
      * **O toque leva à tela de confirmação, e o som para — alarme ou lembrete, sem distinção.**
      *
@@ -231,8 +239,9 @@ async function tratar(evento: Event): Promise<void> {
      * que ele quer do gesto. Tocar no aviso é ir responder, e o lugar de responder é a tela do
      * horário — a mesma dos dois botões, a que ele reconhece.
      *
-     * A tela cheia continua existindo para o que ela faz bem: irromper sozinha sobre o bloqueio,
-     * onde não há app aberto para receber ninguém. O que sai é ela ser destino de **toque**.
+     * Vale para o alarme que **não** irrompeu, que é o caso que sobra depois da guarda acima: com o
+     * aparelho em uso o Android rebaixa o full-screen intent, e aí o aviso na bandeja é tudo o que
+     * existe.
      *
      * Os três passos, nesta ordem, são o que torna o gesto imediato: tirar o aviso da bandeja (e com
      * ele o `loopSound`), pedir que a tela cheia saia de cena se estiver montada, e só então abrir.

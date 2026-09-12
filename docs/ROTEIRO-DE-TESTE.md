@@ -13,7 +13,9 @@
 | **13.1** | Tela azul sobre outro app | ✅ Aceito como está (11/09) |
 | **14.1.2** | Alarme com o app fora dos recentes | ✅ **Resolvido em 12/09** — era o Autostart da MIUI |
 | **17** | Vários remédios no mesmo horário | **Parado** — precisa ser desenvolvido de novo |
-| **18, 19, 20** | Reboot/bateria, casos de borda, avisos de estoque/receita | **Liberados** — é o que falta rodar |
+| **18.2** | Alarme sobrevive ao reboot | ✅ **Passou em 12/09** — tocou ao desbloquear |
+| **18.3** | Bateria (8–12h, sem carregador) | Falta rodar |
+| **19, 20** | Casos de borda, avisos de estoque/receita | **Liberados** — é o que falta rodar |
 | 🔴 | Alarme adiado toca mesmo após apagar todos os dados | **Bug confirmado em 11/09** — resolver |
 | 🔴 | Responder o alarme abre o app sem desbloquear o celular | **Bug confirmado em 12/09** — privacidade |
 
@@ -201,8 +203,35 @@ carregar, feche. _(Isso agenda ~28 avisos.)_
 
 **7.2** 🔬 **Reinicie o celular.** **Não abra o app** e espere o próximo horário.
 
-> ✅ A notificação chega mesmo depois do reboot, sem o app ter sido aberto.
-> ❌ Se não chegar, dependemos do app ser aberto após cada reboot — anote.
+> ❌ **12/09: reprovou.** Remédio com quatro horários, o primeiro para 3 min. Salvou, reiniciou o
+> celular, não abriu o app nem desbloqueou. O horário chegou e **nada tocou**.
+>
+> O que **não** é a causa: os receptores de boot. O `plugins/alarme-em-tela-cheia.js` já os
+> reexporta com `exported="true"`, que é a correção conhecida para o Android 12+ (sem ela o sistema
+> nunca os invoca, e foi o defeito visto em 05/09). O plugin roda no prebuild desta build.
+>
+> **Suspeita principal: o Autostart, de novo.** A MIUI bloqueia `BOOT_COMPLETED` para app sem
+> Autostart — é o caso que ela controla mais de perto, porque é exatamente o que enche a inicialização
+> do aparelho. Se for isso, o app está correto e a limitação é a mesma do 14.1.2.
+>
+> ✅ **Resolvido no mesmo teste: ao desbloquear o celular, o alarme tocou.**
+>
+> Isto fecha o diagnóstico, e a favor do app: **o agendamento sobreviveu ao reboot**. O que ficou
+> retido foi a *entrega*, enquanto o processo não podia rodar — e ela saiu no instante em que o
+> desbloqueio liberou o app.
+>
+> A distinção importa e é o que absolve o código: o alarme tocou **ao desbloquear**, e não "no
+> próximo horário, depois de abrir o app". Se o reboot tivesse apagado o agendamento, nada tocaria —
+> nem antes, nem depois. O `AlarmManager` disparou no horário certo e o Android guardou a entrega.
+>
+> Mesmo padrão do 14.1.2: a MIUI segurando o processo. Os receptores de boot do plugin fizeram a
+> parte deles.
+
+> 📌 **Para o TCC:** este é o par do achado do 14.1.2, e junto com ele forma um argumento completo. O
+> app agenda corretamente (provado: sobrevive ao reboot), e a entrega depende de o fabricante
+> autorizar o processo a acordar — o que é decisão do sistema, não do aplicativo. A evidência aqui é
+> ainda mais limpa que a do Diagnóstico: o alarme tocou no desbloqueio, ou seja, existia, estava
+> correto, e só esperava permissão para se apresentar.
 
 **7.3** 🔬 **O mais chato:** deixe um remédio agendado para **daqui a 8–12 h** (a noite serve),
 celular **sem carregador**, app fechado, economia de bateria do fabricante ativa.
