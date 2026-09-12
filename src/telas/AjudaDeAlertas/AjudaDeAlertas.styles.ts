@@ -105,6 +105,62 @@ export const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     fontStyle: "italic",
   },
+  /**
+   * O estado em palavra, e não só em cor.
+   *
+   * Verde e vermelho sozinhos excluem quem não distingue as duas — e este é o assunto mais difícil
+   * do app para o público mais velho. "Autorizada" e "Falta autorizar" dizem o mesmo que o ícone,
+   * em texto, e sobrevivem a qualquer forma de daltonismo.
+   */
+  linhaOk: {
+    ...typography.bodySm,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    color: colors.success,
+  },
+  linhaPendente: {
+    ...typography.bodySm,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    color: colors.error,
+  },
+  /**
+   * O placar do topo: quantas faltam, num bloco que se lê de relance.
+   *
+   * É o primeiro elemento da tela por decisão de 12/09 — quem abre aqui está tentando fazer o
+   * alarme funcionar, e atravessar quatro seções de texto antes de achar o que resolve é desistir no
+   * meio. Ícone grande, uma frase, e o que fazer.
+   */
+  placarPendente: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: withOpacity(colors.error, 0.1),
+    borderWidth: 1,
+    borderColor: withOpacity(colors.error, 0.35),
+  },
+  placarOk: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: withOpacity(colors.success, 0.1),
+    borderWidth: 1,
+    borderColor: withOpacity(colors.success, 0.35),
+  },
+  placarTexto: {
+    flex: 1,
+    gap: 2,
+  },
+  placarTitulo: {
+    ...typography.headlineSm,
+    color: colors.onSurface,
+  },
+  placarDescricao: {
+    ...typography.bodySm,
+    color: colors.onSurfaceVariant,
+  },
   alvoDeLink: {
     minHeight: 44,
     justifyContent: "center",

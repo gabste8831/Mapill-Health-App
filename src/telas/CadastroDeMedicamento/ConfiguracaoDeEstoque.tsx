@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 
 import {
+  AvisoDePermissoes,
   BottomSheet,
   Button,
   Checkbox,
@@ -44,6 +45,11 @@ type ConfiguracaoDeEstoqueProps = EstoqueForm & {
   visible: boolean;
   onClose: () => void;
   onDisable: () => void;
+  /**
+   * Abre a ajuda de alertas. Opcional porque o aviso de permissões só aparece com o alerta marcado,
+   * e quem monta a folha sem passar isto simplesmente não o mostra.
+   */
+  onAbrirAjudaDeAlertas?: () => void;
 };
 
 /**
@@ -56,6 +62,7 @@ export function ConfiguracaoDeEstoque({
   visible,
   onClose,
   onDisable,
+  onAbrirAjudaDeAlertas,
   aceitaFracao,
   aviso,
   avisoEhConflito,
@@ -140,6 +147,15 @@ export function ConfiguracaoDeEstoque({
           <Text style={avisoEhConflito ? styles.avisoDeConflito : styles.sectionHintDestaque}>
             {aviso}
           </Text>
+        ) : null}
+
+        {/* Só com o aviso marcado: sem ele nada aqui depende de autorização do aparelho, e o
+            alerta seria ruído numa folha que trata de contar comprimidos. */}
+        {alertEnabled && onAbrirAjudaDeAlertas !== undefined ? (
+          <AvisoDePermissoes
+            oQueNaoFunciona="o aviso de estoque"
+            onAbrir={onAbrirAjudaDeAlertas}
+          />
         ) : null}
 
         <Button label="Pronto" onPress={onClose} />

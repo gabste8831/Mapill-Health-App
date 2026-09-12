@@ -61,6 +61,7 @@ export default function EditarCompromissoScreen() {
     <FormularioDeCompromissoScreen
       initialValue={carregamento.draft}
       onBack={() => router.back()}
+      onAbrirAjudaDeAlertas={() => router.push("/cadastro/ajuda-de-alertas")}
       onSubmit={async (draft) => {
         try {
           await salvarCompromisso(draft, id);

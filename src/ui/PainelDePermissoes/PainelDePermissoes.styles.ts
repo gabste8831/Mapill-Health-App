@@ -36,23 +36,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onErrorSurface,
   },
   /**
-   * A linha que resume as secundárias e leva aos detalhes.
+   * O "Todas são necessárias" dentro da frase.
    *
-   * Sem superfície própria, ao contrário dos itens: ela não é uma permissão, é um caminho. Dar-lhe o
-   * mesmo peso visual das linhas faria parecer a sexta autorização da lista.
+   * Negrito e não cor: a frase inteira já vive num painel de alerta, e uma segunda cor aqui
+   * competiria com o vermelho do título sem acrescentar significado. O peso basta para a vista
+   * parar na parte que muda a leitura do resto.
    */
-  linkDeDetalhes: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.xs,
-    minHeight: 44,
-    borderRadius: radius.md,
-  },
-  linkDeDetalhesTexto: {
-    ...typography.bodySm,
-    color: cores.onWarningSurface,
-    textDecorationLine: "underline",
+  enfase: {
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
 
   lista: {

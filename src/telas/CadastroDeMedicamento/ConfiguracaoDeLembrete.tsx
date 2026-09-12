@@ -9,6 +9,7 @@ import {
   BottomSheet,
   Button,
   OptionGroup,
+  AvisoDePermissoes,
   PainelDePermissoes,
   type OptionGroupOption,
 } from "@/ui";
@@ -113,13 +114,30 @@ export function ConfiguracaoDeLembrete({
         />
 
         {/* Negada, o app não insiste: no Android o diálogo não abre de novo, então o painel leva
-            às configurações do sistema. */}
-        {dependeDoAparelho && permissoes.temPendencia ? (
+            às configurações do sistema.
+
+            Só as verificáveis, pelo mesmo motivo da Home: as outras três o app não sabe se foram
+            atendidas, e com elas aqui o painel nunca sairia desta folha. */}
+        {dependeDoAparelho ? (
           <PainelDePermissoes
-            itens={permissoes.itens}
+            itens={permissoes.itens.filter((item) => item.verificavel)}
             vaiTocar={permissoes.vaiTocar}
-            onPedirTudo={permissao === "naoPedida" ? () => void permissoes.pedir() : undefined}
+            onAbrirDetalhes={onAbrirAjuda}
           />
+        ) : null}
+
+        {/**
+         * O aviso das três que o app não verifica — **no momento em que a pessoa liga o lembrete**.
+         *
+         * É aqui que ela acredita que vai ser avisada, e é aqui que a informação muda uma decisão.
+         * Foi o pedido do Gabriel em 12/09: o aviso precisa estar onde se configura algo que
+         * depende dele, e não só na Home dias depois.
+         *
+         * Só quando o modo escolhido depende do aparelho: para quem escolheu "nenhum aviso" as
+         * autorizações não mudam nada, e cobrar ali é o alerta que ensina a ignorar alertas.
+         */}
+        {dependeDoAparelho ? (
+          <AvisoDePermissoes oQueNaoFunciona="este lembrete" onAbrir={onAbrirAjuda} />
         ) : null}
 
         {/* `emFolha` porque o `outline` usa a mesma superfície do `BottomSheet`: sem ele o botão

@@ -76,6 +76,7 @@ import {
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
+  AvisoDePermissoes,
   Button,
   Card,
   Checkbox,
@@ -2047,6 +2048,13 @@ export function FormularioDeMedicamentoScreen({
                       {avisoDeRenovacao}
                     </Text>
                   ) : null}
+
+                  {/* O aviso de renovação também é notificação, e depende das mesmas
+                      autorizações do aparelho. */}
+                  <AvisoDePermissoes
+                    oQueNaoFunciona="o aviso da receita"
+                    onAbrir={() => router.push("/cadastro/ajuda-de-alertas")}
+                  />
                 </>
               ) : null}
             </Card>
@@ -2173,6 +2181,10 @@ export function FormularioDeMedicamentoScreen({
         visible={isStockSheetOpen}
         onClose={() => setStockSheetOpen(false)}
         onDisable={handleStockDisable}
+        onAbrirAjudaDeAlertas={() => {
+          setStockSheetOpen(false);
+          router.push("/cadastro/ajuda-de-alertas");
+        }}
         aceitaFracao={stockUnit !== null && allowsFractionalDose(stockUnit)}
         aviso={avisoDeAntecedencia}
         avisoEhConflito={antecedenciaConflita}

@@ -19,14 +19,14 @@ export type AjustesScreenProps = {
   onOpenAccount: () => void;
   /** Abre a tela de escolha de tema (Padrão, Escuro, Alto contraste, Sem depender de cor). */
   onOpenTheme: () => void;
+  /** Abre a ajuda de alertas, onde as cinco autorizações do aparelho estão sempre listadas. */
+  onOpenAjudaDeAlertas: () => void;
   /**
    * Abre o diagnóstico de avisos. Ausente em produção — a rota nem existe lá.
    *
    * Opcional, e não obrigatório com `__DEV__` dentro da tela: a decisão de expor a ferramenta é de
    * quem monta a rota, e uma prop opcional deixa isso explícito na assinatura.
    */
-  /** Abre a ajuda de alertas, onde as cinco autorizações do aparelho estão sempre listadas. */
-  onOpenAjudaDeAlertas: () => void;
   onOpenDiagnostico?: () => void;
 };
 
@@ -47,10 +47,18 @@ function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
 
   return (
     // Linha de largura total: escurece, mas não encolhe — escalar faria o texto vizinho tremer.
-    <Pressable style={estadoDePressao(styles.row)} onPress={onPress} accessibilityRole="button">
+    <Pressable
+      style={estadoDePressao(styles.row)}
+      onPress={onPress}
+      accessibilityRole="button"
+    >
       <View style={styles.rowIcon}>{icon}</View>
       <View style={styles.rowText}>
-        <Text style={[styles.rowLabel, destrutiva && styles.rowLabelDestrutiva]}>{label}</Text>
+        <Text
+          style={[styles.rowLabel, destrutiva && styles.rowLabelDestrutiva]}
+        >
+          {label}
+        </Text>
         {hint ? <Text style={styles.rowHint}>{hint}</Text> : null}
       </View>
       <Ionicons name="chevron-forward" size={18} color={cores.outline} />
@@ -62,7 +70,10 @@ function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
 function Iniciais({ name }: { name: string }) {
   const styles = useEstilos(criarEstilos);
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  const initials = parts.length === 0 ? "?" : (parts[0][0] + (parts.at(-1)?.[0] ?? "")).toUpperCase();
+  const initials =
+    parts.length === 0
+      ? "?"
+      : (parts[0][0] + (parts.at(-1)?.[0] ?? "")).toUpperCase();
   return <Text style={styles.avatarInitials}>{initials}</Text>;
 }
 
@@ -84,7 +95,10 @@ export function AjustesScreen({
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* O bloco de identidade é o próprio atalho pra ficha: numa tela sobre o paciente, o
             retrato dele é o ponto de entrada mais óbvio que existe. */}
         <View style={styles.hero}>
@@ -96,7 +110,8 @@ export function AjustesScreen({
               style={estadoDePressao(styles.backButton, { escala: true })}
               onPress={onBack}
               accessibilityRole="button"
-              accessibilityLabel="Voltar">
+              accessibilityLabel="Voltar"
+            >
               <Ionicons name="arrow-back" size={24} color={cores.onPrimary} />
             </Pressable>
             <Text style={styles.heroTitle}>Ajustes</Text>
@@ -106,11 +121,15 @@ export function AjustesScreen({
             // O bloco de identidade ocupa a largura do hero: escurece sem encolher.
             style={estadoDePressao(styles.identity)}
             onPress={onEditProfile}
-            accessibilityRole="button">
+            accessibilityRole="button"
+          >
             {/* `key` na presença da foto — a mesma correção da ficha de saúde. O avatar troca as
                 iniciais pela imagem dentro de um `Pressable`, que é a estreia que não recompunha
                 no Android: a foto recém-salva ficava invisível até a tela remontar. */}
-            <View style={styles.avatar} key={photoUri ? "com-foto" : "sem-foto"}>
+            <View
+              style={styles.avatar}
+              key={photoUri ? "com-foto" : "sem-foto"}
+            >
               {photoUri ? (
                 <FotoLocal uri={photoUri} style={styles.avatarImage} />
               ) : (
@@ -152,7 +171,11 @@ export function AjustesScreen({
                 está vinculada é dado real, diferente do texto genérico que instruía a tocar. */}
             <Linha
               icon={
-                <Ionicons name="person-circle-outline" size={22} color={cores.onSurfaceVariant} />
+                <Ionicons
+                  name="person-circle-outline"
+                  size={22}
+                  color={cores.onSurfaceVariant}
+                />
               }
               label="Conta e dados"
               hint={accountEmail ?? undefined}
@@ -184,7 +207,7 @@ export function AjustesScreen({
                 />
               }
               label="Como funcionam os alertas"
-              hint="Autorizações do aparelho e o que cada uma faz"
+              hint="Autorizações, e o que cada uma faz"
               onPress={onOpenAjudaDeAlertas}
             />
           </Card>
@@ -197,7 +220,13 @@ export function AjustesScreen({
           <Text style={styles.sectionTitle}>Acessibilidade</Text>
           <Card style={styles.cartaoDeLinhas}>
             <Linha
-              icon={<Ionicons name="color-palette-outline" size={22} color={cores.onSurfaceVariant} />}
+              icon={
+                <Ionicons
+                  name="color-palette-outline"
+                  size={22}
+                  color={cores.onSurfaceVariant}
+                />
+              }
               label="Configurações de tema"
               onPress={onOpenTheme}
             />
@@ -218,12 +247,19 @@ export function AjustesScreen({
             As duas condições são resolvidas em tempo de compilação (`__DEV__` e a variável de
             ambiente entram no bundle como literais), então na produção a tela sai do binário — não
             fica escondida atrás de um `if` que alguém possa contornar. */}
-        {(__DEV__ || process.env.EXPO_PUBLIC_DIAGNOSTICO === "1") && onOpenDiagnostico ? (
+        {(__DEV__ || process.env.EXPO_PUBLIC_DIAGNOSTICO === "1") &&
+        onOpenDiagnostico ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Desenvolvimento</Text>
             <Card style={styles.cartaoDeLinhas}>
               <Linha
-                icon={<Ionicons name="pulse-outline" size={22} color={cores.onSurfaceVariant} />}
+                icon={
+                  <Ionicons
+                    name="pulse-outline"
+                    size={22}
+                    color={cores.onSurfaceVariant}
+                  />
+                }
                 label="Diagnóstico de avisos"
                 hint="O que está agendado agora, e disparo de teste"
                 onPress={onOpenDiagnostico}

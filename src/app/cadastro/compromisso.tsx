@@ -32,6 +32,9 @@ export default function CompromissoScreen() {
   return (
     <FormularioDeCompromissoScreen
       onBack={() => router.back()}
+      // Rota irmã dentro do mesmo stack do cadastro: um `push` comum, e o voltar do Android faz o
+      // caminho de volta sozinho.
+      onAbrirAjudaDeAlertas={() => router.push("/cadastro/ajuda-de-alertas")}
       onSubmit={async (draft) => {
         try {
           await salvarCompromisso(draft);

@@ -20,6 +20,7 @@ import { CardAdesaoSemanal } from "@/telas/Inicio/componentes/CardAdesaoSemanal/
 import { CardCompromissoProximo } from "@/telas/Inicio/componentes/CardCompromissoProximo/CardCompromissoProximo";
 import { ListaDeDosesRegistradas } from "@/telas/Inicio/componentes/ListaDeDosesRegistradas/ListaDeDosesRegistradas";
 import { CardCompromissos } from "@/telas/Inicio/componentes/CardCompromissos/CardCompromissos";
+import { AvisoDePermissoes } from "@/ui/AvisoDePermissoes/AvisoDePermissoes";
 import { PainelDePermissoes } from "@/ui/PainelDePermissoes/PainelDePermissoes";
 import { CardEstoque } from "@/ui/CardDeAtalho/CardEstoque";
 import { CardEstoqueBaixo } from "@/telas/Inicio/componentes/CardEstoqueBaixo/CardEstoqueBaixo";
@@ -458,25 +459,19 @@ export function InicioScreen() {
             horários primeiro e descobrir depois que nenhum deles vai tocar é a ordem errada. */}
         {cobrarPermissoes ? (
           <PainelDePermissoes
-            itens={permissoesDoAlarme.itens}
+            /**
+             * **Só as verificáveis**, e é isso que faz o painel poder desaparecer.
+             *
+             * As três que o app não consegue ler (sobrepor apps, início automático, bateria) nunca
+             * seriam marcadas como atendidas, então com elas aqui o painel ficaria para sempre na
+             * Home — inclusive para quem configurou tudo. Um aviso que nunca sai ensina a ignorar o
+             * aviso, e aí ele deixa de proteger justamente as três que ele consegue verificar.
+             *
+             * Elas não desaparecem do app: vivem na ajuda de alertas, na seção "você mesmo precisa
+             * conferir", e o rodapé desta tela leva até lá.
+             */
+            itens={permissoesDoAlarme.itens.filter((item) => item.verificavel)}
             vaiTocar={permissoesDoAlarme.vaiTocar}
-            /**
-             * O botão de pedir só existe enquanto o diálogo do sistema ainda abre. Depois de negada,
-             * `requestPermission` retorna na hora sem mostrar nada — e um botão que não faz nada é
-             * pior que botão nenhum. Aí sobram os itens da lista, que levam à tela do sistema.
-             */
-            onPedirTudo={
-              permissao === "naoPedida"
-                ? () => {
-                    void pedir();
-                    void permissoesDoAlarme.consultar();
-                  }
-                : undefined
-            }
-            /**
-             * O caminho para a lista completa. O painel mostra só o que impede o alarme de existir;
-             * lá estão as cinco, com a seção do que o app não consegue verificar.
-             */
             onAbrirDetalhes={() => router.push("/cadastro/ajuda-de-alertas")}
           />
         ) : null}
@@ -766,6 +761,27 @@ export function InicioScreen() {
 
             Aqui só quando **não** há alerta: com ele, a seção já foi desenhada acima da adesão. */}
         {!temAlertaDeEstoque ? secaoDeEstoque : null}
+
+        {/**
+         * O aviso das autorizações que o app não consegue verificar — **no fim, e não no topo**.
+         *
+         * Ele é permanente: as três (sobrepor apps, início automático, bateria) não expõem estado a
+         * nenhuma API, então não há o que ele espere para desaparecer. Um aviso permanente acima da
+         * agenda tomaria para sempre o lugar do que a pessoa abriu o app para ver — e é justamente
+         * essa inversão que o Gabriel apontou em 12/09.
+         *
+         * No rodapé ele cumpre o papel de quem chegou até aqui procurando por que o alarme não
+         * tocou. O painel do topo continua sendo o alerta de verdade, e sai quando resolvido.
+         *
+         * Só para quem pediu algum aviso: cobrar autorização de quem não configurou lembrete nenhum
+         * é o tipo de alerta que ensina a ignorar os próximos (mesma régua do `cobrarPermissoes`).
+         */}
+        {agenda.tratamentosComLembrete > 0 ? (
+          <AvisoDePermissoes
+            oQueNaoFunciona="seus alarmes e notificações"
+            onAbrir={() => router.push("/cadastro/ajuda-de-alertas")}
+          />
+        ) : null}
       </ScrollView>
 
       <Fab

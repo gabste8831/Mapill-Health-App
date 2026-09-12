@@ -32,7 +32,10 @@ type AjudaDeAlertasScreenProps = {
  *
  * A tela não conhece rota: quem navega é quem a monta (§2.6.1).
  */
-export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasScreenProps) {
+export function AjudaDeAlertasScreen({
+  onBack,
+  onAbrirTermos,
+}: AjudaDeAlertasScreenProps) {
   const cores = useCores();
   /**
    * O hook relê as permissões **a cada volta ao primeiro plano**, e é isso que faz esta tela
@@ -43,37 +46,193 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
 
   const verificaveis = itens.filter((item) => item.verificavel);
   const naoVerificaveis = itens.filter((item) => !item.verificavel);
+  const pendentesVerificaveis = verificaveis.filter(
+    (item) => !item.concedida,
+  ).length;
+  const faltamVerificaveis = pendentesVerificaveis > 0;
+
+  /**
+   * As duas seções de autorização, montadas aqui e renderizadas **antes** das explicações.
+   *
+   * Numa variável porque o JSX delas é longo, e no meio da árvore empurraria as explicações para
+   * fora da vista de quem lê o arquivo. A ordem na tela é o que importa, e ela está no `return`.
+   */
+  const SECOES_DE_PERMISSAO = (
+    <>
+      <View style={styles.condicoes}>
+        <Text style={styles.condicoesTitulo}>
+          O app confere estas para você
+        </Text>
+
+        {verificaveis.map((permissao) => (
+          <Pressable
+            key={permissao.chave}
+            style={estadoDePressao(styles.linhaDePermissao, {
+              superficie: true,
+            })}
+            onPress={() => void permissao.abrir()}
+            accessibilityRole="button"
+            accessibilityLabel={`${permissao.titulo}. ${
+              permissao.concedida
+                ? "Autorizada."
+                : `Falta autorizar. ${permissao.descricao}`
+            } Toque para abrir as configurações.`}
+          >
+            <Ionicons
+              name={permissao.concedida ? "checkmark-circle" : "close-circle"}
+              size={26}
+              color={permissao.concedida ? cores.success : cores.error}
+            />
+            <View style={styles.linhaTexto}>
+              <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
+              {/**
+               * Concedida diz **"Autorizada"**, e não a consequência de não ter.
+               *
+               * A descrição existe para convencer quem ainda não autorizou ("sem isto o aviso pode
+               * atrasar"). Mantê-la depois de resolvido faria a linha verde continuar descrevendo um
+               * problema que não existe mais, e é o tipo de texto que se lê como pendência.
+               */}
+              <Text
+                style={
+                  permissao.concedida ? styles.linhaOk : styles.linhaPendente
+                }
+              >
+                {permissao.concedida ? "Autorizada" : "Falta autorizar"}
+              </Text>
+              {!permissao.concedida ? (
+                <Text style={styles.linhaDescricao}>{permissao.descricao}</Text>
+              ) : null}
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={cores.onSurfaceVariant}
+            />
+          </Pressable>
+        ))}
+      </View>
+
+      {naoVerificaveis.length > 0 ? (
+        <View style={styles.condicoes}>
+          <Text style={styles.condicoesTitulo}>
+            Você precisa conferir estas
+          </Text>
+          <Text style={styles.texto}>
+            O Android não deixa o Mapill ver se estão ligadas. Abra cada uma e
+            confirme, mesmo que você já tenha passado por elas antes.
+          </Text>
+
+          {naoVerificaveis.map((permissao) => (
+            <Pressable
+              key={permissao.chave}
+              style={estadoDePressao(styles.linhaDePermissao, {
+                superficie: true,
+              })}
+              onPress={() => void permissao.abrir()}
+              accessibilityRole="button"
+              accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} ${permissao.comoFazer ?? ""} O app não consegue verificar esta. Toque para abrir as configurações.`}
+            >
+              {/* Sem verde nem vermelho: um ícone de estado aqui seria afirmar o que o app não
+                  sabe, e é justamente o engano que esta seção existe para corrigir. */}
+              <Ionicons
+                name="help-circle"
+                size={26}
+                color={cores.onSurfaceVariant}
+              />
+              <View style={styles.linhaTexto}>
+                <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
+                <Text style={styles.linhaDescricao}>{permissao.descricao}</Text>
+                {permissao.comoFazer !== undefined ? (
+                  <Text style={styles.linhaComoFazer}>
+                    {permissao.comoFazer}
+                  </Text>
+                ) : null}
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={cores.onSurfaceVariant}
+              />
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+    </>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Header title="Como funcionam os alertas" onBack={onBack} />
+      <Header title="Alertas e permissões" onBack={onBack} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.abertura}>O alerta organiza a rotina. Ele avisa, e quem toma é você.</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/**
+         * **As permissões primeiro, a explicação depois** — e essa ordem é a decisão desta tela.
+         *
+         * Ela nasceu como texto explicativo, e as autorizações entraram no fim. O Gabriel corrigiu
+         * em 12/09, e o argumento é de acessibilidade: quem chega aqui está tentando fazer o alarme
+         * funcionar, e atravessar quatro seções de texto antes de achar o que resolve é desistir no
+         * meio. O público inclui idosos, e permissão de Android é o assunto mais difícil do app.
+         *
+         * O placar no topo é o que se lê sem ler: um número, uma cor, e o que fazer.
+         */}
+        <View
+          style={faltamVerificaveis ? styles.placarPendente : styles.placarOk}
+        >
+          <Ionicons
+            name={faltamVerificaveis ? "alert-circle" : "checkmark-circle"}
+            size={32}
+            color={faltamVerificaveis ? cores.error : cores.success}
+          />
+          <View style={styles.placarTexto}>
+            <Text style={styles.placarTitulo}>
+              {faltamVerificaveis
+                ? `${pendentesVerificaveis} de ${verificaveis.length} ainda faltam`
+                : "As que o app confere estão prontas"}
+            </Text>
+            <Text style={styles.placarDescricao}>
+              {faltamVerificaveis
+                ? "Sem todas elas o alarme não toca. Toque em cada uma abaixo para autorizar."
+                : "Confira abaixo as três que o app não consegue verificar sozinho."}
+            </Text>
+          </View>
+        </View>
+
+        {SECOES_DE_PERMISSAO}
+
+        {/* A explicação vem **depois** das autorizações: quem abre esta tela está tentando fazer o
+            alarme funcionar, e o texto é o que se lê depois de resolver, não antes. */}
+        <Text style={styles.abertura}>
+          O alerta organiza a rotina. Ele avisa, e quem toma é você.
+        </Text>
 
         <View style={styles.secao}>
           <Text style={styles.secaoTitulo}>Na hora da dose</Text>
           <Text style={styles.texto}>
-            O alerta mostra o horário, o remédio, a quantidade daquele horário e a orientação de
-            como tomar, se você tiver anotado alguma.
+            O alerta mostra o horário, o remédio, a quantidade daquele horário e
+            a orientação de como tomar, se você tiver anotado alguma.
           </Text>
         </View>
 
         <View style={styles.secao}>
           <Text style={styles.secaoTitulo}>Confirmar, adiar ou ignorar</Text>
           <Text style={styles.texto}>
-            Você responde dali mesmo, sem abrir o app, e a resposta define o status da dose.
-            Confirmou: o estoque desconta, se você estiver controlando. Ignorou: fica registrado que
-            a dose não foi tomada. Os dois entram no seu histórico.
+            Você responde dali mesmo, sem abrir o app, e a resposta define o
+            status da dose. Confirmou: o estoque desconta, se você estiver
+            controlando. Ignorou: fica registrado que a dose não foi tomada. Os
+            dois entram no seu histórico.
           </Text>
         </View>
 
         <View style={styles.secao}>
           <Text style={styles.secaoTitulo}>Se você adiar</Text>
           <Text style={styles.texto}>
-            O alerta volta em 5 minutos, uma vez só, para o app não virar despertador infinito. Se
-            você não responder nessa segunda vez, a dose fica registrada como não tomada e continua
-            na sua lista do dia até você dizer o contrário.
+            O alerta volta em 5 minutos, uma vez só, para o app não virar
+            despertador infinito. Se você não responder nessa segunda vez, a
+            dose fica registrada como não tomada e continua na sua lista do dia
+            até você dizer o contrário.
           </Text>
         </View>
 
@@ -125,73 +284,14 @@ export function AjudaDeAlertasScreen({ onBack, onAbrirTermos }: AjudaDeAlertasSc
          * app silencioso e nada explicando por quê. Aqui elas nunca desaparecem, porque o app nunca
          * soube se foram atendidas.
          */}
-        <View style={styles.condicoes}>
-          <Text style={styles.condicoesTitulo}>Autorizações confirmadas pelo app</Text>
-          <Text style={styles.texto}>
-            Estas o Android informa, e o Mapill confere sozinho a cada vez que você abre o app.
-          </Text>
-
-          {verificaveis.map((permissao) => (
-            <Pressable
-              key={permissao.chave}
-              style={estadoDePressao(styles.linhaDePermissao, { superficie: true })}
-              onPress={() => void permissao.abrir()}
-              accessibilityRole="button"
-              accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} ${
-                permissao.concedida ? "Concedida." : "Pendente."
-              } Toque para abrir as configurações.`}>
-              <Ionicons
-                name={permissao.concedida ? "checkmark-circle" : "close-circle"}
-                size={22}
-                color={permissao.concedida ? cores.success : cores.error}
-              />
-              <View style={styles.linhaTexto}>
-                <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
-                <Text style={styles.linhaDescricao}>
-                  {permissao.concedida ? "Concedida" : permissao.descricao}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
-            </Pressable>
-          ))}
-        </View>
-
-        {naoVerificaveis.length > 0 ? (
-          <View style={styles.condicoes}>
-            <Text style={styles.condicoesTitulo}>Você mesmo precisa conferir</Text>
-            <Text style={styles.texto}>
-              O Android não deixa o Mapill consultar estas três, então ele não sabe se estão ligadas.
-              Se algum aviso deixar de chegar, comece por aqui: abra cada uma e confirme.
-            </Text>
-
-            {naoVerificaveis.map((permissao) => (
-              <Pressable
-                key={permissao.chave}
-                style={estadoDePressao(styles.linhaDePermissao, { superficie: true })}
-                onPress={() => void permissao.abrir()}
-                accessibilityRole="button"
-                accessibilityLabel={`${permissao.titulo}. ${permissao.descricao} O app não consegue verificar esta. Toque para abrir as configurações.`}>
-                {/* Sem verde nem vermelho: um ícone de estado aqui seria afirmar o que o app não
-                    sabe, e é justamente o engano que esta seção existe para corrigir. */}
-                <Ionicons name="help-circle-outline" size={22} color={cores.onSurfaceVariant} />
-                <View style={styles.linhaTexto}>
-                  <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
-                  <Text style={styles.linhaDescricao}>{permissao.descricao}</Text>
-                  {permissao.comoFazer !== undefined ? (
-                    <Text style={styles.linhaComoFazer}>{permissao.comoFazer}</Text>
-                  ) : null}
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-
         <Pressable
           style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
           onPress={onAbrirTermos}
-          accessibilityRole="link">
-          <Text style={styles.linkParaTermos}>Ler os Termos de Uso completos</Text>
+          accessibilityRole="link"
+        >
+          <Text style={styles.linkParaTermos}>
+            Ler os Termos de Uso completos
+          </Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

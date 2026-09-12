@@ -10,6 +10,7 @@ import { formatIntegerInput } from "@/shared/number-input";
 import { rotuloDeAntecedencia } from "@/shared/rotulos-de-compromisso";
 import { parseTimeInput } from "@/shared/time-input";
 import {
+  AvisoDePermissoes,
   Button,
   Card,
   DateField,
@@ -54,6 +55,8 @@ type FormularioDeCompromissoScreenProps = {
   initialValue?: CompromissoDraft;
   onSubmit: (draft: CompromissoDraft) => void;
   onBack: () => void;
+  /** Abre a ajuda de alertas. A tela não conhece rota: quem navega é quem a monta (§2.6.1). */
+  onAbrirAjudaDeAlertas: () => void;
 };
 
 /** `2026-08-27` + `14:30` → instante local em ISO. */
@@ -84,6 +87,7 @@ function emLista(itens: string[]): string {
 export function FormularioDeCompromissoScreen({
   initialValue,
   onSubmit,
+  onAbrirAjudaDeAlertas,
   onBack,
 }: FormularioDeCompromissoScreenProps) {
   const styles = useEstilos(criarEstilos);
@@ -518,6 +522,14 @@ export function FormularioDeCompromissoScreen({
                   ? ` O compromisso também aparece na tela inicial ${leadEscolhido === 1 ? "no dia anterior" : `nos ${leadEscolhido} dias que antecedem a data`}.`
                   : " Na tela inicial, o compromisso aparece no próprio dia."}
               </Text>
+
+              {/* O lembrete de compromisso é notificação, e depende das mesmas autorizações do
+                  aparelho que o alarme de dose. Só com "sim" marcado: sem aviso pedido, nada aqui
+                  depende delas. */}
+              <AvisoDePermissoes
+                oQueNaoFunciona="o lembrete do compromisso"
+                onAbrir={onAbrirAjudaDeAlertas}
+              />
             </>
           ) : null}
         </Card>
