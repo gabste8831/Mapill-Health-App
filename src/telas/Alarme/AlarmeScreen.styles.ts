@@ -91,19 +91,24 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   /** Miniatura à esquerda, texto à direita — a forma de uma linha de lista. */
   linhaDoItem: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: spacing.sm,
   },
   /**
-   * 48dp: o tamanho em que a caixa ainda se reconhece pela cor e pela forma, sem tomar a linha.
+   * 44dp: o tamanho em que a caixa ainda se reconhece pela cor e pela forma, sem tomar a linha.
    *
    * Os 132dp da tela de uma dose não cabem aqui — três deles empilhados não deixam espaço para mais
    * nada, e a tela vista em 12/09 já estava cheia sem foto nenhuma.
+   *
+   * `alignSelf: "flex-start"` alinha a miniatura com o **nome**, e não com o centro do bloco: com a
+   * orientação de tomada dentro do item, a coluna de texto passou a ter até quatro linhas, e uma
+   * foto centrada nelas flutuaria longe do que ela identifica.
    */
   miniatura: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: radius.md,
+    alignSelf: "flex-start",
   },
   /** A coluna de texto ocupa o que sobra, e é o eixo com que o local se alinha. */
   textoDoItem: {
@@ -128,6 +133,28 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     opacity: 0.85,
     textAlign: "left",
+  },
+  /**
+   * A orientação de tomada na lista — "em jejum", "com água".
+   *
+   * **Fica, e isso é regra e não estética.** Cheguei a cortá-la para a lista caber; o Gabriel
+   * corrigiu em 12/09, e com razão: quem toma em jejum precisa saber no instante em que levanta, e
+   * não depois de já ter comido. Caber é problema de escala, e se resolve no corpo do texto.
+   *
+   * `bodySm` com entrelinha apertada: duas linhas dela ainda somam menos que uma linha em `bodyLg`,
+   * que é o corpo da versão de uma dose só.
+   */
+  orientacaoCompacta: {
+    ...typography.bodySm,
+    color: cores.onPrimary,
+    opacity: 0.75,
+    lineHeight: 18,
+    textAlign: "left",
+  },
+  /** O local na lista, um degrau abaixo do `localTexto` da tela de uma dose. */
+  localCompacto: {
+    ...typography.bodySm,
+    color: cores.onPrimary,
   },
   /**
    * A frase que substitui a lista acima de três remédios.

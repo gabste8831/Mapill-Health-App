@@ -31,9 +31,10 @@ const SOM_DO_ALARME = require("../../../assets/sounds/alarme_de_dose.wav");
  *
  * Então:
  *
- * - **1 dose** — a tela cheia de sempre, com foto e nome grande.
- * - **2 ou 3** — uma lista enxuta: nome, quantidade e onde está, em corpo de leitura. Sem foto, sem
- *   título gigante. Dá para ler as três de relance e decidir se levanta.
+ * - **1 dose** — a tela cheia de sempre, com foto de 132dp e nome em corpo 30.
+ * - **2 ou 3** — uma lista: miniatura de 44dp à esquerda, e à direita nome, quantidade, orientação
+ *   de tomada e onde a caixa está. **Nada é omitido** — o que muda é a escala. A foto fica porque
+ *   distinguir uma caixa da outra importa mais aqui do que na tela de uma dose só.
  * - **4 ou mais** — nem lista. Só quantos remédios são, e o caminho para o app. Acima de três, a
  *   pessoa não decide olhando a tela do alarme: ela vai conferir onde cada dose se resolve.
  */
@@ -482,14 +483,25 @@ export function AlarmeScreen({
                   {dose.photoUri !== null ? (
                     <FotoLocal uri={dose.photoUri} style={styles.miniatura} contentFit="cover" />
                   ) : null}
+                  {/**
+                   * **Nada é omitido aqui** — o que muda é o corpo, não o conteúdo.
+                   *
+                   * Nome, dose, onde está e como tomar são informação clínica: quem toma em jejum
+                   * precisa saber disso no instante em que levanta, não depois de já ter comido.
+                   * Cheguei a cortar a orientação para a lista caber, e era a decisão errada —
+                   * caber é problema de tamanho, e se resolve reduzindo a escala do conjunto.
+                   */}
                   <View style={styles.textoDoItem}>
                     <Text style={styles.nomeCompacto}>{dose.medicationName}</Text>
                     <Text style={styles.quantidadeCompacta}>{dose.quantidadeFormatada}</Text>
+                    {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
+                      <Text style={styles.orientacaoCompacta}>{dose.intakeNote}</Text>
+                    ) : null}
                     {/* O local fecha a coluna de texto, alinhado com o nome — com ou sem foto. */}
                     {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
                       <View style={styles.localEnxuto}>
-                        <Ionicons name="location-outline" size={14} color={cores.onPrimary} />
-                        <Text style={styles.localTexto}>{dose.storageLocation}</Text>
+                        <Ionicons name="location-outline" size={13} color={cores.onPrimary} />
+                        <Text style={styles.localCompacto}>{dose.storageLocation}</Text>
                       </View>
                     ) : null}
                   </View>

@@ -43,6 +43,7 @@ instalado ainda tem os defeitos.
 | `4cc90e6` | O cartão da Home exigia antecedência | Marcar o aviso **sem escolher prazo**: o cartão tem de aparecer na semana do fim |
 | `358e55c` | O painel de permissões só valia para lembrete de dose | Cadastrar só aviso de estoque ou compromisso, sem alarme de dose, e negar a permissão: o painel tem de aparecer |
 | `358e55c` | Autostart não era explicado | `Ajustes → como funcionam os alertas`: tem de haver parágrafo próprio sobre o início automático |
+| `930082a` | A tela azul com vários remédios era uma parede de texto | Cadastrar **2 ou 3** no mesmo horário: a lista tem miniatura de 44dp e, ao lado, nome, dose, orientação de tomada e local — tudo legível sem rolar. Depois **4 ou mais**: só a contagem e o botão de abrir o app |
 
 **O que o estoque revelou, e vale para o TCC:** compromisso e receita têm data fixa e nenhuma trava;
 o estoque depende de um cálculo e tem a trava que impede repetir aviso a cada dose. Ela era gravada
