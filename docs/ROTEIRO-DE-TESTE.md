@@ -15,7 +15,19 @@
 | **17** | Vários remédios no mesmo horário | **Parado** — precisa ser desenvolvido de novo |
 | **18.2** | Alarme sobrevive ao reboot | ✅ **Passou em 12/09** — tocou ao desbloquear |
 | **18.3** | Bateria (8–12h, sem carregador) | Falta rodar |
-| **19, 20** | Casos de borda, avisos de estoque/receita | **Liberados** — é o que falta rodar |
+| **19** | Casos de borda | **Liberado** — 19.2 passou; faltam os outros |
+| **20** | Avisos de estoque/receita | **Agendados e confirmados no Diagnóstico** — falta amanhã de manhã |
+
+### O que a build de 12/09 validou em aparelho
+
+Testado com o Autostart ligado, e as duas coisas passaram ponta a ponta:
+
+- **Alarme:** cadastrado, app fora dos recentes, celular bloqueado. A tela azul irrompeu, "Tomei"
+  gravou a dose. É o caso principal do app, e fecha o 13.1, o 14.1.2 e o 19.2.
+- **Notificação:** chegou no modo correto, sem tela cheia, e "Pulei" registrou o desfecho com o
+  redirecionamento certo.
+- **Os avisos de estoque e receita** aparecem no Diagnóstico como agendados — o que confirma a
+  correção do checkbox (`8e85dfb`) sem precisar esperar a madrugada.
 | 🔴 | Alarme adiado toca mesmo após apagar todos os dados | **Bug confirmado em 11/09** — resolver |
 | 🔴 | Responder o alarme abre o app sem desbloquear o celular | **Bug confirmado em 12/09** — privacidade |
 
