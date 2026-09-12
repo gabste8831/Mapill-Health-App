@@ -113,37 +113,40 @@ export function ConfiguracaoDeLembrete({
           onChange={escolherModo}
         />
 
-        {/* Negada, o app não insiste: no Android o diálogo não abre de novo, então o painel leva
-            às configurações do sistema.
-
-            Só as verificáveis, pelo mesmo motivo da Home: as outras três o app não sabe se foram
-            atendidas, e com elas aqui o painel nunca sairia desta folha. */}
-        {dependeDoAparelho ? (
-          <PainelDePermissoes
-            itens={permissoes.itens.filter((item) => item.verificavel)}
-            vaiTocar={permissoes.vaiTocar}
-            onAbrirDetalhes={onAbrirAjuda}
-          />
-        ) : null}
-
         {/**
-         * O aviso das três que o app não verifica — **no momento em que a pessoa liga o lembrete**.
+         * **Um bloco de permissões por vez** — nunca os dois.
          *
-         * É aqui que ela acredita que vai ser avisada, e é aqui que a informação muda uma decisão.
-         * Foi o pedido do Gabriel em 12/09: o aviso precisa estar onde se configura algo que
-         * depende dele, e não só na Home dias depois.
+         * Os dois conviviam aqui, e o Gabriel encontrou o resultado em 12/09: quem abria o app pela
+         * primeira vez e ia cadastrar um remédio via a mesma cobrança duplicada nesta folha, o
+         * painel e o aviso, um debaixo do outro. Dois blocos dizendo a mesma coisa não somam
+         * urgência: eles dividem a atenção e ensinam que a segunda metade é decorativa.
+         *
+         * A escolha é por **quem tem mais a dizer** naquele momento, e por isso é exclusiva:
+         *
+         * - Com pendência **comprovada**, o painel: ele nomeia a consequência ("seus alarmes não vão
+         *   funcionar") e leva à tela onde as cinco autorizações se resolvem. É o bloco mais
+         *   completo, e foi o que o Gabriel pediu para manter.
+         * - Sem pendência comprovada, o aviso: as três não-verificáveis continuam podendo estar
+         *   desligadas, e esta folha é onde a pessoa acredita que vai ser avisada. Calar aqui seria
+         *   prometer o lembrete sem dizer do que ele depende.
          *
          * Só quando o modo escolhido depende do aparelho: para quem escolheu "nenhum aviso" as
          * autorizações não mudam nada, e cobrar ali é o alerta que ensina a ignorar alertas.
+         *
+         * Negada, o app não insiste: no Android o diálogo não abre de novo, então o painel leva às
+         * configurações do sistema. E só as verificáveis entram na conta do painel, pelo mesmo
+         * motivo da Home — com as outras três ele nunca sairia desta folha.
          */}
         {dependeDoAparelho ? (
-          <AvisoDePermissoes
-            oQueNaoFunciona="este lembrete"
-            // Vermelho quando o app comprova pendência — o mesmo sinal que faz o painel acima
-            // aparecer. Sem isso, os dois blocos na mesma folha diriam coisas diferentes.
-            urgente={permissoes.temPendenciaVerificavel}
-            onAbrir={onAbrirAjuda}
-          />
+          permissoes.temPendenciaVerificavel ? (
+            <PainelDePermissoes
+              itens={permissoes.itens.filter((item) => item.verificavel)}
+              vaiTocar={permissoes.vaiTocar}
+              onAbrirDetalhes={onAbrirAjuda}
+            />
+          ) : (
+            <AvisoDePermissoes oQueNaoFunciona="este lembrete" onAbrir={onAbrirAjuda} />
+          )
         ) : null}
 
         {/* `emFolha` porque o `outline` usa a mesma superfície do `BottomSheet`: sem ele o botão

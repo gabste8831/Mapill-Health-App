@@ -103,9 +103,42 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
           </View>
 
           <View style={styles.itemHeaderText}>
-            <Text style={styles.name} numberOfLines={1}>
-              {medication.name}
-            </Text>
+            {/**
+             * O nome e, ao lado, o sino de que **este remédio avisa** — proposta do Gabriel em 12/09.
+             *
+             * Antes, saber se um tratamento tinha lembrete exigia abrir a edição dele, um por um. É
+             * exatamente o que a heurística de *reconhecimento em vez de recordação* (Nielsen) pede
+             * para evitar: a informação existe, o app a tem na mão, e mesmo assim a pessoa precisava
+             * lembrar de cabeça qual dos seis remédios ela configurou para tocar.
+             *
+             * O ícone distingue os dois modos em vez de só dizer "tem aviso", porque a diferença é a
+             * que importa quando algo não toca: `alarm` para o que irrompe em tela cheia, `notifications`
+             * para o que chega na barra. Quem estranha um remédio que não acordou ninguém consegue ver,
+             * na lista, que ele estava em modo notificação — sem abrir nada.
+             *
+             * Fica fora do `numberOfLines` do nome: encolher o nome é aceitável, perder o sino não,
+             * porque ele é justamente o que não se descobre de outro jeito.
+             */}
+            <View style={styles.nomeComSino}>
+              <Text style={styles.name} numberOfLines={1}>
+                {medication.name}
+              </Text>
+              {prescription !== null && prescription.reminderMode !== "none" ? (
+                /* `both` conta como alarme: o modo inclui a tela cheia, e é ela que define o que
+                   esperar do horário. Mostrar o sino de notificação ali prometeria menos do que
+                   o tratamento faz. */
+                <Ionicons
+                  name={prescription.reminderMode === "notification" ? "notifications" : "alarm"}
+                  size={15}
+                  color={cores.corDeDestaque}
+                  accessibilityLabel={
+                    prescription.reminderMode === "notification"
+                      ? "Com notificação"
+                      : "Com alarme em tela cheia"
+                  }
+                />
+              ) : null}
+            </View>
             {/* Quando, não quanto: no lugar do princípio ativo, que não diz nada sobre a rotina do
                 dia a dia — é dado de identificação, não de uso, e já está no popup de detalhe. A
                 dose por tomada ("1 comprimido") também não entra aqui: ao lado do estoque no

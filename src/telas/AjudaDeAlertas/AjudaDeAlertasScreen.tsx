@@ -104,7 +104,7 @@ export function AjudaDeAlertasScreen({
           {/* Uma frase, e curta: o parágrafo de três linhas que estava aqui somava ao peso que o
               Gabriel apontou em 12/09. O essencial é que o app não sabe o estado delas. */}
           <Text style={styles.texto}>
-            O Android não deixa o Mapill ver se estão ligadas.
+            O dispositivo não deixa o Mapill ver se estão ligadas.
           </Text>
 
           {naoVerificaveis.map((permissao) => (

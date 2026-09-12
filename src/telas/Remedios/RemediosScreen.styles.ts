@@ -92,9 +92,22 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodyLg,
     color: cores.onSurface,
   },
+  /**
+   * O nome e o sino do lembrete na mesma linha.
+   *
+   * `flexShrink` no nome (via `flex: 1` do `Text`) e nada no ícone: com nome comprido, quem corta é
+   * o texto, que já tem reticências. O sino é 15dp e não tem como encolher sem sumir — e ele é a
+   * única informação da linha que não existe em nenhum outro lugar da lista.
+   */
+  nomeComSino: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   name: {
     ...typography.headlineSm,
     color: cores.onSurface,
+    flexShrink: 1,
   },
   activeIngredient: {
     ...typography.bodyMd,
