@@ -505,6 +505,20 @@ opção de 1 dia, então a quantidade é o que se ajusta.
 > ⚠️ **A dose precisa ter horário ainda por vir hoje.** Cadastrando à noite com dose às 08:00, a de
 > hoje já passou e a contagem começa amanhã — o que empurra tudo um dia.
 
+> 🔬 **Cadastre pelo menos um com data de fim.** A receita acima usa tratamento contínuo nos quatro
+> casos, e foi justamente isso que deixou passar o defeito achado em 12/09: quando o tratamento tem
+> **data de fim** e o estoque dá conta dele até o último dia, o app descartava o estoque inteiro e
+> **nenhum** aviso saía — nem o da antecedência, nem o do dia em que acaba. Um tratamento de 7 dias
+> com 7 comprimidos ficava calado.
+>
+> Corrigido em `41640b4`, com 16 casos em `scripts/conferir-previsao-de-estoque.mjs`. O teste em
+> aparelho é o **B.9** de [`O-QUE-FALTA-TESTAR.md`](O-QUE-FALTA-TESTAR.md).
+>
+> A causa: a previsão devolvia "não sei" tanto para "dura mais de 730 dias" (verdade) quanto para
+> "dá conta até o fim do tratamento" (uma data conhecida). O Gabriel achou comparando com o aviso de
+> receita, que nunca falhava — porque a validade dela já é uma data pronta, e nada podia descartá-la
+> no caminho.
+
 **20.1 — O estoque avisa** 🔴. Monte os remédios 1 e 2 da tabela acima.
 
 > ✅ A frase abaixo da antecedência diz que o aviso aparece na tela inicial **e** como notificação,

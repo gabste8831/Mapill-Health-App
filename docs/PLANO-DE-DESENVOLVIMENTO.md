@@ -1899,6 +1899,29 @@ planilha.
 - Alvos de toque em lista foram para 40–44px, e os botões secundários trocaram contorno por fundo
   suave.
 
+#### A regra foi esquecida em 12/09, e custou quatro tentativas
+
+As linhas de permissão de `AjudaDeAlertas` precisavam ler como botão, e a solução tentada foi borda
+— quatro vezes, cada uma medida e cada uma pior que a anterior:
+
+| Tentativa | Contraste medido | Por que falhou |
+|---|---|---|
+| `surface` a 60% sobre o bloco | 1,11:1 | claro sobre claro não produz contorno |
+| Azul cheio, 1,5px | 4,56:1 | gritava em cinco linhas empilhadas |
+| Azul a 35% | — | disputava com o aviso da Home, que de fato navega |
+| Cinza `outlineVariant` | 1,38:1 | pior que o azul que saiu |
+
+A causa de todas é a mesma, e é a desta seção: `surface` e `background` **são a mesma cor** no tema
+claro (`#F1F4F8`), então a linha não tinha preenchimento que a separasse da página e a borda
+sustentava o contorno sozinha. O que resolveu foi o que a regra já dizia desde 30/08 — superfície
+elevada, com `surfaceContainerLowest` e `fronteiraDeSuperficie`, exatamente o que o `Card` de
+Ajustes usa. Foi o Gabriel quem apontou o caminho: *"pode fazer com que os botões sejam iguais à da
+tela de ajustes? O fundo branco e o box shadow funcionando, eu não gostei dessas bordas"*.
+
+A lição não é sobre borda: é que **uma decisão de linguagem visual registrada não se aplica sozinha**
+a uma tela nova. Quatro rodadas de medição chegaram por indução onde uma consulta a esta seção teria
+chegado direto.
+
 ---
 
 ### 6.5 Varredura de acessibilidade — 31/08
@@ -2076,14 +2099,31 @@ Rastreado por `node scripts/tema-pendente.mjs`, não por memória:
 | Início (motor pronto, nada migrado) | 99 | 607 |
 | Depois do kit de UI + Home | 64 | 432 |
 | Depois das telas de cadastro e listas | 32 | 93 |
-| Depois da varredura final | **3** | **4** |
+| Depois da varredura final | 3 | 4 |
+| 12/09, depois de `AjudaDeAlertas` e do visualizador | **5** | **9** |
 
-Os 3 arquivos finais são exceções corretas, não pendência disfarçada: `canais-notifee.ts` e
+⚠️ **A conta subiu depois da "varredura final", e vale registrar por quê.** Duas telas nasceram
+depois dela já em `StyleSheet.create` — `AjudaDeAlertas` (15 ocorrências) e `VisualizadorDeMidia`
+(5). A primeira foi migrada em 12/09, e o efeito não era estético: como `StyleSheet.create` lê a
+paleta **na importação**, ela pintava os tokens do tema claro sobre o fundo `#191F27` do tema
+escuro — na tela que trata do assunto mais difícil do app. O Gabriel pediu a correção junto de um
+ajuste visual, e foi o pedido dele que a revelou.
+
+A lição é de processo, não de código: um arquivo novo entra fora do sistema de temas sem que nada
+reclame, porque o `tsc` não tem como saber. `node scripts/tema-pendente.mjs` é o único aviso, e ele
+só fala quando alguém o roda — vale rodá-lo antes de cada build.
+
+Os 4 arquivos restantes são exceções corretas, não pendência disfarçada: `canais-notifee.ts` e
 `notifee-gateway.ts` definem a cor do LED de notificação do Android num código imperativo que roda
 uma vez na criação do canal, fora de qualquer render — não há hook de React ali para reagir a tema.
 `SplashOverlay.tsx` roda **antes** de o `ProvedorDeTema` conseguir carregar a preferência salva do
 disco, então precisa de uma cor fixa por definição — o próprio texto do componente já dizia isso
 antes desta rodada.
+
+`VisualizadorDeMidia` (5 ocorrências em dois arquivos) é a **única pendência real** da lista, e não
+uma exceção: é o visualizador de foto e PDF em tela cheia, e o fundo preto dele é intencional em
+qualquer tema, mas os 5 usos de `colors` não foram auditados um a um. Fica na fila, sem urgência —
+a tela é preta nos quatro temas.
 
 `npx tsc --noEmit` e `npx expo lint` limpos ao final. Testado no navegador (Playwright, sem
 console.error nem exceção não tratada) percorrendo onboarding completo até Home, Remédios,
@@ -2113,3 +2153,6 @@ aqui usa TalkBack ligado. Os quatro temas entram na fila de validação em apare
 | **03/09** | Sistema de temas: escuro, alto contraste e um modo sem depender de cor. A barreira era técnica antes de visual — 567 usos de cor em 99 arquivos dentro de `StyleSheet.create`, que roda uma vez na importação. O motor faz `PaletaDeTema` ser **derivado** do tema padrão, então é impossível um tema ficar pela metade |
 | **05/09** | **Revisão de frontend, tela a tela**, com o Gabriel navegando em aparelho. Nove commits. As cores de estado viraram três tokens por cor (a régua da WCAG muda conforme o papel), a exportação virou planilhas CSV, e duas regras de domínio novas nasceram com verificação em Node |
 | **05/09 (noite)** | **A validação em binário começou, e achou dois defeitos graves.** A sincronização não restaurava nada ao reinstalar, e o alarme não sobrevivia ao reboot. Os dois estão corrigidos — o segundo levou à migração para fora do Notifee, que foi arquivado em 07/04/2026 |
+| **06–10/09** | Teste em aparelho conduzido pelo Gabriel, bloco a bloco do [`ROTEIRO-DE-TESTE.md`](ROTEIRO-DE-TESTE.md). O alarme em tela cheia, o reboot, o adiamento e a confirmação passaram. Ficaram dois bugs conhecidos e sem correção (acesso ao app pela tela de bloqueio, e o apagamento de dados que não cancela agendamento) e a suspeita do tratamento contínuo de 30 dias, que ainda espera o teste A.4 |
+| **11/09** | **A notificação com o celular em uso.** Com a tela desbloqueada e a pessoa em outro app, a notificação piscava e desaparecia — e o alarme não tocava. O toque também levava à tela azul em vez da confirmação. Três correções, e o `DISMISSED` (reviver o alarme ao arrastar a notificação) saiu de escopo: o evento não dispara no swipe do Android. O teste "nada toca com o app fora dos recentes" era o **Autostart do MIUI desligado**, não defeito do app — no Xiaomi, tirar dos recentes é force stop |
+| **12/09** | **A UX de permissões inteira, e três defeitos que ela revelou.** O painel da tela inicial listava só as autorizações que o app **sabe** verificar, e isso definia o escopo errado do que falta fazer — o mesmo engano apareceu num placar "2 de 3" e numa lista, e os três saíram. Nasceu o `AvisoDePermissoes`, presente nas cinco telas que configuram algo dependente de permissão, vermelho só quando a pendência é comprovada. A tela de alertas foi refeita: permissões primeiro, explicação depois, separando o que o app confere do que só a pessoa pode conferir. No caminho, dois bugs de verdade: `AjudaDeAlertas` não respondia a tema nenhum (ver 6.7), e **o aviso de estoque desaparecia** sempre que o estoque cobria o tratamento inteiro — encontrado pelo Gabriel comparando com o aviso de receita, que nunca falhava porque a validade dela já é uma data pronta |

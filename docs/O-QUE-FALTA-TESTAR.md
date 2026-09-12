@@ -11,8 +11,12 @@
 |---|---|---|
 | Casos de borda do alarme (bloco 19) | 7 passos | Não |
 | Bateria (18.3) | 1 passo | Não |
-| As correções de 11–12/09 | 8 itens | **Sim** |
+| As correções de 11–12/09 | 13 itens | **Sim** |
 | Bugs conhecidos, ainda sem correção | 2 | — |
+
+> **Build de 12/09 (preview, com Diagnóstico).** Ela fecha a Parte B inteira. O agendamento do aviso
+> de estoque já foi conferido no Diagnóstico pelo Gabriel em 12/09 — o que falta é a notificação
+> **chegar** no aparelho, que é outra coisa e nunca foi vista.
 
 ---
 
@@ -135,15 +139,20 @@ os defeitos.
 | # | O que conferir | Commit |
 |---|---|---|
 | B.1 | Marcar "me avisar" **sem escolher prazo**, salvar, reabrir em editar → estoque → alterar: **a caixa continua marcada** | `8e85dfb` |
-| B.2 | Marcar o aviso de estoque e abrir o Diagnóstico: ele aparece entre os agendados **e continua lá** depois de sair e voltar ao app | `4cc90e6` |
+| B.2 | ✅ *Conferido em 12/09 no Diagnóstico* — o agendamento aparece e continua lá. Falta a **notificação chegar** (ver B.9) | `4cc90e6` `41640b4` |
 | B.3 | Marcar o aviso **sem prazo**: o cartão aparece na tela inicial na semana em que o estoque acaba | `4cc90e6` |
 | B.4 | Alarme → editar para notificação → salvar → voltar para alarme: **a tela azul sobe nas duas vezes** | `a3aa220` |
 | B.5 | Cadastrar só aviso de estoque ou compromisso, **sem** alarme de dose, e negar a permissão de notificação: o painel da tela inicial aparece | `358e55c` |
 | B.6 | `Ajustes → como funcionam os alertas`: há parágrafo próprio sobre o início automático, e o painel de permissões traz a nota do fabricante | `358e55c` |
 | B.7 | **2 ou 3 remédios** no mesmo horário: a tela azul lista cada um com miniatura, nome, dose, orientação de tomada e local — tudo legível sem rolar | `930082a` `73df26a` |
 | B.8 | **4 ou mais** no mesmo horário: a tela azul mostra só a contagem e o botão de abrir o app | `930082a` |
+| B.9 | 🔴 **A notificação de estoque chega.** Cadastre um tratamento **com data de fim** (ex.: 7 dias) e estoque que dê conta dele, com antecedência de 3 dias. O aviso tem de chegar às 00:01 do dia previsto — e repita **sem** antecedência, onde só o aviso do dia em que acaba existe | `41640b4` |
+| B.10 | Na tela de **Alertas e permissões**: as linhas têm fundo branco com sombra (não borda), sem itálico, e a seta cinza. Toque numa: ela abre a tela do sistema, e ao voltar o estado já está atualizado | `1f6fb56` `8554f0e` |
+| B.11 | O bloco **"Confira as permissões"** aparece nas cinco telas que configuram algo dependente de autorização (lembrete de dose, estoque, compromisso, receita, medicamento) e fica **vermelho** enquanto o painel "Seus alarmes não vão funcionar" estiver na tela inicial | `78771dc` |
+| B.12 | Na tela inicial: **não há** lista de permissões nem placar "2 de 3", e a seção "Autorizações do aparelho" no rodapé leva à tela de alertas | `26c557f` |
+| B.13 | 🔴 **A tela de Alertas e permissões no tema escuro** e no alto contraste. Até 12/09 ela ignorava o tema por completo — texto claro sobre fundo claro. Vale trocar o tema em Ajustes e voltar nela | `1f6fb56` |
 
-E o **bloco 20 do estoque**, que depende de B.1 e B.2: cadastrar na véspera e conferir se a
+E o **bloco 20 do estoque**, que depende de B.1 e B.9: cadastrar na véspera e conferir se a
 notificação chega às 00:01.
 
 ---
