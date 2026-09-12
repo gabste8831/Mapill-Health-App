@@ -16,6 +16,15 @@ import { colors } from "@/shared/theme";
  * reaproveitar um id criado pelo `expo-notifications` deixaria o canal congelado com o que a
  * biblioteca anterior gravou. Um id novo é a única forma de a mudança valer sem desinstalar.
  *
+ * **v5 → v6 (12/09).** O canal do alarme passou a sair no **volume de despertador**, e o
+ * `AudioAttributes` é gravado no canal na criação — congelado junto com o resto. Sem subir a versão,
+ * a correção valeria só para quem instalasse o app do zero, e quem já testava continuaria com o
+ * alarme no volume de mídia sem nada explicando por quê.
+ *
+ * O canal de lembrete sobe junto, mesmo sem mudança própria: os dois versionam em par desde o v5, e
+ * um par desalinhado é o tipo de detalhe que faz alguém ler `v5` no código e `v6` no aparelho e
+ * perder uma hora. Criar canal é barato; confusão de versão não é.
+ *
  * ### A armadilha da palavra "default", registrada para não voltar
  *
  * No `expo-notifications` a palavra `"default"` significava coisas **opostas** conforme a direção:
@@ -25,8 +34,8 @@ import { colors } from "@/shared/theme";
  * Aqui não há ambiguidade: `sound` é sempre nome de recurso em `res/raw`, sem extensão. O alarme
  * usa o arquivo próprio; o lembrete omite o campo para receber o som padrão do sistema.
  */
-export const CANAL_ALARME = "dose-alarm-v5";
-export const CANAL_LEMBRETE = "dose-reminder-v5";
+export const CANAL_ALARME = "dose-alarm-v6";
+export const CANAL_LEMBRETE = "dose-reminder-v6";
 
 /**
  * ⚠️ **O plugin `expo-notifications` continua no `app.json`, e não pode ser removido.**
@@ -143,7 +152,9 @@ export async function registrarCanais(): Promise<void> {
      * notificação aparecia na tela sem emitir som nenhum, com o volume alto.
      *
      * É o que separa esta opção do alarme: aqui o som é o do sistema, sai pelo volume de avisos e
-     * respeita o silencioso; lá é um arquivo próprio, no volume de alarme.
+     * respeita o silencioso; lá é um arquivo próprio, no volume de **despertador** — quem de fato
+     * diz isso ao Android é `plugins/volume-de-despertador.js`, porque o `AudioAttributes` do canal
+     * não é configurável pelo JavaScript desta biblioteca.
      */
     sound: "default",
     vibration: true,

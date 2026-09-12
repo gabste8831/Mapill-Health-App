@@ -78,7 +78,8 @@
       "expo-sharing",
       "expo-audio",
       "react-native-notify-kit",
-      "./plugins/alarme-em-tela-cheia"
+      "./plugins/alarme-em-tela-cheia",
+      "./plugins/volume-de-despertador"
     ],
     "experiments": {
       "typedRoutes": true,
