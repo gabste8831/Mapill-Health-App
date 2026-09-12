@@ -806,6 +806,9 @@ export function InicioScreen() {
               // A frase acima já diz a consequência: repeti-la aqui seria a mesma informação em
               // duas linhas seguidas.
               semDescricao
+              // Vermelho exatamente quando o painel crítico está na tela: `cobrarPermissoes` é a
+              // mesma condição, então os dois blocos nunca discordam sobre haver pendência.
+              urgente={cobrarPermissoes}
               onAbrir={() => router.push("/cadastro/ajuda-de-alertas")}
             />
           </View>

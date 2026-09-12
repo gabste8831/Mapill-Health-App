@@ -50,6 +50,8 @@ type ConfiguracaoDeEstoqueProps = EstoqueForm & {
    * e quem monta a folha sem passar isto simplesmente não o mostra.
    */
   onAbrirAjudaDeAlertas?: () => void;
+  /** `true` quando o app comprova pendência — a folha não consulta o hook, quem monta já sabe. */
+  avisoDePermissoesUrgente?: boolean;
 };
 
 /**
@@ -63,6 +65,7 @@ export function ConfiguracaoDeEstoque({
   onClose,
   onDisable,
   onAbrirAjudaDeAlertas,
+  avisoDePermissoesUrgente = false,
   aceitaFracao,
   aviso,
   avisoEhConflito,
@@ -154,6 +157,7 @@ export function ConfiguracaoDeEstoque({
         {alertEnabled && onAbrirAjudaDeAlertas !== undefined ? (
           <AvisoDePermissoes
             oQueNaoFunciona="o aviso de estoque"
+            urgente={avisoDePermissoesUrgente}
             onAbrir={onAbrirAjudaDeAlertas}
           />
         ) : null}

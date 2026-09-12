@@ -137,7 +137,13 @@ export function ConfiguracaoDeLembrete({
          * autorizações não mudam nada, e cobrar ali é o alerta que ensina a ignorar alertas.
          */}
         {dependeDoAparelho ? (
-          <AvisoDePermissoes oQueNaoFunciona="este lembrete" onAbrir={onAbrirAjuda} />
+          <AvisoDePermissoes
+            oQueNaoFunciona="este lembrete"
+            // Vermelho quando o app comprova pendência — o mesmo sinal que faz o painel acima
+            // aparecer. Sem isso, os dois blocos na mesma folha diriam coisas diferentes.
+            urgente={permissoes.temPendenciaVerificavel}
+            onAbrir={onAbrirAjuda}
+          />
         ) : null}
 
         {/* `emFolha` porque o `outline` usa a mesma superfície do `BottomSheet`: sem ele o botão

@@ -7,7 +7,12 @@ import {
   type DiagnosticoDeAlarme,
 } from "@/notifications/permissoes-de-alarme";
 
-const VAZIO: DiagnosticoDeAlarme = { itens: [], vaiTocar: true, temPendencia: false };
+const VAZIO: DiagnosticoDeAlarme = {
+  itens: [],
+  vaiTocar: true,
+  temPendencia: false,
+  temPendenciaVerificavel: false,
+};
 
 /**
  * O estado das permissões do alarme, sempre atualizado.

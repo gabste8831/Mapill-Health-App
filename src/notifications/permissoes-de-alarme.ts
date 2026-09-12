@@ -185,8 +185,19 @@ export type DiagnosticoDeAlarme = {
   itens: ItemDePermissao[];
   /** O alarme dispara? Falso quando falta alguma essencial. */
   vaiTocar: boolean;
-  /** Falta algo, essencial ou não. */
+  /** Falta algo, essencial ou não — incluindo as que o app não consegue verificar. */
   temPendencia: boolean;
+  /**
+   * Falta alguma das que o app **comprova**, e é isso que autoriza a interface a alarmar.
+   *
+   * `temPendencia` inclui as três não-verificáveis, que nunca contam como atendidas enquanto a
+   * pessoa não visita a tela do sistema — usá-lo para pintar algo de vermelho deixaria o alerta
+   * permanente, inclusive para quem autorizou tudo.
+   *
+   * Este campo existe porque três telas precisavam da mesma conta (a Home, a folha de lembrete e o
+   * aviso compacto), e a mesma regra calculada em três lugares é como elas passam a discordar.
+   */
+  temPendenciaVerificavel: boolean;
 };
 
 /**
@@ -198,7 +209,7 @@ export type DiagnosticoDeAlarme = {
  */
 export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
   if (Platform.OS !== "android") {
-    return { itens: [], vaiTocar: true, temPendencia: false };
+    return { itens: [], vaiTocar: true, temPendencia: false, temPendenciaVerificavel: false };
   }
 
   /**
@@ -417,6 +428,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
     itens,
     vaiTocar: essenciaisOk,
     temPendencia: itens.some((item) => !item.concedida),
+    temPendenciaVerificavel: itens.some((item) => item.verificavel && !item.concedida),
   };
 }
 
@@ -429,7 +441,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
  */
 export async function pedirPermissoesDeAlarme(): Promise<DiagnosticoDeAlarme> {
   if (Platform.OS !== "android") {
-    return { itens: [], vaiTocar: true, temPendencia: false };
+    return { itens: [], vaiTocar: true, temPendencia: false, temPendenciaVerificavel: false };
   }
 
   await notifee.requestPermission();

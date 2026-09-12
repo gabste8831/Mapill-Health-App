@@ -8,6 +8,7 @@ import { dataEHoraPorExtenso, dataPorExtenso } from "@/shared/datas-por-extenso"
 import { parseDateInput, todayIsoDate } from "@/shared/date-input";
 import { formatIntegerInput } from "@/shared/number-input";
 import { rotuloDeAntecedencia } from "@/shared/rotulos-de-compromisso";
+import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
   AvisoDePermissoes,
@@ -91,6 +92,10 @@ export function FormularioDeCompromissoScreen({
   onBack,
 }: FormularioDeCompromissoScreenProps) {
   const styles = useEstilos(criarEstilos);
+
+  // Só para saber se o aviso de permissões entra em vermelho. O hook relê a cada volta ao primeiro
+  // plano, então voltar de ter autorizado já atualiza a cor.
+  const permissoes = usePermissoesDeAlarme();
 
   const { scrollViewRef, scrollToFocusedInput, onScroll } = useScrollToFocusedInput();
 
@@ -528,6 +533,7 @@ export function FormularioDeCompromissoScreen({
                   depende delas. */}
               <AvisoDePermissoes
                 oQueNaoFunciona="o lembrete do compromisso"
+                urgente={permissoes.temPendenciaVerificavel}
                 onAbrir={onAbrirAjudaDeAlertas}
               />
             </>

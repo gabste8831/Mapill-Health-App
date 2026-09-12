@@ -20,6 +20,18 @@ type AvisoDePermissoesProps = {
    * este bloco é o único lugar que explica por que o lembrete recém-configurado pode não chegar.
    */
   semDescricao?: boolean;
+  /**
+   * `true` quando o app **comprova** que falta alguma autorização, e aí o bloco fica vermelho.
+   *
+   * É o mesmo estado que faz o painel "Seus alarmes não vão funcionar" aparecer na Home: alguma das
+   * três verificáveis está negada. Decisão do Gabriel em 12/09 — enquanto houver pendência provada,
+   * o aviso precisa ter a urgência de um erro, e não a neutralidade de uma informação.
+   *
+   * Volta ao azul quando as verificáveis estão atendidas. Aí não há nada provado a cobrar: as três
+   * restantes o app não consegue ler, e pintar de vermelho o que ele não sabe seria afirmar um
+   * estado inexistente — o mesmo erro do placar e da lista que saíram da Home no mesmo dia.
+   */
+  urgente?: boolean;
   onAbrir: () => void;
 };
 
@@ -54,6 +66,7 @@ type AvisoDePermissoesProps = {
 export function AvisoDePermissoes({
   oQueNaoFunciona,
   semDescricao = false,
+  urgente = false,
   onAbrir,
 }: AvisoDePermissoesProps) {
   const styles = useEstilos(criarEstilos);
@@ -61,11 +74,14 @@ export function AvisoDePermissoes({
 
   return (
     <Pressable
-      style={estadoDePressao(styles.aviso, { superficie: true })}
+      style={estadoDePressao([styles.aviso, urgente && styles.avisoUrgente], {
+        superficie: true,
+      })}
       onPress={onAbrir}
       accessibilityRole="button"
-      accessibilityLabel={`Confira as permissões do aparelho. Sem elas ${oQueNaoFunciona} não funciona. Toque para ver quais são.`}
-    >
+      accessibilityLabel={`${
+        urgente ? "Falta autorizar permissões. " : ""
+      }Confira as permissões do aparelho. Sem elas ${oQueNaoFunciona} não funciona. Toque para ver quais são.`}>
       {/**
        * O ícone dentro de um selo redondo, como o da tela de Conta e dados.
        *
@@ -73,12 +89,21 @@ export function AvisoDePermissoes({
        * azul a 12%, e o `shield-checkmark` em `corDeDestaque`. Solto, o ícone flutuava ao lado do
        * texto; no selo ele ganha peso de marca visual e o bloco passa a ler como uma peça, não como
        * uma linha de lista com um símbolo à esquerda.
+       *
+       * No estado urgente o escudo vira triângulo de alerta: cor sozinha não distingue nada para
+       * quem não a percebe, e o ícone é o segundo sinal que a WCAG 1.4.1 pede.
        */}
-      <View style={styles.selo}>
-        <Ionicons name="shield-checkmark" size={22} color={cores.corDeDestaque} />
+      <View style={[styles.selo, urgente && styles.seloUrgente]}>
+        <Ionicons
+          name={urgente ? "warning" : "shield-checkmark"}
+          size={22}
+          color={urgente ? cores.error : cores.corDeDestaque}
+        />
       </View>
       <View style={styles.texto}>
-        <Text style={styles.titulo}>Confira as permissões</Text>
+        <Text style={[styles.titulo, urgente && styles.tituloUrgente]}>
+          {urgente ? "Falta autorizar permissões" : "Confira as permissões"}
+        </Text>
         {/**
          * A consequência só quando não há texto acima dizendo a mesma coisa.
          *
@@ -88,13 +113,17 @@ export function AvisoDePermissoes({
          * lembrete que a pessoa acabou de configurar pode não chegar.
          */}
         {semDescricao ? null : (
-          <Text style={styles.descricao}>Sem elas {oQueNaoFunciona} não funciona.</Text>
+          <Text style={[styles.descricao, urgente && styles.descricaoUrgente]}>
+            Sem elas {oQueNaoFunciona} não funciona.
+          </Text>
         )}
       </View>
+      {/* A seta acompanha o fundo: `onPrimarySurface` é azul escuro, e sobre a superfície vermelha
+          do estado urgente ela ficaria fora da paleta do bloco. */}
       <Ionicons
         name="chevron-forward"
         size={18}
-        color={cores.onPrimarySurface}
+        color={urgente ? cores.onErrorSurface : cores.onPrimarySurface}
       />
     </Pressable>
   );

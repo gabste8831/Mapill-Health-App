@@ -74,6 +74,7 @@ import {
   UNIT_LABELS,
 } from "@/shared/rotulos-de-medicamento";
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
+import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
 import { parseTimeInput } from "@/shared/time-input";
 import {
   AvisoDePermissoes,
@@ -373,6 +374,9 @@ export function FormularioDeMedicamentoScreen({
 }: FormularioDeMedicamentoScreenProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
+
+  // Só para a cor do aviso de permissões: vermelho enquanto o app comprova que falta autorização.
+  const permissoes = usePermissoesDeAlarme();
 
   const router = useRouter();
   const { scrollViewRef, scrollToFocusedInput, onScroll } =
@@ -2053,6 +2057,7 @@ export function FormularioDeMedicamentoScreen({
                       autorizações do aparelho. */}
                   <AvisoDePermissoes
                     oQueNaoFunciona="o aviso da receita"
+                    urgente={permissoes.temPendenciaVerificavel}
                     onAbrir={() => router.push("/cadastro/ajuda-de-alertas")}
                   />
                 </>
@@ -2181,6 +2186,7 @@ export function FormularioDeMedicamentoScreen({
         visible={isStockSheetOpen}
         onClose={() => setStockSheetOpen(false)}
         onDisable={handleStockDisable}
+        avisoDePermissoesUrgente={permissoes.temPendenciaVerificavel}
         onAbrirAjudaDeAlertas={() => {
           setStockSheetOpen(false);
           router.push("/cadastro/ajuda-de-alertas");

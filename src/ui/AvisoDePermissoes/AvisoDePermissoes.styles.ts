@@ -47,6 +47,34 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
       : { borderWidth: 1, borderColor: withOpacity(cores.corDeDestaque, 0.35) }),
   },
   /**
+   * O estado urgente: **vermelho enquanto o app comprova que falta autorização.**
+   *
+   * Decisão do Gabriel em 12/09, e ela é coerente com tudo o que a gente corrigiu hoje: a cor só
+   * afirma o que o app sabe. Enquanto o painel "Seus alarmes não vão funcionar" estiver na Home,
+   * existe pendência **provada** — e aí o vermelho é factual, não dramatização.
+   *
+   * Quando as verificáveis são atendidas, volta ao azul. As três restantes o app não consegue ler, e
+   * manter o vermelho por elas seria pintar de erro um estado desconhecido.
+   *
+   * A borda é `error` cheio (6,03:1 sobre branco, medido) porque aqui ela carrega significado, e não
+   * só separação — é o mesmo critério que faz o painel crítico usar a cor cheia.
+   */
+  avisoUrgente: {
+    backgroundColor: cores.errorSurface,
+    borderWidth: 1.5,
+    borderColor: cores.error,
+  },
+  seloUrgente: {
+    backgroundColor: withOpacity(cores.error, 0.12),
+  },
+  tituloUrgente: {
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    color: cores.onErrorSurface,
+  },
+  descricaoUrgente: {
+    color: cores.onErrorSurface,
+  },
+  /**
    * O selo redondo do ícone, igual ao `introIcone` da tela de Conta e dados.
    *
    * 40dp com o azul a 12% sobre a superfície do bloco. `corDeDestaque` e não `primary` pelo mesmo
