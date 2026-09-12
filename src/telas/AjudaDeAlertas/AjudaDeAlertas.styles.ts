@@ -1,7 +1,6 @@
-import { StyleSheet } from "react-native";
-
 import {
-  colors,
+  estilosDoTema,
+  fronteiraDeSuperficie,
   gapEntreSecoes,
   radius,
   screenPadding,
@@ -9,10 +8,19 @@ import {
   typography,
 } from "@/shared/theme";
 
-export const styles = StyleSheet.create({
+/**
+ * Reativa ao tema desde 12/09 — antes era `StyleSheet.create` com a paleta lida na importação.
+ *
+ * Este arquivo era o maior devedor do app (15 ocorrências no `scripts/tema-pendente.mjs`), e a
+ * consequência não era estética: `StyleSheet.create` roda uma vez, quando o módulo é importado, e
+ * as cores lidas ali ficam congeladas. Quem trocasse para o tema escuro ou para o alto contraste
+ * continuava vendo esta tela no tema claro — texto quase branco sobre fundo quase branco, na tela
+ * que trata do assunto mais difícil do app. O Gabriel apontou em 12/09.
+ */
+export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: cores.background,
   },
   scrollContent: {
     paddingHorizontal: screenPadding,
@@ -22,18 +30,18 @@ export const styles = StyleSheet.create({
   },
   abertura: {
     ...typography.headlineSm,
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   secao: {
     gap: spacing.sm,
   },
   secaoTitulo: {
     ...typography.label,
-    color: colors.primary,
+    color: cores.primary,
   },
   texto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   /**
    * A lista do "o que o Mapill não faz".
@@ -48,11 +56,11 @@ export const styles = StyleSheet.create({
   },
   limiteMarcador: {
     ...typography.bodyMd,
-    color: colors.primary,
+    color: cores.primary,
   },
   limiteTexto: {
     ...typography.bodyMd,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     flex: 1,
   },
   /**
@@ -63,49 +71,46 @@ export const styles = StyleSheet.create({
    * tela parecer pesada apesar de cada peça estar correta (apontado em 12/09).
    *
    * Sem o bloco, o que separa a seção é o mesmo que separa as de texto: o rótulo e o espaço. As
-   * linhas passam a ser os únicos elementos com contorno, que é o que as faz ler como botões.
+   * linhas passam a ser as únicas superfícies elevadas, que é o que as faz ler como botões.
    */
   condicoes: {
     gap: spacing.xs,
   },
   condicoesTitulo: {
     ...typography.label,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
   },
   condicoesParagrafo: {
     marginTop: spacing.sm,
   },
   /**
-   * A linha de uma permissão — desenhada como **botão**, e não como item de lista.
+   * A linha de uma permissão — desenhada como **superfície elevada**, igual às linhas de Ajustes.
    *
-   * ## Por que borda, e não fundo
+   * ## Por que sombra, e não borda
    *
-   * Ela tinha `surface` a 60% sobre o bloco, e isso dava **1,11:1** de contraste (medido). Branco
-   * cravado daria 1,18. Nenhum dos dois se distingue do bloco: as duas superfícies são claras, e
-   * empilhar clarinho sobre clarinho não produz contorno nenhum. Era por isso que a linha não lia
-   * como algo clicável, apontado pelo Gabriel em 12/09.
+   * Esta linha passou por quatro tentativas em 12/09, e as três primeiras erraram por insistir em
+   * borda: `surface` a 60% sobre o bloco dava **1,11:1** (medido); depois azul cheio, que gritava
+   * em cinco linhas empilhadas; depois cinza `outlineVariant`, que dá **1,38:1** porque `surface` e
+   * `background` são a mesma cor no tema claro — a linha não tinha preenchimento que a separasse da
+   * página, e a borda sustentava o contorno sozinha.
    *
-   * A borda resolve porque ela não depende de diferença entre fundos.
+   * A regra do app resolve isso e é anterior a tudo: **sombra e nunca borda** (21/08). Uma borda de
+   * 1px faz o bloco parecer caixa desenhada de formulário HTML; o que separa uma superfície do fundo
+   * é ela estar *acima* dele. `surfaceContainerLowest` dá o branco que `surface` não dava, e a
+   * sombra faz a elevação — é exatamente o `Card` de Ajustes, que foi o pedido do Gabriel.
    *
-   * ## Por que `outline`, e não `outlineVariant`
+   * ## E no alto contraste
    *
-   * A borda é **cinza** por pedido do Gabriel em 12/09: azul disputava com o aviso da Home, e
-   * aquele é o que de fato leva a outro lugar. Mas o primeiro cinza que entrou aqui foi
-   * `outlineVariant`, e medido ele dá **1,38:1** contra a linha — pior que a borda azul que saiu, e
-   * longe dos 3:1 da WCAG 1.4.11.
-   *
-   * O motivo é que `surface` e `background` são **a mesma cor** neste tema (`#F1F4F8`): a linha não
-   * tem preenchimento que a separe da página, então a borda carrega o contorno sozinha. É aqui que
-   * esta linha difere do aviso da Home, que ela imita — lá existe `primarySurface` por baixo, e a
-   * borda discreta só acompanha um bloco que já se distingue.
-   *
-   * `outline` dá **4,38:1** (medido) e continua inequivocamente cinza: atende o pedido e mantém o
-   * contorno visível para quem mais precisa dele.
+   * `fronteiraDeSuperficie` troca a sombra por contorno quando o tema pede. Isso não é detalhe:
+   * a regra da sombra pressupõe enxergar 8% de opacidade, e quem escolheu alto contraste não
+   * enxerga — ali a sombra não é discrição, é a fronteira apagada. O helper é o mesmo que o `Card`
+   * usa, então as duas telas continuam iguais nos três temas em vez de divergirem na próxima
+   * mudança.
    *
    * ## As medidas
    *
    * 56dp de altura mínima, acima dos 44 do projeto: esta é a tela mais difícil do app para o
-   * público mais velho, e o alvo maior é a acomodação mais baratas que existe. `gap` maior pelo
+   * público mais velho, e o alvo maior é a acomodação mais barata que existe. `gap` maior pelo
    * mesmo motivo — dedo grosso em alvo apertado erra a linha vizinha.
    */
   linhaDePermissao: {
@@ -116,14 +121,9 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     marginTop: spacing.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    /**
-     * Cinza neutro, na medida que se vê: ver o bloco acima para o porquê de `outline` e não
-     * `outlineVariant`. Quem diz que a linha abre algo é a seta à direita; a borda só delimita.
-     */
-    borderWidth: 1,
-    borderColor: colors.outline,
+    borderRadius: radius.lg,
+    backgroundColor: cores.surfaceContainerLowest,
+    ...fronteiraDeSuperficie(cores, ajustes),
   },
   /**
    * A linha autorizada **não tem estilo próprio**, e é por isso que não existe uma chave para ela.
@@ -141,19 +141,19 @@ export const styles = StyleSheet.create({
   /**
    * O nome da permissão: corpo de leitura com peso de rótulo.
    *
-   * Cheguei a subir para 18px, e com a borda discreta ficou desproporcional — texto grande em caixa
-   * leve lê como título de seção, não como botão. `bodyMd` em semibold dá a mesma hierarquia dentro
-   * da linha sem competir com o rótulo da seção acima.
+   * Cheguei a subir para 18px, e com a superfície discreta ficou desproporcional — texto grande em
+   * caixa leve lê como título de seção, não como botão. `bodyMd` em semibold dá a mesma hierarquia
+   * dentro da linha sem competir com o rótulo da seção acima.
    */
   linhaTitulo: {
     ...typography.bodyMd,
     fontFamily: "PlusJakartaSans_600SemiBold",
-    color: colors.onSurface,
+    color: cores.onSurface,
   },
   /** O passo dentro da tela do sistema — onde procurar depois que ela abrir. */
   linhaComoFazer: {
     ...typography.bodySm,
-    color: colors.onSurfaceVariant,
+    color: cores.onSurfaceVariant,
     fontStyle: "italic",
   },
   /**
@@ -166,12 +166,12 @@ export const styles = StyleSheet.create({
   linhaOk: {
     ...typography.bodySm,
     fontFamily: "PlusJakartaSans_600SemiBold",
-    color: colors.success,
+    color: cores.success,
   },
   linhaPendente: {
     ...typography.bodySm,
     fontFamily: "PlusJakartaSans_600SemiBold",
-    color: colors.error,
+    color: cores.error,
   },
   /**
    * O placar de progresso saiu em 12/09, junto dos seus estilos.
@@ -189,7 +189,7 @@ export const styles = StyleSheet.create({
   },
   linkParaTermos: {
     ...typography.bodyMd,
-    color: colors.primary,
+    color: cores.primary,
     textDecorationLine: "underline",
   },
-});
+}));

@@ -3,9 +3,9 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { usePermissoesDeAlarme } from "@/hooks/use-permissoes-de-alarme";
-import { estadoDePressao, useCores } from "@/shared/theme";
+import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { Header } from "@/ui";
-import { styles } from "./AjudaDeAlertas.styles";
+import { criarEstilos } from "./AjudaDeAlertas.styles";
 
 type AjudaDeAlertasScreenProps = {
   onBack: () => void;
@@ -37,6 +37,7 @@ export function AjudaDeAlertasScreen({
   onAbrirTermos,
 }: AjudaDeAlertasScreenProps) {
   const cores = useCores();
+  const styles = useEstilos(criarEstilos);
   /**
    * O hook relê as permissões **a cada volta ao primeiro plano**, e é isso que faz esta tela
    * funcionar como página de conferência: a pessoa toca numa linha, vai à tela do sistema, concede,
