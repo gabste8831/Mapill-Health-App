@@ -4,6 +4,10 @@ import { BackHandler } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useDatabaseReady } from "@/hooks/use-database-ready";
+import {
+  activityDeAlarmeNascendo,
+  activityDeAlarmeParouDeNascer,
+} from "@/notifications/alarme-em-cena";
 import { ehAlarmeDeTelaCheia } from "@/notifications/notifee-gateway";
 import { CenteredLoader } from "@/ui";
 import { AlarmeScreen } from "./AlarmeScreen";
@@ -32,6 +36,31 @@ export function AlarmeRaiz() {
    * remontar a Activity —, cai para o horário atual, que é a melhor aproximação disponível e mantém
    * a tela útil em vez de vazia.
    */
+  /**
+   * **Anuncia a Activity antes de saber de qual horário ela é** — e essa ordem é a correção.
+   *
+   * O efeito abaixo é assíncrono: abre o banco, consulta `getInitialNotification` e às vezes varre a
+   * bandeja. Só no fim `AlarmeScreen` monta e se registra em `alarme-em-cena`. Durante toda essa
+   * espera, `jaEstaEmCena` respondia `false` — e o listener de avisos concluía que não havia tela
+   * nenhuma para o horário.
+   *
+   * Foi o defeito que o Gabriel descreveu em 12/09, com um detalhe que mudou o diagnóstico: o que ele
+   * via **não** era a ausência da tela azul, era a tela de "Hora do remédio" no lugar dela. Isso
+   * aponta para o caminho do `PRESS` em `escutar-avisos`, que fecha a tela cheia e abre a de horário
+   * — e que só age porque a guarda de `jaEstaEmCena` respondia `false` cedo demais.
+   *
+   * O padrão dos recentes é a assinatura da corrida: app nos recentes, o processo já está de pé e o
+   * `PRESS` (que a MIUI entrega sozinha na tela de bloqueio) chega antes da montagem; app fora dos
+   * recentes, o processo sobe inteiro primeiro, a Activity ganha, e a tela azul fica.
+   *
+   * Este efeito roda **antes** do de baixo — a ordem de declaração é a ordem de execução no React —
+   * e sem `await` nenhum, então não há janela entre o nascimento da Activity e o anúncio dela.
+   */
+  useEffect(() => {
+    activityDeAlarmeNascendo();
+    return () => activityDeAlarmeParouDeNascer();
+  }, []);
+
   useEffect(() => {
     let ativo = true;
 
