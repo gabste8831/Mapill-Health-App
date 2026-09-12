@@ -32,9 +32,16 @@ export default function AjustesRoute() {
       onEditProfile={() => router.push("/ficha")}
       onOpenAccount={() => router.push("/conta")}
       onOpenTheme={() => router.push("/tema")}
-      // Só em desenvolvimento: `__DEV__` vira `false` no bundle de produção, e a linha some junto
+      // Fora de produção: `__DEV__` cobre o dev client, e a variável cobre a build `preview` — que
+      // é onde se testa alarme com o app fechado, e onde o diagnóstico mais importa (ver
+      // `AjustesScreen`). Os dois entram no bundle como literais, então a linha some do binário de
+      // produção em vez de ficar escondida.
       // com o caminho para a tela.
-      onOpenDiagnostico={__DEV__ ? () => router.push("/diagnostico") : undefined}
+      onOpenDiagnostico={
+        __DEV__ || process.env.EXPO_PUBLIC_DIAGNOSTICO === "1"
+          ? () => router.push("/diagnostico")
+          : undefined
+      }
     />
   );
 }

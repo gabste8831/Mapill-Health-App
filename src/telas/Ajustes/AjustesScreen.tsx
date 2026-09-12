@@ -174,13 +174,19 @@ export function AjustesScreen({
 
         {/* A ferramenta de teste dos avisos.
 
-            Só em desenvolvimento: ela mostra ids internos e canais do Android, e existe para
-            responder "por que o alarme não tocou?" sem cabo e sem Metro. Numa build de produção
-            seria uma porta para o avesso do app.
+            Ela mostra ids internos e canais do Android, e existe para responder "por que o alarme
+            não tocou?" sem cabo e sem Metro. Numa build de produção seria uma porta para o avesso
+            do app, então fica fora dela.
 
-            `__DEV__` é substituído por `false` no bundle de produção, então a tela inteira sai do
-            binário — não fica escondida atrás de uma condição em tempo de execução. */}
-        {__DEV__ && onOpenDiagnostico ? (
+            **Vale também na `preview`**, e é essa a diferença: antes a condição era só `__DEV__`, e
+            a tela desaparecia justamente na build que serve para testar alarme com o app fechado —
+            onde o Metro não existe e o diagnóstico é a única forma de saber se um aviso foi
+            agendado. Foi o que faltou na noite de 11/09, ao investigar o alarme que não tocava.
+
+            As duas condições são resolvidas em tempo de compilação (`__DEV__` e a variável de
+            ambiente entram no bundle como literais), então na produção a tela sai do binário — não
+            fica escondida atrás de um `if` que alguém possa contornar. */}
+        {(__DEV__ || process.env.EXPO_PUBLIC_DIAGNOSTICO === "1") && onOpenDiagnostico ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Desenvolvimento</Text>
             <Card style={styles.cartaoDeLinhas}>
