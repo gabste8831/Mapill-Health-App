@@ -7,7 +7,6 @@ import {
   screenPadding,
   spacing,
   typography,
-  withOpacity,
 } from "@/shared/theme";
 
 export const styles = StyleSheet.create({
@@ -86,9 +85,22 @@ export const styles = StyleSheet.create({
    * empilhar clarinho sobre clarinho não produz contorno nenhum. Era por isso que a linha não lia
    * como algo clicável, apontado pelo Gabriel em 12/09.
    *
-   * A borda azul resolve porque ela não depende de diferença entre fundos: `primary` contra branco
-   * dá **4,56:1**, acima dos 3:1 que a WCAG 1.4.11 pede para componente de interface. É o mesmo
-   * azul dos outros botões do app, então ela também diz *que tipo* de coisa é.
+   * A borda resolve porque ela não depende de diferença entre fundos.
+   *
+   * ## Por que `outline`, e não `outlineVariant`
+   *
+   * A borda é **cinza** por pedido do Gabriel em 12/09: azul disputava com o aviso da Home, e
+   * aquele é o que de fato leva a outro lugar. Mas o primeiro cinza que entrou aqui foi
+   * `outlineVariant`, e medido ele dá **1,38:1** contra a linha — pior que a borda azul que saiu, e
+   * longe dos 3:1 da WCAG 1.4.11.
+   *
+   * O motivo é que `surface` e `background` são **a mesma cor** neste tema (`#F1F4F8`): a linha não
+   * tem preenchimento que a separe da página, então a borda carrega o contorno sozinha. É aqui que
+   * esta linha difere do aviso da Home, que ela imita — lá existe `primarySurface` por baixo, e a
+   * borda discreta só acompanha um bloco que já se distingue.
+   *
+   * `outline` dá **4,38:1** (medido) e continua inequivocamente cinza: atende o pedido e mantém o
+   * contorno visível para quem mais precisa dele.
    *
    * ## As medidas
    *
@@ -106,29 +118,21 @@ export const styles = StyleSheet.create({
     marginTop: spacing.sm,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
-    // **35%, e não a borda cheia.** Cheia em cinco linhas empilhadas fica gritante — o Gabriel
-    // apontou em 12/09, e é o mesmo valor que o `CardDeAtalho` e o `AvisoDePermissoes` usam: a
-    // diluição separa sem berrar, e é o contorno que o app já tem em toda parte.
+    /**
+     * Cinza neutro, na medida que se vê: ver o bloco acima para o porquê de `outline` e não
+     * `outlineVariant`. Quem diz que a linha abre algo é a seta à direita; a borda só delimita.
+     */
     borderWidth: 1,
-    borderColor: withOpacity(colors.primary, 0.35),
+    borderColor: colors.outline,
   },
   /**
-   * A linha já autorizada: **sem borda azul**, porque não há o que fazer nela.
+   * A linha autorizada **não tem estilo próprio**, e é por isso que não existe uma chave para ela.
    *
-   * Ela continua tocável (a pessoa pode querer conferir ou revogar), mas não convida. Borda de
-   * botão em algo resolvido competiria com as que ainda pedem ação, e é isso que faz uma lista de
-   * cinco itens parecer cinco tarefas quando três já estão prontas.
+   * Ela já se distingue pelo ícone verde e pela palavra "Autorizada" — dois sinais independentes,
+   * que é o que a WCAG 1.4.1 pede. Borda ou fundo verde seria o terceiro para a mesma informação, e
+   * faria o resolvido chamar mais atenção que o pendente: o oposto do que a tela quer.
    */
-  linhaResolvida: {
-    /**
-     * Sem fundo, e a borda no mesmo peso da azul.
-     *
-     * O que distingue esta linha é o ícone verde e a palavra "Autorizada" — dois sinais
-     * independentes, que é o que a acessibilidade pede. Somar fundo e borda cheia a isso seria o
-     * quarto sinal para a mesma informação, e faria o resolvido pesar mais na tela que o pendente.
-     */
-    borderColor: withOpacity(colors.success, 0.35),
-  },
+
   /** Ocupa o que sobra entre o ícone de estado e a seta. */
   linhaTexto: {
     flex: 1,
@@ -145,10 +149,6 @@ export const styles = StyleSheet.create({
     ...typography.bodyMd,
     fontFamily: "PlusJakartaSans_600SemiBold",
     color: colors.onSurface,
-  },
-  linhaDescricao: {
-    ...typography.bodySm,
-    color: colors.onSurfaceVariant,
   },
   /** O passo dentro da tela do sistema — onde procurar depois que ela abrir. */
   linhaComoFazer: {

@@ -63,10 +63,7 @@ export function AjudaDeAlertasScreen({
         {verificaveis.map((permissao) => (
           <Pressable
             key={permissao.chave}
-            style={estadoDePressao(
-              [styles.linhaDePermissao, permissao.concedida && styles.linhaResolvida],
-              { escala: true },
-            )}
+            style={estadoDePressao(styles.linhaDePermissao, { escala: true })}
             onPress={() => void permissao.abrir()}
             accessibilityRole="button"
             accessibilityLabel={`${permissao.titulo}. ${
@@ -93,7 +90,7 @@ export function AjudaDeAlertasScreen({
                 {permissao.concedida ? "Autorizada" : "Toque para autorizar"}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={cores.primary} />
+            <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
           </Pressable>
         ))}
       </View>
@@ -128,7 +125,7 @@ export function AjudaDeAlertasScreen({
                   {permissao.comoFazer ?? "Toque para abrir e conferir"}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={cores.primary} />
+              <Ionicons name="chevron-forward" size={18} color={cores.onSurfaceVariant} />
             </Pressable>
           ))}
         </View>
