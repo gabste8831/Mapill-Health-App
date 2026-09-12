@@ -157,10 +157,57 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
   },
   /**
-   * A frase que substitui a lista acima de três remédios.
+   * A lista **mínima**, de quatro remédios em diante: só nome e quantidade.
    *
-   * Diz o que fazer, e não o que há: o "quantos" já está no título, e repetir o número aqui seria
-   * dizer duas vezes a única coisa que a tela sabe antes de a pessoa tocar.
+   * Nasceu em 12/09, quando o Gabriel testou com quatro e encontrou a tela vazia entre o horário e
+   * os botões — a versão anterior não listava nada acima de três, só uma frase mandando abrir o
+   * app. "Você tem 4 remédios" sem os nomes não é informação: é o aviso de que a informação está
+   * em outro lugar, numa tela que existe justamente para dizer o que está acontecendo agora.
+   *
+   * É o terceiro degrau de escala da tela, e o que ele corta é o que **não** decide se a pessoa
+   * levanta: foto, orientação de tomada e local. O nome fica porque responde "é o da pressão ou o
+   * do sono?", e a quantidade porque vem junto dele em uma linha só.
+   *
+   * `gap` menor que o da lista de três: aqui cada item é uma linha, e o respiro de um bloco entre
+   * linhas simples faria quatro nomes ocuparem o que seis ocupariam.
+   */
+  listaMinima: {
+    width: "100%",
+    gap: spacing.sm,
+  },
+  /**
+   * Nome e quantidade lado a lado, e não empilhados.
+   *
+   * Empilhado, cada remédio vira dois níveis e a lista dobra de altura — com seis remédios a tela
+   * volta a rolar, que é o que este degrau existe para evitar. Lado a lado, o nome fica com o
+   * espaço que sobrar e a quantidade ocupa o que precisa.
+   */
+  itemMinimo: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    gap: spacing.sm,
+  },
+  /**
+   * `flexShrink` com `numberOfLines={1}` na tela: nome comprido corta com reticências em vez de
+   * empurrar a quantidade para fora. A quantidade é curta e não pode ser a que some — ela é metade
+   * da informação clínica desta linha.
+   */
+  nomeMinimo: {
+    ...typography.bodyLg,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    color: cores.onPrimary,
+    flexShrink: 1,
+  },
+  quantidadeMinima: {
+    ...typography.bodyMd,
+    color: cores.onPrimary,
+    opacity: 0.85,
+  },
+  /**
+   * A frase que acompanha a lista mínima, acima de três remédios.
+   *
+   * Diz o que fazer, e não o que há: o "quantos" já está no título e os nomes estão logo acima.
    */
   resumo: {
     ...typography.bodyLg,

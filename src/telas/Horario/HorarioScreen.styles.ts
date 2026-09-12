@@ -52,6 +52,30 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
+  /** Onde a caixa está: ícone e texto na mesma linha, como na tela do alarme. */
+  local: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  localTexto: {
+    ...typography.bodyMd,
+    color: cores.onSurfaceVariant,
+    flex: 1,
+  },
+  /**
+   * A observação livre do tratamento.
+   *
+   * Um degrau abaixo da orientação de tomada, e não igual a ela: uma é instrução da dose ("em
+   * jejum"), a outra é anotação de quem cuida. Empatadas em cor e corpo, as duas viram um parágrafo
+   * só e a instrução se perde dentro da anotação — que é o oposto do que esta tela precisa.
+   */
+  observacao: {
+    ...typography.bodySm,
+    color: cores.onSurfaceVariant,
+    marginTop: 2,
+  },
   foto: {
     width: 52,
     height: 52,

@@ -431,15 +431,39 @@ export function AlarmeScreen({
         {/* Os remédios, em letra grande: é o que a pessoa precisa ler antes de responder, e ela
             pode estar sem óculos, no escuro, recém-acordada. */}
         {/**
-         * Acima de três, a tela **não lista**.
+         * Acima de três, a tela mostra **nome e dose**, e nada além disso.
          *
-         * Listar cinco nomes numa tela que irrompe de madrugada é dar trabalho a quem acabou de
-         * acordar, sem ajudar a decidir nada: a resposta já não acontece aqui (ver
-         * `podeResponderAqui`), e quem vai conferir cinco doses vai fazê-lo no app, onde cada uma
-         * tem seu botão. A contagem no título já diz o tamanho do que espera.
+         * A versão anterior não listava nada: só uma frase mandando abrir o app. O Gabriel testou
+         * com quatro remédios em 12/09 e o resultado era um vazio entre o horário e os botões — a
+         * tela do alarme deixava de dizer o que o alarme era. "Você tem 4 remédios" sem os nomes não
+         * é informação, é um aviso de que há informação em outro lugar.
+         *
+         * O argumento antigo — que listar cinco nomes de madrugada dá trabalho sem ajudar a decidir
+         * — vale para a **lista completa**, com foto, orientação de tomada e local. Não vale para o
+         * nome: ele é o que responde "é o remédio da pressão ou o do sono?", e essa pergunta a
+         * pessoa faz antes de decidir se levanta agora ou daqui a pouco.
+         *
+         * Então a escala cai mais um degrau, em vez de a informação sumir: sem foto, sem orientação,
+         * sem local, e o nome e a quantidade numa linha só por remédio. A resposta continua não
+         * acontecendo aqui (ver `podeResponderAqui`), e o botão de abrir o app segue sendo o
+         * caminho de confirmar cada uma.
          */}
         {!listar ? (
-          <Text style={styles.resumo}>Toque abaixo para ver quais são e confirmar cada uma.</Text>
+          <View style={styles.listaMinima}>
+            {pendentes.map((dose) => (
+              <View key={dose.doseScheduleId} style={styles.itemMinimo}>
+                <Text style={styles.nomeMinimo} numberOfLines={1}>
+                  {dose.medicationName}
+                </Text>
+                <Text style={styles.quantidadeMinima} numberOfLines={1}>
+                  {dose.quantidadeFormatada}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+        {!listar ? (
+          <Text style={styles.resumo}>Toque abaixo para ver cada uma e confirmar.</Text>
         ) : null}
 
         <View style={styles.lista}>

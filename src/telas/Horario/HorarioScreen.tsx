@@ -46,6 +46,10 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
           dose.quantidadeFormatada,
           dose.resolvida ? (confirmada ? "dose tomada" : "dose pulada") : "aguardando resposta",
           dose.intakeNote ?? "",
+          // O local e a observação entram no rótulo pelo mesmo motivo que entraram na tela: quem usa
+          // leitor de tela precisa da orientação inteira, e não de uma versão resumida dela.
+          dose.storageLocation === null ? "" : `guardado em ${dose.storageLocation}`,
+          dose.notes ?? "",
         ]
           .filter((parte) => parte.length > 0)
           .join(", ")}>
@@ -59,11 +63,37 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
           <FotoLocal uri={dose.photoUri} style={styles.foto} contentFit="contain" />
         ) : null}
 
+        {/**
+         * **Tudo o que foi cadastrado aparece aqui** — pedido do Gabriel em 12/09.
+         *
+         * Esta é a tela onde a dose se confirma, e é para onde o toque na notificação leva. Quem
+         * chega aqui está com o remédio na mão, ou indo buscá-lo: cada campo que o app guarda e não
+         * mostra neste instante é orientação que o paciente cadastrou e não recebe de volta na hora
+         * em que ela vale.
+         *
+         * A ordem segue o uso: nome e dose para saber **o quê**, a orientação de tomada para saber
+         * **como**, o local para saber **onde**, e a observação livre por último, porque é a única
+         * que não tem forma previsível — ela pode ser uma frase longa, e vindo antes empurraria o
+         * resto para fora da vista.
+         */}
         <View style={styles.cardTexto}>
           <Text style={styles.nome}>{dose.medicationName}</Text>
           <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
           {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
             <Text style={styles.orientacao}>{dose.intakeNote}</Text>
+          ) : null}
+          {/* Onde a caixa está: a mesma informação que a tela do alarme dá, e pelo mesmo motivo —
+              é o que evita procurar pela casa com o alarme tocando. */}
+          {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
+            <View style={styles.local}>
+              <Ionicons name="location-outline" size={14} color={cores.onSurfaceVariant} />
+              <Text style={styles.localTexto}>{dose.storageLocation}</Text>
+            </View>
+          ) : null}
+          {/* A observação livre do tratamento. Separada da orientação de tomada por um degrau de
+              cor: uma é instrução da dose, a outra é anotação de quem cuida. */}
+          {dose.notes !== null && dose.notes.length > 0 ? (
+            <Text style={styles.observacao}>{dose.notes}</Text>
           ) : null}
         </View>
 
