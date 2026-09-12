@@ -12,6 +12,7 @@
 | Casos de borda do alarme (bloco 19) | 7 passos | Não |
 | Bateria (18.3) | 1 passo | Não |
 | As correções de 11–12/09 | 13 itens | **Sim** |
+| Os sete ajustes de 12/09 (tarde) | 9 itens | **Sim** |
 | Bugs conhecidos, ainda sem correção | 2 | — |
 
 > **Build de 12/09 (preview, com Diagnóstico).** Ela fecha a Parte B inteira. O agendamento do aviso
@@ -151,6 +152,22 @@ os defeitos.
 | B.11 | O bloco **"Confira as permissões"** aparece nas cinco telas que configuram algo dependente de autorização (lembrete de dose, estoque, compromisso, receita, medicamento) e fica **vermelho** enquanto o painel "Seus alarmes não vão funcionar" estiver na tela inicial | `78771dc` |
 | B.12 | Na tela inicial: **não há** lista de permissões nem placar "2 de 3", e a seção "Autorizações do aparelho" no rodapé leva à tela de alertas | `26c557f` |
 | B.13 | 🔴 **A tela de Alertas e permissões no tema escuro** e no alto contraste. Até 12/09 ela ignorava o tema por completo — texto claro sobre fundo claro. Vale trocar o tema em Ajustes e voltar nela | `1f6fb56` |
+
+## Os sete ajustes de 12/09 (tarde)
+
+Levantados pelo Gabriel usando a build `489a67a`. **Todos precisam de build nova.**
+
+| # | O que conferir | Como saber que passou |
+|---|---|---|
+| B.14 | 🔴 **O alarme sai no volume de despertador.** Com o alarme tocando, aperte o volume: o controle que aparece tem de ser o do **relógio**, não o de mídia | O ícone no controle de volume é um despertador |
+| B.15 | 🔴 **O alarme toca no silencioso.** Celular no mudo pelo botão de volume, alarme para daqui a 3 min | Toca alto mesmo no mudo. É a mesma correção do B.14: o volume de despertador é o que o silencioso não corta |
+| B.16 | O lembrete (modo notificação) **continua** no volume de aviso, e continua respeitando o silencioso | No mudo, o lembrete não toca — e isso é o correto |
+| B.17 | 🔴 **A tela azul com o app nos recentes.** Bloqueie o celular com o Mapill **aberto nos recentes** e espere o alarme | A tela azul sobe igual. Antes, só subia com o app fora dos recentes. Se falhar, abra o Diagnóstico e veja a linha **"Tela cheia"** |
+| B.18 | Na seção de **lembretes** do cadastro de medicação, com permissões pendentes: aparece **um** bloco de permissão, não dois | Só o painel "Seus alarmes não vão funcionar", com o botão. Concedidas as verificáveis, ele dá lugar ao aviso azul |
+| B.19 | No **tema escuro**, a opção de lembrete selecionada: o subtítulo do botão azul é legível | Texto claro sobre o azul. Antes era 2,08:1, escuro sobre escuro |
+| B.20 | **4 ou mais remédios** no mesmo horário: a tela azul mostra nome e dose de cada um | Não há mais o vazio entre o horário e os botões |
+| B.21 | Na tela **"Hora do remédio"**: foto, dose, orientação de tomada, **onde está guardado** e a observação do tratamento | Os dois últimos são novos. Cadastre um remédio com local e observação para conferir |
+| B.22 | Na **lista de remédios**, um sino ao lado do nome de quem tem lembrete | Despertador para alarme, sino para notificação, nada para "nenhum aviso" |
 
 E o **bloco 20 do estoque**, que depende de B.1 e B.9: cadastrar na véspera e conferir se a
 notificação chega às 00:01.
