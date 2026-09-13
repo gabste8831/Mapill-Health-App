@@ -41,7 +41,10 @@ function Linha({
   const styles = useEstilos(criarEstilos);
   return (
     <View style={styles.linha}>
-      <Text style={styles.rotulo}>{rotulo}</Text>
+      {/* `String(...)` nos dois: um valor não-string chegando aqui derruba a árvore inteira, e esta
+          é a tela que a pessoa abre **quando algo já está errado**. Ela tem de sobreviver a dado
+          ruim — foi o que faltou em 13/09, quando uma linha malformada apagou o diagnóstico todo. */}
+      <Text style={styles.rotulo}>{String(rotulo ?? "")}</Text>
       <Text
         style={[
           styles.valor,
@@ -49,7 +52,7 @@ function Linha({
           estado === "ruim" && styles.valorRuim,
         ]}
       >
-        {valor}
+        {String(valor ?? "")}
       </Text>
     </View>
   );
@@ -129,10 +132,17 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
       daquiADias.toISOString(),
     );
     setDosesGravadas(
-      comStatus.slice(0, 5).map(({ doseSchedule }) => ({
-        iso: doseSchedule.scheduledFor,
-        local: new Date(doseSchedule.scheduledFor).toLocaleString("pt-BR"),
-      })),
+      comStatus.slice(0, 5).map(({ doseSchedule }) => {
+        // `String(...)` e o fallback não são zelo excessivo: uma linha vinda de sincronização ou de
+        // migration antiga pode trazer o campo ausente, e um `Text` com valor não-string derruba a
+        // tela inteira — que é justamente o que não pode acontecer numa tela de diagnóstico.
+        const iso = String(doseSchedule.scheduledFor ?? "");
+        const data = new Date(iso);
+        return {
+          iso: iso === "" ? "(vazio)" : iso,
+          local: Number.isNaN(data.getTime()) ? "(inválida)" : data.toLocaleString("pt-BR"),
+        };
+      }),
     );
   }, []);
 
@@ -386,20 +396,14 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
              * ISO disser `21:00Z` e a local disser `17:00`, o banco está certo e o problema é de
              * exibição; se o ISO já vier errado, foi a gravação.
              */}
-            {dosesGravadas.length > 0 ? (
-              <>
-                <Linha rotulo="Próximas doses (banco)" valor={`${dosesGravadas.length} lidas`} />
-                {dosesGravadas.map((dose) => (
-                  <Linha
-                    key={dose.iso}
-                    rotulo={dose.local}
-                    valor={dose.iso}
-                  />
-                ))}
-              </>
-            ) : (
-              <Linha rotulo="Próximas doses (banco)" valor="Nenhuma" estado="ruim" />
-            )}
+            <Linha
+              rotulo="Próximas doses (banco)"
+              valor={dosesGravadas.length === 0 ? "Nenhuma" : `${dosesGravadas.length} lidas`}
+              estado={dosesGravadas.length === 0 ? "ruim" : "ok"}
+            />
+            {dosesGravadas.map((dose, indice) => (
+              <Linha key={`${dose.iso}-${indice}`} rotulo={dose.local} valor={dose.iso} />
+            ))}
           </View>
         </View>
 
