@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
+import Constants from "expo-constants";
+import * as Application from "expo-application";
 
 import {
   diagnosticarAvisos,
@@ -233,6 +235,47 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
           </Text>
         </View>
 
+        {/**
+         * Qual build está rodando — a primeira pergunta de toda sessão de teste.
+         *
+         * Em 13/09 o Gabriel instalou uma build nova e não tinha como confirmar, de dentro do app,
+         * que era ela: a saída era conferir o versionCode nas configurações do Android. Um teste
+         * feito sobre a build errada não é um teste, e o custo de descobrir isso depois é a rodada
+         * inteira.
+         *
+         * O `versionCode` é o que decide, porque sobe a cada build; o `1.0.0` fica igual por meses.
+         */}
+        <View style={styles.secao}>
+          <Text style={styles.secaoTitulo}>Esta build</Text>
+          <View style={styles.cartao}>
+            {/* De `expo-application`, e não de `Constants.expoConfig`: o `eas.json` usa
+                `appVersionSource: "remote"`, então o `versionCode` não existe no `app.json` — quem o
+                atribui é o EAS, na build. Lido do APK instalado, ele é o número que de fato
+                identifica o binário, e o único que sobe a cada build. */}
+            <Linha
+              rotulo="Versão"
+              valor={`${Application.nativeApplicationVersion ?? "?"} (${
+                Application.nativeBuildVersion ?? "?"
+              })`}
+            />
+            {/* A marca do patch de volume, que decide se o alarme sai no stream de despertador. O
+                `AudioAttributes` do canal não é legível pelo JS, então esta é a aproximação
+                possível: diz que `plugins/volume-de-despertador.js` está registrado, e o plugin
+                falha a build se não conseguir aplicar o patch. Ver `canais-notifee`. */}
+            <Linha
+              rotulo="Volume de despertador"
+              valor={
+                Constants.expoConfig?.extra?.volumeDeDespertadorAplicado === true
+                  ? "Patch aplicado"
+                  : "NÃO APLICADO"
+              }
+              estado={
+                Constants.expoConfig?.extra?.volumeDeDespertadorAplicado === true ? "ok" : "ruim"
+              }
+            />
+          </View>
+        </View>
+
         <View style={styles.secao}>
           <Text style={styles.secaoTitulo}>Permissões</Text>
           <View style={styles.cartao}>
@@ -276,6 +319,18 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               dados.canais.map((canal) => (
                 <View key={canal.id} style={styles.agendado}>
                   <Text style={styles.agendadoQuando}>{canal.nome}</Text>
+                  {/* O id carrega a versão do canal (`dose-alarm-v7`), e ela é a única forma de saber
+                      **qual** canal o aparelho está usando — dois canais com o mesmo nome e versões
+                      diferentes são indistinguíveis sem isto.
+
+                      Importa porque canal no Android é imutável: uma correção de som, importância ou
+                      `AudioAttributes` só alcança quem já instalou se a versão subir, e um canal
+                      antigo sobrevivendo parece saudável em toda verificação que o app sabe fazer.
+                      Em 13/09 o Gabriel precisou conferir se o `v7` tinha nascido, e a tela não
+                      dizia. */}
+                  <Text style={styles.agendadoId} numberOfLines={1}>
+                    {canal.id}
+                  </Text>
                   {/* Canal sem som é o defeito que passou semanas despercebido: o app agendava, o
                       Android entregava, e nada tocava.
 
