@@ -7,8 +7,12 @@
 
 ## Resumo
 
-**Tudo neste documento espera a build preview de 13/09.** A Parte A foi executada inteira em 13/09 e
-saiu daqui — o que ela achou virou correção, e as correções estão listadas abaixo.
+**Tudo aqui pode ser testado agora**, na build de **desenvolvimento** de 13/09 — versionCode 3, a do
+`--dev-client`. Ela conecta no Metro, então correção em TypeScript chega recarregando (`r` no
+terminal), sem build nova. A única exceção é o **E.1**, que depende de patch nativo.
+
+A Parte A foi executada inteira em 13/09 e saiu deste documento — o que ela achou virou correção, e
+as correções estão listadas abaixo.
 
 | O que conferir | Quantos |
 |---|---|
@@ -59,10 +63,11 @@ correção funcionando de passagem.
 
 ---
 
-# PARTE B — Espera a próxima build
+# PARTE B — As correções de 11–12/09
 
-Oito correções entraram **depois** do APK instalado. Não adianta testar agora: o binário ainda tem
-os defeitos.
+Entraram depois do APK de preview que estava instalado, e por isso o documento dizia "espera a
+próxima build". **Isso não vale mais desde 13/09:** com a build de desenvolvimento, este código
+chega pelo Metro — é só recarregar (`r` no terminal do Expo). Tudo aqui é TypeScript.
 
 | # | O que conferir | Commit |
 |---|---|---|
@@ -82,7 +87,7 @@ os defeitos.
 
 ## Os sete ajustes de 12/09 (tarde)
 
-Levantados pelo Gabriel usando a build `489a67a`. **Todos precisam de build nova.**
+Levantados pelo Gabriel usando a build `489a67a`. Como o resto da Parte B, chegam pelo Metro.
 
 | # | O que conferir | Como saber que passou |
 |---|---|---|
@@ -205,12 +210,15 @@ backfill e a revisão dos ~35 arquivos que leem `scheduledFor`, e foi o que se e
 
 # PARTE C — Bugs conhecidos, ainda sem correção
 
-Estes dois **não** foram corrigidos. Você vai encontrá-los se testar, e é esperado — não são falha
-da build nova.
+Estes dois **não** foram corrigidos. Você vai encontrá-los se testar, e é esperado — não são
+regressão.
+
+Os dois precisam de código nativo, então são os únicos itens além do E.1 que **não** se resolvem
+recarregando o Metro.
 
 Os bugs que saíram da rodada de 13/09 — grade de 30 dias, tela azul e alarmes empilhados — foram
-corrigidos e estão na **Parte D**, esperando validação. O fuso virou decisão, não correção: ver
-**E.2**.
+corrigidos: o da grade já passou (D.3), e a tela azul espera o D.5. O fuso virou decisão, não
+correção: ver **E.2**.
 
 ## C.1 — 🔴 Responder o alarme dá acesso ao app sem desbloquear
 
