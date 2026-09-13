@@ -19,6 +19,8 @@ import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { diagnosticarCanalDeAlarme } from "./canais-notifee";
 import { esquecerAlarmesAbertos } from "./escutar-avisos";
 import { NotifeeGateway } from "./notifee-gateway";
+import { regerarGradeSeOFusoMudou } from "./fuso-da-grade";
+import { reabastecerGradeDeDoses } from "./reabastecer-grade-de-doses";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`), então não há o que agendar. */
 const persistsLocally = Platform.OS !== "web";
@@ -90,6 +92,41 @@ async function executarReagendamento(): Promise<void> {
     }
 
     const agora = new Date();
+
+    /**
+     * A grade de doses é **posta em dia** antes de agendar, porque é dela que os avisos saem.
+     *
+     * Duas manutenções, as duas achadas pelos testes de 13/09 e as duas invisíveis em uso de poucos
+     * dias — que é o que as fez sobreviver tanto tempo:
+     *
+     * - **O fuso** (passo A.6): trocar de fuso movia o horário da dose junto, e as 16:00 viravam
+     *   15:00. Ver `regerarGradeSeOFusoMudou`.
+     * - **O horizonte** (passo A.4): nada reabastecia a grade, que era gravada no cadastro 30 dias
+     *   de cada vez e acabava. Um tratamento contínuo parava de avisar por volta do 30º dia, calado
+     *   — agendar a partir de uma grade vazia agenda nada. Ver `reabastecerGradeDeDoses`.
+     *
+     * Aqui e não noutro lugar porque esta função já é o único ponto de entrada do ciclo de vida dos
+     * avisos e já roda a cada abertura do app.
+     *
+     * O `catch` é deliberado: manter a grade é manutenção de fundo, e falhar nela não pode impedir o
+     * reagendamento dos avisos que já existem — que é o que mantém o app avisando hoje. A próxima
+     * abertura tenta de novo, porque as duas operações são idempotentes.
+     */
+    try {
+      /**
+       * O fuso vem **antes** do reabastecimento, e a ordem é deliberada.
+       *
+       * Regerar corrige os instantes das doses que já existem; reabastecer completa o que falta até
+       * o horizonte. Na ordem inversa, o reabastecimento geraria doses no fuso novo e a regeração
+       * logo em seguida as apagaria para recriá-las iguais — trabalho dobrado e, no meio do
+       * caminho, uma grade misturando dois fusos.
+       */
+      await regerarGradeSeOFusoMudou(agora);
+      await reabastecerGradeDeDoses(agora);
+    } catch (erro) {
+      console.warn("[avisos] falha ao manter a grade de doses", erro);
+    }
+
     const ate = new Date(agora.getTime() + JANELA_DE_AVISOS_EM_DIAS * 24 * 60 * 60_000);
 
     const [comStatus, prescriptions, medications] = await Promise.all([

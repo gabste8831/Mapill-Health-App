@@ -1,6 +1,7 @@
 import { Directory, File, Paths } from "expo-file-system";
 import { Platform } from "react-native";
 
+import { CHAVE_DO_FUSO_DA_GRADE } from "../local/migrations/019-app-state";
 import { escreverEmTransacao } from "../local/database";
 import { apagarNaNuvem, SQL_LIMPAR_MARCA_DAGUA } from "../remote/apagar-na-nuvem";
 
@@ -88,6 +89,19 @@ export class LocalDataRepository {
        */
       await database
         .runAsync(SQL_LIMPAR_MARCA_DAGUA)
+        .catch(() => {});
+
+      /**
+       * O fuso em que a grade de doses foi gerada sai junto, pelo mesmo motivo.
+       *
+       * Ele descreve as doses gravadas (ver `fuso-da-grade`). Apagadas elas, ele não descreve mais
+       * nada — e mantido, diria que a grade vazia está no fuso certo. Quem viajasse e apagasse os
+       * dados na viagem cadastraria tudo de novo no fuso novo e ficaria sem a regeração, porque o
+       * app acharia que nada mudou. `IF EXISTS` pelo mesmo motivo da marca d'água: quem instalou
+       * antes da migration 019 pode não ter a tabela na primeira abertura.
+       */
+      await database
+        .runAsync("DELETE FROM app_state WHERE key = ?", [CHAVE_DO_FUSO_DA_GRADE])
         .catch(() => {});
     });
   }

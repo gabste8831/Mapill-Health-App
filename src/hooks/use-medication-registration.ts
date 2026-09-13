@@ -17,7 +17,12 @@ const persistsLocally = Platform.OS !== "web";
 
 /**
  * Quantos dias de horários são gerados de uma vez. Agendar até o infinito não cabe em banco nem
- * no limite de alarmes do sistema operacional — a janela é reabastecida depois (bloco C1).
+ * no limite de alarmes do sistema operacional.
+ *
+ * A janela é reabastecida a cada abertura do app por `reabastecerGradeDeDoses`, com este mesmo
+ * horizonte. Até 13/09 este comentário prometia esse reabastecimento e ele **não existia**: a grade
+ * acabava no 30º dia e o tratamento contínuo parava de avisar, calado (passo A.4). Se mexer neste
+ * número, mexa no `HORIZONTE_EM_DIAS` de lá junto.
  */
 const SCHEDULE_HORIZON_DAYS = 30;
 
