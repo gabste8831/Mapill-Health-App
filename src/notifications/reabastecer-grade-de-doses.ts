@@ -22,6 +22,15 @@ export type ResultadoDoReabastecimento = {
   tratamentos: number;
   /** Quantas doses novas entraram no banco. Zero com tratamentos > 0 significa grade já completa. */
   gravadas: number;
+  /**
+   * A dose mais distante que existe no banco, depois do reabastecimento.
+   *
+   * É o que responde "a grade alcança o horizonte?" — a pergunta do passo D.3. `gravadas: 0` sozinho
+   * é ambíguo: pode ser grade completa (certo) ou reabastecimento que não fez nada (errado), e os
+   * dois casos têm o mesmo número. A data do fim distingue: se ela está a ~30 dias, a grade está
+   * cheia; se está a 2 dias, o tratamento vai emudecer e ninguém foi avisado.
+   */
+  ultimaDose: string | null;
 };
 
 /**
@@ -97,11 +106,25 @@ export async function reabastecerGradeDeDoses(agora: Date): Promise<ResultadoDoR
     const candidatos = generateDoseSchedules({ prescription, from: agora, until: ate });
     if (candidatos.length === 0) continue;
 
+    /**
+     * A comparação é por **instante**, e não pelo texto do ISO.
+     *
+     * O banco guarda os dois formatos: o cadastro grava com `toISOString()`, que termina em `Z`, e o
+     * que volta da sincronização vem com `+00:00`. Os dois descrevem o mesmo momento e são strings
+     * diferentes — foi o que o Diagnóstico do Gabriel mostrou em 13/09, com as duas formas lado a
+     * lado na mesma lista.
+     *
+     * Comparando texto, `2026-09-14T02:00:00.000Z` nunca casaria com
+     * `2026-09-14T02:00:00+00:00`, e o reabastecimento gravaria uma segunda dose para um horário que
+     * já existe — duplicando o alarme em vez de completar a grade.
+     */
     const existentes = await doseScheduleRepository.findByPrescription(prescription.id);
-    const instantesExistentes = new Set(existentes.map((dose) => dose.scheduledFor));
+    const instantesExistentes = new Set(
+      existentes.map((dose) => new Date(dose.scheduledFor).getTime()),
+    );
 
     for (const candidato of candidatos) {
-      if (instantesExistentes.has(candidato.scheduledFor)) continue;
+      if (instantesExistentes.has(new Date(candidato.scheduledFor).getTime())) continue;
       await doseScheduleRepository.save({
         id: Crypto.randomUUID(),
         ...candidato,
@@ -111,5 +134,18 @@ export async function reabastecerGradeDeDoses(agora: Date): Promise<ResultadoDoR
     }
   }
 
-  return { tratamentos: prescriptions.length, gravadas };
+  /**
+   * Relê o banco depois de gravar, em vez de deduzir do que foi gerado: o que interessa é o estado
+   * final, e ele inclui as doses que já estavam lá.
+   */
+  let ultimaDose: string | null = null;
+  for (const prescription of prescriptions) {
+    for (const dose of await doseScheduleRepository.findByPrescription(prescription.id)) {
+      if (ultimaDose === null || new Date(dose.scheduledFor) > new Date(ultimaDose)) {
+        ultimaDose = dose.scheduledFor;
+      }
+    }
+  }
+
+  return { tratamentos: prescriptions.length, gravadas, ultimaDose };
 }

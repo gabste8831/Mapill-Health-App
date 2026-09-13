@@ -40,6 +40,8 @@ export type ManutencaoDaGrade = {
   fusoRegerado: boolean;
   tratamentos: number;
   gravadas: number;
+  /** Até quando a grade alcança. É o que responde "o tratamento contínuo sobrevive aos 30 dias?". */
+  ultimaDose: string | null;
   erro: string | null;
 };
 
@@ -156,6 +158,7 @@ async function executarReagendamento(): Promise<void> {
         fusoRegerado,
         tratamentos: reposicao.tratamentos,
         gravadas: reposicao.gravadas,
+        ultimaDose: reposicao.ultimaDose,
         erro: null,
       };
     } catch (erro) {
@@ -174,6 +177,7 @@ async function executarReagendamento(): Promise<void> {
         fusoRegerado: false,
         tratamentos: 0,
         gravadas: 0,
+        ultimaDose: null,
         erro: erro instanceof Error ? erro.message : String(erro),
       };
       console.warn("[avisos] falha ao manter a grade de doses", erro);

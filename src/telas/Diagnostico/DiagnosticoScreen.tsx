@@ -28,6 +28,14 @@ export type DiagnosticoScreenProps = {
 /** Daqui a quantos segundos o aviso de teste dispara. Tempo de bloquear o aparelho e esperar. */
 const SEGUNDOS_DO_TESTE = 30;
 
+/** Quantos dias faltam até um instante ISO. Negativo se já passou; 0 se a data é ausente. */
+function diasAte(iso: string | null): number {
+  if (iso === null) return 0;
+  const alvo = new Date(iso).getTime();
+  if (Number.isNaN(alvo)) return 0;
+  return Math.round((alvo - Date.now()) / (24 * 60 * 60 * 1000));
+}
+
 function Linha({
   rotulo,
   valor,
@@ -364,6 +372,25 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                   estado={manutencao.tratamentos > 0 ? "ok" : "ruim"}
                 />
                 <Linha rotulo="Doses gravadas" valor={String(manutencao.gravadas)} />
+                {/**
+                 * **Esta é a linha que responde o D.3**, e não a de cima.
+                 *
+                 * "Doses gravadas: 0" é ambíguo: pode ser grade já completa (certo) ou
+                 * reabastecimento que não fez nada (errado) — o mesmo número para os dois casos, que
+                 * foi o que travou o teste de 13/09. A data do fim distingue: perto de 30 dias, a
+                 * grade alcança o horizonte; a poucos dias, o tratamento vai emudecer.
+                 */}
+                <Linha
+                  rotulo="Grade vai até"
+                  valor={
+                    manutencao.ultimaDose === null
+                      ? "Nenhuma dose"
+                      : `${new Date(manutencao.ultimaDose).toLocaleDateString("pt-BR")} (${diasAte(
+                          manutencao.ultimaDose,
+                        )}d)`
+                  }
+                  estado={diasAte(manutencao.ultimaDose) >= 25 ? "ok" : "ruim"}
+                />
                 <Linha
                   rotulo="Fuso mudou"
                   valor={manutencao.fusoRegerado ? "Sim, grade regerada" : "Não"}

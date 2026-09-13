@@ -16,14 +16,31 @@ function syncFields() {
 }
 
 /**
- * O fuso do aparelho agora — `"America/Sao_Paulo"`, `"America/Manaus"`.
+ * O fuso do aparelho, **com o deslocamento que o `Date` está de fato usando** — `America/Manaus@240`.
  *
- * O nome IANA, e não o deslocamento em horas: São Paulo é −03:00 em junho e já foi −02:00 em
- * janeiro, e trocar de fuso não é a mesma coisa que entrar no horário de verão. Comparar
- * deslocamentos faria a volta do horário de verão parecer uma viagem e regerar a grade sem motivo.
+ * ## Por que os dois, e não só o nome
+ *
+ * A primeira versão comparava só o nome IANA, pelo argumento de que o deslocamento sozinho confunde
+ * horário de verão com viagem. O argumento continua válido — e por isso o nome continua aqui —, mas
+ * o nome sozinho tem um defeito que apareceu no teste do Gabriel em 13/09.
+ *
+ * Trocando o fuso para Manaus, o Diagnóstico mostrou `America/Manaus` **com deslocamento UTC−3**.
+ * Manaus é UTC−4. O nome que o `Intl` resolve muda na hora, mas o deslocamento que o `Date` aplica
+ * só acompanha depois — no aparelho do teste, a defasagem durou até o app reiniciar.
+ *
+ * Isso envenenava a regeração: ela detectava a troca pelo nome e regerava a grade **com o
+ * deslocamento antigo**, gravando 18:00 como se Manaus fosse −3. Quando o deslocamento enfim
+ * atualizava, aquelas doses apareciam uma hora fora — e o Gabriel viu 18:00 virar 15:00, que é essa
+ * defasagem somada à diferença real entre os fusos.
+ *
+ * Guardando os dois, uma troca de fuso só conta como troca quando o `Date` já está de acordo com
+ * ela. O horário de verão continua sem disparar regeração falsa, porque o nome não muda nele — e
+ * quando o deslocamento muda sozinho (que é o que o horário de verão faz), a regeração é justamente
+ * o que se quer: as doses precisam seguir a hora de parede.
  */
 function fusoAtual(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const nome = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return `${nome}@${new Date().getTimezoneOffset()}`;
 }
 
 async function lerFusoGravado(): Promise<string | null> {
