@@ -14,7 +14,7 @@ saiu daqui — o que ela achou virou correção, e as correções estão listada
 |---|---|
 | As correções de 11–12/09 (Parte B) | 13 itens |
 | Os ajustes de 12/09 à tarde | 7 itens |
-| **As correções de 13/09** | **2 itens** (D.3, D.5) |
+| **As correções de 13/09** | **1 item** (D.5) |
 | Bugs conhecidos, ainda sem correção | 2 (C.1, C.2) |
 | Decidido e fora de escopo | 2 (**E.1** volume, **E.2** fuso) |
 
@@ -32,14 +32,14 @@ saiu daqui — o que ela achou virou correção, e as correções estão listada
 
 # PARTE D — As correções de 13/09
 
-Saíram da rodada da Parte A, que fechou nesse dia. Dos cinco itens originais, três já foram
-resolvidos ou decididos — restam **D.3 e D.5**.
+Saíram da rodada da Parte A, que fechou nesse dia. Dos cinco itens originais, quatro já foram
+validados ou decididos — resta **D.5**.
 
 | # | O que conferir | Como saber que passou |
 |---|---|---|
 | D.1 | ⏸️ **O volume do alarme saiu da fila.** Testado em 13/09 nesta build: continua no volume de mídia. Não é ajuste, é mudança de arquitetura — ver **E.1** | — |
 | D.2 | ⏸️ Depende do D.1, pelo mesmo motivo | — |
-| D.3 | 🔴 **O tratamento contínuo passa dos 30 dias.** Remédio de uso contínuo, hora automática desligada, relógio adiantado **31+ dias**, e então **feche e reabra o app**. Confira em `Diagnóstico → Manutenção da grade` a linha **"Grade vai até"** | Ela mostra ~30 dias à frente, e a Home lista a dose do dia **sem** você reabrir o cadastro |
+| D.3 | ✅ **Passou em 13/09.** Relógio adiantado de 13/09 para 14/10: a Home abriu vazia e **se preencheu sozinha em segundos**, e o Diagnóstico mostrou `Grade vai até 13/10/2026 (30d)`. Não precisou reabrir o cadastro — que era o defeito | — |
 | D.4 | ✅ **Fechado em 13/09 — o comportamento atual é o correto.** A dose acontece no **instante** marcado, então 21:00 em São Paulo toca às 20:00 em Manaus. Ver E.2 | — |
 | D.5 | 🔴 **A tela azul sobe e fica.** App **fora dos recentes**, celular parado, tela bloqueada, alarme para daqui a alguns minutos | A tela azul aparece e **permanece** — não é trocada pela de "Hora do remédio". **Repita 3 ou 4 vezes, em momentos diferentes:** é uma corrida de tempo, e um acerto isolado não prova nada |
 
@@ -54,7 +54,8 @@ resolvidos ou decididos — restam **D.3 e D.5**.
 **Não precisa testar:** o empilhamento de alarmes atrasados (dose vencida há mais de 4 h não irrompe
 mais em tela cheia). Foi corrigido junto, por decisão do Gabriel em 13/09 não entra na fila de
 validação — o cenário é raro e a falha, se houver, é recusar um alarme velho, não perder um atual.
-Se ao adiantar o relógio no D.3 **não** aparecer pilha de telas azuis, é essa correção funcionando.
+No teste do D.3, adiantar o relógio um mês **não** produziu pilha de telas azuis, o que é essa
+correção funcionando de passagem.
 
 ---
 
@@ -240,9 +241,9 @@ agendadas. É alarme órfão por um caminho que o bloco 16 não testa.
 Só o que falhar, com o número do passo:
 
 ```
-D.3 passou — a grade foi ate 12/10 depois de adiantar o relogio
 D.5 passou nas 4 tentativas
 B.9 falhou — a notificacao de estoque nao chegou
+B.13 falhou — texto claro sobre fundo claro no tema escuro
 resto ok
 ```
 
