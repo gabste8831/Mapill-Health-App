@@ -105,26 +105,22 @@ const PATCH = `                  // [Mapill] O stream de áudio decide qual bot�
                           .build();`;
 
 /**
- * A prova, dentro do app, de que este patch entrou na build — lida por `Constants.expoConfig.extra`.
- *
- * ## Por que isto existe
+ * ## Por que o app não consegue verificar sozinho se isto funcionou
  *
  * O `AudioAttributes` de um canal **não é legível pelo JavaScript**: `getChannel` devolve som,
- * importância e bypass, e nada de áudio. Então o app não tem como verificar sozinho se o alarme vai
- * sair no volume de despertador — e foi por isso que o defeito sobreviveu à build de 12/09 sem
- * ninguém perceber. O diagnóstico dizia "✅ OK" com o alarme tocando no volume de mídia.
+ * importância e bypass, e nada de áudio. Foi por isso que o defeito sobreviveu à build de 12/09 sem
+ * ninguém perceber — o diagnóstico dizia "✅ OK" com o alarme tocando no volume de mídia.
  *
- * O que **é** verificável é se este plugin rodou. A marca é gravada dentro do mod, depois de o
- * arquivo ser encontrado: presente, o `ChannelManager.java` foi patchado nesta build; ausente, não
- * foi — e aí o alarme toca no volume de mídia por mais que o código JS esteja certo.
+ * A marca `volumeDeDespertadorAplicado`, no `extra` do `app.json`, é a aproximação possível: ela diz
+ * que **este plugin está registrado**. Não pode ser gravada aqui dentro, por mais que fosse o lugar
+ * honesto: mods rodam na fase de `prebuild`, sobre arquivos nativos, e o `extra` que chega ao
+ * runtime é resolvido antes disso — escrever `config.extra` num mod não alcança
+ * `Constants.expoConfig`.
  *
- * É prova indireta (diz que o patch entrou, não que o Android honrou o stream), mas separa as duas
- * hipóteses que de outra forma se confundem no teste em aparelho: "o patch não entrou na build" e "o
- * canal velho sobreviveu no aparelho". Sem ela, um alarme no volume errado não diz qual das duas é —
- * e foi exatamente essa dúvida que custou a rodada de 12/09.
+ * O que garante a correspondência entre a marca e a realidade são os dois `throw` abaixo: registrado
+ * o plugin, ou ele aplica o patch ou a build **falha**. Não existe o caminho silencioso em que a
+ * marca diz "aplicado" e o patch não entrou — que é justamente o modo de falha de 12/09.
  */
-const CHAVE_DA_MARCA = "volumeDeDespertadorAplicado";
-
 function withPatchDoChannelManager(config) {
   return withDangerousMod(config, [
     "android",
@@ -139,10 +135,6 @@ function withPatchDoChannelManager(config) {
       }
 
       const conteudo = fs.readFileSync(alvo, "utf8");
-
-      // A marca vai no `extra`, que o app lê por `Constants.expoConfig.extra` — ver `CHAVE_DA_MARCA`.
-      // Dentro do mod, e não fora, porque é aqui que se sabe que o patch realmente aconteceu.
-      config.extra = { ...config.extra, [CHAVE_DA_MARCA]: true };
 
       // Já aplicado: `prebuild` roda mais de uma vez, e aplicar duas vezes quebraria o Java.
       if (conteudo.includes("ehCanalDeAlarme")) return config;
@@ -163,9 +155,10 @@ function withPatchDoChannelManager(config) {
 }
 
 /**
- * O patch no Java **e** a marca que prova que ele rodou — nesta ordem, porque só faz sentido marcar
- * o que de fato aconteceu. Se o patch lançar (alvo não encontrado), a build para antes da marca.
+ * O patch no Java, que grava a marca de `CHAVE_DA_MARCA` no `extra` ao aplicar.
+ *
+ * A marca sai de dentro do mod, e não de um segundo plugin: só faz sentido marcar o que de fato
+ * aconteceu, e ali dentro já se sabe que o arquivo existe e que o bloco alvo foi encontrado. Se o
+ * patch lançar, a build para antes de qualquer marca ser gravada.
  */
-module.exports = function withVolumeDeDespertador(config) {
-  return withMarcaDoPatch(withPatchDoChannelManager(config));
-};
+module.exports = withPatchDoChannelManager;

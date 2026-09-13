@@ -89,7 +89,8 @@
       "router": {},
       "eas": {
         "projectId": "7064a16a-6bdb-4db3-aabc-7651a744e1de"
-      }
+      },
+      "volumeDeDespertadorAplicado": true
     }
   }
 }

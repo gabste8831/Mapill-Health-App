@@ -220,13 +220,18 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
   /**
    * O stream de áudio, que é o que decide se o alarme sai no volume de **despertador**.
    *
-   * Não dá para lê-lo do canal: o `AudioAttributes` não é exposto pela API do Notifee. O que dá para
-   * saber é se `plugins/volume-de-despertador.js` rodou nesta build — ele grava esta marca no
-   * `extra` ao patchar o `ChannelManager.java`, e sem o patch todo canal sai em `USAGE_NOTIFICATION`.
+   * Não dá para lê-lo do canal: o `AudioAttributes` não é exposto pela API do Notifee — e essa
+   * cegueira é o que deixou o defeito passar na build de 12/09, com o diagnóstico dizendo "OK".
    *
-   * A distinção importa no teste: alarme no volume errado **com** a marca presente é canal velho
-   * sobrevivendo no aparelho (a versão do id precisa subir); **sem** a marca, é o patch que não
-   * entrou na compilação. Eram duas hipóteses indistinguíveis na rodada de 12/09.
+   * A marca vem do `extra` do `app.json` e diz que `plugins/volume-de-despertador.js` está
+   * registrado. É indireta de propósito: um mod não consegue escrever no `extra` que chega ao
+   * runtime (ele roda no `prebuild`, depois de o config ser resolvido). O que sustenta a marca é o
+   * plugin **falhar a build** se não encontrar o alvo do patch — registrado, ou ele aplica ou nada
+   * compila.
+   *
+   * No teste isto separa duas hipóteses: alarme no volume errado **com** a marca é canal velho
+   * sobrevivendo no aparelho (a versão do id precisa subir); **sem** a marca, o plugin saiu do
+   * `app.json`. Eram indistinguíveis em 12/09.
    */
   const comPatchDeVolume = Constants.expoConfig?.extra?.volumeDeDespertadorAplicado === true;
   if (!comPatchDeVolume) {
