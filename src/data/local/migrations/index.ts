@@ -19,6 +19,7 @@ import { MIGRATION_016_SYNC_STATE } from "./016-sync-state";
 import { MIGRATION_017_LOW_STOCK_ALERT_STATE } from "./017-low-stock-alert-state";
 import { MIGRATION_018_RENEWAL_REMINDER_ENABLED } from "./018-renewal-reminder-enabled";
 import { MIGRATION_019_APP_STATE } from "./019-app-state";
+import { MIGRATION_020_NORMALIZAR_INSTANTES } from "./020-normalizar-instantes";
 
 type Migration = {
   version: number;
@@ -46,6 +47,7 @@ const MIGRATIONS: Migration[] = [
   { version: 17, sql: MIGRATION_017_LOW_STOCK_ALERT_STATE },
   { version: 18, sql: MIGRATION_018_RENEWAL_REMINDER_ENABLED },
   { version: 19, sql: MIGRATION_019_APP_STATE },
+  { version: 20, sql: MIGRATION_020_NORMALIZAR_INSTANTES },
 ];
 
 /**

@@ -67,9 +67,12 @@ export class AppointmentRepository
 
   async findUpcoming(referenceDate: string): Promise<Appointment[]> {
     const rows = await this.database.getAllAsync<AppointmentRow>(
+      // `julianday` pelo mesmo motivo das doses: `scheduled_for` é texto e pode chegar em duas
+      // formas de ISO (`Z` do cadastro, `+00:00` da sincronização), e comparar texto deixa de fora
+      // as linhas em `+00:00` — aqui, compromissos futuros que sumiriam da lista.
       `SELECT * FROM ${this.tableName}
-       WHERE deleted_at IS NULL AND scheduled_for >= ?
-       ORDER BY scheduled_for ASC`,
+       WHERE deleted_at IS NULL AND julianday(scheduled_for) >= julianday(?)
+       ORDER BY julianday(scheduled_for) ASC`,
       [referenceDate],
     );
     return rows.map((row) => this.toEntity(row));
