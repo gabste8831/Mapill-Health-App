@@ -1,4 +1,5 @@
 import notifee, { AndroidImportance, AndroidVisibility } from "react-native-notify-kit";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 import { colors } from "@/shared/theme";
@@ -25,6 +26,20 @@ import { colors } from "@/shared/theme";
  * um par desalinhado é o tipo de detalhe que faz alguém ler `v5` no código e `v6` no aparelho e
  * perder uma hora. Criar canal é barato; confusão de versão não é.
  *
+ * **v6 → v7 (13/09).** O teste do Gabriel em 13/09 mostrou que o alarme **continuava** no volume de
+ * mídia: com o volume de mídia e o de notificação zerados e só o de despertador alto, não saiu som
+ * nenhum. O v6 tinha sido criado justamente para carregar o `USAGE_ALARM` — e não carregou.
+ *
+ * A razão é que `recriarSeDivergente` **não consegue** comparar o `AudioAttributes`: a API do Notifee
+ * não o expõe na leitura do canal (`getChannel` devolve som, importância e bypass, e nada de áudio).
+ * Então um canal `v6` criado antes de o patch nativo valer sobrevive a qualquer correção de código —
+ * ele parece correto em toda verificação que o app sabe fazer.
+ *
+ * Subir a versão é a única saída que não depende de a pessoa desinstalar o app: o `v7` nasce do
+ * código já patchado, e nasce uma vez só. Se o alarme ainda sair no volume de mídia com o `v7`, a
+ * conclusão é outra e mais grave — o patch de `plugins/volume-de-despertador.js` não entrou na build,
+ * e aí o problema é da compilação, não do canal.
+ *
  * ### A armadilha da palavra "default", registrada para não voltar
  *
  * No `expo-notifications` a palavra `"default"` significava coisas **opostas** conforme a direção:
@@ -34,8 +49,8 @@ import { colors } from "@/shared/theme";
  * Aqui não há ambiguidade: `sound` é sempre nome de recurso em `res/raw`, sem extensão. O alarme
  * usa o arquivo próprio; o lembrete omite o campo para receber o som padrão do sistema.
  */
-export const CANAL_ALARME = "dose-alarm-v6";
-export const CANAL_LEMBRETE = "dose-reminder-v6";
+export const CANAL_ALARME = "dose-alarm-v7";
+export const CANAL_LEMBRETE = "dose-reminder-v7";
 
 /**
  * ⚠️ **O plugin `expo-notifications` continua no `app.json`, e não pode ser removido.**
@@ -202,6 +217,22 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
     problemas.push("bypassDnd desligado: nao fura o Nao Perturbe (falta a permissão do sistema)");
   }
 
+  /**
+   * O stream de áudio, que é o que decide se o alarme sai no volume de **despertador**.
+   *
+   * Não dá para lê-lo do canal: o `AudioAttributes` não é exposto pela API do Notifee. O que dá para
+   * saber é se `plugins/volume-de-despertador.js` rodou nesta build — ele grava esta marca no
+   * `extra` ao patchar o `ChannelManager.java`, e sem o patch todo canal sai em `USAGE_NOTIFICATION`.
+   *
+   * A distinção importa no teste: alarme no volume errado **com** a marca presente é canal velho
+   * sobrevivendo no aparelho (a versão do id precisa subir); **sem** a marca, é o patch que não
+   * entrou na compilação. Eram duas hipóteses indistinguíveis na rodada de 12/09.
+   */
+  const comPatchDeVolume = Constants.expoConfig?.extra?.volumeDeDespertadorAplicado === true;
+  if (!comPatchDeVolume) {
+    problemas.push("SEM o patch de volume: o alarme sai no volume de MIDIA, nao no de despertador");
+  }
+
   const estado = problemas.length === 0 ? "✅ OK" : `⚠️ ${problemas.join(" | ")}`;
 
   return [
@@ -210,5 +241,6 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
     `importance: ${canal.importance}`,
     `som: ${canal.sound ?? "NENHUM"}`,
     `bypassDnd: ${canal.bypassDnd}`,
+    `volume de despertador: ${comPatchDeVolume ? "patch aplicado" : "NAO APLICADO"}`,
   ].join(" · ");
 }

@@ -104,7 +104,28 @@ const PATCH = `                  // [Mapill] O stream de áudio decide qual bot�
                           .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                           .build();`;
 
-module.exports = function withVolumeDeDespertador(config) {
+/**
+ * A prova, dentro do app, de que este patch entrou na build — lida por `Constants.expoConfig.extra`.
+ *
+ * ## Por que isto existe
+ *
+ * O `AudioAttributes` de um canal **não é legível pelo JavaScript**: `getChannel` devolve som,
+ * importância e bypass, e nada de áudio. Então o app não tem como verificar sozinho se o alarme vai
+ * sair no volume de despertador — e foi por isso que o defeito sobreviveu à build de 12/09 sem
+ * ninguém perceber. O diagnóstico dizia "✅ OK" com o alarme tocando no volume de mídia.
+ *
+ * O que **é** verificável é se este plugin rodou. A marca é gravada dentro do mod, depois de o
+ * arquivo ser encontrado: presente, o `ChannelManager.java` foi patchado nesta build; ausente, não
+ * foi — e aí o alarme toca no volume de mídia por mais que o código JS esteja certo.
+ *
+ * É prova indireta (diz que o patch entrou, não que o Android honrou o stream), mas separa as duas
+ * hipóteses que de outra forma se confundem no teste em aparelho: "o patch não entrou na build" e "o
+ * canal velho sobreviveu no aparelho". Sem ela, um alarme no volume errado não diz qual das duas é —
+ * e foi exatamente essa dúvida que custou a rodada de 12/09.
+ */
+const CHAVE_DA_MARCA = "volumeDeDespertadorAplicado";
+
+function withPatchDoChannelManager(config) {
   return withDangerousMod(config, [
     "android",
     (config) => {
@@ -118,6 +139,10 @@ module.exports = function withVolumeDeDespertador(config) {
       }
 
       const conteudo = fs.readFileSync(alvo, "utf8");
+
+      // A marca vai no `extra`, que o app lê por `Constants.expoConfig.extra` — ver `CHAVE_DA_MARCA`.
+      // Dentro do mod, e não fora, porque é aqui que se sabe que o patch realmente aconteceu.
+      config.extra = { ...config.extra, [CHAVE_DA_MARCA]: true };
 
       // Já aplicado: `prebuild` roda mais de uma vez, e aplicar duas vezes quebraria o Java.
       if (conteudo.includes("ehCanalDeAlarme")) return config;
@@ -135,4 +160,12 @@ module.exports = function withVolumeDeDespertador(config) {
       return config;
     },
   ]);
+}
+
+/**
+ * O patch no Java **e** a marca que prova que ele rodou — nesta ordem, porque só faz sentido marcar
+ * o que de fato aconteceu. Se o patch lançar (alvo não encontrado), a build para antes da marca.
+ */
+module.exports = function withVolumeDeDespertador(config) {
+  return withMarcaDoPatch(withPatchDoChannelManager(config));
 };
