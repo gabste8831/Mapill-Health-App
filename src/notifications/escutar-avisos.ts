@@ -60,6 +60,19 @@ let aoAbrirDestino: AoAbrirDestino | null = null;
 const jaAbertos = new Set<string>();
 
 /**
+ * Quanto atraso uma dose ainda pode ter para irromper em **tela cheia**.
+ *
+ * Quatro horas é o intervalo em que o alarme ainda serve ao que ele promete: o da manhã ainda vale
+ * se a pessoa pegou o celular no fim da manhã; o de ontem não irrompe hoje. Passado isso, o aviso
+ * continua existindo — na bandeja, na Home, no histórico —, mas não como despertador.
+ *
+ * Não confundir com `TOLERANCIA_DE_ATRASO_EM_MINUTOS` (em `planejar-avisos-de-dose`), que resolve o
+ * problema **oposto**: lá são 2 minutos para o aviso que acabou de vencer não se perder no
+ * reagendamento. Um decide o que ainda deve ser agendado; este, o que ainda deve acordar alguém.
+ */
+const ATRASO_MAXIMO_PARA_TELA_CHEIA_EM_MS = 4 * 60 * 60 * 1000;
+
+/**
  * Esquece tudo o que já foi aberto — chamado a cada reconstrução da janela de avisos.
  *
  * A trava existe para o mesmo `DELIVERED` não abrir duas telas, e isso vale **dentro de um
@@ -200,6 +213,40 @@ async function tratar(evento: Event): Promise<void> {
        * notificação. O alarme tocava, e o que o app prometia não acontecia.
        */
       jaAbertos.delete(dados.scheduledFor);
+      return;
+    }
+
+    /**
+     * **A dose que venceu há muito tempo não irrompe em tela cheia.**
+     *
+     * Relatado pelo Gabriel em 13/09: ao adiantar o relógio, **todos** os alarmes do intervalo
+     * tocaram juntos, um por cima do outro. A causa não é o replanejamento — é o Android. Os avisos
+     * são agendados com `SET_ALARM_CLOCK` (ver `notifee-gateway`), e quando o relógio ultrapassa o
+     * timestamp de vários alarmes de uma vez, o sistema entrega **todos**, antes de o app poder
+     * replanejar coisa alguma.
+     *
+     * O relógio adiantado é artificial, mas o caso real não é: celular desligado a noite toda, sem
+     * bateria, ou um fim de semana em modo avião produzem a mesma pilha em menor escala. E o
+     * prejuízo é concreto — quem acorda com seis alarmes empilhados de doses cujo horário já passou
+     * não consegue distinguir a que ainda importa da que não importa mais, e a saída fácil (tomar o
+     * que o alarme pede) é tomar remédio fora de hora.
+     *
+     * A tela cheia é a resposta certa para "está na hora", não para "já passou". A dose atrasada
+     * **não some**: ela segue pendente na Home, no histórico e no próximo reagendamento, que é onde
+     * ela pode ser resolvida com o contexto do dia inteiro à vista. O que se recusa aqui é só o
+     * despertador — a notificação continua na bandeja, silenciosa, e ainda leva à tela do horário.
+     *
+     * Quatro horas: um alarme da manhã ainda irrompe se a pessoa pegou o celular no fim da manhã, e
+     * nenhum alarme de ontem irrompe hoje. Ver `TOLERANCIA_DE_ATRASO_EM_MINUTOS`, que resolve o
+     * problema oposto (o aviso que acabou de vencer e **deve** chegar) e por isso é muito menor.
+     *
+     * `cancelNotification(id)` mira **este** aviso, e não `dispensarAlarmeAtivo()`, que tira da
+     * bandeja todos os alarmes do app: numa pilha de atrasados, o primeiro a ser recusado levaria
+     * junto os seguintes — inclusive um que ainda estivesse dentro da janela e devesse tocar.
+     */
+    const atrasoEmMs = Date.now() - new Date(dados.scheduledFor).getTime();
+    if (atrasoEmMs > ATRASO_MAXIMO_PARA_TELA_CHEIA_EM_MS) {
+      await notifee.cancelNotification(id).catch(() => {});
       return;
     }
 
