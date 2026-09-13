@@ -10,6 +10,7 @@ import {
   type AvisoAgendado,
   type DiagnosticoDeAvisos,
 } from "@/notifications/diagnostico-de-avisos";
+import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
 import { NotifeeGateway } from "@/notifications/notifee-gateway";
 import {
   lerUltimaManutencaoDaGrade,
@@ -106,12 +107,33 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
   const [dados, setDados] = useState<DiagnosticoDeAvisos | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [manutencao, setManutencao] = useState<ManutencaoDaGrade | null>(null);
+  const [dosesGravadas, setDosesGravadas] = useState<{ iso: string; local: string }[]>([]);
 
   const carregar = useCallback(async () => {
     setDados(await diagnosticarAvisos());
     // Lido junto do resto, e não uma vez só: "Refazer a janela" chama `carregar` no fim, e é aí que
     // o resultado da manutenção que acabou de rodar aparece.
     setManutencao(lerUltimaManutencaoDaGrade());
+
+    /**
+     * As doses direto do banco, sem passar pelo planejador de avisos.
+     *
+     * É de propósito que não venham de `diagnosticarAvisos`: aquilo lista o que o **sistema** tem
+     * agendado, e com a permissão negada é sempre vazio — como no teste de 13/09, que mostrou
+     * "Agendados: 0" e não distinguia "a grade está vazia" de "não há permissão para agendar".
+     */
+    const agora = new Date();
+    const daquiADias = new Date(agora.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const comStatus = await new DoseScheduleRepository().findBetween(
+      agora.toISOString(),
+      daquiADias.toISOString(),
+    );
+    setDosesGravadas(
+      comStatus.slice(0, 5).map(({ doseSchedule }) => ({
+        iso: doseSchedule.scheduledFor,
+        local: new Date(doseSchedule.scheduledFor).toLocaleString("pt-BR"),
+      })),
+    );
   }, []);
 
   /** O fuso IANA que o app enxerga — o mesmo que `fuso-da-grade` compara para decidir se regera. */
@@ -355,6 +377,29 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
              */}
             <Linha rotulo="Fuso do aparelho" valor={fusoDoAparelho} />
             <Linha rotulo="Deslocamento" valor={deslocamentoDoAparelho} />
+            {/**
+             * As próximas doses **gravadas no banco**, com o instante cru e a hora local lado a lado.
+             *
+             * É a leitura que faltava para o fuso. A Home mostra a hora já convertida, então quando
+             * ela diz "15:00" não dá para saber se o instante gravado está errado ou se a conversão
+             * é que erra — e essas duas causas pedem correções opostas. Aqui aparecem os dois: se o
+             * ISO disser `21:00Z` e a local disser `17:00`, o banco está certo e o problema é de
+             * exibição; se o ISO já vier errado, foi a gravação.
+             */}
+            {dosesGravadas.length > 0 ? (
+              <>
+                <Linha rotulo="Próximas doses (banco)" valor={`${dosesGravadas.length} lidas`} />
+                {dosesGravadas.map((dose) => (
+                  <Linha
+                    key={dose.iso}
+                    rotulo={dose.local}
+                    valor={dose.iso}
+                  />
+                ))}
+              </>
+            ) : (
+              <Linha rotulo="Próximas doses (banco)" valor="Nenhuma" estado="ruim" />
+            )}
           </View>
         </View>
 

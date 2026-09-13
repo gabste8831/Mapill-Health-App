@@ -109,33 +109,36 @@ async function executarReagendamento(): Promise<void> {
     // horários que voltarem serão outros registros com o mesmo instante. Ver `esquecerAlarmesAbertos`.
     esquecerAlarmesAbertos();
 
-    // Sem permissão não há aviso a agendar, e pedir aqui seria pedir fora de contexto — quem pede
-    // é a tela, no momento em que a pessoa liga o lembrete.
-    if ((await gateway.consultarPermissao()) !== "concedida") {
-      await gateway.cancelarTudo();
-      return;
-    }
-
     const agora = new Date();
 
     /**
-     * A grade de doses é **posta em dia** antes de agendar, porque é dela que os avisos saem.
+     * A grade de doses é posta em dia **antes da guarda de permissão**, e a ordem é a correção.
      *
      * Duas manutenções, as duas achadas pelos testes de 13/09 e as duas invisíveis em uso de poucos
      * dias — que é o que as fez sobreviver tanto tempo:
      *
-     * - **O fuso** (passo A.6): trocar de fuso movia o horário da dose junto, e as 16:00 viravam
+     * - **O fuso** (passo A.6): trocar de fuso movia o horário da dose junto, e as 18:00 viravam
      *   15:00. Ver `regerarGradeSeOFusoMudou`.
      * - **O horizonte** (passo A.4): nada reabastecia a grade, que era gravada no cadastro 30 dias
      *   de cada vez e acabava. Um tratamento contínuo parava de avisar por volta do 30º dia, calado
      *   — agendar a partir de uma grade vazia agenda nada. Ver `reabastecerGradeDeDoses`.
      *
-     * Aqui e não noutro lugar porque esta função já é o único ponto de entrada do ciclo de vida dos
-     * avisos e já roda a cada abertura do app.
+     * ## Por que antes da permissão, e não depois
+     *
+     * Na primeira versão (13/09) isto ficava **depois** da guarda de `consultarPermissao`, e o passo
+     * D.3 falhou por causa disso: o Diagnóstico do Gabriel mostrou `Notificações: Não pedida`, e a
+     * guarda devolve cedo — então a manutenção nunca rodava. Salvar o cadastro continuava
+     * funcionando porque aquele caminho grava as doses direto, sem passar por aqui, e era esse
+     * contraste que fazia o defeito parecer coisa do reabastecimento.
+     *
+     * A guarda existe para **avisos**, não para a grade. `DoseSchedule` é dado do app — é o que a
+     * Home lista, o que o calendário mostra e o que o histórico referencia. Nada disso depende de o
+     * Android deixar notificar. Amarrar as duas coisas fazia a pessoa que negou a permissão perder
+     * também a agenda, que é o que o app faz de mais básico.
      *
      * O `catch` é deliberado: manter a grade é manutenção de fundo, e falhar nela não pode impedir o
-     * reagendamento dos avisos que já existem — que é o que mantém o app avisando hoje. A próxima
-     * abertura tenta de novo, porque as duas operações são idempotentes.
+     * reagendamento dos avisos que já existem. A próxima abertura tenta de novo, porque as duas
+     * operações são idempotentes.
      */
     try {
       /**
@@ -174,6 +177,19 @@ async function executarReagendamento(): Promise<void> {
         erro: erro instanceof Error ? erro.message : String(erro),
       };
       console.warn("[avisos] falha ao manter a grade de doses", erro);
+    }
+
+    /**
+     * Daqui para baixo é só **agendamento**, e é isso que a permissão gateia.
+     *
+     * Sem permissão não há aviso a agendar, e pedir aqui seria pedir fora de contexto — quem pede é
+     * a tela, no momento em que a pessoa liga o lembrete. A grade já foi mantida acima, e continua
+     * sendo mantida em toda abertura mesmo com a permissão negada: a Home, o calendário e o
+     * histórico dependem dela, e nenhum deles depende do Android deixar notificar.
+     */
+    if ((await gateway.consultarPermissao()) !== "concedida") {
+      await gateway.cancelarTudo();
+      return;
     }
 
     const ate = new Date(agora.getTime() + JANELA_DE_AVISOS_EM_DIAS * 24 * 60 * 60_000);
