@@ -26,6 +26,31 @@ import { reabastecerGradeDeDoses } from "./reabastecer-grade-de-doses";
 const persistsLocally = Platform.OS !== "web";
 
 /**
+ * O que a última manutenção da grade fez — lido pelo Diagnóstico.
+ *
+ * Existe porque em 13/09 o reabastecimento falhou e **nada** revelou isso: o `catch` abaixo escrevia
+ * no `console`, que ninguém lê com o APK na mão. Sem este registro, "a correção não funcionou" e "a
+ * correção nem rodou" são indistinguíveis — e foi exatamente aí que a rodada travou.
+ *
+ * Mora no módulo, e não em estado de React, porque quem chama o reagendamento não é uma tela: são os
+ * gatilhos do ciclo de vida, o listener de avisos e a volta ao primeiro plano.
+ */
+export type ManutencaoDaGrade = {
+  quando: string;
+  fusoRegerado: boolean;
+  tratamentos: number;
+  gravadas: number;
+  erro: string | null;
+};
+
+let ultimaManutencao: ManutencaoDaGrade | null = null;
+
+/** O que a última manutenção fez, ou `null` se nenhuma rodou nesta execução. */
+export function lerUltimaManutencaoDaGrade(): ManutencaoDaGrade | null {
+  return ultimaManutencao;
+}
+
+/**
  * Quantos dias de avisos ficam pendentes no sistema operacional.
  *
  * Sete, e não o tratamento inteiro: "3x ao dia por 6 meses" são ~540 avisos para **uma**
@@ -121,9 +146,33 @@ async function executarReagendamento(): Promise<void> {
        * logo em seguida as apagaria para recriá-las iguais — trabalho dobrado e, no meio do
        * caminho, uma grade misturando dois fusos.
        */
-      await regerarGradeSeOFusoMudou(agora);
-      await reabastecerGradeDeDoses(agora);
+      const fusoRegerado = await regerarGradeSeOFusoMudou(agora);
+      const reposicao = await reabastecerGradeDeDoses(agora);
+      ultimaManutencao = {
+        quando: agora.toISOString(),
+        fusoRegerado,
+        tratamentos: reposicao.tratamentos,
+        gravadas: reposicao.gravadas,
+        erro: null,
+      };
     } catch (erro) {
+      /**
+       * O erro é **guardado**, e não só registrado no console.
+       *
+       * Em 13/09 este `catch` engoliu a falha do passo D.3 e o resultado foi o pior possível: a
+       * correção não funcionou, e não havia como saber por quê — nem dose na Home, nem aviso, nem
+       * linha em lugar nenhum. `console.warn` não existe para quem testa com o APK na mão.
+       *
+       * O `catch` continua aqui porque manter a grade não pode derrubar o agendamento dos avisos que
+       * já existem. O que muda é que agora ele deixa rastro, e o Diagnóstico o mostra.
+       */
+      ultimaManutencao = {
+        quando: agora.toISOString(),
+        fusoRegerado: false,
+        tratamentos: 0,
+        gravadas: 0,
+        erro: erro instanceof Error ? erro.message : String(erro),
+      };
       console.warn("[avisos] falha ao manter a grade de doses", erro);
     }
 

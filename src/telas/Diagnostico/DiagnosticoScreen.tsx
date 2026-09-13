@@ -11,7 +11,11 @@ import {
   type DiagnosticoDeAvisos,
 } from "@/notifications/diagnostico-de-avisos";
 import { NotifeeGateway } from "@/notifications/notifee-gateway";
-import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
+import {
+  lerUltimaManutencaoDaGrade,
+  reagendarTodosOsAvisos,
+  type ManutencaoDaGrade,
+} from "@/notifications/reagendar-avisos";
 import { useEstilos } from "@/shared/theme";
 import { Button, CenteredLoader, Header } from "@/ui";
 import { criarEstilos } from "./DiagnosticoScreen.styles";
@@ -101,10 +105,29 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
   const styles = useEstilos(criarEstilos);
   const [dados, setDados] = useState<DiagnosticoDeAvisos | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const [manutencao, setManutencao] = useState<ManutencaoDaGrade | null>(null);
 
   const carregar = useCallback(async () => {
     setDados(await diagnosticarAvisos());
+    // Lido junto do resto, e não uma vez só: "Refazer a janela" chama `carregar` no fim, e é aí que
+    // o resultado da manutenção que acabou de rodar aparece.
+    setManutencao(lerUltimaManutencaoDaGrade());
   }, []);
+
+  /** O fuso IANA que o app enxerga — o mesmo que `fuso-da-grade` compara para decidir se regera. */
+  const fusoDoAparelho = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  /**
+   * O deslocamento em horas, com sinal. `getTimezoneOffset` devolve minutos **invertidos** (UTC−3 dá
+   * `180`), então o sinal é trocado aqui para ler como as pessoas escrevem: `UTC-3`.
+   */
+  const deslocamentoDoAparelho = (() => {
+    const minutos = -new Date().getTimezoneOffset();
+    const sinal = minutos < 0 ? "-" : "+";
+    const horas = Math.floor(Math.abs(minutos) / 60);
+    const resto = Math.abs(minutos) % 60;
+    return `UTC${sinal}${horas}${resto > 0 ? `:${String(resto).padStart(2, "0")}` : ""}`;
+  })();
 
   useFocusEffect(
     useCallback(() => {
@@ -274,6 +297,64 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               valor="Mídia (o esperado é despertador — ver E.1)"
               estado="ruim"
             />
+          </View>
+        </View>
+
+        {/**
+         * O que a manutenção da grade fez na última execução.
+         *
+         * Existe por causa do 13/09: o reabastecimento falhou, o `catch` engoliu o erro, e o teste
+         * não tinha como distinguir "a correção não funcionou" de "a correção nem rodou". Sem esta
+         * seção, a única saída era ler o código e adivinhar.
+         *
+         * "Ainda não rodou" é resposta legítima: a manutenção acontece dentro de
+         * `reagendarTodosOsAvisos`, então basta tocar em "Refazer a janela de avisos" abaixo.
+         */}
+        <View style={styles.secao}>
+          <Text style={styles.secaoTitulo}>Manutenção da grade</Text>
+          <View style={styles.cartao}>
+            {manutencao === null ? (
+              <Text style={styles.vazio}>
+                Ainda não rodou nesta execução. Toque em &quot;Refazer a janela de avisos&quot;.
+              </Text>
+            ) : (
+              <>
+                {manutencao.erro !== null ? (
+                  <Linha rotulo="Erro" valor={manutencao.erro} estado="ruim" />
+                ) : (
+                  <Linha rotulo="Estado" valor="Sem erro" estado="ok" />
+                )}
+                {/* Zero tratamentos explica um reabastecimento que não fez nada — e é diferente de
+                    ter tratamentos e não gravar, que significa grade já completa. */}
+                <Linha
+                  rotulo="Tratamentos ativos"
+                  valor={String(manutencao.tratamentos)}
+                  estado={manutencao.tratamentos > 0 ? "ok" : "ruim"}
+                />
+                <Linha rotulo="Doses gravadas" valor={String(manutencao.gravadas)} />
+                <Linha
+                  rotulo="Fuso mudou"
+                  valor={manutencao.fusoRegerado ? "Sim, grade regerada" : "Não"}
+                />
+                <Linha
+                  rotulo="Rodou em"
+                  valor={new Date(manutencao.quando).toLocaleString("pt-BR")}
+                />
+              </>
+            )}
+            {/**
+             * O fuso do aparelho e o deslocamento — sempre visíveis, mesmo sem manutenção.
+             *
+             * No teste de 13/09 a dose das 18:00 apareceu às 15:00, e isso **não** é a conversão de
+             * Rio do Sul para Manaus, que daria 17:00. Três horas é o próprio deslocamento de Rio do
+             * Sul, o que aponta para um instante UTC sendo lido como hora de parede em algum ponto —
+             * e não para a troca de fuso em si.
+             *
+             * Sem ver o fuso que o app enxerga, distinguir essas duas explicações é chute. Estas
+             * linhas existem para o próximo teste começar com o dado na mão.
+             */}
+            <Linha rotulo="Fuso do aparelho" valor={fusoDoAparelho} />
+            <Linha rotulo="Deslocamento" valor={deslocamentoDoAparelho} />
           </View>
         </View>
 

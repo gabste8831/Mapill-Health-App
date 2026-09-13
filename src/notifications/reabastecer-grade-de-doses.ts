@@ -10,6 +10,21 @@ function syncFields() {
 }
 
 /**
+ * O que o reabastecimento fez — para o Diagnóstico poder **mostrar**.
+ *
+ * Na rodada de 13/09 esta função rodou dentro de um `try/catch` que engolia o erro, e o passo D.3
+ * falhou sem nada aparecer em lugar nenhum: nem a dose na Home, nem um aviso, nem uma linha. Uma
+ * manutenção que falha calada é o mesmo modo de falha que o defeito original — e pior, porque agora
+ * há código dando a impressão de que o problema foi resolvido.
+ */
+export type ResultadoDoReabastecimento = {
+  /** Quantos tratamentos ativos foram considerados. Zero explica um reabastecimento que não fez nada. */
+  tratamentos: number;
+  /** Quantas doses novas entraram no banco. Zero com tratamentos > 0 significa grade já completa. */
+  gravadas: number;
+};
+
+/**
  * Até onde a grade de doses é mantida cheia, em dias.
  *
  * O mesmo valor que o cadastro usa ao salvar (`SCHEDULE_HORIZON_DAYS` em
@@ -55,9 +70,10 @@ const HORIZONTE_EM_DIAS = 30;
  * Nunca lança: reabastecer é manutenção de fundo, e falhar nela não pode impedir o reagendamento
  * dos avisos que já existem. O erro sobe para quem chama registrar.
  */
-export async function reabastecerGradeDeDoses(agora: Date): Promise<void> {
+export async function reabastecerGradeDeDoses(agora: Date): Promise<ResultadoDoReabastecimento> {
   const prescriptionRepository = new PrescriptionRepository();
   const doseScheduleRepository = new DoseScheduleRepository();
+  let gravadas = 0;
 
   /**
    * `findActive` e não `findAll`: além de descartar o que foi excluído (que seria alarme órfão, o
@@ -91,6 +107,9 @@ export async function reabastecerGradeDeDoses(agora: Date): Promise<void> {
         ...candidato,
         ...syncFields(),
       });
+      gravadas += 1;
     }
   }
+
+  return { tratamentos: prescriptions.length, gravadas };
 }
