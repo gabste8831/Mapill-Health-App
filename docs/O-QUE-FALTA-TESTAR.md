@@ -7,34 +7,21 @@
 
 ## Resumo
 
-**Quase tudo aqui pode ser testado agora**, na build de **desenvolvimento** de 13/09 — versionCode
-3, a do `--dev-client`. Ela conecta no Metro, então correção em TypeScript chega recarregando (`r` no
-terminal), sem build nova.
+**As Partes A, B e D foram validadas em 13/09** — a A em aparelho com a preview, a B e a D na build
+de desenvolvimento. O que sobrou está listado abaixo, e **tudo espera uma build de preview nova**.
 
-**Três coisas não fecham nesta build:** o **E.1** (patch nativo), o **C.1/C.2** (código nativo), e o
-**D.5 com o app fora dos recentes** — ali o Metro precisa reentregar o bundle inteiro antes de a tela
-montar, o que não acontece numa build real. Esses ficam para a próxima preview.
-
-A Parte A foi executada inteira em 13/09 e saiu deste documento — o que ela achou virou correção, e
-as correções estão listadas abaixo.
-
-| O que conferir | Quantos |
+| O que falta | Por que espera a preview |
 |---|---|
-| As correções de 11–12/09 (Parte B) | 13 itens |
-| Os ajustes de 12/09 à tarde | 7 itens |
-| **As correções de 13/09** | **1 item** (D.5) |
-| Bugs conhecidos, ainda sem correção | 2 (C.1, C.2) |
-| Decidido e fora de escopo | 2 (**E.1** volume, **E.2** fuso) |
+| **A tela azul** — B.4, B.7, B.8, B.17b, B.20 e o D.5 fora dos recentes | Numa build de desenvolvimento o bundle vem do Metro: tirar o app dos recentes mata o processo, e a Activity precisa rebaixar tudo antes de a tela montar. O cenário fica muito mais lento do que numa build real |
+| **B.9** — a notificação de estoque às 00:01 | Depende de virar o dia |
+| **E.1** — o alarme no volume de despertador | Patch nativo. Ainda **não implementado** — ver a Parte E |
+| **C.1 e C.2** — os dois bugs conhecidos | Código nativo Android. Ainda **sem correção** |
 
-> **Dois assuntos saíram da fila em 13/09.** O **volume do alarme** (E.1) continua no volume de
-> mídia — a causa está diagnosticada e o caminho levantado, para depois do resto. E o **fuso** (E.2)
-> foi decidido: a dose segue o **instante**, então 21:00 em São Paulo toca às 20:00 em Manaus, e
-> isso está certo.
+> **O fuso (E.2) foi decidido em 13/09:** a dose segue o **instante**, então 21:00 em São Paulo toca
+> às 20:00 em Manaus, e isso está certo. Saiu da fila de testes.
 
-> **Ao testar, deixe o volume de mídia alto** — enquanto o E.1 não for feito, o alarme sai por ele, e
-> com a mídia baixa o passo não mede o que deveria.
-
-**Validado o que resta, o app fica funcional em tudo menos o volume do alarme.**
+> **Ao testar o alarme, deixe o volume de mídia alto** — enquanto o E.1 não for feito, o som sai por
+> ele, e com a mídia baixa o passo não mede o que deveria.
 
 ---
 
@@ -79,45 +66,48 @@ correção funcionando de passagem.
 
 # PARTE B — As correções de 11–12/09
 
-Entraram depois do APK de preview que estava instalado, e por isso o documento dizia "espera a
-próxima build". **Isso não vale mais desde 13/09:** com a build de desenvolvimento, este código
-chega pelo Metro — é só recarregar (`r` no terminal do Expo). Tudo aqui é TypeScript.
+**✅ Validada em 13/09**, na build de desenvolvimento, com as exceções marcadas abaixo. As telas, os
+painéis de permissão, o tema escuro e os cartões da Home estão conferidos.
 
-| # | O que conferir | Commit |
+O que **não** foi fechado são os passos que dependem da **tela azul** (B.4, B.7, B.8, B.20) e o
+aviso de estoque das 00:01 (B.9) — os primeiros porque o Metro atrapalha o cenário, o último porque
+depende de virar o dia. Ficam para a próxima preview, junto do D.5.
+
+| # | O que conferir | Estado |
 |---|---|---|
-| B.1 | Marcar "me avisar" **sem escolher prazo**, salvar, reabrir em editar → estoque → alterar: **a caixa continua marcada** | `8e85dfb` |
-| B.2 | ✅ *Conferido em 12/09 no Diagnóstico* — o agendamento aparece e continua lá. Falta a **notificação chegar** (ver B.9) | `4cc90e6` `41640b4` |
-| B.3 | Marcar o aviso **sem prazo**: o cartão aparece na tela inicial na semana em que o estoque acaba | `4cc90e6` |
-| B.4 | Alarme → editar para notificação → salvar → voltar para alarme: **a tela azul sobe nas duas vezes** | `a3aa220` |
-| B.5 | Cadastrar só aviso de estoque ou compromisso, **sem** alarme de dose, e negar a permissão de notificação: o painel da tela inicial aparece | `358e55c` |
-| B.6 | `Ajustes → como funcionam os alertas`: há parágrafo próprio sobre o início automático, e o painel de permissões traz a nota do fabricante | `358e55c` |
-| B.7 | **2 ou 3 remédios** no mesmo horário: a tela azul lista cada um com miniatura, nome, dose, orientação de tomada e local — tudo legível sem rolar | `930082a` `73df26a` |
-| B.8 | **4 ou mais** no mesmo horário: a tela azul mostra só a contagem e o botão de abrir o app | `930082a` |
-| B.9 | 🔴 **A notificação de estoque chega.** Cadastre um tratamento **com data de fim** (ex.: 7 dias) e estoque que dê conta dele, com antecedência de 3 dias. O aviso tem de chegar às 00:01 do dia previsto — e repita **sem** antecedência, onde só o aviso do dia em que acaba existe | `41640b4` |
-| B.10 | Na tela de **Alertas e permissões**: as linhas têm fundo branco com sombra (não borda), sem itálico, e a seta cinza. Toque numa: ela abre a tela do sistema, e ao voltar o estado já está atualizado | `1f6fb56` `8554f0e` |
-| B.11 | O bloco **"Confira as permissões"** aparece nas cinco telas que configuram algo dependente de autorização (lembrete de dose, estoque, compromisso, receita, medicamento) e fica **vermelho** enquanto o painel "Seus alarmes não vão funcionar" estiver na tela inicial | `78771dc` |
-| B.12 | Na tela inicial: **não há** lista de permissões nem placar "2 de 3", e a seção "Autorizações do aparelho" no rodapé leva à tela de alertas | `26c557f` |
-| B.13 | 🔴 **A tela de Alertas e permissões no tema escuro** e no alto contraste. Até 12/09 ela ignorava o tema por completo — texto claro sobre fundo claro. Vale trocar o tema em Ajustes e voltar nela | `1f6fb56` |
+| B.1 | Marcar "me avisar" sem prazo, salvar, reabrir em editar → estoque → alterar: a caixa continua marcada | ✅ |
+| B.2 | O agendamento do aviso de estoque aparece no Diagnóstico e continua lá | ✅ |
+| B.3 | Aviso **sem prazo**: o cartão aparece na tela inicial na semana em que o estoque acaba | ✅ |
+| B.4 | Alarme → editar para notificação → salvar → voltar para alarme: a tela azul sobe nas duas vezes | ⏳ **preview** |
+| B.5 | Só aviso de estoque ou compromisso, sem alarme, com a permissão negada: o painel da Home aparece | ✅ |
+| B.6 | `Ajustes → como funcionam os alertas`: parágrafo do início automático e a nota do fabricante | ✅ |
+| B.7 | **2 ou 3 remédios** no mesmo horário: a tela azul lista cada um, legível sem rolar | ⏳ **preview** |
+| B.8 | **4 ou mais** no mesmo horário: a tela azul mostra a contagem e o botão de abrir o app | ⏳ **preview** |
+| B.9 | 🔴 **A notificação de estoque chega às 00:01.** Tratamento com data de fim e estoque que dê conta dele, com 3 dias de antecedência — e repita **sem** antecedência | ⏳ **vira o dia** |
+| B.10 | **Alertas e permissões**: fundo branco com sombra, sem itálico, seta cinza; toque abre a tela do sistema e o estado volta atualizado | ✅ |
+| B.11 | O bloco "Confira as permissões" nas cinco telas, vermelho enquanto o painel da Home estiver lá | ✅ |
+| B.12 | Na tela inicial: sem lista de permissões e sem placar "2 de 3"; o rodapé leva à tela de alertas | ✅ |
+| B.13 | A tela de Alertas e permissões no **tema escuro** e no alto contraste | ✅ |
 
-## Os sete ajustes de 12/09 (tarde)
+## Os ajustes de 12/09 (tarde)
 
-Levantados pelo Gabriel usando a build `489a67a`. Como o resto da Parte B, chegam pelo Metro.
+Levantados pelo Gabriel usando a build `489a67a`. **✅ Validados em 13/09**, com as exceções abaixo.
 
-| # | O que conferir | Como saber que passou |
+| # | O que conferir | Estado |
 |---|---|---|
-| B.14 | ⏸️ **Virou E.1** — adiado por decisão, com a causa diagnosticada | — |
-| B.15 | ⏸️ Depende do E.1 | — |
-| B.16 | ⏸️ Depende do E.1 — enquanto o alarme sai no volume de mídia, comparar os dois canais não diz nada | — |
-| B.17 | ➡️ **Virou D.5** — a correção de 12/09 não fechou o caso, e há uma nova | — |
-| B.17b | 🔴 **A contraprova do D.5**, que é onde o risco está: celular **desbloqueado**, usando outro app (navegador, WhatsApp), e o alarme dispara. **Dá para testar nesta build** — o app está vivo, então o Metro não atrapalha | Chega a notificação com som em loop, e **não** uma tela invisível. Se o som vier duplicado ou sem nada na tela, a guarda errou o caso e eu preciso saber |
-| B.18 | Na seção de **lembretes** do cadastro de medicação, com permissões pendentes: aparece **um** bloco de permissão, não dois | Só o painel "Seus alarmes não vão funcionar", com o botão. Concedidas as verificáveis, ele dá lugar ao aviso azul |
-| B.19 | No **tema escuro**, a opção de lembrete selecionada: o subtítulo do botão azul é legível | Texto claro sobre o azul. Antes era 2,08:1, escuro sobre escuro |
-| B.20 | **4 ou mais remédios** no mesmo horário: a tela azul mostra nome e dose de cada um | Não há mais o vazio entre o horário e os botões |
-| B.21 | Na tela **"Hora do remédio"**: foto, dose, orientação de tomada, **onde está guardado** e a observação do tratamento | Os dois últimos são novos. Cadastre um remédio com local e observação para conferir |
-| B.22 | Na **lista de remédios**, um sino ao lado do nome de quem tem lembrete | Despertador para alarme, sino para notificação, nada para "nenhum aviso" |
+| B.14 | O alarme no volume de despertador | ⏸️ **Virou E.1** |
+| B.15 | O alarme toca no silencioso | ⏸️ Depende do E.1 |
+| B.16 | O lembrete continua no volume de aviso e respeita o silencioso | ⏸️ Depende do E.1 |
+| B.17 | A tela azul com o app nos recentes | ✅ *(o caso que falhava em 12/09; ver D.5)* |
+| B.17b | 🔴 **A contraprova do D.5:** celular **desbloqueado**, usando outro app, e o alarme dispara. Deve chegar a notificação com som em loop, e **não** uma tela invisível | ⏳ **preview** |
+| B.18 | Na seção de lembretes, com permissões pendentes: **um** bloco de permissão, não dois | ✅ |
+| B.19 | No tema escuro, o subtítulo do botão azul de lembrete é legível | ✅ |
+| B.20 | **4 ou mais remédios** no mesmo horário: a tela azul mostra nome e dose de cada um | ⏳ **preview** |
+| B.21 | Na tela "Hora do remédio": foto, dose, orientação, **onde está guardado** e a observação | ✅ |
+| B.22 | Na lista de remédios, o sino ao lado de quem tem lembrete | ✅ |
 
 E o **bloco 20 do estoque**, que depende de B.1 e B.9: cadastrar na véspera e conferir se a
-notificação chega às 00:01.
+notificação chega às 00:01. Vai junto com o B.9.
 
 ---
 
@@ -263,9 +253,9 @@ agendadas. É alarme órfão por um caminho que o bloco 16 não testa.
 Só o que falhar, com o número do passo:
 
 ```
-D.5 passou nas 4 tentativas
-B.9 falhou — a notificacao de estoque nao chegou
-B.13 falhou — texto claro sobre fundo claro no tema escuro
+D.5 passou nas 4 tentativas, fora dos recentes
+B.7 falhou — o local do remedio nao apareceu na tela azul
+B.9 passou — o aviso chegou as 00:01
 resto ok
 ```
 
