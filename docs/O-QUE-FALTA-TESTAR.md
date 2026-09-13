@@ -1,4 +1,4 @@
-# O que falta testar
+﻿# O que falta testar
 
 > Documento de trabalho, criado em 12/09. Só o que ainda não foi validado em aparelho.
 >
@@ -7,128 +7,41 @@
 
 ## Resumo
 
-| | Quantos | Precisa de build nova? |
-|---|---|---|
-| Casos de borda do alarme (bloco 19) | 7 passos | Não |
-| Bateria (18.3) | 1 passo | Não |
-| As correções de 11–12/09 | 13 itens | **Sim** |
-| Os sete ajustes de 12/09 (tarde) | 9 itens | **Sim** |
-| Bugs conhecidos, ainda sem correção | 2 | — |
+**Tudo neste documento espera a build preview de 13/09.** A Parte A foi executada inteira em 13/09 e
+saiu daqui — o que ela achou virou correção, e as correções estão listadas abaixo.
 
-> **Build de 12/09 (preview, com Diagnóstico).** Ela fecha a Parte B inteira. O agendamento do aviso
-> de estoque já foi conferido no Diagnóstico pelo Gabriel em 12/09 — o que falta é a notificação
-> **chegar** no aparelho, que é outra coisa e nunca foi vista.
+| O que conferir | Quantos |
+|---|---|
+| As correções de 11–12/09 (Parte B) | 13 itens |
+| Os ajustes de 12/09 à tarde | 9 itens |
+| **As correções de 13/09** | **5 itens** |
+| Bugs conhecidos, ainda sem correção | 1 (C.2) |
+
+> **Comece pelo D.1** (volume do alarme). Ele é o único item cuja correção não pôde ser verificada
+> sem aparelho, e se ele falhar a leitura dos demais muda.
 
 ---
 
-# PARTE A — Dá para testar agora
+# PARTE D — As correções de 13/09
 
-Com o APK que está instalado. **O Autostart precisa estar ligado** (Configurações → Apps →
-Gerenciar apps → Mapill → Autostart), e reinstalar o app o desliga de novo.
+Saíram da rodada da Parte A, que fechou nesse dia. Quatro bugs corrigidos e um item de conferência.
 
-## A.1 — Dose já confirmada não toca
+| # | O que conferir | Como saber que passou |
+|---|---|---|
+| D.1 | 🔴 **O alarme sai no volume de despertador.** Zere o volume de **mídia** e o de **notificação**, deixe só o de **despertador** alto, e espere um alarme | Toca. Foi assim que o defeito apareceu em 13/09: com mídia zerada, não saía som — prova de que o alarme usava o stream de mídia. Confira também em `Ajustes → Diagnóstico`: a linha do canal agora diz `volume de despertador: patch aplicado` |
+| D.2 | 🔴 **O alarme toca no silencioso e no Não perturbe** | Mesma correção do D.1 — o volume de despertador é o que o silencioso não corta. Se o D.1 passar e este falhar, é a permissão de política do Não Perturbe, não o canal |
+| D.3 | 🔴 **O tratamento contínuo passa dos 30 dias.** Remédio de uso contínuo, hora automática desligada, relógio adiantado **31+ dias**, e então **feche e reabra o app** | A Home mostra a dose do dia **sem** você reabrir o cadastro. Antes, só salvar o cadastro de novo trazia as doses de volta. Adiante mais 31 dias e repita |
+| D.4 | 🔴 **O horário não escorrega com o fuso.** Remédio às 16:00, troque o fuso para Manaus, **reabra o app** | Continua às 16:00 (não 15:00). Devolva o fuso, reabra, e confira de novo. A regeração roda na **abertura** — trocar o fuso com o app aberto só vale no próximo ciclo |
+| D.5 | 🔴 **A tela azul sobe e fica.** App **fora dos recentes**, celular parado, tela bloqueada, alarme para daqui a alguns minutos | A tela azul aparece e **permanece** — não é trocada pela de "Hora do remédio". **Repita 3 ou 4 vezes, em momentos diferentes:** é uma corrida de tempo, e um acerto isolado não prova nada |
 
-1. Cadastre `Tomei Antes`, alarme para **daqui a 4 min**
-2. Na tela inicial, **confirme essa dose** antes da hora
-3. Feche o app e espere o horário passar
+> **Sobre o D.5.** É o item mais frágil da lista e o que mais precisa de repetição. A correção
+> anterior (12/09) falhava só no arranque frio — celular parado há horas, processo subindo do zero —,
+> que é justamente o cenário de madrugada. Testar com o app recém-usado esconde o defeito.
 
-✅ **Nada toca** — nem tela cheia, nem notificação.
-
-❌ Se tocar, o cancelamento individual não alcançou o agendador. É alarme órfão pelo caminho da
-Home, e não pela edição do cadastro.
-
-## A.2 — Dois horários atravessando a meia-noite
-
-1. Cadastre `Meia Noite` com **dois horários**: `23:50` e `00:10`
-2. Olhe a tela inicial
-
-✅ A dose das `00:10` aparece **no dia seguinte**, não hoje.
-
-Se não quiser esperar a virada, mude para daqui a 3 e 8 min e confirme que os dois tocam.
-
-## A.3 — Não perturbe, e depois o mudo
-
-1. Cadastre `Silencioso`, alarme para **daqui a 3 min**
-2. Ative o **Não perturbe** do Android
-3. Feche o app e bloqueie a tela
-
-✅ **Toca mesmo assim.** O app promete "toca alto, mesmo no silencioso".
-
-Depois **repita** com o celular no **mudo** (botão de volume, não o Não perturbe).
-
-✅ Toca igual.
-
-> Anote os dois separadamente: eles falham por motivos diferentes. Se o Não perturbe silenciar, é a
-> permissão de política de notificação; se o mudo silenciar, é o canal.
-
-## A.4 — 🔴 O tratamento contínuo sobrevive a 30 dias?
-
-**O passo mais importante deste documento.** Ele responde uma dúvida achada por leitura de código,
-não por teste.
-
-As doses são gravadas no banco em blocos de **30 dias**. O comentário do `SCHEDULE_HORIZON_DAYS` diz
-que a janela "é reabastecida depois", mas não foi encontrado código que faça isso.
-
-1. Cadastre um remédio de **uso contínuo**, 1x ao dia
-2. Nas configurações do Android, **desligue a hora automática**
-3. **Adiante o relógio 31 dias**
-4. Volte à tela inicial do app
-
-✅ A tela inicial **continua mostrando a dose do dia**.
-
-❌ **Se ficar vazia, a suspeita se confirma** — e é o pior modo de falhar deste app: os avisos param
-por volta do 30º dia, e nada denuncia. Anote com destaque.
-
-*(Deixe a hora adiantada, o passo seguinte aproveita.)*
-
-## A.5 — Relógio mudado à mão
-
-1. Cadastre `Relogio`, alarme para **daqui a 2 h**
-2. Feche o app
-3. Com a hora automática desligada, adiante o relógio para **5 min antes** do horário da dose
-4. Espere
-
-✅ O aviso chega no horário **do relógio novo**.
-
-⚠️ Se não chegar, abra o app e veja se ele chega então. Isso decide se o app precisa reagir à
-mudança de relógio ou se basta a próxima abertura.
-
-## A.6 — Fuso horário
-
-1. Com a hora automática ainda desligada, mude o **fuso** para um vizinho (Fortaleza ou Manaus)
-2. Abra o app
-
-✅ A dose das 08:00 **continua às 08:00**. Quem toma remédio às 8 da manhã toma às 8 da manhã em
-qualquer lugar — o horário é uma promessa sobre o relógio de parede, não um instante absoluto.
-
-❌ Se escorregar para 07:00 ou 09:00, é o defeito mais sutil deste bloco.
-
-**Devolva o fuso e a hora automática ao terminar.**
-
-## A.7 — App reinstalado
-
-1. Com um alarme cadastrado para algumas horas à frente, **desinstale o Mapill**
-2. **Instale de novo** e **não abra**
-3. Espere o horário
-
-✅ **Nada chega** — e isso é o correto: desinstalar leva os agendamentos junto.
-
-4. ⚠️ **Religue o Autostart** (a reinstalação o desligou)
-5. Abra o app **uma vez** e feche
-
-✅ A partir daí os avisos **voltam a chegar**, sem reeditar nada.
-
-❌ Se não voltarem, existe um caminho em que a pessoa fica sem lembrete nenhum e sem nenhum sinal
-disso.
-
-> Este passo apaga os dados locais se não houver conta vinculada. Faça-o por último.
-
-## A.8 — Bateria (o teste da noite)
-
-1. Deixe um alarme para **daqui a 8–12 h** (a noite serve)
-2. Celular **sem carregador**, app fechado, economia de bateria do fabricante ativa
-
-🔬 Chegou? No horário ou atrasado?
+**Não precisa testar:** o empilhamento de alarmes atrasados (dose vencida há mais de 4 h não irrompe
+mais em tela cheia). Foi corrigido junto, por decisão do Gabriel em 13/09 não entra na fila de
+validação — o cenário é raro e a falha, se houver, é recusar um alarme velho, não perder um atual.
+Se ao adiantar o relógio no D.3 **não** aparecer pilha de telas azuis, é essa correção funcionando.
 
 ---
 
@@ -159,11 +72,11 @@ Levantados pelo Gabriel usando a build `489a67a`. **Todos precisam de build nova
 
 | # | O que conferir | Como saber que passou |
 |---|---|---|
-| B.14 | 🔴 **O alarme sai no volume de despertador.** Com o alarme tocando, aperte o volume: o controle que aparece tem de ser o do **relógio**, não o de mídia | O ícone no controle de volume é um despertador |
-| B.15 | 🔴 **O alarme toca no silencioso.** Celular no mudo pelo botão de volume, alarme para daqui a 3 min | Toca alto mesmo no mudo. É a mesma correção do B.14: o volume de despertador é o que o silencioso não corta |
-| B.16 | O lembrete (modo notificação) **continua** no volume de aviso, e continua respeitando o silencioso | No mudo, o lembrete não toca — e isso é o correto |
-| B.17 | 🔴 **A tela azul com o app nos recentes.** Bloqueie o celular com o Mapill **aberto nos recentes** e espere o alarme | A tela azul sobe **e fica**. Antes, ela era trocada pela tela "Hora do remédio" tão rápido que parecia nunca ter aparecido |
-| B.17b | 🔴 **A contraprova do B.17**, que é onde o risco está: celular **desbloqueado**, usando outro app (navegador, WhatsApp), e o alarme dispara | Chega a notificação com som em loop, e **não** uma tela invisível. Se o som vier duplicado ou sem nada na tela, a espera errou o caso e eu preciso saber |
+| B.14 | ➡️ **Virou D.1** — o teste de 13/09 mostrou que este ajuste não pegou, e a correção nova está lá | — |
+| B.15 | ➡️ **Virou D.2**, pelo mesmo motivo | — |
+| B.16 | O lembrete (modo notificação) **continua** no volume de aviso, e continua respeitando o silencioso | No mudo, o lembrete não toca — e isso é o correto. É a contraprova do D.1: se este também tocar no mudo, os dois canais viraram a mesma coisa |
+| B.17 | ➡️ **Virou D.5** — a correção de 12/09 não fechou o caso, e há uma nova | — |
+| B.17b | 🔴 **A contraprova do D.5**, que é onde o risco está: celular **desbloqueado**, usando outro app (navegador, WhatsApp), e o alarme dispara | Chega a notificação com som em loop, e **não** uma tela invisível. Se o som vier duplicado ou sem nada na tela, a guarda errou o caso e eu preciso saber |
 | B.18 | Na seção de **lembretes** do cadastro de medicação, com permissões pendentes: aparece **um** bloco de permissão, não dois | Só o painel "Seus alarmes não vão funcionar", com o botão. Concedidas as verificáveis, ele dá lugar ao aviso azul |
 | B.19 | No **tema escuro**, a opção de lembrete selecionada: o subtítulo do botão azul é legível | Texto claro sobre o azul. Antes era 2,08:1, escuro sobre escuro |
 | B.20 | **4 ou mais remédios** no mesmo horário: a tela azul mostra nome e dose de cada um | Não há mais o vazio entre o horário e os botões |
@@ -177,7 +90,11 @@ notificação chega às 00:01.
 
 # PARTE C — Bugs conhecidos, ainda sem correção
 
-Estes dois **não** foram corrigidos. Você vai encontrá-los se testar, e é esperado.
+Estes dois **não** foram corrigidos. Você vai encontrá-los se testar, e é esperado — não são falha
+da build nova.
+
+Os quatro bugs que saíram da rodada de 13/09 (grade de 30 dias, fuso, tela azul, alarmes empilhados)
+foram corrigidos e estão na **Parte D**, esperando validação.
 
 ## C.1 — 🔴 Responder o alarme dá acesso ao app sem desbloquear
 
@@ -208,10 +125,14 @@ agendadas. É alarme órfão por um caminho que o bloco 16 não testa.
 Só o que falhar, com o número do passo:
 
 ```
-A.3 falhou — o Não perturbe silenciou o alarme
-A.4 passou — a Home continuou mostrando a dose depois de 31 dias
+D.1 falhou — com midia zerada nao saiu som
+D.4 passou — 16:00 continuou 16:00 em Manaus
+D.5 passou nas 4 tentativas
 resto ok
 ```
 
 Os passos marcados 🔴 valem anotar **mesmo quando passam** — são eles que fecham o C1 formalmente no
 plano de desenvolvimento.
+
+**No D.5, diga quantas vezes tentou.** "Passou" e "passou nas 4 tentativas" são informações
+diferentes num defeito que é corrida de tempo: o primeiro não distingue correção de sorte.
