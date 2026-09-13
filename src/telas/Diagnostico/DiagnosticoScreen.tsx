@@ -258,20 +258,21 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                 Application.nativeBuildVersion ?? "?"
               })`}
             />
-            {/* A marca do patch de volume, que decide se o alarme sai no stream de despertador. O
-                `AudioAttributes` do canal não é legível pelo JS, então esta é a aproximação
-                possível: diz que `plugins/volume-de-despertador.js` está registrado, e o plugin
-                falha a build se não conseguir aplicar o patch. Ver `canais-notifee`. */}
+            {/**
+             * O alarme **sai no volume de mídia**, e esta linha diz isso em vez de esconder.
+             *
+             * O patch de `USAGE_ALARM` no canal está aplicado — verificado rodando `expo prebuild`
+             * em 13/09 —, e mesmo assim não funciona: quem toca o som da notificação é o
+             * NotificationManager, e ele usa o stream dele independente do que o canal peça. A
+             * correção é o app tocar o próprio som (ver E.1 em `docs/O-QUE-FALTA-TESTAR.md`).
+             *
+             * Marcada como "ruim" de propósito: é uma limitação conhecida e ainda aberta, e um "OK"
+             * aqui foi exatamente o que deixou o defeito passar na build de 12/09.
+             */}
             <Linha
-              rotulo="Volume de despertador"
-              valor={
-                Constants.expoConfig?.extra?.volumeDeDespertadorAplicado === true
-                  ? "Patch aplicado"
-                  : "NÃO APLICADO"
-              }
-              estado={
-                Constants.expoConfig?.extra?.volumeDeDespertadorAplicado === true ? "ok" : "ruim"
-              }
+              rotulo="Volume do alarme"
+              valor="Mídia (o esperado é despertador — ver E.1)"
+              estado="ruim"
             />
           </View>
         </View>

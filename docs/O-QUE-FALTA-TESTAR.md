@@ -13,12 +13,18 @@ saiu daqui — o que ela achou virou correção, e as correções estão listada
 | O que conferir | Quantos |
 |---|---|
 | As correções de 11–12/09 (Parte B) | 13 itens |
-| Os ajustes de 12/09 à tarde | 9 itens |
-| **As correções de 13/09** | **5 itens** |
-| Bugs conhecidos, ainda sem correção | 1 (C.2) |
+| Os ajustes de 12/09 à tarde | 7 itens |
+| **As correções de 13/09** | **3 itens** (D.3, D.4, D.5) |
+| Bugs conhecidos, ainda sem correção | 2 (C.1, C.2) |
+| Adiado por decisão | 1 (**E.1** — volume do alarme) |
 
-> **Comece pelo D.1** (volume do alarme). Ele é o único item cuja correção não pôde ser verificada
-> sem aparelho, e se ele falhar a leitura dos demais muda.
+> **O volume do alarme saiu da fila.** Testado nesta build e continua no volume de mídia; a causa
+> está diagnosticada e o caminho levantado na **Parte E**, para depois de todo o resto. Até lá,
+> **deixe o volume de mídia alto ao testar** — senão o alarme não toca e o passo não mede o que
+> deveria.
+
+**Validado o que resta, o app fica funcional em tudo menos essa característica.** É o combinado de
+13/09: fechar o resto primeiro, e só então mexer na arquitetura do som.
 
 ---
 
@@ -28,8 +34,8 @@ Saíram da rodada da Parte A, que fechou nesse dia. Quatro bugs corrigidos e um 
 
 | # | O que conferir | Como saber que passou |
 |---|---|---|
-| D.1 | 🔴 **O alarme sai no volume de despertador.** Zere o volume de **mídia** e o de **notificação**, deixe só o de **despertador** alto, e espere um alarme | Toca. Foi assim que o defeito apareceu em 13/09: com mídia zerada, não saía som — prova de que o alarme usava o stream de mídia. Confira também em `Ajustes → Diagnóstico`: a linha do canal agora diz `volume de despertador: patch aplicado` |
-| D.2 | 🔴 **O alarme toca no silencioso e no Não perturbe** | Mesma correção do D.1 — o volume de despertador é o que o silencioso não corta. Se o D.1 passar e este falhar, é a permissão de política do Não Perturbe, não o canal |
+| D.1 | ⏸️ **O volume do alarme saiu da fila.** Testado em 13/09 nesta build: continua no volume de mídia. Não é ajuste, é mudança de arquitetura — ver **E.1** | — |
+| D.2 | ⏸️ Depende do D.1, pelo mesmo motivo | — |
 | D.3 | 🔴 **O tratamento contínuo passa dos 30 dias.** Remédio de uso contínuo, hora automática desligada, relógio adiantado **31+ dias**, e então **feche e reabra o app** | A Home mostra a dose do dia **sem** você reabrir o cadastro. Antes, só salvar o cadastro de novo trazia as doses de volta. Adiante mais 31 dias e repita |
 | D.4 | 🔴 **O horário não escorrega com o fuso.** Remédio às 16:00, troque o fuso para Manaus, **reabra o app** | Continua às 16:00 (não 15:00). Devolva o fuso, reabra, e confira de novo. A regeração roda na **abertura** — trocar o fuso com o app aberto só vale no próximo ciclo |
 | D.5 | 🔴 **A tela azul sobe e fica.** App **fora dos recentes**, celular parado, tela bloqueada, alarme para daqui a alguns minutos | A tela azul aparece e **permanece** — não é trocada pela de "Hora do remédio". **Repita 3 ou 4 vezes, em momentos diferentes:** é uma corrida de tempo, e um acerto isolado não prova nada |
@@ -37,6 +43,10 @@ Saíram da rodada da Parte A, que fechou nesse dia. Quatro bugs corrigidos e um 
 > **Sobre o D.5.** É o item mais frágil da lista e o que mais precisa de repetição. A correção
 > anterior (12/09) falhava só no arranque frio — celular parado há horas, processo subindo do zero —,
 > que é justamente o cenário de madrugada. Testar com o app recém-usado esconde o defeito.
+
+> **Enquanto o E.1 não for feito, o alarme toca no volume de mídia.** Para testar o D.5 e a Parte B,
+> deixe o volume de mídia alto — senão o alarme não toca e o passo não diz nada sobre o que ele
+> deveria estar medindo.
 
 **Não precisa testar:** o empilhamento de alarmes atrasados (dose vencida há mais de 4 h não irrompe
 mais em tela cheia). Foi corrigido junto, por decisão do Gabriel em 13/09 não entra na fila de
@@ -72,9 +82,9 @@ Levantados pelo Gabriel usando a build `489a67a`. **Todos precisam de build nova
 
 | # | O que conferir | Como saber que passou |
 |---|---|---|
-| B.14 | ➡️ **Virou D.1** — o teste de 13/09 mostrou que este ajuste não pegou, e a correção nova está lá | — |
-| B.15 | ➡️ **Virou D.2**, pelo mesmo motivo | — |
-| B.16 | O lembrete (modo notificação) **continua** no volume de aviso, e continua respeitando o silencioso | No mudo, o lembrete não toca — e isso é o correto. É a contraprova do D.1: se este também tocar no mudo, os dois canais viraram a mesma coisa |
+| B.14 | ⏸️ **Virou E.1** — adiado por decisão, com a causa diagnosticada | — |
+| B.15 | ⏸️ Depende do E.1 | — |
+| B.16 | ⏸️ Depende do E.1 — enquanto o alarme sai no volume de mídia, comparar os dois canais não diz nada | — |
 | B.17 | ➡️ **Virou D.5** — a correção de 12/09 não fechou o caso, e há uma nova | — |
 | B.17b | 🔴 **A contraprova do D.5**, que é onde o risco está: celular **desbloqueado**, usando outro app (navegador, WhatsApp), e o alarme dispara | Chega a notificação com som em loop, e **não** uma tela invisível. Se o som vier duplicado ou sem nada na tela, a guarda errou o caso e eu preciso saber |
 | B.18 | Na seção de **lembretes** do cadastro de medicação, com permissões pendentes: aparece **um** bloco de permissão, não dois | Só o painel "Seus alarmes não vão funcionar", com o botão. Concedidas as verificáveis, ele dá lugar ao aviso azul |
@@ -85,6 +95,68 @@ Levantados pelo Gabriel usando a build `489a67a`. **Todos precisam de build nova
 
 E o **bloco 20 do estoque**, que depende de B.1 e B.9: cadastrar na véspera e conferir se a
 notificação chega às 00:01.
+
+---
+
+# PARTE E — Adiado por decisão, com o caminho já levantado
+
+## E.1 — 🔊 O alarme no volume de despertador
+
+**Decisão do Gabriel em 13/09:** fica para depois de todo o resto estar validado. Duas builds foram
+gastas nisso sem resultado, e o motivo é que o caminho tentado não leva lá — não é questão de
+insistir mais.
+
+**Até lá, o alarme toca no volume de mídia.** É a única característica do app que fica sabidamente
+incompleta.
+
+### Por que as duas tentativas falharam
+
+O `AudioAttributes` do canal **foi** aplicado. Verificado em 13/09 rodando `expo prebuild`
+localmente: o [`plugins/volume-de-despertador.js`](../plugins/volume-de-despertador.js) transforma o
+`ChannelManager.java` corretamente, `USAGE_NOTIFICATION` vira `USAGE_ALARM`. O plugin funciona.
+
+O problema é que **quem toca o som da notificação é o NotificationManager, não o app** — e ele usa o
+stream dele independentemente do que o canal peça. O `AudioAttributes` ali é uma dica, não uma
+ordem.
+
+Não é defeito do Notifee: a [issue #297](https://github.com/invertase/notifee/issues/297), pedindo
+exatamente isto, foi fechada como *not planned*. E os [requisitos do Google Play para apps de
+alarme](https://support.google.com/googleplay/android-developer/answer/13392821) descrevem a
+arquitetura esperada — o app toca som próprio, e a notificação serve ao full-screen intent, não ao
+áudio.
+
+### O caminho que funciona
+
+Separar quem mostra de quem toca:
+
+1. **O canal do alarme fica mudo** (`sound: null`). A notificação continua fazendo a tela azul
+   irromper e continua na bandeja — só não emite som.
+2. **A tela do alarme toca o som**, com `expo-audio` (já instalado e registrado no `app.json`), em
+   loop, parando quando a dose é respondida.
+3. **Um segundo config plugin** põe `USAGE_ALARM` no player. É necessário porque o `expo-audio`
+   [não expõe a escolha de stream](https://docs.expo.dev/versions/v57.0.0/sdk/audio/) — tem
+   `interruptionMode` e `playsInSilentMode`, e nada de `androidAudioUsage`.
+
+**O alvo do patch já está localizado:** `node_modules/expo-audio/android/src/main/java/expo/modules/
+audio/AudioPlayer.kt`, linha 39 — `.setAudioAttributes(AudioAttributes.DEFAULT, false)`, onde
+`DEFAULT` é `USAGE_MEDIA`. Uma linha, no mesmo formato do patch que já existe e comprovadamente
+aplica.
+
+### O que ganha junto
+
+O loop do som passa a ser do app, e não do canal; e parar o som vira uma chamada direta em vez de
+cancelar notificação. Os dois são contornos que existem hoje só porque o som é do sistema.
+
+### O risco a tratar
+
+Se o Android matar o processo antes de a tela montar, o som não toca — hoje quem toca é o sistema, e
+isso não acontece. A defesa é um **foreground service**, que é o que os requisitos do Play descrevem
+para apps de alarme e que este app ainda não usa. Entra no mesmo trabalho.
+
+### Tamanho
+
+Mudança de arquitetura do alarme, não ajuste. Merece build dedicada e uma rodada de teste própria —
+foi por isso que ficou para depois, e não por ser difícil.
 
 ---
 
@@ -125,9 +197,9 @@ agendadas. É alarme órfão por um caminho que o bloco 16 não testa.
 Só o que falhar, com o número do passo:
 
 ```
-D.1 falhou — com midia zerada nao saiu som
 D.4 passou — 16:00 continuou 16:00 em Manaus
 D.5 passou nas 4 tentativas
+B.9 falhou — a notificacao de estoque nao chegou
 resto ok
 ```
 

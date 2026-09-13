@@ -26,19 +26,29 @@ import { colors } from "@/shared/theme";
  * um par desalinhado é o tipo de detalhe que faz alguém ler `v5` no código e `v6` no aparelho e
  * perder uma hora. Criar canal é barato; confusão de versão não é.
  *
- * **v6 → v7 (13/09).** O teste do Gabriel em 13/09 mostrou que o alarme **continuava** no volume de
- * mídia: com o volume de mídia e o de notificação zerados e só o de despertador alto, não saiu som
- * nenhum. O v6 tinha sido criado justamente para carregar o `USAGE_ALARM` — e não carregou.
+ * **v6 → v7 (13/09).** Feito supondo que o `v6` tivesse nascido sem o `USAGE_ALARM`, porque
+ * `recriarSeDivergente` não consegue comparar o `AudioAttributes` — a API do Notifee não o expõe na
+ * leitura. A hipótese era razoável e **estava errada**; fica registrada abaixo junto com o que ela
+ * revelou. O `v7` permanece porque já nasceu nos aparelhos, e voltar não traria nada.
  *
- * A razão é que `recriarSeDivergente` **não consegue** comparar o `AudioAttributes`: a API do Notifee
- * não o expõe na leitura do canal (`getChannel` devolve som, importância e bypass, e nada de áudio).
- * Então um canal `v6` criado antes de o patch nativo valer sobrevive a qualquer correção de código —
- * ele parece correto em toda verificação que o app sabe fazer.
+ * ### ⚠️ O volume de despertador não se resolve por aqui — não suba a versão de novo por isso
  *
- * Subir a versão é a única saída que não depende de a pessoa desinstalar o app: o `v7` nasce do
- * código já patchado, e nasce uma vez só. Se o alarme ainda sair no volume de mídia com o `v7`, a
- * conclusão é outra e mais grave — o patch de `plugins/volume-de-despertador.js` não entrou na build,
- * e aí o problema é da compilação, não do canal.
+ * A build com o `v7` saiu e **o alarme continuou no volume de mídia**. Isso encerra a hipótese do
+ * canal velho: o `v7` nasceu do código patchado e falhou igual.
+ *
+ * O patch de `plugins/volume-de-despertador.js` **é** aplicado — verificado em 13/09 rodando
+ * `expo prebuild` localmente, com o `ChannelManager.java` saindo transformado. O que acontece é que
+ * **quem toca o som da notificação é o NotificationManager, não o app**, e ele usa o stream dele
+ * independentemente do que o `AudioAttributes` do canal peça. Ali o atributo é dica, não ordem.
+ *
+ * Não é limitação do Notifee: a issue #297, pedindo exatamente isto, foi fechada como *not planned*.
+ * E os requisitos do Google Play para apps de alarme descrevem a arquitetura esperada — o app toca
+ * som próprio, e a notificação serve ao full-screen intent, não ao áudio.
+ *
+ * **A correção** é o app tocar o próprio som com `expo-audio`, com o canal do alarme mudo. Está
+ * descrita como **E.1** em `docs/O-QUE-FALTA-TESTAR.md`, com o alvo do patch já localizado, e foi
+ * adiada por decisão do Gabriel em 13/09 até o resto do app estar validado. Até lá o alarme sai no
+ * volume de mídia, e isso é limitação conhecida — não um defeito a investigar de novo.
  *
  * ### A armadilha da palavra "default", registrada para não voltar
  *

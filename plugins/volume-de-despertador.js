@@ -3,6 +3,27 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 /**
+ * ⚠️ **ESTE PLUGIN NÃO ALCANÇA O QUE PROMETE — e o motivo está medido, não suposto.**
+ *
+ * Ele aplica corretamente (verificado em 13/09 rodando `expo prebuild`: o `ChannelManager.java` sai
+ * transformado, `USAGE_NOTIFICATION` vira `USAGE_ALARM`), e **mesmo assim o alarme toca no volume de
+ * mídia**. Duas builds foram gastas confirmando isso.
+ *
+ * A razão é que **quem toca o som da notificação é o NotificationManager, não o app**, e ele usa o
+ * stream dele independentemente do que o `AudioAttributes` do canal peça — ali o atributo é dica,
+ * não ordem. Não é limitação do Notifee: a issue #297, pedindo exatamente isto, foi fechada como
+ * *not planned*.
+ *
+ * **Antes de mexer aqui, leia a E.1 em `docs/O-QUE-FALTA-TESTAR.md`.** A correção é o app tocar o
+ * próprio som com `expo-audio` e o canal do alarme ficar mudo; o alvo do patch (em `AudioPlayer.kt`)
+ * já está localizado lá. Ajustar este plugin não vai resolver.
+ *
+ * O plugin continua no lugar porque não custa nada e passa a valer no dia em que o Android tratar o
+ * atributo como ordem. O texto abaixo é o raciocínio original, mantido porque explica o problema —
+ * mas a conclusão dele sobre "este plugin é a correção dos dois relatos" está superada.
+ *
+ * ---
+ *
  * Faz o alarme sair no **volume de despertador**, e não no de mídia.
  *
  * ## O defeito
