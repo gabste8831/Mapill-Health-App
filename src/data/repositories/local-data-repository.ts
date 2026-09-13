@@ -92,13 +92,11 @@ export class LocalDataRepository {
         .catch(() => {});
 
       /**
-       * O fuso em que a grade de doses foi gerada sai junto, pelo mesmo motivo.
+       * Resto da tentativa de regerar a grade por fuso, abandonada em 13/09.
        *
-       * Ele descreve as doses gravadas (ver `fuso-da-grade`). Apagadas elas, ele não descreve mais
-       * nada — e mantido, diria que a grade vazia está no fuso certo. Quem viajasse e apagasse os
-       * dados na viagem cadastraria tudo de novo no fuso novo e ficaria sem a regeração, porque o
-       * app acharia que nada mudou. `IF EXISTS` pelo mesmo motivo da marca d'água: quem instalou
-       * antes da migration 019 pode não ter a tabela na primeira abertura.
+       * Nada escreve nesta chave hoje, mas os aparelhos que rodaram aquela versão têm a linha
+       * gravada — e ela descrevia as doses, que este apagamento remove. Sai junto para não deixar
+       * lixo de uma feature que não existe mais. O `catch` cobre quem não tem a tabela.
        */
       await database
         .runAsync("DELETE FROM app_state WHERE key = ?", [CHAVE_DO_FUSO_DA_GRADE])

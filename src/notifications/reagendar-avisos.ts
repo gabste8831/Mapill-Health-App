@@ -19,7 +19,6 @@ import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { diagnosticarCanalDeAlarme } from "./canais-notifee";
 import { esquecerAlarmesAbertos } from "./escutar-avisos";
 import { NotifeeGateway } from "./notifee-gateway";
-import { regerarGradeSeOFusoMudou } from "./fuso-da-grade";
 import { reabastecerGradeDeDoses } from "./reabastecer-grade-de-doses";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`), então não há o que agendar. */
@@ -37,7 +36,6 @@ const persistsLocally = Platform.OS !== "web";
  */
 export type ManutencaoDaGrade = {
   quando: string;
-  fusoRegerado: boolean;
   tratamentos: number;
   gravadas: number;
   /** Até quando a grade alcança. É o que responde "o tratamento contínuo sobrevive aos 30 dias?". */
@@ -116,14 +114,9 @@ async function executarReagendamento(): Promise<void> {
     /**
      * A grade de doses é posta em dia **antes da guarda de permissão**, e a ordem é a correção.
      *
-     * Duas manutenções, as duas achadas pelos testes de 13/09 e as duas invisíveis em uso de poucos
-     * dias — que é o que as fez sobreviver tanto tempo:
-     *
-     * - **O fuso** (passo A.6): trocar de fuso movia o horário da dose junto, e as 18:00 viravam
-     *   15:00. Ver `regerarGradeSeOFusoMudou`.
-     * - **O horizonte** (passo A.4): nada reabastecia a grade, que era gravada no cadastro 30 dias
-     *   de cada vez e acabava. Um tratamento contínuo parava de avisar por volta do 30º dia, calado
-     *   — agendar a partir de uma grade vazia agenda nada. Ver `reabastecerGradeDeDoses`.
+     * Reabastecer existe por causa do passo A.4: nada repunha a grade, que era gravada no cadastro
+     * 30 dias de cada vez e acabava. Um tratamento contínuo parava de avisar por volta do 30º dia,
+     * calado — agendar a partir de uma grade vazia agenda nada. Ver `reabastecerGradeDeDoses`.
      *
      * ## Por que antes da permissão, e não depois
      *
@@ -139,23 +132,13 @@ async function executarReagendamento(): Promise<void> {
      * também a agenda, que é o que o app faz de mais básico.
      *
      * O `catch` é deliberado: manter a grade é manutenção de fundo, e falhar nela não pode impedir o
-     * reagendamento dos avisos que já existem. A próxima abertura tenta de novo, porque as duas
-     * operações são idempotentes.
+     * reagendamento dos avisos que já existem. A próxima abertura tenta de novo, porque a operação é
+     * idempotente.
      */
     try {
-      /**
-       * O fuso vem **antes** do reabastecimento, e a ordem é deliberada.
-       *
-       * Regerar corrige os instantes das doses que já existem; reabastecer completa o que falta até
-       * o horizonte. Na ordem inversa, o reabastecimento geraria doses no fuso novo e a regeração
-       * logo em seguida as apagaria para recriá-las iguais — trabalho dobrado e, no meio do
-       * caminho, uma grade misturando dois fusos.
-       */
-      const fusoRegerado = await regerarGradeSeOFusoMudou(agora);
       const reposicao = await reabastecerGradeDeDoses(agora);
       ultimaManutencao = {
         quando: agora.toISOString(),
-        fusoRegerado,
         tratamentos: reposicao.tratamentos,
         gravadas: reposicao.gravadas,
         ultimaDose: reposicao.ultimaDose,
@@ -174,7 +157,6 @@ async function executarReagendamento(): Promise<void> {
        */
       ultimaManutencao = {
         quando: agora.toISOString(),
-        fusoRegerado: false,
         tratamentos: 0,
         gravadas: 0,
         ultimaDose: null,

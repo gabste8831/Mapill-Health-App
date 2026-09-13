@@ -154,7 +154,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
     );
   }, []);
 
-  /** O fuso IANA que o app enxerga — o mesmo que `fuso-da-grade` compara para decidir se regera. */
+  /** O fuso IANA que o app enxerga. Fica porque contextualiza os horários mostrados abaixo. */
   const fusoDoAparelho = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   /**
@@ -390,10 +390,6 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                         )}d)`
                   }
                   estado={diasAte(manutencao.ultimaDose) >= 25 ? "ok" : "ruim"}
-                />
-                <Linha
-                  rotulo="Fuso mudou"
-                  valor={manutencao.fusoRegerado ? "Sim, grade regerada" : "Não"}
                 />
                 <Linha
                   rotulo="Rodou em"

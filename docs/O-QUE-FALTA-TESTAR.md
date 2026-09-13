@@ -14,30 +14,33 @@ saiu daqui — o que ela achou virou correção, e as correções estão listada
 |---|---|
 | As correções de 11–12/09 (Parte B) | 13 itens |
 | Os ajustes de 12/09 à tarde | 7 itens |
-| **As correções de 13/09** | **3 itens** (D.3, D.4, D.5) |
+| **As correções de 13/09** | **2 itens** (D.3, D.5) |
 | Bugs conhecidos, ainda sem correção | 2 (C.1, C.2) |
-| Adiado por decisão | 1 (**E.1** — volume do alarme) |
+| Decidido e fora de escopo | 2 (**E.1** volume, **E.2** fuso) |
 
-> **O volume do alarme saiu da fila.** Testado nesta build e continua no volume de mídia; a causa
-> está diagnosticada e o caminho levantado na **Parte E**, para depois de todo o resto. Até lá,
-> **deixe o volume de mídia alto ao testar** — senão o alarme não toca e o passo não mede o que
-> deveria.
+> **Dois assuntos saíram da fila em 13/09.** O **volume do alarme** (E.1) continua no volume de
+> mídia — a causa está diagnosticada e o caminho levantado, para depois do resto. E o **fuso** (E.2)
+> foi decidido: a dose segue o **instante**, então 21:00 em São Paulo toca às 20:00 em Manaus, e
+> isso está certo.
 
-**Validado o que resta, o app fica funcional em tudo menos essa característica.** É o combinado de
-13/09: fechar o resto primeiro, e só então mexer na arquitetura do som.
+> **Ao testar, deixe o volume de mídia alto** — enquanto o E.1 não for feito, o alarme sai por ele, e
+> com a mídia baixa o passo não mede o que deveria.
+
+**Validado o que resta, o app fica funcional em tudo menos o volume do alarme.**
 
 ---
 
 # PARTE D — As correções de 13/09
 
-Saíram da rodada da Parte A, que fechou nesse dia. Quatro bugs corrigidos e um item de conferência.
+Saíram da rodada da Parte A, que fechou nesse dia. Dos cinco itens originais, três já foram
+resolvidos ou decididos — restam **D.3 e D.5**.
 
 | # | O que conferir | Como saber que passou |
 |---|---|---|
 | D.1 | ⏸️ **O volume do alarme saiu da fila.** Testado em 13/09 nesta build: continua no volume de mídia. Não é ajuste, é mudança de arquitetura — ver **E.1** | — |
 | D.2 | ⏸️ Depende do D.1, pelo mesmo motivo | — |
-| D.3 | 🔴 **O tratamento contínuo passa dos 30 dias.** Remédio de uso contínuo, hora automática desligada, relógio adiantado **31+ dias**, e então **feche e reabra o app** | A Home mostra a dose do dia **sem** você reabrir o cadastro. Antes, só salvar o cadastro de novo trazia as doses de volta. Adiante mais 31 dias e repita |
-| D.4 | 🔴 **O horário não escorrega com o fuso.** Remédio às 16:00, troque o fuso para Manaus, **reabra o app** | Continua às 16:00 (não 15:00). Devolva o fuso, reabra, e confira de novo. A regeração roda na **abertura** — trocar o fuso com o app aberto só vale no próximo ciclo |
+| D.3 | 🔴 **O tratamento contínuo passa dos 30 dias.** Remédio de uso contínuo, hora automática desligada, relógio adiantado **31+ dias**, e então **feche e reabra o app**. Confira em `Diagnóstico → Manutenção da grade` a linha **"Grade vai até"** | Ela mostra ~30 dias à frente, e a Home lista a dose do dia **sem** você reabrir o cadastro |
+| D.4 | ✅ **Fechado em 13/09 — o comportamento atual é o correto.** A dose acontece no **instante** marcado, então 21:00 em São Paulo toca às 20:00 em Manaus. Ver E.2 | — |
 | D.5 | 🔴 **A tela azul sobe e fica.** App **fora dos recentes**, celular parado, tela bloqueada, alarme para daqui a alguns minutos | A tela azul aparece e **permanece** — não é trocada pela de "Hora do remédio". **Repita 3 ou 4 vezes, em momentos diferentes:** é uma corrida de tempo, e um acerto isolado não prova nada |
 
 > **Sobre o D.5.** É o item mais frágil da lista e o que mais precisa de repetição. A correção
@@ -98,7 +101,7 @@ notificação chega às 00:01.
 
 ---
 
-# PARTE E — Adiado por decisão, com o caminho já levantado
+# PARTE E — Decisões tomadas, e o que fica fora de escopo
 
 ## E.1 — 🔊 O alarme no volume de despertador
 
@@ -158,6 +161,45 @@ para apps de alarme e que este app ainda não usa. Entra no mesmo trabalho.
 Mudança de arquitetura do alarme, não ajuste. Merece build dedicada e uma rodada de teste própria —
 foi por isso que ficou para depois, e não por ser difícil.
 
+## E.2 — ✅ A dose segue o instante, não a hora de parede
+
+**Decisão do Gabriel em 13/09, e o comportamento atual está correto.** Um remédio cadastrado para as
+21:00 em São Paulo toca às **20:00** em Manaus — é o mesmo momento, visto de outro fuso.
+
+### O que foi tentado, e por que saiu
+
+A suposição de 13/09 era a oposta: que "tomo às 8 da manhã" fosse uma promessa sobre o **relógio de
+parede**, e que o horário devesse se manter ao trocar de fuso. Foi implementado — o app guardava o
+fuso da última geração e regerava as doses futuras quando ele mudava.
+
+Não funcionou, e a caçada consumiu a tarde. Três causas reais foram encontradas no caminho (todas
+corrigidas e mantidas, porque valem por si):
+
+- A manutenção da grade rodava **depois** da guarda de permissão, então nunca rodava com a permissão
+  negada.
+- O offset que o `Date` aplica **demora a acompanhar** o nome do fuso, então a regeração usava o
+  deslocamento antigo.
+- `scheduled_for` tinha **duas formas de ISO** no banco, e a comparação de texto do SQLite deixava
+  escapar metade das linhas.
+
+### Por que o comportamento atual é defensável
+
+Não é só desistência — o instante absoluto tem um argumento próprio, e num app de medicação ele é
+forte: **quem toma de 12 em 12 horas não deve encurtar o intervalo porque atravessou um fuso.**
+Manter a hora de parede numa viagem de três fusos comprimiria ou esticaria o intervalo entre doses,
+que é justamente o que a posologia estabelece.
+
+Para viagem curta — o caso real de quem usa este app — seguir o instante é o mais seguro.
+
+### O que fica registrado
+
+O código da tentativa foi removido (`fuso-da-grade.ts`). A tabela `app_state` (migration 019) fica:
+migration publicada não se remove, e um lugar para estado interno é útil.
+
+**Se um dia isto for revisitado**, o caminho rigoroso é gravar a hora local pretendida (`"21:00"`)
+ao lado do instante e derivar um do outro — não detectar troca de fuso e regerar. Custa uma coluna,
+backfill e a revisão dos ~35 arquivos que leem `scheduledFor`, e foi o que se evitou em 13/09.
+
 ---
 
 # PARTE C — Bugs conhecidos, ainda sem correção
@@ -165,8 +207,9 @@ foi por isso que ficou para depois, e não por ser difícil.
 Estes dois **não** foram corrigidos. Você vai encontrá-los se testar, e é esperado — não são falha
 da build nova.
 
-Os quatro bugs que saíram da rodada de 13/09 (grade de 30 dias, fuso, tela azul, alarmes empilhados)
-foram corrigidos e estão na **Parte D**, esperando validação.
+Os bugs que saíram da rodada de 13/09 — grade de 30 dias, tela azul e alarmes empilhados — foram
+corrigidos e estão na **Parte D**, esperando validação. O fuso virou decisão, não correção: ver
+**E.2**.
 
 ## C.1 — 🔴 Responder o alarme dá acesso ao app sem desbloquear
 
@@ -197,7 +240,7 @@ agendadas. É alarme órfão por um caminho que o bloco 16 não testa.
 Só o que falhar, com o número do passo:
 
 ```
-D.4 passou — 16:00 continuou 16:00 em Manaus
+D.3 passou — a grade foi ate 12/10 depois de adiantar o relogio
 D.5 passou nas 4 tentativas
 B.9 falhou — a notificacao de estoque nao chegou
 resto ok
