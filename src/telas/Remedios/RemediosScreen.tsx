@@ -116,13 +116,15 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
              * para o que chega na barra. Quem estranha um remédio que não acordou ninguém consegue ver,
              * na lista, que ele estava em modo notificação — sem abrir nada.
              *
-             * Fica fora do `numberOfLines` do nome: encolher o nome é aceitável, perder o sino não,
-             * porque ele é justamente o que não se descobre de outro jeito.
+             * Fica fora do nome, num nó próprio: quebrar o nome em mais linhas é aceitável, perder
+             * o sino não, porque ele é justamente o que não se descobre de outro jeito.
              */}
             <View style={styles.nomeComSino}>
-              <Text style={styles.name} numberOfLines={1}>
-                {medication.name}
-              </Text>
+              {/* Sem `numberOfLines`: o nome quebra em quantas linhas precisar. Nome de remédio
+                  carrega dosagem e forma ("Losartana Potássica 50mg comprimido revestido"), e o
+                  corte em "..." escondia justamente a parte que distingue duas caixas do mesmo
+                  princípio ativo — que é o erro que importa evitar numa lista de medicação. */}
+              <Text style={styles.name}>{medication.name}</Text>
               {prescription !== null && prescription.reminderMode !== "none" ? (
                 /* `both` conta como alarme: o modo inclui a tela cheia, e é ela que define o que
                    esperar do horário. Mostrar o sino de notificação ali prometeria menos do que
@@ -131,6 +133,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
                   name={prescription.reminderMode === "notification" ? "notifications" : "alarm"}
                   size={15}
                   color={cores.corDeDestaque}
+                  style={styles.sino}
                   accessibilityLabel={
                     prescription.reminderMode === "notification"
                       ? "Com notificação"

@@ -101,13 +101,21 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    */
   nomeComSino: {
     flexDirection: "row",
-    alignItems: "center",
+    /* `flex-start` e não `center`: com o nome quebrando em duas ou três linhas, centralizar deixaria
+       o sino flutuando no meio do bloco, longe da linha do nome. O `paddingTop` o desce o bastante
+       para ficar na altura da primeira linha — o ícone tem 15px e a linha do nome é mais alta. */
+    alignItems: "flex-start",
     gap: 6,
+  },
+  sino: {
+    paddingTop: 3,
   },
   name: {
     ...typography.headlineSm,
     color: cores.onSurface,
-    flexShrink: 1,
+    /* `flex: 1` e não `flexShrink: 1`: o nome toma a largura que sobra ao lado do sino e quebra
+       dentro dela. Com `flexShrink` ele só cederia espaço até o limite do conteúdo de uma linha. */
+    flex: 1,
   },
   activeIngredient: {
     ...typography.bodyMd,
