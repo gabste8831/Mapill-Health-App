@@ -332,11 +332,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
              * Marcada como "ruim" de propósito: é uma limitação conhecida e ainda aberta, e um "OK"
              * aqui foi exatamente o que deixou o defeito passar na build de 12/09.
              */}
-            <Linha
-              rotulo="Volume do alarme"
-              valor="Mídia (o esperado é despertador — ver E.1)"
-              estado="ruim"
-            />
+            <Linha rotulo="Volume do alarme" valor="Mídia (ver E.1)" estado="ruim" />
           </View>
         </View>
 
