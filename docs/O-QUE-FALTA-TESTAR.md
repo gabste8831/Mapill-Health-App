@@ -7,9 +7,13 @@
 
 ## Resumo
 
-**Tudo aqui pode ser testado agora**, na build de **desenvolvimento** de 13/09 — versionCode 3, a do
-`--dev-client`. Ela conecta no Metro, então correção em TypeScript chega recarregando (`r` no
-terminal), sem build nova. A única exceção é o **E.1**, que depende de patch nativo.
+**Quase tudo aqui pode ser testado agora**, na build de **desenvolvimento** de 13/09 — versionCode
+3, a do `--dev-client`. Ela conecta no Metro, então correção em TypeScript chega recarregando (`r` no
+terminal), sem build nova.
+
+**Três coisas não fecham nesta build:** o **E.1** (patch nativo), o **C.1/C.2** (código nativo), e o
+**D.5 com o app fora dos recentes** — ali o Metro precisa reentregar o bundle inteiro antes de a tela
+montar, o que não acontece numa build real. Esses ficam para a próxima preview.
 
 A Parte A foi executada inteira em 13/09 e saiu deste documento — o que ela achou virou correção, e
 as correções estão listadas abaixo.
@@ -45,11 +49,21 @@ validados ou decididos — resta **D.5**.
 | D.2 | ⏸️ Depende do D.1, pelo mesmo motivo | — |
 | D.3 | ✅ **Passou em 13/09.** Relógio adiantado de 13/09 para 14/10: a Home abriu vazia e **se preencheu sozinha em segundos**, e o Diagnóstico mostrou `Grade vai até 13/10/2026 (30d)`. Não precisou reabrir o cadastro — que era o defeito | — |
 | D.4 | ✅ **Fechado em 13/09 — o comportamento atual é o correto.** A dose acontece no **instante** marcado, então 21:00 em São Paulo toca às 20:00 em Manaus. Ver E.2 | — |
-| D.5 | 🔴 **A tela azul sobe e fica.** App **fora dos recentes**, celular parado, tela bloqueada, alarme para daqui a alguns minutos | A tela azul aparece e **permanece** — não é trocada pela de "Hora do remédio". **Repita 3 ou 4 vezes, em momentos diferentes:** é uma corrida de tempo, e um acerto isolado não prova nada |
+| D.5 | ⚠️ **Parcial em 13/09, e o resto não dá para testar nesta build.** Com o app **nos recentes**: a tela azul apareceu e ficou, o alarme tocou — e esse era o caso que falhava em 12/09. Com o app **fora dos recentes**: inconclusivo, ver a nota abaixo | Fecha na build de **preview**, não nesta |
 
-> **Sobre o D.5.** É o item mais frágil da lista e o que mais precisa de repetição. A correção
-> anterior (12/09) falhava só no arranque frio — celular parado há horas, processo subindo do zero —,
-> que é justamente o cenário de madrugada. Testar com o app recém-usado esconde o defeito.
+> **Sobre o D.5, e por que ele não fecha nesta build.** Achado do Gabriel em 13/09: numa build de
+> **desenvolvimento** o JavaScript vem do Metro, não do APK. Tirar o app dos recentes mata o
+> processo, e quando o alarme dispara a Activity precisa reconectar no Metro e rebaixar o bundle
+> inteiro antes de montar. O que ele observou — a tela azul piscando, o som por um segundo, e tudo
+> parando — é essa carga não terminando, não a guarda falhando.
+>
+> É justamente o cenário que a guarda protege, e ele fica muito mais lento aqui do que jamais seria
+> numa build real. **O passo com o app fora dos recentes só vale na preview**, onde o bundle está
+> dentro do APK.
+>
+> O que já foi observado vale: **com o app nos recentes, a tela azul apareceu e ficou**. Era esse o
+> caso que a tela "Hora do remédio" substituía em 12/09, então a correção da corrida está funcionando
+> onde dava para ver.
 
 > **Enquanto o E.1 não for feito, o alarme toca no volume de mídia.** Para testar o D.5 e a Parte B,
 > deixe o volume de mídia alto — senão o alarme não toca e o passo não diz nada sobre o que ele
@@ -95,7 +109,7 @@ Levantados pelo Gabriel usando a build `489a67a`. Como o resto da Parte B, chega
 | B.15 | ⏸️ Depende do E.1 | — |
 | B.16 | ⏸️ Depende do E.1 — enquanto o alarme sai no volume de mídia, comparar os dois canais não diz nada | — |
 | B.17 | ➡️ **Virou D.5** — a correção de 12/09 não fechou o caso, e há uma nova | — |
-| B.17b | 🔴 **A contraprova do D.5**, que é onde o risco está: celular **desbloqueado**, usando outro app (navegador, WhatsApp), e o alarme dispara | Chega a notificação com som em loop, e **não** uma tela invisível. Se o som vier duplicado ou sem nada na tela, a guarda errou o caso e eu preciso saber |
+| B.17b | 🔴 **A contraprova do D.5**, que é onde o risco está: celular **desbloqueado**, usando outro app (navegador, WhatsApp), e o alarme dispara. **Dá para testar nesta build** — o app está vivo, então o Metro não atrapalha | Chega a notificação com som em loop, e **não** uma tela invisível. Se o som vier duplicado ou sem nada na tela, a guarda errou o caso e eu preciso saber |
 | B.18 | Na seção de **lembretes** do cadastro de medicação, com permissões pendentes: aparece **um** bloco de permissão, não dois | Só o painel "Seus alarmes não vão funcionar", com o botão. Concedidas as verificáveis, ele dá lugar ao aviso azul |
 | B.19 | No **tema escuro**, a opção de lembrete selecionada: o subtítulo do botão azul é legível | Texto claro sobre o azul. Antes era 2,08:1, escuro sobre escuro |
 | B.20 | **4 ou mais remédios** no mesmo horário: a tela azul mostra nome e dose de cada um | Não há mais o vazio entre o horário e os botões |
