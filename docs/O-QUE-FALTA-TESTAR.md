@@ -9,9 +9,11 @@
 
 ---
 
-## Numa build de development nova
+## Na build de preview de 14/09
 
-Os dois esperam a mesma build. O código está pronto e commitado.
+**Os quatro passos são nesta mesma build** — a de 14/09, commit `27a2a38`, a 14ª do projeto. Ela
+tem o módulo de desbloqueio (que os passos 1 e 3 exigem) e o bundle dentro do APK (que o passo 4
+exige). Não há mais nada esperando outra build.
 
 ### 1. C.1 — Entrar no app pela tela azul exige desbloqueio
 
@@ -41,10 +43,6 @@ Celular **desbloqueado**, usando outro app, e o alarme dispara. Toque na notific
 > Só vale nesta build: a decisão depende do módulo de desbloqueio, que é nativo. Nas anteriores a
 > tela azul continua subindo, e isso não é a correção falhando.
 
----
-
-## Por último, numa build de preview
-
 ### 4. D.5 — A tela azul com o app fora dos recentes
 
 Tire o app dos recentes e espere o alarme. **Tente 4 vezes** — é defeito de corrida de tempo, e
@@ -52,8 +50,9 @@ Tire o app dos recentes e espere o alarme. **Tente 4 vezes** — é defeito de c
 
 **Passa se:** a tela azul sobe e fica, nas 4.
 
-> Só vale na preview: numa build de development o JavaScript vem do Metro, e tirar o app dos
-> recentes mata o processo. A tela piscar e parar aqui é a carga não terminando, não o defeito.
+> É o passo que exigia a preview: numa build de development o JavaScript vem do Metro, e tirar o
+> app dos recentes mata o processo. A tela piscar e parar lá era a carga não terminando, não o
+> defeito. Aqui o bundle está dentro do APK, e o que se vir é o comportamento real.
 
 ---
 
