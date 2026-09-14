@@ -64,7 +64,9 @@
         {
           "icon": "./assets/images/android-icon-monochrome.png",
           "color": "#196FF3",
-          "sounds": ["./assets/sounds/alarme_de_dose.wav"]
+          "sounds": [
+            "./assets/sounds/alarme_de_dose.wav"
+          ]
         }
       ],
       [
@@ -79,7 +81,8 @@
       "expo-audio",
       "react-native-notify-kit",
       "./plugins/alarme-em-tela-cheia",
-      "./plugins/volume-de-despertador"
+      "./plugins/volume-de-despertador",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
