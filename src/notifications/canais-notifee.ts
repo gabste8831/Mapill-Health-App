@@ -59,8 +59,8 @@ import { colors } from "@/shared/theme";
  * Aqui não há ambiguidade: `sound` é sempre nome de recurso em `res/raw`, sem extensão. O alarme
  * usa o arquivo próprio; o lembrete omite o campo para receber o som padrão do sistema.
  */
-export const CANAL_ALARME = "dose-alarm-v7";
-export const CANAL_LEMBRETE = "dose-reminder-v7";
+export const CANAL_ALARME = "dose-alarm-v8";
+export const CANAL_LEMBRETE = "dose-reminder-v8";
 
 /**
  * ⚠️ **O plugin `expo-notifications` continua no `app.json`, e não pode ser removido.**
@@ -125,7 +125,7 @@ async function recriarSeDivergente(
 export async function registrarCanais(): Promise<void> {
   if (Platform.OS !== "android") return;
 
-  await recriarSeDivergente(CANAL_ALARME, { bypassDnd: true, sound: "alarme_de_dose" });
+  await recriarSeDivergente(CANAL_ALARME, { bypassDnd: true, sound: undefined });
   /**
    * O de lembrete também: ele nasceu mudo enquanto `sound` era omitido, e canal criado é
    * **imutável** no Android — mudar o código não conserta o que já existe no aparelho. Sem isto, a
@@ -139,11 +139,17 @@ export async function registrarCanais(): Promise<void> {
     description: "Abre a tela do remédio e toca até você responder.",
     importance: AndroidImportance.HIGH,
     /**
-     * O arquivo embarcado, **sem extensão** — é assim que o Android resolve um recurso de
-     * `res/raw`. Aqui a string é um nome de arquivo de verdade, ao contrário do que acontecia no
-     * `expo-notifications` (ver o comentário sobre "default" no topo).
+     * **Mudo de propósito, desde o `v8`.** Omitir `sound` cria o canal sem som, e é o que se quer:
+     * quem toca o alarme é o app, pelo foreground service (ver `som-do-alarme.ts`), no volume de
+     * despertador.
+     *
+     * Dar som ao canal aqui traria o defeito de volta em dobro: o sistema tocaria no volume de
+     * mídia por cima do som do serviço, as duas fontes sobrepostas, e parar uma não calaria a
+     * outra.
+     *
+     * A notificação continua inteira no resto — é ela que faz a tela azul irromper pelo
+     * `fullScreenAction` e que fica na bandeja. O que saiu foi só o áudio.
      */
-    sound: "alarme_de_dose",
     vibration: true,
     // Longo e espaçado: o padrão curto do sistema se confunde com mensagem, e a diferença entre
     // "chegou um WhatsApp" e "está na hora do remédio" precisa ser sentida sem olhar a tela.
@@ -214,8 +220,13 @@ export async function diagnosticarCanalDeAlarme(): Promise<string> {
    */
   const problemas: string[] = [];
 
-  if (canal.sound === undefined || canal.sound === null) {
-    problemas.push("SEM SOM (canal mudo)");
+  /**
+   * **Canal mudo é o esperado desde o `v8`** — quem toca é o app, pelo foreground service. Som no
+   * canal é que virou defeito: significa um canal antigo sobrevivendo no aparelho, e o alarme
+   * sairia duas vezes, uma delas no volume de mídia.
+   */
+  if (canal.sound !== undefined && canal.sound !== null) {
+    problemas.push(`som no canal (${canal.sound}): deveria ser mudo, quem toca e o app`);
   }
   // `importance` é opcional na tipagem: um canal lido do sistema pode não trazê-la. Ausente conta
   // como problema — não saber a importância é o mesmo que não poder afirmar que o alarme interrompe.

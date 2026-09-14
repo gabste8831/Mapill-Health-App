@@ -33,9 +33,18 @@ import { AppRegistry } from "react-native";
 
 import { registrarEventosEmSegundoPlano } from "./src/notifications/escutar-avisos";
 import { COMPONENTE_DE_ALARME } from "./src/notifications/canais-notifee";
+import { registrarServicoDeSom } from "./src/notifications/som-do-alarme";
 import { AlarmeRaiz } from "./src/telas/Alarme/AlarmeRaiz";
 
 AppRegistry.registerComponent(COMPONENTE_DE_ALARME, () => AlarmeRaiz);
 registrarEventosEmSegundoPlano();
+/**
+ * ## 3. O serviço que toca o alarme
+ *
+ * Pelo mesmo motivo dos dois acima: quando o aviso dispara, o app pode não estar rodando. O serviço
+ * é quem toca o som e segura o processo enquanto ele soa — e ele precisa estar registrado antes de
+ * qualquer notificação poder chegar, senão o Android encontra um serviço que não existe.
+ */
+registrarServicoDeSom();
 
 import "expo-router/entry";

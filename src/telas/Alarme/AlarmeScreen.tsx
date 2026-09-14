@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { createAudioPlayer } from "expo-audio";
 import { useCallback, useEffect, useState } from "react";
 import { AppState, Linking, Pressable, ScrollView, Text, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,13 +10,12 @@ import { MINUTOS_DE_ADIAMENTO } from "@/notifications/acoes";
 import { ouvirPedidoDeEncerrarAlarme } from "@/notifications/doses-resolvidas";
 import { entrouEmCena, saiuDeCena } from "@/notifications/alarme-em-cena";
 import { dispensarAlarmeAtivo, NotifeeGateway } from "@/notifications/notifee-gateway";
+import { comecarASoar, pararDeSoar } from "@/notifications/som-do-alarme";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import { adiarAviso } from "@/notifications/responder-aviso";
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { CenteredLoader, FotoLocal } from "@/ui";
 import { criarEstilos } from "./AlarmeScreen.styles";
-
-const SOM_DO_ALARME = require("../../../assets/sounds/alarme_de_dose.wav");
 
 /**
  * A tela tem **três formas**, e o número de doses escolhe qual.
@@ -101,11 +99,15 @@ type AlarmeScreenProps = {
  * primeira ação, separada das outras, porque parar o barulho é o que ela quer fazer **antes** de
  * conseguir pensar em qualquer outra coisa.
  *
- * ## O som mora aqui, e não na notificação
+ * ## O som **não** mora aqui — desde 14/09
  *
- * Notificação nenhuma toca em loop — o Android toca uma vez e para, em qualquer biblioteca. O que
- * faz este alarme ser um alarme é esta tela tocar o áudio em `loop` enquanto estiver aberta. A
- * notificação de tela cheia só a traz até aqui.
+ * Morava: esta tela criava o próprio player e o destruía ao fechar. O problema é que ela nem sempre
+ * monta — com o celular em uso o Android rebaixa a tela cheia, e com o app fechado não há processo
+ * para navegar —, e nesses casos o alarme ficava mudo.
+ *
+ * Agora quem toca é o foreground service (ver `som-do-alarme.ts`), que sobe com a notificação e
+ * independe de tela. Esta tela **pede** o som ao montar (é idempotente) e o para ao ser respondida,
+ * mas não o possui: fechá-la não cala um alarme que ninguém respondeu.
  */
 export function AlarmeScreen({
   instanteIso,
@@ -182,30 +184,29 @@ export function AlarmeScreen({
   useEffect(() => {
     if (silenciado) return;
 
-    const player = createAudioPlayer(SOM_DO_ALARME);
-    player.loop = true;
-    player.play();
+    /**
+     * **Pede o som ao módulo compartilhado, em vez de criar o próprio player.**
+     *
+     * Desde o `v8` quem toca é o foreground service (ver `som-do-alarme.ts`), e ele já está tocando
+     * quando esta tela monta — o alarme começa a soar com a notificação, antes de qualquer tela
+     * existir. `comecarASoar` é idempotente, então chamar aqui não cria um segundo player: serve
+     * para o caso em que a tela abre sem o serviço ter subido.
+     *
+     * Um player próprio aqui seria a segunda fonte de áudio tocando o mesmo arquivo — o som
+     * duplicado de 10/09, agora com o agravante de que silenciar pela tela calaria só um dos dois.
+     */
+    comecarASoar();
 
     /**
-     * Rede de segurança do loop: se o áudio parar mesmo com `loop` ligado, isto o traz de volta.
+     * **A limpeza não para o som**, e isso é a mudança de 14/09.
      *
-     * `loop` é o mecanismo principal e funciona. Mas ele é resolvido do lado nativo, e um alarme de
-     * medicação não pode depender de uma única garantia: se o sistema pausar o player por qualquer
-     * razão — foco de áudio disputado com outro app, por exemplo —, o alarme emudece sem sinal
-     * nenhum, e a pessoa continua dormindo.
+     * O som deixou de pertencer a esta tela: ele é do serviço, e sobrevive a ela de propósito —
+     * com o celular em uso a tela nem chega a montar, e o alarme precisa soar do mesmo jeito.
+     * Parar na desmontagem faria a tela fechada calar um alarme que ninguém respondeu.
      *
-     * O intervalo é maior que o arquivo (4,1 s), então em operação normal ele nunca faz nada: só
-     * observa que o som está tocando e volta a dormir.
+     * Quem para é `dispensarAlarmeAtivo`, no funil por onde passam todos os caminhos que encerram
+     * o alarme — inclusive o `encerrar` e o `onFechar` desta tela.
      */
-    const vigia = setInterval(() => {
-      if (!player.playing) player.play();
-    }, 6_000);
-
-    return () => {
-      clearInterval(vigia);
-      player.pause();
-      player.release();
-    };
   }, [silenciado]);
 
   /**
@@ -222,14 +223,32 @@ export function AlarmeScreen({
     return () => Vibration.cancel();
   }, [silenciado]);
 
-  /** Silencia sozinho depois de um tempo — ver `SILENCIA_SOZINHO_EM_MS`. */
+  /**
+   * Silencia sozinho depois de um tempo — ver `SILENCIA_SOZINHO_EM_MS`.
+   *
+   * Para o serviço junto, pelo mesmo motivo do botão: o som não é mais desta tela, e marcar o
+   * estado sem pará-lo deixaria o alarme tocando para sempre num aparelho que ninguém atendeu.
+   */
   useEffect(() => {
     if (silenciado) return;
-    const timer = setTimeout(() => setSilenciado(true), SILENCIA_SOZINHO_EM_MS);
+    const timer = setTimeout(() => {
+      pararDeSoar();
+      setSilenciado(true);
+    }, SILENCIA_SOZINHO_EM_MS);
     return () => clearTimeout(timer);
   }, [silenciado]);
 
-  const silenciar = useCallback(() => setSilenciado(true), []);
+  /**
+   * Silenciar **para o serviço**, e não só marca o estado desta tela.
+   *
+   * Antes do `v8` bastava o estado: o player era desta tela, e o efeito o destruía ao ver
+   * `silenciado`. Agora o som é do serviço e não pertence mais a ela — sem esta chamada, o botão
+   * mudaria a tela e o alarme seguiria berrando.
+   */
+  const silenciar = useCallback(() => {
+    pararDeSoar();
+    setSilenciado(true);
+  }, []);
 
   /**
    * Responder encerra o alarme inteiro: para o som, tira a notificação da bandeja e fecha a tela.

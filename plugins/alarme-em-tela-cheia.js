@@ -55,6 +55,50 @@ const RECEPTORES_DE_BOOT = [
  * recebem dado nenhum de fora, só o aviso de que o sistema terminou de iniciar. Um app malicioso
  * que os invocasse conseguiria, no máximo, fazer o Mapill reagendar os próprios alarmes.
  */
+/**
+ * Dá ao serviço do Notifee o **tipo** que o Android 14 exige.
+ *
+ * ## O defeito que isto evita
+ *
+ * O `registerForegroundService` é o que faz o som do alarme tocar sem depender de tela (ver
+ * `src/notifications/som-do-alarme.ts`). A partir do Android 14, subir um foreground service cujo
+ * `<service>` não declara `foregroundServiceType` lança `MissingForegroundServiceTypeException` — e
+ * o alarme morre no instante em que deveria tocar.
+ *
+ * O `foregroundServiceTypes` que a notificação passa no JS **não basta**: ele diz ao Notifee qual
+ * tipo usar na chamada, e o Android confere contra o que está no manifesto. Os dois precisam
+ * concordar.
+ *
+ * O AAR do Notifee declara o serviço sem tipo, e o manifesto da biblioteca não se edita. `mergeRules`
+ * com `tools:replace` é o que dá ao merge um lado nosso para vencer — o mesmo mecanismo que os
+ * receptores de boot já usavam aqui.
+ *
+ * `mediaPlayback` é o tipo correto para um despertador que toca áudio, e é o que os requisitos do
+ * Play descrevem para apps de alarme.
+ */
+function withTipoDoServicoDeSom(manifesto) {
+  const aplicacao = manifesto.manifest.application?.[0];
+  if (!aplicacao) return;
+
+  const NOME = "app.notifee.core.ForegroundService";
+  aplicacao.service ??= [];
+
+  const existente = aplicacao.service.find((service) => service.$["android:name"] === NOME);
+  if (existente) {
+    existente.$["android:foregroundServiceType"] = "mediaPlayback";
+    existente.$["tools:replace"] = "android:foregroundServiceType";
+    return;
+  }
+
+  aplicacao.service.push({
+    $: {
+      "android:name": NOME,
+      "android:foregroundServiceType": "mediaPlayback",
+      "tools:replace": "android:foregroundServiceType",
+    },
+  });
+}
+
 function withReceptoresDeBootExportados(manifesto) {
   const aplicacao = manifesto.manifest.application?.[0];
   if (!aplicacao) return;
@@ -104,6 +148,7 @@ module.exports = function withAlarmeEmTelaCheia(config) {
     }
 
     withReceptoresDeBootExportados(manifesto);
+    withTipoDoServicoDeSom(manifesto);
 
     return config;
   });

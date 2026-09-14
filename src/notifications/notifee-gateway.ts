@@ -1,6 +1,7 @@
 import notifee, {
   AlarmType,
   AndroidCategory,
+  AndroidForegroundServiceType,
   AndroidImportance,
   AndroidVisibility,
   AuthorizationStatus,
@@ -23,6 +24,7 @@ import {
   COMPONENTE_DE_ALARME,
   registrarCanais,
 } from "./canais-notifee";
+import { pararDeSoar } from "./som-do-alarme";
 
 /**
  * O agendador de avisos do app — **um só**, para os dois modos que o cadastro promete.
@@ -368,7 +370,22 @@ export class NotifeeGateway implements NotificationGateway {
                  * bandeja o aviso do horário dela assim que monta (ver `AlarmeScreen`): quando a
                  * tela sobe, quem toca é ela; quando ela não sobe, este loop é o único aviso.
                  */
-                loopSound: true,
+                /**
+                 * **O alarme sobe como foreground service, e é ele quem toca o som.**
+                 *
+                 * `loopSound` saiu junto com o som do canal: ele era o `FLAG_INSISTENT` do Android
+                 * repetindo o áudio **do canal**, e o canal ficou mudo no `v8`. Mantê-lo seria
+                 * repetir silêncio.
+                 *
+                 * O que ele tentava cobrir — "a tela cheia nem sempre sobe, e aí o único som era
+                 * uma batida só" — o serviço cobre melhor: ele toca independente de tela, e no
+                 * volume de despertador. O teste de 14/09 mostrou que o `loopSound` não cobria nada
+                 * nesse caso: com o celular em uso, o alarme não emitia som nenhum.
+                 */
+                asForegroundService: true,
+                foregroundServiceTypes: [
+                  AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
+                ],
                 /**
                  * A peça que sustenta a promessa central: abre o componente React registrado em
                  * `index.js` **por cima da tela de bloqueio**, sem passar pelo roteador do app.
@@ -485,6 +502,17 @@ export class NotifeeGateway implements NotificationGateway {
  */
 export async function dispensarAlarmeAtivo(): Promise<void> {
   if (Platform.OS !== "android") return;
+
+  /**
+   * **O som para aqui, e não em cada chamador.**
+   *
+   * Desde o `v8` o áudio é do app, não do canal — ele deixou de morrer junto com a notificação, e
+   * pará-lo virou responsabilidade nossa. Esta função é o funil por onde passam todos os caminhos
+   * que encerram um alarme: os botões da tela, o toque na notificação, a dose respondida em outro
+   * lugar. Espalhar a chamada por cada um deles abriria caminho para alguém esquecer — e o que se
+   * esquece aqui é um alarme que continua berrando depois de respondido.
+   */
+  pararDeSoar();
 
   /**
    * Tira **só os alarmes**, e não tudo.
