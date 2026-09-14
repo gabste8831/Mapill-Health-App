@@ -5,15 +5,16 @@
 > O registro completo — o que passou, quando, e o que cada achado revelou — está no
 > [`ROTEIRO-DE-TESTE.md`](ROTEIRO-DE-TESTE.md).
 
-**Antes de qualquer teste de alarme: deixe o volume de mídia alto.** O alarme ainda sai por ele.
+**Antes de qualquer teste de alarme: suba o volume de DESPERTADOR.** Mudou nesta build — o alarme
+saía no de mídia até a anterior. Se nada tocar, confira esse volume antes de reportar falha.
 
 ---
 
 ## Na build de preview de 14/09
 
-**Os quatro passos são nesta mesma build** — a de 14/09, commit `27a2a38`, a 14ª do projeto. Ela
-tem o módulo de desbloqueio (que os passos 1 e 3 exigem) e o bundle dentro do APK (que o passo 4
-exige). Não há mais nada esperando outra build.
+**Os cinco passos são nesta mesma build**, a 14ª do projeto. Ela tem o módulo de desbloqueio (que
+os passos 1 e 3 exigem), o serviço de som (passo 4) e o bundle dentro do APK (passo 5). Não há mais
+nada esperando outra build.
 
 ### 1. C.1 — Entrar no app pela tela azul exige desbloqueio
 
@@ -43,7 +44,27 @@ Celular **desbloqueado**, usando outro app, e o alarme dispara. Toque na notific
 > Só vale nesta build: a decisão depende do módulo de desbloqueio, que é nativo. Nas anteriores a
 > tela azul continua subindo, e isso não é a correção falhando.
 
-### 4. D.5 — A tela azul com o app fora dos recentes
+### 4. E.1 — 🔊 O som do alarme
+
+Mudou quem toca: era o sistema, passou a ser o app, por um serviço que não depende de tela.
+**Quatro cenários, e o som tem que sair nos quatro:**
+
+| Cenário | O que esperar |
+|---|---|
+| Celular **bloqueado** | tela azul sobe **e** toca |
+| Celular **em uso**, em outro app | a notificação chega **e toca** — era isto que falhava |
+| App **fechado** (fora dos recentes) | toca do mesmo jeito |
+| Volume de **mídia no zero**, despertador alto | toca — é a prova de que saiu pelo stream certo |
+
+**Passa se:** sai som nos quatro, **no volume de despertador**.
+
+**E o som tem que parar** em cada um destes: "Tomei", "Pulei", "Silenciar", "Adiar", "Responder
+depois", e ao tocar na notificação (que leva à tela do horário). Som que continua depois de
+respondido é o pior defeito possível aqui — se acontecer, me diga em qual botão.
+
+> Confira também o **silencioso**: o alarme deve furar, o lembrete de dose **não**.
+
+### 5. D.5 — A tela azul com o app fora dos recentes
 
 Tire o app dos recentes e espere o alarme. **Tente 4 vezes** — é defeito de corrida de tempo, e
 "passou" e "passou nas 4 tentativas" não são a mesma informação.
@@ -69,30 +90,15 @@ Tire o app dos recentes e espere o alarme. **Tente 4 vezes** — é defeito de c
 
 ---
 
-## Fora de escopo — vira "trabalhos futuros" no artigo
+## Decidido, não testado
 
-**E.1 — o alarme no volume de despertador, e o silêncio com o celular em uso.** São o mesmo
-problema, e o teste de 14/09 (o antigo B.17b) mostrou que o segundo é pior que o primeiro: com o
-celular em uso **o alarme não emite som nenhum** — canal sonoro, URI resolvida, todos os volumes
-altos. Tocar na notificação abre a tela e aí o som sai, porque quem toca é a tela.
+**E.1 saiu daqui em 14/09** — virou o passo 4. O som passou a ser do app, tocado por um foreground
+service no volume de despertador. O histórico da investigação — as duas builds gastas no canal, a
+issue #297 fechada como *not planned*, e o teste que mostrou o alarme mudo com o celular em uso —
+está no [anexo do roteiro](ROTEIRO-DE-TESTE.md).
 
-Descartados com evidência: canal mudo, volume baixo, notificação cancelada antes de tocar, versão
-velha do canal, e `ongoing: true`. Sem causa provada — o que resta é o Android não tocar o som do
-canal ao rebaixar uma notificação de tela cheia para heads-up, comportamento que a documentação
-oficial não descreve.
-
-**A correção não depende de descobrir a causa:** o app passa a tocar o próprio som. Falta um
-**foreground service** para isso funcionar sem depender de a tela montar — e a biblioteca já expõe
-o necessário (`registerForegroundService`), então não é código nativo novo. O patch do player está
-pronto e **não registrado** em
-[`plugins/som-do-alarme-em-despertador.js`](../plugins/som-do-alarme-em-despertador.js), com o que
-falta escrito nele.
-
-A metade difícil já está provada em aparelho: o app tocando o próprio som é o que acontece toda vez
-que a tela azul sobe.
-
-> **Enquanto isso, o artigo não pode alegar que o alarme toca no silencioso** — hoje ele sai no
-> volume de mídia, o silencioso o corta, e com o celular em uso ele não toca.
+> **Se o passo 4 passar, o artigo pode voltar a alegar que o alarme toca no silencioso.** Se
+> falhar, o E.1 volta a ser trabalho futuro e a alegação precisa sair do texto.
 
 **E.2 — o fuso.** Decidido, e o comportamento atual está certo: a dose segue o **instante**, então
 21:00 em São Paulo toca às 20:00 em Manaus. Não é teste, é decisão.
