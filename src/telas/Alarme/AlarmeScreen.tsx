@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppState, Linking, Pressable, ScrollView, Text, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { estaBloqueado, pedirDesbloqueio } from "@/modules/desbloqueio";
 import { chaveDoHorario } from "@/domain/use-cases/planejar-avisos-de-dose";
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
 import { MINUTOS_DE_ADIAMENTO } from "@/notifications/acoes";
@@ -282,8 +283,19 @@ export function AlarmeScreen({
    *
    * Silencia e dispensa antes de sair, na mesma ordem do `encerrar`: sem isso o som continuaria
    * tocando por cima do app recém-aberto.
+   *
+   * **Com o aparelho bloqueado, exige o desbloqueio primeiro.** Responder a dose daqui — "Tomei",
+   * "Pulei", adiar, silenciar — segue sem senha, porque é para isso que o alarme existe e o dado
+   * não sai da tela. Entrar no app é outra coisa: lá estão os medicamentos, o histórico e a ficha
+   * de saúde, e a tela azul sobe por cima do bloqueio sem que ninguém tenha se identificado.
+   *
+   * O pedido vem **antes** de silenciar e dispensar: quem desiste da senha continua com o alarme
+   * tocando e a tela no lugar, que é o estado em que estava. Desligar o alarme primeiro entregaria
+   * a quem cancelou exatamente o que o cancelamento recusou.
    */
   const abrirNoApp = useCallback(async () => {
+    if ((await estaBloqueado()) && !(await pedirDesbloqueio())) return;
+
     setSilenciado(true);
     await dispensarAlarmeAtivo();
     await Linking.openURL(`mapillapp://horario/${encodeURIComponent(instanteIso)}`).catch(() => {});

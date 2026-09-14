@@ -1,0 +1,102 @@
+package br.com.mapill.desbloqueio
+
+import android.app.Activity
+import android.app.KeyguardManager
+import android.content.Context
+import android.os.Build
+import expo.modules.kotlin.Promise
+import expo.modules.kotlin.modules.Module
+import expo.modules.kotlin.modules.ModuleDefinition
+
+/**
+ * Pede o desbloqueio antes de a tela azul deixar alguém entrar no app.
+ *
+ * ## Por que existe
+ *
+ * O `showWhenLocked` vale para a **MainActivity**, e o `index.js` monta a tela do alarme e o app
+ * inteiro no mesmo processo. A permissão de aparecer sobre o bloqueio, então, é do app todo: sair
+ * da tela azul para dentro do app revelava medicamentos, histórico e ficha de saúde sem que
+ * ninguém digitasse a senha.
+ *
+ * Nem o Expo 57 nem o Notifee expõem o keyguard, então o pedido precisa ser feito daqui.
+ *
+ * ## O que ele não faz
+ *
+ * Não desbloqueia nada por conta própria — só **pede**, e quem decide é o sistema, com a senha ou a
+ * biometria que a pessoa já configurou. Num aparelho sem bloqueio o Android dispensa na hora, que é
+ * o certo: não há segredo a proteger onde a pessoa optou por não ter um.
+ */
+class DesbloqueioModule : Module() {
+  override fun definition() = ModuleDefinition {
+    Name("Desbloqueio")
+
+    /**
+     * `true` quando a tela de bloqueio está na frente agora.
+     *
+     * Serve para a tela do alarme não pedir autenticação a quem já está com o aparelho aberto —
+     * pedir ali seria atrito sem ganho, já que a pessoa acabou de passar pelo bloqueio.
+     */
+    AsyncFunction("estaBloqueado") {
+      return@AsyncFunction keyguardManager()?.isKeyguardLocked ?: false
+    }
+
+    /**
+     * Pede o desbloqueio e responde se ele aconteceu.
+     *
+     * **Resolve `false` em vez de rejeitar quando a pessoa desiste.** Cancelar não é erro: é uma
+     * resposta legítima, e quem chama precisa apenas não abrir o app. Rejeitar obrigaria cada
+     * chamador a distinguir "desistiu" de "quebrou" dentro de um `catch`, e o risco de alguém tratar
+     * os dois como sucesso é exatamente o defeito que este módulo existe para fechar.
+     */
+    AsyncFunction("pedirDesbloqueio") { promise: Promise ->
+      val activity = appContext.currentActivity
+      val keyguard = keyguardManager()
+
+      if (activity == null || keyguard == null) {
+        // Sem Activity não há a quem pedir. Negar é a resposta segura: o chamador não abre o app.
+        promise.resolve(false)
+        return@AsyncFunction
+      }
+
+      if (!keyguard.isKeyguardLocked) {
+        promise.resolve(true)
+        return@AsyncFunction
+      }
+
+      /**
+       * `requestDismissKeyguard` só existe da API 26 em diante, e o app atende a partir da 24.
+       *
+       * No 24 e no 25 a resposta é `false`, e não `true`: sem como pedir a autenticação, deixar
+       * passar seria entregar o dado — e é melhor a pessoa desbloquear por fora e abrir o app pela
+       * própria mão do que o alarme abrir sozinho por cima do bloqueio.
+       */
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+        promise.resolve(false)
+        return@AsyncFunction
+      }
+
+      // O callback do keyguard chega na thread principal, e é de lá que o Android quer o pedido.
+      activity.runOnUiThread {
+        keyguard.requestDismissKeyguard(
+          activity,
+          object : KeyguardManager.KeyguardDismissCallback() {
+            override fun onDismissSucceeded() {
+              promise.resolve(true)
+            }
+
+            override fun onDismissCancelled() {
+              promise.resolve(false)
+            }
+
+            override fun onDismissError() {
+              promise.resolve(false)
+            }
+          },
+        )
+      }
+    }
+  }
+
+  private fun keyguardManager(): KeyguardManager? =
+    appContext.reactContext?.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+}

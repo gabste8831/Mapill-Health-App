@@ -8,6 +8,9 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@/modules/desbloqueio": [
+        "./modules/desbloqueio/src"
       ]
     }
   },
