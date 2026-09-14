@@ -50,13 +50,17 @@ esperado — o que se mede é o som.
 
 Preciso implementar antes. A build é uma só, para os dois.
 
-### 6. C.1 — Responder o alarme não pode dar acesso ao app
+### 6. C.1 — Entrar no app pela tela azul exige desbloqueio
 
 Celular **bloqueado**, o alarme toca, a tela azul sobe.
 
 **Passa se:**
-- Tocar em **"Tomei"** → a dose é registrada e o celular **volta para o bloqueio**, sem mostrar o app
-- Tocar em **"ir ao aplicativo confirmar as doses"** → o celular **pede desbloqueio** antes de abrir
+- **"Tomei"**, **"Pulei"**, **silenciar** e **adiar** funcionam **sem pedir senha**, e o celular
+  volta para o bloqueio depois — sem mostrar o app
+- **"Ver e confirmar no app"** → o celular **pede a senha ou a biometria** antes de abrir
+- **Cancelando a senha** → volta para a tela azul com o alarme ainda tocando, e o app não aparece
+
+> Confira também com o celular **desbloqueado**: aí o botão abre o app direto, sem pedir nada.
 
 ### 7. C.2 — Apagar os dados tem que cancelar os alarmes
 
