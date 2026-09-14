@@ -80,10 +80,16 @@ export class LocalDataRepository {
    * reaparecerem sozinhos, que é a pior coisa que um botão de exclusão pode fazer. Apagando lá
    * primeiro, mesmo que o app feche no meio, o que sobra localmente sobe como exclusão na próxima
    * sincronização.
+   *
+   * **E quando a nuvem não pode ser limpa** — offline, sessão expirada, erro de permissão —, o
+   * apagamento local acontece do mesmo jeito, mas a marca d'água da sincronização é **preservada**.
+   * É ela que impede o pull seguinte de rebaixar o servidor inteiro de volta para o aparelho. Sem
+   * isso, o botão de apagar virava um apagamento temporário: tudo sumia e voltava na sincronização
+   * seguinte, exatamente o que o parágrafo acima diz que não pode acontecer.
    */
   async eraseHealthData(): Promise<void> {
-    await apagarNaNuvem(TABELAS_CLINICAS);
-    await this.eraseTables(TABELAS_CLINICAS);
+    const nuvemLimpa = await apagarNaNuvem(TABELAS_CLINICAS);
+    await this.eraseTables(TABELAS_CLINICAS, nuvemLimpa);
     this.eraseFiles(["medicamento-caixa", "medicamento-receita"]);
     await cancelarAvisosOrfaos();
   }
@@ -91,8 +97,8 @@ export class LocalDataRepository {
   /** Tudo: o clínico, a ficha, o consentimento e os arquivos. O app volta à primeira execução. */
   async eraseEverything(): Promise<void> {
     const tabelas = [...TABELAS_CLINICAS, ...TABELAS_DE_IDENTIDADE];
-    await apagarNaNuvem(tabelas);
-    await this.eraseTables(tabelas);
+    const nuvemLimpa = await apagarNaNuvem(tabelas);
+    await this.eraseTables(tabelas, nuvemLimpa);
     this.eraseFiles(PREFIXOS_DE_ARQUIVO);
     await cancelarAvisosOrfaos();
   }
@@ -101,22 +107,29 @@ export class LocalDataRepository {
    * Numa transação só: apagar metade deixaria o app num estado que nenhuma tela sabe desenhar —
    * tratamento sem medicamento, dose sem tratamento.
    */
-  private async eraseTables(tabelas: string[]): Promise<void> {
+  private async eraseTables(tabelas: string[], nuvemLimpa: boolean): Promise<void> {
     await escreverEmTransacao(async (database) => {
       for (const tabela of tabelas) {
         await database.runAsync(`DELETE FROM ${tabela}`);
       }
       /**
-       * A marca d'água da sincronização vai junto.
+       * A marca d'água da sincronização vai junto — **mas só se a nuvem tiver sido limpa**.
        *
        * Ela diz "já baixei tudo até tal instante". Mantida depois de esvaziar o banco, o próximo
        * pull pularia exatamente as linhas mais antigas que ela — e o app ficaria com metade dos
-       * dados se algum dia eles voltassem. `IF EXISTS` porque a tabela só nasce na primeira
-       * sincronização, e quem nunca vinculou conta não a tem.
+       * dados se algum dia eles voltassem. Por isso ela sai no caminho normal.
+       *
+       * **Com a nuvem intacta, apagá-la é o defeito.** Offline, sem sessão ou com erro de permissão,
+       * `apagarNaNuvem` falha e o servidor continua cheio; zerar a marca d'água aí faz o pull
+       * seguinte baixar tudo de volta, e a pessoa vê reaparecer o que mandou apagar. Preservando-a,
+       * o servidor fica alto demais para ser rebaixado e nada ressuscita — os dados remotos seguem
+       * lá até a exclusão por contato, que é o que o texto legal descreve.
+       *
+       * O `catch` cobre quem nunca vinculou conta: a tabela só nasce na primeira sincronização.
        */
-      await database
-        .runAsync(SQL_LIMPAR_MARCA_DAGUA)
-        .catch(() => {});
+      if (nuvemLimpa) {
+        await database.runAsync(SQL_LIMPAR_MARCA_DAGUA).catch(() => {});
+      }
 
       /**
        * Resto da tentativa de regerar a grade por fuso, abandonada em 13/09.

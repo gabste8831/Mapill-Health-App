@@ -118,7 +118,17 @@ export async function reabastecerGradeDeDoses(agora: Date): Promise<ResultadoDoR
      * `2026-09-14T02:00:00+00:00`, e o reabastecimento gravaria uma segunda dose para um horário que
      * já existe — duplicando o alarme em vez de completar a grade.
      */
-    const existentes = await doseScheduleRepository.findByPrescription(prescription.id);
+    /**
+     * **Inclui as excluídas**, e é o que impede o reabastecimento de desfazer uma edição.
+     *
+     * Editar a posologia marca as doses futuras como excluídas (ver `deleteUpcoming`). Olhando só
+     * as vivas, o reabastecimento veria aqueles instantes como buracos na grade e gravaria doses
+     * novas para eles — com id novo, imunes ao `deleted_at` que acabou de matá-las, e o horário
+     * removido voltaria a tocar.
+     */
+    const existentes = await doseScheduleRepository.findByPrescriptionIncluindoExcluidas(
+      prescription.id,
+    );
     const instantesExistentes = new Set(
       existentes.map((dose) => new Date(dose.scheduledFor).getTime()),
     );

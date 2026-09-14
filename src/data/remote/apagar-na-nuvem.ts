@@ -22,13 +22,14 @@ import { TABELAS_SINCRONIZAVEIS, type TabelaSincronizavel } from "./tabelas-sinc
  * apagamento local precisa acontecer do mesmo jeito. Falhar aqui e abortar tudo deixaria a pessoa
  * sem conseguir apagar nem o que está no próprio aparelho.
  */
-export async function apagarNaNuvem(tabelasDesejadas: readonly string[]): Promise<void> {
-  if (supabase === null) return;
+export async function apagarNaNuvem(tabelasDesejadas: readonly string[]): Promise<boolean> {
+  if (supabase === null) return true;
 
   try {
     const { data } = await supabase.auth.getUser();
     const userId = data.user?.id;
-    if (userId === undefined) return;
+    // Sem conta vinculada não há nuvem a limpar, e isso é sucesso: não sobrou nada em lugar nenhum.
+    if (userId === undefined) return true;
 
     // Só as que existem no servidor, e na ordem inversa da sincronização.
     const alvo = [...TABELAS_SINCRONIZAVEIS]
@@ -39,16 +40,25 @@ export async function apagarNaNuvem(tabelasDesejadas: readonly string[]): Promis
       const { error } = await supabase.from(tabela).delete().eq("user_id", userId);
       if (error !== null) throw new Error(`${tabela}: ${error.message}`);
     }
+    return true;
   } catch (cause) {
     /**
-     * Registrado e seguido em frente. É a decisão menos ruim: o apagamento local é o que a pessoa
-     * consegue ver acontecer, e travá-lo por causa da nuvem deixaria os dados nos **dois** lugares.
+     * Registrado, e o **fracasso é devolvido** — não engolido.
      *
-     * O que sobra na nuvem não fica perdido: as linhas locais são apagadas de vez, então a próxima
-     * sincronização não as ressuscita — e o texto legal descreve o caminho de contato para a
-     * exclusão remota, em até 15 dias.
+     * Seguir em frente continua certo: travar o apagamento local por causa da nuvem deixaria os
+     * dados nos dois lugares. O que mudou em 14/09 é quem sabe que a nuvem não foi limpa.
+     *
+     * O texto que estava aqui dizia que "as linhas locais são apagadas de vez, então a próxima
+     * sincronização não as ressuscita". **Isso estava errado:** a marca d'água é apagada junto
+     * (`SQL_LIMPAR_MARCA_DAGUA`), e sem ela o pull seguinte baixa o servidor inteiro de volta. Com a
+     * nuvem intacta, o botão de apagar virava um apagamento temporário — a pessoa via tudo sumir e
+     * voltar, que é o que o comentário de `eraseHealthData` chama de a pior coisa que um botão de
+     * exclusão pode fazer.
+     *
+     * Quem chama usa este retorno para decidir se preserva a marca d'água. Ver `eraseHealthData`.
      */
     console.error("Falha ao apagar os dados na nuvem:", cause);
+    return false;
   }
 }
 

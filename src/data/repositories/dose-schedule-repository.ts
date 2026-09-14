@@ -106,6 +106,25 @@ export class DoseScheduleRepository
   }
 
   /**
+   * Como `findByPrescription`, mas **incluindo as excluídas** — só para não recriá-las.
+   *
+   * Existe por causa do reabastecimento da grade, e é o único lugar que deve usá-la. Ele completa a
+   * janela de doses comparando o que já existe com o que deveria existir; enxergando só as vivas,
+   * ele recriaria exatamente as que a edição de posologia acabou de excluir, e a dose voltaria com
+   * id novo — imune ao `deleted_at` que a matou.
+   *
+   * Nenhuma tela usa isto: para desenhar, dose excluída não existe. Aqui o que importa é que ela
+   * **já ocupou** aquele instante.
+   */
+  async findByPrescriptionIncluindoExcluidas(prescriptionId: string): Promise<DoseSchedule[]> {
+    const rows = await this.database.getAllAsync<DoseScheduleRow>(
+      `SELECT * FROM ${this.tableName} WHERE prescription_id = ?`,
+      [prescriptionId],
+    );
+    return rows.map((row) => this.toEntity(row));
+  }
+
+  /**
    * As doses de uma faixa de instantes, com o desfecho de cada uma.
    *
    * Faixa de instantes, e não comparação de datas: `scheduled_for` é gravado em UTC e o dia que a
@@ -162,9 +181,32 @@ export class DoseScheduleRepository
   }
 
   /**
-   * Hard delete de propósito: um horário futuro que deixou de existir porque a posologia mudou
-   * não é histórico, é ruído. O soft delete existe pra preservar o que aconteceu — e nada
-   * aconteceu nesses.
+   * Some com os horários futuros de uma prescrição — por **soft delete**, desde 14/09.
+   *
+   * ## Por que deixou de ser hard delete
+   *
+   * O argumento antigo era: "um horário futuro que deixou de existir porque a posologia mudou não é
+   * histórico, é ruído". Ele valia num app local-only e parou de valer quando a sincronização entrou.
+   *
+   * **Linha apagada some sem deixar recado.** O push envia o que está na tabela
+   * (`WHERE synced_at IS NULL OR updated_at > synced_at`), e o que não existe mais nunca é
+   * selecionado — a exclusão nunca chega ao servidor, e a linha continua viva lá com
+   * `deleted_at NULL`. Qualquer aparelho cuja marca d'água seja anterior a baixa de volta: um
+   * segundo celular, ou o mesmo depois de reinstalar.
+   *
+   * Nenhuma delas toca alarme nem aparece em tela — todo leitor filtra `deleted_at IS NULL` —, mas
+   * elas se acumulam a cada edição de posologia, incham o primeiro pull de todo aparelho novo e
+   * saem no **CSV de exportação**, que não filtra excluídos: horários de um remédio que a pessoa
+   * mandou apagar, num arquivo que existe para cumprir a LGPD.
+   *
+   * O próprio `excluirMedicamento` já enuncia a regra que esta função contrariava: "linha apagada
+   * some sem deixar recado, e voltaria do servidor na sincronização seguinte".
+   *
+   * ## O que se ganha junto
+   *
+   * A dose confirmada **antes da hora** (o app permite, com 15 min de tolerância) e apagada logo
+   * depois deixava o `intake_log` apontando para nada. Com a linha preservada, o histórico
+   * continua ligado ao que o referencia.
    */
   async deleteUpcoming(prescriptionId: string, fromTimestamp: string): Promise<void> {
     /**
@@ -182,13 +224,17 @@ export class DoseScheduleRepository
      * existe.
      *
      * `julianday` entende os dois formatos ISO e devolve número, então a comparação passa a ser
-     * sobre o instante. O custo é perder o índice da coluna, que aqui não pesa: o `DELETE` já é
+     * sobre o instante. O custo é perder o índice da coluna, que aqui não pesa: o `UPDATE` já é
      * restrito a uma prescrição.
      */
+    const agora = new Date().toISOString();
     await this.database.runAsync(
-      `DELETE FROM ${this.tableName}
-       WHERE prescription_id = ? AND julianday(scheduled_for) >= julianday(?)`,
-      [prescriptionId, fromTimestamp],
+      `UPDATE ${this.tableName}
+          SET deleted_at = ?, updated_at = ?
+        WHERE prescription_id = ?
+          AND deleted_at IS NULL
+          AND julianday(scheduled_for) >= julianday(?)`,
+      [agora, agora, prescriptionId, fromTimestamp],
     );
   }
 
