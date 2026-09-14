@@ -37,12 +37,27 @@ Alarme → editar para notificação → salvar → voltar para alarme.
 
 **Passa se:** a tela azul sobe nas duas vezes.
 
-### 5. B.17b — O som com o celular em uso
+### 5. B.17b — 🔴 O som com o celular em uso — **FALHOU em 14/09**
 
 Celular **desbloqueado**, usando outro app, e o alarme dispara. A tela cheia não aparecer aqui é o
 esperado — o que se mede é o som.
 
 **Passa se:** chega a notificação **com som em loop**.
+
+> **Falhou: a notificação chega e não sai som nenhum.** Testado com todos os volumes altos, pelo
+> disparo do Diagnóstico e pelo alarme real. Tocar na notificação abre a tela, e aí o som toca —
+> porque quem toca é a tela, não a notificação.
+>
+> **Investigado e descartado, com evidência:** canal mudo (o Diagnóstico mostra
+> `som: alarme_de_dose` e a URI resolvida), volume baixo, notificação cancelada antes de tocar (ela
+> continua tocável), versão velha do canal (`v7`, a atual), e `ongoing: true` (a documentação do
+> Android diz que não bloqueia som).
+>
+> **Sem causa provada.** O que resta é o Android não tocar o som do canal quando rebaixa uma
+> notificação de tela cheia para heads-up — comportamento que a documentação oficial não descreve.
+>
+> **Vale mais corrigir que diagnosticar:** o caminho do **E.1** resolve sem depender da causa,
+> porque quem passa a tocar é o app. Ver a nota do E.1 abaixo, que este achado mudou.
 
 ---
 
@@ -100,11 +115,27 @@ do arquivo.
 >
 > Com o **app fechado e o celular em uso** — o caso mais comum do dia —, o Android rebaixa a tela
 > cheia e o processo está morto, então nem a Activity nem a rota montam a tela. Sem som no canal,
-> **ninguém toca nada**. Hoje esse caso é coberto pelo `loopSound` do canal, que some junto.
+> ninguém toca nada.
+>
+> ### ⚠️ O teste de 14/09 derrubou a razão de ter parado
+>
+> O argumento acima supunha que o `loopSound` do canal cobria esse caso hoje. **Não cobre:** o B.17b
+> falhou, e o alarme com o celular em uso **já está mudo**, sem o E.1 e sem nada mudado. O buraco
+> que o E.1 "abriria" já está aberto.
+>
+> Então a conta se inverteu: o E.1 deixa de ser uma troca (volume certo × um caso mudo) e passa a
+> ser correção de dois defeitos ao mesmo tempo — o volume e o silêncio com o celular em uso.
+>
+> ### O que falta, e o que já está provado
 >
 > Falta um **foreground service** para tocar o som sem depender de tela nem de processo vivo — que
 > é o que os requisitos do Play descrevem para apps de alarme. A biblioteca já expõe o necessário
-> (`registerForegroundService`), então não é código nativo novo, mas é mudança no núcleo do alarme.
+> (`registerForegroundService`), então não é código nativo novo; é mudança no núcleo do alarme, e
+> merece build e rodada próprias.
+>
+> **A metade difícil já funciona:** o app tocando o próprio som está provado em aparelho — é o que
+> acontece toda vez que a tela azul sobe, e quando o toque na notificação abre a tela. O que falta
+> é fazer isso sem depender da tela montar.
 >
 > **Enquanto isso, o artigo não pode alegar que o alarme toca no silencioso** — hoje ele sai no
 > volume de mídia e o silencioso o corta.

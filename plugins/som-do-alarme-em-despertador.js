@@ -19,9 +19,14 @@ const path = require("node:path");
  * - **Banco lento no arranque**: a Activity sobe e fica no loader, `jaEstaEmCena` responde `true`,
  *   e o caminho tardio de `use-dose-notifications` desiste. Tela azul parada e muda.
  *
- * Hoje esses casos são cobertos pelo `loopSound: true` do canal (`notifee-gateway.ts`), que é o
- * `FLAG_INSISTENT` do Android repetindo o som **do canal**. Canal mudo, e esse piso desaparece —
- * o `loopSound` continua no código, mas repetindo silêncio.
+ * **Atualização de 14/09, e ela derruba metade do argumento acima.** A suposição era que o
+ * `loopSound: true` do canal cobria esses casos hoje. O teste em aparelho (B.17b) mostrou que não:
+ * com o celular em uso o alarme **já não emite som nenhum**, com o canal sonoro e todos os volumes
+ * altos. O piso que este aviso dizia existir não existe.
+ *
+ * Isso não torna o plugin suficiente — ele continua sendo metade do trabalho —, mas muda o motivo
+ * de esperar: não é mais "para não abrir um buraco", é "para abrir junto com o foreground service,
+ * que fecha o que já está aberto".
  *
  * ## O que falta para ele valer
  *
