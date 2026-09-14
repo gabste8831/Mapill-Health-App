@@ -101,6 +101,10 @@ export function useAdherenceReport(periodo: PeriodoDeAdesao) {
          * As doses dele continuam no banco como histórico — o registro de que existiram não se
          * apaga. Mas um relatório que some com o remédio e mantém a estatística dele mostraria uma
          * taxa que ninguém consegue explicar: o denominador não bate com nada visível na tela.
+         *
+         * **Confirmado pelo Gabriel em 14/09**, ao auditar a exclusão com sincronização ligada:
+         * quem exclui o remédio exclui o histórico dele junto. O dado permanece no banco e na
+         * exportação — o que sai é a leitura, não o registro.
          */
         if (!prescription || !medication) continue;
 
