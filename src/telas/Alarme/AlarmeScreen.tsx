@@ -563,7 +563,7 @@ export function AlarmeScreen({
                     {/* O local fecha a coluna de texto, alinhado com o nome — com ou sem foto. */}
                     {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
                       <View style={styles.localEnxuto}>
-                        <Ionicons name="location-outline" size={13} color={cores.onPrimary} />
+                        <Ionicons name="location-outline" size={15} color={cores.onPrimary} />
                         <Text style={styles.localCompacto}>{dose.storageLocation}</Text>
                       </View>
                     ) : null}
