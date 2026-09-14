@@ -440,9 +440,9 @@ export function AlarmeScreen({
        * na lista, não o cabeçalho.
        */}
       <View style={styles.cabecalho}>
-        <View style={styles.icone}>
-          <Ionicons name="alarm" size={28} color={cores.onPrimary} />
-        </View>
+        {/* Sem o círculo do despertador desde 14/09: ele custava 56dp de altura no topo de uma tela
+            que precisa caber três remédios, e não dizia nada que o título já não diga. Numa tela
+            que irrompe sozinha tocando, ninguém precisa de um ícone para saber que é um alarme. */}
         {/* A contagem entra quando há mais de um: é ela que diz, antes de qualquer nome, quantas
             respostas este horário espera. */}
         <Text style={styles.titulo}>
@@ -534,10 +534,32 @@ export function AlarmeScreen({
                  * tamanho a moldura inteira da caixa não se lê de qualquer forma — o que resta é a
                  * cor e a forma, que é justamente o que distingue uma da outra.
                  */
-                <View style={styles.linhaDoItem}>
-                  {dose.photoUri !== null ? (
-                    <FotoLocal uri={dose.photoUri} style={styles.miniatura} contentFit="cover" />
-                  ) : null}
+                /**
+                 * **Duas faixas, e não duas colunas.**
+                 *
+                 * Em cima, a foto ao lado do nome e da dose — é o par que identifica o remédio, e a
+                 * foto tem altura para valer alguma coisa. Embaixo, o texto que explica a tomada,
+                 * ocupando a **largura inteira** do cartão.
+                 *
+                 * Presas à coluna de 66% ao lado da foto, as três linhas de texto quebravam cedo e
+                 * o cartão crescia em altura — com três remédios, o terceiro só aparecia rolando
+                 * (visto em aparelho em 14/09). A largura toda é o mesmo conteúdo em menos linhas,
+                 * e o que se ganha em altura é o terceiro cartão cabendo na tela.
+                 *
+                 * O vão abaixo da foto deixa de ser espaço morto: era ele que a coluna de texto
+                 * não alcançava.
+                 */
+                <View style={styles.itemEmFaixas}>
+                  <View style={styles.identificacao}>
+                    {dose.photoUri !== null ? (
+                      <FotoLocal uri={dose.photoUri} style={styles.miniatura} contentFit="cover" />
+                    ) : null}
+                    <View style={styles.nomeEDose}>
+                      <Text style={styles.nomeCompacto}>{dose.medicationName}</Text>
+                      <Text style={styles.quantidadeCompacta}>{dose.quantidadeFormatada}</Text>
+                    </View>
+                  </View>
+
                   {/**
                    * **Nada é omitido aqui** — o que muda é o corpo, não o conteúdo.
                    *
@@ -546,9 +568,7 @@ export function AlarmeScreen({
                    * Cheguei a cortar a orientação para a lista caber, e era a decisão errada —
                    * caber é problema de tamanho, e se resolve reduzindo a escala do conjunto.
                    */}
-                  <View style={styles.textoDoItem}>
-                    <Text style={styles.nomeCompacto}>{dose.medicationName}</Text>
-                    <Text style={styles.quantidadeCompacta}>{dose.quantidadeFormatada}</Text>
+                  <View style={styles.detalhesDoItem}>
                     {/* As orientações marcadas no cadastro ("Em jejum · Com bastante água"). Vêm
                         antes do texto livre porque são a regra fechada; o livre é o complemento. */}
                     {dose.orientacoes !== null ? (
@@ -560,7 +580,6 @@ export function AlarmeScreen({
                     {dose.notes !== null && dose.notes.length > 0 ? (
                       <Text style={styles.observacaoCompacta}>{dose.notes}</Text>
                     ) : null}
-                    {/* O local fecha a coluna de texto, alinhado com o nome — com ou sem foto. */}
                     {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
                       <View style={styles.localEnxuto}>
                         <Ionicons name="location-outline" size={15} color={cores.onPrimary} />

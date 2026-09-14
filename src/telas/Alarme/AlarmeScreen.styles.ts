@@ -37,14 +37,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     // como bloco à parte da lista — não como o primeiro item dela.
     paddingBottom: spacing.md,
   },
-  icone: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: withOpacity(cores.onPrimary, 0.18),
-  },
   titulo: {
     ...typography.label,
     color: cores.onPrimary,
@@ -68,7 +60,10 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   lista: {
     flex: 1,
     justifyContent: "center",
-    gap: spacing.lg,
+    // `md` e não `lg`: o vão de 32dp fazia sentido quando os itens eram blocos soltos no azul.
+    // Com o fundo claro delimitando cada cartão, a separação já está feita — e o espaço que sobra
+    // é o que falta para o terceiro remédio caber na tela.
+    gap: spacing.md,
   },
   item: {
     alignItems: "center",
@@ -117,16 +112,34 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     backgroundColor: withOpacity(cores.onPrimary, 0.12),
     borderRadius: radius.lg,
   },
+  /** As duas faixas do cartão: identificação em cima, detalhes embaixo. */
+  itemEmFaixas: {
+    gap: spacing.sm,
+  },
   /**
-   * Miniatura à esquerda, texto à direita — a forma de uma linha de lista.
+   * A faixa de cima: foto à esquerda, nome e dose à direita.
    *
-   * `center` para a foto acompanhar o meio do bloco de texto: presa ao topo, ela deixava um vão
-   * embaixo sempre que o item tinha três ou quatro linhas.
+   * `center` para a foto acompanhar o meio do par nome/dose — são duas linhas de altura conhecida,
+   * ao contrário do bloco de detalhes, que varia com o que foi cadastrado.
    */
-  linhaDoItem: {
+  identificacao: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
+  },
+  /** Nome e dose ocupam o que sobra ao lado da foto. */
+  nomeEDose: {
+    flex: 1,
+    gap: 2,
+  },
+  /**
+   * A faixa de baixo: orientação, observação e local, na **largura inteira** do cartão.
+   *
+   * É o ganho da disposição em faixas — estas linhas são as que mais crescem, e presas à coluna ao
+   * lado da foto quebravam cedo demais.
+   */
+  detalhesDoItem: {
+    gap: 2,
   },
   /**
    * 64dp: grande o bastante para a caixa se reconhecer pela cor e pela forma, sem tomar a linha.
