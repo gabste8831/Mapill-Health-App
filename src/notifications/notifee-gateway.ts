@@ -437,6 +437,26 @@ export class NotifeeGateway implements NotificationGateway {
   }
 
   /**
+   * Cancela **tudo**, sem as exceções do `cancelarTudo`.
+   *
+   * A diferença é o propósito. `cancelarTudo` prepara uma reconstrução: o que ela preserva — o
+   * lembrete adiado — volta a fazer sentido logo depois, porque a grade é regerada em seguida.
+   * Aqui não há "depois": os dados que davam sentido ao aviso deixaram de existir.
+   *
+   * Preservar o adiado neste caminho é o defeito, e não a regra: era ele que tocava depois de a
+   * pessoa apagar tudo, anunciando pelo nome um remédio que ela mandou apagar.
+   */
+  async cancelarTodosOsAgendamentos(): Promise<void> {
+    if (Platform.OS !== "android") return;
+
+    const pendentes = await notifee.getTriggerNotificationIds();
+    if (pendentes.length > 0) await notifee.cancelTriggerNotifications(pendentes);
+
+    // O que já está na bandeja também: um alarme exibido continua nomeando o remédio apagado.
+    await notifee.cancelDisplayedNotifications().catch(() => {});
+  }
+
+  /**
    * Tira o aviso da bandeja depois de respondido.
    *
    * **No Android ele não sai sozinho** ao tocar num botão de ação — fica lá, e cada toque dispara o

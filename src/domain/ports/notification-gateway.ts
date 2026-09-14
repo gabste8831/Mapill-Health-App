@@ -96,6 +96,14 @@ export interface NotificationGateway {
    * idempotência é a única forma barata de garantir que nenhum sobreviva a uma edição.
    */
   cancelarTudo(): Promise<void>;
+  /**
+   * Apaga todo agendamento, sem preservar nada — inclusive o lembrete adiado, que o `cancelarTudo`
+   * poupa de propósito.
+   *
+   * É o par do apagamento de dados, e não do reagendamento: quando o dado que dava sentido ao
+   * aviso deixa de existir, não há reconstrução na qual o adiado voltaria a caber.
+   */
+  cancelarTodosOsAgendamentos(): Promise<void>;
   /** Quantos avisos estão pendentes no sistema. Serve ao diagnóstico, não à regra. */
   contarPendentes(): Promise<number>;
   /**

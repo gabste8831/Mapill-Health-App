@@ -24,6 +24,31 @@ const TABELAS_CLINICAS = [
 const TABELAS_DE_IDENTIDADE = ["patient_profiles", "consent_records"];
 
 /**
+ * Desmarca do sistema os avisos que acabaram de perder o dado que os justificava.
+ *
+ * Apagar as tabelas não desagenda nada: o agendamento vive no Android, não no banco. Sem isto, o
+ * alarme toca depois do apagamento e **anuncia pelo nome** um remédio que a pessoa mandou apagar —
+ * o dado sensível volta pela tela de bloqueio, que é justamente o que o apagamento deveria impedir.
+ *
+ * **A falha aqui não derruba o apagamento.** O dado já morreu quando esta função roda, e é ele que
+ * a LGPD protege; um aviso órfão que sobreviva a um erro do agendador é ruim, mas desfazer a
+ * exclusão por causa dele seria pior. Por isso o `catch` engole — e é a única razão para engolir.
+ *
+ * O import é dinâmico porque o módulo de avisos carrega o Notifee, que só existe no aparelho: no
+ * topo do arquivo ele quebraria o repositório em ambiente sem nativo.
+ */
+async function cancelarAvisosOrfaos(): Promise<void> {
+  if (Platform.OS !== "android") return;
+
+  try {
+    const { NotifeeGateway } = await import("../../notifications/notifee-gateway");
+    await new NotifeeGateway().cancelarTodosOsAgendamentos();
+  } catch {
+    // Ver acima: o apagamento vale mesmo que o agendador falhe.
+  }
+}
+
+/**
  * Prefixos que `persistPickedFile` usa ao gravar no diretório de documentos. Apagar por prefixo,
  * e não o diretório inteiro, é o que impede levar junto arquivo de outra origem (banco do
  * `expo-sqlite`, cache de biblioteca) que também mora ali.
@@ -60,6 +85,7 @@ export class LocalDataRepository {
     await apagarNaNuvem(TABELAS_CLINICAS);
     await this.eraseTables(TABELAS_CLINICAS);
     this.eraseFiles(["medicamento-caixa", "medicamento-receita"]);
+    await cancelarAvisosOrfaos();
   }
 
   /** Tudo: o clínico, a ficha, o consentimento e os arquivos. O app volta à primeira execução. */
@@ -68,6 +94,7 @@ export class LocalDataRepository {
     await apagarNaNuvem(tabelas);
     await this.eraseTables(tabelas);
     this.eraseFiles(PREFIXOS_DE_ARQUIVO);
+    await cancelarAvisosOrfaos();
   }
 
   /**
