@@ -9,63 +9,11 @@
 
 ---
 
-## Agora, na build que já está no aparelho
+## Numa build de development nova
 
-Nada aqui precisa de build nova.
+Os dois esperam a mesma build. O código está pronto e commitado.
 
-### 1. B.7 — Dois ou três remédios no mesmo horário
-
-Cadastre 2 ou 3 remédios no mesmo horário e espere o alarme.
-
-**Passa se:** a tela azul lista cada um, com nome e dose, legível sem rolar.
-
-### 2. B.8 — Quatro ou mais no mesmo horário
-
-Mesma coisa, com 4 ou mais.
-
-**Passa se:** a tela azul mostra a contagem e o botão de abrir o app.
-
-### 3. B.20 — Nome e dose com quatro ou mais
-
-No mesmo cenário do B.8, olhe o conteúdo da lista.
-
-**Passa se:** aparece nome e dose de cada remédio.
-
-### 4. B.4 — Trocar de alarme para notificação e voltar
-
-Alarme → editar para notificação → salvar → voltar para alarme.
-
-**Passa se:** a tela azul sobe nas duas vezes.
-
-### 5. B.17b — 🔴 O som com o celular em uso — **FALHOU em 14/09**
-
-Celular **desbloqueado**, usando outro app, e o alarme dispara. A tela cheia não aparecer aqui é o
-esperado — o que se mede é o som.
-
-**Passa se:** chega a notificação **com som em loop**.
-
-> **Falhou: a notificação chega e não sai som nenhum.** Testado com todos os volumes altos, pelo
-> disparo do Diagnóstico e pelo alarme real. Tocar na notificação abre a tela, e aí o som toca —
-> porque quem toca é a tela, não a notificação.
->
-> **Investigado e descartado, com evidência:** canal mudo (o Diagnóstico mostra
-> `som: alarme_de_dose` e a URI resolvida), volume baixo, notificação cancelada antes de tocar (ela
-> continua tocável), versão velha do canal (`v7`, a atual), e `ongoing: true` (a documentação do
-> Android diz que não bloqueia som).
->
-> **Sem causa provada.** O que resta é o Android não tocar o som do canal quando rebaixa uma
-> notificação de tela cheia para heads-up — comportamento que a documentação oficial não descreve.
->
-> **Vale mais corrigir que diagnosticar:** o caminho do **E.1** resolve sem depender da causa,
-> porque quem passa a tocar é o app. Ver a nota do E.1 abaixo, que este achado mudou.
-
----
-
-## Depois, numa build de development nova
-
-Preciso implementar antes. A build é uma só, para os dois.
-
-### 6. C.1 — Entrar no app pela tela azul exige desbloqueio
+### 1. C.1 — Entrar no app pela tela azul exige desbloqueio
 
 Celular **bloqueado**, o alarme toca, a tela azul sobe.
 
@@ -77,18 +25,27 @@ Celular **bloqueado**, o alarme toca, a tela azul sobe.
 
 > Confira também com o celular **desbloqueado**: aí o botão abre o app direto, sem pedir nada.
 
-### 7. C.2 — Apagar os dados tem que cancelar os alarmes
+### 2. C.2 — Apagar os dados tem que cancelar os alarmes
 
 Adie um alarme e apague todos os dados de saúde antes dos 5 minutos.
 
 **Passa se:** o alarme adiado **não toca**. Confira também que nenhuma dose da grade continua
 agendada no Diagnóstico.
 
+### 3. A tela azul não sobe com o celular em uso
+
+Celular **desbloqueado**, usando outro app, e o alarme dispara. Toque na notificação.
+
+**Passa se:** abre a tela **"Hora do remédio"**, e não a tela azul.
+
+> Só vale nesta build: a decisão depende do módulo de desbloqueio, que é nativo. Nas anteriores a
+> tela azul continua subindo, e isso não é a correção falhando.
+
 ---
 
 ## Por último, numa build de preview
 
-### 8. D.5 — A tela azul com o app fora dos recentes
+### 4. D.5 — A tela azul com o app fora dos recentes
 
 Tire o app dos recentes e espere o alarme. **Tente 4 vezes** — é defeito de corrida de tempo, e
 "passou" e "passou nas 4 tentativas" não são a mesma informação.
@@ -100,45 +57,43 @@ Tire o app dos recentes e espere o alarme. **Tente 4 vezes** — é defeito de c
 
 ---
 
+## Validado em 14/09 — não precisa repetir
+
+| # | O que era | Resultado |
+|---|---|---|
+| B.7 | 2 ou 3 remédios na tela azul | ✅ com os ajustes de layout do dia |
+| B.8 | 4 ou mais: contagem e botão | ✅ |
+| B.20 | 4 ou mais: nome e dose de cada | ✅ |
+| B.4 | Alarme → notificação → alarme | ✅ nos dois sentidos |
+| B.9 | Aviso de estoque às 00:01 | ✅ |
+| B.17 | Tela azul com o app nos recentes | ✅ apareceu de primeira em todos os testes |
+
+---
+
 ## Fora de escopo — vira "trabalhos futuros" no artigo
 
-**E.1 — o alarme no volume de despertador.** Sai no volume de mídia. É a única característica
-sabidamente incompleta. A causa está medida e o caminho de correção descrito no
-[anexo do roteiro](ROTEIRO-DE-TESTE.md#anexo--as-decisoes-de-1309-sobre-alarme-e-fuso), no fim
-do arquivo.
+**E.1 — o alarme no volume de despertador, e o silêncio com o celular em uso.** São o mesmo
+problema, e o teste de 14/09 (o antigo B.17b) mostrou que o segundo é pior que o primeiro: com o
+celular em uso **o alarme não emite som nenhum** — canal sonoro, URI resolvida, todos os volumes
+altos. Tocar na notificação abre a tela e aí o som sai, porque quem toca é a tela.
 
-> **Tentado de novo em 14/09, e parado antes da build — o caminho "canal mudo" está incompleto.**
->
-> O plano era silenciar o canal e deixar a tela tocar, com `USAGE_ALARM` no player. O patch ficou
-> pronto ([`plugins/som-do-alarme-em-despertador.js`](../plugins/som-do-alarme-em-despertador.js),
-> **não registrado** no `app.json`), e a revisão do código mostrou que ele abre um buraco pior:
->
-> Com o **app fechado e o celular em uso** — o caso mais comum do dia —, o Android rebaixa a tela
-> cheia e o processo está morto, então nem a Activity nem a rota montam a tela. Sem som no canal,
-> ninguém toca nada.
->
-> ### ⚠️ O teste de 14/09 derrubou a razão de ter parado
->
-> O argumento acima supunha que o `loopSound` do canal cobria esse caso hoje. **Não cobre:** o B.17b
-> falhou, e o alarme com o celular em uso **já está mudo**, sem o E.1 e sem nada mudado. O buraco
-> que o E.1 "abriria" já está aberto.
->
-> Então a conta se inverteu: o E.1 deixa de ser uma troca (volume certo × um caso mudo) e passa a
-> ser correção de dois defeitos ao mesmo tempo — o volume e o silêncio com o celular em uso.
->
-> ### O que falta, e o que já está provado
->
-> Falta um **foreground service** para tocar o som sem depender de tela nem de processo vivo — que
-> é o que os requisitos do Play descrevem para apps de alarme. A biblioteca já expõe o necessário
-> (`registerForegroundService`), então não é código nativo novo; é mudança no núcleo do alarme, e
-> merece build e rodada próprias.
->
-> **A metade difícil já funciona:** o app tocando o próprio som está provado em aparelho — é o que
-> acontece toda vez que a tela azul sobe, e quando o toque na notificação abre a tela. O que falta
-> é fazer isso sem depender da tela montar.
->
+Descartados com evidência: canal mudo, volume baixo, notificação cancelada antes de tocar, versão
+velha do canal, e `ongoing: true`. Sem causa provada — o que resta é o Android não tocar o som do
+canal ao rebaixar uma notificação de tela cheia para heads-up, comportamento que a documentação
+oficial não descreve.
+
+**A correção não depende de descobrir a causa:** o app passa a tocar o próprio som. Falta um
+**foreground service** para isso funcionar sem depender de a tela montar — e a biblioteca já expõe
+o necessário (`registerForegroundService`), então não é código nativo novo. O patch do player está
+pronto e **não registrado** em
+[`plugins/som-do-alarme-em-despertador.js`](../plugins/som-do-alarme-em-despertador.js), com o que
+falta escrito nele.
+
+A metade difícil já está provada em aparelho: o app tocando o próprio som é o que acontece toda vez
+que a tela azul sobe.
+
 > **Enquanto isso, o artigo não pode alegar que o alarme toca no silencioso** — hoje ele sai no
-> volume de mídia e o silencioso o corta.
+> volume de mídia, o silencioso o corta, e com o celular em uso ele não toca.
 
 **E.2 — o fuso.** Decidido, e o comportamento atual está certo: a dose segue o **instante**, então
 21:00 em São Paulo toca às 20:00 em Manaus. Não é teste, é decisão.
@@ -150,8 +105,8 @@ do arquivo.
 Só o que falhar, com o número do passo:
 
 ```
-B.7 falhou — o local do remedio nao apareceu na tela azul
 C.1 passou — voltou pro bloqueio
+C.2 falhou — o alarme adiado tocou mesmo assim
 resto ok
 ```
 
