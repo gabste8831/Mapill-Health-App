@@ -92,6 +92,23 @@ sabidamente incompleta. A causa está medida e o caminho de correção descrito 
 [anexo do roteiro](ROTEIRO-DE-TESTE.md#anexo--as-decisoes-de-1309-sobre-alarme-e-fuso), no fim
 do arquivo.
 
+> **Tentado de novo em 14/09, e parado antes da build — o caminho "canal mudo" está incompleto.**
+>
+> O plano era silenciar o canal e deixar a tela tocar, com `USAGE_ALARM` no player. O patch ficou
+> pronto ([`plugins/som-do-alarme-em-despertador.js`](../plugins/som-do-alarme-em-despertador.js),
+> **não registrado** no `app.json`), e a revisão do código mostrou que ele abre um buraco pior:
+>
+> Com o **app fechado e o celular em uso** — o caso mais comum do dia —, o Android rebaixa a tela
+> cheia e o processo está morto, então nem a Activity nem a rota montam a tela. Sem som no canal,
+> **ninguém toca nada**. Hoje esse caso é coberto pelo `loopSound` do canal, que some junto.
+>
+> Falta um **foreground service** para tocar o som sem depender de tela nem de processo vivo — que
+> é o que os requisitos do Play descrevem para apps de alarme. A biblioteca já expõe o necessário
+> (`registerForegroundService`), então não é código nativo novo, mas é mudança no núcleo do alarme.
+>
+> **Enquanto isso, o artigo não pode alegar que o alarme toca no silencioso** — hoje ele sai no
+> volume de mídia e o silencioso o corta.
+
 **E.2 — o fuso.** Decidido, e o comportamento atual está certo: a dose segue o **instante**, então
 21:00 em São Paulo toca às 20:00 em Manaus. Não é teste, é decisão.
 
