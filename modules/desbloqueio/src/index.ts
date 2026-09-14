@@ -12,21 +12,34 @@ type ModuloDeDesbloqueio = NativeModule & {
  */
 const modulo = requireOptionalNativeModule<ModuloDeDesbloqueio>("Desbloqueio");
 
-/** Se a tela de bloqueio está na frente agora. */
-export async function estaBloqueado(): Promise<boolean> {
-  if (Platform.OS !== "android" || modulo === null) return false;
-  return modulo.estaBloqueado().catch(() => false);
+/**
+ * Se a tela de bloqueio está na frente agora — `null` quando não há como perguntar.
+ *
+ * **Os três estados importam, e reduzi-los a dois já custou caro.** `false` significa "o aparelho
+ * está destravado"; `null` significa "não sei" — build sem o módulo nativo, Expo Go, web. Quem
+ * chama decide o que fazer com a dúvida, e a resposta costuma ser diferente da do `false`.
+ *
+ * O caso concreto: a tela cheia do alarme só sobe com o aparelho bloqueado. Tratar "não sei" como
+ * "destravado" faria ela parar de subir em toda build que ainda não tem o módulo — o alarme
+ * deixaria de aparecer justamente onde ele mais importa, por causa de uma pergunta sem resposta.
+ */
+export async function estaBloqueado(): Promise<boolean | null> {
+  if (Platform.OS !== "android" || modulo === null) return null;
+  return modulo.estaBloqueado().catch(() => null);
 }
 
 /**
  * Pede o desbloqueio e diz se ele aconteceu. `false` quando a pessoa desiste.
  *
- * **Sem o módulo nativo, responde `false`.** É o Expo Go e o web, onde não há keyguard a consultar —
- * e negar ali é o mesmo princípio do lado Kotlin: quem não consegue perguntar não deve deixar
- * passar. Em desenvolvimento isso aparece como o botão não abrindo o app, que é visível na hora;
- * o inverso — deixar passar calado — é o defeito que este caminho existe para fechar.
+ * **Sem o módulo nativo, responde `true`** — Expo Go, web, e toda build anterior a 14/09. Não é
+ * "deixar passar": é que ali não existe nem o pedido nem a tela cheia sobre o bloqueio que o
+ * justifica, e recusar tornaria o botão de abrir o app inerte em toda build sem o módulo, sem nada
+ * na tela explicando por quê.
+ *
+ * Quem chama trata a dúvida do `estaBloqueado` (o `null`) pedindo assim mesmo — e é lá, na soma das
+ * duas respostas, que a decisão de segurança acontece.
  */
 export async function pedirDesbloqueio(): Promise<boolean> {
-  if (Platform.OS !== "android" || modulo === null) return false;
+  if (Platform.OS !== "android" || modulo === null) return true;
   return modulo.pedirDesbloqueio().catch(() => false);
 }

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { AppState } from "react-native";
 
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
+import { estaBloqueado } from "@/modules/desbloqueio";
 import { jaEstaEmCena } from "@/notifications/alarme-em-cena";
 import {
   consultarRespostaDeAbertura,
@@ -58,9 +59,20 @@ export function useDoseNotifications(): void {
     const esperasDaActivity = new Set<ReturnType<typeof setTimeout>>();
 
     function abrirHorario(dados: DadosDoAviso) {
+      abrirHorarioDe(dados.scheduledFor);
+    }
+
+    /**
+     * A tela onde a dose se responde, pelo instante.
+     *
+     * Separada de `abrirHorario` porque quem dispara o alarme tem só o `scheduledFor` — forjar um
+     * `DadosDoAviso` com chave vazia e lista vazia para atravessar a assinatura seria inventar
+     * dados que ninguém lê.
+     */
+    function abrirHorarioDe(scheduledFor: string) {
       router.push({
         pathname: "/horario/[instante]",
-        params: { instante: dados.scheduledFor },
+        params: { instante: scheduledFor },
       });
     }
 
@@ -143,12 +155,19 @@ export function useDoseNotifications(): void {
        */
       aoDispararAlarme: (scheduledFor) => {
         /**
-         * **Com o app em primeiro plano, a tela sobe na hora.** É o caso simples: a pessoa está
-         * olhando para o Mapill, o Android rebaixou a tela cheia para um aviso no topo, e navegar
-         * põe a tela do alarme por cima do que ela estava vendo.
+         * **Com o Mapill aberto na frente, o alarme leva à tela do horário.**
+         *
+         * Era a tela azul até 14/09, e o argumento era que ela é a tela do alarme. Mas ela existe
+         * para irromper sobre o bloqueio: com o app na mão e a tela destravada, a pessoa já está
+         * olhando — e cair numa tela azul de tela cheia sobre o que ela estava fazendo interrompe
+         * sem precisar.
+         *
+         * A tela do horário tem o que responder a dose exige, é a mesma que o toque na notificação
+         * abre, e é a que ela reconhece. Um caminho só para "o celular está em uso", vindo do
+         * toque ou do disparo.
          */
         if (AppState.currentState === "active") {
-          abrirTelaDeAlarme(scheduledFor);
+          abrirHorarioDe(scheduledFor);
           return true;
         }
 
@@ -201,8 +220,32 @@ export function useDoseNotifications(): void {
          * sempre. Quem marca agora é o próprio caminho tardio, ao abrir de verdade.
          */
         const espera = setTimeout(() => {
+          void (async () => {
           esperasDaActivity.delete(espera);
           if (jaEstaEmCena(scheduledFor)) return;
+
+          /**
+           * **Com o celular desbloqueado, a tela azul não sobe — e isso é a regra, não um resto.**
+           *
+           * A tela cheia existe para irromper sobre o bloqueio. Quem está com o aparelho na mão já
+           * está olhando para ele: interromper o que a pessoa faz com uma tela que toma tudo é
+           * agressivo sem ganho, e ela nem foi o que o Android decidiu mostrar — o sistema rebaixou
+           * para heads-up justamente porque o celular está em uso.
+           *
+           * O aviso na bandeja fica, e tocar nele leva à tela do horário (ver `escutar-avisos`),
+           * que é onde a dose se responde. Decisão do Gabriel em 14/09, testando em aparelho.
+           *
+           * **Isto é o que a heurística do `AppState` tentava adivinhar e errava.** O comentário
+           * acima admitia: "a distinção não é perfeita — ela erra para o lado de abrir a tela".
+           * Agora não é heurística: o módulo de desbloqueio pergunta ao Android se o bloqueio está
+           * na frente, que é exatamente a pergunta que importa.
+           *
+           * `=== false` e não `!`: a resposta tem três estados, e `null` é "não consegui perguntar"
+           * — build sem o módulo nativo, que é toda build anterior a esta. Aí vale o comportamento
+           * antigo, que abre a tela: sem resposta, errar para o lado de mostrar o alarme é o lado
+           * certo de errar.
+           */
+          if ((await estaBloqueado()) === false) return;
           /**
            * **Só se a pessoa não estiver usando outro app.**
            *
@@ -218,6 +261,7 @@ export function useDoseNotifications(): void {
            */
           abrirTelaDeAlarme(scheduledFor);
           marcarAlarmeComoAberto(scheduledFor);
+          })();
         }, RESPIRO_DA_ACTIVITY_EM_MS);
         esperasDaActivity.add(espera);
 

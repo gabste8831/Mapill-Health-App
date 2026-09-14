@@ -294,7 +294,10 @@ export function AlarmeScreen({
    * a quem cancelou exatamente o que o cancelamento recusou.
    */
   const abrirNoApp = useCallback(async () => {
-    if ((await estaBloqueado()) && !(await pedirDesbloqueio())) return;
+    // `!== false`: na dúvida, pede. O `null` é "não consegui perguntar", e aqui ele pesa para o
+    // lado oposto do que pesa em `use-dose-notifications` — lá a dúvida mostra o alarme, que é
+    // inofensivo; aqui ela guarda a ficha de saúde, e deixar passar é o defeito.
+    if ((await estaBloqueado()) !== false && !(await pedirDesbloqueio())) return;
 
     setSilenciado(true);
     await dispensarAlarmeAtivo();
