@@ -9,6 +9,7 @@ import { IntakeLogRepository } from "@/data/repositories/intake-log-repository";
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { MedicationRepository } from "@/data/repositories/medication-repository";
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
+import { sincronizar } from "@/data/remote/sync-service";
 import type { InventoryItem } from "@/domain/entities/inventory-item";
 import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
 import type { Medication, PosologyUnit } from "@/domain/entities/medication";
@@ -468,6 +469,7 @@ export async function gravarDesfecho(
      * por aqui, e anunciar em cada chamador abriria caminho para alguém esquecer.
      */
     anunciarDosesResolvidas([dose.doseScheduleId]);
+    subirDesfecho();
     return;
   }
 
@@ -483,8 +485,23 @@ export async function gravarDesfecho(
   });
 
   anunciarDosesResolvidas([dose.doseScheduleId]);
+  subirDesfecho();
 }
 
+/**
+ * Manda o desfecho para a nuvem sem segurar quem gravou.
+ *
+ * O histórico de ingestão é o que o médico lê, e é o dado que menos pode existir só num aparelho.
+ * Até 14/09 ele esperava alguém abrir a tela de Conta para subir — e quem confirma doses todo dia
+ * não tem motivo para abrir aquela tela nunca.
+ *
+ * Sem `await` e com o erro engolido, de propósito: a gravação local já aconteceu e é ela que vale.
+ * Falhar aqui deixa a linha pendente, e a próxima passada da sincronização a leva — que é como o
+ * offline-first do app funciona em todo o resto.
+ */
+function subirDesfecho() {
+  void sincronizar().catch(() => {});
+}
 
 /**
  * A agenda de hoje, recarregada quando a tela volta ao foco — é o que faz um cadastro feito agora

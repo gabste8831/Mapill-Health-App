@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 
 import { PatientProfileRepository } from "@/data/repositories/patient-profile-repository";
+import { sincronizar } from "@/data/remote/sync-service";
 import type { PatientProfileDraft } from "@/domain/entities/patient-profile";
 
 /** Web nunca persiste no SQLite (ver `useDatabaseReady`) — lá a ficha é sempre vazia. */
@@ -54,6 +55,19 @@ export async function savePatientProfileDraft(draft: PatientProfileDraft): Promi
     syncedAt: null,
     deletedAt: null,
   });
+
+  /**
+   * Sobe agora, sem esperar o app sair e voltar.
+   *
+   * A ficha é o caso em que a espera mais custa: quem a edita costuma ficar no app depois, então o
+   * gatilho de "voltou ao primeiro plano" pode demorar horas — e se a pessoa trocar de conta nesse
+   * meio-tempo, o `pull` traz a versão antiga e a edição some. Foi o que aconteceu com o Gabriel em
+   * 14/09, com o nome que ele tinha acabado de corrigir.
+   *
+   * Sem `await`: a tela não deve esperar a rede para dizer que salvou — o dado já está no SQLite, e
+   * é ele que manda. Falhando aqui, a linha continua pendente e a próxima passada a leva.
+   */
+  void sincronizar().catch(() => {});
 }
 
 export type PatientProfileState = {

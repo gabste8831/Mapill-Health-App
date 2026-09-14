@@ -9,6 +9,7 @@ import { MedicationRepository } from "@/data/repositories/medication-repository"
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import type { Prescription } from "@/domain/entities/prescription";
 import { generateDoseSchedules } from "@/domain/use-cases/generate-dose-schedules";
+import { sincronizar } from "@/data/remote/sync-service";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
 import type { MedicamentoDraft } from "@/telas/CadastroDeMedicamento/FormularioDeMedicamentoScreen";
 
@@ -174,6 +175,10 @@ export async function salvarMedicamento(
   // de vida do C1. Refazer tudo, e não corrigir o que mudou, é o que garante zero alarme órfão.
   await reagendarTodosOsAvisos();
 
+  // Sobe sem segurar a tela: o cadastro já está no SQLite, e é ele que manda. Falhando a rede, a
+  // linha fica pendente e a próxima passada a leva. Ver `subirDesfecho` em `use-today-doses`.
+  void sincronizar().catch(() => {});
+
   return { medicationId, prescriptionId };
 }
 
@@ -329,4 +334,13 @@ export async function excluirMedicamento(ids: MedicamentoAExcluir): Promise<void
   // O alarme órfão nasce exatamente aqui: sem isto, o aviso de um remédio excluído continuaria
   // tocando até a próxima abertura do app.
   await reagendarTodosOsAvisos();
+
+  /**
+   * A exclusão é o que **mais** precisa subir logo.
+   *
+   * Ela é lógica (`softDelete`), e o que a torna real na nuvem é o push carregando o `deletedAt`.
+   * Enquanto ele não sobe, o servidor ainda tem a linha viva — e um `pull` antes disso traz o
+   * remédio excluído de volta, com os avisos junto.
+   */
+  void sincronizar().catch(() => {});
 }
