@@ -5,6 +5,13 @@ apply plugin: 'expo-module-gradle-plugin'
 group = 'br.com.mapill.desbloqueio'
 version = '0.1.0'
 
+// Modulo local do app: nunca vai para o Maven. Sem isto o plugin monta a
+// publicacao mesmo assim e exige um android.defaultConfig.versionName, e a
+// build quebra ao configurar o projeto.
+expoModule {
+  canBePublished = false
+}
+
 android {
   namespace 'br.com.mapill.desbloqueio'
 }
