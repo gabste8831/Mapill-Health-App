@@ -45,7 +45,8 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
           dose.medicationName,
           dose.quantidadeFormatada,
           dose.resolvida ? (confirmada ? "dose tomada" : "dose pulada") : "aguardando resposta",
-          dose.orientacoes ?? "",
+          // Numa linha só: o leitor de tela lê em sequência, e as etiquetas não existem para ele.
+          dose.orientacoes.join(", "),
           dose.intakeNote ?? "",
           // O local e a observação entram no rótulo pelo mesmo motivo que entraram na tela: quem usa
           // leitor de tela precisa da orientação inteira, e não de uma versão resumida dela.
@@ -83,8 +84,16 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
           {/* As orientações da lista fechada ("Em jejum · Com bastante água"). Entraram em 14/09:
               eram gravadas no cadastro e não apareciam em tela nenhuma — e é este o lugar onde o
               "tudo o que foi cadastrado aparece aqui" acima já as prometia. */}
-          {dose.orientacoes !== null ? (
-            <Text style={styles.orientacao}>{dose.orientacoes}</Text>
+          {/* Uma etiqueta por orientação, como na tela do alarme — a mesma informação lida do mesmo
+              jeito nos dois lugares. */}
+          {dose.orientacoes.length > 0 ? (
+            <View style={styles.etiquetas}>
+              {dose.orientacoes.map((orientacao) => (
+                <View key={orientacao} style={styles.etiqueta}>
+                  <Text style={styles.textoDaEtiqueta}>{orientacao}</Text>
+                </View>
+              ))}
+            </View>
           ) : null}
           {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
             <Text style={styles.orientacao}>{dose.intakeNote}</Text>

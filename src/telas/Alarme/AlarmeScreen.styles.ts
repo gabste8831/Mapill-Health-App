@@ -200,6 +200,34 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     lineHeight: 20,
     textAlign: "left",
   },
+  /** As etiquetas quebram linha quando são muitas — seis orientações não cabem numa só. */
+  etiquetas: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+    marginVertical: 2,
+  },
+  /**
+   * Cada orientação vira uma etiqueta com fundo próprio.
+   *
+   * Mais clara que o cartão (18% contra os 12% dele), para se destacar **dentro** dele: é a regra
+   * da tomada, e quem lê de madrugada precisa distinguí-la da observação livre logo abaixo. Como
+   * texto corrido, as duas se liam como a mesma coisa.
+   */
+  etiqueta: {
+    backgroundColor: withOpacity(cores.onPrimary, 0.18),
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  textoDaEtiqueta: {
+    ...typography.bodySm,
+    color: cores.onPrimary,
+  },
+  /** Na tela de uma dose só tudo é centrado, e as etiquetas acompanham. */
+  etiquetasCentradas: {
+    justifyContent: "center",
+  },
   /**
    * A observação do tratamento, um degrau abaixo da orientação de tomada.
    *
@@ -327,9 +355,12 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
 
   acoes: {
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingHorizontal: spacing.gutter,
-    paddingBottom: spacing.lg,
+    // Enxuto embaixo, com folga em cima: o rodapé é fixo, então cada dp aqui sai da lista. Mas o
+    // respiro **acima** do botão fica — é ele que separa a resposta do último remédio, e sem essa
+    // margem o botão lê como parte do cartão de cima em vez de ação da tela.
+    paddingBottom: spacing.md,
     paddingTop: spacing.md,
   },
   linhaDeResposta: {
@@ -339,7 +370,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   botaoTomei: {
     flex: 1,
     flexDirection: "row",
-    minHeight: 56,
+    /**
+     * 48dp: o mínimo que o Android pede para alvo de toque, e o piso desta tela.
+     *
+     * Eram 56. Numa tela que precisa caber três remédios, os 8dp valem mais na lista do que na
+     * altura de um botão que já é o maior elemento do rodapé — mas **não se desce daqui**: quem
+     * responde recém-acordado erra a mira, e um alvo pequeno num alarme é defeito, não economia.
+     */
+    minHeight: 48,
     alignItems: "center",
     justifyContent: "center",
     gap: spacing.sm,

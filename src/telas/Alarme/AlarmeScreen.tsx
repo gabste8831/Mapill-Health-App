@@ -498,7 +498,22 @@ export function AlarmeScreen({
         ) : null}
 
         <View style={styles.lista}>
-          {(listar ? pendentes : []).map((dose) => (
+          {(listar ? pendentes : []).map((dose) => {
+            /**
+             * Se há algo a dizer além do nome e da dose.
+             *
+             * Sem isto, a faixa de detalhes era desenhada vazia, e o `gap` do cartão abria um vão
+             * embaixo do nome — um cartão mais alto sem nada dentro. Remédio sem orientação, sem
+             * observação e sem local é o caso comum de quem cadastra apressado, e ele não pode
+             * parecer um cartão quebrado.
+             */
+            const temDetalhes =
+              dose.orientacoes.length > 0 ||
+              (dose.intakeNote !== null && dose.intakeNote.length > 0) ||
+              (dose.notes !== null && dose.notes.length > 0) ||
+              (dose.storageLocation !== null && dose.storageLocation.length > 0);
+
+            return (
             <View key={dose.doseScheduleId} style={umaSo ? styles.item : styles.itemEnxuto}>
               {/**
                * A foto da caixa, quando existe.
@@ -568,11 +583,24 @@ export function AlarmeScreen({
                    * Cheguei a cortar a orientação para a lista caber, e era a decisão errada —
                    * caber é problema de tamanho, e se resolve reduzindo a escala do conjunto.
                    */}
+                  {temDetalhes ? (
                   <View style={styles.detalhesDoItem}>
-                    {/* As orientações marcadas no cadastro ("Em jejum · Com bastante água"). Vêm
-                        antes do texto livre porque são a regra fechada; o livre é o complemento. */}
-                    {dose.orientacoes !== null ? (
-                      <Text style={styles.orientacaoCompacta}>{dose.orientacoes}</Text>
+                    {/**
+                     * As orientações marcadas no cadastro, **uma etiqueta cada**.
+                     *
+                     * Vêm antes do texto livre porque são a regra fechada; o livre é o complemento.
+                     * O fundo próprio as separa da observação logo abaixo, que é anotação de quem
+                     * cuida e não instrução da dose — duas coisas que, como texto corrido, se liam
+                     * como a mesma.
+                     */}
+                    {dose.orientacoes.length > 0 ? (
+                      <View style={styles.etiquetas}>
+                        {dose.orientacoes.map((orientacao) => (
+                          <View key={orientacao} style={styles.etiqueta}>
+                            <Text style={styles.textoDaEtiqueta}>{orientacao}</Text>
+                          </View>
+                        ))}
+                      </View>
                     ) : null}
                     {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
                       <Text style={styles.orientacaoCompacta}>{dose.intakeNote}</Text>
@@ -587,6 +615,7 @@ export function AlarmeScreen({
                       </View>
                     ) : null}
                   </View>
+                  ) : null}
                 </View>
               )}
               {/* Orientação de tomada, texto livre e observação: o que a pessoa precisa saber
@@ -594,8 +623,14 @@ export function AlarmeScreen({
                   bloco compacto acima) — cortá-las ali contradizia o "nada é omitido" que a própria
                   lista promete, e "esse era em jejum?" é pergunta que se faz no instante do alarme,
                   não depois. */}
-              {umaSo && dose.orientacoes !== null ? (
-                <Text style={styles.orientacao}>{dose.orientacoes}</Text>
+              {umaSo && dose.orientacoes.length > 0 ? (
+                <View style={[styles.etiquetas, styles.etiquetasCentradas]}>
+                  {dose.orientacoes.map((orientacao) => (
+                    <View key={orientacao} style={styles.etiqueta}>
+                      <Text style={styles.textoDaEtiqueta}>{orientacao}</Text>
+                    </View>
+                  ))}
+                </View>
               ) : null}
               {umaSo && dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
                 <Text style={styles.orientacao}>{dose.intakeNote}</Text>
@@ -616,7 +651,8 @@ export function AlarmeScreen({
                 </View>
               ) : null}
             </View>
-          ))}
+            );
+          })}
         </View>
       </ScrollView>
 

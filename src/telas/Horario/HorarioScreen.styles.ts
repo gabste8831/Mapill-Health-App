@@ -52,6 +52,30 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     ...typography.bodyMd,
     color: cores.onSurfaceVariant,
   },
+  /** As etiquetas quebram linha quando são muitas. Ver `AlarmeScreen.styles`. */
+  etiquetas: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+    marginVertical: 2,
+  },
+  /**
+   * Cada orientação da lista fechada, com fundo próprio.
+   *
+   * Aqui o fundo é o da superfície clara, então a etiqueta usa a cor de destaque com pouca opacidade
+   * — na tela do alarme ela é branco sobre azul. A forma é a mesma nos dois lugares; o que muda é o
+   * contraste que cada fundo pede.
+   */
+  etiqueta: {
+    backgroundColor: withOpacity(cores.primary, 0.1),
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  textoDaEtiqueta: {
+    ...typography.bodySm,
+    color: cores.primary,
+  },
   /** Onde a caixa está: ícone e texto na mesma linha, como na tela do alarme. */
   local: {
     flexDirection: "row",

@@ -17,15 +17,14 @@ export const ORIENTACOES_DE_TOMADA: Record<IntakeInstruction, string> = {
 };
 
 /**
- * Junta as orientações marcadas numa frase só, para caber numa linha da tela do alarme.
+ * As orientações marcadas, em texto legível — uma por item.
  *
- * O separador é `·` e não vírgula: são itens independentes de uma lista, não uma enumeração — e o
- * ponto médio se lê mais rápido de madrugada, que é quando esta linha importa.
+ * Devolve a **lista**, e não uma frase pronta: na tela do alarme cada orientação vira uma etiqueta
+ * com fundo próprio, e isso exige os itens separados. Quem precisar de uma linha só junta com
+ * `juntarOrientacoes`.
  *
- * Devolve `null` quando nada foi marcado, para quem chama decidir entre esconder a linha ou não —
- * string vazia renderizaria um espaço em branco com altura de texto.
+ * Lista vazia quando nada foi marcado — quem chama decide entre esconder o bloco ou não.
  */
-export function formatarOrientacoes(instrucoes: IntakeInstruction[]): string | null {
-  if (instrucoes.length === 0) return null;
-  return instrucoes.map((instrucao) => ORIENTACOES_DE_TOMADA[instrucao]).join(" · ");
+export function formatarOrientacoes(instrucoes: IntakeInstruction[]): string[] {
+  return instrucoes.map((instrucao) => ORIENTACOES_DE_TOMADA[instrucao]);
 }

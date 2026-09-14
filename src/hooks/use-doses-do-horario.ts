@@ -29,9 +29,8 @@ export type DoseDoHorario = {
   photoUri: string | null;
   quantidadeFormatada: string;
   amount: number;
-  /** Orientação de como tomar, quando houver — "com bastante água". */
   /** As orientações da lista fechada, já em texto. Ver `use-doses-do-alarme`. */
-  orientacoes: string | null;
+  orientacoes: string[];
   intakeNote: string | null;
   /**
    * Onde a caixa está guardada, quando o estoque diz.

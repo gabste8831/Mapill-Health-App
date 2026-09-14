@@ -37,7 +37,7 @@ export type DoseDoAlarme = {
    * nenhuma do app — quem marcava "em jejum" preenchia para ninguém. É aqui que ele vale, porque é
    * aqui que a pergunta "esse era em jejum?" acontece, como o próprio tipo já dizia.
    */
-  orientacoes: string | null;
+  orientacoes: string[];
   intakeNote: string | null;
   /** Observação do paciente sobre o tratamento. Também só chegou ao alarme em 14/09. */
   notes: string | null;
