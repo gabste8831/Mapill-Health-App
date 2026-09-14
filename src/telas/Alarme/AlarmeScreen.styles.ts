@@ -262,8 +262,17 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * `gap` menor que o da lista de três: aqui cada item é uma linha, e o respiro de um bloco entre
    * linhas simples faria quatro nomes ocuparem o que seis ocupariam.
    */
+  /**
+   * A lista de quatro ou mais, centrada na altura como a de dois ou três.
+   *
+   * `flex: 1` para ela tomar o espaço entre o cabeçalho e o rodapé, e `justifyContent: "center"`
+   * para os remédios ficarem no meio dele — presa ao topo, a lista deixava um vão embaixo que só
+   * aparecia nesta forma da tela, e as três formas passavam a se comportar de jeitos diferentes.
+   */
   listaMinima: {
     width: "100%",
+    flex: 1,
+    justifyContent: "center",
     gap: spacing.sm,
   },
   /**
@@ -278,6 +287,12 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "baseline",
     justifyContent: "space-between",
     gap: spacing.sm,
+    // O mesmo cartão da lista de dois ou três: as duas formas são a mesma tela vista com mais ou
+    // menos remédios, e um fundo em uma e não na outra as fazia parecer telas diferentes.
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: withOpacity(cores.onPrimary, 0.12),
+    borderRadius: radius.lg,
   },
   /**
    * `flexShrink` com `numberOfLines={1}` na tela: nome comprido corta com reticências em vez de
@@ -300,13 +315,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    *
    * Diz o que fazer, e não o que há: o "quantos" já está no título e os nomes estão logo acima.
    */
-  resumo: {
-    ...typography.bodyLg,
-    color: cores.onPrimary,
-    opacity: 0.85,
-    textAlign: "center",
-    lineHeight: 26,
-  },
   quantidade: {
     ...typography.headlineSm,
     color: cores.onPrimary,

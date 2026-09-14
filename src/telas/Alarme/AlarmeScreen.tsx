@@ -493,9 +493,8 @@ export function AlarmeScreen({
             ))}
           </View>
         ) : null}
-        {!listar ? (
-          <Text style={styles.resumo}>Toque abaixo para ver cada uma e confirmar.</Text>
-        ) : null}
+        {/* Sem frase explicando o que fazer: o botão "Ver e confirmar no app", logo abaixo, já diz
+            — e dizer duas vezes numa tela que se lê de madrugada é ruído, não ajuda. */}
 
         <View style={styles.lista}>
           {(listar ? pendentes : []).map((dose) => {
