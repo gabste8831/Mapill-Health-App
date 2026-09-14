@@ -17,13 +17,23 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   conteudo: {
     flexGrow: 1,
     paddingHorizontal: spacing.gutter,
-    paddingTop: spacing.md,
+    // Sem `paddingTop`: o cabeçalho fixo já fecha com `paddingBottom`, e somar os dois abria um vão
+    // entre a hora e o primeiro remédio maior que o espaço entre os remédios.
     paddingBottom: spacing.md,
   },
 
+  /**
+   * Fixo no topo, fora da rolagem — por isso traz o próprio recuo lateral.
+   *
+   * Dentro do `ScrollView` ele herdava o `paddingHorizontal` do `conteudo`; fora dele, sem isto, o
+   * título encostaria na borda enquanto a lista abaixo continuaria recuada.
+   */
   cabecalho: {
     alignItems: "center",
     gap: spacing.xs,
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
   },
   icone: {
     width: 56,
@@ -77,16 +87,20 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     textAlign: "center",
   },
   /**
-   * O item da lista enxuta: alinhado à esquerda, com uma linha de separação acima.
+   * O item da lista enxuta: alinhado à esquerda, separado por espaço.
    *
    * Centralizado como o de uma dose, três remédios viravam três blocos flutuando no meio da tela,
    * sem eixo comum para o olho seguir. À esquerda eles se leem como lista — que é o que são.
+   *
+   * **Sem linha divisória, desde 14/09.** A miniatura já marca onde cada item começa, e o espaço
+   * entre eles basta para separá-los — a régua cinza só somava ruído numa tela que se lê de
+   * madrugada. É a mesma escolha do resto do app: separar por espaço e sombra, não por borda.
    */
   itemEnxuto: {
     alignItems: "stretch",
+    // Simétrico de propósito: metade em cima e metade embaixo somava espaço desigual entre o
+    // primeiro item e o cabeçalho. Aqui o `gap` da lista é quem separa, e cada item respira igual.
     paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.18)",
   },
   /** Miniatura à esquerda, texto à direita — a forma de uma linha de lista. */
   linhaDoItem: {
@@ -148,6 +162,20 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodySm,
     color: cores.onPrimary,
     opacity: 0.75,
+    lineHeight: 18,
+    textAlign: "left",
+  },
+  /**
+   * A observação do tratamento, um degrau abaixo da orientação de tomada.
+   *
+   * Mais apagada de propósito: ela é sobre o tratamento como um todo ("comprar mais na farmácia da
+   * esquina"), não sobre como engolir esta dose. Com o mesmo peso da orientação, competiria com a
+   * informação que decide a tomada — e é a orientação que precisa ser lida primeiro.
+   */
+  observacaoCompacta: {
+    ...typography.bodySm,
+    color: cores.onPrimary,
+    opacity: 0.6,
     lineHeight: 18,
     textAlign: "left",
   },
@@ -227,6 +255,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     opacity: 0.75,
     lineHeight: 26,
+    textAlign: "center",
+  },
+  /** A observação do tratamento na tela de uma dose. Ver `observacaoCompacta`. */
+  observacao: {
+    ...typography.bodySm,
+    color: cores.onPrimary,
+    opacity: 0.6,
+    lineHeight: 22,
     textAlign: "center",
   },
   local: {

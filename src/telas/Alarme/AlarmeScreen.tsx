@@ -424,7 +424,7 @@ export function AlarmeScreen({
   return (
     <SafeAreaView style={styles.safeArea}>
       {/**
-       * O cabeçalho e os remédios rolam; as ações ficam fixas no rodapé.
+       * **Só os remédios rolam.** O cabeçalho fica parado no topo, as ações fixas no rodapé.
        *
        * A tela cabia justa com **um** remédio — e o bloco 4.1 do roteiro é justamente dois no mesmo
        * horário, cada um com sua foto. Sem rolagem, o segundo cartão empurrava "Responder depois"
@@ -433,27 +433,32 @@ export function AlarmeScreen({
        *
        * As ações fora do scroll porque elas nunca podem depender de rolar: quem foi acordado tem
        * que conseguir responder sem procurar.
+       *
+       * **O cabeçalho saiu do scroll em 14/09.** Ele diz que horário é este, e é a âncora da tela:
+       * rolando junto, a hora sumia justamente quando a lista era longa o bastante para a pessoa
+       * precisar rolar — e é aí que confirmar o horário mais importa. Quem rola procura um remédio
+       * na lista, não o cabeçalho.
        */}
+      <View style={styles.cabecalho}>
+        <View style={styles.icone}>
+          <Ionicons name="alarm" size={28} color={cores.onPrimary} />
+        </View>
+        {/* A contagem entra quando há mais de um: é ela que diz, antes de qualquer nome, quantas
+            respostas este horário espera. */}
+        <Text style={styles.titulo}>
+          {umaSo ? "Hora do seu remédio" : `Hora dos seus ${pendentes.length} remédios`}
+        </Text>
+        <Text style={styles.hora}>
+          {new Date(instanteIso).toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.conteudo}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.cabecalho}>
-          <View style={styles.icone}>
-            <Ionicons name="alarm" size={28} color={cores.onPrimary} />
-          </View>
-          {/* A contagem entra quando há mais de um: é ela que diz, antes de qualquer nome, quantas
-              respostas este horário espera. */}
-          <Text style={styles.titulo}>
-            {umaSo ? "Hora do seu remédio" : `Hora dos seus ${pendentes.length} remédios`}
-          </Text>
-          <Text style={styles.hora}>
-            {new Date(instanteIso).toLocaleTimeString("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </Text>
-        </View>
-
         {/* Os remédios, em letra grande: é o que a pessoa precisa ler antes de responder, e ela
             pode estar sem óculos, no escuro, recém-acordada. */}
         {/**
@@ -544,8 +549,16 @@ export function AlarmeScreen({
                   <View style={styles.textoDoItem}>
                     <Text style={styles.nomeCompacto}>{dose.medicationName}</Text>
                     <Text style={styles.quantidadeCompacta}>{dose.quantidadeFormatada}</Text>
+                    {/* As orientações marcadas no cadastro ("Em jejum · Com bastante água"). Vêm
+                        antes do texto livre porque são a regra fechada; o livre é o complemento. */}
+                    {dose.orientacoes !== null ? (
+                      <Text style={styles.orientacaoCompacta}>{dose.orientacoes}</Text>
+                    ) : null}
                     {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
                       <Text style={styles.orientacaoCompacta}>{dose.intakeNote}</Text>
+                    ) : null}
+                    {dose.notes !== null && dose.notes.length > 0 ? (
+                      <Text style={styles.observacaoCompacta}>{dose.notes}</Text>
                     ) : null}
                     {/* O local fecha a coluna de texto, alinhado com o nome — com ou sem foto. */}
                     {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
@@ -557,11 +570,19 @@ export function AlarmeScreen({
                   </View>
                 </View>
               )}
-              {/* A orientação de tomada só na tela de uma dose: com três, ela é a linha que mais
-                  cresce (costuma ser uma frase inteira) e a que menos decide se a pessoa levanta —
-                  ela se lê na hora de tomar, no app, não no instante do despertar. */}
+              {/* Orientação de tomada, texto livre e observação: o que a pessoa precisa saber
+                  **antes** de engolir. Desde 14/09 aparecem também na lista de dois ou três (ver o
+                  bloco compacto acima) — cortá-las ali contradizia o "nada é omitido" que a própria
+                  lista promete, e "esse era em jejum?" é pergunta que se faz no instante do alarme,
+                  não depois. */}
+              {umaSo && dose.orientacoes !== null ? (
+                <Text style={styles.orientacao}>{dose.orientacoes}</Text>
+              ) : null}
               {umaSo && dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
                 <Text style={styles.orientacao}>{dose.intakeNote}</Text>
+              ) : null}
+              {umaSo && dose.notes !== null && dose.notes.length > 0 ? (
+                <Text style={styles.observacao}>{dose.notes}</Text>
               ) : null}
               {/* Onde a caixa está guardada.
 

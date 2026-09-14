@@ -6,6 +6,7 @@ import { MedicationRepository } from "@/data/repositories/medication-repository"
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
 import { ouvirDosesResolvidas } from "@/notifications/doses-resolvidas";
+import { formatarOrientacoes } from "@/shared/orientacoes-de-tomada";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { gravarDesfecho } from "./use-today-doses";
 
@@ -29,7 +30,17 @@ export type DoseDoAlarme = {
   storageLocation: string | null;
   quantidadeFormatada: string;
   amount: number;
+  /**
+   * As orientações da lista fechada, já em texto ("Em jejum · Com bastante água").
+   *
+   * **Chegaram à tela do alarme em 14/09.** O campo era gravado no cadastro e não aparecia em tela
+   * nenhuma do app — quem marcava "em jejum" preenchia para ninguém. É aqui que ele vale, porque é
+   * aqui que a pergunta "esse era em jejum?" acontece, como o próprio tipo já dizia.
+   */
+  orientacoes: string | null;
   intakeNote: string | null;
+  /** Observação do paciente sobre o tratamento. Também só chegou ao alarme em 14/09. */
+  notes: string | null;
   latestStatus: IntakeStatus | null;
   latestLogId: string | null;
   resolvida: boolean;
@@ -99,7 +110,9 @@ export function useDosesDoAlarme(instanteIso: string) {
           storageLocation: estoquePorMedicamento.get(medication.id)?.storageLocation ?? null,
           quantidadeFormatada: formatarQuantidade(doseSchedule.amount, prescription.doseUnit),
           amount: doseSchedule.amount,
+          orientacoes: formatarOrientacoes(prescription.intakeInstructions),
           intakeNote: prescription.intakeNote,
+          notes: prescription.notes,
           snoozeCount: doseSchedule.snoozeCount,
           latestStatus,
           latestLogId,

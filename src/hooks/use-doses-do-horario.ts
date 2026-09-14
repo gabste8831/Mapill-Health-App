@@ -8,6 +8,7 @@ import { MedicationRepository } from "@/data/repositories/medication-repository"
 import { PrescriptionRepository } from "@/data/repositories/prescription-repository";
 import { resolvesDose, type IntakeStatus } from "@/domain/entities/intake-log";
 import { reagendarTodosOsAvisos } from "@/notifications/reagendar-avisos";
+import { formatarOrientacoes } from "@/shared/orientacoes-de-tomada";
 import { formatarQuantidade } from "@/shared/rotulos-de-medicamento";
 import { gravarDesfecho } from "./use-today-doses";
 
@@ -29,6 +30,8 @@ export type DoseDoHorario = {
   quantidadeFormatada: string;
   amount: number;
   /** Orientação de como tomar, quando houver — "com bastante água". */
+  /** As orientações da lista fechada, já em texto. Ver `use-doses-do-alarme`. */
+  orientacoes: string | null;
   intakeNote: string | null;
   /**
    * Onde a caixa está guardada, quando o estoque diz.
@@ -103,6 +106,7 @@ export function useDosesDoHorario(instanteIso: string) {
           photoUri: medication.photoUri,
           quantidadeFormatada: formatarQuantidade(doseSchedule.amount, prescription.doseUnit),
           amount: doseSchedule.amount,
+          orientacoes: formatarOrientacoes(prescription.intakeInstructions),
           intakeNote: prescription.intakeNote,
           storageLocation: estoquePorMedicamento.get(medication.id)?.storageLocation ?? null,
           notes: prescription.notes,

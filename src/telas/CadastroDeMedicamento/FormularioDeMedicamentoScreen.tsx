@@ -52,6 +52,7 @@ import { usePhotoPicker, type PhotoOrigin } from "@/hooks/use-photo-picker";
 import { useScrollToFocusedInput } from "@/hooks/use-scroll-to-focused-input";
 import { abrirDocumento } from "@/shared/abrir-anexo";
 import { dataPorExtenso } from "@/shared/datas-por-extenso";
+import { ORIENTACOES_DE_TOMADA } from "@/shared/orientacoes-de-tomada";
 import {
   cycleTurningPoints,
   lastDayOfTreatment,
@@ -207,14 +208,9 @@ const WEEKDAYS: { value: Weekday; label: string; nome: string }[] = [
   { value: 6, label: "Sáb", nome: "sábado" },
 ];
 
-const INTAKE_INSTRUCTION_LABELS: Record<IntakeInstruction, string> = {
-  fasting: "Em jejum",
-  withMeal: "Junto da refeição",
-  afterMeal: "Depois de comer",
-  plentyOfWater: "Com bastante água",
-  stayUpright: "Não deitar depois",
-  avoidAlcohol: "Evitar álcool",
-};
+// Os rótulos moram em `shared/orientacoes-de-tomada` desde 14/09: a tela do alarme passou a
+// mostrá-los, e duas cópias divergiriam no dia em que alguém corrigisse um texto num lugar só.
+const INTAKE_INSTRUCTION_LABELS = ORIENTACOES_DE_TOMADA;
 
 /** Ficha que só abre o campo livre; não é valor do domínio. */
 const OUTRA_ORIENTACAO = "other";
