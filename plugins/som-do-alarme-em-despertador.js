@@ -1,11 +1,8 @@
 const { withDangerousMod } = require("expo/config-plugins");
 const path = require("node:path");
 
-const {
-  aplicarPatchDeDespertador,
-  ARQUIVO_ALVO,
-  MARCA,
-} = require("../scripts/patch-som-de-despertador");
+const { ARQUIVO_ALVO, MARCA } = require("../scripts/patch-som-de-despertador");
+const { aplicarTodos } = require("../scripts/aplicar-patches");
 const fs = require("node:fs");
 
 /**
@@ -42,9 +39,9 @@ const fs = require("node:fs");
  * 3. **`eas-build-post-install`** — o gancho que roda depois de todo install e antes do gradlew
  *    (https://docs.expo.dev/build-reference/npm-hooks/). É a última linha antes da compilação.
  *
- * E, como nenhum dos três é prova, **`scripts/conferir-patch-de-despertador.js` falha a build** se o
- * arquivo chegar ao Gradle sem a marca. Um caminho pode falhar; o que não pode é sair um APK com o
- * alarme mudo sem ninguém saber.
+ * E, como nenhum dos três é prova, **`scripts/conferir-patches.js` falha a build** se o arquivo
+ * chegar ao Gradle sem a marca. Um caminho pode falhar; o que não pode é sair um APK com o alarme
+ * mudo sem ninguém saber.
  *
  * ## Por que o patch é global, e por que isso é seguro
  *
@@ -60,19 +57,17 @@ function withSomDoAlarmeEmDespertador(config) {
   return withDangerousMod(config, [
     "android",
     (config) => {
-      const resultado = aplicarPatchDeDespertador(config.modRequest.projectRoot);
-
       /**
-       * O log é a única janela numa build remota.
+       * Aplica **todos** os patches, e não só o do volume.
        *
-       * `ja-estava` aqui significa que o `postinstall` chegou primeiro, que é o esperado no EAS —
-       * e é informação, não ruído: diz qual dos caminhos está segurando o patch.
+       * O prebuild é um dos três caminhos, e ele não pode conhecer só metade da lista — um patch
+       * que só o `postinstall` aplica ficaria de fora no `expo run:android` local, onde não há
+       * segundo install. A lista mora em `scripts/aplicar-patches.js`.
+       *
+       * O log é a única janela numa build remota: `ja-estava` diz que o `postinstall` chegou
+       * primeiro, que é o esperado no EAS — informação, não ruído.
        */
-      console.log(
-        resultado === "aplicado"
-          ? "[som-do-alarme-em-despertador] patch aplicado no prebuild."
-          : "[som-do-alarme-em-despertador] o patch já estava no arquivo (aplicado antes).",
-      );
+      aplicarTodos(config.modRequest.projectRoot);
 
       /**
        * **Reaplica depois de o prebuild terminar**, porque o `yarn install` do EAS vem em seguida.

@@ -592,6 +592,115 @@ hoje") disparam em 30s, no mesmo canal e com o mesmo texto do aviso real.
 
 ---
 
+## 🔴 Achado de 14/09 — a tela azul nunca foi escolhida, e faltava uma linha na MainActivity
+
+O teste da build 15, com o celular ligado no cabo e o logcat gravando, resolveu três defeitos de uma
+vez — e o principal deles estava aberto desde o começo do projeto, disfarçado de outra coisa.
+
+### O sintoma
+
+A tela azul não subia em **cenário nenhum**: bloqueado, em uso, dentro ou fora dos recentes. O
+alarme tocava e o que aparecia era "Hora do remédio".
+
+O dado que resolveu o caso foi do Gabriel: **os dois cenários falhavam de forma idêntica**. Tela de
+bloqueio e app em uso são caminhos de código diferentes — Activity nativa contra rota do roteador —,
+e caminhos diferentes não falham igual por acaso. Isso derrubou a hipótese de corrida de tempo, que
+era o que vinha sendo perseguido desde 12/09.
+
+### O que o logcat mostrou
+
+```
+19:59:00.220  No subscribers registered for MainComponentEvent   ← o pedido da tela azul
+19:59:00.300  initialize ReactContext
+19:59:00.661  occludedChanged mOccluded=true ... MainActivity     ← a tela cheia SUBIU
+19:59:01.432  launched taskId: 1                                  ← o index.js roda só aqui
+19:59:02.200  Displayed .MainActivity: +1s559ms
+```
+
+**O `fullScreenAction` sempre funcionou.** A Activity irrompeu sobre o bloqueio em 660 ms e ficou 28
+segundos na frente, até o toque na notificação. O que subiu foi a `MainActivity` com o componente
+**padrão** — o app inteiro — e não `AlarmeRaiz`.
+
+Nunca houve troca de tela. A azul é que nunca foi escolhida.
+
+### A causa
+
+`NotificationManager.java:418` posta um `MainComponentEvent` *sticky* com o nome do componente, e
+`Notifee.getMainComponent(defaultComponent)` o consome. Esse método é `@KeepForSdk`: é API para o
+**app** chamar. Quem tem de chamá-lo é a `MainActivity`, ao responder que componente montar — e o
+projeto não tinha esse override (zero ocorrências de `getMainComponentName` fora de `node_modules`).
+
+Sem ele, a resposta é sempre `"main"`, e o evento fica sem ninguém para consumir. O
+`AppRegistry.registerComponent` do `index.js` está correto e continua necessário — ele faz o nome
+existir. Mas registrar não adianta se ninguém **pede**.
+
+> **A observação de 12/09 estava certa o tempo todo.** O achado logo abaixo já dizia que "o
+> `fullScreenAction` do Notifee monta o componente dentro da própria MainActivity". Era exatamente
+> isso — faltava saber que a MainActivity precisa *perguntar* qual componente montar.
+
+Isso também explica o histórico: a tela azul **já apareceu** em builds anteriores, mas pelo caminho
+do `PRESS` e da navegação do listener, nunca pelo `fullScreenAction`. As correções de 12/09 e 13/09
+mexeram nas guardas de corrida entre esses caminhos, e por isso o comportamento oscilava — o
+mecanismo primário nunca esteve ligado.
+
+### Por que passou despercebido
+
+A biblioteca **avisa** que o passo existe, no JSDoc de `mainComponent`:
+
+> *"For this to correctly function on Android, a minor native code change is required."*
+
+E aponta para `/react-native/android/behaviour#full-screen` — uma página que **não vem no pacote**,
+só existe no site. O aviso está lá; a instrução, não. E o config plugin da própria lib aplica
+manifesto e ícones, nada que toque a `MainActivity`.
+
+**A correção** é `plugins/tela-do-alarme-na-main-activity.js`, que injeta no prebuild:
+
+```kotlin
+override fun getMainComponentName(): String =
+  Notifee.getInstance().getMainComponent("main")
+```
+
+`"main"` segue sendo o padrão, então toda abertura normal do app é idêntica: o desvio só acontece
+quando há um alarme de tela cheia esperando.
+
+### Os outros dois defeitos da mesma sessão
+
+**O patch do volume nunca chegou ao aparelho.** A fase PREBUILD do EAS roda `expo prebuild` e
+**depois** `yarn install`, que reinstala `node_modules` por cima do que o prebuild patcheou. O patch
+era aplicado e descartado na mesma build, e o `throw` do plugin não denunciava: ele falha quando o
+alvo *some*, e o install devolve o arquivo original intacto — alvo perfeito, sem o patch.
+
+O aviso `No lock file detected` no log era a pista, e foi descartado como inofensivo numa primeira
+leitura. Ele é consequência do `.easignore` omitir o `package-lock.json` (contorno do bug do npm no
+Windows), e é o que faz o EAS resolver dependências tarde.
+
+Agora os patches são aplicados por três caminhos — prebuild, `postinstall` e
+`eas-build-post-install` — e `scripts/conferir-patches.js` **falha a build** se algum não chegar à
+compilação. Ver `scripts/aplicar-patches.js`.
+
+**O `foregroundServiceBehavior` era descartado na ponte.** No mesmo instante do disparo:
+
+```
+W/Bundle: Key foregroundServiceBehavior expected Integer but value was a java.lang.Double.
+          The default value 0 was returned.
+```
+
+A lib injeta `IMMEDIATE` (`1`) sozinha para evitar o adiamento de até 10 s que o Android 12+ impõe à
+notificação de um foreground service. Todo número em JS é ponto flutuante, então o valor chega como
+`Double`; `getInt()` não aceita e devolve `0` — que é justamente o adiamento que o `IMMEDIATE`
+existia para evitar. Corrigido em `scripts/patch-servico-sem-atraso.js`.
+
+### O que essa sessão mudou no método
+
+O celular ligado no cabo tornou possível **compilar e instalar localmente**
+(`npx expo run:android --variant release --device`), sem gastar a cota de 30 builds/mês do EAS. As
+três causas foram encontradas lendo o aparelho — logcat no disparo e `aapt2` sobre o APK instalado —
+e nenhuma delas teria sido encontrada por inspeção de código.
+
+O `adb` já estava na máquina, fora do PATH; `scripts/logcat-alarme.ps1` o encontra sozinho.
+
+---
+
 ## 🔴 Achado de 12/09 — responder o alarme dá acesso ao app sem desbloquear o celular
 
 Tela bloqueada, o alarme toca, a tela azul sobe. Ao tocar em **Tomei**, o app abre na Home — **sem

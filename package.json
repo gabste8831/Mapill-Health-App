@@ -66,8 +66,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "postinstall": "node scripts/patch-som-de-despertador.js",
-    "eas-build-post-install": "node scripts/patch-som-de-despertador.js && node scripts/conferir-patch-de-despertador.js"
+    "postinstall": "node scripts/aplicar-patches.js",
+    "eas-build-post-install": "node scripts/aplicar-patches.js && node scripts/conferir-patches.js"
   },
   "expo": {
     "autolinking": {

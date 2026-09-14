@@ -1,6 +1,7 @@
 import notifee, {
   AlarmType,
   AndroidCategory,
+  AndroidForegroundServiceBehavior,
   AndroidForegroundServiceType,
   AndroidImportance,
   AndroidVisibility,
@@ -386,6 +387,34 @@ export class NotifeeGateway implements NotificationGateway {
                 foregroundServiceTypes: [
                   AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
                 ],
+                /**
+                 * **Explícito para contornar um defeito da biblioteca**, e não por preferência.
+                 *
+                 * A lib já injeta `IMMEDIATE` sozinha quando `asForegroundService` é `true` (ver
+                 * `validateAndroidNotification.js`), justamente para evitar o atraso de até 10 s que
+                 * o Android 12+ impõe à notificação de um foreground service. Só que o valor
+                 * atravessa a ponte como `Double` — todo número em JS é —, e o lado Java lê com
+                 * `getInt()` (`NotificationAndroidModel.java:117`), que não aceita `Double` e
+                 * devolve o padrão.
+                 *
+                 * O logcat de 14/09 registra a perda no instante do disparo:
+                 *
+                 * ```
+                 * W/Bundle: Key foregroundServiceBehavior expected Integer but value was a
+                 *           java.lang.Double. The default value 0 was returned.
+                 * ```
+                 *
+                 * `0` é `FOREGROUND_SERVICE_DEFAULT` — exatamente o adiamento que o `IMMEDIATE`
+                 * existia para evitar. Num despertador de medicação, até 10 s entre o disparo e o
+                 * aviso aparecer é a diferença entre acordar alguém e não acordar.
+                 *
+                 * Passar o valor daqui não conserta a ponte: o `Double` continua sendo `Double`. O
+                 * que ele garante é que **a intenção fique escrita no nosso código**, onde este
+                 * comentário pode explicá-la, em vez de depender de um default da biblioteca que se
+                 * perde em silêncio. A correção de verdade é do lado que lê, e está em
+                 * `scripts/patch-servico-sem-atraso.js`.
+                 */
+                foregroundServiceBehavior: AndroidForegroundServiceBehavior.IMMEDIATE,
                 /**
                  * A peça que sustenta a promessa central: abre o componente React registrado em
                  * `index.js` **por cima da tela de bloqueio**, sem passar pelo roteador do app.

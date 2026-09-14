@@ -24,29 +24,55 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { ARQUIVO_ALVO, MARCA } = require("./patch-som-de-despertador");
+const despertador = require("./patch-som-de-despertador");
+const semAtraso = require("./patch-servico-sem-atraso");
+
+/**
+ * Os patches que precisam estar no lugar quando o Gradle ler os arquivos, e o que cada um custa.
+ *
+ * Um patch ausente não é aviso, é build parada: o custo de deixar passar é um APK que reprova em
+ * aparelho pelo mesmo motivo de sempre, mais uma build da cota (30/mês) e o ciclo de espera inteiro.
+ */
+const OBRIGATORIOS = [
+  {
+    nome: "volume de despertador",
+    modulo: despertador,
+    oQueQuebra: "o alarme toca no volume de MÍDIA — o defeito de 14/09",
+  },
+  {
+    nome: "serviço sem atraso",
+    modulo: semAtraso,
+    oQueQuebra: "a notificação do alarme pode demorar até 10 s para aparecer no Android 12+",
+  },
+];
 
 function conferir(raizDoProjeto) {
-  const alvo = path.join(raizDoProjeto, ARQUIVO_ALVO);
+  const faltando = [];
 
-  if (!fs.existsSync(alvo)) {
-    throw new Error(
-      `[conferir-despertador] ${ARQUIVO_ALVO} não existe. Sem o expo-audio instalado não há o que ` +
-        `conferir — e não há alarme.`,
-    );
+  for (const { nome, modulo, oQueQuebra } of OBRIGATORIOS) {
+    const alvo = path.join(raizDoProjeto, modulo.ARQUIVO_ALVO);
+
+    if (!fs.existsSync(alvo)) {
+      faltando.push(`  - ${nome}: ${modulo.ARQUIVO_ALVO} não existe`);
+      continue;
+    }
+
+    if (!fs.readFileSync(alvo, "utf8").includes(modulo.MARCA)) {
+      faltando.push(`  - ${nome}: sem a marca '${modulo.MARCA}' — ${oQueQuebra}`);
+    }
   }
 
-  if (!fs.readFileSync(alvo, "utf8").includes(MARCA)) {
+  if (faltando.length > 0) {
     throw new Error(
-      `[conferir-despertador] O PATCH DO VOLUME DE DESPERTADOR NÃO ESTÁ NO ARQUIVO.\n\n` +
-        `  ${ARQUIVO_ALVO} chegou à compilação sem a marca '${MARCA}'.\n\n` +
-        `  Compilar assim produz um APK em que o alarme toca no volume de MÍDIA — o defeito de\n` +
-        `  14/09. A build para aqui de propósito.\n\n` +
-        `  Algum dos três caminhos que aplicam o patch não rodou:\n` +
+      `[conferir-patches] PATCH AUSENTE NA COMPILAÇÃO.\n\n` +
+        `${faltando.join("\n")}\n\n` +
+        `  A build para aqui de propósito: compilar assim entrega um APK com o defeito de volta,\n` +
+        `  e nada no log denunciaria.\n\n` +
+        `  Algum dos três caminhos que aplicam os patches não rodou:\n` +
         `    1. plugins/som-do-alarme-em-despertador.js  (prebuild)\n` +
         `    2. "postinstall" no package.json            (todo npm/yarn install)\n` +
         `    3. "eas-build-post-install" no package.json (EAS, antes do gradlew)\n\n` +
-        `  Rode 'node scripts/patch-som-de-despertador.js' e confira o log da build para ver qual.`,
+        `  Rode 'node scripts/aplicar-patches.js' e confira o log da build para ver qual.`,
     );
   }
 
@@ -57,5 +83,5 @@ module.exports = { conferir };
 
 if (require.main === module) {
   conferir(process.cwd());
-  console.log("[conferir-despertador] ok: o alarme vai sair no volume de despertador.");
+  console.log("[conferir-patches] ok: os patches estao no lugar.");
 }

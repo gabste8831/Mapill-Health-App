@@ -84,6 +84,7 @@
       "expo-audio",
       "react-native-notify-kit",
       "./plugins/alarme-em-tela-cheia",
+      "./plugins/tela-do-alarme-na-main-activity",
       "./plugins/volume-de-despertador",
       "./plugins/som-do-alarme-em-despertador",
       "expo-asset"

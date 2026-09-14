@@ -7,6 +7,13 @@
 
 ---
 
+> **As três causas foram encontradas e corrigidas em 14/09 à noite**, com o celular no cabo e o
+> logcat gravando. O relato completo está no
+> [achado de 14/09](ROTEIRO-DE-TESTE.md#-achado-de-1409--a-tela-azul-nunca-foi-escolhida-e-faltava-uma-linha-na-mainactivity).
+> Falta validar em aparelho — agora por build local, sem gastar a cota do EAS.
+
+---
+
 ## O que a build 15 (14/09, noite) mostrou
 
 A build 15 foi a primeira que compilou com o módulo de desbloqueio dentro. O teste em aparelho
@@ -63,51 +70,24 @@ acontecer, diga em qual botão.
 
 ---
 
-## Passo 2 — A tela azul não sobe (bloqueia C.1 e D.5)
+## Passo 2 — A tela azul
 
-**Sem correção ainda. É o que falta investigar antes da próxima build.**
+**Causa encontrada e corrigida em 14/09. Falta validar.**
 
-### O que já foi descartado
+A tela cheia **sempre funcionou** — o que subia era o app, não `AlarmeRaiz`. Faltava a
+`MainActivity` perguntar ao Notifee qual componente montar, um passo que a biblioteca exige e cuja
+instrução não vem no pacote. Corrigido em `plugins/tela-do-alarme-na-main-activity.js`.
 
-Estas três hipóteses **foram verificadas e eliminadas** lendo o APK da build 15 com `aapt2` — não
-por raciocínio, pelo manifesto real que está no aparelho:
+O relato completo, com o logcat que mostrou a sequência, está no
+[achado de 14/09](ROTEIRO-DE-TESTE.md#-achado-de-1409--a-tela-azul-nunca-foi-escolhida-e-faltava-uma-linha-na-mainactivity).
 
-- **`MissingForegroundServiceTypeException`** (era a suspeita principal): o manifesto final traz
-  `app.notifee.core.ForegroundService` com `foregroundServiceType=0x2` (`mediaPlayback`). O
-  `tools:replace` funcionou. Não há exceção — coerente com o som sair, que prova que o serviço sobe.
-- **Permissões ausentes:** `USE_FULL_SCREEN_INTENT`, `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE` e
-  `FOREGROUND_SERVICE_MEDIA_PLAYBACK` estão todas declaradas.
-- **Atributos da Activity:** `MainActivity` tem `showWhenLocked=true`, `turnScreenOn=true` e
-  `launchMode=2`. Nada no manifesto explica a tela sumir.
+**Passa se:** com o celular **bloqueado**, o alarme toca e a **tela azul** sobe — não a tela "Hora
+do remédio".
 
-**Nada na configuração nativa explica o defeito.** Ele é de runtime.
-
-### O dado que mais aponta
-
-Os dois cenários falham **de forma idêntica**. Bloqueado e em uso são caminhos de código diferentes
-(Activity nativa vs. rota do roteador), e uma corrida de tempo não atinge os dois igual — foi essa
-observação, do Gabriel, que descartou a hipótese de corrida. O que atinge os dois é algo comum, e o
-que entrou junto da regressão, comum aos dois, é o serviço de som.
-
-Uma pista concreta, ainda não confirmada: `index.js` chama `registrarServicoDeSom()` **antes** de
-`import "expo-router/entry"`, e `som-do-alarme.ts` importa `expo-audio` no topo do módulo. Se esse
-carregamento lançar ou travar no arranque, ele derruba o processo antes de a Activity montar — e o
-sintoma seria exatamente este: a notificação chega (é do sistema), o som toca (é do serviço), e a
-tela cheia não sobe.
-
-### O que falta para ter certeza
-
-**O logcat do momento do disparo.** É o que separa "o processo morreu ao subir" de "a Activity foi
-recusada" de "algo a fechou depois". Sem ele, a próxima build é chute — e chutar aqui é o que já
-consumiu builds da cota.
-
-```
-powershell -ExecutionPolicy Bypass -File scripts\logcat-alarme.ps1
-```
-
-O `adb` existe nesta máquina mas **não está no PATH** (era por isso que `adb logcat` respondia
-*command not found*); o script o encontra sozinho. Ligue o celular no cabo com a depuração USB
-ativada, rode, dispare o alarme, `Ctrl+C`. Sai em `docs/logcat-alarme.txt`.
+> Descartados pela leitura do APK da build 15 com `aapt2`, para ninguém reinvestigar: o
+> `foregroundServiceType` está no manifesto final (`mediaPlayback`), as permissões estão todas
+> declaradas (`USE_FULL_SCREEN_INTENT` inclusive), e a `MainActivity` tem `showWhenLocked` e
+> `turnScreenOn`. Nada na configuração nativa explicava o defeito.
 
 ---
 
@@ -172,6 +152,32 @@ Celular **desbloqueado**, usando outro app, e o alarme dispara. Toque na notific
 
 > **O artigo só pode alegar que o alarme toca no silencioso depois que o passo 1 passar em
 > aparelho.** Hoje a alegação não se sustenta: a build testada saiu no volume de mídia.
+
+---
+
+## Como testar sem gastar build do EAS
+
+Descoberto em 14/09, e muda o ciclo inteiro: **dá para compilar aqui e instalar pelo cabo.** A
+máquina já tem tudo (JDK 21, SDK, NDK 27.1.12297006), e o EAS passa a ser só para distribuir.
+
+```
+npx expo run:android --variant release --device
+```
+
+- **`--variant release` é essencial.** Em debug o JavaScript vem do Metro, e o arranque do processo
+  muda — justamente o que estes passos medem. Release embute o bundle, como a preview.
+- **A primeira compilação demora** (20-40 min, baixando o Gradle). As seguintes ficam em 2-5 min.
+- A assinatura difere da do EAS, então pode ser preciso **desinstalar o app antes**. Os dados de
+  teste se perdem.
+
+Para ler o que o aparelho faz no disparo:
+
+```
+powershell -ExecutionPolicy Bypass -File scripts\logcat-alarme.ps1
+```
+
+O `adb` está na máquina mas **fora do PATH** — era por isso que `adb logcat` respondia *command not
+found*. O script o encontra sozinho.
 
 ---
 

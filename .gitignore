@@ -55,3 +55,7 @@ skills-lock.json
 .claude/skills/safe-refactor/
 .claude/skills/surgical-patch/
 .claude/skills/verify-and-stop/
+
+# Capturas de logcat (scripts/logcat-alarme.ps1) — brutas e volumosas.
+# O que importa de cada captura vai para o ROTEIRO-DE-TESTE.md.
+docs/logcat-alarme.txt
