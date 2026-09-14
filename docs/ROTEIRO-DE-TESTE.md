@@ -847,3 +847,110 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 **4.4** **"Apagar tudo e recomeçar"** → Continuar → Apagar tudo.
 
 > ✅ Volta para a tela de login; entrando com o Google de novo, o aceite é pedido outra vez.
+
+
+---
+
+# ANEXO — As decisoes de 13/09 sobre alarme e fuso
+
+> Movido do `O-QUE-FALTA-TESTAR.md` em 14/09, que passou a ser so a lista de acao.
+> Fica aqui como registro: as duas analises sustentam seccoes do artigo.
+
+# PARTE E — Decisões tomadas, e o que fica fora de escopo
+
+## E.1 — 🔊 O alarme no volume de despertador
+
+**Decisão do Gabriel em 13/09:** fica para depois de todo o resto estar validado. Duas builds foram
+gastas nisso sem resultado, e o motivo é que o caminho tentado não leva lá — não é questão de
+insistir mais.
+
+**Até lá, o alarme toca no volume de mídia.** É a única característica do app que fica sabidamente
+incompleta.
+
+### Por que as duas tentativas falharam
+
+O `AudioAttributes` do canal **foi** aplicado. Verificado em 13/09 rodando `expo prebuild`
+localmente: o [`plugins/volume-de-despertador.js`](../plugins/volume-de-despertador.js) transforma o
+`ChannelManager.java` corretamente, `USAGE_NOTIFICATION` vira `USAGE_ALARM`. O plugin funciona.
+
+O problema é que **quem toca o som da notificação é o NotificationManager, não o app** — e ele usa o
+stream dele independentemente do que o canal peça. O `AudioAttributes` ali é uma dica, não uma
+ordem.
+
+Não é defeito do Notifee: a [issue #297](https://github.com/invertase/notifee/issues/297), pedindo
+exatamente isto, foi fechada como *not planned*. E os [requisitos do Google Play para apps de
+alarme](https://support.google.com/googleplay/android-developer/answer/13392821) descrevem a
+arquitetura esperada — o app toca som próprio, e a notificação serve ao full-screen intent, não ao
+áudio.
+
+### O caminho que funciona
+
+Separar quem mostra de quem toca:
+
+1. **O canal do alarme fica mudo** (`sound: null`). A notificação continua fazendo a tela azul
+   irromper e continua na bandeja — só não emite som.
+2. **A tela do alarme toca o som**, com `expo-audio` (já instalado e registrado no `app.json`), em
+   loop, parando quando a dose é respondida.
+3. **Um segundo config plugin** põe `USAGE_ALARM` no player. É necessário porque o `expo-audio`
+   [não expõe a escolha de stream](https://docs.expo.dev/versions/v57.0.0/sdk/audio/) — tem
+   `interruptionMode` e `playsInSilentMode`, e nada de `androidAudioUsage`.
+
+**O alvo do patch já está localizado:** `node_modules/expo-audio/android/src/main/java/expo/modules/
+audio/AudioPlayer.kt`, linha 39 — `.setAudioAttributes(AudioAttributes.DEFAULT, false)`, onde
+`DEFAULT` é `USAGE_MEDIA`. Uma linha, no mesmo formato do patch que já existe e comprovadamente
+aplica.
+
+### O que ganha junto
+
+O loop do som passa a ser do app, e não do canal; e parar o som vira uma chamada direta em vez de
+cancelar notificação. Os dois são contornos que existem hoje só porque o som é do sistema.
+
+### O risco a tratar
+
+Se o Android matar o processo antes de a tela montar, o som não toca — hoje quem toca é o sistema, e
+isso não acontece. A defesa é um **foreground service**, que é o que os requisitos do Play descrevem
+para apps de alarme e que este app ainda não usa. Entra no mesmo trabalho.
+
+### Tamanho
+
+Mudança de arquitetura do alarme, não ajuste. Merece build dedicada e uma rodada de teste própria —
+foi por isso que ficou para depois, e não por ser difícil.
+
+## E.2 — ✅ A dose segue o instante, não a hora de parede
+
+**Decisão do Gabriel em 13/09, e o comportamento atual está correto.** Um remédio cadastrado para as
+21:00 em São Paulo toca às **20:00** em Manaus — é o mesmo momento, visto de outro fuso.
+
+### O que foi tentado, e por que saiu
+
+A suposição de 13/09 era a oposta: que "tomo às 8 da manhã" fosse uma promessa sobre o **relógio de
+parede**, e que o horário devesse se manter ao trocar de fuso. Foi implementado — o app guardava o
+fuso da última geração e regerava as doses futuras quando ele mudava.
+
+Não funcionou, e a caçada consumiu a tarde. Três causas reais foram encontradas no caminho (todas
+corrigidas e mantidas, porque valem por si):
+
+- A manutenção da grade rodava **depois** da guarda de permissão, então nunca rodava com a permissão
+  negada.
+- O offset que o `Date` aplica **demora a acompanhar** o nome do fuso, então a regeração usava o
+  deslocamento antigo.
+- `scheduled_for` tinha **duas formas de ISO** no banco, e a comparação de texto do SQLite deixava
+  escapar metade das linhas.
+
+### Por que o comportamento atual é defensável
+
+Não é só desistência — o instante absoluto tem um argumento próprio, e num app de medicação ele é
+forte: **quem toma de 12 em 12 horas não deve encurtar o intervalo porque atravessou um fuso.**
+Manter a hora de parede numa viagem de três fusos comprimiria ou esticaria o intervalo entre doses,
+que é justamente o que a posologia estabelece.
+
+Para viagem curta — o caso real de quem usa este app — seguir o instante é o mais seguro.
+
+### O que fica registrado
+
+O código da tentativa foi removido (`fuso-da-grade.ts`). A tabela `app_state` (migration 019) fica:
+migration publicada não se remove, e um lugar para estado interno é útil.
+
+**Se um dia isto for revisitado**, o caminho rigoroso é gravar a hora local pretendida (`"21:00"`)
+ao lado do instante e derivar um do outro — não detectar troca de fuso e regerar. Custa uma coluna,
+backfill e a revisão dos ~35 arquivos que leem `scheduledFor`, e foi o que se evitou em 13/09.
