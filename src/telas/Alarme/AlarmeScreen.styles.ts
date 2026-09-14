@@ -65,9 +65,20 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     // é o que falta para o terceiro remédio caber na tela.
     gap: spacing.md,
   },
+  /**
+   * A dose única, no mesmo cartão das outras formas.
+   *
+   * Era o único item que continuava solto no azul depois de 14/09 — e as três formas da tela são a
+   * mesma tela vista com mais ou menos remédios, não três telas diferentes. Aqui o conteúdo segue
+   * centrado, porque com uma dose só não há lista a alinhar: há um remédio, e ele é o assunto.
+   */
   item: {
     alignItems: "center",
     gap: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    backgroundColor: withOpacity(cores.onPrimary, 0.12),
+    borderRadius: radius.lg,
   },
   foto: {
     width: 132,
