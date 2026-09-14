@@ -394,10 +394,41 @@ export function AlarmeScreen({
     void dispensarAlarmeAtivo().then(onFechar);
   }, [doses, isLoading, onFechar]);
 
+  /**
+   * Quantos remédios a tela **desenha**, decidido uma vez e mantido.
+   *
+   * O número de pendentes cai enquanto a tela está aberta: o `useDosesDoAlarme` revalida a cada três
+   * segundos, e uma dose confirmada pelo botão da notificação ou por outra tela some da lista. Com a
+   * forma derivada direto dele, quatro remédios viravam três no meio do uso — e aí o botão único de
+   * "Ver e confirmar no app" virava dois botões, a lista mínima virava a lista com foto, e o rodapé
+   * inteiro se reorganizava debaixo do dedo de quem estava prestes a tocar.
+   *
+   * Congelar só a **forma** é o que resolve sem mentir: a lista mostra as doses de verdade, e é a
+   * escolha de layout que não muda. Uma tela de alarme vive segundos, e nesse intervalo a estrutura
+   * que a pessoa vê tem de ser a mesma em que ela toca.
+   *
+   * Vale para a montagem seguinte: fechada e reaberta, a tela recalcula com o que houver então.
+   *
+   * `useState` e não `useRef`: ler ref durante o render é o que a regra `react-hooks/refs` proíbe,
+   * e com o React Compiler ligado ela tem razão. O estado é escrito uma vez, quando a lista chega.
+   */
+  const [formaCongelada, setFormaCongelada] = useState<number | null>(null);
+
   if (isLoading) return <CenteredLoader />;
 
   const pendentes = doses.filter((dose) => !dose.resolvida);
-  const umaSo = pendentes.length === 1;
+
+  /**
+   * Congela na primeira renderização com a lista já carregada.
+   *
+   * Escrito durante o render, e não num efeito: é o padrão de estado derivado que o React documenta
+   * (*"adjusting state when props change"*), e é o que a regra `set-state-in-effect` empurra para
+   * cá. O `if` garante uma escrita só — a partir daí a condição é falsa e o render é puro.
+   */
+  if (formaCongelada === null) setFormaCongelada(pendentes.length);
+
+  const quantosDesenhar = formaCongelada ?? pendentes.length;
+  const umaSo = quantosDesenhar === 1;
   /**
    * **Com mais de uma dose, o alarme lista e não responde**: a confirmação passa a exigir o app.
    *
@@ -410,14 +441,14 @@ export function AlarmeScreen({
    * torna isso aceitável — ele é a primeira coisa na tela e leva ao horário, onde cada dose se
    * resolve individualmente.
    */
-  const podeResponderAqui = pendentes.length <= MAXIMO_PARA_RESPONDER_NO_ALARME;
+  const podeResponderAqui = quantosDesenhar <= MAXIMO_PARA_RESPONDER_NO_ALARME;
   /**
    * Se a tela lista os remédios ou só diz quantos são. Ver `MAXIMO_PARA_LISTAR`.
    *
    * A outra forma — detalhada contra enxuta — é decidida por `umaSo`, e não por uma terceira
    * variável: é a mesma pergunta ("há uma dose só?") que já governa o título e os botões.
    */
-  const listar = pendentes.length <= MAXIMO_PARA_LISTAR;
+  const listar = quantosDesenhar <= MAXIMO_PARA_LISTAR;
   // Um adiamento por horário: basta uma dose já ter gasto o dela para o botão não ter mais efeito.
   const podeAdiar = pendentes.length > 0 && pendentes.every((dose) => dose.snoozeCount === 0);
 
@@ -702,24 +733,44 @@ export function AlarmeScreen({
 
               Silenciar vira aviso quando já foi tocado, e Adiar some quando o horário gastou seu
               adiamento — então a linha pode ter dois, um ou nenhum botão. */}
-          {silenciado ? (
-            <Text style={styles.silenciadoAviso}>
-              Som desligado. A dose continua esperando sua resposta.
-            </Text>
-          ) : null}
-
-          {!silenciado || podeAdiar ? (
-            <View style={styles.linhaDeSaidas}>
-              {!silenciado ? (
-                <Pressable
-                  style={estadoDePressao(styles.botaoSilenciar)}
-                  onPress={silenciar}
-                  accessibilityRole="button"
-                  accessibilityLabel="Desligar o som do alarme">
-                  <Ionicons name="volume-mute" size={18} color={cores.onPrimary} />
-                  <Text style={styles.textoSilenciar}>Silenciar</Text>
-                </Pressable>
-              ) : null}
+          {/**
+           * **O rodapé não muda de forma depois do toque.**
+           *
+           * Antes, silenciar tirava o botão da linha e inseria um aviso de texto no lugar: o Adiar
+           * ao lado esticava para a largura toda e tudo descia alguns dp. Quem tocou viu o layout
+           * se reorganizar debaixo do dedo — e, num alarme, o botão seguinte muda de lugar entre a
+           * intenção e o toque.
+           *
+           * Agora o botão **fica**, apagado e sem ação, dizendo o que aconteceu. A informação que
+           * o aviso dava — que a dose continua esperando — é o que a tela inteira já comunica ao
+           * permanecer aberta com os botões de resposta.
+           */}
+          {/* A linha existe sempre: o botão de silenciar fica nela do começo ao fim, mudando de
+              estado e não de presença. O Adiar ao lado é que pode faltar — quando o horário já
+              gastou seu adiamento, e isso é decidido antes de a tela abrir, não durante. */}
+          <View style={styles.linhaDeSaidas}>
+              <Pressable
+                style={
+                  silenciado
+                    ? [styles.botaoSilenciar, styles.botaoInativo]
+                    : estadoDePressao(styles.botaoSilenciar)
+                }
+                onPress={silenciado ? undefined : silenciar}
+                disabled={silenciado}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: silenciado }}
+                accessibilityLabel={
+                  silenciado ? "O som já está desligado" : "Desligar o som do alarme"
+                }>
+                <Ionicons
+                  name={silenciado ? "volume-off" : "volume-mute"}
+                  size={18}
+                  color={cores.onPrimary}
+                />
+                <Text style={styles.textoSilenciar}>
+                  {silenciado ? "Sem som" : "Silenciar"}
+                </Text>
+              </Pressable>
 
               {/* Adiar promete volta; "Responder depois" só fecha. As duas saídas existem porque
                   são coisas diferentes: quem vai buscar o remédio agora quer ser lembrado em
@@ -736,7 +787,6 @@ export function AlarmeScreen({
                 </Pressable>
               ) : null}
             </View>
-          ) : null}
 
           {/* Sair sem responder é legítimo — a pessoa pode querer conferir a caixa antes. A dose
               continua pendente e reaparece na Home, como qualquer atrasada. */}

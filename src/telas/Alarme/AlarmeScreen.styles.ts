@@ -442,11 +442,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     opacity: 0.8,
   },
-  silenciadoAviso: {
-    ...typography.bodyMd,
-    color: cores.onPrimary,
-    textAlign: "center",
-    opacity: 0.85,
-    paddingVertical: spacing.md,
+  /**
+   * O botão que já cumpriu seu papel: fica no lugar, apagado e sem ação.
+   *
+   * Some seria pior — a linha se reorganizaria debaixo do dedo de quem acabou de tocar, e o botão
+   * vizinho mudaria de tamanho e de posição. Apagado, ele responde ao toque ("pronto, silenciei")
+   * sem mover nada.
+   */
+  botaoInativo: {
+    opacity: 0.45,
   },
 }));
