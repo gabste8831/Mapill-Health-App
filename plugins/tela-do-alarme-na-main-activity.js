@@ -68,20 +68,39 @@ const { withMainActivity } = require("expo/config-plugins");
 const ORIGINAL = `override fun getMainComponentName(): String = "main"`;
 
 /**
- * O que ela passa a responder: o que o Notifee pediu, ou o app quando não há pedido.
+ * O que ela passa a responder: o componente que **este intent** pediu, ou o app.
  *
- * `"main"` continua sendo o padrão, então **toda abertura normal do app segue idêntica** — o desvio
- * só acontece quando há um alarme de tela cheia esperando, que é quando o sticky existe.
+ * ## Por que o sticky sozinho não serve
+ *
+ * `getMainComponent` lê um evento sticky do EventBus da lib, e o sticky é postado no **display**
+ * da notificação (`NotificationManager.java:418`), não no toque. Ele fica pendurado até alguém
+ * consumi-lo, e nada o vincula ao intent que de fato abriu a Activity.
+ *
+ * Duas consequências, as duas medidas em 15/09:
+ *
+ * 1. **O alarme ignorado contamina a abertura seguinte.** Tocou, ninguém respondeu, o sticky
+ *    ficou. Abrir o app pelo ícone depois disso montava a tela azul — sem alarme nenhum, e vazia.
+ * 2. **O toque na notificação caía na tela azul.** O `pressAction` é `"default"`, sem
+ *    `mainComponent`, então o toque não posta sticky algum — mas consumia o que o display havia
+ *    deixado. Era a tela azul vazia com o celular em uso, o defeito que sobrou do teste de 15/09.
+ *
+ * ## A guarda
+ *
+ * O extra `mainComponent` é posto no `launchIntent` na mesma linha do `postSticky`
+ * (`NotificationManager.java:415-419`), e **só** no caminho do `fullScreenAction`. Exigi-lo aqui
+ * é o que amarra o sticky ao intent que o originou: sem o extra, a Activity monta `"main"` e o
+ * sticky fica intacto para quem realmente vier pelo full-screen.
  */
-const PATCH = `// [Mapill] Quem decide o componente é o Notifee, não a Activity.
+const PATCH = `// [Mapill] Quem decide o componente é o Notifee — mas só quando ESTE intent o pediu.
   //
-  // Com um alarme de tela cheia esperando, o `+"`getMainComponent`"+` devolve `+"`AlarmeRaiz`"+` — a tela azul —, e
-  // é este override que a põe no ar. Sem ele a MainActivity monta "main" (o app inteiro) e a tela
-  // azul nunca sobe, ainda que o fullScreenAction funcione: foi o defeito medido em 14/09.
+  // A guarda do extra separa "o alarme abriu esta Activity" de "um alarme foi exibido em algum
+  // momento". Sem ela, o sticky pendurado de um alarme ignorado fazia a abertura normal do app
+  // montar a tela azul, e o toque na notificação cair nela vazia (15/09).
   //
   // Ver plugins/tela-do-alarme-na-main-activity.js
   override fun getMainComponentName(): String =
-    Notifee.getInstance().getMainComponent("main")`;
+    if (intent?.hasExtra("mainComponent") == true) Notifee.getInstance().getMainComponent("main")
+    else "main"`;
 
 /**
  * O corpo vazio do delegate que o Expo gera — é onde o `getLaunchOptions` entra.
@@ -139,17 +158,65 @@ const DELEGATE_PATCH = `          object : DefaultReactActivityDelegate(
             }
           })`;
 
+/**
+ * A âncora do `onNewIntent`: o fim do `onCreate` gerado pelo Expo.
+ *
+ * O método não existe no template, então não há o que substituir — ele é **acrescentado** logo
+ * depois do `onCreate`, que é onde ele pertence por simetria.
+ */
+const ONCREATE_ORIGINAL = `    super.onCreate(null)
+  }`;
+
+/**
+ * O `onNewIntent`, que o template do Expo não tem — e cuja ausência era o defeito de 15/09.
+ *
+ * ## O que ele resolve
+ *
+ * `getMainComponentName` e `getLaunchOptions` são consultados **uma vez, no `onCreate`**. Quando a
+ * Activity já existe — app nos recentes, ou em uso —, o Android entrega o alarme por `onNewIntent`
+ * e nenhum dos dois volta a rodar. O `intent` do delegate continua sendo o **antigo**.
+ *
+ * Foi o que o teste em aparelho mostrou, em três sintomas de uma causa só: a tela do app piscando
+ * antes da tela azul (o componente montado ainda era `"main"`), os botões aparecendo sem conteúdo,
+ * e a tela azul subindo vazia de forma intermitente — o horário não chegava por prop, e a tela caía
+ * nas três buscas de `AlarmeRaiz`, que são corridas.
+ *
+ * ## Por que `setIntent` basta
+ *
+ * `setIntent` troca o intent que a Activity expõe, e é dele que os dois métodos leem. Vem **antes**
+ * do `super`, que repassa o intent ao delegate: na ordem inversa o delegate ainda veria o antigo.
+ */
+const ONCREATE_PATCH = `    super.onCreate(null)
+  }
+
+  // [Mapill] O alarme que chega a uma Activity JÁ EXISTENTE.
+  //
+  // Sem isto, app nos recentes ou em uso significava: componente decidido pelo intent antigo (a
+  // tela do app piscando antes da azul), horário não chegando por prop (tela azul vazia), e os
+  // botões renderizando antes dos dados. Um defeito, três sintomas — medidos em 15/09.
+  //
+  // Ver plugins/tela-do-alarme-na-main-activity.js
+  override fun onNewIntent(intent: Intent) {
+    // setIntent ANTES do super: o ReactActivity repassa o intent ao delegate, e getMainComponentName
+    // lê de getIntent(). Na ordem inversa, o delegate ainda veria o intent anterior.
+    setIntent(intent)
+    super.onNewIntent(intent)
+  }`;
+
+/** O import do `Intent`, que o `onNewIntent` exige. */
+const IMPORT_INTENT = "import android.content.Intent";
+
 /** O import que o patch exige. */
 const IMPORT = "import app.notifee.core.Notifee";
 
 /**
  * A marca dos patches, para não aplicar duas vezes. `prebuild` roda mais de uma vez.
  *
- * É a do **segundo** patch, e não a do primeiro: os dois são aplicados juntos, então a presença do
- * último prova que ambos entraram. Marcando pelo primeiro, um arquivo com só ele — de uma versão
- * anterior do plugin — seria dado por pronto, e o horário nunca chegaria à tela.
+ * É a do **último** patch aplicado, e não a de um intermediário: os três entram juntos, então a
+ * presença do último prova que todos entraram. Marcando por um anterior, um arquivo de uma versão
+ * antiga do plugin seria dado por pronto, e a correção nunca chegaria ao aparelho.
  */
-const MARCA = "notificacaoDoAlarme";
+const MARCA = "onNewIntent";
 
 function withTelaDoAlarmeNaMainActivity(config) {
   return withMainActivity(config, (config) => {
@@ -211,8 +278,36 @@ function withTelaDoAlarmeNaMainActivity(config) {
     }
     novo = novo.replace(DELEGATE_ORIGINAL, DELEGATE_PATCH);
 
+    /**
+     * O terceiro patch: o alarme que chega a uma Activity já viva.
+     *
+     * Falha a build se o alvo sumir, como os outros dois. Sem ele, app nos recentes volta a ser o
+     * caso quebrado — e é o caso comum, não a exceção.
+     */
+    if (!novo.includes(ONCREATE_ORIGINAL)) {
+      throw new Error(
+        `[tela-do-alarme] não encontrei o fim do onCreate na MainActivity. O template do Expo ` +
+          `mudou. Sem o onNewIntent, o alarme que chega com o app nos recentes monta o componente ` +
+          `errado e a tela azul sobe vazia.`,
+      );
+    }
+    novo = novo.replace(ONCREATE_ORIGINAL, ONCREATE_PATCH);
+
+    /** O `Intent` do `onNewIntent` — mesmo cuidado do import do Notifee. */
+    if (!novo.includes(IMPORT_INTENT)) {
+      const pacote = novo.match(/^package .+$/m);
+      if (pacote === null) {
+        throw new Error(
+          "[tela-do-alarme] a MainActivity não tem declaração de package — não sei onde pôr o import.",
+        );
+      }
+      novo = novo.replace(pacote[0], `${pacote[0]}
+
+${IMPORT_INTENT}`);
+    }
+
     console.log(
-      "[tela-do-alarme] MainActivity agora pergunta o componente ao Notifee, e passa o horário.",
+      "[tela-do-alarme] MainActivity: componente pelo intent, horário por prop, e onNewIntent.",
     );
     config.modResults.contents = novo;
 
