@@ -1,0 +1,39 @@
+/*
+ * Forca o CMake 3.31.0 nos modulos com build nativo.
+ *
+ * ## O defeito que isto resolve
+ *
+ * O CMake 3.22.1, que o Android Gradle Plugin usa por padrao, entra em loop no Windows: regenera o
+ * `build.ninja` indefinidamente ate o ninja desistir.
+ *
+ *     ninja: error: manifest 'build.ninja' still dirty after 100 tries
+ *
+ * Custou quatro tentativas de build local em 14/09 antes de ser isolado. O aviso de
+ * `CMAKE_OBJECT_PATH_MAX` que aparece junto e ruido: o caminho critico tem 202 caracteres contra um
+ * limite de 250, entao nao e ele que quebra.
+ *
+ * Confirmado isolando o modulo que falhava: com o 3.31.0 ele compilou em 2m17s, zero loops.
+ *
+ * ## Como usar
+ *
+ *     .\android\gradlew.bat -p android assembleRelease -I gradle\cmake-do-windows.gradle
+ *
+ * O caminho do `-I` e relativo ao diretorio de onde se chama o gradlew, e nao ao `-p` — passar
+ * `.claude-scratch/...` com `-p android` faz o Gradle procurar em `android/.claude-scratch/`.
+ *
+ * ## Por que init script, e nao config plugin
+ *
+ * Porque isto e uma particularidade **desta maquina**, nao do app: o EAS compila o mesmo projeto no
+ * Linux sem tropecar nisso. Um config plugin gravaria a versao no projeto gerado e afetaria todo
+ * mundo que buildar, inclusive o CI, para resolver um problema que so existe aqui.
+ *
+ * Requer `sdkmanager "cmake;3.31.0"` instalado uma vez.
+ */
+allprojects {
+  plugins.withId("com.android.library") {
+    android { externalNativeBuild { cmake { version = "3.31.0" } } }
+  }
+  plugins.withId("com.android.application") {
+    android { externalNativeBuild { cmake { version = "3.31.0" } } }
+  }
+}
