@@ -7,127 +7,82 @@
 
 ---
 
-> **As três causas foram encontradas e corrigidas em 14/09 à noite**, com o celular no cabo e o
-> logcat gravando. O relato completo está no
+> **Atualizado em 14/09, fim da noite.** A sessão com o celular no cabo resolveu a tela azul e o
+> desbloqueio, e achou a causa real do volume. O relato completo está no
 > [achado de 14/09](ROTEIRO-DE-TESTE.md#-achado-de-1409--a-tela-azul-nunca-foi-escolhida-e-faltava-uma-linha-na-mainactivity).
-> Falta validar em aparelho — agora por build local, sem gastar a cota do EAS.
+>
+> **Tudo o que falta abaixo já está corrigido no código e espera uma build nova** — a ser gerada em
+> 15/09. Nada aqui é investigação em aberto.
 
 ---
 
-## O que a build 15 (14/09, noite) mostrou
+## O que 14/09 resolveu
 
-A build 15 foi a primeira que compilou com o módulo de desbloqueio dentro. O teste em aparelho
-derrubou duas suposições e **deixou um defeito novo**, que é o que manda agora.
-
-| # | O que era | Resultado em 14/09 |
+| # | O que era | Resultado |
 |---|---|---|
-| C.2 | Apagar os dados cancela os alarmes | ✅ **passou** |
-| C.1 | Desbloqueio ao entrar pela tela azul | ⛔ **não testável** — a tela azul não sobe |
-| 3 | Tela azul não sobe com o celular em uso | ⚠️ "correto" por acidente — ver abaixo |
-| E.1 | Som no volume de despertador | ❌ **falhou** — saiu no volume de mídia |
-| D.5 | Tela azul com o app fora dos recentes | ⛔ **não testável** — a tela azul não sobe |
+| C.2 | Apagar os dados cancela os alarmes | ✅ passou |
+| **Tela azul** | Não subia em cenário nenhum | ✅ **sobe** — `Running "alarme-de-dose"` no logcat |
+| **C.1** | Desbloqueio ao entrar pela tela azul | ✅ **passou** — pede a senha na hora |
+| Atraso do serviço | `foregroundServiceBehavior` descartado | ✅ warning sumiu do log |
 
-**A tela azul não sobe em cenário nenhum.** Bloqueado ou em uso, com o app nos recentes ou fora
-deles: o alarme toca e a notificação leva direto a "Hora do remédio". É regressão — antes ela subia
-nos dois casos.
-
-O passo 3 "passar" não é resultado: ele pede que a tela azul **não** suba com o celular em uso, e
-ela não sobe em lugar nenhum. Passou pelo motivo errado, e volta para a fila quando a azul voltar.
+A tela azul era o passo que bloqueava todos os outros, e ela **nunca tinha subido pelo
+`fullScreenAction`** — faltava uma linha na `MainActivity`. O C.1 só pôde ser testado depois disso:
+o módulo de desbloqueio existia desde 13/09, mas o botão que pede a senha vive na tela que não
+aparecia.
 
 ---
 
-## Passo 1 — E.1: o som no volume de despertador
+## Passo 1 — 🔊 O som no volume de despertador
 
-**Corrigido no código em 14/09 (commit `fa68477`), esperando build.**
+**Corrigido, esperando build.** Duas causas, e a segunda só apareceu no teste em aparelho:
 
-O patch que escolhe o stream existia e estava certo desde 14/09 de tarde — e **nunca chegou ao
-aparelho**. A ordem da fase PREBUILD do EAS, lida no log da build:
+1. **O patch era apagado pelo próprio build.** A fase PREBUILD do EAS roda `expo prebuild` e
+   **depois** `yarn install`, que reinstala `node_modules` por cima. Corrigido: três caminhos
+   aplicam o patch e `scripts/conferir-patches.js` falha a build se faltar.
+2. **O arquivo patcheado nunca era compilado.** O `expo-audio` declara uma `publication` no
+   `expo-module.config.json`, e o Expo 57 consome um **AAR pré-compilado** — a build tinha **zero
+   tasks `:expo-audio:`**. O `AudioPlayer.kt` era código morto. Corrigido em
+   `scripts/patch-expo-audio-do-fonte.js`, que tira a publicação; a build seguinte compilou 49
+   tasks do módulo.
 
-```
-expo prebuild --no-install   ← o plugin aplica o patch em node_modules/expo-audio
-✔ Finished prebuild
-yarn install                 ← node_modules reinstalado: o patch morre aqui
-```
-
-O install roda **depois** do prebuild e restaura o `AudioPlayer.kt` original. O Gradle compila o
-arquivo limpo, o player nasce `USAGE_MEDIA`, e o alarme sai no volume de música. O `throw` do plugin
-não denunciava nada: ele falha quando o **alvo some**, e o install devolve o arquivo original
-intacto — alvo perfeito, sem o patch.
-
-Agora o patch é aplicado por três caminhos (prebuild, `postinstall`, `eas-build-post-install`) e uma
-quarta peça **falha a build** se o arquivo chegar ao Gradle sem a marca. O cenário que quebrou —
-`node_modules` reinstalado — foi reproduzido em terra e o `postinstall` recuperou sozinho.
-
-**O que ainda não foi verificado:** que `USAGE_ALARM` produz o volume de despertador **neste
-aparelho**. A API é a correta e o Kotlin compila, mas isso é inferência até alguém ouvir.
+A prova de que ainda falhava, no logcat de 21:19: `requestAudioFocus AA=USAGE_UNKNOWN/CONTENT_TYPE_MUSIC`
+e `mStreamType 3` (3 é música; alarme é 4).
 
 **Passa se:** o som sai no volume de despertador nos quatro cenários — bloqueado, em uso, app
 fechado, e com o volume de **mídia no zero** (a prova de que saiu pelo stream certo).
 
 **E o som tem que parar** em: "Tomei", "Pulei", "Silenciar", "Adiar", "Responder depois", e ao tocar
-na notificação. Som que continua depois de respondido é o pior defeito possível aqui — se
-acontecer, diga em qual botão.
+na notificação. Som que continua depois de respondido é o pior defeito possível aqui.
 
 ---
 
-## Passo 2 — A tela azul
+## Passo 2 — A tela azul vazia ao tocar na notificação
 
-**Causa encontrada e corrigida em 14/09. Falta validar.**
+**Corrigido, esperando build.** Defeito **novo**, criado pela correção da tela azul: antes ela nunca
+subia por esse caminho, então nunca disputava com o cancelamento.
 
-A tela cheia **sempre funcionou** — o que subia era o app, não `AlarmeRaiz`. Faltava a
-`MainActivity` perguntar ao Notifee qual componente montar, um passo que a biblioteca exige e cuja
-instrução não vem no pacote. Corrigido em `plugins/tela-do-alarme-na-main-activity.js`.
+Relatado em aparelho em 14/09: a tela azul sobe, mas fica **"literalmente só uma tela azul"**, sem
+remédio nenhum. Acontece quando se **toca na notificação** em vez de esperar o alarme irromper.
 
-O relato completo, com o logcat que mostrou a sequência, está no
-[achado de 14/09](ROTEIRO-DE-TESTE.md#-achado-de-1409--a-tela-azul-nunca-foi-escolhida-e-faltava-uma-linha-na-mainactivity).
+O logcat mostra a corrida em 70 ms:
 
-**Passa se:** com o celular **bloqueado**, o alarme toca e a **tela azul** sobe — não a tela "Hora
-do remédio".
+```
+21:19:05.753  Running "alarme-de-dose"              ← a tela monta
+21:19:05.822  Removing notification alarme:dose-…   ← a notificação é apagada
+```
 
-> Descartados pela leitura do APK da build 15 com `aapt2`, para ninguém reinvestigar: o
-> `foregroundServiceType` está no manifesto final (`mediaPlayback`), as permissões estão todas
-> declaradas (`USE_FULL_SCREEN_INTENT` inclusive), e a `MainActivity` tem `showWhenLocked` e
-> `turnScreenOn`. Nada na configuração nativa explicava o defeito.
+`AlarmeRaiz` descobre de qual horário é lendo a notificação, e o caminho do `PRESS` a cancela ao
+tratar o toque. Quando a tela vai procurar, não há mais o que procurar, e ela cai no último recurso
+— o horário atual, que não tem dose agendada.
 
----
+A correção anota o horário no `DELIVERED` (antes de existir toque para cancelar), e a tela usa isso
+como penúltimo recurso. Ver `anotarHorarioEntregue` em `src/notifications/alarme-em-cena.ts`.
 
-## Passo 3 — C.1: entrar no app pela tela azul exige desbloqueio
+**Passa se:** tocar na notificação do alarme abre a tela azul **com o remédio e a dose**, e não só o
+fundo azul.
 
-**Bloqueado pelo passo 2.** O módulo de desbloqueio compilou e está no APK, mas o botão que pede a
-senha vive na tela azul — sem ela, não há o que testar. **C.1 não reprovou: não foi exercitado.**
-
-Celular **bloqueado**, o alarme toca, a tela azul sobe.
-
-**Passa se:**
-- **"Tomei"**, **"Pulei"**, **silenciar** e **adiar** funcionam **sem pedir senha**, e o celular
-  volta para o bloqueio depois — sem mostrar o app
-- **"Ver e confirmar no app"** → o celular **pede a senha ou a biometria** antes de abrir
-- **Cancelando a senha** → volta para a tela azul com o alarme ainda tocando, e o app não aparece
-
-> Confira também com o celular **desbloqueado**: aí o botão abre o app direto, sem pedir nada.
-
----
-
-## Passo 4 — D.5: a tela azul com o app fora dos recentes
-
-**Bloqueado pelo passo 2.** Ele mede a estabilidade de uma tela que hoje não sobe em cenário nenhum.
-
-Tire o app dos recentes e espere o alarme. **Tente 4 vezes** — é defeito de corrida de tempo, e
-"passou" e "passou nas 4 tentativas" não são a mesma informação.
-
-**Passa se:** a tela azul sobe e fica, nas 4.
-
----
-
-## Passo 5 — A tela azul não sobe com o celular em uso
-
-**Volta à fila quando o passo 2 for resolvido.** Em 14/09 ele "passou", mas pelo motivo errado: pede
-que a azul não suba com o celular em uso, e ela não subia em lugar nenhum. Só vale como resultado
-quando a azul voltar a subir com o celular bloqueado.
-
-Celular **desbloqueado**, usando outro app, e o alarme dispara. Toque na notificação.
-
-**Passa se:** abre a tela **"Hora do remédio"**, e não a tela azul.
+> Aconteceu em 2 dos 3 testes de 14/09. Quando o alarme irrompeu sozinho com a tela bloqueada,
+> funcionou perfeito — a notificação ainda estava lá.
 
 ---
 
@@ -141,7 +96,11 @@ Celular **desbloqueado**, usando outro app, e o alarme dispara. Toque na notific
 | B.20 | 4 ou mais: nome e dose de cada | ✅ |
 | B.4 | Alarme → notificação → alarme | ✅ nos dois sentidos |
 | B.9 | Aviso de estoque às 00:01 | ✅ |
-| B.17 | Tela azul com o app nos recentes | ✅ na build 13 — **regrediu na 15** |
+| B.17 | Tela azul com o app nos recentes | ✅ — volta a subir desde a correção de 14/09 |
+
+> **D.5 (tela azul com o app fora dos recentes) e o passo "não sobe com o celular em uso" saíram da
+> lista.** Os dois mediam o comportamento de uma tela que nunca subia pelo `fullScreenAction`; com o
+> mecanismo primário ligado, refazê-los só faz sentido depois que os passos 1 e 2 passarem.
 
 ---
 
@@ -167,8 +126,11 @@ npx expo run:android --variant release --device
 - **`--variant release` é essencial.** Em debug o JavaScript vem do Metro, e o arranque do processo
   muda — justamente o que estes passos medem. Release embute o bundle, como a preview.
 - **A primeira compilação demora** (20-40 min, baixando o Gradle). As seguintes ficam em 2-5 min.
-- A assinatura difere da do EAS, então pode ser preciso **desinstalar o app antes**. Os dados de
-  teste se perdem.
+- A assinatura difere da do EAS, então pode ser preciso **desinstalar o app antes**. Em 14/09 o
+  `adb install -r` preservou os dados; se recusar por assinatura, aí sim os dados de teste se perdem.
+- **Duas pedras do caminho, já resolvidas nesta máquina:** o Gradle precisa do
+  `android/local.properties` apontando o SDK, e o CMake 3.22.1 (padrão do AGP) trava num loop de
+  `Re-running CMake` no Windows — instalar o 3.31.0 pelo `sdkmanager` resolve.
 
 Para ler o que o aparelho faz no disparo:
 
