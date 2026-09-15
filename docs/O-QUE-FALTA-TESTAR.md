@@ -7,12 +7,28 @@
 
 ---
 
-> **Atualizado em 14/09, fim da noite.** A sessão com o celular no cabo resolveu a tela azul e o
-> desbloqueio, e achou a causa real do volume. O relato completo está no
-> [achado de 14/09](ROTEIRO-DE-TESTE.md#-achado-de-1409--a-tela-azul-nunca-foi-escolhida-e-faltava-uma-linha-na-mainactivity).
+> **Atualizado em 15/09, manhã.** A build de 15/09 reprovou os dois passos, e as duas causas foram
+> encontradas — **nenhuma delas era o que se supunha**. O passo 1 falhou na compilação, não no
+> código; o passo 2 tinha uma causa que só aparece em teste de intervalo curto, e foi a observação
+> do Gabriel ("eu sempre cadastrava para 1 minuto depois") que a revelou.
 >
-> **Tudo o que falta abaixo já está corrigido no código e espera uma build nova** — a ser gerada em
-> 15/09. Nada aqui é investigação em aberto.
+> **Tudo abaixo já está corrigido e espera a build seguinte.** Nada aqui é investigação em aberto.
+
+---
+
+## ⚠️ O comando de build mudou — a primeira linha não é opcional
+
+```
+node scripts/aplicar-patches.js && npx expo run:android --variant release --device
+```
+
+**Foi ela que faltou em 15/09.** O `expo run:android` **pula o prebuild quando `android/` já
+existe** — e é o prebuild que aplica os patches. Da segunda compilação em diante, o `expo-audio`
+volta a ser consumido como AAR pré-compilado e o alarme sai no volume de mídia, sem nada no log
+denunciando.
+
+`npm run android` já faz isso sozinho, e o prebuild agora **confere** antes do Gradle — a
+conferência existia só no gancho do EAS, que o caminho do cabo não tem.
 
 ---
 
@@ -34,18 +50,15 @@ aparecia.
 
 ## Passo 1 — 🔊 O som no volume de despertador
 
-> **Reprovou em 15/09 — e a causa era a compilação, não o código.** O `expo run:android` **pula o
-> prebuild quando `android/` já existe**, e é o prebuild que aplica os patches. A compilação de
-> 15/09 foi a segunda na mesma pasta: o `expo-module.config.json` do `expo-audio` chegou ao Gradle
-> **com a `publication`**, o módulo veio como AAR pré-compilado, e o `AudioPlayer.kt` patcheado não
-> foi compilado — a mesma causa nº 2 abaixo, por um caminho novo.
+> **Reprovou em 15/09, e a causa era a compilação — o código estava certo o tempo todo.**
 >
-> A prova está nas datas dos arquivos: o patch do `AudioPlayer.kt` era de 14/09 14:22 e sobreviveu;
-> a remoção da `publication` só aconteceu em 15/09 08:12, quando foi rodada à mão nesta sessão.
+> A prova está nas datas dos arquivos: o patch do `AudioPlayer.kt` era de **14/09 14:22** e
+> sobreviveu; a remoção da `publication` só aconteceu em **15/09 08:12**, quando foi rodada à mão.
+> Ou seja: durante a compilação testada, o `expo-audio` ainda declarava a `publication`, veio como
+> AAR pré-compilado, e o Kotlin patcheado **não foi compilado**.
 >
-> **Corrigido em três frentes:** o comando documentado abaixo passa a aplicar os patches antes,
-> `npm run android` faz o mesmo, e o plugin agora **confere** antes do Gradle — a conferência
-> existia só no gancho do EAS, que o caminho do cabo não tem.
+> É a causa nº 2 abaixo, chegando por um caminho novo: o do `expo run:android` que pula o prebuild.
+> Ver o aviso do comando no topo.
 
 **As duas causas originais, ambas corrigidas:**
 
@@ -69,33 +82,42 @@ na notificação. Som que continua depois de respondido é o pior defeito possí
 
 ---
 
-## Passo 2 — A tela azul vazia ao tocar na notificação
+## Passo 2 — A tela azul vazia
 
-**Corrigido, esperando build.** Defeito **novo**, criado pela correção da tela azul: antes ela nunca
-subia por esse caminho, então nunca disputava com o cancelamento.
+**Reprovou em 15/09, e a causa era outra — achada pela observação do Gabriel.**
 
-Relatado em aparelho em 14/09: a tela azul sobe, mas fica **"literalmente só uma tela azul"**, sem
-remédio nenhum. Acontece quando se **toca na notificação** em vez de esperar o alarme irromper.
+Ele notou que **sempre cadastrava a medicação para 1 minuto depois**. Era exatamente isso:
 
-O logcat mostra a corrida em 70 ms:
+- A dose é gravada sempre em `:00.000` — a grade nasce de `HH:MM`, sem segundos.
+- Mas `planejar-avisos-de-dose` tem um **piso**: uma dose vencida, ou que vence em menos de um
+  segundo, é agendada para `agora + 1 s` em vez do horário dela.
+- A notificação carregava **o gatilho**, não a dose. Os dois divergiam por segundos:
+  `10:31:00.000` na grade, `10:31:00.500` no aviso.
+- A tela busca doses numa janela de 60 s **a partir do que recebe** — então ela começava a procurar
+  *depois* da dose que a originou. Lista vazia, tela azul sem remédio nenhum.
 
-```
-21:19:05.753  Running "alarme-de-dose"              ← a tela monta
-21:19:05.822  Removing notification alarme:dose-…   ← a notificação é apagada
-```
+**Só aparece em teste de intervalo curto.** Com a dose daqui a horas, `quando` e `scheduledFor`
+coincidem e nada denuncia a diferença. O caminho que funciona nunca tinha sido testado.
 
-`AlarmeRaiz` descobre de qual horário é lendo a notificação, e o caminho do `PRESS` a cancela ao
-tratar o toque. Quando a tela vai procurar, não há mais o que procurar, e ela cai no último recurso
-— o horário atual, que não tem dose agendada.
+> O diagnóstico de 14/09 — a corrida entre a tela montar e a notificação ser cancelada — descrevia
+> um problema real, mas não este. A correção daquele dia (`anotarHorarioEntregue`) também não podia
+> funcionar com o app fechado: ela depende de um evento que o Notifee emite **antes de existir
+> JavaScript para ouvi-lo**, e que não é retido.
 
-A correção anota o horário no `DELIVERED` (antes de existir toque para cancelar), e a tela usa isso
-como penúltimo recurso. Ver `anotarHorarioEntregue` em `src/notifications/alarme-em-cena.ts`.
+**As três correções:**
 
-**Passa se:** tocar na notificação do alarme abre a tela azul **com o remédio e a dose**, e não só o
-fundo azul.
+1. **O aviso passa a carregar o instante da dose** (`instanteDasDoses`). O campo já existia e o
+   lembrete adiado já o preenchia, pelo mesmo motivo — faltava a grade fazer o mesmo.
+2. **As duas telas alinham a janela ao minuto**, para o defeito não voltar por um caminho novo.
+3. **O horário chega por `initialProps`**, lido do intent que abriu a `MainActivity` — síncrono, sem
+   depender de evento nenhum. E o último recurso busca a dose pendente mais próxima, em vez de cair
+   no instante atual, que garantia lista vazia.
 
-> Aconteceu em 2 dos 3 testes de 14/09. Quando o alarme irrompeu sozinho com a tela bloqueada,
-> funcionou perfeito — a notificação ainda estava lá.
+**Passa se:** a tela azul sobe **com o remédio e a dose**, nos dois caminhos — alarme irrompendo
+sozinho com a tela bloqueada, e toque na notificação com o celular em uso.
+
+> **Teste também com um intervalo maior** (10 minutos, por exemplo). Se o de 1 minuto passar e o de
+> 10 falhar, é defeito novo — e o inverso prova que esta correção pegou.
 
 ---
 
@@ -136,10 +158,7 @@ máquina já tem tudo (JDK 21, SDK, NDK 27.1.12297006), e o EAS passa a ser só 
 node scripts/aplicar-patches.js && npx expo run:android --variant release --device
 ```
 
-> **A primeira linha não é opcional, e foi ela que faltou em 15/09.** O `expo run:android` **pula o
-> prebuild quando `android/` já existe** — e é o prebuild que aplica os patches. Na segunda
-> compilação em diante, o `expo-audio` volta a ser consumido como AAR pré-compilado e o alarme sai
-> no volume de mídia, sem nada no log denunciando. `npm run android` já faz isso sozinho.
+> Sobre a primeira linha, ver o aviso no topo do documento — foi ela que faltou em 15/09.
 
 - **`--variant release` é essencial.** Em debug o JavaScript vem do Metro, e o arranque do processo
   muda — justamente o que estes passos medem. Release embute o bundle, como a preview.
