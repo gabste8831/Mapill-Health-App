@@ -84,23 +84,52 @@ const ORIGINAL = `override fun getMainComponentName(): String = "main"`;
  *    `mainComponent`, então o toque não posta sticky algum — mas consumia o que o display havia
  *    deixado. Era a tela azul vazia com o celular em uso, o defeito que sobrou do teste de 15/09.
  *
- * ## A guarda
+ * ## Por que não há guarda — e por que a que existiu barrava tudo
  *
- * O extra `mainComponent` é posto no `launchIntent` na mesma linha do `postSticky`
- * (`NotificationManager.java:415-419`), e **só** no caminho do `fullScreenAction`. Exigi-lo aqui
- * é o que amarra o sticky ao intent que o originou: sem o extra, a Activity monta `"main"` e o
- * sticky fica intacto para quem realmente vier pelo full-screen.
+ * A versão de 15/09 (`cdac0b2`) condicionava a chamada a um extra do intent:
+ *
+ * ```kotlin
+ * if (intent?.hasExtra("mainComponent") == true) Notifee.getInstance().getMainComponent("main")
+ * else "main"
+ * ```
+ *
+ * **Ela negava sempre**, e com isso a tela azul não subiu em nenhum disparo daquele dia. A causa só
+ * apareceu com um log dentro do método, e é mais simples do que qualquer hipótese que se levantou:
+ *
+ * ```
+ * 20:12:00.827  getMainComponentName: intent=null extras=null temMainComponent=null
+ * 20:12:00.827  getMainComponent devolveu: alarme-de-dose
+ * 20:12:01.923  Running "alarme-de-dose"
+ * ```
+ *
+ * **`intent` é `null` aqui.** `ReactActivity` consulta `getMainComponentName()` durante o
+ * `onCreate`, antes de o intent estar disponível na Activity. Então `intent?.hasExtra(...)` devolve
+ * `null`, `null == true` é `false`, e o ramo do alarme nunca roda. Não importava *qual* extra a
+ * guarda checasse — duas tentativas se gastaram nisso antes do log existir.
+ *
+ * ## Por que o sticky sozinho basta
+ *
+ * A mesma medição mostra `getMainComponent` devolvendo `alarme-de-dose` no disparo e `main` na
+ * abertura normal do app. Ele **já** distingue os dois casos, porque `removeStickEvent`
+ * (`Notifee.java:103`) consome o evento: existe um sticky se, e só se, um `fullScreenAction` acabou
+ * de pedir esta tela.
+ *
+ * O caso que a guarda queria cobrir — sticky pendurado de um alarme ignorado contaminando a próxima
+ * abertura — é real, mas o preço cobrado foi a funcionalidade inteira. Se ele voltar a aparecer, a
+ * correção é do lado do JS (a tela sai de cena ao ver que não há dose), nunca uma condição sobre um
+ * intent que não existe neste ponto do ciclo de vida.
  */
-const PATCH = `// [Mapill] Quem decide o componente é o Notifee — mas só quando ESTE intent o pediu.
+const PATCH = `// [Mapill] Quem decide o componente é o Notifee.
   //
-  // A guarda do extra separa "o alarme abriu esta Activity" de "um alarme foi exibido em algum
-  // momento". Sem ela, o sticky pendurado de um alarme ignorado fazia a abertura normal do app
-  // montar a tela azul, e o toque na notificação cair nela vazia (15/09).
+  // Sem condição sobre o intent: ReactActivity chama este método durante o onCreate, quando
+  // getIntent() ainda é null. A guarda de 15/09 (\`intent?.hasExtra(...)\`) por isso negava SEMPRE, e
+  // a tela azul não subiu em nenhum disparo daquele dia — medido com log dentro do método.
+  //
+  // getMainComponent consome um sticky (removeStickEvent), então ele já responde com precisão:
+  // "alarme-de-dose" quando um fullScreenAction pediu esta tela, "main" na abertura normal.
   //
   // Ver plugins/tela-do-alarme-na-main-activity.js
-  override fun getMainComponentName(): String =
-    if (intent?.hasExtra("mainComponent") == true) Notifee.getInstance().getMainComponent("main")
-    else "main"`;
+  override fun getMainComponentName(): String = Notifee.getInstance().getMainComponent("main")`;
 
 /**
  * O corpo vazio do delegate que o Expo gera — é onde o `getLaunchOptions` entra.
@@ -149,7 +178,11 @@ const DELEGATE_PATCH = `          object : DefaultReactActivityDelegate(
             //
             // Ver plugins/tela-do-alarme-na-main-activity.js
             override fun getLaunchOptions(): Bundle? {
-              val daNotificacao = intent?.getBundleExtra("notification")
+              // this@MainActivity.intent, e não \`intent\`: dentro deste object o nome resolveria
+              // para o delegate. E é lido AQUI, não no onCreate — quando o delegate pede as
+              // launch options o intent da Activity já está posto, ao contrário do que acontece em
+              // getMainComponentName (ver o comentário lá em cima).
+              val daNotificacao = this@MainActivity.intent?.getBundleExtra("notification")
                 ?: return super.getLaunchOptions()
               return Bundle().apply {
                 super.getLaunchOptions()?.let { putAll(it) }
@@ -212,11 +245,13 @@ const IMPORT = "import app.notifee.core.Notifee";
 /**
  * A marca dos patches, para não aplicar duas vezes. `prebuild` roda mais de uma vez.
  *
- * É a do **último** patch aplicado, e não a de um intermediário: os três entram juntos, então a
- * presença do último prova que todos entraram. Marcando por um anterior, um arquivo de uma versão
- * antiga do plugin seria dado por pronto, e a correção nunca chegaria ao aparelho.
+ * **É um trecho que muda quando o conteúdo do patch muda**, e não um nome de método estável. A
+ * versão anterior marcava por `onNewIntent`, e isso escondeu a correção da guarda em 15/09: o
+ * arquivo gerado já tinha o `onNewIntent` da build anterior, o plugin se deu por aplicado, e a
+ * `MainActivity` seguiu com a guarda velha — a que barra a tela azul. Marcar pelo nome do método
+ * responde "algum patch já entrou"; o que precisa ser sabido é "o patch **desta versão** entrou".
  */
-const MARCA = "onNewIntent";
+const MARCA = "this@MainActivity.intent";
 
 function withTelaDoAlarmeNaMainActivity(config) {
   return withMainActivity(config, (config) => {
