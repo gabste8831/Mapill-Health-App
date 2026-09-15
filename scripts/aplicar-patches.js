@@ -19,6 +19,7 @@
 
 const { aplicarPatchDeDespertador } = require("./patch-som-de-despertador");
 const { aplicarPatchSemAtraso } = require("./patch-servico-sem-atraso");
+const { aplicarPatchDoFonte } = require("./patch-expo-audio-do-fonte");
 
 /**
  * Cada patch, com o que se perde sem ele.
@@ -27,6 +28,16 @@ const { aplicarPatchSemAtraso } = require("./patch-servico-sem-atraso");
  * minutos precisa saber o que está em jogo sem ter de abrir o script.
  */
 const PATCHES = [
+  /**
+   * **Antes do patch do volume**, e a ordem importa: sem isto o `expo-audio` é consumido como AAR
+   * pré-compilado e o `AudioPlayer.kt` patcheado nunca chega ao compilador — o patch seguinte vira
+   * código morto, aplicado e sem efeito nenhum.
+   */
+  {
+    nome: "expo-audio-do-fonte",
+    aplicar: aplicarPatchDoFonte,
+    oQueQuebra: "o expo-audio vem pré-compilado e o patch do volume não tem efeito",
+  },
   {
     nome: "som-de-despertador",
     aplicar: aplicarPatchDeDespertador,

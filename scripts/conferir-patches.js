@@ -26,6 +26,7 @@ const path = require("node:path");
 
 const despertador = require("./patch-som-de-despertador");
 const semAtraso = require("./patch-servico-sem-atraso");
+const doFonte = require("./patch-expo-audio-do-fonte");
 
 /**
  * Os patches que precisam estar no lugar quando o Gradle ler os arquivos, e o que cada um custa.
@@ -48,6 +49,21 @@ const OBRIGATORIOS = [
 
 function conferir(raizDoProjeto) {
   const faltando = [];
+
+  /**
+   * Conferido à parte porque a prova dele é uma **ausência**: não há string para procurar, e sim um
+   * bloco `publication` que precisa ter saído do JSON.
+   *
+   * É o patch mais fácil de esquecer e o mais caro de perder — sem ele o patch do volume é aplicado
+   * normalmente, a conferência de texto passa, e o alarme sai no volume errado assim mesmo, porque
+   * o arquivo patcheado não foi compilado. Foi o defeito medido em aparelho em 14/09.
+   */
+  if (!doFonte.publicacaoRemovida(raizDoProjeto)) {
+    faltando.push(
+      `  - expo-audio do fonte: ${doFonte.ARQUIVO_ALVO} ainda declara 'publication' — o módulo vem ` +
+        `pré-compilado e o patch do volume não tem efeito`,
+    );
+  }
 
   for (const { nome, modulo, oQueQuebra } of OBRIGATORIOS) {
     const alvo = path.join(raizDoProjeto, modulo.ARQUIVO_ALVO);
