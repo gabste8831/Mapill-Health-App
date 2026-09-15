@@ -7,6 +7,7 @@ import { useDatabaseReady } from "@/hooks/use-database-ready";
 import {
   activityDeAlarmeNascendo,
   activityDeAlarmeParouDeNascer,
+  horarioEntregueMaisRecente,
 } from "@/notifications/alarme-em-cena";
 import { ehAlarmeDeTelaCheia } from "@/notifications/notifee-gateway";
 import { CenteredLoader } from "@/ui";
@@ -93,6 +94,23 @@ export function AlarmeRaiz() {
         typeof notification.id === "string" ? ehAlarmeDeTelaCheia(notification.id) : false,
       );
       if (usar(doAlarme?.notification.data)) return;
+
+      /**
+       * **O horário que o listener anotou na entrega** — a rede contra a tela azul vazia.
+       *
+       * O caminho do `PRESS` cancela a notificação ao tratar o toque, e as duas buscas acima
+       * dependem dela. Medido em aparelho em 14/09: 70 ms entre esta tela montar e a notificação
+       * sumir, e a tela subia **só azul**, sem remédio nenhum — exatamente o que o Gabriel
+       * descreveu ao tocar no aviso em vez de esperar o alarme irromper.
+       *
+       * `anotarHorarioEntregue` grava no `DELIVERED`, antes de existir toque para cancelar coisa
+       * alguma, então este valor sobrevive ao que as buscas acima perdem.
+       */
+      const anotado = horarioEntregueMaisRecente();
+      if (anotado !== null) {
+        setInstanteIso(anotado);
+        return;
+      }
 
       // Última saída: o horário atual. A tela abre com a lista vazia, mas os botões de silenciar e
       // sair continuam funcionando — o som para, que é o mínimo que ela deve garantir.

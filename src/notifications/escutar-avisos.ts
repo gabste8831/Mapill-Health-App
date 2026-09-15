@@ -9,7 +9,7 @@ import {
   lerDadosDoAviso,
   type DadosDoAviso,
 } from "./notifee-gateway";
-import { jaEstaEmCena } from "./alarme-em-cena";
+import { anotarHorarioEntregue, jaEstaEmCena } from "./alarme-em-cena";
 import { destinoDaChave, type DestinoDoAviso } from "./destino-do-aviso";
 import { todasAsDosesResolvidas, tratarRespostaAoAviso } from "./responder-aviso";
 
@@ -173,6 +173,21 @@ async function tratar(evento: Event): Promise<void> {
    */
   if (evento.type === EventType.DELIVERED) {
     if (!ehAlarmeDeTelaCheia(id)) return;
+
+    /**
+     * **Anota o horário antes de qualquer guarda**, e é a rede que impede a tela azul vazia.
+     *
+     * `AlarmeRaiz` lê o horário da notificação, mas o caminho do `PRESS` abaixo a **cancela** ao
+     * tratar o toque — e as duas coisas correm juntas quando a pessoa toca no aviso em vez de
+     * esperar o alarme irromper. Medido em aparelho em 14/09: 70 ms entre a tela montar e a
+     * notificação sumir, e a tela subia sem remédio nenhum.
+     *
+     * Aqui é o ponto mais cedo possível: o `DELIVERED` chega quando o aviso é mostrado, antes de
+     * existir toque para cancelar coisa alguma. Fica **antes das guardas** de propósito — todas
+     * elas (`jaAbertos`, dose resolvida, atraso, `jaEstaEmCena`) retornam cedo em casos em que a
+     * tela ainda pode subir por outro caminho, e o horário precisa estar guardado em todos.
+     */
+    anotarHorarioEntregue(dados.scheduledFor);
 
     /**
      * Um horário abre a tela **uma vez só**.

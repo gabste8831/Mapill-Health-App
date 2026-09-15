@@ -98,6 +98,64 @@ let activityNascendo = false;
 let activityConhecida = false;
 
 /**
+ * O horário do alarme que disparou por último — a **rede de segurança** do `AlarmeRaiz`.
+ *
+ * ## O defeito que isto resolve
+ *
+ * A tela azul subia e ficava **vazia**: só o fundo azul, sem remédio nenhum. Relatado em aparelho em
+ * 14/09, e sempre no mesmo caminho — quando a pessoa **toca na notificação** em vez de esperar o
+ * alarme irromper sozinho.
+ *
+ * O logcat mostra a corrida em 70 ms:
+ *
+ * ```
+ * 21:19:05.753  Running "alarme-de-dose"              ← a tela monta
+ * 21:19:05.822  Removing notification alarme:dose-…   ← a notificação e apagada
+ * ```
+ *
+ * `AlarmeRaiz` descobre de qual horário é lendo a notificação: `getInitialNotification` e, se ela
+ * falhar, varrendo a bandeja com `getDisplayedNotifications`. Mas o caminho do `PRESS` em
+ * `escutar-avisos` **cancela a notificação** ao tratar o toque — e as duas coisas acontecem quase
+ * juntas. Quando a tela vai procurar, não há mais o que procurar, e ela cai no último recurso: o
+ * horário atual, que não tem dose nenhuma agendada.
+ *
+ * É uma corrida **nova**, criada pela correção do mesmo dia: antes a tela azul nunca subia pelo
+ * `fullScreenAction`, então nunca disputava com o cancelamento.
+ *
+ * ## Por que aqui, e por que sem prazo de validade
+ *
+ * Este módulo já é o que os dois pontos de entrada compartilham — Activity e rota vivem no mesmo
+ * processo mas em árvores diferentes, e é aqui que a informação comum mora.
+ *
+ * O valor é gravado quando o aviso é **entregue**, antes de qualquer toque poder cancelá-lo, e não
+ * expira: sobrescrever no próximo alarme é o certo, porque o que interessa é sempre o último que
+ * disparou. Guardar só o horário (uma string curta) é o suficiente — a tela relê o banco a partir
+ * dele, então não há dado de saúde em memória além do instante.
+ */
+let ultimoHorarioEntregue: string | null = null;
+
+/**
+ * Anota o horário do alarme entregue — chamado pelo listener, no `DELIVERED`.
+ *
+ * Antes de qualquer cancelamento: é justamente o `PRESS` que apaga a notificação, e quando ele
+ * chega este valor já precisa estar guardado.
+ */
+export function anotarHorarioEntregue(scheduledFor: string): void {
+  ultimoHorarioEntregue = scheduledFor;
+}
+
+/**
+ * O horário do último alarme entregue, ou `null` se nenhum passou por aqui nesta execução.
+ *
+ * `AlarmeRaiz` usa como penúltimo recurso: depois da notificação inicial e da bandeja, antes de
+ * cair no horário atual. A ordem importa — a notificação é sempre a fonte mais precisa, e isto só
+ * responde quando ela não existe mais.
+ */
+export function horarioEntregueMaisRecente(): string | null {
+  return ultimoHorarioEntregue;
+}
+
+/**
  * Marca que a tela do alarme deste horário está na frente.
  *
  * Chamado pela própria tela ao montar, e não por quem a abre: é a montagem que prova que ela
