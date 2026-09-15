@@ -69,8 +69,21 @@ export function useDoseNotifications(): void {
      * `DadosDoAviso` com chave vazia e lista vazia para atravessar a assinatura seria inventar
      * dados que ninguém lê.
      */
+    /**
+     * `navigate`, e não `push`: **duas telas do mesmo horário nunca se empilham.**
+     *
+     * Pelo mesmo motivo de `abrirTelaDeAlarme`, e pelo defeito visto em aparelho em 15/09: com o app
+     * fora dos recentes, a tela de "Hora do remédio" apareceu **duplicada**, uma sobre a outra. No
+     * arranque frio dois caminhos pediam a mesma rota — o bootstrap (corrigido em
+     * `consultarRespostaDeAbertura`) e o `PRESS` que a MIUI entrega sozinha na tela de bloqueio — e
+     * `push` empilha sempre, mesmo com a rota já aberta.
+     *
+     * A correção do bootstrap tira a causa conhecida; esta é a segunda camada, para o caminho que
+     * ninguém previu. Empilhar tela foi o defeito que mais custou nesta semana, e ele não pode
+     * depender de uma trava só.
+     */
     function abrirHorarioDe(scheduledFor: string) {
-      router.push({
+      router.navigate({
         pathname: "/horario/[instante]",
         params: { instante: scheduledFor },
       });

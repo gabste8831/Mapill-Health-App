@@ -7,10 +7,9 @@
 
 ---
 
-> **Atualizado em 15/09, manhã.** A build de 15/09 reprovou os dois passos, e as duas causas foram
-> encontradas — **nenhuma delas era o que se supunha**. O passo 1 falhou na compilação, não no
-> código; o passo 2 tinha uma causa que só aparece em teste de intervalo curto, e foi a observação
-> do Gabriel ("eu sempre cadastrava para 1 minuto depois") que a revelou.
+> **Atualizado em 15/09, noite.** A build das 14:55 **aprovou o passo 1** — o som saiu no volume de
+> despertador nos cinco cenários testados. O passo 2 reprovou, e a causa encontrada é **outra**: não
+> era a tela azul falhando em subir, era a tela de "Hora do remédio" sendo empurrada por cima dela.
 >
 > **Tudo abaixo já está corrigido e espera a build seguinte.** Nada aqui é investigação em aberto.
 
@@ -48,9 +47,22 @@ aparecia.
 
 ---
 
-## Passo 1 — 🔊 O som no volume de despertador
+## Passo 1 — 🔊 O som no volume de despertador — ✅ **PASSOU em 15/09**
 
-> **Reprovou em 15/09, e a causa era a compilação — o código estava certo o tempo todo.**
+> **Aprovado na build das 14:55, nos cinco cenários testados.** O som saiu no volume de despertador
+> em todos — app nos recentes e fora, tela bloqueada e em uso. As duas correções abaixo (o patch que
+> sobrevive ao build, e o `expo-audio` compilando do fonte) eram as certas.
+>
+> O som também **parou** corretamente em "Silenciar" e ao tocar na notificação. Os demais botões
+> ("Tomei", "Pulei", "Adiar", "Responder depois") ainda não foram exercitados um a um.
+>
+> **O artigo já pode alegar que o alarme toca no volume de despertador** — a alegação agora se
+> sustenta em aparelho.
+
+<details>
+<summary>O histórico das duas causas, para o registro</summary>
+
+> **Reprovou em 15/09 de manhã, e a causa era a compilação — o código estava certo o tempo todo.**
 >
 > A prova está nas datas dos arquivos: o patch do `AudioPlayer.kt` era de **14/09 14:22** e
 > sobreviveu; a remoção da `publication` só aconteceu em **15/09 08:12**, quando foi rodada à mão.
@@ -74,17 +86,90 @@ aparecia.
 A prova de que ainda falhava, no logcat de 21:19: `requestAudioFocus AA=USAGE_UNKNOWN/CONTENT_TYPE_MUSIC`
 e `mStreamType 3` (3 é música; alarme é 4).
 
-**Passa se:** o som sai no volume de despertador nos quatro cenários — bloqueado, em uso, app
-fechado, e com o volume de **mídia no zero** (a prova de que saiu pelo stream certo).
+</details>
 
-**E o som tem que parar** em: "Tomei", "Pulei", "Silenciar", "Adiar", "Responder depois", e ao tocar
-na notificação. Som que continua depois de respondido é o pior defeito possível aqui.
+**O que resta deste passo:** conferir que o som para em **"Tomei", "Pulei", "Adiar" e "Responder
+depois"** — "Silenciar" e o toque na notificação já foram confirmados. Som que continua depois de
+respondido é o pior defeito possível aqui.
 
 ---
 
-## Passo 2 — A tela azul vazia
+## Passo 2 — A tela azul trocada pela de "Hora do remédio"
 
-**Reprovou em 15/09, e a causa era outra — achada pela observação do Gabriel.**
+> **Reprovou na build das 14:55, e a causa é nova — o defeito não é o que o nome deste passo dizia.**
+>
+> A tela azul **não está vazia, e não deixa de subir**. Ela sobe com o conteúdo certo e é
+> **substituída** pela tela de "Hora do remédio" logo depois. Foi o "pisca" que o Gabriel descreveu
+> nos testes da noite de 15/09.
+
+### O que os cinco testes de 15/09 mostraram
+
+| # | Recentes | Tela | Resultado |
+|---|---|---|---|
+| 1 | fora | bloqueada | tela azul **pisca** e some; abre "Hora do remédio" |
+| 2 | fora | bloqueada | igual, e a de "Hora do remédio" apareceu **duplicada** |
+| 3 | **nos** | bloqueada | ✅ tela azul **aparece e fica**; "Silenciar" funcionou |
+| 4 | fora | em uso | ✅ heads-up, som certo, toque abre "Hora do remédio" |
+| 5 | nos | em uso | ✅ idem |
+
+**O eixo que decide é "recentes", não o bloqueio** — e isso **inverte** o padrão de 12/09, que dizia
+o contrário. A inversão é a prova de que `activityNascendo` fez o trabalho dele: a corrida que ele
+fechava é justamente a que passou agora (caso 3). O que sobrou é uma falha diferente.
+
+Os casos 4 e 5 estão **integralmente resolvidos** e saem da lista.
+
+### A causa
+
+`consultarRespostaDeAbertura`, chamada no **bootstrap** do app, não passava por guarda nenhuma —
+nem `jaEstaEmCena`, nem `jaAbertos`, nem `estaBloqueado`. Ela perguntava ao Notifee "tem notificação
+inicial?" e navegava.
+
+E `getInitialNotification` responde a **duas perguntas diferentes com a mesma resposta**. Ela diz
+"esta notificação abriu a Activity" — e quando o `fullScreenAction` monta a `MainActivity`, isso é
+literalmente verdade: o intent que a abriu **é** o do alarme, sem ninguém ter tocado em nada. O
+`AlarmeRaiz` já sabia disso e lê o mesmo intent pelos `initialProps`; era o bootstrap que continuava
+lendo como toque.
+
+O filtro de ação não alcançava: um full-screen intent não tem `pressAction`, então a ação vem vazia
+e passava como "toque no corpo".
+
+**Por que só fora dos recentes:** o eixo real não é a lista de recentes, é **se o processo sobe do
+zero**. Com o app nos recentes o `useDoseNotifications` já montou, o efeito não roda de novo, e o
+bootstrap não dispara. É por isso que o caso 3 passou.
+
+**A duplicação do caso 2** tem a mesma raiz: no arranque frio o `PRESS` da MIUI também chega, e os
+dois caminhos pediam a mesma rota com `router.push`, que empilha sempre.
+
+### As duas correções
+
+1. **O bootstrap não navega pelo alarme de tela cheia.** `consultarRespostaDeAbertura` devolve `null`
+   quando a notificação inicial tem o prefixo `alarme:`. Síncrono, sem corrida — uma guarda de cena
+   responderia à pergunta certa, mas o bootstrap pode rodar antes de `AlarmeRaiz` se anunciar.
+2. **`abrirHorarioDe` passa a usar `navigate`**, não `push` — segunda camada contra empilhar, igual
+   ao que `abrirTelaDeAlarme` já fazia.
+
+**Passa se:** nos casos 1 e 2 (app **fora dos recentes**, tela bloqueada) a tela azul sobe **com o
+remédio** e **fica** — sem piscar e sem ser trocada. O caso 3 tem que continuar passando.
+
+---
+
+## Passo 3 — O desbloqueio no "Tomei" 🆕
+
+**Achado em 15/09, no caso 3.** Ao tocar em "Tomei" na tela azul, o app foi direto para a Home
+**sem pedir a senha** — e o C.1 estava marcado como aprovado desde 14/09.
+
+Ainda **não investigado**. A hipótese é que seja consequência do passo 2: a tela em que ele tocou
+podia ser a rota, e não a Activity, e o desbloqueio vive no caminho da Activity. Se for isso, some
+junto com a correção acima.
+
+**Testar depois do passo 2**, e só investigar a fundo se persistir.
+
+---
+
+<details>
+<summary>O passo 2 anterior (a tela azul vazia) — resolvido, para o registro</summary>
+
+**Reprovou em 15/09 de manhã, e a causa era outra — achada pela observação do Gabriel.**
 
 Ele notou que **sempre cadastrava a medicação para 1 minuto depois**. Era exatamente isso:
 
@@ -113,11 +198,10 @@ coincidem e nada denuncia a diferença. O caminho que funciona nunca tinha sido 
    depender de evento nenhum. E o último recurso busca a dose pendente mais próxima, em vez de cair
    no instante atual, que garantia lista vazia.
 
-**Passa se:** a tela azul sobe **com o remédio e a dose**, nos dois caminhos — alarme irrompendo
-sozinho com a tela bloqueada, e toque na notificação com o celular em uso.
+> As três correções valeram: em 15/09 a tela azul subiu **com o remédio** sempre que subiu (caso 3).
+> O que falhou foi outra coisa vindo por cima — ver o passo 2 atual.
 
-> **Teste também com um intervalo maior** (10 minutos, por exemplo). Se o de 1 minuto passar e o de
-> 10 falhar, é defeito novo — e o inverso prova que esta correção pegou.
+</details>
 
 ---
 
@@ -131,7 +215,9 @@ sozinho com a tela bloqueada, e toque na notificação com o celular em uso.
 | B.20 | 4 ou mais: nome e dose de cada | ✅ |
 | B.4 | Alarme → notificação → alarme | ✅ nos dois sentidos |
 | B.9 | Aviso de estoque às 00:01 | ✅ |
-| B.17 | Tela azul com o app nos recentes | ✅ — volta a subir desde a correção de 14/09 |
+| B.17 | Tela azul com o app nos recentes | ✅ — reconfirmado em 15/09 (caso 3): sobe e **fica** |
+| — | Som no volume de despertador, 5 cenários | ✅ 15/09 — ver passo 1 |
+| — | Alarme com o celular **em uso** (recentes e fora) | ✅ 15/09 — heads-up, som certo, toque abre a tela do horário |
 
 > **D.5 (tela azul com o app fora dos recentes) e o passo "não sobe com o celular em uso" saíram da
 > lista.** Os dois mediam o comportamento de uma tela que nunca subia pelo `fullScreenAction`; com o
@@ -144,8 +230,8 @@ sozinho com a tela bloqueada, e toque na notificação com o celular em uso.
 **E.2 — o fuso.** Decidido, e o comportamento atual está certo: a dose segue o **instante**, então
 21:00 em São Paulo toca às 20:00 em Manaus. Não é teste, é decisão.
 
-> **O artigo só pode alegar que o alarme toca no silencioso depois que o passo 1 passar em
-> aparelho.** Hoje a alegação não se sustenta: a build testada saiu no volume de mídia.
+> **A alegação do artigo sobre o volume de despertador está liberada** desde 15/09 — o passo 1 passou
+> em aparelho, nos cinco cenários.
 
 ---
 
