@@ -1,4 +1,5 @@
 import notifee from "react-native-notify-kit";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { BackHandler } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -89,6 +90,45 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   useEffect(() => {
     activityDeAlarmeNascendo();
     return () => activityDeAlarmeParouDeNascer();
+  }, []);
+
+  /**
+   * **Esconde a splash nativa — e é isto que tira a tela azul vazia.**
+   *
+   * ## O defeito
+   *
+   * A tela azul subia sem remédio nenhum, e **continuava lá depois de desbloquear**. O que se via
+   * não era esta tela falhando: era a **splash do Expo** por cima dela, cujo fundo é o mesmo
+   * `#196FF3` do tema. Medido em 15/09, com log a cada render:
+   *
+   * ```
+   * 20:36:00.616  Try to add startingWindow STARTING_WINDOW_TYPE_SPLASH_SCREEN
+   * 20:36:01.848  Running "alarme-de-dose"
+   * 20:36:05.003  AlarmeScreen render: doses:1 pendentes:1 nomes:["Losartana Potássica 50 MG"]
+   * ```
+   *
+   * O React montava certo, com a dose carregada, revalidando a cada três segundos — atrás de uma
+   * janela que nunca saiu. Nenhuma linha de remoção da splash no log inteiro.
+   *
+   * ## Por que acontece só aqui
+   *
+   * `_layout.tsx` chama `preventAutoHideAsync()` **no topo do módulo**, e o `index.js` importa
+   * `expo-router/entry` — então a trava vale em qualquer processo, inclusive neste. Mas quem chama
+   * `hideAsync()` é o `SplashOverlay`, que vive dentro da árvore do `expo-router`. Esta Activity
+   * monta por `AppRegistry`, fora dela: a splash é impedida de sumir e ninguém a esconde.
+   *
+   * É o mesmo defeito que os comentários de `_layout.tsx` e `use-database-ready` já descrevem —
+   * "o app fica preso no fundo azul da splash" —, chegando pelo caminho que não passa pelo roteador.
+   *
+   * ## Por que aqui, e sem esperar o banco
+   *
+   * Sem `await` nenhum e fora de qualquer guarda: o alarme já está tocando, e uma splash sobre o
+   * `CenteredLoader` é igual a uma splash sobre a tela pronta — em ambos os casos a pessoa acordou
+   * com um fundo azul mudo. `hideAsync` é idempotente e rejeita quando não há splash, daí o
+   * `catch` vazio: chamar sem ter o que esconder é normal, não é erro.
+   */
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => {});
   }, []);
 
   useEffect(() => {
