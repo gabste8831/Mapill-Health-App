@@ -45,11 +45,17 @@ export type AvisoDeDose = {
    */
   doseScheduleIds: string[];
   /**
-   * O instante das doses, quando ele **não** é a hora de tocar.
+   * O instante das doses, que **nem sempre** é a hora de tocar.
    *
-   * Nos avisos da grade os dois coincidem, e este campo fica ausente. No lembrete adiado eles se
-   * separam: ele toca cinco minutos depois do toque em "Adiar", mas as doses continuam sendo as do
-   * horário original.
+   * Dois casos os separam. No lembrete adiado, por construção: ele toca cinco minutos depois do
+   * toque em "Adiar", mas as doses continuam sendo as do horário original.
+   *
+   * **E nos avisos da grade, sempre que a dose está vencida ou quase.** Aqui morava a afirmação de
+   * que "nos avisos da grade os dois coincidem, e este campo fica ausente" — e ela era falsa: o
+   * piso de `pisoDoGatilho` empurra o gatilho para "agora + 1 s" quando o horário já passou, e os
+   * dois divergem por segundos. Bastava isso para a tela do alarme subir vazia, porque ela procura
+   * doses numa janela de 60 s a partir do que recebe. Medido em 15/09, com teste de dose para um
+   * minuto depois.
    *
    * A distinção não é acadêmica. A tela de alarme localiza o que mostrar pelo instante que recebe,
    * e usar a hora de tocar a fazia procurar doses no minuto do adiamento — onde não há nenhuma. O

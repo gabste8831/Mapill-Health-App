@@ -34,7 +34,20 @@ aparecia.
 
 ## Passo 1 — 🔊 O som no volume de despertador
 
-**Corrigido, esperando build.** Duas causas, e a segunda só apareceu no teste em aparelho:
+> **Reprovou em 15/09 — e a causa era a compilação, não o código.** O `expo run:android` **pula o
+> prebuild quando `android/` já existe**, e é o prebuild que aplica os patches. A compilação de
+> 15/09 foi a segunda na mesma pasta: o `expo-module.config.json` do `expo-audio` chegou ao Gradle
+> **com a `publication`**, o módulo veio como AAR pré-compilado, e o `AudioPlayer.kt` patcheado não
+> foi compilado — a mesma causa nº 2 abaixo, por um caminho novo.
+>
+> A prova está nas datas dos arquivos: o patch do `AudioPlayer.kt` era de 14/09 14:22 e sobreviveu;
+> a remoção da `publication` só aconteceu em 15/09 08:12, quando foi rodada à mão nesta sessão.
+>
+> **Corrigido em três frentes:** o comando documentado abaixo passa a aplicar os patches antes,
+> `npm run android` faz o mesmo, e o plugin agora **confere** antes do Gradle — a conferência
+> existia só no gancho do EAS, que o caminho do cabo não tem.
+
+**As duas causas originais, ambas corrigidas:**
 
 1. **O patch era apagado pelo próprio build.** A fase PREBUILD do EAS roda `expo prebuild` e
    **depois** `yarn install`, que reinstala `node_modules` por cima. Corrigido: três caminhos
@@ -120,8 +133,13 @@ Descoberto em 14/09, e muda o ciclo inteiro: **dá para compilar aqui e instalar
 máquina já tem tudo (JDK 21, SDK, NDK 27.1.12297006), e o EAS passa a ser só para distribuir.
 
 ```
-npx expo run:android --variant release --device
+node scripts/aplicar-patches.js && npx expo run:android --variant release --device
 ```
+
+> **A primeira linha não é opcional, e foi ela que faltou em 15/09.** O `expo run:android` **pula o
+> prebuild quando `android/` já existe** — e é o prebuild que aplica os patches. Na segunda
+> compilação em diante, o `expo-audio` volta a ser consumido como AAR pré-compilado e o alarme sai
+> no volume de mídia, sem nada no log denunciando. `npm run android` já faz isso sozinho.
 
 - **`--variant release` é essencial.** Em debug o JavaScript vem do Metro, e o arranque do processo
   muda — justamente o que estes passos medem. Release embute o bundle, como a preview.

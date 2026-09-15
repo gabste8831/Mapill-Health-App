@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { BackHandler } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
+import { resolvesDose } from "@/domain/entities/intake-log";
 import { useDatabaseReady } from "@/hooks/use-database-ready";
 import {
   activityDeAlarmeNascendo,
@@ -25,9 +27,36 @@ import { AlarmeScreen } from "./AlarmeScreen";
  * passar por tudo aquilo. Repetir o gate aqui seria pedir consentimento às três da manhã a quem já
  * consentiu.
  */
-export function AlarmeRaiz() {
+/**
+ * O que a `MainActivity` passa como `initialProps` — ver
+ * `plugins/tela-do-alarme-na-main-activity.js`.
+ *
+ * O bundle da notificação vem inteiro, do intent que abriu a Activity. Só o `data.scheduledFor`
+ * interessa aqui; o resto é o que o Notifee empacota e não nos diz respeito.
+ */
+type AlarmeRaizProps = {
+  notificacaoDoAlarme?: { data?: { scheduledFor?: unknown } };
+};
+
+export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   const bancoPronto = useDatabaseReady();
-  const [instanteIso, setInstanteIso] = useState<string | null>(null);
+
+  /**
+   * **O horário vem por prop, e é a fonte que não falha.**
+   *
+   * As três buscas do efeito abaixo dependem de coisas que podem não existir no arranque frio: a
+   * notificação inicial, a bandeja, e um evento que o JS pode não ter chegado a ouvir. Com o app
+   * fechado, as três vinham vazias e a tela subia só azul — o defeito de 14 e 15/09.
+   *
+   * Esta prop vem do intent que abriu a Activity, já preenchida na primeira renderização. Quando
+   * ela existe, o efeito nem precisa correr atrás de nada.
+   */
+  const daProp =
+    typeof notificacaoDoAlarme?.data?.scheduledFor === "string"
+      ? notificacaoDoAlarme.data.scheduledFor
+      : null;
+
+  const [instanteIso, setInstanteIso] = useState<string | null>(daProp);
 
   /**
    * Lê o horário que disparou, do `data` da notificação que abriu esta tela.
@@ -63,6 +92,19 @@ export function AlarmeRaiz() {
   }, []);
 
   useEffect(() => {
+    // A prop já resolveu: não há o que procurar, e procurar assim mesmo só abriria espaço para uma
+    // das buscas devolver um horário diferente do que abriu esta tela.
+    if (daProp !== null) return;
+
+    /**
+     * Espera o banco, porque o último recurso consulta a grade de doses.
+     *
+     * Não custa tempo de tela: `AlarmeRaiz` já renderiza o loader enquanto `bancoPronto` for falso
+     * (ver o `return` lá embaixo), então a busca não poderia mostrar nada antes disso de qualquer
+     * forma. E o som já está tocando — quem o toca é o serviço, não esta tela.
+     */
+    if (!bancoPronto) return;
+
     let ativo = true;
 
     function usar(dados: Record<string, unknown> | undefined) {
@@ -114,14 +156,44 @@ export function AlarmeRaiz() {
 
       // Última saída: o horário atual. A tela abre com a lista vazia, mas os botões de silenciar e
       // sair continuam funcionando — o som para, que é o mínimo que ela deve garantir.
-      setInstanteIso(new Date().toISOString());
+      /**
+       * **Último recurso: a dose agendada mais próxima de agora**, e não o instante atual.
+       *
+       * "Agora" garantia tela vazia — dificilmente existe dose no minuto exato em que o efeito roda,
+       * e o alarme costuma chegar alguns segundos depois do horário marcado. A tela subia azul, sem
+       * remédio nenhum, que é o pior desfecho possível para quem foi acordado por ela.
+       *
+       * Uma janela de duas horas para cada lado cobre o alarme que atrasou e o que a pessoa demorou
+       * a atender, sem alcançar a dose do turno seguinte. Se nada houver ali, aí sim cai no instante
+       * atual — a tela fica vazia, mas silenciar e sair continuam funcionando.
+       */
+      const agora = new Date();
+      const duasHoras = 2 * 60 * 60_000;
+      const porPerto = await new DoseScheduleRepository()
+        .findBetween(
+          new Date(agora.getTime() - duasHoras).toISOString(),
+          new Date(agora.getTime() + duasHoras).toISOString(),
+        )
+        .catch(() => []);
+      if (!ativo) return;
+
+      const pendente = porPerto
+        .filter(({ latestStatus }) => !resolvesDose(latestStatus))
+        .sort(
+          (a, b) =>
+            Math.abs(new Date(a.doseSchedule.scheduledFor).getTime() - agora.getTime()) -
+            Math.abs(new Date(b.doseSchedule.scheduledFor).getTime() - agora.getTime()),
+        )
+        .at(0);
+
+      setInstanteIso(pendente?.doseSchedule.scheduledFor ?? agora.toISOString());
     }
 
     void lerHorario();
     return () => {
       ativo = false;
     };
-  }, []);
+  }, [daProp, bancoPronto]);
 
   if (!bancoPronto || instanteIso === null) return <CenteredLoader />;
 

@@ -78,9 +78,20 @@ export function useDosesDoAlarme(instanteIso: string) {
 
   const carregar = useCallback(async () => {
     try {
-      // A janela é o minuto exato do horário: as doses de um aviso compartilham o instante, e é
-      // esse instante que a notificação carrega.
+      /**
+       * A janela é o **minuto**, alinhado — e o alinhamento é o que a torna à prova de deslocamento.
+       *
+       * As doses nascem sempre em `:00.000` (a grade é construída a partir de `HH:MM`), mas o
+       * instante que a notificação carrega pode trazer segundos: o piso do gatilho empurra o aviso
+       * de uma dose vencida para "agora + 1 s". Ancorando a busca no instante cru, a janela começava
+       * **depois** da dose que a originou, e a tela subia vazia — o defeito de 15/09.
+       *
+       * `setSeconds(0, 0)` faz a janela cobrir o minuto inteiro em que a dose está, venha o instante
+       * como vier. A correção em `planejar-avisos-de-dose` faz os dois coincidirem de novo; esta
+       * aqui é o que impede o mesmo defeito de voltar por um caminho que ninguém previu.
+       */
       const inicio = new Date(instanteIso);
+      inicio.setSeconds(0, 0);
       const fim = new Date(inicio.getTime() + 60_000);
 
       const [comStatus, prescriptions, medications, inventories] = await Promise.all([

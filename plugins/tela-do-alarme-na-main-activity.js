@@ -83,11 +83,73 @@ const PATCH = `// [Mapill] Quem decide o componente é o Notifee, não a Activit
   override fun getMainComponentName(): String =
     Notifee.getInstance().getMainComponent("main")`;
 
+/**
+ * O corpo vazio do delegate que o Expo gera — é onde o `getLaunchOptions` entra.
+ *
+ * Casar o `){}` fechado, e não criar um `createReactActivityDelegate` próprio: o Expo já tem o
+ * dele, envolto em `ReactActivityDelegateWrapper`, e dois overrides do mesmo método não compilam.
+ * O wrapper precisa ser preservado — é ele que liga os módulos do Expo ao ciclo da Activity.
+ */
+const DELEGATE_ORIGINAL = `          object : DefaultReactActivityDelegate(
+              this,
+              mainComponentName,
+              fabricEnabled
+          ){})`;
+
+/**
+ * O delegate com o horário do alarme entrando como prop.
+ *
+ * ## O defeito que isto resolve
+ *
+ * A tela azul subia **vazia** com o app fechado, e a causa é de ordem, não de corrida: o Notifee
+ * emite o `DELIVERED` no instante do disparo, quando ainda não há JavaScript de pé — o bundle só
+ * executa ~1,2 s depois. O evento não é retido (`EventBus.post`, não `postSticky`), então quem
+ * assina depois nunca o vê. As três fontes que `AlarmeRaiz` consultava chegavam todas vazias, e a
+ * tela caía no último recurso: o horário atual, que não tem dose agendada.
+ *
+ * ## Por que aqui, e não numa quarta fonte
+ *
+ * Porque o dado **sempre esteve aqui**. O Notifee põe o bundle inteiro da notificação no intent que
+ * abre esta Activity (`NotificationManager.java:417`), e ninguém o lia. Lê-lo no `getLaunchOptions`
+ * entrega o horário **na montagem, síncrono** — sem `await`, sem depender de evento, de sticky
+ * consumível ou de a notificação ainda estar na bandeja.
+ *
+ * Vale para os dois caminhos, porque os dois passam por esta Activity: o `fullScreenAction` põe o
+ * extra no intent, e o toque na notificação também.
+ */
+const DELEGATE_PATCH = `          object : DefaultReactActivityDelegate(
+              this,
+              mainComponentName,
+              fabricEnabled
+          ){
+            // [Mapill] O horário do alarme chega à tela como prop, na montagem.
+            //
+            // Sem isto a tela azul sobe vazia com o app fechado: o DELIVERED que alimentava as
+            // buscas do AlarmeRaiz é emitido antes de existir JavaScript para ouvi-lo, e não é
+            // retido. O bundle da notificação, porém, vem no intent que abriu esta Activity.
+            //
+            // Ver plugins/tela-do-alarme-na-main-activity.js
+            override fun getLaunchOptions(): Bundle? {
+              val daNotificacao = intent?.getBundleExtra("notification")
+                ?: return super.getLaunchOptions()
+              return Bundle().apply {
+                super.getLaunchOptions()?.let { putAll(it) }
+                putBundle("notificacaoDoAlarme", daNotificacao)
+              }
+            }
+          })`;
+
 /** O import que o patch exige. */
 const IMPORT = "import app.notifee.core.Notifee";
 
-/** A marca do patch, para não aplicar duas vezes. `prebuild` roda mais de uma vez. */
-const MARCA = "getMainComponent(";
+/**
+ * A marca dos patches, para não aplicar duas vezes. `prebuild` roda mais de uma vez.
+ *
+ * É a do **segundo** patch, e não a do primeiro: os dois são aplicados juntos, então a presença do
+ * último prova que ambos entraram. Marcando pelo primeiro, um arquivo com só ele — de uma versão
+ * anterior do plugin — seria dado por pronto, e o horário nunca chegaria à tela.
+ */
+const MARCA = "notificacaoDoAlarme";
 
 function withTelaDoAlarmeNaMainActivity(config) {
   return withMainActivity(config, (config) => {
@@ -134,7 +196,24 @@ function withTelaDoAlarmeNaMainActivity(config) {
       novo = novo.replace(pacote[0], `${pacote[0]}\n\n${IMPORT}`);
     }
 
-    console.log("[tela-do-alarme] MainActivity agora pergunta o componente ao Notifee.");
+    /**
+     * O segundo patch: o horário do alarme entrando como prop.
+     *
+     * Falha a build se o alvo sumir, como o primeiro. Sem ele a tela azul volta a subir vazia com o
+     * app fechado — e esse é o tipo de defeito que só aparece em aparelho, depois da build inteira.
+     */
+    if (!novo.includes(DELEGATE_ORIGINAL)) {
+      throw new Error(
+        `[tela-do-alarme] não encontrei o corpo do ReactActivityDelegate na MainActivity. O ` +
+          `template do Expo mudou. Sem o getLaunchOptions a tela azul sobe vazia com o app ` +
+          `fechado, porque o horário do alarme não chega a ela.`,
+      );
+    }
+    novo = novo.replace(DELEGATE_ORIGINAL, DELEGATE_PATCH);
+
+    console.log(
+      "[tela-do-alarme] MainActivity agora pergunta o componente ao Notifee, e passa o horário.",
+    );
     config.modResults.contents = novo;
 
     return config;

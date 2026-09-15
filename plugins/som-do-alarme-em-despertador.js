@@ -3,6 +3,7 @@ const path = require("node:path");
 
 const { ARQUIVO_ALVO, MARCA } = require("../scripts/patch-som-de-despertador");
 const { aplicarTodos } = require("../scripts/aplicar-patches");
+const { conferir } = require("../scripts/conferir-patches");
 const fs = require("node:fs");
 
 /**
@@ -84,6 +85,21 @@ function withSomDoAlarmeEmDespertador(config) {
             "Isto não deveria acontecer — confira o script em scripts/patch-som-de-despertador.js.",
         );
       }
+
+      /**
+       * **Confere todos os patches aqui também**, e não só no `eas-build-post-install`.
+       *
+       * O gancho do EAS não existe no `expo run:android` — o caminho do cabo, que virou o principal
+       * em 15/09. A conferência ficava só do lado remoto, e a compilação local seguia sem ela.
+       *
+       * Foi o que deixou passar a build de 15/09: o `expo-module.config.json` do `expo-audio`
+       * chegou ao Gradle **com a `publication`**, o módulo veio pré-compilado, e o alarme saiu no
+       * volume de mídia outra vez — o mesmo defeito de 14/09, pelo mesmo motivo, e de novo sem nada
+       * no log denunciando.
+       *
+       * Aqui é o último ponto antes do Gradle que roda nos **dois** caminhos.
+       */
+      conferir(config.modRequest.projectRoot);
 
       return config;
     },

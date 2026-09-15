@@ -183,6 +183,24 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
       chave: chaveDoHorario(scheduledFor),
       quando,
       /**
+       * **O instante da dose, que nem sempre é o de tocar** — e confundir os dois esvaziava a tela.
+       *
+       * `quando` passa pelo piso de `pisoDoGatilho` acima: uma dose que já venceu, ou que vence em
+       * menos de um segundo, é agendada para "agora + 1s" em vez do horário dela. Aí os dois
+       * divergem — `10:31:00.000` na grade, `10:31:00.500` no gatilho — e a tela do alarme, que
+       * busca doses numa janela de 60 s a partir do que a notificação carrega, começava a procurar
+       * **depois** da dose que a originou. Lista vazia, tela azul sem remédio nenhum.
+       *
+       * Foi o defeito medido em 15/09, e ele só aparecia em teste de intervalo curto: com a dose
+       * daqui a horas, `quando` e `scheduledFor` coincidem e nada denuncia a diferença. O Gabriel
+       * cadastrava sempre para um minuto depois — exatamente a janela em que o piso age.
+       *
+       * O campo já existia para isto, e o lembrete adiado já o preenchia pelo mesmo motivo (ver
+       * `responder-aviso.ts`). O que faltava era a grade fazer o mesmo: a premissa de que "nos
+       * avisos da grade os dois coincidem" é falsa sempre que o piso entra.
+       */
+      instanteDasDoses: scheduledFor,
+      /**
        * O título diz **o que é**, e o corpo diz **o que tomar**.
        *
        * Antes o título era `08:00 — Losartana`, o que repetia duas informações que o sistema já

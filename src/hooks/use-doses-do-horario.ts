@@ -74,9 +74,11 @@ export function useDosesDoHorario(instanteIso: string) {
     }
 
     try {
-      // A janela é o minuto exato do horário: as doses de um aviso compartilham o instante, e é
-      // esse instante que a notificação carrega.
+      // A janela é o **minuto**, alinhado — mesmo motivo de `use-doses-do-alarme`: o instante que a
+      // notificação carrega pode trazer segundos, e as doses nascem sempre em `:00.000`. Esta tela
+      // é o destino do toque na notificação, então o deslocamento a esvaziaria do mesmo jeito.
       const inicio = new Date(instanteIso);
+      inicio.setSeconds(0, 0);
       const fim = new Date(inicio.getTime() + 60_000);
 
       const [comStatus, prescriptions, medications, inventories] = await Promise.all([
