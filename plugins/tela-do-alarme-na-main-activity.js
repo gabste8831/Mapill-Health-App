@@ -119,14 +119,23 @@ const ORIGINAL = `override fun getMainComponentName(): String = "main"`;
  * correção é do lado do JS (a tela sai de cena ao ver que não há dose), nunca uma condição sobre um
  * intent que não existe neste ponto do ciclo de vida.
  */
-const PATCH = `// [Mapill] Quem decide o componente é o Notifee.
+const PATCH = `// [Mapill] Quem decide o componente é o Notifee, sem condição sobre o intent.
   //
-  // Sem condição sobre o intent: ReactActivity chama este método durante o onCreate, quando
-  // getIntent() ainda é null. A guarda de 15/09 (\`intent?.hasExtra(...)\`) por isso negava SEMPRE, e
-  // a tela azul não subiu em nenhum disparo daquele dia — medido com log dentro do método.
+  // **Nenhuma guarda funciona aqui**, e as três tentativas de 15/09 mediram por quê:
   //
-  // getMainComponent consome um sticky (removeStickEvent), então ele já responde com precisão:
-  // "alarme-de-dose" quando um fullScreenAction pediu esta tela, "main" na abertura normal.
+  // 1. \`intent?.hasExtra("mainComponent")\` — negava sempre. ReactActivity consulta este método
+  //    durante o onCreate, quando getIntent() ainda é null, e \`null == true\` é false.
+  // 2. \`intent?.hasExtra("notification")\` — idem, mesmo motivo.
+  // 3. Ler o extra no onCreate (onde o intent existe) e guardar num campo — o START mostrava
+  //    \`(has extras)\`, mas hasExtra("notification") deu false assim mesmo. O extra não sobrevive
+  //    ao PendingIntent neste aparelho; o que chega é o bundle que o getLaunchOptions lê.
+  //
+  // Sobra o sticky, e ele funciona: getMainComponent consome um MainComponentEvent
+  // (removeStickEvent), que o Notifee posta ao EXIBIR uma notificação com fullScreenAction.
+  //
+  // O preço é o sticky órfão: com o celular em uso o Android rebaixa para heads-up, ninguém monta
+  // a Activity, e o evento fica pendurado até a próxima abertura consumi-lo. Isso é tratado no JS
+  // — ver \`escutar-avisos\`, que manda a tela sair de cena quando ela sobe sem alarme tocando.
   //
   // Ver plugins/tela-do-alarme-na-main-activity.js
   override fun getMainComponentName(): String = Notifee.getInstance().getMainComponent("main")`;
@@ -219,7 +228,12 @@ const ONCREATE_ORIGINAL = `    super.onCreate(null)
  * `setIntent` troca o intent que a Activity expõe, e é dele que os dois métodos leem. Vem **antes**
  * do `super`, que repassa o intent ao delegate: na ordem inversa o delegate ainda veria o antigo.
  */
-const ONCREATE_PATCH = `    super.onCreate(null)
+const ONCREATE_PATCH = `    // [Mapill] Quem abriu esta Activity: o alarme de tela cheia, ou um toque/o ícone?
+    //
+    // Gravado AQUI porque aqui o intent existe — em getMainComponentName ele ainda é null (o
+    // ReactActivity o consulta antes). Ver o comentário daquele método.
+    //
+    super.onCreate(null)
   }
 
   // [Mapill] O alarme que chega a uma Activity JÁ EXISTENTE.
@@ -230,7 +244,7 @@ const ONCREATE_PATCH = `    super.onCreate(null)
   //
   // Ver plugins/tela-do-alarme-na-main-activity.js
   override fun onNewIntent(intent: Intent) {
-    // setIntent ANTES do super: o ReactActivity repassa o intent ao delegate, e getMainComponentName
+    // setIntent ANTES do super: o ReactActivity repassa o intent ao delegate, e getLaunchOptions
     // lê de getIntent(). Na ordem inversa, o delegate ainda veria o intent anterior.
     setIntent(intent)
     super.onNewIntent(intent)
@@ -251,7 +265,7 @@ const IMPORT = "import app.notifee.core.Notifee";
  * `MainActivity` seguiu com a guarda velha — a que barra a tela azul. Marcar pelo nome do método
  * responde "algum patch já entrou"; o que precisa ser sabido é "o patch **desta versão** entrou".
  */
-const MARCA = "this@MainActivity.intent";
+const MARCA = "Nenhuma guarda funciona aqui";
 
 function withTelaDoAlarmeNaMainActivity(config) {
   return withMainActivity(config, (config) => {

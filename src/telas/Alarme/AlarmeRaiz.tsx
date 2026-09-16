@@ -1,4 +1,12 @@
 import notifee from "react-native-notify-kit";
+import {
+  PlusJakartaSans_300Light,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  useFonts,
+} from "@expo-google-fonts/plus-jakarta-sans";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { BackHandler } from "react-native";
@@ -41,6 +49,42 @@ type AlarmeRaizProps = {
 
 export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   const bancoPronto = useDatabaseReady();
+
+  /**
+   * **Carrega a fonte do app — e é isto que conserta o texto cortado.**
+   *
+   * ## O defeito
+   *
+   * Com o app **nos recentes**, a tela azul subia com tudo truncado: "Hora do seu" em vez de "Hora
+   * do seu remédio", "Tome" em vez de "Tomei", "Sem" em vez de "Silenciar", e as orientações
+   * cortadas no meio ("Depois de", "Junto da"). O conteúdo estava certo — o nome do remédio e a
+   * dose apareciam inteiros —, o que faltava era o fim de cada frase.
+   *
+   * ## A causa, e por que é a mesma da splash
+   *
+   * Todo o `typography` pede `PlusJakartaSans`, e quem a carrega é o `useFonts` do `_layout.tsx` —
+   * dentro da árvore do `expo-router`. Esta Activity monta por `AppRegistry`, fora dela: a família
+   * nunca é registrada aqui, o Android cai na fonte do sistema, e as métricas da folha de estilos
+   * (lineHeight fixo, letterSpacing negativo) passam a valer para uma fonte mais larga. O texto não
+   * cabe e é cortado.
+   *
+   * É o mesmo padrão do `hideAsync` acima: tudo o que o `_layout` prepara para o app não existe
+   * neste segundo ponto de entrada, e precisa ser refeito aqui.
+   *
+   * ## Por que não espera a fonte para montar
+   *
+   * O valor de retorno é ignorado de propósito. Um alarme que espera a fonte carregar para mostrar
+   * qual remédio tomar é pior que um alarme com a fonte do sistema — e o `_layout` já trata a
+   * fonte que **falha** como resolvida, pelo mesmo motivo. A tela sobe na hora e redesenha quando a
+   * família chega.
+   */
+  useFonts({
+    PlusJakartaSans_300Light,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+  });
 
   /**
    * **O horário vem por prop, e é a fonte que não falha.**
@@ -90,6 +134,49 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   useEffect(() => {
     activityDeAlarmeNascendo();
     return () => activityDeAlarmeParouDeNascer();
+  }, []);
+
+  /**
+   * **A tela sai de cena se subiu por um sticky órfão** — o toque que não devia trazê-la.
+   *
+   * ## O defeito
+   *
+   * Com o celular **em uso**, tocar na notificação abria a tela azul. Devia abrir a de "Hora do
+   * remédio": decisão de 10/09, e é o que o listener faz com o `PRESS`. Medido às 20:49 de 15/09.
+   *
+   * A causa é o Notifee postar o `MainComponentEvent` quando a notificação é **exibida**, não
+   * quando alguém toca. Com o aparelho em uso o Android rebaixa o full-screen intent para heads-up,
+   * ninguém monta a Activity, e o evento fica pendurado. O toque seguinte abre a `MainActivity`,
+   * `getMainComponent` consome esse sticky e devolve o componente do alarme.
+   *
+   * ## Por que a guarda vive aqui, e não na `MainActivity`
+   *
+   * Porque **nenhuma guarda nativa funciona** — três tentativas de 15/09 mediram isso (ver o
+   * comentário de `getMainComponentName` no plugin). O intent é `null` quando o componente é
+   * decidido, e o extra que distinguiria os caminhos não sobrevive ao `PendingIntent`.
+   *
+   * Aqui a pergunta é outra e tem resposta: **o alarme está tocando agora?** Um `fullScreenAction`
+   * legítimo tem seu aviso na bandeja (`ongoing: true`) no instante em que esta tela sobe. Um
+   * sticky órfão é o rastro de um alarme que já foi respondido ou dispensado — não há nada lá.
+   *
+   * `BackHandler.exitApp()` e não `onFechar`: esta Activity nasceu de um toque cujo destino é a
+   * tela do horário, e o listener já a está abrindo. Sair devolve a vez para ela.
+   */
+  useEffect(() => {
+    let vivo = true;
+    void notifee
+      .getDisplayedNotifications()
+      .then((naBandeja) => {
+        if (!vivo) return;
+        const temAlarme = naBandeja.some(({ notification }) =>
+          typeof notification.id === "string" ? ehAlarmeDeTelaCheia(notification.id) : false,
+        );
+        if (!temAlarme) BackHandler.exitApp();
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
   }, []);
 
   /**
