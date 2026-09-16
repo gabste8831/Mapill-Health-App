@@ -1,40 +1,25 @@
 /**
  * Quem já tem a tela do alarme na frente — e é o que impede **duas** ao mesmo tempo.
  *
- * ## O defeito que isto resolve
+ * A tela tem dois pontos de entrada, e ambos são necessários: a Activity que o Notifee monta pelo
+ * `fullScreenAction` (por cima do bloqueio, sem navegação nenhuma) e a rota `/alarme/[instante]`,
+ * que o listener empurra quando o alarme chega com o app aberto — aí o Android rebaixa a tela cheia
+ * para heads-up, e um aviso discreto no topo é o que se ignora sem perceber.
  *
- * A tela do alarme tem dois pontos de entrada, e os dois são necessários:
+ * Os dois vivem no **mesmo processo JavaScript**: o `index.js` registra o componente nativo e logo
+ * abaixo sobe o app inteiro. Quando o alarme irrompe com o app em segundo plano, as duas coisas
+ * acontecem — e o sintoma é som duplicado, com uma tela por cima da outra.
  *
- * - **`AlarmeRaiz`**, uma Activity que o Notifee monta pelo `fullScreenAction`, por cima da tela de
- *   bloqueio, sem passar por navegação nenhuma. É a promessa central do app.
- * - **A rota `/alarme/[instante]`**, empurrada pelo listener quando o `DELIVERED` chega com o app
- *   aberto — porque nesse caso o Android **rebaixa** o full-screen intent para um heads-up, e um
- *   aviso discreto no topo é o que se ignora sem perceber.
- *
- * O problema é que os dois vivem no **mesmo processo JavaScript**: o `index.js` registra o
- * componente nativo e, logo abaixo, `import "expo-router/entry"` sobe o app inteiro — incluindo o
- * `useDoseNotifications` que assina o `DELIVERED`. Então quando o alarme irrompe com o app rodando
- * em segundo plano, **as duas coisas acontecem**: a Activity sobe e o listener empurra a rota.
- *
- * O sintoma relatado em aparelho (09/09) descreve exatamente isso: o som sai **duplicado** — dois
- * players, um por tela —, e ao responder na de cima ela fecha e a de baixo pisca antes de também
- * se fechar por ver tudo resolvido.
- *
- * ## Por que um módulo, e não estado de React
- *
- * Porque os dois lados não compartilham árvore de componentes: um é `AppRegistry`, o outro é o
- * roteador. O que eles compartilham é o **módulo**, e é aí que a informação tem de morar. Um `Set`
- * em componente seria zerado a cada montagem, e a trava não travaria nada — a mesma razão do
- * `jaAbertos` em `escutar-avisos`.
+ * **Por que um módulo, e não estado de React:** os dois lados não compartilham árvore de
+ * componentes (um é `AppRegistry`, o outro é o roteador). O que compartilham é o módulo. Um `Set`
+ * em componente seria zerado a cada montagem, e a trava não travaria nada.
  */
 
 /**
  * Os horários cuja tela já está em cena, e por qual caminho.
  *
- * O caminho importa: a Activity nativa tem precedência sobre a rota, porque ela é a que o sistema
- * colocou na frente. Se a rota registrar primeiro e a Activity chegar depois, é a rota que deve
- * sair — mas isso não acontece na prática, porque o `fullScreenAction` é resolvido pelo Android
- * antes de o evento JS chegar ao listener.
+ * O caminho importa: a Activity tem precedência sobre a rota, porque é ela que o sistema pôs na
+ * frente — ver `quemEstaEmCena`, que permite à rota ceder lugar.
  */
 const emCena = new Map<string, "activity" | "rota">();
 

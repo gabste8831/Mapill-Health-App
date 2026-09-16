@@ -40,16 +40,14 @@ export const curva = Easing.out(Easing.cubic);
 export const curvaEnfatica = Easing.out(Easing.back(1.4));
 
 /**
- * O tempo de uma animação, **respeitando a preferência de "reduzir movimento"** do sistema.
+ * **A preferência de "reduzir movimento" é lida com `useReducedMotion()`**, do Reanimated — não
+ * por um helper daqui.
  *
- * Devolve `0` quando a pessoa pediu menos movimento: com duração zero o valor salta direto para
- * o destino, então o estado final continua correto e nada pisca — o código que anima não precisa
- * de um caminho alternativo.
+ * Havia um `duracaoRespeitandoMovimento(ms, reduzir)` neste arquivo e um `use-reduzir-movimento`
+ * nos hooks, escritos para ser o caminho padrão. Os componentes acabaram usando o hook da
+ * biblioteca, que faz o mesmo e já roda na thread de UI — e as duas peças próprias ficaram sem
+ * consumidor. Duas formas de responder à mesma pergunta divergem em silêncio; ficou a da lib.
  *
- * Por que zerar em vez de simplesmente não animar: quem liga "reduzir movimento" costuma fazê-lo
- * por enjoo vestibular ou por distração — para essas pessoas, o movimento não é neutro, é sintoma.
- * Ignorar a preferência do sistema é sobrepor o gosto do app à necessidade de quem usa.
+ * O padrão, em quem anima: `const semMovimento = useReducedMotion();` e a duração vira `0`.
+ * Com duração zero o valor salta para o destino — o estado final continua correto e nada pisca.
  */
-export function duracaoRespeitandoMovimento(ms: number, reduzirMovimento: boolean): number {
-  return reduzirMovimento ? 0 : ms;
-}

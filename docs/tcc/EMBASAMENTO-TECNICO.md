@@ -98,9 +98,22 @@ O bloco 9 do roteiro de teste (TalkBack) **foi percorrido em aparelho e aprovado
 
 ### 1.3 Redução de movimento
 
-`src/hooks/use-reduzir-movimento.ts` lê `AccessibilityInfo.isReduceMotionEnabled()` e assina
-`reduceMotionChanged`, respeitando a preferência do sistema em tempo real. Atende **WCAG 2.3.3
-Animation from Interactions** (AAA).
+Toda animação do app consulta `useReducedMotion()` (Reanimated), que lê a preferência do sistema
+e reage à mudança em tempo real. Quando ela está ligada, a duração vira `0`: o elemento salta para
+o estado final em vez de se mover até ele — o resultado visual é o mesmo, sem o movimento.
+
+Os cinco pontos que animam:
+
+- `src/ui/BarraDeProgresso/BarraDeProgresso.tsx:61` — a barra que cresce
+- `src/ui/SuccessOverlay/SuccessOverlay.tsx:51` — o check da dose confirmada
+- `src/ui/Accordion/Accordion.tsx` — o bloco que abre
+- `src/telas/Inicio/InicioScreen.tsx:114` — a entrada da lista
+- `src/telas/Inicio/componentes/ItemDeDose/ItemDeDose.tsx:79` — o item de dose
+
+Atende **WCAG 2.3.3 Animation from Interactions** (AAA).
+
+> Quem liga essa opção costuma fazê-lo por enjoo vestibular: para essas pessoas o movimento não é
+> estilo, é sintoma. Por isso a preferência do sistema prevalece sobre a do app.
 
 ### 1.4 Os três temas de acessibilidade
 

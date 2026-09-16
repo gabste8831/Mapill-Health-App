@@ -4,6 +4,7 @@ import { AccessibilityInfo, Modal, Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSequence,
   withTiming,
@@ -38,15 +39,26 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
 
-  const scale = useSharedValue(0.6);
+  /**
+   * **A animação some quando a pessoa pediu menos movimento** — o aviso, não.
+   *
+   * Com duração zero o símbolo aparece no lugar certo em vez de crescer até ele: o estado final
+   * é o mesmo, sem o movimento que para quem tem enjoo vestibular é sintoma e não estilo.
+   *
+   * Os tempos de **leitura** (`VISIBLE_MS`, `FADE_OUT_MS`) ficam intactos: eles não são
+   * movimento, são quanto tempo a confirmação permanece legível antes de a tela seguir.
+   */
+  const semMovimento = useReducedMotion();
+
+  const scale = useSharedValue(semMovimento ? 1 : 0.6);
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: 180 });
+    opacity.value = withTiming(1, { duration: semMovimento ? 0 : 180 });
     // Passa um pouco de 1 e volta: o exagero curto é o que faz o símbolo parecer "carimbado".
     scale.value = withSequence(
-      withTiming(1.08, { duration: 260, easing: Easing.out(Easing.cubic) }),
-      withTiming(1, { duration: 140 }),
+      withTiming(1.08, { duration: semMovimento ? 0 : 260, easing: Easing.out(Easing.cubic) }),
+      withTiming(1, { duration: semMovimento ? 0 : 140 }),
     );
 
     // Quem usa leitor de tela não vê o símbolo nem o sumiço automático — o anúncio é o que
@@ -56,7 +68,7 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
     // Dois timers em vez do callback do `withTiming`: aquele roda na thread de UI, e `onDone`
     // navega — o que só pode acontecer na thread de JS.
     const fadeOut = setTimeout(() => {
-      opacity.value = withTiming(0, { duration: FADE_OUT_MS });
+      opacity.value = withTiming(0, { duration: semMovimento ? 0 : FADE_OUT_MS });
     }, VISIBLE_MS);
     const done = setTimeout(onDone, VISIBLE_MS + FADE_OUT_MS);
 
@@ -64,7 +76,7 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
       clearTimeout(fadeOut);
       clearTimeout(done);
     };
-  }, [description, onDone, opacity, scale, title]);
+  }, [description, onDone, opacity, scale, semMovimento, title]);
 
   const overlayStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
   const checkStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));

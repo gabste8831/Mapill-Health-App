@@ -2,7 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { type ReactNode, useState } from "react";
 import type { LayoutChangeEvent, StyleProp, ViewStyle } from "react-native";
 import { Pressable, Text, View } from "react-native";
-import Animated, { Easing, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  withTiming,
+} from "react-native-reanimated";
 
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./Accordion.styles";
@@ -33,7 +38,16 @@ export type AccordionProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-const TIMING = { duration: 260, easing: Easing.out(Easing.cubic) };
+/**
+ * O tempo da abertura — **zero quando a pessoa pediu menos movimento**.
+ *
+ * Com duração zero o bloco aparece aberto em vez de descer: o estado final é o mesmo, sem o
+ * movimento que para quem tem enjoo vestibular é sintoma e não estilo.
+ */
+const timing = (semMovimento: boolean) => ({
+  duration: semMovimento ? 0 : 260,
+  easing: Easing.out(Easing.cubic),
+});
 
 /**
  * Título sempre visível, conteúdo sob demanda. Recolhido por padrão: o título é o que precisa
@@ -65,6 +79,7 @@ export function Accordion({
    * primeiro toque, que é o que acontecia quando o conteúdo montava depois do layout.
    */
   const [contentHeight, setContentHeight] = useState<number | null>(null);
+  const TIMING = timing(useReducedMotion());
 
   const bodyStyle = useAnimatedStyle(() => ({
     height: contentHeight === null ? undefined : withTiming(isExpanded ? contentHeight : 0, TIMING),
