@@ -180,50 +180,23 @@ export function useDoseNotifications(): void {
         /**
          * **Fora do primeiro plano, o app espera a Activity nativa — e assume se ela não vier.**
          *
-         * ## O defeito que isto corrige
+         * Um `return false` seco aqui produzia um padrão estranho: com o celular bloqueado, a tela
+         * azul aparecia com o app **fora** dos recentes e não aparecia com ele **nos** recentes. Se
+         * fosse permissão negada, seria sempre — o Android não sabe o que está nos recentes. A
+         * causa era o app competindo com a própria Activity: com o processo vivo este listener
+         * recusava; com ele morto, ninguém recusava e o `fullScreenAction` subia sozinho.
          *
-         * Aqui havia um `return false` seco, e ele produzia o padrão que o Gabriel isolou em 12/09:
-         * com o celular **bloqueado**, a tela azul aparecia quando o Mapill estava fora dos
-         * recentes, e **não** aparecia quando estava nos recentes.
+         * **Por que esperar, e não simplesmente abrir:** a guarda antiga protegia um caso real, e
+         * ele continua valendo — com o aparelho **desbloqueado** e a pessoa em outro app, navegar
+         * monta a tela **atrás** do que está na frente, invisível e com uma segunda fonte de som.
          *
-         * O raciocínio dele é o que fecha o caso, e é mais forte que a hipótese que eu perseguia: se
-         * a permissão de tela cheia estivesse negada, ela estaria negada **sempre** — o Android não
-         * sabe o que está na lista de recentes. A causa só podia ser o app, e era: com o processo
-         * vivo, este listener recebe o `DELIVERED` e recusava; com o processo morto, ninguém
-         * recusava nada e o `fullScreenAction` subia sozinho. O app estava competindo com a própria
-         * Activity e ganhando a corrida para não fazer nada.
+         * A pergunta certa não é "onde o app está?", e sim "a Activity veio?". Esperar um instante
+         * e olhar `jaEstaEmCena` responde exatamente isso. `RESPIRO_DA_ACTIVITY_EM_MS` é curto de
+         * propósito: é tempo de alarme tocando.
          *
-         * ## Por que esperar, em vez de simplesmente abrir
-         *
-         * Porque a guarda antiga protegia um caso real, e ele continua valendo: com o aparelho
-         * **desbloqueado** e a pessoa em outro app, navegar monta a tela **atrás** do que está na
-         * frente — invisível, com o `expo-audio` dela virando uma segunda fonte de som sem rosto
-         * (defeito de 10/09). Abrir sempre traria isso de volta.
-         *
-         * O que separa os dois casos não é o `AppState`, que diz `background` nos dois. É **quem
-         * assume o alarme**: com a tela bloqueada o Android monta a Activity do full-screen intent;
-         * com a pessoa usando outro app, ele rebaixa para heads-up e não monta nada.
-         *
-         * Então a pergunta certa não é "onde o app está?", e sim "a Activity veio?". Esperar um
-         * instante e olhar `jaEstaEmCena` responde exatamente isso, sem precisar de API de keyguard
-         * (que esta biblioteca não expõe) nem de código nativo novo.
-         *
-         * `RESPIRO_DA_ACTIVITY_EM_MS` é a folga para ela montar e se registrar. Curto de propósito:
-         * é tempo de alarme tocando, e o `AlarmeRaiz` registra a si mesmo assim que monta.
-         *
-         * ## O que acontece em cada caso
-         *
-         * - **Bloqueado, Activity subiu:** `jaEstaEmCena` responde `true` e o app não faz nada — a
-         *   tela que a pessoa vê é a nativa, com uma fonte de som só.
-         * - **Bloqueado, Activity não subiu** (o caso do Gabriel): ninguém está em cena, e o app
-         *   abre a rota. A tela azul aparece, que é o que o alarme promete.
-         * - **Desbloqueado, em outro app:** a Activity não sobe, mas o serviço em primeiro plano
-         *   toca o som e a notificação fica na bandeja — e é ela que o `AlarmeScreen` dispensaria
-         *   se a tela montasse escondida. Ver a guarda de visibilidade abaixo.
-         *
-         * Devolve `false` de imediato porque a decisão virou assíncrona: quem chama usa o retorno só
-         * para marcar `jaAbertos`, e marcar antes da hora é o defeito que travava o horário para
-         * sempre. Quem marca agora é o próprio caminho tardio, ao abrir de verdade.
+         * Devolve `false` de imediato porque a decisão virou assíncrona — quem chama usa o retorno
+         * só para marcar `jaAbertos`, e marcar antes da hora travaria o horário para sempre. Quem
+         * marca agora é o próprio caminho tardio, ao abrir de verdade.
          */
         const espera = setTimeout(() => {
           void (async () => {

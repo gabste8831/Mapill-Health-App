@@ -26,96 +26,47 @@ const emCena = new Map<string, "activity" | "rota">();
 /**
  * A Activity do alarme está **nascendo**, mas ainda não sabe de qual horário é.
  *
- * ## O defeito que isto resolve
+ * `AlarmeRaiz` precisa de duas coisas assíncronas antes de montar a tela — abrir o banco e
+ * descobrir o horário — e só então `AlarmeScreen` chama `entrouEmCena`. Entre o nascimento da
+ * Activity e esse registro há uma janela em que `jaEstaEmCena` responderia `false` para um horário
+ * cuja tela **está subindo agora**. É nessa janela que a MIUI entrega um `PRESS` da notificação sem
+ * ninguém ter tocado em nada, e a tela azul era fechada e substituída pela do horário.
  *
- * `AlarmeRaiz` precisa de duas coisas assíncronas antes de montar a tela: abrir o banco e descobrir
- * o horário (`getInitialNotification`, e às vezes uma segunda busca na bandeja). Só então
- * `AlarmeScreen` monta e chama `entrouEmCena`. Entre o nascimento da Activity e esse registro há uma
- * janela — pequena, mas real.
+ * **Sem horário, de propósito:** no instante em que a Activity nasce ele ainda não foi lido — é o
+ * que ela está indo buscar. "Alguma tela de alarme está subindo" é tudo o que dá para saber, e
+ * basta: existe no máximo uma por vez.
  *
- * Nessa janela o app está cego: `jaEstaEmCena` responde `false` para um horário cuja tela **está
- * subindo agora**. E é exatamente nessa janela que a MIUI entrega um `PRESS` da notificação na tela
- * de bloqueio, sem ninguém ter tocado em nada.
- *
- * O resultado é o que o Gabriel relatou em 12/09, e o padrão dos recentes é a assinatura da corrida:
- * com o app **nos recentes** o processo já está de pé, o `PRESS` chega quase junto do disparo e
- * vence a montagem — a tela azul é fechada e substituída pela de "Hora do remédio". Com o app **fora
- * dos recentes** o processo precisa subir inteiro, o que atrasa o `PRESS` o bastante para a Activity
- * chegar primeiro, e aí a tela azul fica.
- *
- * ## Por que um sinalizador sem horário
- *
- * Porque no instante em que a Activity nasce o horário ainda não foi lido — é justamente o que ela
- * está indo buscar. Guardar "alguma tela de alarme está subindo" é tudo o que dá para saber, e é o
- * suficiente: existe no máximo uma Activity de alarme por vez, e qualquer `PRESS` que chegue
- * enquanto ela sobe é sobre ela.
- *
- * ## Por que ele vale enquanto a Activity vive, e não por um tempo
- *
- * A primeira versão (12/09) apagava o sinalizador por `setTimeout`, 4 s depois de acendê-lo. O
- * Gabriel reportou em 13/09 que a tela azul **continuava intermitente**, e a razão é essa:
- *
- * `AlarmeRaiz` só monta `AlarmeScreen` — e só então alguém chama `entrouEmCena` — depois de o banco
- * abrir **e** o horário ser lido. Até lá ela devolve um loader. Abrir o banco num arranque frio, com
- * o aparelho parado há horas e o sistema ocupado subindo o processo, passa dos 4 s sem dificuldade.
- * O relógio apagava o sinalizador com a Activity ainda no loader, a janela cega reabria, e o `PRESS`
- * da MIUI voltava a vencer — justamente no cenário de madrugada, que é o que importa.
- *
- * Um relógio não podia acertar isso: ele mede tempo, e o que precisa ser sabido é **se a Activity
- * ainda está viva**. Quem sabe disso é o ciclo de vida do React, e é ele quem apaga agora — o
- * cleanup do efeito em `AlarmeRaiz` roda quando a Activity sai, tanto no caminho feliz quanto no de
- * erro. Sem prazo, sem aposta.
+ * **E vale enquanto a Activity vive, não por um prazo.** Uma primeira versão apagava o sinalizador
+ * por `setTimeout` de 4 s, e num arranque frio abrir o banco passa disso sem dificuldade — a janela
+ * cega reabria com a tela ainda no loader. O que precisa ser sabido não é tempo decorrido, é se a
+ * Activity ainda está viva; quem sabe disso é o cleanup do efeito em `AlarmeRaiz`.
  */
 let activityNascendo = false;
 
 /**
  * A Activity já se registrou com horário, e portanto **não é mais cega**.
  *
- * Separa os dois estados de uma Activity viva. Enquanto ela sobe, ninguém sabe de qual horário ela
- * é, e a única resposta honesta a `jaEstaEmCena` é "sim" para qualquer um. Depois que ela monta e se
- * registra, o mapa `emCena` responde com precisão — e aí a resposta cega passa a atrapalhar: um
- * segundo alarme, disparando enquanto a primeira tela está aberta, teria a rota recusada por uma
- * guarda que fala por ele sem saber dele.
+ * Separa os dois estados de uma Activity viva. Enquanto ela sobe, a única resposta honesta a
+ * `jaEstaEmCena` é "sim" para qualquer horário; depois que ela se registra, o mapa responde com
+ * precisão — e aí a resposta cega passaria a atrapalhar um segundo alarme, recusando a rota dele.
  *
- * Não dá para apagar `activityNascendo` nesse momento porque a Activity **continua viva**, e é a
- * vida dela — não o registro — que o cleanup em `AlarmeRaiz` desfaz.
+ * Não dá para apagar `activityNascendo` aqui: a Activity **continua viva**, e é a vida dela — não o
+ * registro — que o cleanup desfaz.
  */
 let activityConhecida = false;
 
 /**
  * O horário do alarme que disparou por último — a **rede de segurança** do `AlarmeRaiz`.
  *
- * ## O defeito que isto resolve
+ * A tela descobre de qual horário é lendo a notificação: `getInitialNotification` e, se falhar,
+ * varrendo a bandeja. Mas o caminho do `PRESS` **cancela a notificação** ao tratar o toque, e as
+ * duas coisas correm juntas — medido em 70 ms entre a tela montar e o aviso sumir. Quando ela vai
+ * procurar, não há mais o que procurar.
  *
- * A tela azul subia e ficava **vazia**: só o fundo azul, sem remédio nenhum. Relatado em aparelho em
- * 14/09, e sempre no mesmo caminho — quando a pessoa **toca na notificação** em vez de esperar o
- * alarme irromper sozinho.
- *
- * O logcat mostra a corrida em 70 ms:
- *
- * ```
- * 21:19:05.753  Running "alarme-de-dose"              ← a tela monta
- * 21:19:05.822  Removing notification alarme:dose-…   ← a notificação e apagada
- * ```
- *
- * `AlarmeRaiz` descobre de qual horário é lendo a notificação: `getInitialNotification` e, se ela
- * falhar, varrendo a bandeja com `getDisplayedNotifications`. Mas o caminho do `PRESS` em
- * `escutar-avisos` **cancela a notificação** ao tratar o toque — e as duas coisas acontecem quase
- * juntas. Quando a tela vai procurar, não há mais o que procurar, e ela cai no último recurso: o
- * horário atual, que não tem dose nenhuma agendada.
- *
- * É uma corrida **nova**, criada pela correção do mesmo dia: antes a tela azul nunca subia pelo
- * `fullScreenAction`, então nunca disputava com o cancelamento.
- *
- * ## Por que aqui, e por que sem prazo de validade
- *
- * Este módulo já é o que os dois pontos de entrada compartilham — Activity e rota vivem no mesmo
- * processo mas em árvores diferentes, e é aqui que a informação comum mora.
- *
- * O valor é gravado quando o aviso é **entregue**, antes de qualquer toque poder cancelá-lo, e não
- * expira: sobrescrever no próximo alarme é o certo, porque o que interessa é sempre o último que
- * disparou. Guardar só o horário (uma string curta) é o suficiente — a tela relê o banco a partir
- * dele, então não há dado de saúde em memória além do instante.
+ * O valor é gravado na **entrega**, antes de existir toque para cancelar coisa alguma, e não
+ * expira: sobrescrever no alarme seguinte é o certo, porque interessa sempre o último que disparou.
+ * Guardar só o instante basta — a tela relê o banco a partir dele, então não há dado de saúde em
+ * memória.
  */
 let ultimoHorarioEntregue: string | null = null;
 

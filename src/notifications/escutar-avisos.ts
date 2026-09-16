@@ -268,14 +268,13 @@ async function tratar(evento: Event): Promise<void> {
     /**
      * **A Activity nativa já está na frente: não empurra a rota.**
      *
-     * Esta é a causa do som duplicado, e sobreviveu a três correções minhas porque eu tratava o
-     * toque e o eco em vez do disparo. O `fullScreenAction` monta `AlarmeRaiz` numa Activity, e o
-     * `index.js` sobe o app inteiro no **mesmo processo** — então este listener está vivo e recebe
-     * o `DELIVERED` do mesmo alarme que acabou de irromper. Sem esta guarda, ele empurrava a rota
-     * `/alarme/[instante]` por baixo da Activity: duas telas, dois players de áudio.
+     * O `fullScreenAction` monta `AlarmeRaiz` numa Activity, e o `index.js` sobe o app inteiro no
+     * **mesmo processo** — então este listener está vivo e recebe o `DELIVERED` do mesmo alarme que
+     * acabou de irromper. Sem a guarda, ele empurrava a rota `/alarme/[instante]` por baixo da
+     * Activity: duas telas, duas fontes de som.
      *
-     * O `jaAbertos` não cobria isso: ele só sabe o que **este** listener abriu, e a Activity é
-     * montada pelo Android, sem passar por aqui. `alarme-em-cena` é o registro que as duas telas
+     * O `jaAbertos` não cobre isso — ele só sabe o que **este** listener abriu, e a Activity é
+     * montada pelo Android sem passar por aqui. `alarme-em-cena` é o registro que as duas
      * compartilham.
      */
     if (jaEstaEmCena(dados.scheduledFor)) return;
@@ -368,19 +367,14 @@ async function tratar(evento: Event): Promise<void> {
     /**
      * **A tela cheia já está na frente: o toque não a derruba.**
      *
-     * Esta guarda existia (`46eee55`) e eu a removi ao fazer o toque ir para a tela de confirmação
-     * (`8336aec`), sem notar que ela cobria outro caso. O resultado apareceu em aparelho em 12/09:
-     * com o celular **bloqueado**, o alarme tocava, a tela azul subia — e era imediatamente trocada
-     * pela tela do horário. De tão rápido, parecia que a azul nunca tinha aparecido.
+     * O `fullScreenAction` monta a tela azul, e o Android mostra **a mesma notificação** também na
+     * bandeja. A MIUI gera um `PRESS` dali por conta própria, na tela de bloqueio, sem ninguém ter
+     * tocado — e sem esta guarda o `pedirParaEncerrarAlarme()` abaixo fechava a tela certa para
+     * abrir outra, tão rápido que a azul parecia nunca ter aparecido.
      *
-     * A sequência era esta: o `fullScreenAction` monta a tela azul, o Android mostra **a mesma
-     * notificação** também como aviso na bandeja, um `PRESS` chega daí (a MIUI gera esse evento por
-     * conta na tela de bloqueio), e o `pedirParaEncerrarAlarme()` abaixo fechava a tela que estava
-     * certa para abrir outra.
-     *
-     * Com a tela em cena não há o que fazer: a pessoa já está diante da tela onde se responde, com
-     * foto, adiar e silenciar. Ignorar o toque também fecha o caminho que abria o app **sobre a tela
-     * de bloqueio** — ver o achado de privacidade de 12/09.
+     * Com a tela em cena não há o que fazer: a pessoa já está diante de onde se responde, com foto,
+     * adiar e silenciar. Ignorar o toque também fecha o caminho que abria o app **sobre a tela de
+     * bloqueio**.
      */
     if (jaEstaEmCena(dados.scheduledFor)) return;
 

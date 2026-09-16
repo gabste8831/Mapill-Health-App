@@ -160,8 +160,7 @@ export function AlarmeScreen({
    * definição (o Android a colocou lá); como rota, ela só dispensa se o app estiver `active`.
    *
    * `dispensar(chave)` e não `dispensarAlarmeAtivo()`: aquela varre todos os alarmes da bandeja, e
-   * um alarme de outro horário ainda sem resposta não tem por que sumir porque esta tela abriu — foi
-   * o excesso revertido em 83135de.
+   * um alarme de outro horário ainda sem resposta não tem por que sumir porque esta tela abriu.
    */
   useEffect(() => {
     if (!ehActivityDeAlarme && AppState.currentState !== "active") return;
