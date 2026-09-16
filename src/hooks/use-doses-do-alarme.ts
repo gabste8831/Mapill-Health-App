@@ -58,19 +58,14 @@ export type DoseDoAlarme = {
  *
  * ## Por que não reusa o `use-doses-do-horario`
  *
- * Os dois carregam a mesma coisa, e a duplicação incomoda. Mas aquele hook recarrega com
- * `useFocusEffect`, que é do `expo-router` e depende de haver uma rota em foco. A tela de alarme é
- * aberta pelo Notifee como `mainComponent`, **por cima da tela de bloqueio e fora da árvore de
- * navegação** — ali não existe rota, e o `useFocusEffect` quebra ou nunca dispara.
+ * Os dois carregam a mesma coisa, e a duplicação incomoda. Mas aquele recarrega com
+ * `useFocusEffect`, que é do `expo-router` e depende de haver uma rota em foco. Esta tela é montada
+ * por `AppRegistry`, **fora da árvore de navegação** — ali não existe rota, e o `useFocusEffect`
+ * quebra ou nunca dispara.
  *
- * Fazer o hook compartilhado tolerar os dois mundos deixaria ambos mais frágeis por um ganho de
- * poucas linhas. A diferença entre "tela consultada" e "tela que irrompe" é real, e ela aparece
- * aqui: este carrega uma vez, na montagem, porque não há para onde voltar o foco.
- *
- * ## E por que não recarrega sozinho
- *
- * A `HorarioScreen` recarrega ao voltar ao foco porque a pessoa pode ter respondido pela Home no
- * meio do caminho. Aqui não há meio do caminho: a tela abre, é respondida e fecha.
+ * A diferença entre "tela consultada" e "tela que irrompe" é real, e é ela que separa os dois: um
+ * recarrega ao voltar ao foco, o outro por intervalo e por anúncio (ver o efeito abaixo), porque
+ * aqui não há foco a que voltar.
  */
 export function useDosesDoAlarme(instanteIso: string) {
   const [doses, setDoses] = useState<DoseDoAlarme[]>([]);

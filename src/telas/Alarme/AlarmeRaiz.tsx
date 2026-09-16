@@ -106,14 +106,6 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   const [instanteIso, setInstanteIso] = useState<string | null>(daProp);
 
   /**
-   * Lê o horário que disparou, do `data` da notificação que abriu esta tela.
-   *
-   * `getInitialNotification` é o único caminho: o componente nasce do full-screen intent, sem
-   * parâmetro de rota e sem props. Se não houver notificação inicial — o que acontece se o sistema
-   * remontar a Activity —, cai para o horário atual, que é a melhor aproximação disponível e mantém
-   * a tela útil em vez de vazia.
-   */
-  /**
    * **Anuncia a Activity antes de saber de qual horário ela é** — e essa ordem é a correção.
    *
    * O efeito abaixo é assíncrono: abre o banco, consulta `getInitialNotification` e às vezes varre a
@@ -258,8 +250,6 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
         return;
       }
 
-      // Última saída: o horário atual. A tela abre com a lista vazia, mas os botões de silenciar e
-      // sair continuam funcionando — o som para, que é o mínimo que ela deve garantir.
       /**
        * **Último recurso: a dose agendada mais próxima de agora**, e não o instante atual.
        *

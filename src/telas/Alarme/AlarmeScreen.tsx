@@ -140,9 +140,9 @@ export function AlarmeScreen({
   /**
    * A notificação do horário sai da bandeja — mas **só com a tela de fato visível**.
    *
-   * As duas fontes de áudio (o `loopSound` do canal e o `createAudioPlayer` abaixo) tocam o mesmo
-   * arquivo e se sobrepõem enquanto coexistem: o som duplicado de 10/09. Quando esta tela está na
-   * frente, ela é quem toca, e a notificação pode sair.
+   * O serviço em primeiro plano e esta tela pediriam o mesmo som se coexistissem — por isso
+   * `comecarASoar` é idempotente. Quando esta tela está na frente, ela é quem responde, e a
+   * notificação pode sair da bandeja.
    *
    * ## Por que a condição virou explícita em 12/09
    *
@@ -169,17 +169,10 @@ export function AlarmeScreen({
   }, [instanteIso, ehActivityDeAlarme]);
 
   /**
-   * Toca em loop até ser silenciado.
+   * O som, enquanto a dose não for respondida.
    *
-   * O player é criado **dentro do efeito**, com `createAudioPlayer`, e não pelo `useAudioPlayer`.
-   * O hook devolve um objeto que o React Compiler trata como imutável, e ligar o loop exige
-   * atribuir `player.loop` — o que ele recusa, com razão: mutar valor de hook é justamente o que
-   * quebra a memoização dele.
-   *
-   * Aqui o player é nosso, criado e destruído por este efeito. A limpeza faz as duas coisas: para
-   * o som e libera o recurso nativo, inclusive quando a tela sai por um caminho que não passa pelos
-   * botões — o sistema matando a Activity, por exemplo. Alarme que continua tocando depois da tela
-   * fechada é o tipo de defeito que faz desinstalar o app.
+   * Quem toca é o serviço em primeiro plano (`som-do-alarme.ts`), não esta tela — ver os dois
+   * blocos abaixo, que explicam por quê.
    */
   useEffect(() => {
     if (silenciado) return;
@@ -410,8 +403,8 @@ export function AlarmeScreen({
      * efeito é o que a regra `set-state-in-effect` proíbe — com razão, porque aqui o componente está
      * saindo e o re-render não teria para quem servir.
      *
-     * O som já morre com a tela: o player é criado e destruído pelo efeito do áudio, e a limpeza
-     * dele roda na desmontagem.
+     * O som para no `dispensarAlarmeAtivo` abaixo, que é o funil de todos os caminhos que
+     * encerram um alarme — a tela desmontando não o calaria, porque ele é do serviço.
      */
     void dispensarAlarmeAtivo().then(onFechar);
   }, [doses, isLoading, onFechar]);

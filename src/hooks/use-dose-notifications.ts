@@ -156,15 +156,8 @@ export function useDoseNotifications(): void {
     const pararDeEscutar = escutarAvisos({
       aoAbrirHorario: abrirHorario,
       /**
-       * `navigate`, e não `push`: **duas telas de alarme nunca se empilham.**
-       *
-       * `push` empilha sempre, mesmo com a rota já aberta — e foi o que fez cada toque na
-       * notificação abrir mais uma tela azul (visto em 10/09, passo 14.5.2). `navigate` reaproveita
-       * a rota quando os parâmetros são os mesmos, então o mesmo horário nunca vira duas telas.
-       *
-       * A guarda de `alarme-em-cena` já evita o caso conhecido; esta é a segunda camada, para o
-       * disparo que escape por um caminho que ninguém previu. Empilhar tela de alarme é o defeito
-       * que mais custou nesta semana, e ele não pode depender de uma trava só.
+       * A segunda camada contra empilhar tela de alarme: a guarda de `alarme-em-cena` cobre o caso
+       * conhecido, e o `navigate` de `abrirTelaDeAlarme` cobre o que escapar dela.
        */
       aoDispararAlarme: (scheduledFor) => {
         /**
@@ -224,9 +217,9 @@ export function useDoseNotifications(): void {
          *   tela que a pessoa vê é a nativa, com uma fonte de som só.
          * - **Bloqueado, Activity não subiu** (o caso do Gabriel): ninguém está em cena, e o app
          *   abre a rota. A tela azul aparece, que é o que o alarme promete.
-         * - **Desbloqueado, em outro app:** a Activity não sobe, mas a notificação com `loopSound`
-         *   está na bandeja se lendo e tocando — e é ela que o `AlarmeScreen` dispensaria se a tela
-         *   montasse escondida. Ver a guarda de visibilidade abaixo.
+         * - **Desbloqueado, em outro app:** a Activity não sobe, mas o serviço em primeiro plano
+         *   toca o som e a notificação fica na bandeja — e é ela que o `AlarmeScreen` dispensaria
+         *   se a tela montasse escondida. Ver a guarda de visibilidade abaixo.
          *
          * Devolve `false` de imediato porque a decisão virou assíncrona: quem chama usa o retorno só
          * para marcar `jaAbertos`, e marcar antes da hora é o defeito que travava o horário para
@@ -248,10 +241,8 @@ export function useDoseNotifications(): void {
            * O aviso na bandeja fica, e tocar nele leva à tela do horário (ver `escutar-avisos`),
            * que é onde a dose se responde. Decisão do Gabriel em 14/09, testando em aparelho.
            *
-           * **Isto é o que a heurística do `AppState` tentava adivinhar e errava.** O comentário
-           * acima admitia: "a distinção não é perfeita — ela erra para o lado de abrir a tela".
-           * Agora não é heurística: o módulo de desbloqueio pergunta ao Android se o bloqueio está
-           * na frente, que é exatamente a pergunta que importa.
+           * A pergunta é feita ao Android, e não deduzida do `AppState`: o módulo de desbloqueio
+           * responde se o bloqueio está na frente, que é exatamente o que decide.
            *
            * `=== false` e não `!`: a resposta tem três estados, e `null` é "não consegui perguntar"
            * — build sem o módulo nativo, que é toda build anterior a esta. Aí vale o comportamento
@@ -259,19 +250,6 @@ export function useDoseNotifications(): void {
            * certo de errar.
            */
           if ((await estaBloqueado()) === false) return;
-          /**
-           * **Só se a pessoa não estiver usando outro app.**
-           *
-           * Este é o resto da guarda de 10/09, e ele fica. `active` aqui significaria que o app
-           * voltou ao primeiro plano no meio da espera — e aí o caminho de cima já teria agido.
-           * O que interessa é o contrário: seguir em `background` **sem** Activity em cena é o
-           * aparelho bloqueado, porque um app em uso à frente teria mantido o Mapill em background
-           * com a tela cheia rebaixada e a notificação na bandeja como único aviso.
-           *
-           * A distinção não é perfeita — ela erra para o lado de abrir a tela, e esse é o lado
-           * certo de errar num despertador de remédio: uma tela a mais se fecha com um toque, um
-           * alarme que não aparece se perde inteiro.
-           */
           abrirTelaDeAlarme(scheduledFor);
           marcarAlarmeComoAberto(scheduledFor);
           })();

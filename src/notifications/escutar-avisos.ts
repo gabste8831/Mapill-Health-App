@@ -304,7 +304,7 @@ async function tratar(evento: Event): Promise<void> {
    * dizendo "já vi, pode parar". O alarme insistir depois disso é o app discutindo com quem ele
    * deveria servir — e foi o pior sintoma do bloco, som seguindo sem nada na tela para desligá-lo.
    *
-   * O som da própria notificação (`loopSound`) morre com ela, sem código. O que sobra é a tela
+   * O som é do serviço em primeiro plano, e quem o encerra é a tela. O que sobra, então, é a tela
    * cheia, se estiver montada: `pedirParaEncerrarAlarme` é o que a faz silenciar e sair. A dose
    * **não** é respondida aqui — dispensar não é "tomei" nem "pulei", e ela segue pendente na Home,
    * no histórico e no próximo reagendamento.
@@ -398,7 +398,7 @@ async function tratar(evento: Event): Promise<void> {
      * existe.
      *
      * Os três passos, nesta ordem, são o que torna o gesto imediato: tirar o aviso da bandeja (e com
-     * ele o `loopSound`), pedir que a tela cheia saia de cena se estiver montada, e só então abrir.
+     * com ele o serviço que toca), pedir que a tela cheia saia de cena se montada, e só então abrir.
      * Qualquer um que falte deixa som tocando enquanto a pessoa já está decidindo em outra tela.
      */
     jaAbertos.delete(dados.scheduledFor);

@@ -349,7 +349,7 @@ export class NotifeeGateway implements NotificationGateway {
                  * ela sai. As exceções que continuam presas são `CallStyle`, mídia e apps de
                  * política corporativa — nenhuma alcançável por esta biblioteca.
                  *
-                 * Dispensada com o alarme tocando, o som **continua** — é o `loopSound` abaixo, e a
+                 * Dispensada com o alarme tocando, o som **continua** — quem o toca é o serviço, e a
                  * tela cheia segue acessível pelo app. Tentamos trazer a notificação de volta pelo
                  * evento `DISMISSED`, mas ele não chega no gesto de arrastar (testado em 10/09), e
                  * a peça saiu do escopo em vez de ficar como contorno que não cumpre o que promete.
@@ -357,33 +357,11 @@ export class NotifeeGateway implements NotificationGateway {
                 autoCancel: false,
                 ongoing: true,
                 /**
-                 * O som **repete** enquanto a notificação estiver na bandeja.
-                 *
-                 * Isto corrige uma afirmação que morava aqui: "notificação nenhuma toca em loop,
-                 * em biblioteca nenhuma". `loopSound` existe e faz exatamente isso — `FLAG_INSISTENT`
-                 * do Android, que repete o áudio até o aviso ser cancelado ou aberto.
-                 *
-                 * Importa porque a tela cheia **nem sempre sobe**: com o aparelho em uso, o Android
-                 * a rebaixa para heads-up, e aí o único som era uma batida só. Um despertador que
-                 * toca uma vez e cala não desperta ninguém.
-                 *
-                 * **Uma fonte de áudio por vez.** A tela do alarme tem o loop dela, em `expo-audio`,
-                 * e os dois se sobrepõem enquanto ambos existem — o som duplicado relatado em
-                 * aparelho em 10/09, que este `loopSound` reintroduziu. Por isso a tela dispensa da
-                 * bandeja o aviso do horário dela assim que monta (ver `AlarmeScreen`): quando a
-                 * tela sobe, quem toca é ela; quando ela não sobe, este loop é o único aviso.
-                 */
-                /**
                  * **O alarme sobe como foreground service, e é ele quem toca o som.**
                  *
-                 * `loopSound` saiu junto com o som do canal: ele era o `FLAG_INSISTENT` do Android
-                 * repetindo o áudio **do canal**, e o canal ficou mudo no `v8`. Mantê-lo seria
-                 * repetir silêncio.
-                 *
-                 * O que ele tentava cobrir — "a tela cheia nem sempre sobe, e aí o único som era
-                 * uma batida só" — o serviço cobre melhor: ele toca independente de tela, e no
-                 * volume de despertador. O teste de 14/09 mostrou que o `loopSound` não cobria nada
-                 * nesse caso: com o celular em uso, o alarme não emitia som nenhum.
+                 * O canal é mudo de propósito (ver `canais-notifee`), então não há som de sistema a
+                 * repetir. O serviço toca independente de tela e no volume de despertador — e a tela
+                 * cheia nem sempre sobe: com o aparelho em uso o Android a rebaixa para heads-up.
                  */
                 asForegroundService: true,
                 foregroundServiceTypes: [
