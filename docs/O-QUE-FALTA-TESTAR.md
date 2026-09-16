@@ -7,13 +7,23 @@
 
 ---
 
-> **Atualizado em 15/09, 21h40 — depois de uma noite inteira de build pelo cabo.**
+> **Atualizado em 16/09, manhã — o módulo do alarme está fechado.**
 >
-> **A tela azul funciona.** Ela sobe sobre o bloqueio, com o remédio, a dose e os textos completos —
-> validada três vezes seguidas no cenário principal. Foram **quatro defeitos empilhados**, cada um
-> escondendo o seguinte, e todos estão corrigidos e commitados.
+> **Os quatro cenários passaram em aparelho**, e com eles os dois pontos que ainda estavam em
+> aberto. A correção foi arquitetural: a tela do alarme ganhou **Activity própria**.
 >
-> Sobraram **dois pontos em aberto**, ambos com a causa já identificada. Ver "O que falta" abaixo.
+> | Cenário | Resultado |
+> |---|---|
+> | Tela bloqueada, **fora** dos recentes | ✅ tela azul completa |
+> | Tela bloqueada, **nos** recentes | ✅ tela azul completa |
+> | Em uso, **nos** recentes | ✅ heads-up → toque → tela do horário |
+> | Em uso, **fora** dos recentes | ✅ heads-up → toque → tela do horário |
+> | **Responder com o aparelho bloqueado** | ✅ **pede o desbloqueio** |
+> | Som no volume de despertador | ✅ os cinco cenários (15/09) |
+>
+> **O que falta é acabamento, não funcionalidade:** a limpeza do código
+> ([`LIMPEZA-DO-CODIGO.md`](LIMPEZA-DO-CODIGO.md)), a documentação de arquitetura, e a build
+> preview do EAS para a validação final — a cota reseta em 01/10.
 
 ---
 
@@ -46,64 +56,50 @@ revelou o `intent=null`. Duas builds foram gastas deduzindo antes disso.
 
 ---
 
-## 🔴 O que falta — os dois pontos em aberto
+## ✅ Como os dois últimos pontos foram fechados
 
-### A. O app fica acessível depois de responder com a tela bloqueada
+Os dois tinham a **mesma raiz**, e por isso uma correção só resolveu ambos: `showWhenLocked` é
+atributo de **Activity**, não de tela, e o alarme dividia a `MainActivity` com o app inteiro.
 
-**O que acontece:** alarme dispara com o celular bloqueado, a tela azul sobe, toca-se em "Tomei" —
-e o Mapill fica na frente, navegável, **sem pedir senha**. Medido duas vezes (21:10 e 21:21), com
-scroll no app registrado no logcat enquanto o `window mode` ainda era `4 (keyguard)`.
+### A. O app ficava acessível depois de responder com a tela bloqueada
 
-**Não é a decisão de 14/09.** Aquela diz que *responder a dose* não pede senha, e isso está certo —
-o dado não sai da tela. O que não deveria acontecer é a resposta virar **porta para o resto do
-app**: medicamentos, histórico e ficha de saúde.
+Alarme dispara com o celular bloqueado, a tela azul sobe, toca-se em "Tomei" — e o Mapill ficava na
+frente, navegável, **sem pedir senha**. Medido duas vezes em 15/09 (21:10 e 21:21).
 
-**A causa é estrutural, e está no topo de `DesbloqueioModule.kt`:**
+A licença de aparecer sobre o bloqueio era do **app todo**, porque a Activity era uma só.
+`finishAndRemoveTask` não resolvia e foi tentado: o Android já dispensou o keyguard quando a
+Activity sobe com `showWhenLocked` + `turnScreenOn`, e **não existe API de re-bloqueio**.
 
-> O `showWhenLocked` vale para a **MainActivity**, e o `index.js` monta a tela do alarme e o app
-> inteiro no mesmo processo. A permissão de aparecer sobre o bloqueio, então, é do app todo.
+**Corrigido em `fcf6c91`:** a `AlarmeActivity` tem a licença, e a `MainActivity` não. Em task
+própria (`singleInstance`, `taskAffinity` vazio, `excludeFromRecents`), fechar o alarme devolve o
+aparelho ao bloqueio — o app nunca teve permissão de estar ali.
 
-**`finishAndRemoveTask` foi tentado em 15/09 e não resolve.** Quando a Activity sobe com
-`showWhenLocked` + `turnScreenOn`, o Android **já dispensou o keyguard** para ela; remover a task
-depois não desfaz isso, e **não existe API de re-bloqueio** para app nenhum no Android.
+### B. Em uso e fora dos recentes, o toque abria a tela azul
 
-**A saída é arquitetural:** uma Activity separada só para o alarme, com o `showWhenLocked` **nela** e
-não na `MainActivity`. Aí fechar a tela do alarme devolve o aparelho ao bloqueio, porque a
-`MainActivity` nunca teve licença para aparecer sobre ele.
+Celular destravado, app fora dos recentes: a notificação aparecia como heads-up (correto), mas
+tocar nela abria a **tela azul** em vez da tela do horário, e o som só parava depois de responder.
 
-> **Para o TCC, enquanto não for feito:** o caminho que leva ao dado sensível de propósito
-> ("Responder depois" → `abrirNoApp`) **exige o desbloqueio** e isso funciona. O que está exposto é
-> a tela do app depois de uma dose respondida, num aparelho que a pessoa tem em mãos. É limitação
-> conhecida e documentável, não um buraco aberto.
+Duas sobras da arquitetura antiga, as duas visíveis **só no arranque frio** — e era esse o contraste
+que as apontava: nos recentes o caminho passava pelo listener já vivo e funcionava.
 
----
+1. **A `MainActivity` ainda perguntava ao sticky** qual componente montar. O `MainComponentEvent` é
+   postado quando a notificação é **exibida**, não quando alguém toca: com o celular em uso o
+   Android rebaixa para heads-up, ninguém monta a Activity do alarme, e o evento fica pendurado até
+   o toque seguinte consumi-lo.
+2. **A guarda do bootstrap barrava a navegação.** Ela previa não alcançar o toque real "porque o
+   `PRESS` é tratado pelo listener, que cancela a notificação antes" — mas com o processo frio **não
+   há listener de pé para cancelar coisa alguma**.
 
-### B. Em uso e fora dos recentes, o toque na notificação abre a tela azul
+**Corrigido em `f6ddda7`:** cada Activity devolve um componente **literal** (`"main"` e
+`"alarme-de-dose"`), e a guarda saiu. A pergunta não precisa mais ser feita: o `fullScreenAction`
+abre a `AlarmeActivity`, e o bootstrap só roda dentro do `_layout` do `expo-router`, que monta na
+`MainActivity` — se ele está rodando, ela subiu, e ela só sobe por toque.
 
-**O que acontece:** celular destravado, app fora dos recentes. O alarme toca, a notificação aparece
-como heads-up (correto) — mas tocar nela abre a **tela azul** em vez da tela do horário.
+### O que some junto
 
-**Nos recentes o mesmo teste passa**, e é esse contraste que aponta o culpado: o arranque frio.
-
-**A causa:** o Notifee posta o `MainComponentEvent` (sticky) quando a notificação é **exibida**, não
-quando alguém toca. Com o aparelho em uso o Android rebaixa o full-screen intent, ninguém monta a
-Activity, e o evento **fica pendurado**. O toque seguinte abre a `MainActivity`, `getMainComponent`
-consome esse sticky órfão e devolve o componente do alarme.
-
-**A guarda não pode viver no nativo** — as três tentativas de 15/09 estão documentadas no
-`plugins/tela-do-alarme-na-main-activity.js`. O intent é `null` quando o componente é decidido, e o
-extra que distinguiria os caminhos não sobrevive ao `PendingIntent`.
-
-**A primeira correção JS também falhou**, e vale registrar por quê: ela perguntava *"há alarme na
-bandeja?"*, e o aviso é `ongoing: true` — continua lá mesmo rebaixado. A guarda achava o alarme,
-concluía "legítimo", e nunca disparava.
-
-**A correção que está no código e ainda não foi testada** (commitada hoje, sem build em aparelho):
-`AlarmeRaiz` pergunta **`estaBloqueado()`** — a tela cheia existe para irromper sobre o bloqueio; com
-o aparelho destravado ela sai de cena e devolve a vez para a rota do horário, que o listener já está
-abrindo. É a mesma pergunta que `use-dose-notifications` faz, pelo mesmo motivo.
-
-> **Amanhã:** buildar e testar só este cenário. Se passar, o B fecha.
+A classe de defeitos que custou três builds em 15/09 **deixa de existir por construção**: sticky
+órfão decidindo qual tela montar, `intent` nulo em `getMainComponentName`, extra que não sobrevive
+ao `PendingIntent`. Não há o que adivinhar quando cada Activity já é a de um dono só.
 
 ---
 
