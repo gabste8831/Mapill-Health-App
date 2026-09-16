@@ -41,6 +41,18 @@ class DesbloqueioModule : Module() {
     }
 
     /**
+     * **Não existe função para reimpor o bloqueio**, e isto é uma nota para quem vier procurá-la.
+     *
+     * `finishAndRemoveTask` foi tentado em 15/09 e não resolve: quando a Activity sobe com
+     * `showWhenLocked` e `turnScreenOn`, o Android **já dispensou o keyguard** para ela, e remover a
+     * task depois não desfaz isso. O Android não expõe API de re-bloqueio para app nenhum.
+     *
+     * A causa do problema (responder a dose deixa o app acessível) é a do topo deste arquivo: o
+     * `showWhenLocked` vale para a `MainActivity`, onde o app inteiro vive. A saída é uma Activity
+     * separada só para o alarme — ver `docs/O-QUE-FALTA-TESTAR.md`.
+     */
+
+    /**
      * Pede o desbloqueio e responde se ele aconteceu.
      *
      * **Resolve `false` em vez de rejeitar quando a pessoa desiste.** Cancelar não é erro: é uma

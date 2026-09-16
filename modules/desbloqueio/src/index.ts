@@ -43,3 +43,15 @@ export async function pedirDesbloqueio(): Promise<boolean> {
   if (Platform.OS !== "android" || modulo === null) return true;
   return modulo.pedirDesbloqueio().catch(() => false);
 }
+
+/**
+ * **Não há como reimpor o bloqueio**, e esta nota existe para quem vier procurar a função.
+ *
+ * Tentado em 15/09 com `finishAndRemoveTask`, e não resolve: o Android **já dispensou o keyguard**
+ * quando a Activity do alarme sobe com `showWhenLocked` e `turnScreenOn`, e remover a task depois
+ * não desfaz isso. Não existe API de re-bloqueio para app nenhum.
+ *
+ * O defeito que isso deixa em aberto — responder a dose deixa o app acessível sem autenticação —
+ * está em `docs/O-QUE-FALTA-TESTAR.md`, com a saída proposta: uma Activity separada só para o
+ * alarme, com o `showWhenLocked` nela e não na `MainActivity`.
+ */

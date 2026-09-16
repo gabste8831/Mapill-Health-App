@@ -13,6 +13,7 @@ import { BackHandler } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
+import { estaBloqueado } from "@/modules/desbloqueio";
 import { resolvesDose } from "@/domain/entities/intake-log";
 import { useDatabaseReady } from "@/hooks/use-database-ready";
 import {
@@ -155,23 +156,34 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
    * comentário de `getMainComponentName` no plugin). O intent é `null` quando o componente é
    * decidido, e o extra que distinguiria os caminhos não sobrevive ao `PendingIntent`.
    *
-   * Aqui a pergunta é outra e tem resposta: **o alarme está tocando agora?** Um `fullScreenAction`
-   * legítimo tem seu aviso na bandeja (`ongoing: true`) no instante em que esta tela sobe. Um
-   * sticky órfão é o rastro de um alarme que já foi respondido ou dispensado — não há nada lá.
+   * ## A pergunta que funciona, e a que não funcionou
+   *
+   * A primeira tentativa perguntou **"há alarme na bandeja?"**, e ela nunca dispara: o aviso é
+   * `ongoing: true` e continua lá mesmo rebaixado a heads-up. Tocar nele encontra o alarme na
+   * bandeja, a guarda conclui "legítimo" e a tela azul fica. Medido em 15/09, no cenário em uso
+   * com o app fora dos recentes.
+   *
+   * A pergunta certa é **"esta tela deveria estar na frente agora?"**, e o app já sabe respondê-la:
+   * a tela cheia existe para irromper **sobre o bloqueio**. Com o aparelho destravado o Android
+   * rebaixa o full-screen intent justamente porque a pessoa está usando o celular, e o destino do
+   * toque é a tela do horário (`escutar-avisos`), que o listener já está abrindo.
+   *
+   * É a mesma pergunta que `use-dose-notifications` faz antes de abrir a rota, pelo mesmo motivo.
+   *
+   * `=== false` e não `!`: a resposta tem três estados, e `null` é "não consegui perguntar" — build
+   * sem o módulo nativo. Aí a tela **fica**, porque errar para o lado de mostrar o alarme é o lado
+   * certo de errar num despertador de remédio.
    *
    * `BackHandler.exitApp()` e não `onFechar`: esta Activity nasceu de um toque cujo destino é a
-   * tela do horário, e o listener já a está abrindo. Sair devolve a vez para ela.
+   * tela do horário, e o listener já a está abrindo. Sair devolve a vez para ela — e aqui não há a
+   * task a encerrar, porque o app segue aberto atrás.
    */
   useEffect(() => {
     let vivo = true;
-    void notifee
-      .getDisplayedNotifications()
-      .then((naBandeja) => {
+    void estaBloqueado()
+      .then((bloqueado) => {
         if (!vivo) return;
-        const temAlarme = naBandeja.some(({ notification }) =>
-          typeof notification.id === "string" ? ehAlarmeDeTelaCheia(notification.id) : false,
-        );
-        if (!temAlarme) BackHandler.exitApp();
+        if (bloqueado === false) BackHandler.exitApp();
       })
       .catch(() => {});
     return () => {
@@ -339,9 +351,20 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
          * encerra um serviço em primeiro plano — recurso que este alarme não usa, e chamá-lo
          * deixaria a tela aberta com o alarme já respondido.
          *
-         * "Sair do app" soa drástico, mas aqui é o certo: esta Activity **é** tudo o que está
-         * aberto. Quem chegou por ela não tinha o Mapill em uso, e devolver o aparelho ao estado em
-         * que estava é o comportamento esperado de um despertador desligado.
+         * ## O que isto **não** resolve, e por que não dá para resolver aqui
+         *
+         * Responder a dose com o aparelho bloqueado deixa o app acessível sem autenticação —
+         * medido em 15/09 às 21:10 e 21:21. `finishAndRemoveTask` foi tentado e não muda nada: o
+         * Android **já dispensou o keyguard** quando esta Activity subiu com `showWhenLocked` e
+         * `turnScreenOn`, e não existe API para reimpô-lo.
+         *
+         * A causa é estrutural e está no topo de `DesbloqueioModule`: `showWhenLocked` vale para a
+         * `MainActivity`, e o `index.js` monta a tela do alarme e o app inteiro no mesmo processo.
+         * A permissão de aparecer sobre o bloqueio é, portanto, do app todo.
+         *
+         * A saída seria uma Activity separada só para o alarme, com o `showWhenLocked` nela e não
+         * na `MainActivity`. É refatoração de arquitetura, não ajuste — ver
+         * `docs/O-QUE-FALTA-TESTAR.md`.
          */
         onFechar={() => BackHandler.exitApp()}
       />

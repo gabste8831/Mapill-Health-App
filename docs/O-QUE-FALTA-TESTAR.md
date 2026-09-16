@@ -7,27 +7,131 @@
 
 ---
 
-> **Atualizado em 15/09, noite.** A build das 14:55 **aprovou o passo 1** — o som saiu no volume de
-> despertador nos cinco cenários testados. O passo 2 reprovou, e a causa encontrada é **outra**: não
-> era a tela azul falhando em subir, era a tela de "Hora do remédio" sendo empurrada por cima dela.
+> **Atualizado em 15/09, 21h40 — depois de uma noite inteira de build pelo cabo.**
 >
-> **Tudo abaixo já está corrigido e espera a build seguinte.** Nada aqui é investigação em aberto.
+> **A tela azul funciona.** Ela sobe sobre o bloqueio, com o remédio, a dose e os textos completos —
+> validada três vezes seguidas no cenário principal. Foram **quatro defeitos empilhados**, cada um
+> escondendo o seguinte, e todos estão corrigidos e commitados.
+>
+> Sobraram **dois pontos em aberto**, ambos com a causa já identificada. Ver "O que falta" abaixo.
 
 ---
 
-## ⚠️ O comando de build mudou — a primeira linha não é opcional
+## O que 15/09 (noite) resolveu
 
-```
-node scripts/aplicar-patches.js && npx expo run:android --variant release --device
+Quatro defeitos, na ordem em que apareceram — cada um só ficou visível depois que o anterior saiu.
+
+| # | O sintoma | A causa | Commit |
+|---|---|---|---|
+| 1 | Tela azul piscava e era trocada pela de "Hora do remédio" | O bootstrap navegava pelo alarme: `getInitialNotification` responde ao `fullScreenAction` como se fosse toque | `c4543be` |
+| 2 | Tela azul **não subia** — montava `main` | A guarda de `cdac0b2` lia `intent` em `getMainComponentName`, onde ele é **`null`**: negava 100% das vezes | `f21f3f9` |
+| 3 | Tela azul subia **vazia**, e persistia após desbloquear | Era a **splash do Expo** por cima (`#196FF3`, o mesmo azul). O `_layout` trava o auto-hide e quem esconde vive no expo-router | `24130ae` |
+| 4 | Textos **truncados** ("Hora do seu", "Tome", "Sem") | A fonte Plus Jakarta não é carregada na Activity do alarme — mesmo motivo da splash | `9b2a868` |
+
+**O padrão que liga 3 e 4:** tudo o que o `_layout.tsx` prepara para o app (splash, fontes, tema)
+**não existe** na Activity do alarme, que monta por `AppRegistry` fora da árvore do `expo-router`.
+Quem for mexer nessa tela, comece por aí.
+
+**A lição do #2:** três tentativas de guarda no nativo falharam, e só um `Log.i` dentro do método
+revelou o `intent=null`. Duas builds foram gastas deduzindo antes disso.
+
+### Validado em aparelho, na build de 21:19
+
+| Cenário | Resultado |
+|---|---|
+| Bloqueada, **fora** dos recentes | ✅ tela azul completa — 3x seguidas |
+| Bloqueada, **nos** recentes | ✅ tela azul completa, textos inteiros |
+| **Em uso**, nos recentes | ✅ heads-up, toque leva à tela do horário |
+| Som no volume de despertador | ✅ os cinco cenários |
+
+---
+
+## 🔴 O que falta — os dois pontos em aberto
+
+### A. O app fica acessível depois de responder com a tela bloqueada
+
+**O que acontece:** alarme dispara com o celular bloqueado, a tela azul sobe, toca-se em "Tomei" —
+e o Mapill fica na frente, navegável, **sem pedir senha**. Medido duas vezes (21:10 e 21:21), com
+scroll no app registrado no logcat enquanto o `window mode` ainda era `4 (keyguard)`.
+
+**Não é a decisão de 14/09.** Aquela diz que *responder a dose* não pede senha, e isso está certo —
+o dado não sai da tela. O que não deveria acontecer é a resposta virar **porta para o resto do
+app**: medicamentos, histórico e ficha de saúde.
+
+**A causa é estrutural, e está no topo de `DesbloqueioModule.kt`:**
+
+> O `showWhenLocked` vale para a **MainActivity**, e o `index.js` monta a tela do alarme e o app
+> inteiro no mesmo processo. A permissão de aparecer sobre o bloqueio, então, é do app todo.
+
+**`finishAndRemoveTask` foi tentado em 15/09 e não resolve.** Quando a Activity sobe com
+`showWhenLocked` + `turnScreenOn`, o Android **já dispensou o keyguard** para ela; remover a task
+depois não desfaz isso, e **não existe API de re-bloqueio** para app nenhum no Android.
+
+**A saída é arquitetural:** uma Activity separada só para o alarme, com o `showWhenLocked` **nela** e
+não na `MainActivity`. Aí fechar a tela do alarme devolve o aparelho ao bloqueio, porque a
+`MainActivity` nunca teve licença para aparecer sobre ele.
+
+> **Para o TCC, enquanto não for feito:** o caminho que leva ao dado sensível de propósito
+> ("Responder depois" → `abrirNoApp`) **exige o desbloqueio** e isso funciona. O que está exposto é
+> a tela do app depois de uma dose respondida, num aparelho que a pessoa tem em mãos. É limitação
+> conhecida e documentável, não um buraco aberto.
+
+---
+
+### B. Em uso e fora dos recentes, o toque na notificação abre a tela azul
+
+**O que acontece:** celular destravado, app fora dos recentes. O alarme toca, a notificação aparece
+como heads-up (correto) — mas tocar nela abre a **tela azul** em vez da tela do horário.
+
+**Nos recentes o mesmo teste passa**, e é esse contraste que aponta o culpado: o arranque frio.
+
+**A causa:** o Notifee posta o `MainComponentEvent` (sticky) quando a notificação é **exibida**, não
+quando alguém toca. Com o aparelho em uso o Android rebaixa o full-screen intent, ninguém monta a
+Activity, e o evento **fica pendurado**. O toque seguinte abre a `MainActivity`, `getMainComponent`
+consome esse sticky órfão e devolve o componente do alarme.
+
+**A guarda não pode viver no nativo** — as três tentativas de 15/09 estão documentadas no
+`plugins/tela-do-alarme-na-main-activity.js`. O intent é `null` quando o componente é decidido, e o
+extra que distinguiria os caminhos não sobrevive ao `PendingIntent`.
+
+**A primeira correção JS também falhou**, e vale registrar por quê: ela perguntava *"há alarme na
+bandeja?"*, e o aviso é `ongoing: true` — continua lá mesmo rebaixado. A guarda achava o alarme,
+concluía "legítimo", e nunca disparava.
+
+**A correção que está no código e ainda não foi testada** (commitada hoje, sem build em aparelho):
+`AlarmeRaiz` pergunta **`estaBloqueado()`** — a tela cheia existe para irromper sobre o bloqueio; com
+o aparelho destravado ela sai de cena e devolve a vez para a rota do horário, que o listener já está
+abrindo. É a mesma pergunta que `use-dose-notifications` faz, pelo mesmo motivo.
+
+> **Amanhã:** buildar e testar só este cenário. Se passar, o B fecha.
+
+---
+
+## ⚠️ O comando de build — o `expo run:android` **não serve** quando o `android/` é recriado
+
+```powershell
+# compila (3-4 min incremental)
+$init = (Resolve-Path "gradle\cmake-do-windows.gradle").Path
+.\android\gradlew.bat -p android assembleRelease -I $init
+
+# instala
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" install -r android\app\build\outputs\apk\release\app-release.apk
 ```
 
-**Foi ela que faltou em 15/09.** O `expo run:android` **pula o prebuild quando `android/` já
-existe** — e é o prebuild que aplica os patches. Da segunda compilação em diante, o `expo-audio`
-volta a ser consumido como AAR pré-compilado e o alarme sai no volume de mídia, sem nada no log
+**Descoberto em 15/09, à noite.** O `npx expo run:android` chama o Gradle por conta própria e **não
+passa o `-I`** — então o init script que força o CMake 3.31 não vale, e a build morre no loop
+`ninja: error: manifest 'build.ninja' still dirty after 100 tries`, em `expo-modules-core` e
+`react-native-reanimated`.
+
+Só aparece quando o `android/` é recriado do zero (um `prebuild`); com a pasta já compilada o
+problema fica escondido.
+
+**O caminho do `-I` precisa ser absoluto.** Relativo, o Gradle o resolve contra o `-p android` e
+procura em `android/gradle/` — o próprio script avisa disso no comentário.
+
+**Se o `android/` for recriado**, rodar `node scripts/aplicar-patches.js` antes: é o prebuild que
+aplica os patches do `expo-audio`, e sem eles o alarme volta ao volume de mídia sem nada no log
 denunciando.
-
-`npm run android` já faz isso sozinho, e o prebuild agora **confere** antes do Gradle — a
-conferência existia só no gancho do EAS, que o caminho do cabo não tem.
 
 ---
 
@@ -94,6 +198,9 @@ respondido é o pior defeito possível aqui.
 
 ---
 
+<details>
+<summary>Passos 2 e 3 (da tarde de 15/09) — superados pelos quatro defeitos da noite, para o registro</summary>
+
 ## Passo 2 — A tela azul trocada pela de "Hora do remédio"
 
 > **Reprovou na build das 14:55, e a causa é nova — o defeito não é o que o nome deste passo dizia.**
@@ -153,16 +260,15 @@ remédio** e **fica** — sem piscar e sem ser trocada. O caso 3 tem que continu
 
 ---
 
-## Passo 3 — O desbloqueio no "Tomei" 🆕
+## Passo 3 — O desbloqueio no "Tomei"
 
-**Achado em 15/09, no caso 3.** Ao tocar em "Tomei" na tela azul, o app foi direto para a Home
-**sem pedir a senha** — e o C.1 estava marcado como aprovado desde 14/09.
+**Investigado em 15/09 à noite, e virou o item A** da lista de pendências no topo. A hipótese
+registrada aqui (de que a tela fosse a rota e não a Activity) estava errada: a causa é o
+`showWhenLocked` da `MainActivity`, e não há conserto sem separar a Activity do alarme.
 
-Ainda **não investigado**. A hipótese é que seja consequência do passo 2: a tela em que ele tocou
-podia ser a rota, e não a Activity, e o desbloqueio vive no caminho da Activity. Se for isso, some
-junto com a correção acima.
+---
 
-**Testar depois do passo 2**, e só investigar a fundo se persistir.
+</details>
 
 ---
 
@@ -215,13 +321,13 @@ coincidem e nada denuncia a diferença. O caminho que funciona nunca tinha sido 
 | B.20 | 4 ou mais: nome e dose de cada | ✅ |
 | B.4 | Alarme → notificação → alarme | ✅ nos dois sentidos |
 | B.9 | Aviso de estoque às 00:01 | ✅ |
-| B.17 | Tela azul com o app nos recentes | ✅ — reconfirmado em 15/09 (caso 3): sobe e **fica** |
+| B.17 | Tela azul com o app nos recentes | ✅ — reconfirmado em 15/09 |
 | — | Som no volume de despertador, 5 cenários | ✅ 15/09 — ver passo 1 |
-| — | Alarme com o celular **em uso** (recentes e fora) | ✅ 15/09 — heads-up, som certo, toque abre a tela do horário |
+| — | Tela azul, bloqueada e **fora** dos recentes | ✅ 15/09 noite — 3x seguidas |
+| — | Tela azul, bloqueada e **nos** recentes | ✅ 15/09 noite — com os textos completos |
+| — | Alarme com o celular **em uso**, nos recentes | ✅ 15/09 noite — heads-up, toque abre a tela do horário |
 
-> **D.5 (tela azul com o app fora dos recentes) e o passo "não sobe com o celular em uso" saíram da
-> lista.** Os dois mediam o comportamento de uma tela que nunca subia pelo `fullScreenAction`; com o
-> mecanismo primário ligado, refazê-los só faz sentido depois que os passos 1 e 2 passarem.
+> **Em uso e FORA dos recentes ainda não passa** — é o item B das pendências, no topo.
 
 ---
 
@@ -240,11 +346,8 @@ coincidem e nada denuncia a diferença. O caminho que funciona nunca tinha sido 
 Descoberto em 14/09, e muda o ciclo inteiro: **dá para compilar aqui e instalar pelo cabo.** A
 máquina já tem tudo (JDK 21, SDK, NDK 27.1.12297006), e o EAS passa a ser só para distribuir.
 
-```
-node scripts/aplicar-patches.js && npx expo run:android --variant release --device
-```
-
-> Sobre a primeira linha, ver o aviso no topo do documento — foi ela que faltou em 15/09.
+**O comando está no topo do documento** — e não é o `expo run:android`, que não passa o init script
+do CMake. Ver o aviso lá.
 
 - **`--variant release` é essencial.** Em debug o JavaScript vem do Metro, e o arranque do processo
   muda — justamente o que estes passos medem. Release embute o bundle, como a preview.
