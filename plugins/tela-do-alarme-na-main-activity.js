@@ -119,26 +119,20 @@ const ORIGINAL = `override fun getMainComponentName(): String = "main"`;
  * correção é do lado do JS (a tela sai de cena ao ver que não há dose), nunca uma condição sobre um
  * intent que não existe neste ponto do ciclo de vida.
  */
-const PATCH = `// [Mapill] Quem decide o componente é o Notifee, sem condição sobre o intent.
+const PATCH = `// [Mapill] O componente é FIXO: esta Activity é só do app.
   //
-  // **Nenhuma guarda funciona aqui**, e as três tentativas de 15/09 mediram por quê:
+  // Perguntar ao Notifee (getMainComponent, que consome o sticky MainComponentEvent) fazia sentido
+  // quando esta Activity servia aos dois donos. Desde a AlarmeActivity (16/09) ela não serve: o
+  // fullScreenAction abre a Activity do alarme, e esta só sobe pelo ícone ou por toque na
+  // notificação.
   //
-  // 1. \`intent?.hasExtra("mainComponent")\` — negava sempre. ReactActivity consulta este método
-  //    durante o onCreate, quando getIntent() ainda é null, e \`null == true\` é false.
-  // 2. \`intent?.hasExtra("notification")\` — idem, mesmo motivo.
-  // 3. Ler o extra no onCreate (onde o intent existe) e guardar num campo — o START mostrava
-  //    \`(has extras)\`, mas hasExtra("notification") deu false assim mesmo. O extra não sobrevive
-  //    ao PendingIntent neste aparelho; o que chega é o bundle que o getLaunchOptions lê.
-  //
-  // Sobra o sticky, e ele funciona: getMainComponent consome um MainComponentEvent
-  // (removeStickEvent), que o Notifee posta ao EXIBIR uma notificação com fullScreenAction.
-  //
-  // O preço é o sticky órfão: com o celular em uso o Android rebaixa para heads-up, ninguém monta
-  // a Activity, e o evento fica pendurado até a próxima abertura consumi-lo. Isso é tratado no JS
-  // — ver \`escutar-avisos\`, que manda a tela sair de cena quando ela sobe sem alarme tocando.
+  // E o sticky é postado quando a notificação é EXIBIDA, não quando alguém toca. Com o celular em
+  // uso o Android rebaixa para heads-up, ninguém monta a AlarmeActivity, e o evento fica pendurado:
+  // consumi-lo aqui montava a tela azul no lugar da tela do horário, com o app fora dos recentes.
+  // Medido em aparelho em 16/09.
   //
   // Ver plugins/tela-do-alarme-na-main-activity.js
-  override fun getMainComponentName(): String = Notifee.getInstance().getMainComponent("main")`;
+  override fun getMainComponentName(): String = "main"`;
 
 /**
  * O corpo vazio do delegate que o Expo gera — é onde o `getLaunchOptions` entra.
@@ -254,7 +248,6 @@ const ONCREATE_PATCH = `    // [Mapill] Quem abriu esta Activity: o alarme de te
 const IMPORT_INTENT = "import android.content.Intent";
 
 /** O import que o patch exige. */
-const IMPORT = "import app.notifee.core.Notifee";
 
 /**
  * A marca dos patches, para não aplicar duas vezes. `prebuild` roda mais de uma vez.
@@ -265,7 +258,7 @@ const IMPORT = "import app.notifee.core.Notifee";
  * `MainActivity` seguiu com a guarda velha — a que barra a tela azul. Marcar pelo nome do método
  * responde "algum patch já entrou"; o que precisa ser sabido é "o patch **desta versão** entrou".
  */
-const MARCA = "Nenhuma guarda funciona aqui";
+const MARCA = "O componente é FIXO";
 
 function withTelaDoAlarmeNaMainActivity(config) {
   return withMainActivity(config, (config) => {
@@ -295,22 +288,7 @@ function withTelaDoAlarmeNaMainActivity(config) {
 
     let novo = contents.replace(ORIGINAL, PATCH);
 
-    /**
-     * O import entra depois do `package`, que é o único lugar válido em Kotlin.
-     *
-     * `addImports` do `AndroidConfig.CodeMod` faria isto, mas ele insere depois do último import já
-     * existente — e a ordem alfabética do arquivo gerado não é garantida. Fazer à mão aqui é uma
-     * linha, e falha de forma visível se o `package` sumir.
-     */
-    if (!novo.includes(IMPORT)) {
-      const pacote = novo.match(/^package .+$/m);
-      if (pacote === null) {
-        throw new Error(
-          "[tela-do-alarme] a MainActivity não tem declaração de package — não sei onde pôr o import.",
-        );
-      }
-      novo = novo.replace(pacote[0], `${pacote[0]}\n\n${IMPORT}`);
-    }
+    // Nenhum import a acrescentar por este patch: o componente é uma string literal.
 
     /**
      * O segundo patch: o horário do alarme entrando como prop.

@@ -474,32 +474,23 @@ export async function consultarRespostaDeAbertura(): Promise<
   if (inicial === null) return null;
 
   /**
-   * **O alarme que irrompeu não é um toque, e o bootstrap não navega por ele.**
+   * **A guarda do alarme saiu daqui em 16/09, e a Activity própria é o motivo.**
    *
-   * Este é o defeito relatado em aparelho em 15/09: com o app **fora dos recentes** e a tela
-   * bloqueada, a tela azul subia e era imediatamente trocada pela de "Hora do remédio" — o "pisca"
-   * que o Gabriel descreveu. Nos recentes não acontecia, e era esse contraste que apontava o
-   * culpado.
+   * Ela existia porque `getInitialNotification` responde a duas perguntas com a mesma resposta:
+   * ela diz "esta notificação abriu a Activity", e enquanto o `fullScreenAction` montava a
+   * `MainActivity` isso era verdade **sem ninguém ter tocado em nada**. O bootstrap lia o alarme
+   * que irrompeu como toque e empurrava a tela do horário por cima da azul — o "pisca" de 15/09.
    *
-   * A causa é que `getInitialNotification` responde a **duas** perguntas diferentes com a mesma
-   * resposta. Ela diz "esta notificação abriu a Activity", e quando o `fullScreenAction` monta a
-   * `MainActivity` isso é literalmente verdade: o intent que a abriu **é** o do alarme, sem ninguém
-   * ter tocado em nada. O `AlarmeRaiz` já sabia disso e lê o mesmo intent pelos `initialProps`; era
-   * este caminho que continuava lendo como toque.
+   * O comentário que morava aqui previa que ela não alcançaria o toque real, "porque o `PRESS` é
+   * tratado pelo listener, que cancela a notificação antes". **Com o processo frio isso não vale:**
+   * não há listener de pé para cancelar coisa alguma. A notificação sobrevivia, a guarda a via como
+   * alarme e devolvia `null` — e o toque com o app fora dos recentes parava de navegar. Medido em
+   * aparelho em 16/09.
    *
-   * O filtro de ação abaixo não alcançava: um full-screen intent não tem `pressAction`, então a ação
-   * vem vazia e passava como "toque no corpo".
-   *
-   * **Por que aqui, e não por uma guarda de cena.** `jaEstaEmCena` responderia à pergunta certa, mas
-   * com corrida — o bootstrap roda no arranque do processo, e pode chegar antes de `AlarmeRaiz`
-   * anunciar que está nascendo. O prefixo do id é síncrono e não depende de ordem nenhuma.
-   *
-   * Não alcança o caso em que a pessoa **toca** no alarme com o celular em uso: ali o `PRESS` é
-   * tratado pelo listener, que cancela a notificação antes — ela não sobrevive para ser a inicial.
+   * Agora a pergunta não precisa mais ser feita: o `fullScreenAction` abre a `AlarmeActivity`, e
+   * este código só existe dentro do `_layout` do `expo-router`, que monta na `MainActivity`. Se ele
+   * está rodando, **a MainActivity subiu — e ela só sobe por toque**.
    */
-  const idInicial = inicial.notification.id;
-  if (typeof idInicial === "string" && ehAlarmeDeTelaCheia(idInicial)) return null;
-
   const dados = lerDadosDoAviso(inicial.notification.data);
   if (dados === null) return null;
 
