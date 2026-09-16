@@ -206,3 +206,51 @@ podem voltar a servir. Decidir caso a caso.
 > **Nada disso antes da validação da build de 15/09 em aparelho.** Limpar antes de saber o que de
 > fato funciona confunde as duas coisas: se algo falhar, não se sabe se foi a correção ou a
 > limpeza.
+
+---
+
+## O que ficou para depois — e o tamanho real
+
+> Acrescentado em 16/09, depois de as três primeiras etapas passarem. O levantamento original só
+> media os dez arquivos do alarme; medido o `src/` inteiro, o padrão é do projeto todo.
+
+### O que já foi feito
+
+| Etapa | Commit | Resultado |
+|---|---|---|
+| Comentários que mentiam | `1f9bd24` | 13 casos, 66 linhas |
+| Código morto | `6f124a1` | 62 linhas |
+| Acessibilidade + alinhamento do TCC | `1ec717a` | 5/5 animações respeitam a preferência |
+| Prosa histórica dos arquivos do alarme | `0b434bd` | 83 linhas; `alarme-em-cena` de 264 → 200 |
+
+Em todas: **nenhuma linha de código alterada** — conferido por `git diff`, `tsc --noEmit` e lint a
+cada etapa.
+
+### O que falta, medido em 16/09
+
+| Marcador | Ocorrências em `src/` |
+|---|---|
+| Subtítulos `##` / `###` dentro de JSDoc | **104** |
+| Linhas de comentário com data de teste | **155** |
+| Menções a "Gabriel" | **62** |
+
+### A decisão do Gabriel
+
+**Corte agressivo, e não poda.** Duas diretrizes, nas palavras dele:
+
+1. **Os comentários passam a ser dele.** Sai a terceira pessoa que narra o que "o Gabriel relatou",
+   "decidiu" ou "testou em 12/09" — isso é registro de processo, e o processo já está nos documentos
+   de teste. O comentário é escrito por quem mantém o código, para quem o mantém depois.
+2. **Baixar drasticamente o nível.** Não é enxugar 10%: é mudar a régua. Um JSDoc de 40 linhas para
+   uma variável booleana não vira um de 20 — vira uma frase, ou nenhuma.
+
+O que **fica**, mesmo no corte agressivo: a restrição que não se deduz do código. `sound` omitido
+cria canal mudo; `intent` é `null` em `getMainComponentName`; o extra não sobrevive ao
+`PendingIntent`; `SET_ALARM_CLOCK` atravessa o Doze. Quem apagar isso vai reencontrar o defeito.
+
+### Por que dá para cortar fundo agora
+
+Porque o conhecimento deixou de morar só no código:
+[`ARQUITETURA-DO-ALARME.md`](ARQUITETURA-DO-ALARME.md) guarda o mecanismo,
+[`O-QUE-FALTA-TESTAR.md`](O-QUE-FALTA-TESTAR.md) e [`ROTEIRO-DE-TESTE.md`](ROTEIRO-DE-TESTE.md)
+guardam o histórico. Antes disso, cortar teria perdido o que ninguém mais registrava.
