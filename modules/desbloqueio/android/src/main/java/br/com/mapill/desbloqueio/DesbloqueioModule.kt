@@ -41,6 +41,24 @@ class DesbloqueioModule : Module() {
     }
 
     /**
+     * Encerra **esta** Activity e a tira dos recentes — sem matar o processo.
+     *
+     * A tela do alarme vive numa Activity própria, em task própria (`AlarmeActivity`,
+     * `launchMode=singleInstance`). `BackHandler.exitApp()` não serve aqui: ele encerra o processo
+     * inteiro, e com ele o app que pode estar aberto atrás — além de derrubar o serviço que toca o
+     * som antes de ele se despedir.
+     *
+     * `finishAndRemoveTask` fecha a task do alarme e devolve o aparelho ao que estava antes: o
+     * bloqueio, se era dali que a tela veio. É o que torna "Tomei" com o celular bloqueado não
+     * revelar o app — junto com o `showWhenLocked` ter saído da `MainActivity`.
+     */
+    AsyncFunction("fecharTelaDoAlarme") {
+      val activity = appContext.currentActivity ?: return@AsyncFunction false
+      activity.runOnUiThread { activity.finishAndRemoveTask() }
+      return@AsyncFunction true
+    }
+
+    /**
      * **Não existe função para reimpor o bloqueio**, e isto é uma nota para quem vier procurá-la.
      *
      * `finishAndRemoveTask` foi tentado em 15/09 e não resolve: quando a Activity sobe com

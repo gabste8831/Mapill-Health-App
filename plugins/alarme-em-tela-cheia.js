@@ -139,13 +139,10 @@ module.exports = function withAlarmeEmTelaCheia(config) {
     // Expo costuma declará-lo, mas depender disso deixaria o plugin quebrando em silêncio.
     manifesto.manifest.$["xmlns:tools"] ??= "http://schemas.android.com/tools";
 
-    const principal = aplicacao.activity?.find(
-      (activity) => activity.$["android:name"] === ".MainActivity",
-    );
-    if (principal) {
-      principal.$["android:showWhenLocked"] = "true";
-      principal.$["android:turnScreenOn"] = "true";
-    }
+    // O `showWhenLocked` saiu daqui em 16/09, e a mudanca e o ponto todo: ele vive agora na
+    // AlarmeActivity (plugins/activity-propria-do-alarme.js). Nesta Activity, a licenca era do app
+    // inteiro — responder a dose com o celular bloqueado deixava medicamentos, historico e ficha
+    // de saude acessiveis sem senha.
 
     withReceptoresDeBootExportados(manifesto);
     withTipoDoServicoDeSom(manifesto);

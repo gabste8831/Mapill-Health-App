@@ -4,6 +4,7 @@ import notifee, {
   AndroidForegroundServiceBehavior,
   AndroidForegroundServiceType,
   AndroidImportance,
+  AndroidLaunchActivityFlag,
   AndroidVisibility,
   AuthorizationStatus,
   TriggerType,
@@ -20,6 +21,7 @@ import type {
 import { colors } from "@/shared/theme";
 import { ACAO_PULEI, ACAO_TOMEI } from "./acoes";
 import {
+  ACTIVITY_DO_ALARME,
   CANAL_ALARME,
   CANAL_LEMBRETE,
   COMPONENTE_DE_ALARME,
@@ -416,10 +418,29 @@ export class NotifeeGateway implements NotificationGateway {
                  */
                 foregroundServiceBehavior: AndroidForegroundServiceBehavior.IMMEDIATE,
                 /**
-                 * A peça que sustenta a promessa central: abre o componente React registrado em
-                 * `index.js` **por cima da tela de bloqueio**, sem passar pelo roteador do app.
+                 * A peça que sustenta a promessa central: abre a tela do alarme **por cima da tela
+                 * de bloqueio**, sem passar pelo roteador do app.
+                 *
+                 * `launchActivity` aponta a Activity própria do alarme, e é o que devolve o
+                 * aparelho ao bloqueio depois de responder — ver
+                 * `plugins/activity-propria-do-alarme.js`. A lib usa o nome literalmente:
+                 * `IntentUtils.getLaunchActivity` só cai na launcher activity quando o valor é
+                 * ausente ou `"default"`.
+                 *
+                 * O `mainComponent` fica, e **não** é redundância: o extra `notification` — que
+                 * leva o horário da dose à tela por `initialProps` — só é anexado ao intent quando
+                 * ele está presente (`NotificationManager.java`, no ramo do full-screen).
+                 *
+                 * `NEW_TASK` é explícito porque o caminho do full-screen **não** o aplica sozinho,
+                 * ao contrário do toque na notificação. Sem ele a Activity não nasce em task
+                 * própria, e fechá-la voltaria a revelar o app em vez do bloqueio.
                  */
-                fullScreenAction: { id: "alarme", mainComponent: COMPONENTE_DE_ALARME },
+                fullScreenAction: {
+                  id: "alarme",
+                  launchActivity: ACTIVITY_DO_ALARME,
+                  launchActivityFlags: [AndroidLaunchActivityFlag.NEW_TASK],
+                  mainComponent: COMPONENTE_DE_ALARME,
+                },
                 /**
                  * O toque no corpo **não** abre o componente nativo — ele abre o app.
                  *

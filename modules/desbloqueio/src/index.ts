@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 type ModuloDeDesbloqueio = NativeModule & {
   estaBloqueado(): Promise<boolean>;
   pedirDesbloqueio(): Promise<boolean>;
+  fecharTelaDoAlarme(): Promise<boolean>;
 };
 
 /**
@@ -55,3 +56,19 @@ export async function pedirDesbloqueio(): Promise<boolean> {
  * está em `docs/O-QUE-FALTA-TESTAR.md`, com a saída proposta: uma Activity separada só para o
  * alarme, com o `showWhenLocked` nela e não na `MainActivity`.
  */
+
+/**
+ * Fecha a Activity do alarme e a tira dos recentes — **sem matar o processo**.
+ *
+ * `BackHandler.exitApp()` fazia isso antes, e deixou de servir quando a tela ganhou Activity
+ * própria (16/09): ele encerra o processo inteiro, levando junto o app que pode estar aberto atrás
+ * e o serviço que toca o som.
+ *
+ * **`false` quando não há módulo nativo** — Expo Go, web, build antiga. Quem chama cai no
+ * `BackHandler.exitApp()`, que é o comportamento de antes: pior, mas melhor que uma tela de alarme
+ * que não fecha.
+ */
+export async function fecharTelaDoAlarme(): Promise<boolean> {
+  if (Platform.OS !== "android" || modulo === null) return false;
+  return modulo.fecharTelaDoAlarme().catch(() => false);
+}

@@ -87,6 +87,18 @@ export const CANAL_LEMBRETE = "dose-reminder-v8";
 export const COMPONENTE_DE_ALARME = "alarme-de-dose";
 
 /**
+ * A Activity que o alarme abre — **a própria**, e não a do app.
+ *
+ * O nome completo da classe, como o Notifee o resolve (`Class.forName`). Errar aqui não dá erro de
+ * compilação: a lib registra `Launch Activity ... does not exist` no logcat e a tela cheia
+ * simplesmente não sobe.
+ *
+ * É ela que tem `showWhenLocked`, e é por isso que responder a dose com o celular bloqueado não
+ * deixa o app acessível depois. Ver `plugins/activity-propria-do-alarme.js`.
+ */
+export const ACTIVITY_DO_ALARME = "com.gabsteffens.mapillapp.AlarmeActivity";
+
+/**
  * Recria o canal quando o que está no aparelho **diverge** do que pedimos.
  *
  * Um canal congela na criação: `createChannel` sobre um id existente atualiza nome e descrição, e

@@ -13,7 +13,8 @@ import { BackHandler } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { DoseScheduleRepository } from "@/data/repositories/dose-schedule-repository";
-import { estaBloqueado } from "@/modules/desbloqueio";
+import { fecharTelaDoAlarme } from "@/modules/desbloqueio";
+
 import { resolvesDose } from "@/domain/entities/intake-log";
 import { useDatabaseReady } from "@/hooks/use-database-ready";
 import {
@@ -138,59 +139,23 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   }, []);
 
   /**
-   * **A tela sai de cena se subiu por um sticky órfão** — o toque que não devia trazê-la.
+   * **O sticky órfão deixou de decidir qualquer coisa** — e por isso a guarda que vivia aqui saiu.
    *
-   * ## O defeito
+   * Ela existia porque a `MainActivity` servia a dois donos, e precisava adivinhar qual tela montar:
+   * o Notifee posta o `MainComponentEvent` quando a notificação é **exibida**, não quando alguém
+   * toca, e o evento ficava pendurado para o toque seguinte consumir. A tela azul subia no lugar da
+   * tela do horário, com o celular em uso.
    *
-   * Com o celular **em uso**, tocar na notificação abria a tela azul. Devia abrir a de "Hora do
-   * remédio": decisão de 10/09, e é o que o listener faz com o `PRESS`. Medido às 20:49 de 15/09.
+   * A tentativa anterior perguntava "há alarme na bandeja?" e nunca disparava (o aviso é `ongoing`
+   * e continua lá); a seguinte perguntava "o aparelho está bloqueado?" e nunca foi a aparelho.
    *
-   * A causa é o Notifee postar o `MainComponentEvent` quando a notificação é **exibida**, não
-   * quando alguém toca. Com o aparelho em uso o Android rebaixa o full-screen intent para heads-up,
-   * ninguém monta a Activity, e o evento fica pendurado. O toque seguinte abre a `MainActivity`,
-   * `getMainComponent` consome esse sticky e devolve o componente do alarme.
+   * Com a `AlarmeActivity` (16/09) a pergunta some junto com o problema: **esta tela só monta na
+   * Activity do alarme**, que devolve o componente fixo. Quem abre o app pelo ícone ou toca na
+   * notificação chega à `MainActivity`, que monta `"main"` e nunca consulta sticky nenhum.
    *
-   * ## Por que a guarda vive aqui, e não na `MainActivity`
-   *
-   * Porque **nenhuma guarda nativa funciona** — três tentativas de 15/09 mediram isso (ver o
-   * comentário de `getMainComponentName` no plugin). O intent é `null` quando o componente é
-   * decidido, e o extra que distinguiria os caminhos não sobrevive ao `PendingIntent`.
-   *
-   * ## A pergunta que funciona, e a que não funcionou
-   *
-   * A primeira tentativa perguntou **"há alarme na bandeja?"**, e ela nunca dispara: o aviso é
-   * `ongoing: true` e continua lá mesmo rebaixado a heads-up. Tocar nele encontra o alarme na
-   * bandeja, a guarda conclui "legítimo" e a tela azul fica. Medido em 15/09, no cenário em uso
-   * com o app fora dos recentes.
-   *
-   * A pergunta certa é **"esta tela deveria estar na frente agora?"**, e o app já sabe respondê-la:
-   * a tela cheia existe para irromper **sobre o bloqueio**. Com o aparelho destravado o Android
-   * rebaixa o full-screen intent justamente porque a pessoa está usando o celular, e o destino do
-   * toque é a tela do horário (`escutar-avisos`), que o listener já está abrindo.
-   *
-   * É a mesma pergunta que `use-dose-notifications` faz antes de abrir a rota, pelo mesmo motivo.
-   *
-   * `=== false` e não `!`: a resposta tem três estados, e `null` é "não consegui perguntar" — build
-   * sem o módulo nativo. Aí a tela **fica**, porque errar para o lado de mostrar o alarme é o lado
-   * certo de errar num despertador de remédio.
-   *
-   * `BackHandler.exitApp()` e não `onFechar`: esta Activity nasceu de um toque cujo destino é a
-   * tela do horário, e o listener já a está abrindo. Sair devolve a vez para ela — e aqui não há a
-   * task a encerrar, porque o app segue aberto atrás.
+   * Mantê-la seria pior que inútil: ela derrubaria a tela legítima no instante em que a pessoa
+   * desbloqueia o aparelho para responder o alarme.
    */
-  useEffect(() => {
-    let vivo = true;
-    void estaBloqueado()
-      .then((bloqueado) => {
-        if (!vivo) return;
-        if (bloqueado === false) BackHandler.exitApp();
-      })
-      .catch(() => {});
-    return () => {
-      vivo = false;
-    };
-  }, []);
-
   /**
    * **Esconde a splash nativa — e é isto que tira a tela azul vazia.**
    *
@@ -344,29 +309,28 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
         // coisa veio para a frente, e o alarme deve sair de cena junto.
         ehActivityDeAlarme
         /**
-         * Fechar a tela cheia é **encerrar a Activity**, e não navegar para trás: não há pilha
-         * atrás dela — ela nasceu de uma notificação, por cima da tela de bloqueio.
+         * Fechar a tela do alarme é **encerrar esta Activity**, e não navegar para trás: não há
+         * pilha atrás dela — ela nasceu de uma notificação, em task própria.
          *
-         * `BackHandler.exitApp()` faz exatamente isso. Não é `stopForegroundService`, que só
-         * encerra um serviço em primeiro plano — recurso que este alarme não usa, e chamá-lo
-         * deixaria a tela aberta com o alarme já respondido.
+         * ## Por que não é mais `exitApp`
          *
-         * ## O que isto **não** resolve, e por que não dá para resolver aqui
+         * `BackHandler.exitApp()` encerra o **processo inteiro**. Enquanto o alarme e o app
+         * dividiam a mesma Activity isso era aceitável; com a `AlarmeActivity` em task própria
+         * (16/09) passaria a matar o app aberto atrás e o serviço que toca o som.
          *
-         * Responder a dose com o aparelho bloqueado deixa o app acessível sem autenticação —
-         * medido em 15/09 às 21:10 e 21:21. `finishAndRemoveTask` foi tentado e não muda nada: o
-         * Android **já dispensou o keyguard** quando esta Activity subiu com `showWhenLocked` e
-         * `turnScreenOn`, e não existe API para reimpô-lo.
+         * `finishAndRemoveTask` fecha só esta task e devolve o aparelho ao que estava antes — o
+         * bloqueio, quando foi dali que a tela veio. **É a metade que faltava** para responder a
+         * dose com o celular bloqueado não deixar o app acessível: a outra é o `showWhenLocked`
+         * ter saído da `MainActivity`.
          *
-         * A causa é estrutural e está no topo de `DesbloqueioModule`: `showWhenLocked` vale para a
-         * `MainActivity`, e o `index.js` monta a tela do alarme e o app inteiro no mesmo processo.
-         * A permissão de aparecer sobre o bloqueio é, portanto, do app todo.
-         *
-         * A saída seria uma Activity separada só para o alarme, com o `showWhenLocked` nela e não
-         * na `MainActivity`. É refatoração de arquitetura, não ajuste — ver
-         * `docs/O-QUE-FALTA-TESTAR.md`.
+         * O `exitApp` fica como último recurso, para a build sem o módulo nativo: pior, mas melhor
+         * que uma tela de alarme que não fecha.
          */
-        onFechar={() => BackHandler.exitApp()}
+        onFechar={() => {
+          void fecharTelaDoAlarme().then((fechou) => {
+            if (!fechou) BackHandler.exitApp();
+          });
+        }}
       />
     </SafeAreaProvider>
   );
