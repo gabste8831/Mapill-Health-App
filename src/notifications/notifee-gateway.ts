@@ -66,7 +66,7 @@ export const PREFIXO_ADIADO = "adiado-";
  * esta exceção, o aviso de teste seria cancelado no instante em que se faz o gesto que o teste
  * pede.
  */
-export const PREFIXO_DE_TESTE = "teste-";
+const PREFIXO_DE_TESTE = "teste-";
 
 /**
  * Prefixo do alarme de tela cheia, aplicado **aqui** e não no domínio.
@@ -75,7 +75,7 @@ export const PREFIXO_DE_TESTE = "teste-";
  * cheia — ele decide *quando* avisar, não *como*. Marcar o id nesta camada é o que permite ao
  * listener reconhecer um alarme sem que a regra pura conheça o Notifee (§2.6.1).
  */
-export const PREFIXO_ALARME = "alarme:";
+const PREFIXO_ALARME = "alarme:";
 
 export function ehAlarmeDeTelaCheia(id: string): boolean {
   return id.startsWith(PREFIXO_ALARME);

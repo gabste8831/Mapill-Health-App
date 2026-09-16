@@ -18,6 +18,15 @@
  *     node scripts/conferir-ids-de-aviso.mjs
  */
 
+/**
+ * ⚠️ **As quatro regras abaixo são CÓPIA das de `src/notifications/notifee-gateway.ts`.**
+ *
+ * O script é `.mjs` puro e roda sem transpilação, então não importa do TypeScript. O preço é este:
+ * mudar um prefixo lá e não mudar aqui faz o script conferir o valor antigo e **passar** — dando
+ * segurança falsa justamente sobre o que ele existe para proteger.
+ *
+ * Mexeu em prefixo de id no gateway? Mexa aqui também.
+ */
 const PREFIXO_ADIADO = "adiado-";
 const PREFIXO_ALARME = "alarme:";
 
