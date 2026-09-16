@@ -456,7 +456,7 @@ O trabalho busca responder ao seguinte questionamento principal: De que maneira 
 Quadro 2 \- Comparação entre o Mapill e soluções de mercado
 
 | Aspecto | Mapill | Medisafe | MyTherapy |
-| ----- | ----- | ----- | ----- |
+| :---- | :---- | :---- | :---- |
 | Funcionalidades essenciais gratuitas | Sim, sem exceções | Não (desde 2026, limitado a 2 medicamentos) | Sim |
 | Como sustenta a gratuidade | Não se aplica | Não se aplica (cobra assinatura) | Repassa dados agregados a parceiros farmacêuticos e de pesquisa |
 | Funcionamento sem conta | Completo, por padrão | Requer conta | Funcionalidades essenciais sim. Sincronização exige conta |
@@ -500,7 +500,7 @@ O levantamento de requisitos do aplicativo seguiu a classificação clássica de
 Quadro 3 \- Requisitos funcionais: identidade e consentimento
 
 | Código | Requisito |
-| ----- | ----- |
+| :---- | :---- |
 | 01 | O sistema deve permitir uso sem conta, mantendo toda a funcionalidade clínica |
 | 02 | O sistema deve permitir autenticação via Google (OAuth), como opção |
 | 03 | O usuário anônimo deve poder vincular sua conta Google depois, sem perder dados locais |
@@ -513,7 +513,7 @@ Fonte: elaborado pelo autor.
 Quadro 4 \- Requisitos funcionais: cadastro clínico
 
 | Código | Requisito |
-| ----- | ----- |
+| :---- | :---- |
 | 07 | O sistema deve cadastrar medicamentos em nove formas farmacêuticas: comprimido, líquido, gota, injeção, pomada, sublingual, inalador, adesivo e sachê |
 | 08 | A unidade de dose deve acompanhar a forma farmacêutica escolhida |
 | 09 | O sistema deve suportar quatro frequências: todo dia, dias da semana, ciclo com pausa, e sob demanda |
@@ -529,7 +529,7 @@ Fonte: elaborado pelo autor.
 Quadro 5 \- Requisitos funcionais: operação diária 
 
 | Código | Requisito |
-| ----- | ----- |
+| :---- | :---- |
 | 16 | O sistema deve apresentar a agenda de doses do dia, com estado visual por dose |
 | 17 | O usuário deve poder confirmar ou pular cada dose |
 | 18 | Confirmar dose deve descontar do estoque a quantidade da dose, não uma unidade |
@@ -545,9 +545,9 @@ Fonte: elaborado pelo autor.
 Quadro 6 \- Requisitos funcionais: lembretes
 
 | Código | Requisito |
-| ----- | ----- |
+| :---- | :---- |
 | 25 | O sistema deve disparar lembrete no horário da dose com o aplicativo fechado |
-| 26 | O sistema deve oferecer dois modos: alarme (som alto, ignora silencioso) e notificação |
+| 26 | O sistema deve oferecer três modos de lembrete: alarme, notificação e desligado |
 | 27 | A notificação deve oferecer ações rápidas: confirmar e adiar |
 | 28 | O adiamento deve ser permitido uma única vez por horário |
 | 29 | Doses de medicamentos diferentes no mesmo horário devem gerar um único aviso agrupado |
@@ -561,7 +561,7 @@ Fonte: elaborado pelo autor.
 Quadro 7 \- Requisitos funcionais: agenda clínica
 
 | Código | Requisito |
-| ----- | ----- |
+| :---- | :---- |
 | 34 | O sistema deve cadastrar compromissos (consultas, exames, terapia) com lembrete próprio |
 | 35 | O calendário deve exibir compromissos e doses no mesmo dia |
 | 36 | O sistema deve projetar doses futuras além do horizonte gravado |
@@ -573,7 +573,7 @@ Fonte: elaborado pelo autor.
 Quadro 8 \- Requisitos funcionais: dados e direitos
 
 | Código | Requisito |
-| ----- | ----- |
+| :---- | :---- |
 | 39 | O sistema deve sincronizar com a nuvem quando houver conta vinculada |
 | 40 | Conflito de edição deve resolver por Last-Write-Wins, de forma determinística |
 | 41 | O sistema deve calcular taxa de adesão por período e por medicamento |
@@ -592,11 +592,11 @@ Os requisitos não funcionais sustentam as decisões arquiteturais discutidas na
 Quadro 9 \- Requisitos não funcionais
 
 | Código | Requisito |
-| ----- | ----- |
+| :---- | :---- |
 | 01 | Offline-first: nenhuma operação clínica pode depender de rede |
 | 02 | O lembrete deve funcionar com o app fechado e após reinicialização do aparelho |
 | 03 | Toda tabela na nuvem deve ter isolamento por usuário |
-| 04 | Migrações de banco devem ser aditivas e reversíveis por versão |
+| 04 | Migrações de banco devem ser sequenciais, versionadas e preservar o histórico clínico. |
 | 05 | A interface deve respeitar a escala de fonte do sistema |
 | 06 | Nenhuma credencial deve constar no repositório |
 | 07 | Nenhuma operação pode falhar em silêncio |
@@ -621,16 +621,16 @@ Fonte: elaborado pelo autor.
 
 ### **4.3.4 Notificações e Lembretes**  	Doses de medicamentos diferentes marcadas para o mesmo horário geram um único aviso agrupado, e o adiamento de um lembrete é permitido apenas uma vez por horário, deixando de ser oferecido na segunda tentativa. Qualquer alteração em uma prescrição cancela a totalidade dos avisos agendados e reconstrói o agendamento por completo, evitando que um lembrete de um tratamento já encerrado continue sendo emitido. Além disso, o texto apresentado ao paciente descreve exatamente o comportamento entregue pela plataforma móvel, e compromissos clínicos utilizam apenas notificações comuns, reservando o alarme sonoro de alta prioridade exclusivamente para doses de medicamento.
 
-### **4.3.5 Sincronização de Dados**  	Conflitos de edição entre aparelhos diferentes são resolvidos pelo critério de *Last-Write-Wins* já apresentado na seção 2.9.3, sempre considerando o registro em sua totalidade, nunca mesclando campos isolados de versões diferentes. A exclusão de um registro, por sua vez, é propagada à nuvem antes de ser removida localmente, e de forma definitiva, e não apenas lógica, o que impede que um dado excluído pelo titular reapareça em uma sincronização posterior. 
+### **4.3.5 Sincronização de Dados**  	Conflitos de edição entre aparelhos diferentes são resolvidos pelo critério de Last-Write-Wins já apresentado na seção 2.9.3, sempre considerando o registro em sua totalidade, nunca mesclando campos isolados de versões diferentes.
 
-### 
+### A exclusão ocorre em duas modalidades. A de um registro individual, como um tratamento encerrado, é lógica: a linha recebe um carimbo de exclusão e permanece na base, o que preserva o histórico de doses já registradas e permite propagar a remoção aos demais aparelhos, já que uma linha apagada desapareceria sem deixar registro e retornaria na sincronização seguinte. Os registros são removidos da nuvem antes do aparelho, ordem que impede que a sincronização seguinte os traga de volta. 	Não há expurgo automático por decurso de prazo, e isso é deliberado. O histórico de adesão é o insumo do relatório levado à consulta, cujo intervalo costuma ser semestral, de modo que uma retenção curta inutilizaria a funcionalidade que justifica a aplicação. A eliminação permanece, assim, prerrogativa exclusiva do titular.
 
-### **4.3.6 Cálculo de Adesão**  	Doses cujo horário ainda não chegou não entram no cálculo da taxa de adesão, evitando que o percentual seja penalizado por compromissos futuros, e a ausência completa de doses vencidas resulta na indicação de que ainda não há dados suficientes para medição, em vez da apresentação de uma taxa de zero por cento, que representaria uma afirmação incorreta sobre o comportamento do paciente.
+###  **4.3.6 Cálculo de Adesão**  	Doses cujo horário ainda não chegou não entram no cálculo da taxa de adesão, evitando que o percentual seja penalizado por compromissos futuros, e a ausência completa de doses vencidas resulta na indicação de que ainda não há dados suficientes para medição, em vez da apresentação de uma taxa de zero por cento, que representaria uma afirmação incorreta sobre o comportamento do paciente.
 
 Quadro 10 \- Regras de negócio
 
 | Código | Regra | Justificativa |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | 01 | A ausência de resposta nunca é um desfecho | Uma dose não respondida jamais vira "pulada" pela passagem do tempo. Isso inventaria um fato não confirmado pelo paciente |
 | 02 | O estoque desconta a dose, não a unidade | Descontar uma unidade fixa por confirmação erraria a previsão em posologias de múltiplas unidades por dose |
 | 03 | O estoque conta na unidade da embalagem | Quando estoque e dose usam unidades incompatíveis, o sistema recusa dar previsão em vez de calcular uma resposta incerta |
@@ -715,7 +715,7 @@ Fonte: elaborado pelo autor.
 Quadro 11 \- medications \- Modelo de dados referente às medicações
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único do medicamento |
 | user\_id | *uuid (FK)* | Proprietário do registro, referencia o usuário autenticado |
 | name | *text* | Nome do medicamento |
@@ -734,7 +734,7 @@ Fonte: elaborado pelo autor.
 Quadro 12 \- prescriptions \- Modelo de dados referente às prescrições
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único da prescrição |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | medication\_id | *uuid (FK)* | Medicamento ao qual a prescrição se refere |
@@ -761,7 +761,7 @@ Fonte: elaborado pelo autor.
 Quadro 13 \- dose\_schedules \- Modelo de dados referente aos horários de dose
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único do horário de dose |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | prescription\_id | *uuid (FK)* | Prescrição à qual este horário pertence |
@@ -777,7 +777,7 @@ Fonte: elaborado pelo autor.
 Quadro 14 \- intake\_logs \- Modelo de dados referente aos registros de ingestão
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único do registro de ingestão |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | dose\_schedule\_id | *uuid (FK)* | Horário de dose ao qual este registro se refere |
@@ -792,7 +792,7 @@ Fonte: elaborado pelo autor.
 Quadro 15 \- inventory\_items \- Modelo de dados referente aos itens de estoque
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único do item de estoque |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | medication\_id | *uuid (FK)* | Medicamento ao qual este estoque se refere |
@@ -810,7 +810,7 @@ Fonte: elaborado pelo autor.
 Quadro 16 \- inventory\_adjustments \- Modelo de dados referente aos ajustes de estoque
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único do ajuste de estoque |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | inventory\_item\_id | *uuid (FK)* | Item de estoque ao qual este ajuste se refere |
@@ -824,7 +824,7 @@ Fonte: elaborado pelo autor.
 Quadro 17 \- appointments \- Modelo de dados referente aos compromissos
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único do compromisso |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | title | *text* | Título do compromisso |
@@ -844,7 +844,7 @@ Fonte: elaborado pelo autor.
 Quadro 18 \- patient\_profiles \- Modelo de dados referente aos perfis de paciente
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único da ficha de saúde |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | full\_name | *text* | Nome completo do titular |
@@ -864,7 +864,7 @@ Fonte: elaborado pelo autor.
 Quadro 19 \- consent\_records \- Modelo de dados referente aos registros de consentimento
 
 | Campo | Tipo | Descrição |
-| ----- | ----- | ----- |
+| :---- | :---- | :---- |
 | id | *uuid (PK)* | Identificador único do registro de consentimento |
 | user\_id | *uuid (FK)* | Proprietário do registro |
 | terms\_version | *text* | Versão do termo de uso aceito |
@@ -874,61 +874,35 @@ Quadro 19 \- consent\_records \- Modelo de dados referente aos registros de cons
 
 Fonte: elaborado pelo autor.
 
-### 4.6 USABILIDADE E EXPERIÊNCIA DO USUÁRIO
+# 4.6 JORNADA E EXPERIÊNCIA DO USUÁRIO
 
-### 
+	A aplicação prática das heurísticas de usabilidade discutidas na seção 2.4 percorre o aplicativo na ordem em que o paciente de fato o utiliza, do primeiro acesso ao acompanhamento de longo prazo. Cada etapa dessa jornada é analisada à luz do referencial teórico, de modo a demonstrar como decisões de arquitetura da informação, prevenção de erros e psicologia do design se materializam em telas da aplicação.
 
-### **4.6.1 Gestão centralizada como SSoT**
+**4.6.1 Primeiro acesso**
 
-### 
+A primeira tela aparente ao usuário é a tela de login do sistema, onde estão disponíveis as opções de "Continuar com Google", caso o paciente deseje vincular seus dados a uma conta e habilitar a sincronização, e "Continuar sem login", caso prefira usar o aplicativo apenas localmente. Essa escolha inicial não é definitiva, e pode ser revertida a qualquer momento pela tela de conta, o que atende à heurística de controle e liberdade do usuário discutida na seção 2.4.1.  
+	Posterior à tela inicial, o processo acontece da seguinte forma. O paciente aceita os termos e a política de privacidade antes de qualquer dado clínico ser solicitado, e só então preenche a ficha de saúde, seguindo a ordem exigida pela base legal de consentimento discutida na seção 2.10.1. Essa ordem não é arbitrária, ela é o que garante que o consentimento seja de fato informado, e não retroativo a uma coleta já ocorrida.  
+	A ficha de saúde, por sua vez, ocupa um lugar deliberadamente à parte do restante do sistema. Diferente do cadastro de medicamento, cujos dados alimentam o cálculo de posologia, estoque e adesão, a ficha guarda informações como tipo sanguíneo, alergias e contatos de emergência sem que nenhuma delas seja processada algoritmicamente pela aplicação. Ela existe para ser lida por um humano em uma situação de urgência, e não como insumo do tratamento.
 
-### Figura 5 \- Calendário com doses e compromissos no mesmo dia
+Figura 3 \- Telas de Login, consentimento e ficha de saúde  
+Fonte: elaborado pelo autor.	
 
-### **O que a tela precisa mostrar: a visão do Calendário/Agenda com pelo menos um dia que tenha tanto uma dose de medicamento quanto um compromisso clínico (consulta, exame) visíveis ao mesmo tempo, de preferência com algum indicador visual diferenciando os dois tipos (cor, ícone). Se possível, um dia expandido mostrando a lista do dia inteiro, não só a grade do mês.**  **4.6.2 Sistema de lembretes e gestão temporal**
+**4.6.2 Cadastro de medicamentos**
 
-Figura 6 \- Alarme de dose em tela cheia  
-O que a tela precisa mostrar: a tela de alarme disparada — nome do medicamento, dose, horário, e os botões de ação (Tomei / Pulei / Adiar). Se for possível capturar com a tela por cima do bloqueio do aparelho (mostrando que ele interrompe mesmo com o celular travado), é ainda mais forte como evidência — mas uma captura normal da tela de alarme já cumpre o argumento.
+O cadastro de um medicamento pode começar de duas formas: cadastro manual ou escaneando o código de barras presente na embalagem do produto. Ao ler o código, o aplicativo consulta um catálogo local derivado da base pública da Anvisa (CMED) e, quando encontra o produto, preenche automaticamente o nome comercial, o princípio ativo e a dosagem. O ponto central dessa funcionalidade é que nada é salvo sem revisão, o scanner sugere e a pessoa confirma, nunca o contrário, o que evita transferir ao reconhecimento automático a responsabilidade por um dado clínico.  
+No formulário propriamente dito, a heurística de prevenção de erros, apresentada na seção 2.4.1, orienta uma decisão central, onde todo campo relativo à posologia nasce vazio, sem valor pré-selecionado. Essa exigência corresponde à regra de negócio de código 08, discutida na seção 4.3, e está registrada no próprio código do formulário.  
+A fim de transformar um ambiente complicado e denso de preenchimento em algo intuitivo e simples de operar, o cadastro adota uma revelação progressiva de campos. Enquanto o essencial não está completo (medicamento, a dose e a posologia), os campos opcionais permanecem ocultos. Assim que o essencial fecha, uma mensagem avisa que o cadastro já pode ser concluído ali mesmo, e o restante, como estoque, foto, anexo de receita e local de guarda, se revela de uma vez, disponível de forma não obrigatória ao preenchimento. Essa abordagem reduz a carga cognitiva de um formulário longo, ao mostrar a cada momento só o que o paciente precisa decidir naquele passo, e adia o que pode ser adiado.
 
-### 
+Figura 4 \- Identificação do medicamento por código de barras  
+Fonte: elaborado pelo autor.
 
-### **4.4.3 Heurísticas Aplicada: Cadastro de Medicamento e Sistema de Alarmes**   	A aplicação prática das heurísticas de usabilidade discutidas na seção 2.4 concentra-se, sobretudo, em duas frentes: o formulário de cadastro de medicamento e a tela de resposta ao alarme de dose, por serem os pontos de maior contato entre o paciente e o sistema. 
+Figura 5 \- Formulário de cadastro de medicação  
+Fonte: elaborado pelo autor.
 
-### No cadastro, a heurística de prevenção de erros, apresentada na seção 2.4.1, orienta uma decisão central: todo campo relativo à posologia nasce vazio, sem valor pré-selecionado. Um seletor de frequência já marcado por padrão seria indistinguível de uma escolha feita pelo paciente, e o cadastro avançaria com uma posologia que o sistema presumiu, e não com uma que o paciente de fato informou. Essa exigência corresponde à regra de negócio de código 08, discutida na seção 4.3, e está registrada no próprio código do formulário: 
+	O cadastro se encerra com decisões que dependem da natureza do medicamento e da rotina do paciente. A exigência de receita, quando aplicável, habilita o anexo de um documento com validade e aviso de renovação. Configurações de lembrete determinam se o disparo ocorrerá por alarme sonoro ou por notificação comum. O controle de estoque, por fim, registra a quantidade disponível, o local onde o medicamento é guardado, e permite configurar um aviso quando a reserva estiver próxima do fim, com a antecedência escolhida pelo paciente.
 
-### Figura 3 \- Formulário de cadastro de medicação
-
-###  	Na tela de resposta à dose, a mesma heurística orienta a apresentação dos dois botões de desfecho, "Tomei" e "Pulei": enquanto a dose não é respondida, ambos permanecem com o mesmo destaque visual, sem que nenhum deles pareça a opção sugerida pelo sistema. Somente após a resposta do paciente o botão correspondente recebe destaque de cor, reforçando a heurística de reconhecimento em vez de recordação e a psicologia do uso intencional de cor apresentada na seção 2.4.3, na qual a cor comunica um estado já ocorrido, e não uma sugestão de ação.  Figura 4 \- Tela de resposta à dose ao clicar na notificação junto com dps de clicar em um e em outro  	Essa mesma tela reflete a ausência de punição discutida na delimitação de escopo apresentada na seção 4.1: uma dose já respondida pode ser corrigida a qualquer momento, e o texto da interface convida explicitamente essa correção, em vez de tratar a resposta como definitiva. Tal comportamento aproxima-se do conceito de desoneração cognitiva de Risko e Gilbert (2016), discutido na seção 2.3.2, na medida em que reduz o receio do paciente em registrar sua rotina real, incluindo eventuais falhas, por saber que o sistema não penaliza o erro nem impede sua correção. 	No sistema de alarmes, a heurística de gestão temporal apresentada na seção 2.3.1 é observada no agrupamento de avisos: doses de medicamentos diferentes previstas para o mesmo horário geram uma única notificação, reduzindo a fadiga de alertas discutida na seção 2.3.2 sem comprometer a completude da informação apresentada ao paciente.  **4.6.4 Gamificação e reforço positivo**
-
-Figura 7 \- Indicador de progresso na tela inicial  
-O que a tela precisa mostrar: a Home com a barra/indicador de progresso do dia visível (doses confirmadas vs. total do dia), idealmente num estado intermediário (nem 0%, nem 100%) pra deixar claro que é feedback neutro de acompanhamento, não uma meta gamificada com prêmio.
-
-**4.6.5 Acessibilidade**
-
-	A aplicação das WCAG discutidas na seção 2.4.5 concentra-se em três frentes: a exposição semântica da interface a tecnologias assistivas, a preservação da escala de fonte do sistema e a oferta de temas visuais alternativos.  
-A cobertura de API semântica soma 50 ocorrências de accessibilityRole e 46 de accessibilityLabel ao longo do código-fonte, descrevendo respectivamente o que cada elemento interativo é e sua função para o leitor de tela. Mudanças de estado puramente visuais, como o progresso de adesão e a confirmação de uma ação concluída, são anunciadas de forma programática por meio de AccessibilityInfo.announceForAccessibility, atendendo ao critério WCAG 4.1.3 Status Messages, que exige que mensagens de status sejam expostas à tecnologia assistiva sem depender do foco do usuário. Uma lacuna real permanece declarada como trabalho futuro: a ausência de accessibilityHint em qualquer ponto da interface, atributo que complementaria o rótulo descrevendo a consequência da ação, e não apenas a natureza do elemento, como ocorre em casos de interação medicamentosa.  
-A área de toque dos elementos interativos segue o padrão de 44 pontos, medida que excede o mínimo de 24×24 pixels CSS exigido pelo critério WCAG 2.5.8 Target Size, e corresponde à recomendação das diretrizes de interface humana das plataformas móveis. Da mesma forma, a aplicação não trava a escala de fonte do sistema, respeitando-a integralmente inclusive no tamanho máximo, o que atende ao critério WCAG 1.4.4 Resize Text.  
-Além do tema padrão, a aplicação oferece duas aparências alternativas de acessibilidade: escura e alto contraste. Uma quarta opção, "Automático", não é um tema próprio, mas uma preferência que acompanha o esquema de cores do sistema operacional, alternando entre o tema padrão e o escuro conforme a configuração do aparelho. O usuário seleciona a aparência pela tela de ajustes do aplicativo, com troca imediata e reversível num único toque.. O tema de alto contraste responde a uma condição comum na faixa etária que caracteriza parte do público-alvo do aplicativo. Segundo diretriz do Conselho Brasileiro de Oftalmologia (2003), a prevalência de catarata atinge 50% da população entre 65 e 74 anos, e sobe para 75% acima dos 75 anos. A catarata também figura entre as causas mais comuns de baixa visão relacionada à idade, ao lado de degeneração macular e glaucoma. Tecnicamente, o tema muda três coisas, e cada mudança atende a um requisito de acessibilidade específico. O contraste entre texto e fundo sobe para o máximo possível entre preto e branco absolutos, superando com folga o mínimo exigido pela WCAG. A cor de destaque escurece, de modo a atender o nível mais rigoroso da norma (AAA) mesmo em superfícies de maior área, e não apenas o nível mínimo exigido para texto comum. E as sombras, que no tema padrão substituem bordas, dão lugar a contornos visíveis, já que distinguir uma sombra sutil pressupõe uma problema visual que este tema não pressupõe existir.
-
-Figura 8 \- Comparação entre o tema padrão e o tema de alto contraste  
-O que a tela precisa mostrar: a mesma tela do app (sugiro a Home, por ser a mais representativa) capturada duas vezes — uma no tema padrão, outra no alto contraste — lado a lado ou empilhadas, pra comparação direta. Se puder, escolha uma tela que tenha os três elementos que mudam: algum texto/fundo, a cor de destaque (azul) e algum elemento com sombra no padrão que vire contorno no alto contraste (um card, por exemplo).
-
-A aplicação também oferece um ajuste independente das cores de estado, verde para confirmação, amarelo para atenção, vermelho para urgência, disponível dentro de qualquer uma das aparências descritas acima. A primeira versão desse ajuste era um par fixo de cores, acionado como um modo próprio de "daltonismo". Testes de simulação, reproduzindo as três formas de discromatopsia congênita pelo algoritmo de Brettel, Viénot e Mollon (1997), mostraram que esse par fixo não era necessariamente a melhor escolha: em alguns casos, ele separava as cores pior do que o verde e o vermelho originais que deveria substituir.  
-A causa é que a discromatopsia congênita não é uma condição só. O conjunto de cores que resolve a protanopia não é o mesmo que resolve a tritanopia, e nenhum par fixo atende igualmente bem às três formas. A solução adotada devolveu a escolha à pessoa, diante de cinco conjuntos de cores, incluindo o original, todos validados quanto ao contraste mínimo exigido pela WCAG e quanto à separação sob as três formas de discromatopsia, apresentados lado a lado para comparação direta. A pessoa escolhe aquela em que as cores lhe parecem mais distintas entre si, sem precisar identificar ou nomear a própria condição.
-
-Figura 9 \- Seletor de cores de estado  
-que a tela precisa mostrar: a tela de Ajustes → Tema, especificamente o bloco "Preferências visuais" com a grade dos cinco pares de cores lado a lado (padrão, azul/laranja, azul/vermelho, roxo/âmbar, turquesa/magenta), do jeito que o SeletorDeCoresDeEstado.tsx renderiza — é a evidência mais direta do argumento de "comparação lado a lado" que o texto já descreve.
-
-4.7 PRIVACIDADE E LGPD APLICADA
-
-**4.7.1 Base legal e consentimento versionado**
-
-**4.7.2 Direitos do titular (exportação e exclusão)**
-
-**4.7.3 Minimização e localidade do dado**
-
-### 
-
-###  
+Figura 6 \- Configurações adicionais do cadastro de medicação  
+Fonte: elaborado pelo autor.
 
 # **5 RESULTADOS**
 
