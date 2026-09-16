@@ -7,10 +7,18 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingVertical: spacing.sm,
     gap: spacing.sm,
   },
-  // A roda do Material (iOS) só se desenha dentro de um host de largura finita — sem os dois, ela
-  // colapsa e não aparece nada na tela. Continua aqui porque o irmão `.ios.tsx` a usa.
+  /**
+   * A roda do Material só se desenha dentro de um host de dimensões finitas — sem largura, ela
+   * colapsa e não aparece nada na tela.
+   *
+   * O `minHeight` resolve o mesmo problema no outro eixo: o host abre dentro do `ScrollView` do
+   * `BottomSheet`, que oferece altura ilimitada aos filhos para medir. O `matchContents` vertical
+   * então não tem contra o que se medir, e o mostrador saía esmagado atrás dos botões. 320 é o que
+   * o relógio do Material 3 pede; abaixo disso ele corta os números.
+   */
   host: {
     width: "100%",
+    minHeight: 320,
   },
 
   // --- Campos de digitação (Android e web) ---
