@@ -263,7 +263,7 @@ app, e depois dele o estado do aparelho não serve para os outros:
 
 | O que | Situação |
 |---|---|
-| **Capítulo 4** — argumento → decisão de código | Base em [`docs/tcc/`](./tcc/) — `EMBASAMENTO-TECNICO.md`, `INVENTARIO-FUNCIONAL.md` e `ROTEIRO-SECAO-DESENVOLVIMENTO.md` (esta última é a estrutura proposta para o texto, não texto pronto). O antigo `GUIA-DO-TCC.md` foi removido em 11/09 por estar superado por esses três. |
+| **Capítulo 4** — argumento → decisão de código | Base em [`docs/tcc/`](./tcc/) — `EMBASAMENTO-TECNICO.md`, `INVENTARIO-FUNCIONAL.md` e `ROTEIRO-SECAO-DESENVOLVIMENTO.md` (esta última é a estrutura proposta para o texto, não texto pronto). O antigo GUIA-DO-TCC.md foi removido em 11/09 por estar superado por esses três. |
 | Prints do caminho crítico | A capturar na sessão de validação, seguindo a Parte 2 do [`ROTEIRO-DE-TESTE.md`](./ROTEIRO-DE-TESTE.md) |
 | Limitações e trabalhos futuros | Ver `docs/tcc/EMBASAMENTO-TECNICO.md` |
 | Acessibilidade (E1) | O que foi medido entra no artigo; o passe de front e o TalkBack ficam para o fim |

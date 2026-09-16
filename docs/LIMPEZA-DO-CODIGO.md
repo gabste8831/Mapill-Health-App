@@ -1,9 +1,12 @@
 # Limpeza do código — o mapa
 
-> Levantamento de 15/09, feito **sem editar nada**. Serve para decidir o que sai, o que fica e o
-> que muda de lugar, depois que a build de 15/09 for validada em aparelho.
+> Levantamento de 15/09, **atualizado em 16/09 com o que já foi executado**.
 >
-> A ordem aqui é a ordem de fazer: do risco zero ao que exige critério.
+> ⚠️ **As seções 1 e 2 estão FEITAS** — ficam aqui como registro do que era e do que se decidiu,
+> não como lista de tarefas. O que ainda falta está em "O que ficou para depois", no fim.
+>
+> Os caminhos e números das seções 1 e 2 são de **antes** das correções: servem para entender o
+> diagnóstico, não para navegar o código de hoje.
 
 ---
 
