@@ -21,7 +21,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     minHeight: 320,
   },
 
-  // --- Campos de digitação (Android e web) ---
+  // --- Campos de digitação (só a web; os nativos usam o relógio da plataforma) ---
   campos: {
     flexDirection: "row",
     alignItems: "center",

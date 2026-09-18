@@ -31,8 +31,11 @@ function paraHorario(data: Date): string {
  * Mostrador redondo nativo do Android (Material 3). É Jetpack Compose: `.ios.tsx` usa a roda do
  * SwiftUI e `.web.tsx` mantém campos digitáveis para o preview.
  *
- * Cuidado ao mexer: `variant="input"` do `@expo/ui` é aceito pelo TypeScript mas ignorado no
- * caminho da hora. `DatePickerView.kt` só lê `props.variant` no caminho da data.
+ * **O mostrador é o único modo que existe aqui, e não dá para escolher outro.** `variant` e
+ * `showVariantToggle` são aceitos pelo TypeScript mas o Android os ignora para hora:
+ * `DatePickerView.kt` só lê `props.variant` no caminho da data. Passá-los dava a impressão de que
+ * o popup abriria em digitação e ofereceria o botão de alternar — nenhum dos dois acontecia.
+ * Quem precisa digitar usa o campo do `TimeField`, que é o caminho principal.
  */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {
   const styles = useEstilos(criarEstilos);
@@ -45,9 +48,6 @@ export function TimePicker({ initialValue, onChange }: TimePickerProps) {
           displayedComponents="hourAndMinute"
           // Sem AM/PM, "20" é 20: é onde o erro seria caro, tomar às 20:00 o que era das 08:00.
           is24Hour
-          // `showVariantToggle` deixa alternar para digitação dentro do popup.
-          variant="picker"
-          showVariantToggle
           initialDate={paraData(initialValue ?? HORARIO_NEUTRO).toISOString()}
           // `color` sozinho pinta só parte dos elementos: o resto herda o acento do Material You
           // do aparelho. Cada peça precisa ser nomeada em `elementColors`.

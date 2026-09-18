@@ -458,9 +458,14 @@ export function CalendarioScreen() {
               Fixa, ela custava mais de um terço da tela em toda rolagem — e quem já escolheu o dia
               está lendo o que tem nele, não procurando outro. O filtro fica porque governa as duas
               coisas ao mesmo tempo: os pontinhos do mês e o que a lista mostra. */}
+          {/* As duas props de teclado existem por causa do popup de revisão: fechá-lo enquanto o
+              teclado ainda sobe deixa o teclado sobre esta tela, e sem elas o primeiro toque num
+              dia da grade seria gasto só dispensando-o. */}
           <ScrollView
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
             stickyHeaderIndices={[1]}>
             {/* Margem negativa para anular o `paddingHorizontal` do scroll: a faixa azul é desenhada
                 de borda a borda, e recuada ela deixaria duas listras do fundo nas laterais. */}

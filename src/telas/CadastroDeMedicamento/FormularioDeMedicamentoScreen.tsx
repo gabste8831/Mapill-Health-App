@@ -1461,9 +1461,9 @@ export function FormularioDeMedicamentoScreen({
           {frequency === "cycle" ? (
             <>
               <TextField
-                label="A cada quantos dias?"
+                label="A volta completa dura quantos dias?"
                 required
-                placeholder="Ex: 28 na cartela, 30 na injeção mensal"
+                placeholder="Ex: 28 = 21 tomando + 7 de pausa"
                 value={cycleLengthInput}
                 onChangeText={(raw) => apenasDigitos(raw, setCycleLengthInput)}
                 onFocus={scrollToFocusedInput}
@@ -1471,11 +1471,11 @@ export function FormularioDeMedicamentoScreen({
                 maxLength={3}
               />
 
-              {/* Só depois do tamanho do ciclo, que é quem dá escala e limite. Em branco vale 1. */}
+              {/* Só depois do tamanho do ciclo: é ele que dá o teto do placeholder. Em branco vale 1. */}
               {cycleLengthDefinido ? (
                 <TextField
-                  label="Por quantos dias seguidos?"
-                  placeholder="1 dia, se for dose única"
+                  label="Desses, quantos você toma?"
+                  placeholder={`De 1 a ${parsedCycleLength - 1}. O resto é pausa.`}
                   value={activeDaysInput}
                   onChangeText={(raw) => apenasDigitos(raw, setActiveDaysInput)}
                   onFocus={scrollToFocusedInput}

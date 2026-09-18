@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
-import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 import { Alert, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -96,19 +95,22 @@ type EmergencyContactsFieldProps = {
   contacts: EmergencyContact[];
   onAdd: (contact: EmergencyContact) => void;
   onRemove: (index: number) => void;
-  onFocusField: (event: NativeSyntheticEvent<TargetedEvent>) => void;
 };
 
 /**
  * Lista de contatos de emergência + popup "Adicionar" (mesmo padrão de bottom-sheet do
  * `SelectField`, só que com um mini-formulário em vez de uma lista de opções). Cada contato só
  * entra na lista depois de completo - nunca existe um contato salvo pela metade.
+ *
+ * Os campos do popup **não** recebem o `scrollToFocusedInput` da tela: aquele hook governa o
+ * scroll do formulário que ficou atrás do popup. Ligado aqui, focar "Telefone" rolava a tela de
+ * trás enquanto o campo em foco não saía do lugar. Quem cuida do teclado aqui é o próprio
+ * `BottomSheet`, que sobe e encolhe conforme a altura real dele.
  */
 function EmergencyContactsField({
   contacts,
   onAdd,
   onRemove,
-  onFocusField,
 }: EmergencyContactsFieldProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
@@ -192,7 +194,6 @@ function EmergencyContactsField({
           placeholder="Nome do contato"
           value={name}
           onChangeText={setName}
-          onFocus={onFocusField}
           maxLength={60}
         />
         <TextField
@@ -200,7 +201,6 @@ function EmergencyContactsField({
           placeholder="(00) 00000-0000"
           value={phone}
           onChangeText={(value) => setPhone(formatPhoneInput(value, phone))}
-          onFocus={onFocusField}
           keyboardType="phone-pad"
           maxLength={15}
         />
@@ -209,7 +209,6 @@ function EmergencyContactsField({
           placeholder="Ex: Filha, cônjuge, vizinho..."
           value={relationship}
           onChangeText={setRelationship}
-          onFocus={onFocusField}
           maxLength={40}
         />
         <Button
@@ -564,7 +563,6 @@ export function FichaDeSaudeScreen({
             contacts={emergencyContacts}
             onAdd={addEmergencyContact}
             onRemove={removeEmergencyContact}
-            onFocusField={scrollToFocusedInput}
           />
         </Card>
 
