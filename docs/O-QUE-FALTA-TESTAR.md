@@ -8,19 +8,29 @@
 
 ---
 
-> **Atualizado em 18/09.** O módulo do alarme fechou em 16/09 e saiu desta lista — seis cenários
-> validados em aparelho, com a tela do alarme em Activity própria. O que resta aqui é a rodada de
-> aparelho das correções de UI de 18/09, quatro pontas soltas, e a build preview do EAS.
+> **Atualizado em 18/09, tarde.** O módulo do alarme fechou em 16/09 e saiu desta lista — seis
+> cenários validados em aparelho, com a tela do alarme em Activity própria.
+>
+> **A build com as correções de UI está instalada no aparelho** (seção 1). O que falta agora é
+> percorrer a seção 2 com o app na mão — nada ali foi visto ainda.
 
 ---
 
-## 1. 🔨 A build nova — antes de qualquer coisa
+## 1. ✅ A build — feita e instalada em 18/09
 
-As correções de 18/09 (`63a2e9e`) **ainda não foram vistas em aparelho**. Nada abaixo pode ser
-testado sem ela.
+**Compilada às 09:39** (`BUILD SUCCESSFUL in 3m 41s`) e **instalada no aparelho às 16:39**, sobre a
+instalação de 15/09 — a assinatura bateu, então o `install -r` atualizou sem apagar nada e os dados
+de teste continuam lá.
 
-O comando está na [seção 5](#5-como-compilar-e-instalar). **Não é o `expo run:android`** — ver o
-aviso lá.
+Conferido dentro do APK, para não testar build velha por engano: os textos novos do ciclo estão no
+bundle e os quatro antigos sumiram; a `AlarmeActivity` está no manifest com `showWhenLocked`; as
+duas activities com `adjustResize`; os patches do `expo-audio` conferidos antes de compilar.
+
+> O que isso prova é que **o código correto está dentro do APK**. Se as correções resolvem o que
+> aparecia na tela — principalmente o salto do relógio — é o que os itens abaixo vão dizer.
+
+O comando, se precisar refazer, está na [seção 5](#5-como-compilar-e-instalar). **Não é o
+`expo run:android`** — ver o aviso lá.
 
 ---
 
