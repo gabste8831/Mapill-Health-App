@@ -511,8 +511,8 @@ opção de 1 dia, então a quantidade é o que se ajusta.
 > **nenhum** aviso saía — nem o da antecedência, nem o do dia em que acaba. Um tratamento de 7 dias
 > com 7 comprimidos ficava calado.
 >
-> Corrigido em `41640b4`, com 16 casos em `scripts/conferir-previsao-de-estoque.mjs`. O teste em
-> aparelho é o **B.9** de [`O-QUE-FALTA-TESTAR.md`](O-QUE-FALTA-TESTAR.md).
+> Corrigido em `41640b4`, com 16 casos em `scripts/conferir-previsao-de-estoque.mjs`. O aviso de
+> estoque às 00:01 (o antigo B.9) passou em aparelho e não precisa ser repetido.
 >
 > A causa: a previsão devolvia "não sei" tanto para "dura mais de 730 dias" (verdade) quanto para
 > "dá conta até o fim do tratamento" (uma data conhecida). O Gabriel achou comparando com o aviso de
