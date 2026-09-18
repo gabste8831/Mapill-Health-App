@@ -36,7 +36,7 @@ causa de uma dessas ausências.
   │  AlarmeActivity     │  notificação na bandeja  │
   │  (tela cheia azul)  │  toque → tela do horário │
   └─────────────────────┴──────────────────────────┘
-            ↓
+    ↓
   foreground service toca o som (independe de tela)
 ```
 
