@@ -289,7 +289,43 @@ Seja específico, não genérico. O que você tem, verificado:
 - `accessibilityHint` não implementado (§1.1);
 - LWW pode perder edição concorrente (B.2);
 - previsão de estoque indisponível quando as unidades divergem — decisão consciente (B.3);
-- validação com usuários reais do público-alvo não realizada.
+- validação com usuários reais do público-alvo não realizada;
+- **tratamento não tem como ser arquivado nem pausado** — ver abaixo.
+
+#### Arquivar ou pausar um tratamento
+
+Achado em uso, na validação em aparelho de 18/09. Não é defeito: é função que não existe.
+
+Um tratamento cadastrado está em curso por construção — não há campo de estado, e quem decide se
+ele vale é a vigência por datas (`startDate`/`endDate` em `generate-dose-schedules.ts`), sendo
+`endDate: null` o tratamento contínuo. Lembrete e estoque são opcionais e não mudam isso: o
+medicamento aparece na lista de qualquer jeito, porque a listagem filtra só por `deleted_at IS NULL`.
+
+Quem parou de tomar algo fica entre duas saídas ruins, e elas são excludentes:
+
+| O que a pessoa quer | O que ela precisa fazer | O que ela perde |
+|---|---|---|
+| Sumir da rotina | Excluir | O histórico inteiro |
+| Guardar o histórico | Deixar como está | Continua sendo cobrada por doses que não vai tomar |
+
+O preço da segunda é maior do que parece, e cai justamente na tela de maior valor clínico: o
+relatório conta dose não respondida igual a pulada, então quem parou por orientação médica e não
+mexeu no app aparece com adesão baixa. O número mente para quem vai levá-lo ao médico, que é
+exatamente para quem ele foi feito.
+
+**São dois pedidos diferentes**, e só o primeiro exige datas:
+
+- **Pausar** — parou por uns dias e volta; o app precisaria saber quando recomeça.
+- **Arquivar** — não toma mais; sai da rotina, o histórico fica consultável.
+
+O segundo é o mais comum (antibiótico que acabou, remédio que o médico trocou) e resolve-se
+sozinho, sem o primeiro. O recorte mínimo seria um estado de arquivado que tira o tratamento da
+Home e da lista ativa, preserva o histórico, e **exclui o período do denominador da adesão** em vez
+de contá-lo como falha — o cálculo de "previstas" já filtra por horário passado, então seria mais
+um filtro no mesmo lugar.
+
+Não confundir com a **pausa da cartela**, que já está implementada e é outra coisa: ela é regular,
+prevista e parte da posologia (`kind: "cycle"` em `prescription.ts`).
 
 ---
 
