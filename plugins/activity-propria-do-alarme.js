@@ -4,13 +4,13 @@ const fs = require("node:fs");
 const { withDangerousMod, withAndroidManifest } = require("expo/config-plugins");
 
 /**
- * Dá ao alarme uma **Activity própria** — e é isso que devolve o aparelho ao bloqueio.
+ * Dá ao alarme uma **Activity própria** - e é isso que devolve o aparelho ao bloqueio.
  *
  * ## O defeito que isto resolve
  *
  * `showWhenLocked` é atributo de **Activity**, não de tela. Com uma Activity só, a licença de
  * aparecer sobre o bloqueio era do app inteiro: o alarme disparava, a tela azul subia, e ao
- * responder "Tomei" o Mapill ficava na frente — navegável, sem senha, com medicamentos, histórico e
+ * responder "Tomei" o Mapill ficava na frente - navegável, sem senha, com medicamentos, histórico e
  * ficha de saúde à mão de quem pegasse o aparelho. Medido em aparelho em 15/09, duas vezes.
  *
  * `finishAndRemoveTask` não resolve, e foi tentado: quando a Activity sobe com `showWhenLocked` +
@@ -22,7 +22,7 @@ const { withDangerousMod, withAndroidManifest } = require("expo/config-plugins")
  *
  * ## O que some junto
  *
- * Três defeitos custaram builds em 14 e 15/09 por causa da mesma raiz — decidir **qual componente
+ * Três defeitos custaram builds em 14 e 15/09 por causa da mesma raiz - decidir **qual componente
  * montar** dentro de uma Activity que serve a dois donos:
  *
  * - o sticky `MainComponentEvent` é postado quando a notificação é **exibida**, e ficava pendurado
@@ -38,11 +38,11 @@ const { withDangerousMod, withAndroidManifest } = require("expo/config-plugins")
  *
  * O `fullScreenAction` tem um campo `launchActivity` que recebe o nome completo da classe, e a lib
  * o usa literalmente: `IntentUtils.getLaunchActivity` só cai na launcher activity quando o valor é
- * ausente ou `"default"`, e `NotificationManager` monta um `new Intent(context, classe)` — intent
+ * ausente ou `"default"`, e `NotificationManager` monta um `new Intent(context, classe)` - intent
  * explícito. É o caminho oficial da biblioteca, não um contorno.
  *
  * O `mainComponent` **continua sendo enviado junto**, e não por redundância: o extra `notification`
- * — que carrega o horário da dose até a tela, por `initialProps` — só é anexado ao intent quando
+ * - que carrega o horário da dose até a tela, por `initialProps` - só é anexado ao intent quando
  * ele está presente.
  */
 
@@ -55,13 +55,13 @@ const CAMINHO_NO_ANDROID = ["app", "src", "main", "java"];
  * Herda de `ReactActivity` como a principal, e difere em três pontos, todos deliberados:
  *
  * 1. `getMainComponentName` devolve o componente do alarme, **fixo**. Sem Notifee, sem sticky, sem
- *    intent — nada a decidir.
+ *    intent - nada a decidir.
  * 2. `getLaunchOptions` entrega o bundle da notificação como prop, que é como o horário da dose
  *    chega à tela sem depender de evento nenhum.
  * 3. `onNewIntent` troca o intent antes do `super`, para um segundo alarme chegando a esta Activity
  *    ser lido corretamente.
  *
- * O `ReactActivityDelegateWrapper` do Expo é preservado — é ele que liga os módulos do Expo ao
+ * O `ReactActivityDelegateWrapper` do Expo é preservado - é ele que liga os módulos do Expo ao
  * ciclo de vida da Activity, e sem ele nada do `expo-*` funciona aqui dentro.
  */
 function kotlinDaActivity(pacote, componente) {
@@ -80,7 +80,7 @@ import expo.modules.ReactActivityDelegateWrapper
 /**
  * A tela do alarme, na própria Activity.
  *
- * É ela que tem \`showWhenLocked\` e \`turnScreenOn\` — a MainActivity não tem, e é isso que faz
+ * É ela que tem \`showWhenLocked\` e \`turnScreenOn\` - a MainActivity não tem, e é isso que faz
  * responder a dose com o celular bloqueado **não** deixar o app acessível depois.
  *
  * Gerada por plugins/activity-propria-do-alarme.js. Não editar aqui: o prebuild reescreve.
@@ -137,7 +137,7 @@ function withArquivoDaActivity(config, componente) {
       const pacote = config.android?.package;
       if (!pacote) {
         throw new Error(
-          "[activity-do-alarme] o app.json não declara android.package — sem ele não sei em que " +
+          "[activity-do-alarme] o app.json não declara android.package - sem ele não sei em que " +
             "pacote escrever a AlarmeActivity, e o alarme perde a Activity própria.",
         );
       }
@@ -196,7 +196,7 @@ function withDeclaracaoNoManifesto(config) {
        * `singleInstance` e não `singleTask`: a Activity fica **sozinha na própria task**.
        *
        * É o que faz fechá-la devolver o aparelho ao bloqueio em vez de revelar o app. Numa task
-       * compartilhada, encerrar a de cima mostra a de baixo — que é o defeito que este plugin
+       * compartilhada, encerrar a de cima mostra a de baixo - que é o defeito que este plugin
        * existe para fechar.
        */
       "android:launchMode": "singleInstance",

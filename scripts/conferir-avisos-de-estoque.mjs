@@ -4,7 +4,7 @@
  * O que estes casos travam é a diferença entre o estoque e os outros avisos do app: a validade de
  * uma receita é uma data fixa, mas a previsão de estoque é recalculada a cada dose confirmada e a
  * cada recontagem. Sem a trava, um estoque baixo geraria uma notificação nova a cada toque em
- * "confirmar" — o caminho mais curto para a pessoa desligar as notificações do app e perder junto
+ * "confirmar" - o caminho mais curto para a pessoa desligar as notificações do app e perder junto
  * os alarmes de dose.
  *
  * Rodar: node --experimental-strip-types scripts/conferir-avisos-de-estoque.mjs
@@ -20,11 +20,11 @@ function conferir(descricao, condicao, detalhe) {
     console.log(`  ok  ${descricao}`);
   } else {
     falhou += 1;
-    console.error(`FALHOU  ${descricao}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.error(`FALHOU  ${descricao}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
-/** 01/09/2026, 10h — a janela vai até 30 dias depois, como a dos outros avisos. */
+/** 01/09/2026, 10h - a janela vai até 30 dias depois, como a dos outros avisos. */
 const AGORA = new Date(2026, 8, 1, 10, 0);
 const ATE = new Date(2026, 9, 1, 10, 0);
 
@@ -57,8 +57,8 @@ console.log("\nQuando o aviso é planejado\n");
   const acabou = avisos.find((a) => a.chave.endsWith("-acabou"));
   conferir("o fim do estoque tem aviso próprio", acabou !== undefined && acabou.quando.getDate() === 11);
 
-  conferir("nenhum é alarme — estoque não interrompe", avisos.every((a) => a.modo === "notification"));
-  conferir("nenhum tem ação rápida — não há dose a responder", avisos.every((a) => a.semAcoesRapidas === true));
+  conferir("nenhum é alarme - estoque não interrompe", avisos.every((a) => a.modo === "notification"));
+  conferir("nenhum tem ação rápida - não há dose a responder", avisos.every((a) => a.semAcoesRapidas === true));
   conferir("nenhum carrega dose vinculada", avisos.every((a) => a.doseScheduleIds.length === 0));
 }
 
@@ -66,7 +66,7 @@ console.log("\nQuerer o aviso e escolher a antecedência são duas perguntas\n")
 {
   // Quem não marcou continua sem nada: a caixa é a pergunta que decide.
   conferir(
-    "sem querer aviso, nenhum é planejado — nem com prazo escolhido",
+    "sem querer aviso, nenhum é planejado - nem com prazo escolhido",
     planejar([estoque({ querAviso: false })]).length === 0,
   );
 
@@ -92,7 +92,7 @@ console.log("\nA trava: avisado uma vez, calado até haver reposição\n");
     planejar([estoque({ quantidadeQuandoAvisou: 20, quantidadeAtual: 20 })]).length === 0,
   );
   conferir(
-    "consumir mais não rearma — é a mesma queda já avisada",
+    "consumir mais não rearma - é a mesma queda já avisada",
     planejar([estoque({ quantidadeQuandoAvisou: 20, quantidadeAtual: 12 })]).length === 0,
   );
   conferir(
@@ -116,7 +116,7 @@ console.log("\nO que não pode acontecer\n");
   );
 
   // O aviso do passado não existe: quem já deixou o estoque acabar não recebe notificação de
-  // um dia que passou — o cartão vermelho da Home é quem conta essa história.
+  // um dia que passou - o cartão vermelho da Home é quem conta essa história.
   conferir(
     "estoque já zerado não gera aviso retroativo",
     planejar([estoque({ diasRestantes: 0, avisoLeadDays: 7 })]).length === 0,

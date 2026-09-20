@@ -3,7 +3,7 @@
  *
  * A regra nasceu com hora fixa às 08:00 e o defeito só aparecia em compromissos cedo: uma consulta
  * às 06:00 recebia o aviso "no dia" duas horas **depois** de ela já ter começado, e uma às 08:05 o
- * recebia cinco minutos antes. Agora é 00:01, e o que estes casos travam é isso — que a hora do
+ * recebia cinco minutos antes. Agora é 00:01, e o que estes casos travam é isso - que a hora do
  * compromisso não influencia mais a hora do aviso.
  *
  * Rodar: node --experimental-strip-types scripts/conferir-avisos-de-compromisso.mjs
@@ -19,11 +19,11 @@ function conferir(descricao, condicao, detalhe) {
     console.log(`  ok  ${descricao}`);
   } else {
     falhou += 1;
-    console.error(`FALHOU  ${descricao}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.error(`FALHOU  ${descricao}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
-/** 01/09/2026, 10h — a janela vai até 30 dias depois, como a das doses. */
+/** 01/09/2026, 10h - a janela vai até 30 dias depois, como a das doses. */
 const AGORA = new Date(2026, 8, 1, 10, 0);
 const ATE = new Date(2026, 9, 1, 10, 0);
 
@@ -42,7 +42,7 @@ function compromisso(extra) {
   };
 }
 
-/** "00:01 do dia 10/09" — o que se quer ler quando um caso falha. */
+/** "00:01 do dia 10/09" - o que se quer ler quando um caso falha. */
 function quandoLegivel(data) {
   const p = (v) => String(v).padStart(2, "0");
   return `${p(data.getDate())}/${p(data.getMonth() + 1)} às ${p(data.getHours())}:${p(data.getMinutes())}`;
@@ -98,7 +98,7 @@ console.log("\nO aviso 'no dia' cai às 00:01, qualquer que seja a hora do compr
   const [aviso] = planejar([
     compromisso({ scheduledFor: new Date(2026, 8, 10, 9, 0).toISOString(), reminderOnDay: true }),
   ]);
-  conferir("nunca 00:00 — é um minuto depois da virada", aviso?.quando.getMinutes() === 1);
+  conferir("nunca 00:00 - é um minuto depois da virada", aviso?.quando.getMinutes() === 1);
 }
 
 console.log("\nO aviso de antecedência cai no mesmo horário, N dias antes\n");
@@ -145,7 +145,7 @@ console.log("\nO que não muda: nada disso vira alarme, e o passado não gera av
     compromisso({ scheduledFor: new Date(2026, 8, 10, 6, 0).toISOString(), reminderOnDay: true }),
   ]);
   conferir("modo é sempre notification", avisos.every((a) => a.modo === "notification"));
-  conferir("sem ações rápidas — não há dose a responder", avisos.every((a) => a.semAcoesRapidas));
+  conferir("sem ações rápidas - não há dose a responder", avisos.every((a) => a.semAcoesRapidas));
   conferir("sem dose vinculada", avisos.every((a) => a.doseScheduleIds.length === 0));
 }
 
@@ -265,7 +265,7 @@ console.log("\nQuerer o aviso e escolher a antecedência são duas perguntas\n")
       },
     ],
   );
-  conferir("sem querer aviso, nenhum é planejado — nem com prazo escolhido", avisos.length === 0);
+  conferir("sem querer aviso, nenhum é planejado - nem com prazo escolhido", avisos.length === 0);
 }
 
 console.log(`\n${passou} passaram, ${falhou} falharam\n`);

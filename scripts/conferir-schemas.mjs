@@ -2,13 +2,13 @@
  * Confere se o SQLite local e o schema do Supabase falam a mesma língua.
  *
  * **Por que existe.** O SQLite não remove coluna, e a regra do projeto é que migration publicada
- * não se edita — então toda coluna substituída fica na tabela local para sempre. O push envia a
+ * não se edita - então toda coluna substituída fica na tabela local para sempre. O push envia a
  * linha inteira, e uma única coluna que o servidor não conhece faz o PostgREST recusar o lote:
  * uma coluna morta há semanas bloqueia a sincronização inteira do usuário.
  *
  * Foi o que aconteceu na validação de 01/09, com `emergency_contact_name` (substituída pela lista
  * `emergency_contacts` na migration 005, três semanas antes). O erro só apareceu no aparelho, e só
- * na primeira tabela — as três órfãs de `appointments` seriam a falha seguinte.
+ * na primeira tabela - as três órfãs de `appointments` seriam a falha seguinte.
  *
  * Este script antecipa isso: cria o banco de verdade em memória, aplica todas as migrações na
  * ordem e compara coluna a coluna com `docs/supabase-schema.sql`.
@@ -26,7 +26,7 @@ import { fileURLToPath } from "node:url";
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DIR_MIGRACOES = join(RAIZ, "src/data/local/migrations");
 
-/** Tabelas que sobem e descem — espelha `TABELAS_SINCRONIZAVEIS`. */
+/** Tabelas que sobem e descem - espelha `TABELAS_SINCRONIZAVEIS`. */
 const SINCRONIZAVEIS = [
   "patient_profiles",
   "consent_records",

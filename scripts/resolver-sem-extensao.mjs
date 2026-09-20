@@ -3,13 +3,13 @@
  *
  * ## Por que isto existe
  *
- * O código-fonte importa sem extensão (`from "./generate-dose-schedules"`) — é a convenção do
+ * O código-fonte importa sem extensão (`from "./generate-dose-schedules"`) - é a convenção do
  * projeto inteiro, e o Metro resolve sozinho. O Node puro não: ele exige o caminho exato, e por
  * isso qualquer `conferir-*` que alcançasse um módulo com import de **valor** sem extensão morria
  * em `ERR_MODULE_NOT_FOUND`. Os scripts existentes escapavam porque os imports que eles
  * atravessavam eram `import type`, apagados pelo strip-types antes de virarem resolução.
  *
- * Foi o que deixou `estimate-stock-depletion` sem cobertura até 12/09 — e foi exatamente lá que o
+ * Foi o que deixou `estimate-stock-depletion` sem cobertura até 12/09 - e foi exatamente lá que o
  * aviso de estoque desaparecia. Regra que não dá para testar é regra que quebra calada.
  *
  * A alternativa era pôr `.ts` nos imports do `src/`, o que mexeria em arquivos do app inteiro para

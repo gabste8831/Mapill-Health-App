@@ -1,5 +1,5 @@
 /**
- * Confere a taxa de adesão de um período — o número grande de "Minha adesão" e o do relatório em
+ * Confere a taxa de adesão de um período - o número grande de "Minha adesão" e o do relatório em
  * PDF que vai ao médico.
  *
  * Roda em Node puro porque `resumirAdesao` é uma função pura. O que se testa aqui é se o resumo
@@ -35,7 +35,7 @@ console.log("\nresumirAdesao");
 confere("dose confirmada antes do horário conta como tomada", () => {
   /**
    * O defeito de 08/09, relatado em aparelho: duas doses tomadas hoje (uma confirmada antes da
-   * hora) e uma pulada ontem apareciam como "1 de 2 doses tomadas — 50%". A dose confirmada às 15h
+   * hora) e uma pulada ontem apareciam como "1 de 2 doses tomadas - 50%". A dose confirmada às 15h
    * para o horário das 22h saía inteira da conta, e o acerto da pessoa desaparecia da tela.
    */
   const doses = [
@@ -61,7 +61,7 @@ confere("dose futura sem resposta continua fora da conta", () => {
   assert.equal(resumo.taxa, 1);
 });
 
-confere("dose futura pulada também conta — é um fato, não uma promessa", () => {
+confere("dose futura pulada também conta - é um fato, não uma promessa", () => {
   const doses = [dose(8, 8, "confirmed", "A"), dose(8, 22, "skipped", "B")];
   const resumo = resumirAdesao({ doses, agora: AGORA });
 
@@ -80,7 +80,7 @@ confere("pular reduz a adesão, e sem resposta conta igual no número", () => {
   assert.equal(resumo.semResposta, 1);
 });
 
-confere("sem dose vencida não há taxa — e nunca 0%", () => {
+confere("sem dose vencida não há taxa - e nunca 0%", () => {
   // RN20: zero por cento é uma afirmação sobre o paciente; ausência de dados não é.
   const resumo = resumirAdesao({ doses: [dose(9, 8, null)], agora: AGORA });
   assert.equal(resumo.previstas, 0);

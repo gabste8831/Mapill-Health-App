@@ -1,5 +1,5 @@
 /**
- * Confere que o patch do volume de despertador está no arquivo — e **falha a build** se não estiver.
+ * Confere que o patch do volume de despertador está no arquivo - e **falha a build** se não estiver.
  *
  * ## Por que isto existe
  *
@@ -9,7 +9,7 @@
  *
  * A build de 14/09 saiu com o alarme no volume de mídia e **nada no log denunciou**: o plugin
  * aplicou o patch, disse que aplicou, e o `yarn install` seguinte o apagou. O Gabriel descobriu no
- * aparelho, depois de esperar a build inteira — tendo pedido o volume de despertador várias vezes.
+ * aparelho, depois de esperar a build inteira - tendo pedido o volume de despertador várias vezes.
  *
  * Um patch que falha em silêncio é pior que patch nenhum: sem ele a gente sabe que não tem, e com
  * ele a gente **acha** que tem. Esta conferência é o que troca "achar" por "saber".
@@ -38,7 +38,7 @@ const OBRIGATORIOS = [
   {
     nome: "volume de despertador",
     modulo: despertador,
-    oQueQuebra: "o alarme toca no volume de MÍDIA — o defeito de 14/09",
+    oQueQuebra: "o alarme toca no volume de MÍDIA - o defeito de 14/09",
   },
   {
     nome: "serviço sem atraso",
@@ -54,13 +54,13 @@ function conferir(raizDoProjeto) {
    * Conferido à parte porque a prova dele é uma **ausência**: não há string para procurar, e sim um
    * bloco `publication` que precisa ter saído do JSON.
    *
-   * É o patch mais fácil de esquecer e o mais caro de perder — sem ele o patch do volume é aplicado
+   * É o patch mais fácil de esquecer e o mais caro de perder - sem ele o patch do volume é aplicado
    * normalmente, a conferência de texto passa, e o alarme sai no volume errado assim mesmo, porque
    * o arquivo patcheado não foi compilado. Foi o defeito medido em aparelho em 14/09.
    */
   if (!doFonte.publicacaoRemovida(raizDoProjeto)) {
     faltando.push(
-      `  - expo-audio do fonte: ${doFonte.ARQUIVO_ALVO} ainda declara 'publication' — o módulo vem ` +
+      `  - expo-audio do fonte: ${doFonte.ARQUIVO_ALVO} ainda declara 'publication' - o módulo vem ` +
         `pré-compilado e o patch do volume não tem efeito`,
     );
   }
@@ -74,7 +74,7 @@ function conferir(raizDoProjeto) {
     }
 
     if (!fs.readFileSync(alvo, "utf8").includes(modulo.MARCA)) {
-      faltando.push(`  - ${nome}: sem a marca '${modulo.MARCA}' — ${oQueQuebra}`);
+      faltando.push(`  - ${nome}: sem a marca '${modulo.MARCA}' - ${oQueQuebra}`);
     }
   }
 

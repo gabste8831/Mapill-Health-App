@@ -9,13 +9,13 @@
  * 1. **Contraste WCAG AA** (4,5:1 para texto, 3:1 para elemento gráfico) de cada cor contra as
  *    superfícies onde ela aparece. É o que garante que a cor seja **vista**.
  * 2. **Distinção entre as três**, para quem não percebe cores da forma comum. É o que garante que
- *    elas signifiquem coisas diferentes — e contraste não mede isso, porque contraste compara
+ *    elas signifiquem coisas diferentes - e contraste não mede isso, porque contraste compara
  *    figura com fundo, e aqui o problema é figura contra figura.
  *
  * ## O método da segunda exigência
  *
  * As cores são convertidas para como cada tipo de daltonismo as vê, pelas matrizes de
- * **Viénot, Brettel e Mollon (1999)** — as mesmas usadas por simuladores como o Coblis. As cores
+ * **Viénot, Brettel e Mollon (1999)** - as mesmas usadas por simuladores como o Coblis. As cores
  * resultantes são comparadas com **CIEDE2000** (CIE, 2001), a fórmula padrão de diferença
  * perceptual de cor.
  *

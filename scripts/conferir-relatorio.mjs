@@ -1,16 +1,16 @@
 /**
  * Confere o conteúdo do relatório clínico em PDF, sem aparelho.
  *
- * **Por que existe.** O relatório é um documento que sai do app e vai para a mão de outra pessoa —
+ * **Por que existe.** O relatório é um documento que sai do app e vai para a mão de outra pessoa -
  * é o único artefato do Mapill que existe fora do celular. Um erro aqui não aparece como tela
  * quebrada: aparece como um número errado numa consulta, ou como um PDF truncado que ninguém
  * percebe estar faltando uma linha de tratamento.
  *
  * Duas coisas são verificadas, e as duas são puras:
  *
- * 1. `montarRelatorio` — o conteúdo. Agrupamento das perdas, corte das doses futuras, e a
+ * 1. `montarRelatorio` - o conteúdo. Agrupamento das perdas, corte das doses futuras, e a
  *    declaração do recorte quando o relatório é filtrado por medicamento.
- * 2. `montarHtml` — o documento. Escape do texto digitado pelo paciente (um `&` num nome de
+ * 2. `montarHtml` - o documento. Escape do texto digitado pelo paciente (um `&` num nome de
  *    remédio truncaria o PDF em silêncio) e as regras que o papel precisa respeitar: RN20 (sem
  *    dose vencida não há percentual) e RN01 (compromisso sem resposta não vira "faltou").
  *
@@ -36,13 +36,13 @@ function checar(nome, condicao, detalhe) {
     ok += 1;
   } else {
     falhou += 1;
-    console.log(`FALHA  ${nome}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.log(`FALHA  ${nome}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
 try {
   // O gerador importa `expo-print` e `react-native`, que não existem em Node. Como aqui só
-  // interessa o HTML — string a partir de objeto —, substituímos os dois por dublês.
+  // interessa o HTML - string a partir de objeto -, substituímos os dois por dublês.
   const modulos = path.join(saida, "node_modules");
   mkdirSync(path.join(modulos, "expo-print"), { recursive: true });
   mkdirSync(path.join(modulos, "react-native"), { recursive: true });
@@ -68,7 +68,7 @@ try {
     );
   }
 
-  // `--ignoreConfig` descarta o tsconfig do projeto — e com ele o alias `@/`. Um tsconfig próprio
+  // `--ignoreConfig` descarta o tsconfig do projeto - e com ele o alias `@/`. Um tsconfig próprio
   // devolve só o que a compilação precisa, sem arrastar as opções de React Native.
   const configuracao = path.join(saida, "tsconfig.json");
   writeFileSync(
@@ -77,7 +77,7 @@ try {
       compilerOptions: {
         outDir: saida,
         // CommonJS: o ESM do Node exige a extensão `.js` nos imports relativos, e o TS não a
-        // acrescenta ao emitir. Aqui o formato não importa — só o resultado das funções.
+        // acrescenta ao emitir. Aqui o formato não importa - só o resultado das funções.
         module: "commonjs",
         moduleResolution: "node10",
         ignoreDeprecations: "6.0",
@@ -101,7 +101,7 @@ try {
       shell: process.platform === "win32",
     });
   } catch (erro) {
-    // A saída do tsc vem em `stdout`, não em `stderr` — sem isto o erro chega como um Buffer de
+    // A saída do tsc vem em `stdout`, não em `stderr` - sem isto o erro chega como um Buffer de
     // bytes, que não diz nada a quem rodou o script.
     console.error("A compilação falhou:\n");
     console.error(String(erro.stdout ?? erro.message));
@@ -167,7 +167,7 @@ try {
     checar("confirmada não vira perda", r.perdas[0].puladas + r.perdas[0].semResposta === 2);
   }
 
-  // `deferred` é "vi e resolvo depois" — informação sobre o alarme, não sobre a dose.
+  // `deferred` é "vi e resolvo depois" - informação sobre o alarme, não sobre a dose.
   {
     const r = montarRelatorio(
       base({ doses: [dose("d1", "m1", "Losartana", "2026-09-01T08:00:00.000Z", "deferred")] }),
@@ -280,7 +280,7 @@ try {
       html.includes("Maria Silva") && html.includes("03/08/2026") && html.includes("02/09/2026"));
     checar("taxa em inteiro", html.includes("85%"));
 
-    // Tabela aberta e não fechada produz PDF truncado — e truncado em silêncio.
+    // Tabela aberta e não fechada produz PDF truncado - e truncado em silêncio.
     const abre = (html.match(/<table/g) ?? []).length;
     const fecha = (html.match(/<\/table>/g) ?? []).length;
     checar("tabelas balanceadas", abre === fecha, `${abre} abertas, ${fecha} fechadas`);

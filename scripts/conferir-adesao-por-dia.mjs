@@ -57,7 +57,7 @@ confere("conta só as confirmadas como aderência", () => {
 });
 
 confere("o dia em andamento conta inteiro, com as doses que ainda não venceram", () => {
-  // 8h já passou (agora são 15h); 20h não — e mesmo assim entra, porque o dia é um só.
+  // 8h já passou (agora são 15h); 20h não - e mesmo assim entra, porque o dia é um só.
   //
   // Era o defeito de 08/09: contando só as vencidas, este dia dava 100% enquanto a barra de
   // progresso da Home, logo acima na mesma tela, dizia 50%. Um dia com duas doses em que uma foi
@@ -105,10 +105,10 @@ confere("a ordem é do mais antigo para o mais recente", () => {
   );
 });
 
-confere("pulada não conta como tomada — é o que separa o gráfico da barra da Home", () => {
+confere("pulada não conta como tomada - é o que separa o gráfico da barra da Home", () => {
   // O defeito de 08/09: a barra de progresso do topo da Home marcava 50% e o gráfico dos sete dias
-  // marcava 100% para o mesmo dia. São contas diferentes de propósito — a barra mede quantas doses
-  // já foram *respondidas* (confirmadas e puladas), o gráfico mede quantas foram *tomadas* —, mas
+  // marcava 100% para o mesmo dia. São contas diferentes de propósito - a barra mede quantas doses
+  // já foram *respondidas* (confirmadas e puladas), o gráfico mede quantas foram *tomadas* -, mas
   // as duas precisam sair do mesmo lugar para não divergirem por acidente.
   const doses = [dose("2026-09-05", 8, "confirmed"), dose("2026-09-05", 9, "skipped")];
   const [hoje] = adesaoPorDia({ doses, agora: AGORA, dias: 1 });
@@ -118,8 +118,8 @@ confere("pulada não conta como tomada — é o que separa o gráfico da barra d
 });
 
 confere("o gráfico da Home e a barra de progresso dão o mesmo número", () => {
-  // As duas ficam lado a lado na mesma tela. O numerador difere de propósito — a barra conta as
-  // *respondidas*, o gráfico as *tomadas* —, mas o denominador é o mesmo dia inteiro, e num dia sem
+  // As duas ficam lado a lado na mesma tela. O numerador difere de propósito - a barra conta as
+  // *respondidas*, o gráfico as *tomadas* -, mas o denominador é o mesmo dia inteiro, e num dia sem
   // dose pulada os dois números têm que coincidir. Foi vendo 50% em cima e 100% embaixo que o
   // defeito apareceu.
   const doses = [dose("2026-09-05", 8, "confirmed"), dose("2026-09-05", 22)];

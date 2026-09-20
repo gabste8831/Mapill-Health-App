@@ -14,11 +14,11 @@
  * ```
  *
  * O prebuild patcheia, e o install roda **depois** e restaura o arquivo original. O Gradle compila
- * o `AudioPlayer.kt` limpo, onde o player nasce com `AudioAttributes.DEFAULT` — que é
+ * o `AudioPlayer.kt` limpo, onde o player nasce com `AudioAttributes.DEFAULT` - que é
  * `USAGE_MEDIA`. O alarme sai no volume de música, que foi o que o Gabriel ouviu em 14/09.
  *
  * O `throw` do plugin não denuncia isso: ele falha a build quando o **alvo some**, e o install
- * devolve o arquivo original intacto — alvo perfeito, sem o patch. É o modo de falha silencioso que
+ * devolve o arquivo original intacto - alvo perfeito, sem o patch. É o modo de falha silencioso que
  * o comentário do plugin jurava não existir, por um caminho que ele não previu.
  *
  * ## Por que o `eas-build-post-install`
@@ -28,13 +28,13 @@
  * instante em que o Gradle lê o arquivo, que é o único instante que importa.
  *
  * O plugin continua chamando este mesmo código: no `expo run:android` local não há segundo install,
- * e ali é o prebuild que precisa aplicar. Uma regra, um arquivo — a duplicação é justamente como as
+ * e ali é o prebuild que precisa aplicar. Uma regra, um arquivo - a duplicação é justamente como as
  * duas metades divergiriam em silêncio.
  *
  * ## Por que não `patch-package`
  *
  * Ele resolveria, e ao custo de uma dependência nova e de um `.patch` gerado que ninguém lê. O
- * patch aqui é uma substituição de texto de dez linhas, com o motivo escrito ao lado — e é o motivo
+ * patch aqui é uma substituição de texto de dez linhas, com o motivo escrito ao lado - e é o motivo
  * que se perde num arquivo gerado.
  */
 
@@ -59,7 +59,7 @@ const ARQUIVO_ALVO = path.join(
  * O trecho exato a substituir, com a indentação do arquivo.
  *
  * Casar a linha inteira, e não só `AudioAttributes.DEFAULT`, é deliberado: se o `expo-audio` for
- * atualizado e esta construção mudar, o patch não encontra o alvo e a build para com uma mensagem —
+ * atualizado e esta construção mudar, o patch não encontra o alvo e a build para com uma mensagem -
  * em vez de aplicar no lugar errado ou deixar passar em silêncio.
  */
 const ORIGINAL = `    .setAudioAttributes(AudioAttributes.DEFAULT, false)`;
@@ -69,7 +69,7 @@ const ORIGINAL = `    .setAudioAttributes(AudioAttributes.DEFAULT, false)`;
  *
  * `C.USAGE_ALARM` é o que faz o botão de volume do despertador mandar no som, o silencioso não o
  * cortar e o Não Perturbe respeitá-lo como alarme. `CONTENT_TYPE_SONIFICATION` descreve o que ele é:
- * um aviso funcional, não música — é o mesmo par que o canal do alarme já pede.
+ * um aviso funcional, não música - é o mesmo par que o canal do alarme já pede.
  *
  * O segundo argumento (`handleAudioFocus`) segue `false`, como estava. Ligá-lo faria o player
  * devolver o foco a outro app que o peça, e um alarme de medicação que se cala porque um vídeo
@@ -95,7 +95,7 @@ const MARCA = "C.USAGE_ALARM";
 /**
  * Aplica o patch. Idempotente: com a marca já no arquivo, não faz nada.
  *
- * Devolve `"aplicado"` ou `"ja-estava"` para quem chama poder registrar o que houve — numa build
+ * Devolve `"aplicado"` ou `"ja-estava"` para quem chama poder registrar o que houve - numa build
  * remota, a linha no log é a única prova de que o patch entrou.
  *
  * **Lança** se o alvo não existe ou mudou de forma. Falhar a build é o comportamento certo: sem
@@ -108,7 +108,7 @@ function aplicarPatchDeDespertador(raizDoProjeto) {
   if (!fs.existsSync(alvo)) {
     throw new Error(
       `[som-de-despertador] ${ARQUIVO_ALVO} não existe. O expo-audio mudou de estrutura ou não ` +
-        `foi instalado — sem este patch o alarme toca no volume de mídia.`,
+        `foi instalado - sem este patch o alarme toca no volume de mídia.`,
     );
   }
 
@@ -119,7 +119,7 @@ function aplicarPatchDeDespertador(raizDoProjeto) {
   if (!conteudo.includes(ORIGINAL)) {
     throw new Error(
       `[som-de-despertador] a linha de setAudioAttributes não foi encontrada em ${ARQUIVO_ALVO}. ` +
-        `O expo-audio provavelmente foi atualizado. Confira o arquivo e ajuste o patch — sem ele o ` +
+        `O expo-audio provavelmente foi atualizado. Confira o arquivo e ajuste o patch - sem ele o ` +
         `alarme volta ao volume de mídia.`,
     );
   }
@@ -135,7 +135,7 @@ module.exports = { aplicarPatchDeDespertador, ARQUIVO_ALVO, MARCA };
  * `eas-build-post-install` o chama.
  *
  * O log importa: numa build remota é a única janela para saber se o patch entrou. "ja-estava" no
- * EAS significaria que o install **não** desfez o patch — e aí este script é redundante, o que é
+ * EAS significaria que o install **não** desfez o patch - e aí este script é redundante, o que é
  * informação, não ruído.
  */
 if (require.main === module) {
@@ -143,6 +143,6 @@ if (require.main === module) {
   console.log(
     resultado === "aplicado"
       ? "[som-de-despertador] patch aplicado: o alarme sai no volume de despertador."
-      : "[som-de-despertador] o patch já estava no arquivo — nada a fazer.",
+      : "[som-de-despertador] o patch já estava no arquivo - nada a fazer.",
   );
 }

@@ -6,7 +6,7 @@
 > **Como usar:** cada item traz o que está no artigo hoje, o texto de substituição pronto e a razão
 > da mudança.
 >
-> **Estado — conferido em 16/09 contra `TCC Gabriel Steffens Atualizado 11_09.docx (1).md`:**
+> **Estado - conferido em 16/09 contra `TCC Gabriel Steffens Atualizado 11_09.docx (1).md`:**
 > os itens **1, 2a, 3 e 5 já foram aplicados**. Restam o 2b, o 4, o 6, o 7 e o 8.
 
 ---
@@ -32,7 +32,7 @@
 > *"Configurações de lembrete determinam se o disparo ocorrerá por alarme sonoro ou por notificação
 > comum."*
 
-Você removeu tanto o "código 11" (que estava errado) quanto a "seção 4.4.9" (que não existia) — o que
+Você removeu tanto o "código 11" (que estava errado) quanto a "seção 4.4.9" (que não existia) - o que
 resolve os itens 3 e 4, mas deixa a frase **sem rastreabilidade**, diferente do resto do capítulo.
 **Sugestão:** se criar a §4.4.9 (item 6), reponha como *"conforme a regra de negócio de código 16 e a
 discussão da seção 4.4.9"*. Se não criar, use *"conforme a regra de negócio de código 16"*.
@@ -43,13 +43,13 @@ no sumário automático do Word como se fosse uma seção nova. Precisa virar pa
 4.3.5.
 
 > Também notei que a versão aplicada juntou os parágrafos dois e três e cortou a menção ao art. 18 da
-> LGPD. Funciona, mas a citação do artigo dava respaldo legal à afirmação — vale reconsiderar.
+> LGPD. Funciona, mas a citação do artigo dava respaldo legal à afirmação - vale reconsiderar.
 
 ---
 
-# PARTE I — CORREÇÕES
+# PARTE I - CORREÇÕES
 
-## 1. 🔴 RF-26 — número de modos de lembrete
+## 1. 🔴 RF-26 - número de modos de lembrete
 
 **Onde:** Quadro 6 (Requisitos funcionais: lembretes), linha do código 26.
 
@@ -61,7 +61,7 @@ no sumário automático do Word como se fosse uma seção nova. Precisa virar pa
 
 > | 26 | O sistema deve oferecer três modos de lembrete por tratamento: alarme (som alto, ignora o silencioso), notificação comum e nenhum aviso |
 
-**Por quê:** `src/domain/entities/prescription.ts:24` declara quatro valores —
+**Por quê:** `src/domain/entities/prescription.ts:24` declara quatro valores -
 `"alarm" | "notification" | "both" | "none"`. Três são oferecidos ao paciente; `both` foi removido da
 interface em 05/09 e permanece no tipo apenas para ler tratamentos salvos antes da remoção, onde é
 interpretado como `alarm`.
@@ -75,7 +75,7 @@ interpretado como `alarm`.
 
 ## 2. 🔴 "Migrações estritamente aditivas"
 
-**Onde:** dois lugares — Quadro 9 (RNF-04) e o parágrafo da §4.4.3.
+**Onde:** dois lugares - Quadro 9 (RNF-04) e o parágrafo da §4.4.3.
 
 ### 2a. No Quadro 9
 
@@ -130,7 +130,7 @@ tabela.
 **POR:** `conforme a regra de negócio de código 16`
 
 **Por quê:** a RN-11 é *"Um aviso por horário, não por dose"*. A regra sobre alarme versus
-notificação é a **RN-16** — *"Compromisso avisa por notificação, nunca por alarme"*. O erro aponta
+notificação é a **RN-16** - *"Compromisso avisa por notificação, nunca por alarme"*. O erro aponta
 para uma regra que existe, só que a errada, e por isso não salta aos olhos numa releitura.
 
 ---
@@ -145,7 +145,7 @@ para uma regra que existe, só que a errada, e por isso não salta aos olhos num
 
 **Por quê:** a §4.4 vai de 4.4.1 a 4.4.8.
 
-> ⚠️ **Se você criar a §4.4.9** (item 6), mantenha a referência como está — ela deixa de ser órfã.
+> ⚠️ **Se você criar a §4.4.9** (item 6), mantenha a referência como está - ela deixa de ser órfã.
 
 ---
 
@@ -184,14 +184,14 @@ faz as duas corretamente. O terceiro parágrafo resolve de uma vez a questão da
 pergunta natural de banca e o artigo não respondia.
 
 > **Sobre o volume**, se perguntarem: um paciente com quinze doses diárias acumula cerca de onze mil
-> registros por ano, menos de dois megabytes — contra os 782 KB do catálogo CMED já embarcado e os 1
+> registros por ano, menos de dois megabytes - contra os 782 KB do catálogo CMED já embarcado e os 1
 > a 3 MB de **uma única** foto de caixa. O peso real do aplicativo são os anexos, não o histórico.
 
 ---
 
 ## 7. 🟡 O termo de consentimento promete JSON; o app entrega ZIP com CSV
 
-**Onde:** `src/telas/Consentimento/texto-legal.ts:190-192` — **é código, não o artigo.**
+**Onde:** `src/telas/Consentimento/texto-legal.ts:190-192` - **é código, não o artigo.**
 
 **SUBSTITUA:**
 
@@ -204,16 +204,16 @@ pergunta natural de banca e o artigo não respondia.
 > no Excel, no Google Planilhas ou no LibreOffice."
 
 **Por quê:** `exportarDados.ts:84` gera um `.zip` com uma planilha CSV por tabela, mais um LEIA-ME. A
-troca foi deliberada e está documentada na linha 88: *"O JSON cumpria a lei — 'formato de uso comum e
-leitura por máquina' — mas [não servia a] quem quer abrir e olhar."* O histórico registra a mudança
+troca foi deliberada e está documentada na linha 88: *"O JSON cumpria a lei - 'formato de uso comum e
+leitura por máquina' - mas [não servia a] quem quer abrir e olhar."* O histórico registra a mudança
 em 05/09; o texto legal não acompanhou.
 
-É o documento que descreve ao titular o formato em que ele receberá os próprios dados — divergência
+É o documento que descreve ao titular o formato em que ele receberá os próprios dados - divergência
 aí é o tipo de detalhe que uma banca atenta à LGPD cobra.
 
 ---
 
-# PARTE II — TEXTO NOVO
+# PARTE II - TEXTO NOVO
 
 ## 6. 🟠 Completar a §4.6 e criar a §4.4.9
 
@@ -222,14 +222,14 @@ prazo"*, mas termina na 4.6.2. Faltam quatro etapas, entre elas o alarme e o uso
 
 > **Titulação.** Os títulos abaixo seguem a convenção predominante do documento: subseção em negrito,
 > Title Case, como "4.4.6 Sincronização e Consistência Eventual". A 4.6.1 e 4.6.2 ("Primeiro acesso",
-> "Cadastro de medicamentos") estão em sentence case e são a exceção do capítulo — se quiser
+> "Cadastro de medicamentos") estão em sentence case e são a exceção do capítulo - se quiser
 > uniformizar, renomeie para **"4.6.1 Primeiro Acesso"** e **"4.6.2 Cadastro de Medicamentos"**.
 >
 > **Escopo.** Estas subseções descrevem a **experiência do paciente** e remetem ao mecanismo em vez
-> de reexplicá-lo. A §4.3 continua sendo o lugar das regras e a §4.4 o da implementação — sem essa
+> de reexplicá-lo. A §4.3 continua sendo o lugar das regras e a §4.4 o da implementação - sem essa
 > fronteira, a §4.6 repetiria o que o capítulo já afirmou.
 
-### COLE ao fim da §4.6 — 4.6.3
+### COLE ao fim da §4.6 - 4.6.3
 
 > **4.6.3 Uso Diário e Registro de Doses**
 >
@@ -253,7 +253,7 @@ prazo"*, mas termina na 4.6.2. Faltam quatro etapas, entre elas o alarme e o uso
 > gera um novo apontando para ele, de modo que o estoque é ajustado apenas pela diferença entre os
 > dois estados.
 
-### COLE — 4.6.4
+### COLE - 4.6.4
 
 > **4.6.4 Disparo e Resposta ao Alarme**
 >
@@ -279,7 +279,7 @@ prazo"*, mas termina na 4.6.2. Faltam quatro etapas, entre elas o alarme e o uso
 > único aviso, e não um por medicamento, pois quatro notificações idênticas em sequência ensinam o
 > paciente a ignorar a primeira.
 
-### COLE — 4.6.5
+### COLE - 4.6.5
 
 > **4.6.5 Acompanhamento e Análise de Adesão**
 >
@@ -303,7 +303,7 @@ prazo"*, mas termina na 4.6.2. Faltam quatro etapas, entre elas o alarme e o uso
 > período em documento portátil, gerado integralmente no aparelho e destinado à consulta médica, que
 > é o momento em que o histórico de adesão sai do celular e cumpre sua finalidade.
 
-### COLE — 4.6.6
+### COLE - 4.6.6
 
 > **4.6.6 Exercício dos Direitos do Titular**
 >
@@ -322,7 +322,7 @@ prazo"*, mas termina na 4.6.2. Faltam quatro etapas, entre elas o alarme e o uso
 > consentimento e eliminar os dados são a mesma operação, e oferecer um botão que apenas retornasse
 > o usuário à tela de aceite seria menos do que a lei exige.
 
-### COLE ao fim da §4.4 — a subseção 4.4.9
+### COLE ao fim da §4.4 - a subseção 4.4.9
 
 Resolve de quebra a referência órfã do item 4.
 
@@ -356,7 +356,7 @@ Resolve de quebra a referência órfã do item 4.
 
 **Por que este item existe:** o capítulo tem hoje **dois blocos de código**, ambos na §4.4.7 e ambos
 sobre o mesmo assunto. A §4.3 apresenta vinte regras de negócio sem um único trecho que mostre como
-alguma delas é imposta. A §4.4.7 prova que o padrão funciona bem — ele só aparece uma vez.
+alguma delas é imposta. A §4.4.7 prova que o padrão funciona bem - ele só aparece uma vez.
 
 Os três blocos abaixo seguem o mesmo formato: código numerado entre dois parágrafos. Nenhum passa de
 dez linhas, e os três foram conferidos contra o repositório.
@@ -433,7 +433,7 @@ afirmação em uma demonstração.
 
 | Seção | Por quê |
 |---|---|
-| **4.1** | É delimitação de escopo — código ali desloca o foco |
+| **4.1** | É delimitação de escopo - código ali desloca o foco |
 | **4.2** | Requisitos são o que o sistema deve fazer, não como |
 | **4.5** | Os nove quadros já cumprem o papel de evidência |
 | **4.6** | É a experiência do paciente; código quebraria a narrativa |
@@ -443,7 +443,7 @@ de negócio, persistência e sincronização.
 
 ---
 
-# PARTE III — REFERÊNCIA
+# PARTE III - REFERÊNCIA
 
 ## Acompanhamento
 
@@ -454,15 +454,15 @@ Conferido em 16/09 contra `TCC Gabriel Steffens Atualizado 11_09.docx (1).md`.
 | 1 | RF-26: três modos de lembrete | ✅ aplicado |
 | 2a | RNF-04 no Quadro 9 | ✅ aplicado |
 | 2b | Parágrafo da §4.4.3 ainda diz "estritamente aditivas" | ⬜ |
-| 3 | "código 11" removido | ✅ resolvido — mas ver nota sobre repor a 16 |
-| 4 | "seção 4.4.9" removida | ✅ resolvido — mas ver nota |
-| 5 | Parágrafo da §4.3.5 | ✅ aplicado — ⚠️ corrigir o `###` indevido |
+| 3 | "código 11" removido | ✅ resolvido - mas ver nota sobre repor a 16 |
+| 4 | "seção 4.4.9" removida | ✅ resolvido - mas ver nota |
+| 5 | Parágrafo da §4.3.5 | ✅ aplicado - ⚠️ corrigir o `###` indevido |
 | 6a | §4.6.3 Uso Diário e Registro de Doses | ⬜ |
 | 6b | §4.6.4 Disparo e Resposta ao Alarme | ⬜ |
 | 6c | §4.6.5 Acompanhamento e Análise de Adesão | ⬜ |
 | 6d | §4.6.6 Exercício dos Direitos do Titular | ⬜ |
 | 6e | §4.4.9 Decisões de Remoção de Escopo | ⬜ |
-| 7 | `texto-legal.ts` — ZIP/CSV | ⬜ |
+| 7 | `texto-legal.ts` - ZIP/CSV | ⬜ |
 | 8a | Bloco `resolvesDose` na §4.3.1 | ⬜ |
 | 8b | Bloco `TABELAS_SINCRONIZAVEIS` na §4.4.3 | ⬜ |
 | 8c | Bloco da query de pendência na §4.4.6 | ⬜ |
@@ -475,7 +475,7 @@ O parágrafo aplicado entrou como heading. **Está assim:**
 ### A exclusão ocorre em duas modalidades. A de um registro individual...
 ```
 
-**Deve ser** parágrafo comum, sem o `###`, dentro da 4.3.5 — senão vai ao sumário do Word como se
+**Deve ser** parágrafo comum, sem o `###`, dentro da 4.3.5 - senão vai ao sumário do Word como se
 fosse uma subseção nova.
 
 ## O que foi verificado e está correto
@@ -484,14 +484,14 @@ Quatorze afirmações do capítulo foram conferidas contra o código. Doze confe
 
 | Afirmação do artigo | Verificado em |
 |---|---|
-| O bloco de código do `CorrectIntake` (§4.4.7) | `correct-intake.ts:35-47` — **fiel linha por linha** |
-| O tipo `IntakeLog` (§4.4.7) | `intake-log.ts:19-24` — os cinco campos conferem |
-| RN-01 — ausência de resposta nunca é desfecho | `intake-log.ts:14` |
-| RN-03 — recusa previsão com unidades incompatíveis | `estimate-stock-depletion.ts:65` |
-| RN-06 — correção nunca sobrescreve | `correct-intake.ts:41` |
-| RN-11 — um aviso por horário | `planejar-avisos-de-dose.ts:97` |
-| RN-12 — adiamento uma vez só | `snooze-dose-alarm.ts:19` |
-| RN-19 / RN-20 — futuras fora da conta, sem denominador não há taxa | `resumir-adesao.ts:20,43` |
+| O bloco de código do `CorrectIntake` (§4.4.7) | `correct-intake.ts:35-47` - **fiel linha por linha** |
+| O tipo `IntakeLog` (§4.4.7) | `intake-log.ts:19-24` - os cinco campos conferem |
+| RN-01 - ausência de resposta nunca é desfecho | `intake-log.ts:14` |
+| RN-03 - recusa previsão com unidades incompatíveis | `estimate-stock-depletion.ts:65` |
+| RN-06 - correção nunca sobrescreve | `correct-intake.ts:41` |
+| RN-11 - um aviso por horário | `planejar-avisos-de-dose.ts:97` |
+| RN-12 - adiamento uma vez só | `snooze-dose-alarm.ts:19` |
+| RN-19 / RN-20 - futuras fora da conta, sem denominador não há taxa | `resumir-adesao.ts:20,43` |
 | Nove tabelas sincronizáveis, em ordem de dependência | `tabelas-sincronizaveis.ts:14-28` |
 | Domínio sem dependência de framework | 17 use-cases em TypeScript puro |
 | Nove formas farmacêuticas, quatro frequências | `medication.ts`, `prescription.ts` |
@@ -502,9 +502,9 @@ Quatorze afirmações do capítulo foram conferidas contra o código. Doze confe
 Três problemas de marcação que afetam o sumário automático do Word. Não foram corrigidos porque a
 decisão foi mexer só no que é conteúdo:
 
-1. **`# 4.6` está no mesmo nível de `# 4 DESENVOLVIMENTO`** — sai do sumário como capítulo irmão, e
+1. **`# 4.6` está no mesmo nível de `# 4 DESENVOLVIMENTO`** - sai do sumário como capítulo irmão, e
    não como seção do Desenvolvimento.
-2. **4.3 e 4.4 não têm heading** — são parágrafo comum, então não entram no sumário.
+2. **4.3 e 4.4 não têm heading** - são parágrafo comum, então não entram no sumário.
 3. **Títulos colados ao corpo** em toda a 4.3.x e 4.4.x, como em
    `### **4.3.5 Sincronização de Dados**  Conflitos de edição...`.
 

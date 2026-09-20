@@ -2,7 +2,7 @@
  * Confere a normalização dos nomes vindos da CMED.
  *
  * **Por que existe.** A base da Anvisa entrega tudo em maiúsculas, e o app capitaliza só na
- * exibição — o dado gravado continua sendo o que o órgão publicou, porque a busca por EAN depende
+ * exibição - o dado gravado continua sendo o que o órgão publicou, porque a busca por EAN depende
  * dele e alterá-lo apagaria a rastreabilidade da fonte.
  *
  * O risco de uma função assim é **trocar o nome de um remédio por engano**: transformar "AAS" em
@@ -26,13 +26,13 @@ const checar = (nome, cond, detalhe) => {
   if (cond) ok += 1;
   else {
     falhou += 1;
-    console.log(`FALHA  ${nome}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.log(`FALHA  ${nome}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 };
 
 try {
   // Só as funções puras: o arquivo inteiro importa entidades do domínio, e aqui elas não fazem
-  // falta — o que se verifica é transformação de string.
+  // falta - o que se verifica é transformação de string.
   const fonte = readFileSync(path.join(raiz, "src/shared/rotulos-de-medicamento.ts"), "utf8");
   const puro = fonte.slice(fonte.indexOf("const PALAVRAS_MINUSCULAS")).replace(/export function/g, "function");
   const arquivo = path.join(saida, "rotulos.ts");
@@ -62,7 +62,7 @@ try {
     checar(`capitalizar "${entrada}"`, resultado === esperado, `veio "${resultado}"`);
   }
 
-  // A primeira palavra sobe mesmo sendo preposição — "A Saúde", nunca "a Saúde".
+  // A primeira palavra sobe mesmo sendo preposição - "A Saúde", nunca "a Saúde".
   checar("preposição inicial sobe", capitalizarNome("DE OLHO") === "De Olho");
 
   const multipla = resumirSubstancia("EXTRATO DE PASSIFLORA;EXTRATO DE LARANJA;SALICILATO DE SÓDIO");

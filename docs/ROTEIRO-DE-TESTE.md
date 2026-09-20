@@ -1,7 +1,7 @@
 # Roteiro de teste em aparelho
 
 > **Este roteiro tem só o que ainda falta validar.** Os blocos 1 a 9 foram aprovados em 08/09, e a
-> maior parte do que restava (10, 11.5.1/2/3/4, 12, 13.2–13.5, 15, 16, 21, 22, 23) passou na rodada
+> maior parte do que restava (10, 11.5.1/2/3/4, 12, 13.2-13.5, 15, 16, 21, 22, 23) passou na rodada
 > de 11/09 e saiu daqui.
 >
 > O histórico completo, incluindo tudo que já foi validado, continua no git.
@@ -11,16 +11,16 @@
 | | O que é | Situação |
 |---|---|---|
 | **13.1** | Tela azul sobre outro app | ✅ Aceito como está (11/09) |
-| **14.1.2** | Alarme com o app fora dos recentes | ✅ **Resolvido em 12/09** — era o Autostart da MIUI |
-| **18.2** | Alarme sobrevive ao reboot | ✅ **Passou em 12/09** — tocou ao desbloquear |
+| **14.1.2** | Alarme com o app fora dos recentes | ✅ **Resolvido em 12/09** - era o Autostart da MIUI |
+| **18.2** | Alarme sobrevive ao reboot | ✅ **Passou em 12/09** - tocou ao desbloquear |
 | **19.2** | Alarme com o app aberto | ✅ **Passou em 12/09** |
-| **18.3** | Bateria (8–12h, sem carregador) | Falta rodar — dá para fazer na build atual |
-| **19** | Os outros casos de borda | Falta rodar — dá para fazer na build atual |
-| **20** | Compromisso e receita | ✅ **Passou em 12/09** — chegaram às 00:01, com o app fechado |
-| 🔧 | **Estoque, cartão da Home, tela azul após editar** | **Corrigidos — só a próxima build valida** |
+| **18.3** | Bateria (8-12h, sem carregador) | Falta rodar - dá para fazer na build atual |
+| **19** | Os outros casos de borda | Falta rodar - dá para fazer na build atual |
+| **20** | Compromisso e receita | ✅ **Passou em 12/09** - chegaram às 00:01, com o app fechado |
+| 🔧 | **Estoque, cartão da Home, tela azul após editar** | **Corrigidos - só a próxima build valida** |
 | 🔴 | Alarme adiado toca mesmo após apagar todos os dados | Bug confirmado em 11/09 |
-| 🔴 | Responder o alarme abre o app sem desbloquear | Bug confirmado em 12/09 — privacidade |
-| **17** | Vários remédios no mesmo horário | Parado — a resposta em lote precisa ser refeita |
+| 🔴 | Responder o alarme abre o app sem desbloquear | Bug confirmado em 12/09 - privacidade |
+| **17** | Vários remédios no mesmo horário | Parado - a resposta em lote precisa ser refeita |
 
 ### O que a build de 12/09 validou em aparelho
 
@@ -29,16 +29,16 @@ Com o Autostart ligado, e ponta a ponta:
 - **Alarme:** app fora dos recentes, celular bloqueado. A tela azul irrompeu e "Tomei" gravou a
   dose. É o caso principal do app, e fecha o 13.1, o 14.1.2 e o 19.2.
 - **Notificação:** chegou no modo certo, sem tela cheia, e "Pulei" registrou o desfecho.
-- **Compromisso e receita:** as três notificações estavam no celular na manhã seguinte — duas de
+- **Compromisso e receita:** as três notificações estavam no celular na manhã seguinte - duas de
   receita e uma de compromisso, entregues às 00:01 com o app fechado. Fecha o bloco 20 para os dois.
 
 > 📌 **O que isso prova além do bloco 20:** o encanamento inteiro funciona com o app fechado a noite
-> toda — agendar, sobreviver, e entregar na hora marcada. O estoque que falta não é limitação de
+> toda - agendar, sobreviver, e entregar na hora marcada. O estoque que falta não é limitação de
 > infraestrutura: é o defeito corrigido em `4cc90e6`, esperando build.
 
 ### 🔧 O que só a próxima build valida
 
-Quatro correções entraram **depois** do APK de 12/09. Nada disso adianta testar agora — o binário
+Quatro correções entraram **depois** do APK de 12/09. Nada disso adianta testar agora - o binário
 instalado ainda tem os defeitos.
 
 | Commit | O que corrige | Como validar |
@@ -48,33 +48,33 @@ instalado ainda tem os defeitos.
 | `4cc90e6` | O cartão da Home exigia antecedência | Marcar o aviso **sem escolher prazo**: o cartão tem de aparecer na semana do fim |
 | `358e55c` | O painel de permissões só valia para lembrete de dose | Cadastrar só aviso de estoque ou compromisso, sem alarme de dose, e negar a permissão: o painel tem de aparecer |
 | `358e55c` | Autostart não era explicado | `Ajustes → como funcionam os alertas`: tem de haver parágrafo próprio sobre o início automático |
-| `930082a` | A tela azul com vários remédios era uma parede de texto | Cadastrar **2 ou 3** no mesmo horário: a lista tem miniatura de 44dp e, ao lado, nome, dose, orientação de tomada e local — tudo legível sem rolar. Depois **4 ou mais**: só a contagem e o botão de abrir o app |
+| `930082a` | A tela azul com vários remédios era uma parede de texto | Cadastrar **2 ou 3** no mesmo horário: a lista tem miniatura de 44dp e, ao lado, nome, dose, orientação de tomada e local - tudo legível sem rolar. Depois **4 ou mais**: só a contagem e o botão de abrir o app |
 
 **O que o estoque revelou, e vale para o TCC:** compromisso e receita têm data fixa e nenhuma trava;
 o estoque depende de um cálculo e tem a trava que impede repetir aviso a cada dose. Ela era gravada
-no **agendamento**, e como reagendar é "cancela tudo e planeja de novo" — a cada volta do app ao
-primeiro plano —, o segundo reagendamento comparava a quantidade consigo mesma, concluía que já
+no **agendamento**, e como reagendar é "cancela tudo e planeja de novo" - a cada volta do app ao
+primeiro plano -, o segundo reagendamento comparava a quantidade consigo mesma, concluía que já
 avisara e descartava o estoque. O aviso vivia segundos. Agora quem grava é o listener, na entrega.
 
 ### O que o 14.1.2 revelou (12/09)
 
 Testado na build `preview` (APK, bundle embutido), num Xiaomi. Duas descobertas, e a ordem importa:
 
-**Sem o Autostart, nada dispara** — nem alarme, nem notificação, nem com o app nos recentes. **Com o
+**Sem o Autostart, nada dispara** - nem alarme, nem notificação, nem com o app nos recentes. **Com o
 Autostart ligado, funciona.**
 
 A MIUI trata o deslize dos recentes como *force stop* e nasce com o **Autostart desligado** para todo
 app instalado. Sem ele, o sistema recusa acordar o processo, e o `AlarmManager` nunca chega a
-executar — o agendamento continua registrado e simplesmente não é entregue. Foi o que o Diagnóstico
+executar - o agendamento continua registrado e simplesmente não é entregue. Foi o que o Diagnóstico
 mostrou em 11/09: o aviso estava agendado e não tocou.
 
-Não é defeito do app, e nenhum código o contorna: o Autostart não tem API pública — não há permissão
+Não é defeito do app, e nenhum código o contorna: o Autostart não tem API pública - não há permissão
 a pedir, nem estado a consultar (é por isso que ele não está no painel de permissões, ver
 `permissoes-de-alarme.ts`). A mitigação possível é **orientar**, que é o que Alarmy e Sleep as
 Android fazem: detectar o fabricante por `Build.MANUFACTURER` e mostrar a instrução específica.
 
 > 📌 **Pendência de implementação:** a tela de ajuda de alertas precisa mencionar o Autostart em
-> Xiaomi, Samsung e Motorola. É orientação, não verificação — nunca marcar como "concedido" algo que
+> Xiaomi, Samsung e Motorola. É orientação, não verificação - nunca marcar como "concedido" algo que
 > o app não consegue ler. Fica para o refinamento, junto dos outros itens de código.
 
 > 📌 **Para o TCC:** isto é conteúdo, não pendência. Limitação de plataforma documentada, com
@@ -86,10 +86,10 @@ Android fazem: detectar o fabricante por `Build.MANUFACTURER` e mostrar a instru
 
 **Com a build atual (12/09):**
 
-1. **19.1, 19.3 e 19.4** — rápidos, cinco a dez minutos cada.
-2. **19.4b a 19.7** — numa sessão só, porque mexem no relógio e o 19.7 reinstala o app. Religue o
+1. **19.1, 19.3 e 19.4** - rápidos, cinco a dez minutos cada.
+2. **19.4b a 19.7** - numa sessão só, porque mexem no relógio e o 19.7 reinstala o app. Religue o
    Autostart depois do 19.7, ou ele reprova pelo motivo errado.
-3. **18.3** — um alarme para daqui a 8–12 h, sem carregador. É o teste da noite: cadastre e durma.
+3. **18.3** - um alarme para daqui a 8-12 h, sem carregador. É o teste da noite: cadastre e durma.
 
 **Com a próxima build:**
 
@@ -98,14 +98,14 @@ Android fazem: detectar o fabricante por `Build.MANUFACTURER` e mostrar a instru
 
 **Depois, e não antes:**
 
-7. Os dois bugs 🔴 — o de privacidade primeiro, por ser dado de saúde exposto.
+7. Os dois bugs 🔴 - o de privacidade primeiro, por ser dado de saúde exposto.
 8. **17**, quando a resposta em lote for refeita.
 
 > ⚠️ **O Autostart tem de estar ligado em todos os blocos abaixo**, e **reinstalar o app o desliga
 > de novo**. Isso afeta o 19 diretamente: o passo 11.7 reinstala o Mapill, então religue o Autostart
-> antes de esperar qualquer horário — senão o passo falha pelo motivo errado.
+> antes de esperar qualquer horário - senão o passo falha pelo motivo errado.
 
-> ⏰ **Planeje a véspera.** Compromisso, receita e estoque avisam às **00:01 do dia** — marcar para
+> ⏰ **Planeje a véspera.** Compromisso, receita e estoque avisam às **00:01 do dia** - marcar para
 > hoje não dispara nada, porque esse instante já passou. Deixe o que for testar cadastrado **na
 > noite anterior**, com data para o dia seguinte. Só o alarme de dose toca na hora marcada.
 >
@@ -117,30 +117,30 @@ Android fazem: detectar o fabricante por `Build.MANUFACTURER` e mostrar a instru
 Só o que falhar, com o número do passo:
 
 ```
-14.2 falhou — a tela cheia não subiu, só veio notificação
-16.1 falhou — o alarme do remédio excluído chegou mesmo assim
+14.2 falhou - a tela cheia não subiu, só veio notificação
+16.1 falhou - o alarme do remédio excluído chegou mesmo assim
 resto ok
 ```
 
-- 🔬 marca as perguntas que **só o aparelho responde**. Anote a resposta **mesmo quando passar** —
+- 🔬 marca as perguntas que **só o aparelho responde**. Anote a resposta **mesmo quando passar** -
   são elas que fecham o C1 formalmente no plano.
 - Se um passo falhar, os seguintes do mesmo bloco costumam depender dele. Avise e siga para o
   próximo bloco.
-- **Se algo dos blocos 1 a 9 falhar agora, é regressão** — use essa palavra, porque muda o
+- **Se algo dos blocos 1 a 9 falhar agora, é regressão** - use essa palavra, porque muda o
   diagnóstico.
 
 ## Antes de começar
 
 ⚠️ **Build nova, e desinstale a anterior.** Os motivos se somam:
 
-1. Permissões novas no `app.json` — permissão não entra por recarga do Metro.
+1. Permissões novas no `app.json` - permissão não entra por recarga do Metro.
 2. A biblioteca de avisos é **dependência nativa**, e ela mudou (Notifee → `react-native-notify-kit`).
 3. Um canal de notificação já criado fica **congelado** no aparelho: som e importância não mudam por
-   atualização. Instalar por cima manteria o alarme mudo — foi assim que o defeito do canal sem som
+   atualização. Instalar por cima manteria o alarme mudo - foi assim que o defeito do canal sem som
    sobreviveu a várias sessões.
 4. As migrations **017 e 018** nunca rodaram em aparelho. São as primeiras desde a 016.
 
-⚠️ **Aparelho físico.** Emulador não serve para os blocos de alarme — o que está em jogo é o
+⚠️ **Aparelho físico.** Emulador não serve para os blocos de alarme - o que está em jogo é o
 comportamento do sistema com o app fechado e sob economia de bateria.
 
 ```bash
@@ -152,9 +152,9 @@ avisos`. Se a seção "DESENVOLVIMENTO" não existir, a build é antiga.
 
 ---
 
-# PARTE 1 — O que falta
+# PARTE 1 - O que falta
 
-## 11 — A ferramenta de diagnóstico
+## 11 - A ferramenta de diagnóstico
 
 **Faça este bloco antes de qualquer teste de alarme.** Ela é o que torna os demais suportáveis: em
 vez de esperar o horário e adivinhar por que nada tocou, ela mostra o estado real em cinco segundos.
@@ -163,7 +163,7 @@ vez de esperar o horário e adivinhar por que nada tocou, ela mostra o estado re
 
 **14.5.1** Confira as três seções de cima.
 
-> ✅ **Permissões**: "Notificações — Concedida" e "Alarme exato — Permitido", os dois em verde. Se
+> ✅ **Permissões**: "Notificações - Concedida" e "Alarme exato - Permitido", os dois em verde. Se
 > algum estiver vermelho, resolva antes de testar qualquer coisa.
 > ✅ **Canais**: cada canal com **Som** preenchido (nunca "MUDO") e **Importância** 4 ou 5.
 > ✅ **Agendados agora**: o número "no sistema" bate com o "esperado pelo banco".
@@ -174,19 +174,19 @@ vez de esperar o horário e adivinhar por que nada tocou, ela mostra o estado re
 
 ---
 
-## 12 — As permissões do alarme ✅ _(passou totalmente em 11/09)_
+## 12 - As permissões do alarme ✅ _(passou totalmente em 11/09)_
 
 ---
 
-## 13 — 🔴 As cinco correções que só esta build pode provar
+## 13 - 🔴 As cinco correções que só esta build pode provar
 
-Cinco defeitos corrigidos no código que **ainda não passaram em binário**. São o coração do TCC —
+Cinco defeitos corrigidos no código que **ainda não passaram em binário**. São o coração do TCC -
 mas ficam no fim da sessão de propósito, junto do resto do alarme, porque os blocos vizinhos mexem
 no relógio e reinstalam o app.
 
 > **Antes de esperar qualquer horário, abra o diagnóstico** (`Ajustes → Desenvolvimento`). Ele diz
 > se o aviso está agendado, para quando, em que canal e com quais permissões. Um alarme que não
-> aparece ali nunca ia tocar — e descobrir isso custa cinco segundos em vez de vinte minutos.
+> aparece ali nunca ia tocar - e descobrir isso custa cinco segundos em vez de vinte minutos.
 
 **1. A tela azul sobre outro aplicativo** 🔴. Cadastre um remédio com alarme para daqui a 2 minutos.
 **Abra o Instagram** (ou qualquer outro app) e fique navegando.
@@ -194,7 +194,7 @@ no relógio e reinstalam o app.
 > 🔬 A tela azul do alarme aparece **por cima** do outro aplicativo?
 >
 > Antes só a notificação no topo aparecia. A correção é a permissão `SYSTEM_ALERT_WINDOW`, que é
-> justamente o que exige build nova — no binário anterior ela nem existia no manifesto. Confirme
+> justamente o que exige build nova - no binário anterior ela nem existia no manifesto. Confirme
 > antes em **Ajustes → alertas** que a permissão de "abrir sobre outros apps" está concedida.
 >
 > Se **não** funcionar, teste o paliativo: tocar na notificação abre a **tela do alarme** (com foto,
@@ -202,44 +202,44 @@ no relógio e reinstalam o app.
 >
 > ⚠️ **11/09:** confirmado funcionando dentro do que foi testado até aqui, com o esquema atual da
 > notificação. Mas o achado do bloco 14.1.2 (tirar o app dos recentes) ainda não foi cruzado com
-> este passo — revisitar se aparecer o mesmo padrão.
+> este passo - revisitar se aparecer o mesmo padrão.
 
 ---
 
-## 14 — O alarme em tela cheia 🔴🔬
+## 14 - O alarme em tela cheia 🔴🔬
 
-**1.2 — App fora dos recentes** ✅ **passou em 12/09, com o Autostart ligado.**
+**1.2 - App fora dos recentes** ✅ **passou em 12/09, com o Autostart ligado.**
 
-> ❌ **11/09 e 12/09, Autostart desligado:** nada dispara. Nem alarme, nem notificação — e nem com o
+> ❌ **11/09 e 12/09, Autostart desligado:** nada dispara. Nem alarme, nem notificação - e nem com o
 > app **nos** recentes.
 > ✅ **12/09, Autostart ligado:** funciona. Tela azul, som em loop, botões.
 >
 > A causa está detalhada no topo deste arquivo. Resumo: a MIUI nasce com o Autostart desligado e
-> recusa acordar o processo, então o `AlarmManager` nunca executa — o aviso fica agendado e não é
+> recusa acordar o processo, então o `AlarmManager` nunca executa - o aviso fica agendado e não é
 > entregue. Não é defeito do app, e não há API para contornar.
 >
 > Suspeita do Gabriel: efeito da build (dev client). **Confirmar numa build de produção/preview
-> antes de tratar como defeito real** — se persistir lá, é o app sendo morto pelo sistema antes de
+> antes de tratar como defeito real** - se persistir lá, é o app sendo morto pelo sistema antes de
 > disparar o alarme, e vira o assunto do bloco 18/20.
 
 ---
 
-## 17 — Vários remédios no mesmo horário
+## 17 - Vários remédios no mesmo horário
 
-> ⚠️ **Fica por último — precisa ser desenvolvido de novo.** Decisão do Gabriel em 11/09: este bloco
+> ⚠️ **Fica por último - precisa ser desenvolvido de novo.** Decisão do Gabriel em 11/09: este bloco
 > vai ficar parado até a funcionalidade ser refeita, então não adianta testar em cima do que existe
 > hoje.
 >
-> Contexto anterior (09/09): a resposta em lote tinha saído do escopo — os botões "Tomei todas" e
+> Contexto anterior (09/09): a resposta em lote tinha saído do escopo - os botões "Tomei todas" e
 > "Pulei todas" foram removidos depois de uma sessão caçando um defeito que aparecia ali (duas telas
 > do alarme abrindo ao mesmo tempo, corrigido, ver `alarme-em-cena`), porque a resposta em lote não
 > valia o risco de manter.
 
 ---
 
-## 18 — Sobrevivência a reboot e bateria 🔬
+## 18 - Sobrevivência a reboot e bateria 🔬
 
-> ✅ **Liberado em 12/09**, com o 14.1.2 resolvido. Rode com o **Autostart ligado** — senão este
+> ✅ **Liberado em 12/09**, com o 14.1.2 resolvido. Rode com o **Autostart ligado** - senão este
 > bloco só reconfirma o achado do 14, e não mede o que veio medir.
 
 **Decide se o app precisa de uma tela orientando a desativar a otimização de bateria.**
@@ -260,17 +260,17 @@ carregar, feche. _(Isso agenda ~28 avisos.)_
 > nunca os invoca, e foi o defeito visto em 05/09). O plugin roda no prebuild desta build.
 >
 > **Suspeita principal: o Autostart, de novo.** A MIUI bloqueia `BOOT_COMPLETED` para app sem
-> Autostart — é o caso que ela controla mais de perto, porque é exatamente o que enche a inicialização
+> Autostart - é o caso que ela controla mais de perto, porque é exatamente o que enche a inicialização
 > do aparelho. Se for isso, o app está correto e a limitação é a mesma do 14.1.2.
 >
 > ✅ **Resolvido no mesmo teste: ao desbloquear o celular, o alarme tocou.**
 >
 > Isto fecha o diagnóstico, e a favor do app: **o agendamento sobreviveu ao reboot**. O que ficou
-> retido foi a *entrega*, enquanto o processo não podia rodar — e ela saiu no instante em que o
+> retido foi a *entrega*, enquanto o processo não podia rodar - e ela saiu no instante em que o
 > desbloqueio liberou o app.
 >
 > A distinção importa e é o que absolve o código: o alarme tocou **ao desbloquear**, e não "no
-> próximo horário, depois de abrir o app". Se o reboot tivesse apagado o agendamento, nada tocaria —
+> próximo horário, depois de abrir o app". Se o reboot tivesse apagado o agendamento, nada tocaria -
 > nem antes, nem depois. O `AlarmManager` disparou no horário certo e o Android guardou a entrega.
 >
 > Mesmo padrão do 14.1.2: a MIUI segurando o processo. Os receptores de boot do plugin fizeram a
@@ -278,56 +278,56 @@ carregar, feche. _(Isso agenda ~28 avisos.)_
 
 > 📌 **Para o TCC:** este é o par do achado do 14.1.2, e junto com ele forma um argumento completo. O
 > app agenda corretamente (provado: sobrevive ao reboot), e a entrega depende de o fabricante
-> autorizar o processo a acordar — o que é decisão do sistema, não do aplicativo. A evidência aqui é
+> autorizar o processo a acordar - o que é decisão do sistema, não do aplicativo. A evidência aqui é
 > ainda mais limpa que a do Diagnóstico: o alarme tocou no desbloqueio, ou seja, existia, estava
 > correto, e só esperava permissão para se apresentar.
 
-**7.3** 🔬 **O mais chato:** deixe um remédio agendado para **daqui a 8–12 h** (a noite serve),
+**7.3** 🔬 **O mais chato:** deixe um remédio agendado para **daqui a 8-12 h** (a noite serve),
 celular **sem carregador**, app fechado, economia de bateria do fabricante ativa.
 
 🔬 **Anote:** chegou? No horário ou atrasado? _(Xiaomi, Samsung e Motorola são os mais agressivos.)_
 
 ---
 
-## 19 — Os casos de borda do alarme 🔬 (C1.8)
+## 19 - Os casos de borda do alarme 🔬 (C1.8)
 
 > ✅ **Liberado em 12/09**, com o 14.1.2 resolvido.
 >
 > ⚠️ **O passo 11.7 reinstala o app, e isso desliga o Autostart.** Religue antes de esperar o
-> horário, ou o passo reprova pelo motivo errado — e é justamente o passo que mede o pior modo de
+> horário, ou o passo reprova pelo motivo errado - e é justamente o passo que mede o pior modo de
 > falhar do app.
 
 **É o bloco que fecha o C1 no plano.** Os blocos 13 a 17 provam que o alarme funciona quando tudo
 está normal; este prova que ele não **mente** quando não está. Num app de medicação, os dois modos
 de falhar são opostos e igualmente graves: o aviso que **não chega**, e o aviso que chega **errado**
-— na hora errada, duplicado, ou de um remédio que a pessoa já tomou.
+- na hora errada, duplicado, ou de um remédio que a pessoa já tomou.
 
 Cada passo tem um número de C1.8 ao lado. Anote a resposta **mesmo quando passar**: são elas que
 marcam as caixas do plano.
 
-⚠️ **Este bloco mexe no relógio do aparelho e reinstala o app.** Faça-o **por último** na Parte 1 —
+⚠️ **Este bloco mexe no relógio do aparelho e reinstala o app.** Faça-o **por último** na Parte 1 -
 depois dele o estado do aparelho não serve para os outros blocos.
 
 ---
 
-**11.1 — Dose já confirmada não toca** _(C1.8 nº6)_
+**11.1 - Dose já confirmada não toca** _(C1.8 nº6)_
 
 Cadastre `Tomei Antes`, daqui a 4 min, **Alarme**. Abra a Home e **confirme a dose pela Home**,
 antes do horário. Feche o app e espere passar o horário.
 
 > ✅ 🔴 **Nada toca.** Nem tela cheia, nem notificação.
-> ❌ Se tocar, o cancelamento individual não alcançou o Notifee — é o mesmo risco do bloco 16, e o
+> ❌ Se tocar, o cancelamento individual não alcançou o Notifee - é o mesmo risco do bloco 16, e o
 > mais provável de escapar, porque aqui quem cancela é a Home e não a edição do cadastro.
 
 ---
 
-**11.2 — Alarme com o app já aberto na tela da dose** _(C1.8 nº5)_
+**11.2 - Alarme com o app já aberto na tela da dose** _(C1.8 nº5)_
 
 Cadastre `App Aberto`, daqui a 3 min, **Alarme**. **Deixe o app aberto**, e navegue até a tela do
 horário dessa mesma dose. Espere o horário.
 
 > ✅ 🔴 A tela de alarme aparece **mesmo com o app aberto** _(é o que o commit de 02/09 entregou)_.
-> ✅ 🔴 **Não empilha duas telas** — ao sair do alarme você não encontra outra tela de dose por baixo
+> ✅ 🔴 **Não empilha duas telas** - ao sair do alarme você não encontra outra tela de dose por baixo
 > esperando resposta da mesma dose.
 > ✅ Respondendo **Tomei** no alarme, a tela por baixo reflete a resposta, e não continua oferecendo
 > Tomei/Pulei para uma dose já resolvida.
@@ -336,7 +336,7 @@ horário dessa mesma dose. Espere o horário.
 
 ---
 
-**11.3 — Dose atravessando a meia-noite** _(C1.8 nº2)_
+**11.3 - Dose atravessando a meia-noite** _(C1.8 nº2)_
 
 Cadastre `Meia Noite` com **dois horários**: `23:50` e `00:10`. Uso contínuo, Alarme.
 
@@ -344,24 +344,24 @@ Cadastre `Meia Noite` com **dois horários**: `23:50` e `00:10`. Uso contínuo, 
 > ✅ 🔴 Na Home, a dose das `00:10` aparece **no dia seguinte**, não hoje.
 
 Se der para esperar a virada, espere. Se não, ajuste os horários para daqui a 3 e 8 min e confirme
-que os dois tocam — o que este passo testa de verdade é a geração, e ela já foi verificada em Node
+que os dois tocam - o que este passo testa de verdade é a geração, e ela já foi verificada em Node
 contra a virada de dia.
 
 🔬 **Anote:** a dose de `00:10` foi listada no dia certo?
 
 ---
 
-**11.4 — Não perturbe / Foco** _(C1.8 nº4)_
+**11.4 - Não perturbe / Foco** _(C1.8 nº4)_
 
 Cadastre `Silencioso`, daqui a 3 min, **Alarme**. Ative o **Não perturbe** do Android. Feche o app e
 bloqueie.
 
-> ✅ 🔴 **O alarme toca mesmo assim** — é o que `bypassDnd` e a permissão de política de notificação
+> ✅ 🔴 **O alarme toca mesmo assim** - é o que `bypassDnd` e a permissão de política de notificação
 > existem para garantir _(commit `5747ed9`)_.
 > ❌ Se ficar mudo, anote: é a diferença entre o app cumprir ou não a promessa "toca alto, mesmo no
-> silencioso" — e, pela RN15, o **texto da interface teria que mudar**, não a promessa ficar.
+> silencioso" - e, pela RN15, o **texto da interface teria que mudar**, não a promessa ficar.
 
-Repita com o celular no **silencioso** (não o Não perturbe — o botão de volume no mudo).
+Repita com o celular no **silencioso** (não o Não perturbe - o botão de volume no mudo).
 
 > ✅ 🔴 Toca igual.
 
@@ -369,7 +369,7 @@ Repita com o celular no **silencioso** (não o Não perturbe — o botão de vol
 
 ---
 
-**11.4b — 🔴🔬 O tratamento contínuo sobrevive a 30 dias?** _(suspeita, não confirmada)_
+**11.4b - 🔴🔬 O tratamento contínuo sobrevive a 30 dias?** _(suspeita, não confirmada)_
 
 Este passo é novo e existe para responder uma dúvida achada por leitura de código, não por teste.
 
@@ -385,7 +385,7 @@ anote quantas doses o banco espera. Depois adiante o relógio em **31 dias** e v
 
 > ✅ 🔴 A Home continua mostrando a dose do dia.
 > ✅ O diagnóstico continua com avisos agendados, e o número não é zero.
-> ❌ Se a Home ficar vazia ou o diagnóstico zerar, a suspeita se confirma — e é o pior modo de
+> ❌ Se a Home ficar vazia ou o diagnóstico zerar, a suspeita se confirma - e é o pior modo de
 > falhar deste app, porque nada avisa que parou.
 
 🔬 **Anote o resultado mesmo se passar:** ele decide se é preciso implementar o reabastecimento ou
@@ -396,32 +396,32 @@ já desligado.
 
 ---
 
-**11.5 — Relógio do aparelho mudado à mão** _(C1.8 nº3)_
+**11.5 - Relógio do aparelho mudado à mão** _(C1.8 nº3)_
 
 Cadastre `Relogio`, daqui a **2 h**, Alarme. Feche o app. Nas configurações do Android, **desligue a
 hora automática** e adiante o relógio para **5 minutos antes** do horário da dose. Espere.
 
-> ✅ O aviso chega no horário **do relógio novo** — o agendamento é por data/hora local, então ele
+> ✅ O aviso chega no horário **do relógio novo** - o agendamento é por data/hora local, então ele
 > acompanha.
 > ⚠️ Se **não** chegar, anote e verifique se ele chega ao **abrir o app** (o reagendamento da janela
 > acontece na abertura). Isso decide se o app precisa reagir à mudança de relógio ou se basta a
 > próxima abertura.
 
-**Devolva a hora automática ao terminar** — os passos seguintes dependem do relógio certo.
+**Devolva a hora automática ao terminar** - os passos seguintes dependem do relógio certo.
 
 🔬 **Anote:** chegou sozinho, só ao abrir o app, ou não chegou?
 
 ---
 
-**11.6 — Fuso horário** _(C1.8 nº1)_
+**11.6 - Fuso horário** _(C1.8 nº1)_
 
 Com a hora automática **desligada**, mude o **fuso** para um vizinho (ex.: Fortaleza / Manaus). Abra
 o app.
 
-> ✅ 🔴 A dose das 08:00 **continua às 08:00** na Home — o horário é uma promessa sobre o relógio de
+> ✅ 🔴 A dose das 08:00 **continua às 08:00** na Home - o horário é uma promessa sobre o relógio de
 > parede da pessoa, não um instante absoluto. Quem toma remédio às 8 da manhã toma às 8 da manhã em
 > qualquer lugar.
-> ❌ Se a dose escorregar para 07:00 ou 09:00, anote — é o defeito mais sutil deste bloco.
+> ❌ Se a dose escorregar para 07:00 ou 09:00, anote - é o defeito mais sutil deste bloco.
 
 **Devolva o fuso** ao terminar.
 
@@ -429,12 +429,12 @@ o app.
 
 ---
 
-**11.7 — App reinstalado** _(C1.8 nº9)_
+**11.7 - App reinstalado** _(C1.8 nº9)_
 
 Com pelo menos um remédio cadastrado com alarme para daqui a algumas horas: **desinstale o Mapill**
 e instale a build de novo. **Não abra o app.** Espere o horário.
 
-> ✅ **Nada chega** — e isso é o comportamento **correto**: desinstalar leva embora os agendamentos
+> ✅ **Nada chega** - e isso é o comportamento **correto**: desinstalar leva embora os agendamentos
 > do sistema junto com o app.
 
 Agora **abra o app** uma vez e feche.
@@ -442,7 +442,7 @@ Agora **abra o app** uma vez e feche.
 > ✅ 🔴 A partir daí os avisos **voltam a chegar**, sem precisar reeditar nada. É o reagendamento da
 > janela na abertura.
 > ❌ Se não voltarem, existe um caminho em que a pessoa fica sem lembrete nenhum e **sem nenhum
-> sinal disso** — é o pior modo de falhar deste app.
+> sinal disso** - é o pior modo de falhar deste app.
 
 ⚠️ Este passo **apaga os dados locais** se você não tiver conta vinculada. Faça-o por último, ou
 depois de conferir que a sincronizacao ja restaurou (bloco 1, aprovado em 08/09).
@@ -451,7 +451,7 @@ depois de conferir que a sincronizacao ja restaurou (bloco 1, aprovado em 08/09)
 
 ---
 
-**11.8 — Bateria crítica** _(C1.8 nº8)_
+**11.8 - Bateria crítica** _(C1.8 nº8)_
 
 Não force. **Se em algum momento da semana o celular chegar abaixo de 15% com a economia extrema
 ligada** e houver dose agendada, anote se o aviso chegou.
@@ -462,14 +462,14 @@ propósito.
 ---
 
 **Fecha o quê:** os nove casos do C1.8. Com 11.1 a 11.7 anotados, a caixa _"Checklist de borda
-percorrido"_ do plano fecha — 11.8 é oportunista e pode ficar como "não observado".
+percorrido"_ do plano fecha - 11.8 é oportunista e pode ficar como "não observado".
 
 ---
 
-## 20 — Os avisos de estoque e de receita (08/09) 🆕
+## 20 - Os avisos de estoque e de receita (08/09) 🆕
 
 > ✅ **Liberado em 12/09**, com o 14.1.2 resolvido. Este bloco depende de notificação sobrevivendo
-> com o app fechado, então o **Autostart precisa estar ligado** — era ele que derrubava tudo.
+> com o app fechado, então o **Autostart precisa estar ligado** - era ele que derrubava tudo.
 
 Até 08/09 o app prometia quatro lembretes e entregava três: quem marcava _"me avisar quando estiver
 acabando"_ recebia só o cartão da tela inicial. Agora o estoque também notifica, e a receita ganhou
@@ -477,7 +477,7 @@ um segundo aviso no dia em que vence.
 
 > ⏰ **O aviso cai às 00:01 do dia, não na hora em que você cadastra.**
 >
-> Isso vale para compromisso, receita e estoque — os três são avisos de planejamento, não alarmes:
+> Isso vale para compromisso, receita e estoque - os três são avisos de planejamento, não alarmes:
 > a intenção é que já estejam na tela quando a pessoa pegar o celular pela primeira vez no dia.
 >
 > **Consequência para o teste:** marcar qualquer coisa para **hoje** não dispara nada, porque 00:01
@@ -490,7 +490,7 @@ O aviso **"acabando"** cai em: hoje + (dias que o estoque dura − antecedência
 O aviso **"acabou"** cai em: hoje + dias que o estoque dura.
 A **receita** é direta: validade − antecedência, e a validade em si.
 
-As antecedências oferecidas são **3, 7, 15 e 30 dias** (estoque) e **7, 15 e 30** (receita) — não há
+As antecedências oferecidas são **3, 7, 15 e 30 dias** (estoque) e **7, 15 e 30** (receita) - não há
 opção de 1 dia, então a quantidade é o que se ajusta.
 
 **Para tudo cair amanhã**, com quatro remédios:
@@ -503,12 +503,12 @@ opção de 1 dia, então a quantidade é o que se ajusta.
 | 4 | Receita válida até **amanhã**, avisar **7 dias** antes | "vence hoje" (a janela já passou) |
 
 > ⚠️ **A dose precisa ter horário ainda por vir hoje.** Cadastrando à noite com dose às 08:00, a de
-> hoje já passou e a contagem começa amanhã — o que empurra tudo um dia.
+> hoje já passou e a contagem começa amanhã - o que empurra tudo um dia.
 
 > 🔬 **Cadastre pelo menos um com data de fim.** A receita acima usa tratamento contínuo nos quatro
 > casos, e foi justamente isso que deixou passar o defeito achado em 12/09: quando o tratamento tem
 > **data de fim** e o estoque dá conta dele até o último dia, o app descartava o estoque inteiro e
-> **nenhum** aviso saía — nem o da antecedência, nem o do dia em que acaba. Um tratamento de 7 dias
+> **nenhum** aviso saía - nem o da antecedência, nem o do dia em que acaba. Um tratamento de 7 dias
 > com 7 comprimidos ficava calado.
 >
 > Corrigido em `41640b4`, com 16 casos em `scripts/conferir-previsao-de-estoque.mjs`. O aviso de
@@ -516,25 +516,25 @@ opção de 1 dia, então a quantidade é o que se ajusta.
 >
 > A causa: a previsão devolvia "não sei" tanto para "dura mais de 730 dias" (verdade) quanto para
 > "dá conta até o fim do tratamento" (uma data conhecida). O Gabriel achou comparando com o aviso de
-> receita, que nunca falhava — porque a validade dela já é uma data pronta, e nada podia descartá-la
+> receita, que nunca falhava - porque a validade dela já é uma data pronta, e nada podia descartá-la
 > no caminho.
 
-**20.1 — O estoque avisa** 🔴. Monte os remédios 1 e 2 da tabela acima.
+**20.1 - O estoque avisa** 🔴. Monte os remédios 1 e 2 da tabela acima.
 
 > ✅ A frase abaixo da antecedência diz que o aviso aparece na tela inicial **e** como notificação,
-> e que são dois — ao entrar na antecedência e quando o estoque acabar.
+> e que são dois - ao entrar na antecedência e quando o estoque acabar.
 > ✅ 🔴 No dia seguinte, a notificação chegou (silenciosa, sem botões de confirmar/pular).
-> ✅ O título diz **o nome do remédio**, e não só "Estoque acabando" — é o que sobrevive quando a
+> ✅ O título diz **o nome do remédio**, e não só "Estoque acabando" - é o que sobrevive quando a
 > tela de bloqueio esconde o conteúdo.
 > ✅ O cartão da tela inicial continua lá, independente da notificação.
 
-**20.1b — Marcar sem escolher prazo** 🔴🔬 — a correção de 08/09.
+**20.1b - Marcar sem escolher prazo** 🔴🔬 - a correção de 08/09.
 
 Marque _"Me avisar quando estiver acabando"_ e **não toque** no seletor de antecedência. O mesmo na
 receita, com _"Me avisar quando a receita vencer"_.
 
 > ✅ 🔴 O aviso **existe**: chega no dia em que o estoque acaba (ou em que a receita vence).
-> ✅ A frase abaixo diz isso — "você será avisado no dia em que...", com o convite a escolher um
+> ✅ A frase abaixo diz isso - "você será avisado no dia em que...", com o convite a escolher um
 > prazo para saber antes.
 > ✅ Na lista de estoque, a linha do remédio diz **"Avisar quando acabar"**, e não "Sem aviso".
 >
@@ -542,60 +542,60 @@ receita, com _"Me avisar quando a receita vencer"_.
 > nulo, e o planejador descartava o item inteiro. A interface confirmava uma intenção que o app não
 > cumpria.
 
-**20.2 — A trava** 🔴🔬 — **o passo mais importante deste bloco.**
+**20.2 - A trava** 🔴🔬 - **o passo mais importante deste bloco.**
 
 Com o estoque baixo, **confirme várias doses seguidas**.
 
 > ✅ 🔴 Chega **uma** notificação, não uma por confirmação.
 >
 > 🔬 A previsão de estoque é recalculada a cada dose, então sem trava cada toque geraria um aviso
-> novo. Se chegarem várias, a trava falhou — e é o defeito mais grave possível aqui, porque leva a
+> novo. Se chegarem várias, a trava falhou - e é o defeito mais grave possível aqui, porque leva a
 > pessoa a desligar as notificações do app e perder junto os alarmes de dose.
 
 Agora **reponha** o estoque (tela de Estoque → "Repor"), e deixe baixar de novo.
 
 > ✅ Volta a avisar. Repor é o único gesto que rearma o aviso; consumir mais não.
 
-**20.3 — A receita avisa duas vezes.** Monte os remédios 3 e 4 da tabela.
+**20.3 - A receita avisa duas vezes.** Monte os remédios 3 e 4 da tabela.
 
 > ✅ A frase diz que são dois lembretes: na antecedência e no dia do vencimento.
 > ✅ Amanhã chegam "Receita de X vencendo" e "Receita de Y vence hoje".
 > ✅ O nome do remédio está no **título** dos dois.
 
-**20.3b — Os quatro avisos sem esperar a madrugada** 🔬. `Ajustes → DESENVOLVIMENTO → Diagnóstico`.
+**20.3b - Os quatro avisos sem esperar a madrugada** 🔬. `Ajustes → DESENVOLVIMENTO → Diagnóstico`.
 
 Os quatro botões novos ("Estoque acabando", "Estoque acabou", "Receita vencendo", "Receita vence
 hoje") disparam em 30s, no mesmo canal e com o mesmo texto do aviso real.
 
 > ✅ Cada um chega com **som**, e a frase cabe na barra sem truncar no meio da palavra.
-> ✅ Com o aparelho bloqueado, o comportamento é o esperado — o canal de lembrete é `PRIVATE`, então
+> ✅ Com o aparelho bloqueado, o comportamento é o esperado - o canal de lembrete é `PRIVATE`, então
 > o conteúdo fica oculto se o aparelho estiver configurado para esconder informação sensível. Isso
 > **não é defeito**: o nome do remédio na tela de bloqueio revela condição clínica.
 > ✅ No painel, "Esperados pelo banco" mostra os quatro tipos separados (doses, compromissos,
 > receitas, estoques), e os números batem com o que foi cadastrado.
 
-**20.4 — O calendário mostra os dois.** Abra o calendário e navegue até os dias acima.
+**20.4 - O calendário mostra os dois.** Abra o calendário e navegue até os dias acima.
 
 > ✅ A validade da receita aparece como **"Receita de X vence"**.
-> ✅ O fim do estoque aparece como **"Estoque de X deve acabar por volta desta data"** — a redação
+> ✅ O fim do estoque aparece como **"Estoque de X deve acabar por volta desta data"** - a redação
 > é diferente de propósito: é projeção, não fato.
 > ✅ Os dois são discretos: sem cartão, sem fundo próprio, sem toque. Não há o que confirmar.
-> ✅ 🔴 Filtrando por "Compromissos" ou "Remédios", eles **continuam aparecendo** — não são nem um
+> ✅ 🔴 Filtrando por "Compromissos" ou "Remédios", eles **continuam aparecendo** - não são nem um
 > nem outro, e sumir ao filtrar esconderia o que ninguém pediu para esconder.
 
-**20.5 — As migrations** 🔬. Este bloco trouxe a `017` e a `018`, as primeiras desde a `016`.
+**20.5 - As migrations** 🔬. Este bloco trouxe a `017` e a `018`, as primeiras desde a `016`.
 
 > ✅ O app abre sem erro de banco, e o estoque cadastrado antes continua lá com os mesmos números.
-> ✅ 🔴 Um remédio que **já tinha** aviso de receita configurado antes de 08/09 continua avisando —
+> ✅ 🔴 Um remédio que **já tinha** aviso de receita configurado antes de 08/09 continua avisando -
 > a `018` migra as linhas existentes como "quer ser avisado", porque marcar a caixa era o único
 > caminho que produzia aquele estado.
 
 ---
 
-## 🔴 Achado de 14/09 — a tela azul nunca foi escolhida, e faltava uma linha na MainActivity
+## 🔴 Achado de 14/09 - a tela azul nunca foi escolhida, e faltava uma linha na MainActivity
 
 O teste da build 15, com o celular ligado no cabo e o logcat gravando, resolveu três defeitos de uma
-vez — e o principal deles estava aberto desde o começo do projeto, disfarçado de outra coisa.
+vez - e o principal deles estava aberto desde o começo do projeto, disfarçado de outra coisa.
 
 ### O sintoma
 
@@ -603,7 +603,7 @@ A tela azul não subia em **cenário nenhum**: bloqueado, em uso, dentro ou fora
 alarme tocava e o que aparecia era "Hora do remédio".
 
 O dado que resolveu o caso foi do Gabriel: **os dois cenários falhavam de forma idêntica**. Tela de
-bloqueio e app em uso são caminhos de código diferentes — Activity nativa contra rota do roteador —,
+bloqueio e app em uso são caminhos de código diferentes - Activity nativa contra rota do roteador -,
 e caminhos diferentes não falham igual por acaso. Isso derrubou a hipótese de corrida de tempo, que
 era o que vinha sendo perseguido desde 12/09.
 
@@ -619,7 +619,7 @@ era o que vinha sendo perseguido desde 12/09.
 
 **O `fullScreenAction` sempre funcionou.** A Activity irrompeu sobre o bloqueio em 660 ms e ficou 28
 segundos na frente, até o toque na notificação. O que subiu foi a `MainActivity` com o componente
-**padrão** — o app inteiro — e não `AlarmeRaiz`.
+**padrão** - o app inteiro - e não `AlarmeRaiz`.
 
 Nunca houve troca de tela. A azul é que nunca foi escolhida.
 
@@ -627,20 +627,20 @@ Nunca houve troca de tela. A azul é que nunca foi escolhida.
 
 `NotificationManager.java:418` posta um `MainComponentEvent` *sticky* com o nome do componente, e
 `Notifee.getMainComponent(defaultComponent)` o consome. Esse método é `@KeepForSdk`: é API para o
-**app** chamar. Quem tem de chamá-lo é a `MainActivity`, ao responder que componente montar — e o
+**app** chamar. Quem tem de chamá-lo é a `MainActivity`, ao responder que componente montar - e o
 projeto não tinha esse override (zero ocorrências de `getMainComponentName` fora de `node_modules`).
 
 Sem ele, a resposta é sempre `"main"`, e o evento fica sem ninguém para consumir. O
-`AppRegistry.registerComponent` do `index.js` está correto e continua necessário — ele faz o nome
+`AppRegistry.registerComponent` do `index.js` está correto e continua necessário - ele faz o nome
 existir. Mas registrar não adianta se ninguém **pede**.
 
 > **A observação de 12/09 estava certa o tempo todo.** O achado logo abaixo já dizia que "o
 > `fullScreenAction` do Notifee monta o componente dentro da própria MainActivity". Era exatamente
-> isso — faltava saber que a MainActivity precisa *perguntar* qual componente montar.
+> isso - faltava saber que a MainActivity precisa *perguntar* qual componente montar.
 
 Isso também explica o histórico: a tela azul **já apareceu** em builds anteriores, mas pelo caminho
 do `PRESS` e da navegação do listener, nunca pelo `fullScreenAction`. As correções de 12/09 e 13/09
-mexeram nas guardas de corrida entre esses caminhos, e por isso o comportamento oscilava — o
+mexeram nas guardas de corrida entre esses caminhos, e por isso o comportamento oscilava - o
 mecanismo primário nunca esteve ligado.
 
 ### Por que passou despercebido
@@ -649,7 +649,7 @@ A biblioteca **avisa** que o passo existe, no JSDoc de `mainComponent`:
 
 > *"For this to correctly function on Android, a minor native code change is required."*
 
-E aponta para `/react-native/android/behaviour#full-screen` — uma página que **não vem no pacote**,
+E aponta para `/react-native/android/behaviour#full-screen` - uma página que **não vem no pacote**,
 só existe no site. O aviso está lá; a instrução, não. E o config plugin da própria lib aplica
 manifesto e ícones, nada que toque a `MainActivity`.
 
@@ -668,14 +668,14 @@ quando há um alarme de tela cheia esperando.
 **O patch do volume nunca chegou ao aparelho.** A fase PREBUILD do EAS roda `expo prebuild` e
 **depois** `yarn install`, que reinstala `node_modules` por cima do que o prebuild patcheou. O patch
 era aplicado e descartado na mesma build, e o `throw` do plugin não denunciava: ele falha quando o
-alvo *some*, e o install devolve o arquivo original intacto — alvo perfeito, sem o patch.
+alvo *some*, e o install devolve o arquivo original intacto - alvo perfeito, sem o patch.
 
 O aviso `No lock file detected` no log era a pista, e foi descartado como inofensivo numa primeira
 leitura. Ele é consequência do `.easignore` omitir o `package-lock.json` (contorno do bug do npm no
 Windows), e é o que faz o EAS resolver dependências tarde.
 
-Agora os patches são aplicados por três caminhos — prebuild, `postinstall` e
-`eas-build-post-install` — e `scripts/conferir-patches.js` **falha a build** se algum não chegar à
+Agora os patches são aplicados por três caminhos - prebuild, `postinstall` e
+`eas-build-post-install` - e `scripts/conferir-patches.js` **falha a build** se algum não chegar à
 compilação. Ver `scripts/aplicar-patches.js`.
 
 **O `foregroundServiceBehavior` era descartado na ponte.** No mesmo instante do disparo:
@@ -687,34 +687,34 @@ W/Bundle: Key foregroundServiceBehavior expected Integer but value was a java.la
 
 A lib injeta `IMMEDIATE` (`1`) sozinha para evitar o adiamento de até 10 s que o Android 12+ impõe à
 notificação de um foreground service. Todo número em JS é ponto flutuante, então o valor chega como
-`Double`; `getInt()` não aceita e devolve `0` — que é justamente o adiamento que o `IMMEDIATE`
+`Double`; `getInt()` não aceita e devolve `0` - que é justamente o adiamento que o `IMMEDIATE`
 existia para evitar. Corrigido em `scripts/patch-servico-sem-atraso.js`.
 
 ### O que essa sessão mudou no método
 
 O celular ligado no cabo tornou possível **compilar e instalar localmente**
 (`npx expo run:android --variant release --device`), sem gastar a cota de 30 builds/mês do EAS. As
-três causas foram encontradas lendo o aparelho — logcat no disparo e `aapt2` sobre o APK instalado —
+três causas foram encontradas lendo o aparelho - logcat no disparo e `aapt2` sobre o APK instalado -
 e nenhuma delas teria sido encontrada por inspeção de código.
 
 O `adb` já estava na máquina, fora do PATH; `scripts/logcat-alarme.ps1` o encontra sozinho.
 
 ---
 
-## 🔴 Achado de 12/09 — responder o alarme dá acesso ao app sem desbloquear o celular
+## 🔴 Achado de 12/09 - responder o alarme dá acesso ao app sem desbloquear o celular
 
-Tela bloqueada, o alarme toca, a tela azul sobe. Ao tocar em **Tomei**, o app abre na Home — **sem
+Tela bloqueada, o alarme toca, a tela azul sobe. Ao tocar em **Tomei**, o app abre na Home - **sem
 pedir o desbloqueio**. O celular continua tecnicamente bloqueado, mas o Mapill está acessível.
 
 > ❌ **É falha de privacidade, e num app de saúde ela é séria.** Qualquer pessoa com o aparelho na
 > mão pode esperar (ou disparar) um alarme, tocar em "Tomei", e chegar aos medicamentos, ao
-> histórico de doses e à ficha de saúde — alergias, tipo sanguíneo, contatos de emergência. Sem
+> histórico de doses e à ficha de saúde - alergias, tipo sanguíneo, contatos de emergência. Sem
 > senha, sem digital.
 >
 > **A causa** está em `plugins/alarme-em-tela-cheia.js`: o `showWhenLocked="true"` é aplicado à
 > **MainActivity**, isto é, ao app inteiro, e não a uma Activity exclusiva do alarme. O
 > `fullScreenAction` do Notifee monta o componente dentro da própria MainActivity (ver `index.js`),
-> então não havia onde mais colocá-lo. Quando a tela do alarme fecha, quem está atrás é o app — que
+> então não havia onde mais colocá-lo. Quando a tela do alarme fecha, quem está atrás é o app - que
 > herdou a mesma permissão de aparecer sobre o bloqueio.
 >
 > **O comportamento correto** é o do despertador nativo: a tela do alarme aparece sobre o bloqueio,
@@ -725,24 +725,24 @@ pedir o desbloqueio**. O celular continua tecnicamente bloqueado, mas o Mapill e
 >    é código nativo.
 > 2. O app recusar a navegação enquanto o aparelho estiver bloqueado, lendo
 >    `KeyguardManager.isKeyguardLocked()`. Mais viável em JS, mas ainda exige um módulo nativo
->    pequeno — não há API do Expo que exponha esse estado.
+>    pequeno - não há API do Expo que exponha esse estado.
 >
 > **Não bloqueia os testes:** os blocos 18, 19 e 20 rodam normalmente. Mas isto é privacidade de
-> dado de saúde, não polimento — decidir antes da defesa se entra.
+> dado de saúde, não polimento - decidir antes da defesa se entra.
 
 > 📌 **Para o TCC:** cabe na seção 4.7 (Privacidade e LGPD). É um caso em que a funcionalidade
 > exigida pelo domínio (o alarme tem de irromper sobre o bloqueio, senão não é alarme) entra em
-> tensão direta com a minimização de exposição do dado sensível — e a resolução dessa tensão é
+> tensão direta com a minimização de exposição do dado sensível - e a resolução dessa tensão é
 > decisão de projeto, não detalhe de implementação.
 
 ---
 
-## 🔴 Achado de 11/09 — alarme adiado sobrevive ao apagamento total dos dados
+## 🔴 Achado de 11/09 - alarme adiado sobrevive ao apagamento total dos dados
 
 Cadastro com alarme, deixado tocar, adiado 5 min. **Antes dos 5 min vencerem**, o Gabriel apagou
 todos os dados de saúde. O alarme **tocou mesmo assim**, no fim dos 5 minutos.
 
-> ❌ O adiamento é agendado direto no sistema (Notifee), fora da grade normal — o mesmo padrão do
+> ❌ O adiamento é agendado direto no sistema (Notifee), fora da grade normal - o mesmo padrão do
 > risco já anotado no antigo 15.6 (`cancelarTudo` e o prefixo `alarme:adiado-…`). Apagar os dados
 > precisa cancelar também os adiamentos pendentes, não só a grade principal.
 >
@@ -761,10 +761,10 @@ crítico para o TCC.
 ---
 
 
-# PARTE 2 — Passada geral
+# PARTE 2 - Passada geral
 
 > **Não é para agora.** É a passada final antes da defesa, com o app fechado. Percorre tudo do zero,
-> como quem nunca o abriu. Começa apagando tudo e termina apagando tudo de novo — o primeiro
+> como quem nunca o abriu. Começa apagando tudo e termina apagando tudo de novo - o primeiro
 > apagamento é para chegar ao zero, o último testa o direito de exclusão (LGPD).
 >
 > **Percorrer na ordem:** os cadastros do começo alimentam os testes do meio. Dá para parar entre
@@ -772,10 +772,10 @@ crítico para o TCC.
 
 | Sessão            | O que cobre                                         | Tempo   |
 | ----------------- | --------------------------------------------------- | ------- |
-| **1 — Entrar**    | apagamento, os dois logins, ficha, termos           | ~20 min |
-| **2 — Cadastrar** | formas farmacêuticas, frequências, anexos, lembrete | ~50 min |
-| **3 — Usar**      | listagem, Home, estoque, calendário, compromissos   | ~40 min |
-| **4 — Sair**      | conta, apagamento parcial e total                   | ~15 min |
+| **1 - Entrar**    | apagamento, os dois logins, ficha, termos           | ~20 min |
+| **2 - Cadastrar** | formas farmacêuticas, frequências, anexos, lembrete | ~50 min |
+| **3 - Usar**      | listagem, Home, estoque, calendário, compromissos   | ~40 min |
+| **4 - Sair**      | conta, apagamento parcial e total                   | ~15 min |
 
 **De onde vem o login com Google:** o `.env` **não sobe para o EAS** (está no `.easignore`). Numa
 build `preview`/`production`, as credenciais vêm das variáveis do servidor EAS; numa `development`
@@ -784,12 +784,12 @@ versão", é aqui que se olha primeiro (`eas env:list --environment preview`).
 
 ---
 
-## SESSÃO 1 — Entrar
+## SESSÃO 1 - Entrar
 
 **1.1** **Ajustes** → **MEUS DADOS** → **"Apagar tudo e recomeçar"** → Continuar → Apagar tudo.
 
 > ✅ O app volta para a **tela de login**, como recém-instalado.
-> ✅ O segundo diálogo **repete o que acontece** — não só "tem certeza?".
+> ✅ O segundo diálogo **repete o que acontece** - não só "tem certeza?".
 
 **1.2** **"Continuar sem login"** → no consentimento, toque na **seta de voltar**.
 
@@ -808,7 +808,7 @@ conta**.
 vezes**.
 
 > ✅ Vai direto para a Home; a tela de login **não pisca** antes.
-> ✅ A splash azul **sai sozinha** — nunca fica presa nela.
+> ✅ A splash azul **sai sozinha** - nunca fica presa nela.
 
 **1.6** **Ajustes** → bloco azul da ficha.
 
@@ -822,9 +822,9 @@ vezes**.
 
 ---
 
-## SESSÃO 2 — Cadastrar
+## SESSÃO 2 - Cadastrar
 
-**2.1 — O caso comum.** `Losartana 50mg`, comprimido, dose 1, Todo dia, 2×, `08:00` e `20:00`, uso
+**2.1 - O caso comum.** `Losartana 50mg`, comprimido, dose 1, Todo dia, 2×, `08:00` e `20:00`, uso
 contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 
 > ✅ No popup de horários abrem **dois campos numéricos**, não o mostrador redondo.
@@ -832,60 +832,60 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 > ✅ Em "Pronto", **o teclado fecha junto** com o popup.
 > ✅ Horário duplicado é barrado.
 
-**2.2 — Unidade ambígua.** `Xarope`, **Líquido**.
+**2.2 - Unidade ambígua.** `Xarope`, **Líquido**.
 
 > ✅ Aparece **"COMO A DOSE É MEDIDA?"** antes da quantidade.
 > ✅ A dica do copinho tem fundo **amarelo claro** com barra viva à esquerda.
-> ✅ Em **ml**, dose `7,5` — a fração é aceita.
+> ✅ Em **ml**, dose `7,5` - a fração é aceita.
 
-**2.3 — Dependência entre campos.** Com `7,5` preenchido, volte e troque a forma para **Comprimido**.
+**2.3 - Dependência entre campos.** Com `7,5` preenchido, volte e troque a forma para **Comprimido**.
 
-> ✅ O campo de dose **fica vazio** — comprimido não aceita fração.
+> ✅ O campo de dose **fica vazio** - comprimido não aceita fração.
 
 **2.4** Escolha **"Prazo definido"**, 7 dias. Troque para **"Uso contínuo"** e volte.
 
-> ✅ O campo de dias está **vazio** — o 7 não voltou sozinho.
+> ✅ O campo de dias está **vazio** - o 7 não voltou sozinho.
 
-**2.5 — Dose que varia.** `Insulina NPH`, Injeção, UI, dose 10, Todo dia, 2×.
+**2.5 - Dose que varia.** `Insulina NPH`, Injeção, UI, dose 10, Todo dia, 2×.
 
 > ✅ Existe **"A dose muda de um horário para o outro"**. Marque: `08:00` com 10, `22:00` com 8.
 > ✅ Em "Preencher de X em X horas", uma frase diz que **as doses por horário são mantidas**.
 
-**2.6 — Frequências.** `Metformina` em **Dias da semana** (Seg/Qua/Sex, 12:00), e um com **ciclo**
+**2.6 - Frequências.** `Metformina` em **Dias da semana** (Seg/Qua/Sex, 12:00), e um com **ciclo**
 21/7 cadastrado no meio da cartela.
 
 > ✅ Funcionam; "dias ativos > tamanho do ciclo" é barrado.
 
-**2.7 — Só quando precisar.** `Dipirona`, Gotas, dose 30 gotas, estoque 20 **ml**.
+**2.7 - Só quando precisar.** `Dipirona`, Gotas, dose 30 gotas, estoque 20 **ml**.
 
 > ✅ Sem horário e sem data de início; o tempo vira "Sempre disponível".
 > ✅ O estoque pergunta em **ml**, não em gotas.
 
-**2.8 — Anexos.** Na Losartana, seção **ANEXOS**.
+**2.8 - Anexos.** Na Losartana, seção **ANEXOS**.
 
 > ✅ A foto da caixa aparece **na hora** (não branca), e muda **toda vez** que você troca.
 > ✅ **RECEITA MÉDICA** abre popup com **três** origens: câmera, galeria e arquivo.
 > ✅ Com anexo: **"Alterar anexo"** e **"Remover"** (vermelho).
 > ✅ Em **RECEITA VÁLIDA ATÉ**, dias passados apagados.
-> ✅ _(02/09)_ Com anexo, tocar no **quadrado** amplia a foto (ou abre o PDF no leitor do sistema) —
+> ✅ _(02/09)_ Com anexo, tocar no **quadrado** amplia a foto (ou abre o PDF no leitor do sistema) -
 > quem troca é o link ao lado.
 
-**2.9 — Lembrete.** Popup **"Configurar lembrete"**.
+**2.9 - Lembrete.** Popup **"Configurar lembrete"**.
 
 > ✅ Três opções, e **"Nenhum aviso" não existe**.
 > ✅ **Alarme** e **Notificação** dividem a primeira linha; **Os dois** ocupa a linha de baixo.
-> ✅ A folha tem só a decisão e "Pronto" — o botão **cabe na tela** sem rolar.
+> ✅ A folha tem só a decisão e "Pronto" - o botão **cabe na tela** sem rolar.
 > ✅ "Como funcionam os alertas" é um **link** que abre uma tela; o scroll dela desce **e sobe**.
 > ✅ Dali, "Ler os Termos" abre os termos, e voltar retorna **à ajuda**.
 >
 > ⚠️ _Mudou em 02/09._ O acordeão dentro do popup e o retorno "ao popup com a ajuda aberta" não
-> existem mais — a explicação virou tela própria (bloco 8-J, aprovado em 08/09).
+> existem mais - a explicação virou tela própria (bloco 8-J, aprovado em 08/09).
 
-**2.10 — Prazo × estoque.** `Amoxicilina`, dose 2, 3× de 8/8h desde `06:00`, prazo 7 dias, estoque 20.
+**2.10 - Prazo × estoque.** `Amoxicilina`, dose 2, 3× de 8/8h desde `06:00`, prazo 7 dias, estoque 20.
 
 > ✅ Avisa que o tratamento consome 42 e você tem 20.
 
-**2.11 — Doses de hoje já passadas.** _(De tarde ou à noite.)_
+**2.11 - Doses de hoje já passadas.** _(De tarde ou à noite.)_
 
 > ✅ Avisa quais horários de hoje não serão agendados.
 > ✅ Pergunta **"VOCÊ JÁ TOMOU ALGUMA DELAS HOJE?"**, nada vem marcado.
@@ -894,39 +894,39 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 
 ---
 
-## SESSÃO 3 — Usar
+## SESSÃO 3 - Usar
 
-**3.1 — Lista.** Aba **Remédios**.
+**3.1 - Lista.** Aba **Remédios**.
 
 > ✅ O card da Insulina mostra `08:00 · 10 UI` e `22:00 · 8 UI`.
 > ✅ Rolando, o texto de apoio sobe e **a busca fica fixa**.
 > ✅ Busca sem acento funciona (`acido` acha `Ácido`).
-> ✅ Ordenação: A–Z, Mais recentes, Acabando.
+> ✅ Ordenação: A-Z, Mais recentes, Acabando.
 > ✅ Excluir avisa que o histórico é mantido; o botão físico de voltar fecha o formulário.
 > ✅ _(02/09)_ Tocar na **miniatura** de um remédio com foto amplia a imagem.
 
-**3.2 — Home.**
+**3.2 - Home.**
 
 > ✅ Progresso do dia, próxima dose, atrasadas em vermelho.
 > ✅ Dose na janela do horário aparece com **É AGORA**; 30 min depois vira **ATRASADA**.
 > ✅ "Confirmar todas" lista **os nomes** de cada dose no diálogo.
 > ✅ O estoque cai **pela dose**, não 1 por dose.
 
-**3.3 — Estoque.**
+**3.3 - Estoque.**
 
-> ✅ Ordenação: Acaba primeiro, Menos na caixa, A–Z.
+> ✅ Ordenação: Acaba primeiro, Menos na caixa, A-Z.
 > ✅ A Insulina prevê **16 ou 17 dias** (10 + 8 = 18 UI/dia, não 2 × 10).
 > ✅ A Dipirona (gotas com estoque em ml) diz **"Sem previsão de término"**.
 > ✅ "Recontar" mostra a diferença antes de confirmar.
 
-**3.4 — Calendário.**
+**3.4 - Calendário.**
 
 > ✅ Grade do mês azul, com pontinhos nos dias com algo marcado.
 > ✅ Rolando, **a grade sobe junto** e só os filtros grudam no topo.
 > ✅ Filtros Tudo / Compromissos / Remédios mudam a grade e a lista.
 > ✅ Avançando dois meses, as doses **continuam aparecendo** (são projetadas).
 
-**3.5 — Compromissos.** Um futuro (5 dias) e um passado.
+**3.5 - Compromissos.** Um futuro (5 dias) e um passado.
 
 > ✅ **DATA** e **HORÁRIO** em **linhas separadas**.
 > ✅ Com data no passado, avisa e a seção **LEMBRETES some**.
@@ -936,7 +936,7 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 
 ---
 
-## SESSÃO 4 — Sair
+## SESSÃO 4 - Sair
 
 **4.1** **Conta e dados** → **MEUS DADOS** → **"Apagar meus dados de saúde"**.
 
@@ -960,17 +960,17 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 
 ---
 
-# ANEXO — As decisoes de 13/09 sobre alarme e fuso
+# ANEXO - As decisoes de 13/09 sobre alarme e fuso
 
 > Movido do `O-QUE-FALTA-TESTAR.md` em 14/09, que passou a ser so a lista de acao.
 > Fica aqui como registro: as duas analises sustentam seccoes do artigo.
 
-# PARTE E — Decisões tomadas, e o que fica fora de escopo
+# PARTE E - Decisões tomadas, e o que fica fora de escopo
 
-## E.1 — 🔊 O alarme no volume de despertador
+## E.1 - 🔊 O alarme no volume de despertador
 
 **Decisão do Gabriel em 13/09:** fica para depois de todo o resto estar validado. Duas builds foram
-gastas nisso sem resultado, e o motivo é que o caminho tentado não leva lá — não é questão de
+gastas nisso sem resultado, e o motivo é que o caminho tentado não leva lá - não é questão de
 insistir mais.
 
 **Até lá, o alarme toca no volume de mídia.** É a única característica do app que fica sabidamente
@@ -982,14 +982,14 @@ O `AudioAttributes` do canal **foi** aplicado. Verificado em 13/09 rodando `expo
 localmente: o [`plugins/volume-de-despertador.js`](../plugins/volume-de-despertador.js) transforma o
 `ChannelManager.java` corretamente, `USAGE_NOTIFICATION` vira `USAGE_ALARM`. O plugin funciona.
 
-O problema é que **quem toca o som da notificação é o NotificationManager, não o app** — e ele usa o
+O problema é que **quem toca o som da notificação é o NotificationManager, não o app** - e ele usa o
 stream dele independentemente do que o canal peça. O `AudioAttributes` ali é uma dica, não uma
 ordem.
 
 Não é defeito do Notifee: a [issue #297](https://github.com/invertase/notifee/issues/297), pedindo
 exatamente isto, foi fechada como *not planned*. E os [requisitos do Google Play para apps de
 alarme](https://support.google.com/googleplay/android-developer/answer/13392821) descrevem a
-arquitetura esperada — o app toca som próprio, e a notificação serve ao full-screen intent, não ao
+arquitetura esperada - o app toca som próprio, e a notificação serve ao full-screen intent, não ao
 áudio.
 
 ### O caminho que funciona
@@ -997,15 +997,15 @@ arquitetura esperada — o app toca som próprio, e a notificação serve ao ful
 Separar quem mostra de quem toca:
 
 1. **O canal do alarme fica mudo** (`sound: null`). A notificação continua fazendo a tela azul
-   irromper e continua na bandeja — só não emite som.
+   irromper e continua na bandeja - só não emite som.
 2. **A tela do alarme toca o som**, com `expo-audio` (já instalado e registrado no `app.json`), em
    loop, parando quando a dose é respondida.
 3. **Um segundo config plugin** põe `USAGE_ALARM` no player. É necessário porque o `expo-audio`
-   [não expõe a escolha de stream](https://docs.expo.dev/versions/v57.0.0/sdk/audio/) — tem
+   [não expõe a escolha de stream](https://docs.expo.dev/versions/v57.0.0/sdk/audio/) - tem
    `interruptionMode` e `playsInSilentMode`, e nada de `androidAudioUsage`.
 
 **O alvo do patch já está localizado:** `node_modules/expo-audio/android/src/main/java/expo/modules/
-audio/AudioPlayer.kt`, linha 39 — `.setAudioAttributes(AudioAttributes.DEFAULT, false)`, onde
+audio/AudioPlayer.kt`, linha 39 - `.setAudioAttributes(AudioAttributes.DEFAULT, false)`, onde
 `DEFAULT` é `USAGE_MEDIA`. Uma linha, no mesmo formato do patch que já existe e comprovadamente
 aplica.
 
@@ -1016,24 +1016,24 @@ cancelar notificação. Os dois são contornos que existem hoje só porque o som
 
 ### O risco a tratar
 
-Se o Android matar o processo antes de a tela montar, o som não toca — hoje quem toca é o sistema, e
+Se o Android matar o processo antes de a tela montar, o som não toca - hoje quem toca é o sistema, e
 isso não acontece. A defesa é um **foreground service**, que é o que os requisitos do Play descrevem
 para apps de alarme e que este app ainda não usa. Entra no mesmo trabalho.
 
 ### Tamanho
 
-Mudança de arquitetura do alarme, não ajuste. Merece build dedicada e uma rodada de teste própria —
+Mudança de arquitetura do alarme, não ajuste. Merece build dedicada e uma rodada de teste própria -
 foi por isso que ficou para depois, e não por ser difícil.
 
-## E.2 — ✅ A dose segue o instante, não a hora de parede
+## E.2 - ✅ A dose segue o instante, não a hora de parede
 
 **Decisão do Gabriel em 13/09, e o comportamento atual está correto.** Um remédio cadastrado para as
-21:00 em São Paulo toca às **20:00** em Manaus — é o mesmo momento, visto de outro fuso.
+21:00 em São Paulo toca às **20:00** em Manaus - é o mesmo momento, visto de outro fuso.
 
 ### O que foi tentado, e por que saiu
 
 A suposição de 13/09 era a oposta: que "tomo às 8 da manhã" fosse uma promessa sobre o **relógio de
-parede**, e que o horário devesse se manter ao trocar de fuso. Foi implementado — o app guardava o
+parede**, e que o horário devesse se manter ao trocar de fuso. Foi implementado - o app guardava o
 fuso da última geração e regerava as doses futuras quando ele mudava.
 
 Não funcionou, e a caçada consumiu a tarde. Três causas reais foram encontradas no caminho (todas
@@ -1048,12 +1048,12 @@ corrigidas e mantidas, porque valem por si):
 
 ### Por que o comportamento atual é defensável
 
-Não é só desistência — o instante absoluto tem um argumento próprio, e num app de medicação ele é
+Não é só desistência - o instante absoluto tem um argumento próprio, e num app de medicação ele é
 forte: **quem toma de 12 em 12 horas não deve encurtar o intervalo porque atravessou um fuso.**
 Manter a hora de parede numa viagem de três fusos comprimiria ou esticaria o intervalo entre doses,
 que é justamente o que a posologia estabelece.
 
-Para viagem curta — o caso real de quem usa este app — seguir o instante é o mais seguro.
+Para viagem curta - o caso real de quem usa este app - seguir o instante é o mais seguro.
 
 ### O que fica registrado
 
@@ -1061,5 +1061,5 @@ O código da tentativa foi removido (`fuso-da-grade.ts`). A tabela `app_state` (
 migration publicada não se remove, e um lugar para estado interno é útil.
 
 **Se um dia isto for revisitado**, o caminho rigoroso é gravar a hora local pretendida (`"21:00"`)
-ao lado do instante e derivar um do outro — não detectar troca de fuso e regerar. Custa uma coluna,
+ao lado do instante e derivar um do outro - não detectar troca de fuso e regerar. Custa uma coluna,
 backfill e a revisão dos ~35 arquivos que leem `scheduledFor`, e foi o que se evitou em 13/09.

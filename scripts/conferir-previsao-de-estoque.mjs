@@ -1,11 +1,11 @@
 /**
- * Confere a previsão de quando o estoque acaba — em especial o caso que apagava o aviso.
+ * Confere a previsão de quando o estoque acaba - em especial o caso que apagava o aviso.
  *
  * O que estes casos travam: `estimateStockDepletion` devolvia `null` sempre que o estoque cobria
  * todas as doses geradas, e isso confundia duas situações muito diferentes. "Dura mais que o
  * horizonte de 730 dias" é desconhecido e `null` está certo; "dá conta até o último dia de um
  * tratamento com data de fim" é um fato com data, e devolver `null` ali descartava o estoque antes
- * de ele chegar ao planejador — o aviso não saía nem na antecedência nem no dia em que acabava.
+ * de ele chegar ao planejador - o aviso não saía nem na antecedência nem no dia em que acabava.
  *
  * O Gabriel encontrou em 12/09 comparando com o aviso de receita, que nunca desaparece porque a
  * validade dela já é uma data pronta. O pedido foi exatamente esse: que o estoque se comportasse
@@ -28,11 +28,11 @@ function conferir(descricao, condicao, detalhe) {
     console.log(`  ok  ${descricao}`);
   } else {
     falhou += 1;
-    console.error(`FALHOU  ${descricao}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.error(`FALHOU  ${descricao}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
-/** 12/09/2026, 14h — o dia em que o caso foi encontrado. */
+/** 12/09/2026, 14h - o dia em que o caso foi encontrado. */
 const AGORA = new Date(2026, 8, 12, 14, 0);
 
 const BASE = {
@@ -45,7 +45,7 @@ const BASE = {
 
 const comprimidos = (n) => ({ amount: n, unit: "comprimido" });
 
-console.log("\nTratamento com data de fim — o caso que apagava o aviso\n");
+console.log("\nTratamento com data de fim - o caso que apagava o aviso\n");
 
 // 30 dias de tratamento (12/09 a 11/10) com 30 comprimidos: dá conta do tratamento inteiro.
 const cobreTudo = estimateStockDepletion(
@@ -82,7 +82,7 @@ conferir(
   sobrando === null ? "veio null" : `veio ${sobrando.lastDay}`,
 );
 
-console.log("\nO que continua sendo null — e precisa continuar\n");
+console.log("\nO que continua sendo null - e precisa continuar\n");
 
 // Tratamento contínuo com estoque grande: dura além do horizonte, e inventar data seria mentir.
 const continuoGrande = estimateStockDepletion(

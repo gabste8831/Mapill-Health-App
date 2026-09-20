@@ -3,14 +3,14 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 /**
- * ⚠️ **ESTE PLUGIN NÃO ALCANÇA O QUE PROMETE — e o motivo está medido, não suposto.**
+ * ⚠️ **ESTE PLUGIN NÃO ALCANÇA O QUE PROMETE - e o motivo está medido, não suposto.**
  *
  * Ele aplica corretamente (verificado em 13/09 rodando `expo prebuild`: o `ChannelManager.java` sai
  * transformado, `USAGE_NOTIFICATION` vira `USAGE_ALARM`), e **mesmo assim o alarme toca no volume de
  * mídia**. Duas builds foram gastas confirmando isso.
  *
  * A razão é que **quem toca o som da notificação é o NotificationManager, não o app**, e ele usa o
- * stream dele independentemente do que o `AudioAttributes` do canal peça — ali o atributo é dica,
+ * stream dele independentemente do que o `AudioAttributes` do canal peça - ali o atributo é dica,
  * não ordem. Não é limitação do Notifee: a issue #297, pedindo exatamente isto, foi fechada como
  * *not planned*.
  *
@@ -19,7 +19,7 @@ const path = require("node:path");
  * já está localizado lá. Ajustar este plugin não vai resolver.
  *
  * O plugin continua no lugar porque não custa nada e passa a valer no dia em que o Android tratar o
- * atributo como ordem. O texto abaixo é o raciocínio original, mantido porque explica o problema —
+ * atributo como ordem. O texto abaixo é o raciocínio original, mantido porque explica o problema -
  * mas a conclusão dele sobre "este plugin é a correção dos dois relatos" está superada.
  *
  * ---
@@ -32,7 +32,7 @@ const path = require("node:path");
  * dos vídeos, e não no do ícone de relógio. A notificação estava certa (volume de aviso); só o
  * alarme errava.
  *
- * O comentário em `canais-notifee.ts` afirmava que o alarme saía "no volume de alarme" — e **nada no
+ * O comentário em `canais-notifee.ts` afirmava que o alarme saía "no volume de alarme" - e **nada no
  * código dizia isso ao Android**. Era uma intenção escrita em português que nunca virou instrução.
  *
  * ## Por que isso importa mais do que parece
@@ -43,19 +43,19 @@ const path = require("node:path");
  *    sem saber.
  * 2. **Se toca no silencioso.** O silencioso do Android silencia mídia e notificação; o volume de
  *    despertador é justamente o que ele **não** corta. É por isso que o Gabriel disse que "uma coisa
- *    resolve a outra" — e está certo: este plugin é a correção dos dois relatos.
+ *    resolve a outra" - e está certo: este plugin é a correção dos dois relatos.
  * 3. **Se some no Não Perturbe.** `bypassDnd` cobre a notificação, mas o áudio ainda seguia a regra
  *    do stream de mídia.
  *
  * Num app de adesão medicamentosa isso é o núcleo do que o modo alarme promete: o app oferece duas
  * opções no cadastro, e a diferença entre elas tem de ser real. Prometer "toca alto, mesmo no
- * silencioso" e sair no volume de mídia é falha de correspondência com o mundo real (Nielsen) — e,
+ * silencioso" e sair no volume de mídia é falha de correspondência com o mundo real (Nielsen) - e,
  * aqui, uma promessa de segurança falsa.
  *
  * ## Por que um patch no Java, e não uma opção da biblioteca
  *
  * Porque a opção não existe. `ChannelManager.java` monta o `AudioAttributes` com
- * `USAGE_NOTIFICATION` **fixo**, para todo canal, sem nada no JS que sobrescreva — conferido na
+ * `USAGE_NOTIFICATION` **fixo**, para todo canal, sem nada no JS que sobrescreva - conferido na
  * tipagem de `NotificationAndroid.d.ts`, que expõe `sound`, `vibration` e `importance`, e nenhum
  * campo de áudio. A biblioteca foi arquivada em 07/04/2026, então não há versão nova a esperar.
  *
@@ -91,7 +91,7 @@ const ARQUIVO_ALVO = path.join(
  *
  * Casar o bloco inteiro, e não só a palavra `USAGE_NOTIFICATION`, é deliberado: se a biblioteca for
  * atualizada e este código mudar de forma, o patch **não** encontra o alvo e a build para com uma
- * mensagem explicando o que houve. A alternativa — um `replace` frouxo que casa qualquer coisa —
+ * mensagem explicando o que houve. A alternativa - um `replace` frouxo que casa qualquer coisa -
  * aplicaria a mudança no lugar errado sem avisar, que é como um patch vira um defeito silencioso.
  */
 const ORIGINAL = `                  AudioAttributes audioAttributes =
@@ -103,7 +103,7 @@ const ORIGINAL = `                  AudioAttributes audioAttributes =
 /**
  * O bloco novo: o canal escolhe o stream conforme o id.
  *
- * `USAGE_ALARM` só para o canal do alarme — o id vem de `canais-notifee.ts` e é comparado por
+ * `USAGE_ALARM` só para o canal do alarme - o id vem de `canais-notifee.ts` e é comparado por
  * prefixo, porque ele carrega versão (`dose-alarm-v5`) e a versão sobe quando som ou importância
  * mudam. Comparar o id inteiro faria o patch parar de valer exatamente na próxima vez que alguém
  * subisse a versão do canal, que é quando ele mais precisa valer.
@@ -130,17 +130,17 @@ const PATCH = `                  // [Mapill] O stream de áudio decide qual bot�
  *
  * O `AudioAttributes` de um canal **não é legível pelo JavaScript**: `getChannel` devolve som,
  * importância e bypass, e nada de áudio. Foi por isso que o defeito sobreviveu à build de 12/09 sem
- * ninguém perceber — o diagnóstico dizia "✅ OK" com o alarme tocando no volume de mídia.
+ * ninguém perceber - o diagnóstico dizia "✅ OK" com o alarme tocando no volume de mídia.
  *
  * A marca `volumeDeDespertadorAplicado`, no `extra` do `app.json`, é a aproximação possível: ela diz
  * que **este plugin está registrado**. Não pode ser gravada aqui dentro, por mais que fosse o lugar
  * honesto: mods rodam na fase de `prebuild`, sobre arquivos nativos, e o `extra` que chega ao
- * runtime é resolvido antes disso — escrever `config.extra` num mod não alcança
+ * runtime é resolvido antes disso - escrever `config.extra` num mod não alcança
  * `Constants.expoConfig`.
  *
  * O que garante a correspondência entre a marca e a realidade são os dois `throw` abaixo: registrado
  * o plugin, ou ele aplica o patch ou a build **falha**. Não existe o caminho silencioso em que a
- * marca diz "aplicado" e o patch não entrou — que é justamente o modo de falha de 12/09.
+ * marca diz "aplicado" e o patch não entrou - que é justamente o modo de falha de 12/09.
  */
 function withPatchDoChannelManager(config) {
   return withDangerousMod(config, [
@@ -151,7 +151,7 @@ function withPatchDoChannelManager(config) {
       if (!fs.existsSync(alvo)) {
         throw new Error(
           `[volume-de-despertador] ${ARQUIVO_ALVO} não existe. A biblioteca de notificação mudou de ` +
-            `estrutura ou não foi instalada — sem este patch o alarme toca no volume de mídia.`,
+            `estrutura ou não foi instalada - sem este patch o alarme toca no volume de mídia.`,
         );
       }
 
@@ -163,7 +163,7 @@ function withPatchDoChannelManager(config) {
       if (!conteudo.includes(ORIGINAL)) {
         throw new Error(
           `[volume-de-despertador] o bloco de AudioAttributes não foi encontrado em ${ARQUIVO_ALVO}. ` +
-            `A biblioteca provavelmente foi atualizada. Confira o arquivo e ajuste o patch — sem ` +
+            `A biblioteca provavelmente foi atualizada. Confira o arquivo e ajuste o patch - sem ` +
             `ele o alarme volta a tocar no volume de mídia, sem erro nenhum na build.`,
         );
       }

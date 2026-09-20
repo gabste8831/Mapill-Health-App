@@ -3,7 +3,7 @@
  * Lista o que ainda NÃO responde a troca de tema.
  *
  * Existe porque a migração é gradual: enquanto ela não termina, é preciso saber com precisão o que
- * já foi e o que falta — sem depender de abrir tela por tela e olhar. Este script é a resposta à
+ * já foi e o que falta - sem depender de abrir tela por tela e olhar. Este script é a resposta à
  * pergunta "quais pontos ainda não estão mapeados?".
  *
  * Uso:
@@ -17,7 +17,7 @@ import { join, relative } from "node:path";
 const RAIZ = new URL("..", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
 const ORIGEM = join(RAIZ, "src");
 
-/** O motor de temas em si lê a paleta de propósito — não é pendência. */
+/** O motor de temas em si lê a paleta de propósito - não é pendência. */
 const ISENTOS = [
   join("src", "shared", "theme"),
 ];
@@ -63,11 +63,11 @@ if (pendencias.length === 0) {
   process.exit(0);
 }
 
-console.log(`\nPENDENTES DE TEMA — ${pendencias.length} arquivos, ${totalOcorrencias} ocorrências\n`);
+console.log(`\nPENDENTES DE TEMA - ${pendencias.length} arquivos, ${totalOcorrencias} ocorrências\n`);
 for (const { rel, achados } of pendencias.sort((a, b) => b.achados.length - a.achados.length)) {
   console.log(`  ${String(achados.length).padStart(3)}  ${rel}`);
   if (listar) for (const a of achados) console.log(`         ${a.n}: ${a.txt.slice(0, 90)}`);
 }
-console.log(`\nMigrar: trocar \`colors\` por \`cores\` do \`estilosDoTema\` — ver src/shared/theme/usar-estilos.ts\n`);
+console.log(`\nMigrar: trocar \`colors\` por \`cores\` do \`estilosDoTema\` - ver src/shared/theme/usar-estilos.ts\n`);
 
 process.exit(ci ? 1 : 0);

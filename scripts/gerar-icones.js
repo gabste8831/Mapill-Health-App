@@ -3,7 +3,7 @@
  *
  * Existe como script, e não como arquivos soltos no repositório, porque a marca é a fonte: mudou
  * o SVG, roda de novo e tudo acompanha. Editar seis PNGs à mão faria eles divergirem entre si com
- * o tempo — e o ícone é a única peça do app que a pessoa vê antes de abrir.
+ * o tempo - e o ícone é a única peça do app que a pessoa vê antes de abrir.
  *
  * Uso: `node scripts/gerar-icones.js`
  */
@@ -15,16 +15,16 @@ const OUT = "assets/images";
 const AZUL = "#196FF3";
 const TRANSPARENTE = { r: 0, g: 0, b: 0, alpha: 0 };
 
-/** Pílula branca e azul-clara, sem fundo — o que vai sobre o azul da marca. */
+/** Pílula branca e azul-clara, sem fundo - o que vai sobre o azul da marca. */
 const markAlt = fs.readFileSync("assets/images/brand/mark-alt.svg");
-/** Pílula azul sobre transparente — para o favicon, que fica sobre fundo claro. */
+/** Pílula azul sobre transparente - para o favicon, que fica sobre fundo claro. */
 const mark = fs.readFileSync("assets/images/brand/mark.svg");
 
 /**
  * A arte da pílula recortada na sua própria caixa, no tamanho pedido.
  *
  * O SVG tem 1000×1000 mas a pílula ocupa só o miolo dele, na diagonal. Um `resize` direto encolhe
- * a tela inteira — margem vazia inclusa —, e a pílula sai bem menor do que o número pedido sugere.
+ * a tela inteira - margem vazia inclusa -, e a pílula sai bem menor do que o número pedido sugere.
  * `trim` corta o vazio antes, então o tamanho passa a valer para a **forma**, que é o que importa
  * quando o Android vai recortar as bordas.
  */
@@ -40,7 +40,7 @@ async function pilula(fonte, tamanho) {
  *
  * O sistema pinta a forma com a cor do tema do aparelho, então só o **alfa** importa: qualquer cor
  * que eu colocasse aqui seria descartada. Extrair o canal alfa e usá-lo como máscara de um branco
- * chapado é o que transforma a arte de duas cores numa silhueta sólida — sem isso, a divisão entre
+ * chapado é o que transforma a arte de duas cores numa silhueta sólida - sem isso, a divisão entre
  * as duas metades da pílula vira um risco vazado no meio do desenho.
  */
 async function silhueta(tamanho) {
@@ -62,7 +62,7 @@ async function sobreFundo(tamanho, fundo, conteudo) {
 }
 
 async function main() {
-  // Ícone principal (iOS e fallback). A pílula ocupa ~72% — o resto é respiro, senão ela encosta
+  // Ícone principal (iOS e fallback). A pílula ocupa ~72% - o resto é respiro, senão ela encosta
   // no arredondamento que o sistema aplica por cima.
   await (await sobreFundo(1024, AZUL, await pilula(markAlt, 620))).toFile(
     path.join(OUT, "icon.png"),

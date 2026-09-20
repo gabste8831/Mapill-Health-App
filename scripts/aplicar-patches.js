@@ -1,5 +1,5 @@
 /**
- * Aplica todos os patches de `node_modules` — o ponto único que o `postinstall` e o
+ * Aplica todos os patches de `node_modules` - o ponto único que o `postinstall` e o
  * `eas-build-post-install` chamam.
  *
  * ## Por que existe
@@ -11,7 +11,7 @@
  * ## Por que os patches são reaplicados a cada install
  *
  * Porque o install os apaga. A fase PREBUILD do EAS roda `expo prebuild` e **depois**
- * `yarn install`, que reinstala `node_modules` por cima do que o prebuild patcheou — foi o que fez
+ * `yarn install`, que reinstala `node_modules` por cima do que o prebuild patcheou - foi o que fez
  * o alarme sair no volume de mídia em 14/09, com o patch aplicado e descartado na mesma build.
  *
  * Ver `scripts/patch-som-de-despertador.js` para o log da build que mostra a ordem.
@@ -30,7 +30,7 @@ const { aplicarPatchDoFonte } = require("./patch-expo-audio-do-fonte");
 const PATCHES = [
   /**
    * **Antes do patch do volume**, e a ordem importa: sem isto o `expo-audio` é consumido como AAR
-   * pré-compilado e o `AudioPlayer.kt` patcheado nunca chega ao compilador — o patch seguinte vira
+   * pré-compilado e o `AudioPlayer.kt` patcheado nunca chega ao compilador - o patch seguinte vira
    * código morto, aplicado e sem efeito nenhum.
    */
   {
@@ -68,7 +68,7 @@ function aplicarTodos(raizDoProjeto = process.cwd()) {
        * esta camada diz **o que se perde** por causa disso. As duas juntas são o que permite decidir
        * entre consertar o patch e removê-lo porque a biblioteca corrigiu o defeito.
        */
-      throw new Error(`[patches] ${nome} falhou — sem ele, ${oQueQuebra}.\n\n${cause.message}`, {
+      throw new Error(`[patches] ${nome} falhou - sem ele, ${oQueQuebra}.\n\n${cause.message}`, {
         cause,
       });
     }

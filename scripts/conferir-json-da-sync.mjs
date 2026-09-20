@@ -5,7 +5,7 @@
  * `TEXT`; no Supabase as mesmas colunas são `jsonb`. Sem conversão nas duas pontas o dado se perde
  * de dois jeitos diferentes, e nenhum deles dá erro visível:
  *
- *   - Subindo, a string vira **duplo encoding**: o Postgres guarda `"[\"Dipirona\"]"` — a string —
+ *   - Subindo, a string vira **duplo encoding**: o Postgres guarda `"[\"Dipirona\"]"` - a string -
  *     em vez do array.
  *   - Descendo, o `jsonb` volta como array de verdade, e o expo-sqlite não aceita objeto como
  *     parâmetro: a linha falha ou grava algo que o `JSON.parse` do repositório não lê.
@@ -14,7 +14,7 @@
  *
  * As duas funções são copiadas aqui de propósito: `sync-service.ts` importa `expo-sqlite` e
  * `react-native`, que não existem no Node. O que se verifica é a **regra**, e ela cabe em vinte
- * linhas — a alternativa seria extrair um módulo só para permitir o teste, o que espalharia a
+ * linhas - a alternativa seria extrair um módulo só para permitir o teste, o que espalharia a
  * lógica em vez de protegê-la.
  */
 import assert from "node:assert/strict";

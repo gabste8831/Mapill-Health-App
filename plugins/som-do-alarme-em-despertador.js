@@ -26,18 +26,18 @@ const fs = require("node:fs");
  * ```
  *
  * O install roda **depois** do prebuild e restaura o `AudioPlayer.kt` original. O Gradle compila o
- * arquivo limpo, o player nasce `USAGE_MEDIA`, e o alarme sai no volume de música — o defeito que o
+ * arquivo limpo, o player nasce `USAGE_MEDIA`, e o alarme sai no volume de música - o defeito que o
  * Gabriel relatou em 14/09 depois de pedir o volume de despertador várias vezes.
  *
  * O `throw` daqui não denunciava nada: ele falha quando o **alvo some**, e o install devolve o
- * arquivo original intacto — alvo perfeito, sem o patch.
+ * arquivo original intacto - alvo perfeito, sem o patch.
  *
  * Então o patch passou a ser aplicado por todo caminho que existe:
  *
- * 1. **Este plugin**, no prebuild — cobre o `expo run:android` local, onde não há segundo install.
- * 2. **`postinstall`** no `package.json` — roda junto de todo `npm/yarn install`, inclusive o que
+ * 1. **Este plugin**, no prebuild - cobre o `expo run:android` local, onde não há segundo install.
+ * 2. **`postinstall`** no `package.json` - roda junto de todo `npm/yarn install`, inclusive o que
  *    apaga o patch. Fecha a janela no próprio instante em que ela abre.
- * 3. **`eas-build-post-install`** — o gancho que roda depois de todo install e antes do gradlew
+ * 3. **`eas-build-post-install`** - o gancho que roda depois de todo install e antes do gradlew
  *    (https://docs.expo.dev/build-reference/npm-hooks/). É a última linha antes da compilação.
  *
  * E, como nenhum dos três é prova, **`scripts/conferir-patches.js` falha a build** se o arquivo
@@ -47,7 +47,7 @@ const fs = require("node:fs");
  * ## Por que o patch é global, e por que isso é seguro
  *
  * O alvo é o construtor do `AudioPlayer`, então **todo** player do app nasce como alarme. O único
- * `expo-audio` do projeto é o som do alarme (`som-do-alarme.ts`) — todo player do app já é o do
+ * `expo-audio` do projeto é o som do alarme (`som-do-alarme.ts`) - todo player do app já é o do
  * alarme.
  *
  * **Se algum dia o app tocar outro som**, ele herdaria `USAGE_ALARM` e sairia no volume errado,
@@ -61,12 +61,12 @@ function withSomDoAlarmeEmDespertador(config) {
       /**
        * Aplica **todos** os patches, e não só o do volume.
        *
-       * O prebuild é um dos três caminhos, e ele não pode conhecer só metade da lista — um patch
+       * O prebuild é um dos três caminhos, e ele não pode conhecer só metade da lista - um patch
        * que só o `postinstall` aplica ficaria de fora no `expo run:android` local, onde não há
        * segundo install. A lista mora em `scripts/aplicar-patches.js`.
        *
        * O log é a única janela numa build remota: `ja-estava` diz que o `postinstall` chegou
-       * primeiro, que é o esperado no EAS — informação, não ruído.
+       * primeiro, que é o esperado no EAS - informação, não ruído.
        */
       aplicarTodos(config.modRequest.projectRoot);
 
@@ -74,7 +74,7 @@ function withSomDoAlarmeEmDespertador(config) {
        * **Reaplica depois de o prebuild terminar**, porque o `yarn install` do EAS vem em seguida.
        *
        * Os `withDangerousMod` rodam dentro do prebuild, e o install que apaga o patch é posterior a
-       * todos eles — não há mod que rode depois. O `postinstall` e o `eas-build-post-install` são o
+       * todos eles - não há mod que rode depois. O `postinstall` e o `eas-build-post-install` são o
        * que cobre isso, e esta nota existe para ninguém remover aqueles dois achando que este
        * plugin basta. Ele não basta: foi exatamente essa suposição que produziu a build muda.
        */
@@ -82,19 +82,19 @@ function withSomDoAlarmeEmDespertador(config) {
       if (!fs.readFileSync(alvo, "utf8").includes(MARCA)) {
         throw new Error(
           "[som-do-alarme-em-despertador] o patch não sobreviveu à própria aplicação. " +
-            "Isto não deveria acontecer — confira o script em scripts/patch-som-de-despertador.js.",
+            "Isto não deveria acontecer - confira o script em scripts/patch-som-de-despertador.js.",
         );
       }
 
       /**
        * **Confere todos os patches aqui também**, e não só no `eas-build-post-install`.
        *
-       * O gancho do EAS não existe no `expo run:android` — o caminho do cabo, que virou o principal
+       * O gancho do EAS não existe no `expo run:android` - o caminho do cabo, que virou o principal
        * em 15/09. A conferência ficava só do lado remoto, e a compilação local seguia sem ela.
        *
        * Foi o que deixou passar a build de 15/09: o `expo-module.config.json` do `expo-audio`
        * chegou ao Gradle **com a `publication`**, o módulo veio pré-compilado, e o alarme saiu no
-       * volume de mídia outra vez — o mesmo defeito de 14/09, pelo mesmo motivo, e de novo sem nada
+       * volume de mídia outra vez - o mesmo defeito de 14/09, pelo mesmo motivo, e de novo sem nada
        * no log denunciando.
        *
        * Aqui é o último ponto antes do Gradle que roda nos **dois** caminhos.

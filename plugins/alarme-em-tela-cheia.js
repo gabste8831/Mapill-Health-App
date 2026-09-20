@@ -7,19 +7,19 @@ const { withAndroidManifest } = require("expo/config-plugins");
  *
  * O `fullScreenAction` do Notifee entrega a intenção ao Android, mas quem decide se a tela pode
  * subir sobre o bloqueio é o **manifesto**. Sem `showWhenLocked` e `turnScreenOn`, o sistema
- * degrada silenciosamente para uma notificação heads-up — que foi exatamente o que aconteceu no
+ * degrada silenciosamente para uma notificação heads-up - que foi exatamente o que aconteceu no
  * primeiro teste em aparelho (02/09): o som tocou, o aviso apareceu, e a tela cheia não.
  *
  * O sintoma engana, porque parece que o alarme funcionou. O que tocou foi o som **do canal**, uma
  * vez só, e não o loop da tela. Sem a tela, não há loop nenhum: o som contínuo mora nela.
  *
- * `turnScreenOn` é o que acende o aparelho apagado — um alarme que espera a pessoa acordar sozinha
+ * `turnScreenOn` é o que acende o aparelho apagado - um alarme que espera a pessoa acordar sozinha
  * para olhar a tela não é um alarme.
  *
  * ## Por que um plugin, e não editar o `AndroidManifest.xml`
  *
  * O projeto é *managed*: a pasta `android/` é gerada a cada build e qualquer edição manual nela é
- * perdida. Um config plugin é a forma suportada de alterar o manifesto — ele roda no `prebuild` e
+ * perdida. Um config plugin é a forma suportada de alterar o manifesto - ele roda no `prebuild` e
  * a mudança sobrevive.
  */
 /**
@@ -28,7 +28,7 @@ const { withAndroidManifest } = require("expo/config-plugins");
  * ## O defeito que isto corrige
  *
  * Os dois escutam `BOOT_COMPLETED` e existem para **reagendar os alarmes depois que o aparelho
- * reinicia** — o Android descarta todo alarme no reboot, então sem eles o app volta mudo.
+ * reinicia** - o Android descarta todo alarme no reboot, então sem eles o app volta mudo.
  *
  * O AAR os declara com `android:exported="false"`. Desde o **Android 12**, um receptor com
  * intent-filter de broadcast do sistema precisa de `exported="true"`, ou o sistema simplesmente não
@@ -37,7 +37,7 @@ const { withAndroidManifest } = require("expo/config-plugins");
  *
  * Confirmado no teste em aparelho (05/09): alarme agendado, celular reiniciado, horário passou, nada
  * tocou. É o mesmo relato de vários usuários da biblioteca (issues 248, 734 e 991), que segue aberto
- * — o projeto foi arquivado em 07/04/2026 sem correção.
+ * - o projeto foi arquivado em 07/04/2026 sem correção.
  */
 const RECEPTORES_DE_BOOT = [
   "app.notifee.core.RebootBroadcastReceiver",
@@ -47,7 +47,7 @@ const RECEPTORES_DE_BOOT = [
 /**
  * Marca os receptores de boot como exportados, sobrescrevendo o que o AAR declara.
  *
- * `tools:replace` é o que autoriza o merge de manifesto a vencer a declaração da biblioteca — sem
+ * `tools:replace` é o que autoriza o merge de manifesto a vencer a declaração da biblioteca - sem
  * ele o build falha com conflito, porque os dois lados afirmam valores diferentes para o mesmo
  * atributo.
  *
@@ -62,7 +62,7 @@ const RECEPTORES_DE_BOOT = [
  *
  * O `registerForegroundService` é o que faz o som do alarme tocar sem depender de tela (ver
  * `src/notifications/som-do-alarme.ts`). A partir do Android 14, subir um foreground service cujo
- * `<service>` não declara `foregroundServiceType` lança `MissingForegroundServiceTypeException` — e
+ * `<service>` não declara `foregroundServiceType` lança `MissingForegroundServiceTypeException` - e
  * o alarme morre no instante em que deveria tocar.
  *
  * O `foregroundServiceTypes` que a notificação passa no JS **não basta**: ele diz ao Notifee qual
@@ -70,7 +70,7 @@ const RECEPTORES_DE_BOOT = [
  * concordar.
  *
  * O AAR do Notifee declara o serviço sem tipo, e o manifesto da biblioteca não se edita. `mergeRules`
- * com `tools:replace` é o que dá ao merge um lado nosso para vencer — o mesmo mecanismo que os
+ * com `tools:replace` é o que dá ao merge um lado nosso para vencer - o mesmo mecanismo que os
  * receptores de boot já usavam aqui.
  *
  * `mediaPlayback` é o tipo correto para um despertador que toca áudio, e é o que os requisitos do
@@ -117,7 +117,7 @@ function withReceptoresDeBootExportados(manifesto) {
     /**
      * O receptor não está no manifesto do app porque vem do AAR, e o merge só acontece na
      * compilação. Declará-lo aqui, vazio e com `tools:replace`, é o que dá ao merge um lado nosso
-     * para vencer — sem intent-filter, que continua vindo da biblioteca.
+     * para vencer - sem intent-filter, que continua vindo da biblioteca.
      */
     aplicacao.receiver.push({
       $: {
@@ -141,7 +141,7 @@ module.exports = function withAlarmeEmTelaCheia(config) {
 
     // O `showWhenLocked` saiu daqui em 16/09, e a mudanca e o ponto todo: ele vive agora na
     // AlarmeActivity (plugins/activity-propria-do-alarme.js). Nesta Activity, a licenca era do app
-    // inteiro — responder a dose com o celular bloqueado deixava medicamentos, historico e ficha
+    // inteiro - responder a dose com o celular bloqueado deixava medicamentos, historico e ficha
     // de saude acessiveis sem senha.
 
     withReceptoresDeBootExportados(manifesto);

@@ -4,7 +4,7 @@
  * O defeito, relatado em aparelho em 09/09 e sobrevivente a três correções: o alarme tocava com o
  * som **duplicado**, e ao responder numa tela a outra piscava antes de fechar.
  *
- * A causa é arquitetural. A tela do alarme tem dois pontos de entrada — a Activity que o Notifee
+ * A causa é arquitetural. A tela do alarme tem dois pontos de entrada - a Activity que o Notifee
  * monta pelo `fullScreenAction`, e a rota `/alarme/[instante]` que o listener empurra quando o
  * Android rebaixa o full-screen intent. Os dois vivem no **mesmo processo JS** (`index.js` registra
  * o componente nativo e sobe o app inteiro), então um alarme que irrompe com o app rodando aciona
@@ -30,7 +30,7 @@ function conferir(descricao, condicao, detalhe) {
     console.log(`  ok  ${descricao}`);
   } else {
     falhou += 1;
-    console.error(`FALHOU  ${descricao}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.error(`FALHOU  ${descricao}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
@@ -55,7 +55,7 @@ console.log("\nA Activity tem precedência sobre a rota\n");
   /**
    * O caso que produzia o som duplicado: a Activity sobe pelo `fullScreenAction`, e o listener
    * empurra a rota antes de perceber. Se a rota sobrescrevesse o registro, ela não teria como
-   * saber que deve ceder — e as duas ficariam tocando.
+   * saber que deve ceder - e as duas ficariam tocando.
    */
   entrouEmCena(HORARIO, "activity");
   entrouEmCena(HORARIO, "rota");
@@ -109,7 +109,7 @@ console.log("\nToques repetidos na notificação não empilham telas\n");
   /**
    * O caso relatado em aparelho (10/09, passo 14.5.2): o alarme irrompe e deixa a notificação na
    * bandeja (`ongoing: true`, de propósito). Cada toque nela abria **mais uma** tela azul, e
-   * responder fechava só a de cima — sobravam as outras, uma por toque.
+   * responder fechava só a de cima - sobravam as outras, uma por toque.
    *
    * A guarda do listener consulta `jaEstaEmCena` antes de abrir. Estes casos travam a pergunta que
    * ela faz: com tela em cena, o toque não tem o que fazer.
@@ -120,7 +120,7 @@ console.log("\nToques repetidos na notificação não empilham telas\n");
   conferir("e o segundo toque também não", jaEstaEmCena(HORARIO));
   conferir("nem o terceiro", jaEstaEmCena(HORARIO));
 
-  // Depois de a tela sair — respondida —, um toque tardio volta a poder abrir. É o caso de quem
+  // Depois de a tela sair - respondida -, um toque tardio volta a poder abrir. É o caso de quem
   // responde, a tela fecha, e a notificação ainda está lá.
   saiuDeCena(HORARIO, "activity");
   conferir("mas depois de a tela sair, o toque volta a valer", !jaEstaEmCena(HORARIO));

@@ -3,7 +3,7 @@
  *
  * O caminho de edição é o mais arriscado do bloco de avisos, e é o único que o
  * `conferir-ids-de-aviso` não cobre: ele prova que a geração é correta a partir de um estado
- * limpo, e aqui o que se testa é a transição de um estado para outro — apagar as doses futuras,
+ * limpo, e aqui o que se testa é a transição de um estado para outro - apagar as doses futuras,
  * gerar as novas, cancelar os avisos e reagendar.
  *
  * O sintoma que motivou o script: depois de editar horários e dose várias vezes no mesmo remédio,
@@ -22,7 +22,7 @@ function conferir(descricao, condicao, detalhe) {
     console.log(`PASSA  ${descricao}`);
   } else {
     falharam += 1;
-    console.log(`FALHA  ${descricao}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.log(`FALHA  ${descricao}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
@@ -66,7 +66,7 @@ function dose(scheduledFor, reminderMode, extras = {}) {
   conferir(
     "horario de hoje ja passado (5 min) nao vira aviso",
     avisos.length === 0,
-    `gerou ${avisos.length} — dose vencida nao deve ser reagendada`,
+    `gerou ${avisos.length} - dose vencida nao deve ser reagendada`,
   );
 }
 
@@ -112,7 +112,7 @@ function dose(scheduledFor, reminderMode, extras = {}) {
   });
   // A opção saiu da tela em 05/09 (ver `ReminderMode`): dois avisos vivos para a mesma dose eram
   // dois caminhos de confirmação a manter em sincronia, e o desconto saía dobrado. Um valor gravado
-  // antes da remoção não pode deixar de avisar — ele vale como alarme, o modo mais forte.
+  // antes da remoção não pode deixar de avisar - ele vale como alarme, o modo mais forte.
   conferir(
     "modo 'both' gravado antes da remocao vale como alarme, e gera UM aviso",
     avisos.length === 1 && avisos[0].modo === "alarm",
@@ -155,8 +155,8 @@ function dose(scheduledFor, reminderMode, extras = {}) {
    * O defeito visto em aparelho (09/09): o Notifee recusa um timestamp vencido com
    * `trigger timestamp date must be in the future`, e a exceção derrubava o reagendamento inteiro.
    *
-   * A dose que **acabou de vencer** entra de propósito — a tolerância existe para o aviso das 08:00
-   * não se perder quando o app é reaberto às 08:00:30 —, mas o instante que vai ao agendador
+   * A dose que **acabou de vencer** entra de propósito - a tolerância existe para o aviso das 08:00
+   * não se perder quando o app é reaberto às 08:00:30 -, mas o instante que vai ao agendador
    * precisa estar no futuro.
    */
   // Local, e não `toISOString()`: o `agora` do script é hora local, e o `dose()` monta o horário do
@@ -206,7 +206,7 @@ function dose(scheduledFor, reminderMode, extras = {}) {
 // --- 9. O alarme diz como se desliga ------------------------------------------------------------
 {
   /**
-   * O alarme toca em loop e a resposta mora na tela cheia — que nem sempre irrompe. Quando o
+   * O alarme toca em loop e a resposta mora na tela cheia - que nem sempre irrompe. Quando o
    * Android rebaixa o full-screen intent, o que aparece é só a notificação, e quem a recebe
    * precisa saber que tocar nela é o caminho para parar o som.
    */

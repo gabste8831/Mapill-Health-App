@@ -1,4 +1,4 @@
-# Mapill — Inventário funcional e catálogo de avisos
+# Mapill - Inventário funcional e catálogo de avisos
 
 > Levantado do código-fonte em 10/09/2026 para embasar a seção de Desenvolvimento do artigo.
 > Toda afirmação traz arquivo e linha como evidência citável.
@@ -32,8 +32,8 @@ medicamento (digitando ou trazendo do scanner), a dose, a posologia (horários f
 aviso. Campos como estoque inicial, foto da caixa, receita e validade são opcionais e aparecem
 conforme a escolha anterior os torna relevantes.
 
-Resolve o problema de transformar uma prescrição médica — que chega em papel, com letra difícil e
-vocabulário técnico — em agendamento que o sistema consegue executar. É de longe a tela com mais
+Resolve o problema de transformar uma prescrição médica - que chega em papel, com letra difícil e
+vocabulário técnico - em agendamento que o sistema consegue executar. É de longe a tela com mais
 regras de validação, porque um erro aqui se propaga para todos os alarmes daquele tratamento.
 
 **Arquivos:** `src/telas/CadastroDeMedicamento/FormularioDeMedicamentoScreen.tsx`,
@@ -60,7 +60,7 @@ Mostra todos os tratamentos cadastrados, com busca por nome e três ordenações
 recentes, e "acabando" (por estoque). Cada item abre um detalhe com a posologia completa, a foto da
 caixa, os dados da receita e atalhos para editar ou excluir.
 
-Resolve a consulta pontual — "qual é mesmo a dose daquele remédio?" — que é diferente da pergunta da
+Resolve a consulta pontual - "qual é mesmo a dose daquele remédio?" - que é diferente da pergunta da
 Home. A busca ignora acentos e maiúsculas, para "acido folico" encontrar "Ácido fólico".
 
 **Arquivo:** `src/telas/Remedios/RemediosScreen.tsx` · **Rota:** `src/app/(abas)/remedios.tsx`
@@ -83,7 +83,7 @@ comprimidos" em "acaba em 4 dias", que é a forma que permite decidir se dá par
 ## 1.6 Calendário / Agenda
 
 Apresenta a linha do tempo do tratamento: o que vem primeiro e, abaixo, o que já passou. Tem um
-filtro de três posições — tudo, só compromissos, só remédios — e tocar num dia abre o detalhe daquele
+filtro de três posições - tudo, só compromissos, só remédios - e tocar num dia abre o detalhe daquele
 dia. Não é uma grade mensal, e a decisão está justificada no código.
 
 Resolve a pergunta "o que é o próximo, e quando", que uma grade de mês responde mal: seria preciso
@@ -98,7 +98,7 @@ profissional e uma cascata de lembretes configurável: avisar com X dias de ante
 também na manhã do próprio dia, ou ambos. Depois que o compromisso passa, a pessoa registra o
 desfecho ("fui" / "não fui"), e ele migra para um acordeão de anteriores.
 
-Resolve o esquecimento de consulta marcada com meses de antecedência — e alimenta o relatório em PDF
+Resolve o esquecimento de consulta marcada com meses de antecedência - e alimenta o relatório em PDF
 que vai para o médico.
 
 **Arquivos:** `src/telas/Compromissos/CompromissosScreen.tsx`,
@@ -113,7 +113,7 @@ pessoa gera um **PDF** com os tratamentos, a adesão e os compromissos, escolhen
 documento.
 
 É a tela que transforma o app de lembrete em registro clínico: sem ela, todo o dado de ingestão fica
-invisível para quem tomaria decisão a partir dele. Deliberadamente **não julga** — não há parabéns,
+invisível para quem tomaria decisão a partir dele. Deliberadamente **não julga** - não há parabéns,
 meta nem alerta por adesão baixa.
 
 **Arquivo:** `src/telas/Adesao/AdesaoScreen.tsx` · **Rota:** `src/app/adesao.tsx` ·
@@ -125,7 +125,7 @@ Central de anotações clínicas de acesso rápido: tipo sanguíneo, alergias, c
 convênio, contatos de emergência e foto do paciente. Cada contato de emergência só entra na lista
 depois de completo, nunca pela metade.
 
-Resolve a situação em que alguém — a própria pessoa ou quem a socorre — precisa de um dado clínico
+Resolve a situação em que alguém - a própria pessoa ou quem a socorre - precisa de um dado clínico
 imediatamente e não tem onde procurar. **Não é insumo do tratamento**: o app não usa esses dados para
 calcular nada, eles existem para serem lidos por um humano.
 
@@ -147,7 +147,7 @@ num botão. Esta é a única tela onde a resposta parcial cabe sem ambiguidade.
 Irrompe sobre a tela de bloqueio no horário da dose, com o nome do medicamento, a quantidade, a foto
 da caixa e som em loop. Oferece quatro saídas: Tomei, Pulei, Adiar e dispensar.
 
-Resolve o caso em que a notificação comum não basta — a dose que não pode ser perdida. É a promessa
+Resolve o caso em que a notificação comum não basta - a dose que não pode ser perdida. É a promessa
 central do app, e a única funcionalidade que exige três permissões especiais do Android.
 
 **Arquivos:** `src/telas/Alarme/AlarmeScreen.tsx`, `AlarmeRaiz.tsx` · **Rota:**
@@ -173,11 +173,11 @@ e adivinhar a causa.
 | **Ajustes** | Tema, permissões, conta, acesso ao diagnóstico | `src/telas/Ajustes/AjustesScreen.tsx` | `src/app/(abas)/ajustes.tsx` |
 | **Tema** | Escolha entre padrão, escuro, alto contraste e daltonismo | `src/telas/Tema/TemaScreen.tsx` | `src/app/tema.tsx` |
 | **Conta** | Login, vínculo com a nuvem, exportar e apagar dados | `src/telas/Conta/ContaScreen.tsx` | `src/app/conta.tsx` |
-| **Consentimento** | Aceite obrigatório antes de qualquer dado clínico | `src/telas/Consentimento/ConsentimentoScreen.tsx` | — (gate) |
+| **Consentimento** | Aceite obrigatório antes de qualquer dado clínico | `src/telas/Consentimento/ConsentimentoScreen.tsx` | - (gate) |
 | **Termos** | Política de privacidade e termos de uso | `src/telas/Termos/TermosScreen.tsx` | `src/app/termos.tsx` |
 | **Ajuda de alertas** | Explica o que cada aviso faz e do que depende | `src/telas/AjudaDeAlertas/AjudaDeAlertasScreen.tsx` | `src/app/cadastro/ajuda-de-alertas.tsx` |
 | **Escolha de cadastro** | Bifurcação entre scanner e entrada manual | `src/telas/EscolhaDeCadastro/EscolhaDeCadastroScreen.tsx` | `src/app/cadastro/escolha.tsx` |
-| **Login** | Autenticação opcional (Supabase) | `src/telas/Login/` | — |
+| **Login** | Autenticação opcional (Supabase) | `src/telas/Login/` | - |
 
 ---
 
@@ -203,7 +203,7 @@ esperar" de "isto não pode".
 > **Nota técnica citável no artigo:** o canal de lembrete precisou de `sound: "default"` explícito.
 > Omitir o campo **cria o canal mudo**, contrariando a documentação do Notifee, que afirma o
 > oposto. O comportamento foi confirmado em aparelho (`canais-notifee.ts:138-148`). Como um canal já
-> criado fica congelado no Android — som e importância não mudam por atualização —, os ids carregam
+> criado fica congelado no Android - som e importância não mudam por atualização -, os ids carregam
 > sufixo de versão (`-v5`) e há uma função que recria o canal quando ele diverge do esperado
 > (`recriarSeDivergente`, `canais-notifee.ts:66`).
 
@@ -225,7 +225,7 @@ O modo é escolhido **por tratamento**, no cadastro: `alarm`, `notification`, `b
 (`src/domain/entities/prescription.ts:24`). O comentário registra o critério clínico: *"insulina pede
 alarme, suplemento de rotina pode ser só notificação ou nada"*.
 
-O texto plural ("Tomei todas") aparece quando o horário tem mais de uma dose — os botões são montados
+O texto plural ("Tomei todas") aparece quando o horário tem mais de uma dose - os botões são montados
 na hora, a partir do aviso.
 
 ## 2.3 Lembrete de dose (notificação comum)
@@ -267,7 +267,7 @@ consulta que renova a receita. O do próprio dia é o que diz que a partir de ag
 mais"*. O segundo só é emitido quando os dois não caem no mesmo dia.
 
 **Decisão não-óbvia:** `querAviso` e `renewalReminderLeadDays` são campos **separados**. Marcar a
-caixa sem escolher prazo antes produzia **silêncio total** — nem o aviso do vencimento chegava
+caixa sem escolher prazo antes produzia **silêncio total** - nem o aviso do vencimento chegava
 (`planejar-avisos-de-compromisso.ts:31-40`).
 
 ## 2.6 Estoque acabando
@@ -282,7 +282,7 @@ caixa sem escolher prazo antes produzia **silêncio total** — nem o aviso do v
 | **Evidência** | `src/domain/use-cases/planejar-avisos-de-estoque.ts:95` |
 
 **A regra anti-repetição é elegante e vale citar.** O sistema guarda a quantidade que havia no momento
-do aviso (`quantidadeQuandoAvisou`) e só volta a avisar quando a quantidade **aumenta** — isto é,
+do aviso (`quantidadeQuandoAvisou`) e só volta a avisar quando a quantidade **aumenta** - isto é,
 quando a pessoa repôs o estoque:
 
 ```ts
@@ -320,7 +320,7 @@ porque 00:01 de hoje já passou. Só o alarme de dose toca na hora marcada.
 |---|---|
 | **Disparo** | 5 minutos após o toque em "Adiar" |
 | **Limite** | **Um adiamento por horário** (`snoozeCount`) |
-| **Registro** | **Nenhum** — não grava desfecho, nem `deferred` |
+| **Registro** | **Nenhum** - não grava desfecho, nem `deferred` |
 | **Evidência** | `src/notifications/responder-aviso.ts:111` (`adiarAviso`), `src/notifications/acoes.ts:43` (`MINUTOS_DE_ADIAMENTO`) |
 
 O aviso que volta traz só o que ainda estiver pendente, e **não oferece adiar de novo**.
@@ -395,7 +395,7 @@ min" era a mais larga das três.
 
 A trava nasceu de um defeito real: **cinco toques em "Adiar" produziam cinco lembretes**, porque cada
 toque disparava o handler outra vez. Num app de adesão, adiamento infinito é a falha silenciosa mais
-provável — a pessoa empurra o alarme indefinidamente e o app registra adesão que não houve.
+provável - a pessoa empurra o alarme indefinidamente e o app registra adesão que não houve.
 
 ## 4.5 Dose futura não oferece botão de confirmar
 
@@ -404,7 +404,7 @@ provável — a pessoa empurra o alarme indefinidamente e o app registra adesão
 > *"Só a próxima e as atrasadas mostram botões: oferecer 'confirmar' numa dose das 22h às 8 da manhã
 > faria o app registrar intenção em vez de ingestão."*
 
-## 4.6 "Tomei" na notificação pula a confirmação visual — e por que é aceitável
+## 4.6 "Tomei" na notificação pula a confirmação visual - e por que é aceitável
 
 `src/notifications/acoes.ts:4-8`
 
@@ -414,7 +414,7 @@ provável — a pessoa empurra o alarme indefinidamente e o app registra adesão
 > aceitável é a Home oferecer correção óbvia."*
 
 Em termos das heurísticas de Nielsen: tensão entre **prevenção de erros** (H5) e **flexibilidade e
-eficiência** (H7), resolvida por **controle e liberdade do usuário** (H3) — a saída rápida é permitida
+eficiência** (H7), resolvida por **controle e liberdade do usuário** (H3) - a saída rápida é permitida
 porque o desfazer existe.
 
 ## 4.7 O botão "Pulei" foi acrescentado para não falsear o relatório
@@ -443,7 +443,7 @@ para uma ação: qual tratamento está falhando.
 > *"Sempre sete dias, mesmo com 30 ou 90 escolhido acima: 'qual dia falhou' só se responde enquanto a
 > pessoa lembra do dia. A janela é de leitura, não de retenção."*
 
-Os dados **não expiram** — a limitação é de apresentação, não de armazenamento. Importante dizer isso
+Os dados **não expiram** - a limitação é de apresentação, não de armazenamento. Importante dizer isso
 no artigo para não sugerir descarte de dado.
 
 ## 4.10 Lista vazia significa "todos"
@@ -452,7 +452,7 @@ no artigo para não sugerir descarte de dado.
 
 No filtro do relatório em PDF, a ausência de seleção é guardada como **lista vazia**, e não como
 "todos os ids marcados". A consequência: um medicamento cadastrado depois entra no relatório
-sozinho — com a lista cheia, ele nasceria fora e ninguém entenderia por quê.
+sozinho - com a lista cheia, ele nasceria fora e ninguém entenderia por quê.
 
 ## 4.11 O calendário é lista, não grade
 

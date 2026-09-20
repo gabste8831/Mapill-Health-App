@@ -3,8 +3,8 @@
  *
  * **Por que existe.** Na unificação em torno do Notifee (02/09) o id do agendamento passou a
  * carregar um prefixo quando o aviso é alarme (`alarme:`), e o lembrete adiado já carregava o seu
- * (`adiado-`). Como o adiado é agendado com `modo: "alarm"` — ele precisa interromper como o aviso
- * original —, seu id fica com **os dois**: `alarme:adiado-…`.
+ * (`adiado-`). Como o adiado é agendado com `modo: "alarm"` - ele precisa interromper como o aviso
+ * original -, seu id fica com **os dois**: `alarme:adiado-…`.
  *
  * Isso quebra o filtro óbvio. `cancelarTudo` preserva o adiado testando o prefixo, e comparar o id
  * cru falharia: o aviso que a função existe para preservar seria apagado a cada reagendamento, em
@@ -22,7 +22,7 @@
  * ⚠️ **As quatro regras abaixo são CÓPIA das de `src/notifications/notifee-gateway.ts`.**
  *
  * O script é `.mjs` puro e roda sem transpilação, então não importa do TypeScript. O preço é este:
- * mudar um prefixo lá e não mudar aqui faz o script conferir o valor antigo e **passar** — dando
+ * mudar um prefixo lá e não mudar aqui faz o script conferir o valor antigo e **passar** - dando
  * segurança falsa justamente sobre o que ele existe para proteger.
  *
  * Mexeu em prefixo de id no gateway? Mexa aqui também.
@@ -40,21 +40,21 @@ const ehAlarme = (id) => id.startsWith(PREFIXO_ALARME);
 let ok = 0, falhou = 0;
 const checar = (nome, cond, det) => {
   if (cond) ok++;
-  else { falhou++; console.log(`  FALHOU: ${nome}${det ? ` — ${det}` : ""}`); }
+  else { falhou++; console.log(`  FALHOU: ${nome}${det ? ` - ${det}` : ""}`); }
 };
 
 const dose = { chave: "dose-2026-09-02T08:00:00.000Z" };
 const compromisso = { chave: "compromisso-abc" };
 const adiado = { chave: "adiado-2026-09-02T08:05:00.000Z" };
 
-// 1 — O alarme é reconhecível; o lembrete não é confundido com alarme.
+// 1 - O alarme é reconhecível; o lembrete não é confundido com alarme.
 {
   checar("1. alarme marcado", ehAlarme(idDoAviso({ ...dose, modo: "alarm" })));
   checar("1. lembrete não é alarme", !ehAlarme(idDoAviso({ ...dose, modo: "notification" })));
   checar("1. compromisso não é alarme", !ehAlarme(idDoAviso({ ...compromisso, modo: "notification" })));
 }
 
-// 2 — O BUG QUE ISTO PEGOU: o lembrete adiado é agendado com `modo: "alarm"`, então seu id fica
+// 2 - O BUG QUE ISTO PEGOU: o lembrete adiado é agendado com `modo: "alarm"`, então seu id fica
 //     `alarme:adiado-…`. Um filtro que comparasse o id cru com PREFIXO_ADIADO não o reconheceria,
 //     e `cancelarTudo` apagaria justamente o aviso que ele existe para preservar.
 {
@@ -65,12 +65,12 @@ const adiado = { chave: "adiado-2026-09-02T08:05:00.000Z" };
     "se este passasse, o teste não provaria nada");
 }
 
-// 3 — Adiado sem prefixo de alarme (modo notification) também é reconhecido.
+// 3 - Adiado sem prefixo de alarme (modo notification) também é reconhecido.
 {
   checar("3. adiado simples", ehAdiado(idDoAviso({ ...adiado, modo: "notification" })));
 }
 
-// 4 — cancelarTudo: preserva só o adiado, apaga o resto — inclusive alarmes.
+// 4 - cancelarTudo: preserva só o adiado, apaga o resto - inclusive alarmes.
 {
   const pendentes = [
     idDoAviso({ ...dose, modo: "alarm" }),
@@ -86,7 +86,7 @@ const adiado = { chave: "adiado-2026-09-02T08:05:00.000Z" };
   checar("4. apaga o compromisso", alvos.includes("compromisso-abc"));
 }
 
-// 5 — Dispensa por chave alcança o alarme, cujo id não é a chave.
+// 5 - Dispensa por chave alcança o alarme, cujo id não é a chave.
 {
   const chave = dose.chave;
   const tentativas = [chave, `${PREFIXO_ALARME}${chave}`];
@@ -94,7 +94,7 @@ const adiado = { chave: "adiado-2026-09-02T08:05:00.000Z" };
   checar("5. alcança o alarme", tentativas.includes(idDoAviso({ ...dose, modo: "alarm" })));
 }
 
-// 6 — Chave estável: mesmo horário, mesmo id. É o que faz reagendar ser idempotente.
+// 6 - Chave estável: mesmo horário, mesmo id. É o que faz reagendar ser idempotente.
 {
   const a = idDoAviso({ ...dose, modo: "alarm" });
   const b = idDoAviso({ chave: "dose-2026-09-02T08:00:00.000Z", modo: "alarm" });

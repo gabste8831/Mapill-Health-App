@@ -1,5 +1,5 @@
 /**
- * Faz o `expo-audio` ser compilado **do código-fonte**, e não do AAR pronto — sem isto o patch do
+ * Faz o `expo-audio` ser compilado **do código-fonte**, e não do AAR pronto - sem isto o patch do
  * volume de despertador é código morto.
  *
  * ## O defeito que isto resolve
@@ -12,18 +12,18 @@
  * mStreamType 3                 ← 3 é STREAM_MUSIC; alarme é 4
  * ```
  *
- * A build explica: **zero tasks `:expo-audio:`**. O módulo não é compilado — ele declara uma
+ * A build explica: **zero tasks `:expo-audio:`**. O módulo não é compilado - ele declara uma
  * `publication` no `expo-module.config.json`, e o Expo 57 consome um AAR pré-compilado de
  * `local-maven-repo`. O `.kt` patcheado nunca chega ao compilador.
  *
  * É a peça que faltava para entender por que o volume "nunca funcionou". O diagnóstico de 14/09 de
- * manhã — o `yarn install` apagando o patch antes do Gradle — era real e está corrigido, mas era
+ * manhã - o `yarn install` apagando o patch antes do Gradle - era real e está corrigido, mas era
  * **metade**: mesmo sobrevivendo ao install, o arquivo não seria compilado.
  *
  * ## O que ele faz
  *
  * Remove o bloco `publication` do `expo-module.config.json`. Sem ele o autolinking trata o
- * `expo-audio` como projeto Gradle comum e compila o fonte — onde o patch está.
+ * `expo-audio` como projeto Gradle comum e compila o fonte - onde o patch está.
  *
  * ## O custo, e por que vale
  *
@@ -90,6 +90,6 @@ if (require.main === module) {
   console.log(
     resultado === "aplicado"
       ? "[expo-audio-do-fonte] publicacao removida: o modulo passa a compilar do fonte."
-      : "[expo-audio-do-fonte] a publicacao já estava fora — nada a fazer.",
+      : "[expo-audio-do-fonte] a publicacao já estava fora - nada a fazer.",
   );
 }

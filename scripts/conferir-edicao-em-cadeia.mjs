@@ -2,8 +2,8 @@
  * Confere que **editar** um tratamento reflete em tudo que depende dele.
  *
  * O sintoma que motivou o script: mudar o horário de um remédio e o alarme não tocar mais. Cada
- * campo do cadastro alimenta uma consequência diferente — horário alimenta o aviso, dose alimenta
- * o estoque, antecedência alimenta o alerta de reposição —, e o que se testa aqui é a **cadeia**,
+ * campo do cadastro alimenta uma consequência diferente - horário alimenta o aviso, dose alimenta
+ * o estoque, antecedência alimenta o alerta de reposição -, e o que se testa aqui é a **cadeia**,
  * não cada peça isolada.
  *
  * As peças já têm seus próprios scripts (`conferir-ids-de-aviso`, `conferir-reagendamento`). O que
@@ -21,7 +21,7 @@ function conferir(descricao, condicao, detalhe) {
     console.log(`PASSA  ${descricao}`);
   } else {
     falharam += 1;
-    console.log(`FALHA  ${descricao}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.log(`FALHA  ${descricao}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
@@ -80,7 +80,7 @@ function avisosDe(horarios, reminderMode = "alarm") {
   conferir(
     "e o aviso do horario ANTIGO deixa de existir",
     !depois.some((aviso) => horaDe(aviso) === "11:40"),
-    "o horario antigo continua na lista — seria alarme orfao",
+    "o horario antigo continua na lista - seria alarme orfao",
   );
   conferir("o horario antigo existia antes da edicao", antes.some((a) => horaDe(a) === "11:40"));
 }
@@ -107,7 +107,7 @@ function avisosDe(horarios, reminderMode = "alarm") {
     "modo notification -> um aviso de notificacao",
     comoNotificacao.every((a) => a.modo === "notification"),
   );
-  // "Os dois" saiu da tela em 05/09 — um valor gravado antes vale como alarme, e produz a mesma
+  // "Os dois" saiu da tela em 05/09 - um valor gravado antes vale como alarme, e produz a mesma
   // grade que o modo `alarm`. Ver `ReminderMode`.
   conferir(
     "modo both (aposentado) produz a mesma grade que alarm",

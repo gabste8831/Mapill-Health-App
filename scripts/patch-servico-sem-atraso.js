@@ -1,5 +1,5 @@
 /**
- * Faz o `foregroundServiceBehavior` sobreviver à ponte JS→Java — e é o que tira o atraso de até
+ * Faz o `foregroundServiceBehavior` sobreviver à ponte JS→Java - e é o que tira o atraso de até
  * 10 s entre o alarme disparar e o aviso aparecer.
  *
  * ## O defeito, medido em 14/09
@@ -15,16 +15,16 @@
  * A biblioteca injeta `IMMEDIATE` (`1`) sozinha quando `asForegroundService` é `true`, para evitar o
  * adiamento que o Android 12+ impõe à notificação de um foreground service. Mas todo número em JS é
  * ponto flutuante, então o valor chega ao Bundle como `Double`; `getInt()` não aceita `Double` e
- * devolve o padrão, `0` — que é `FOREGROUND_SERVICE_DEFAULT`, o adiamento que o `IMMEDIATE` existia
+ * devolve o padrão, `0` - que é `FOREGROUND_SERVICE_DEFAULT`, o adiamento que o `IMMEDIATE` existia
  * para evitar.
  *
  * O defeito é da biblioteca, não do app: nós nunca passamos esse campo, e passá-lo do JS não muda
- * nada — o `Double` continua sendo `Double`. A correção tem de ser de quem lê.
+ * nada - o `Double` continua sendo `Double`. A correção tem de ser de quem lê.
  *
  * ## O que o patch faz
  *
  * Troca `getInt` por uma leitura que aceita qualquer número. `Bundle.get()` devolve o objeto como
- * ele veio, e `Number.intValue()` converte tanto `Double` quanto `Integer` — então funciona se a
+ * ele veio, e `Number.intValue()` converte tanto `Double` quanto `Integer` - então funciona se a
  * biblioteca corrigir a ponte um dia, e continua funcionando enquanto ela não corrigir.
  *
  * ## Por que aqui, e não esperando um release
@@ -34,7 +34,7 @@
  * arquivo pode ser apagado.
  *
  * Aplicado pelos mesmos três caminhos do patch irmão (prebuild, `postinstall`,
- * `eas-build-post-install`) — ver `scripts/patch-som-de-despertador.js` para o porquê de três.
+ * `eas-build-post-install`) - ver `scripts/patch-som-de-despertador.js` para o porquê de três.
  */
 
 const fs = require("node:fs");
@@ -63,7 +63,7 @@ const ORIGINAL = `    return mNotificationAndroidBundle.getInt(
  * O bloco novo.
  *
  * `instanceof Number` cobre `Double` (como o valor chega hoje) e `Integer` (como chegaria se a
- * ponte fosse corrigida). Qualquer outra coisa — ausente, nulo, um tipo inesperado — cai no padrão,
+ * ponte fosse corrigida). Qualquer outra coisa - ausente, nulo, um tipo inesperado - cai no padrão,
  * que é o mesmo comportamento de antes.
  */
 const PATCH = `    // [Mapill] Aceita Double, e nao so Integer.
@@ -71,7 +71,7 @@ const PATCH = `    // [Mapill] Aceita Double, e nao so Integer.
     // A ponte JS->Java entrega todo numero como Double, e o getInt() original descartava o valor:
     // "expected Integer but value was a java.lang.Double. The default value 0 was returned".
     // O 0 e FOREGROUND_SERVICE_DEFAULT, que adia a notificacao do servico em ate 10s no Android 12+
-    // — justamente o que o IMMEDIATE injetado pela lib existia para evitar.
+    // - justamente o que o IMMEDIATE injetado pela lib existia para evitar.
     //
     // Ver scripts/patch-servico-sem-atraso.js
     Object valor = mNotificationAndroidBundle.get("foregroundServiceBehavior");
@@ -86,7 +86,7 @@ const MARCA = "[Mapill] Aceita Double";
 /**
  * Aplica o patch. Idempotente.
  *
- * **Lança** se o alvo não existe ou mudou de forma — que aqui é uma boa notícia disfarçada: se a
+ * **Lança** se o alvo não existe ou mudou de forma - que aqui é uma boa notícia disfarçada: se a
  * biblioteca corrigir a ponte, este patch fica obsoleto e a build avisa em vez de aplicar por cima.
  */
 function aplicarPatchSemAtraso(raizDoProjeto) {
@@ -106,7 +106,7 @@ function aplicarPatchSemAtraso(raizDoProjeto) {
   if (!conteudo.includes(ORIGINAL)) {
     throw new Error(
       `[servico-sem-atraso] o getInt de foregroundServiceBehavior não foi encontrado em ` +
-        `${ARQUIVO_ALVO}. A biblioteca provavelmente foi atualizada — confira se ela já corrigiu a ` +
+        `${ARQUIVO_ALVO}. A biblioteca provavelmente foi atualizada - confira se ela já corrigiu a ` +
         `leitura (era um Double lido com getInt). Se corrigiu, este patch e o script podem sair.`,
     );
   }
@@ -122,6 +122,6 @@ if (require.main === module) {
   console.log(
     resultado === "aplicado"
       ? "[servico-sem-atraso] patch aplicado: a notificacao do servico sai na hora."
-      : "[servico-sem-atraso] o patch já estava no arquivo — nada a fazer.",
+      : "[servico-sem-atraso] o patch já estava no arquivo - nada a fazer.",
   );
 }

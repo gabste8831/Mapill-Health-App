@@ -4,7 +4,7 @@
  * A regra lê o **prefixo da chave** que o planejador montou, e é aí que ela pode quebrar em
  * silêncio: renomear uma chave em `planejar-avisos-de-estoque` ou `planejar-avisos-de-compromisso`
  * e esquecer daqui faria o toque voltar a cair na Home, sem erro nenhum. Estes casos amarram os
- * dois lados — se um sufixo mudar lá, um destes falha.
+ * dois lados - se um sufixo mudar lá, um destes falha.
  *
  * Rodar: node --experimental-strip-types scripts/conferir-destino-do-aviso.mjs
  */
@@ -19,7 +19,7 @@ function conferir(descricao, condicao, detalhe) {
     console.log(`  ok  ${descricao}`);
   } else {
     falhou += 1;
-    console.error(`FALHOU  ${descricao}${detalhe ? ` — ${detalhe}` : ""}`);
+    console.error(`FALHOU  ${descricao}${detalhe ? ` - ${detalhe}` : ""}`);
   }
 }
 
@@ -65,7 +65,7 @@ console.log("\nO aviso de dose não tem destino próprio\n");
 console.log("\nIds com hífen sobrevivem\n");
 {
   /**
-   * Os ids são UUID, que têm hífen — e o sufixo é removido por âncora de fim (`$`), não por corte
+   * Os ids são UUID, que têm hífen - e o sufixo é removido por âncora de fim (`$`), não por corte
    * no primeiro hífen. Se alguém trocar para `split("-")`, este caso quebra.
    */
   const uuid = "3f2504e0-4f89-11d3-9a0c-0305e82c3301";
