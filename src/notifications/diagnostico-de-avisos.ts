@@ -12,69 +12,43 @@ import { planejarAvisosDeCompromisso } from "@/domain/use-cases/planejar-avisos-
 import { planejarAvisosDeEstoque } from "@/domain/use-cases/planejar-avisos-de-estoque";
 import type { PosologyUnit } from "@/domain/entities/medication";
 
-/** Um aviso que o sistema operacional diz ter agendado. */
 export type AvisoAgendado = {
   id: string;
-  /** Quando ele vai disparar, já legível. `null` quando o gatilho não é de horário. */
   quando: string | null;
-  /** `alarme:` no id, ou seja: vai abrir a tela cheia em vez de só notificar. */
+  /** `alarme:` no id: abre a tela cheia em vez de so notificar. */
   ehAlarme: boolean;
-  /** O que o aviso diz - para conferir de relance se é o remédio certo. */
   titulo: string | null;
 };
 
 export type EstadoDeUmCanal = {
   id: string;
   nome: string;
-  /** 0 a 5. Abaixo de 4 o Android não mostra heads-up nem toca som. */
+  /** 0 a 5. Abaixo de 4 o Android nao mostra heads-up nem toca som. */
   importancia: number;
-  /** O nome do recurso, como foi pedido na criação. `null` quando o sistema não devolve. */
   som: string | null;
   /**
-   * A URI que o Android **resolveu** para esse som, e é ela que diz se o canal toca.
+   * A URI que o Android resolveu para o som.
    *
-   * As duas coisas existem porque `sound` sozinho engana: pedindo `"default"`, o Android guarda a
-   * URI do som padrão e pode devolver `sound` vazio - o canal toca, e o diagnóstico dizia "MUDO".
-   * Um canal mudo de verdade vem com **as duas** vazias.
-   *
-   * É a terceira vez que a palavra "default" confunde a leitura neste projeto (ver o topo de
-   * `canais-notifee.ts`). Mostrar o valor resolvido é o que tira a resposta do campo do palpite.
+   * `sound` sozinho engana: pedindo `"default"`, o Android guarda a URI e pode devolver `sound`
+   * vazio. Mudo de verdade e quando as duas estao vazias.
    */
   somUri: string | null;
-  /** Se a pessoa desligou o canal nas configurações do sistema. */
   bloqueado: boolean;
 };
 
 export type DiagnosticoDeAvisos = {
-  /** O que o sistema tem agendado agora, ordenado pelo mais próximo. */
   agendados: AvisoAgendado[];
   canais: EstadoDeUmCanal[];
   permissaoDeNotificar: "concedida" | "negada" | "nao-perguntada";
-  /** Se o app pode agendar alarme exato. Sem isso o horário escorrega. */
   alarmeExato: boolean;
   /**
-   * Se o sistema autoriza a **tela cheia** - a permissão que faz a tela azul irromper sozinha.
+   * Negada, o Android rebaixa todo `fullScreenAction` para heads-up, e a tela azul passa a depender
+   * do caminho JavaScript, que so age com o app em primeiro plano.
    *
-   * Entrou em 12/09, e é a única leitura que responde o relato do Gabriel: com o celular bloqueado,
-   * a tela azul aparecia quando o Mapill **não** estava nos recentes, e não aparecia quando estava.
-   * Sem esta linha, "a tela não subiu" tem meia dúzia de causas possíveis e nenhuma forma de
-   * distingui-las - que é exatamente o tipo de adivinhação que este diagnóstico existe para acabar.
-   *
-   * Negada, o Android rebaixa **todo** `fullScreenAction` para heads-up, e a tela azul depende
-   * inteiramente do caminho JavaScript - que por sua vez só age com o app em primeiro plano. É a
-   * combinação que produz o alarme sem tela.
-   *
-   * Não vira linha de permissão no painel: a tela de destino não existe em todo aparelho (ver a nota
-   * em `permissoes-de-alarme`). Aqui é relatório, não cobrança.
+   * Nao vira linha de permissao no painel: a tela de destino nao existe em todo aparelho.
    */
   telaCheia: boolean;
-  /**
-   * Quantos avisos deveriam existir na janela, por tipo - o número esperado.
-   *
-   * Os quatro separados, e não um total: quando o agendado não bate com o esperado, saber **qual**
-   * tipo falhou é metade do diagnóstico. Estoque zerado com receita cheia aponta para a previsão
-   * ou para a trava; todos zerados apontam para permissão ou para o reagendamento inteiro.
-   */
+  /** Separados por tipo: saber qual falhou e metade do diagnostico. */
   esperados: {
     doses: number;
     compromissos: number;
@@ -89,19 +63,11 @@ const PREFIXO_DE_ALARME = "alarme:";
 /**
  * Fotografa o estado real do subsistema de avisos.
  *
- * ## Por que isto existe
+ * Testar alarme e caro, e quando nao toca ha meia duzia de causas possiveis sem como distinguir
+ * entre elas. Isto responde antes de esperar: um alarme que nao aparece aqui nunca ia tocar.
  *
- * Testar alarme é caro: exige esperar o horário, bloquear o aparelho, às vezes reiniciar. Quando
- * não toca, a pergunta que fica é *por quê* - e havia meia dúzia de respostas possíveis (não foi
- * agendado, foi agendado errado, o canal está mudo, falta permissão, o Android matou), sem como
- * distinguir entre elas. Cada teste virava uma sessão de adivinhação.
- *
- * Isto responde antes de esperar: mostra o que **está agendado neste instante**, com que horário,
- * em que canal, e compara com quantos avisos deveriam existir. Um alarme que não aparece aqui nunca
- * ia tocar, e isso se descobre em cinco segundos em vez de vinte minutos.
- *
- * Lê tudo do sistema operacional e do banco - não guarda estado próprio, porque um diagnóstico que
- * depende do próprio registro mente junto com o defeito que deveria encontrar.
+ * Le tudo do sistema e do banco, sem estado proprio: um diagnostico que depende do proprio registro
+ * mente junto com o defeito que deveria encontrar.
  */
 export async function diagnosticarAvisos(): Promise<DiagnosticoDeAvisos> {
   const geradoEm = new Date();
@@ -144,8 +110,6 @@ export async function diagnosticarAvisos(): Promise<DiagnosticoDeAvisos> {
     id: canal.id,
     nome: canal.name,
     importancia: canal.importance ?? 0,
-    // As duas leituras, porque só as duas juntas decidem: `sound` é o que pedimos, `soundURI` é o
-    // que o Android resolveu. Mudo de verdade é quando **ambas** estão vazias.
     som: canal.sound ?? null,
     somUri: canal.soundURI ?? null,
     bloqueado: canal.blocked === true,
@@ -172,11 +136,10 @@ export async function diagnosticarAvisos(): Promise<DiagnosticoDeAvisos> {
 }
 
 /**
- * Quantos avisos **deveriam** existir, contando do banco.
+ * Quantos avisos deveriam existir, contando do banco.
  *
- * O número que importa não é o absoluto, é a comparação: dez doses na janela e zero avisos
- * agendados é um defeito de agendamento; dez e dez, com o alarme não tocando, é defeito de entrega.
- * São causas diferentes, e sem os dois números o teste não distingue.
+ * O que importa e a comparacao: dez doses e zero agendados e defeito de agendamento; dez e dez, com
+ * o alarme mudo, e defeito de entrega.
  */
 async function contarEsperados(): Promise<{
   doses: number;
@@ -198,11 +161,7 @@ async function contarEsperados(): Promise<{
   const prescricaoPorId = new Map(prescriptions.map((p) => [p.id, p]));
   const medicamentoPorId = new Map(medications.map((m) => [m.id, m]));
 
-  /**
-   * Só as doses que de fato geram aviso: com prescrição e medicamento vivos, ainda não resolvidas,
-   * e com lembrete pedido. Contar todas daria um número maior que o correto e faria a comparação
-   * acusar defeito onde não há.
-   */
+  // So as que de fato geram aviso: contar todas faria a comparacao acusar defeito onde nao ha.
   const doses = comStatus.filter(({ doseSchedule, latestStatus }) => {
     if (latestStatus === "confirmed" || latestStatus === "skipped") return false;
     const prescription = prescricaoPorId.get(doseSchedule.prescriptionId);
@@ -217,16 +176,9 @@ async function contarEsperados(): Promise<{
   }).length;
 
   /**
-   * Receita e estoque contam pelos **próprios planejadores**, e não por um filtro escrito aqui.
-   *
-   * As duas regras têm casos que um filtro simples erraria: a receita gera dois avisos (na
-   * antecedência e no dia), mas **um só** quando a antecedência é zero; o estoque depende de uma
-   * previsão que pode não existir e de uma trava que o cala depois do primeiro aviso. Reescrever
-   * isso aqui faria o diagnóstico discordar do agendador no dia em que a regra mudasse - e um
-   * diagnóstico que mente é pior que nenhum, porque manda procurar defeito onde não há.
-   *
-   * As doses e os compromissos continuam por filtro porque a regra deles é "tem lembrete pedido e
-   * ainda não passou", sem ramificação - e a contagem por dose é o que a comparação usa.
+   * Receita e estoque contam pelos proprios planejadores, e nao por um filtro escrito aqui: as duas
+   * regras tem ramificacoes que um filtro simples erraria, e o diagnostico passaria a discordar do
+   * agendador no dia em que elas mudassem.
    */
   const receitas = planejarAvisosDeCompromisso({
     compromissos: [],

@@ -8,12 +8,8 @@ export type OpcaoDeOrdem<T extends string> = {
   value: T;
   label: string;
   /**
-   * Mantido no tipo, mas **não** desenhado.
-   *
-   * O ícone saiu das fichas: nenhum dos três ("A-Z", "Mais recentes", "Acabando") tem símbolo que
-   * signifique algo sem o rótulo ao lado, então ele custava largura sem acrescentar leitura - e era
-   * a largura que forçava a fileira a rolar. O campo fica porque as telas já o declaram e ele
-   * descreve a intenção de cada opção para quem for lê-las no código.
+   * Mantido no tipo, mas nao desenhado: nenhum dos rotulos tem simbolo que signifique algo sozinho,
+   * e a largura que o icone custava era o que forcava a fileira a rolar.
    */
   icon?: keyof typeof Ionicons.glyphMap;
 };
@@ -31,32 +27,13 @@ export type SeletorDeOrdemProps<T extends string> = {
 };
 
 /**
- * Fileira de fichas para escolher entre poucas opções que **governam o que a tela mostra** -
- * ordem da lista, filtro da agenda, período da adesão.
+ * Fileira de fichas para escolher entre poucas opcoes que governam o que a tela mostra.
  *
- * É a forma única dessa escolha no app, e por isso a cor e o tamanho vêm daqui e não de cada
- * tela: selecionada em azul cheio, as demais em `surfaceContainer`, todas do mesmo tamanho. Uma
- * tela que desenhasse a própria fileira ensinaria a pessoa a reconhecer duas gramáticas para a
- * mesma decisão.
+ * Nao e o `OptionGroup`: aquele e para escolha que se grava, onde a opcao e um cartao com apoio e
+ * icone. Este e para escolha que so muda a vista e se desfaz no toque seguinte.
  *
- * **Não é o `OptionGroup`.** Aquele é para escolha que se grava - a frequência de um remédio, o
- * tipo de lembrete -, onde a opção é um cartão que pode carregar apoio e ícone. Este é para
- * escolha que só muda a vista e se desfaz no toque seguinte.
- *
- * Sempre há uma marcada - ordem é estado, não filtro, e "nenhuma ordem" não existe: a lista sai
- * de algum jeito de qualquer forma. Deixar isso implícito é o que fazia a pessoa não entender por
- * que o remédio que ela acabou de cadastrar aparecia no meio.
- *
- * ## Todas as opções à vista, sem rolagem
- *
- * A fileira rolava na horizontal, e isso escondia opções atrás de um gesto que nada anunciava:
- * quem não arrastasse não sabia que "Acabando" existia. Um seletor com opção invisível não é um
- * seletor, é uma lista de uma opção só com um segredo.
- *
- * Cabem todas porque duas coisas saíram: o **ícone** (nenhum dos rótulos tem símbolo que signifique
- * algo sozinho) e um degrau de fonte. As fichas dividem a largura em partes iguais - `flex: 1` em
- * cada -, então três ou quatro opções acomodam do mesmo jeito, e a fileira fica alinhada em vez de
- * ter larguras ditadas pelo tamanho de cada palavra.
+ * Sempre ha uma marcada, porque ordem e estado e "nenhuma ordem" nao existe. Todas cabem sem
+ * rolagem: a fileira rolava na horizontal e escondia opcoes atras de um gesto que nada anunciava.
  */
 export function SeletorDeOrdem<T extends string>({
   value,

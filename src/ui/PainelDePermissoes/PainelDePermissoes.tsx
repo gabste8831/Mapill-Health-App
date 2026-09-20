@@ -7,40 +7,23 @@ import { criarEstilos } from "./PainelDePermissoes.styles";
 
 type PainelDePermissoesProps = {
   /**
-   * As pendentes que o app **consegue verificar**. Quem filtra é quem monta (ver `InicioScreen`).
+   * As pendentes que o app consegue verificar. Quem filtra e quem monta.
    *
-   * Elas não são exibidas: servem para decidir se o painel aparece. Com as três não-verificáveis
-   * aqui, ele nunca sairia da Home - nem para quem configurou tudo -, e um aviso que nunca sai
-   * ensina a ignorar o aviso.
+   * Nao sao exibidas: servem para decidir se o painel aparece. Com as nao-verificaveis aqui, ele
+   * nunca sairia da Home, nem para quem configurou tudo.
    */
   itens: ItemDePermissao[];
-  /** Falso quando falta alguma essencial. Hoje muda só a cor: o texto é o mesmo nos dois casos. */
+  /** Falso quando falta alguma essencial. Muda so a cor. */
   vaiTocar: boolean;
-  /** Leva à ajuda de alertas, onde as cinco estão listadas e se conferem uma a uma. */
   onAbrirDetalhes?: () => void;
 };
 
 /**
- * O aviso, na Home, de que o alarme não vai tocar - e o caminho único para resolver.
+ * O aviso, na Home, de que o alarme nao vai tocar, com um caminho unico para resolver.
  *
- * ## Por que ele não lista as permissões
- *
- * Listava, até 12/09: uma linha por autorização pendente, cada uma abrindo a tela do sistema. O
- * problema é que só as **verificáveis** podiam estar ali, porque as outras três (sobrepor apps,
- * início automático, bateria) não expõem estado a nenhuma API - e uma lista parcial de itens
- * obrigatórios define o escopo errado do que falta fazer.
- *
- * O efeito, apontado pelo Gabriel: quem atendia as duas ou três listadas via o painel desaparecer e
- * concluía que terminara. As três restantes seguiam intocadas, e o alarme seguia mudo, sem nada na
- * tela explicando por quê.
- *
- * Com um caminho único, a pessoa chega a uma tela onde as cinco estão visíveis, separadas entre o
- * que o app confere e o que ela precisa conferir. Nenhuma delas desaparece por engano.
- *
- * ## O que ele decide, então
- *
- * Só se aparece. E aparece enquanto alguma das verificáveis estiver pendente - é o sinal mais
- * confiável que o app tem de que algo está errado com os avisos.
+ * Nao lista as permissoes porque so as verificaveis poderiam estar ali, e uma lista parcial de
+ * itens obrigatorios define o escopo errado: quem atendia as listadas via o painel sumir e
+ * concluia ter terminado, com o alarme seguindo mudo.
  */
 export function PainelDePermissoes({
   itens,
@@ -66,37 +49,14 @@ export function PainelDePermissoes({
         </Text>
       </View>
 
-      {/**
-       * O texto diz **"não funciona"**, e não "pode melhorar".
-       *
-       * A versão anterior tinha dois tons - "deixe o alarme mais confiável" quando faltava só uma
-       * secundária, "não vai tocar" quando faltava uma essencial. O Gabriel corrigiu em 12/09, e a
-       * correção é factual: sem as autorizações o aviso **não chega**. Chamar isso de melhoria é o
-       * app minimizando a própria falha, e quem lê "pode melhorar" deixa para depois.
-       *
-       * A ênfase em **todas** existe porque a falha é conjuntiva: basta uma pendente para o alarme
-       * não tocar, e o painel não tem como dizer qual delas vai ser o problema.
-       */}
+      {/* Diz "nao funciona", e nao "pode melhorar": sem as autorizacoes o aviso nao chega, e quem
+          le "pode melhorar" deixa para depois. A enfase em todas e porque a falha e conjuntiva, e
+          o painel nao tem como dizer qual delas vai ser o problema. */}
       <Text style={[styles.explicacao, !vaiTocar && styles.explicacaoCritica]}>
         Para que seus lembretes funcionem, o seu aparelho precisa autorizar cinco permissões.{" "}
         <Text style={styles.enfase}>Todas são necessárias</Text>, faltando uma, o aviso não chega.
       </Text>
 
-      {/**
-       * **O painel não lista mais as permissões** - ele avisa e leva ao lugar onde estão todas.
-       *
-       * As linhas que ficavam aqui mostravam só as que o app consegue verificar, e isso enganava:
-       * quem atendia as duas ou três listadas via o painel desaparecer e concluía que terminara,
-       * enquanto as três não-verificáveis (sobrepor apps, início automático, bateria) seguiam
-       * intocadas e o alarme seguia mudo. Apontado pelo Gabriel em 12/09.
-       *
-       * Uma lista parcial de itens obrigatórios é pior que nenhuma: ela define o escopo errado do
-       * que falta fazer. Com um caminho único, a pessoa vê as cinco de uma vez, e o que ela não
-       * autorizar continua visível lá.
-       *
-       * É também o que devolve a tela à agenda do dia: era este bloco que ocupava a área útil da
-       * Home inteira.
-       */}
       {onAbrirDetalhes !== undefined ? (
         <Pressable
           onPress={onAbrirDetalhes}

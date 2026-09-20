@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AccessibilityInfo, View, type ViewStyle } from "react-native";
+import { View, type ViewStyle } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -78,14 +78,4 @@ export function BarraDeProgresso({
       <Animated.View style={[fillStyle, estiloAnimado]} />
     </View>
   );
-}
-
-/**
- * Anuncia um marco de progresso a quem não vê a barra.
- *
- * Separado do componente porque nem todo avanço merece anúncio: interromper o leitor de tela a cada
- * dose confirmada é ruído, e ruído é o que ensina a desligar o leitor. Quem chama decide o momento.
- */
-export function anunciarProgresso(frase: string): void {
-  AccessibilityInfo.announceForAccessibility(frase);
 }

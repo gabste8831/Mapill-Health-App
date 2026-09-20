@@ -25,7 +25,6 @@ export * from "./CardDeAtalho/CardEstoque";
 export * from "./OverlayDeProgresso/OverlayDeProgresso";
 export * from "./IndicadorDeSync/IndicadorDeSync";
 export * from "./Accordion/Accordion";
-export * from "./AvisoDePendencias/AvisoDePendencias";
 export * from "./KeyboardAwareScrollView/KeyboardAwareScrollView";
 export * from "./PainelDePermissoes/PainelDePermissoes";
 export * from "./RodapeDeFormulario/RodapeDeFormulario";
