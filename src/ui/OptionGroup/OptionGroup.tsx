@@ -104,7 +104,14 @@ export function OptionGroup<TValue extends string>({
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}>
               {option.icon}
-              <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
+              {/* Centrado exceto no `alto`, que alinha o cartão inteiro à esquerda — ver
+                  `optionLabelCentrado`. */}
+              <Text
+                style={[
+                  styles.optionLabel,
+                  !alto && styles.optionLabelCentrado,
+                  isSelected && styles.optionLabelSelected,
+                ]}>
                 {option.label}
               </Text>
               {option.hint && layout !== "linha" ? (

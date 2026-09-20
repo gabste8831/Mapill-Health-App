@@ -102,6 +102,22 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     ...typography.bodyMd,
     color: cores.onSurface,
   },
+  /**
+   * O rótulo centrado **linha a linha**, para as fichas que centram o conteúdo.
+   *
+   * Existe separado de `optionLabel` porque `alignItems` não alcança o texto que quebra: o
+   * container centraliza o bloco do `Text`, e não as linhas dentro dele. Com uma linha só os dois
+   * efeitos coincidem e ninguém nota; quando o rótulo quebra, cada linha volta ao padrão — à
+   * esquerda. Era o que fazia "Só quando precisar", o único dos quatro rótulos da frequência longo
+   * o bastante para quebrar numa ficha de 40% da largura, parecer encostado à esquerda ao lado de
+   * "Todo dia".
+   *
+   * **Não** entra no `optionAlto`, que alinha à esquerda de propósito: lá o rótulo divide o cartão
+   * com um `hint` de duas linhas, e centrar só o de cima quebraria a coluna que os dois formam.
+   */
+  optionLabelCentrado: {
+    textAlign: "center",
+  },
   optionLabelSelected: {
     color: cores.onPrimary,
   },
