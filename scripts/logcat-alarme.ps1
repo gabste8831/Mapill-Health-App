@@ -1,6 +1,6 @@
 # Captura o logcat do celular enquanto o alarme dispara.
 #
-# O `adb` nao esta no PATH nesta maquina — ele vive dentro do SDK do Android Studio, e por isso
+# O `adb` nao esta no PATH nesta maquina - ele vive dentro do SDK do Android Studio, e por isso
 # `adb logcat` responde "command not found". Este script acha o executavel sozinho.
 #
 # Como usar:
@@ -32,7 +32,7 @@ if (-not $adb) {
 Write-Host "adb: $adb" -ForegroundColor DarkGray
 
 # `devices` lista o que esta conectado. Sem isto o logcat trava esperando um aparelho, sem dizer
-# por que — e "esperando" e "nao autorizado" se parecem na tela.
+# por que - e "esperando" e "nao autorizado" se parecem na tela.
 $devices = & $adb devices | Select-Object -Skip 1 | Where-Object { $_.Trim() -ne "" }
 if (-not $devices) {
   Write-Host ""

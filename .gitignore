@@ -30,7 +30,7 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files (nunca commitar credenciais reais — ver .env.example)
+# local env files (nunca commitar credenciais reais - ver .env.example)
 .env
 .env*.local
 
@@ -43,7 +43,7 @@ example
 /ios
 /android
 
-# skills de ferramenta instaladas localmente (npx skills add) — ferramenta de quem desenvolve,
+# skills de ferramenta instaladas localmente (npx skills add) - ferramenta de quem desenvolve,
 # não código do app, e cada máquina instala as suas
 .agents/
 skills-lock.json

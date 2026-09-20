@@ -18,7 +18,7 @@
  *
  *     .\android\gradlew.bat -p android assembleRelease -I gradle\cmake-do-windows.gradle
  *
- * O caminho do `-I` e relativo ao diretorio de onde se chama o gradlew, e nao ao `-p` — passar
+ * O caminho do `-I` e relativo ao diretorio de onde se chama o gradlew, e nao ao `-p` - passar
  * `.claude-scratch/...` com `-p android` faz o Gradle procurar em `android/.claude-scratch/`.
  *
  * ## Por que init script, e nao config plugin

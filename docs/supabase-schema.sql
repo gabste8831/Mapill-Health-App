@@ -1,5 +1,5 @@
 -- =============================================================================
--- Mapill — schema do Supabase (PostgreSQL)
+-- Mapill - schema do Supabase (PostgreSQL)
 --
 -- COMO USAR: painel do Supabase → SQL Editor → colar tudo → Run. Uma vez só.
 -- É idempotente (`IF NOT EXISTS` / `DROP POLICY IF EXISTS`), então rodar de novo
@@ -8,7 +8,7 @@
 -- -----------------------------------------------------------------------------
 -- O QUE ESTE SCHEMA É, E O QUE NÃO É
 --
--- Ele **espelha** o SQLite local (migrations 001–018), com três diferenças que
+-- Ele **espelha** o SQLite local (migrations 001-018), com três diferenças que
 -- existem por razões específicas:
 --
 -- ⚠️ Quem acrescenta uma migration que cria coluna **tem que acrescentá-la aqui
@@ -18,7 +18,7 @@
 -- com as migrations 017 e 018.
 --
 -- 1. `user_id` em toda tabela. No aparelho não existe: o banco é de uma pessoa
---    só. No servidor, é o que separa os dados de um paciente dos de outro — e é
+--    só. No servidor, é o que separa os dados de um paciente dos de outro - e é
 --    a coluna sobre a qual todo o RLS é escrito.
 --
 -- 2. Tipos reais. O SQLite guarda tudo como TEXT/INTEGER; aqui datas são
@@ -27,7 +27,7 @@
 --    calado.
 --
 -- 3. Sem as tabelas `cmed_*`. O catálogo da Anvisa é dado de referência embutido
---    no app, igual em todo aparelho — subir 7 mil linhas idênticas por usuário
+--    no app, igual em todo aparelho - subir 7 mil linhas idênticas por usuário
 --    seria replicar um dicionário, não sincronizar dado de paciente.
 --
 -- -----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 -- Toda tabela tem `user_id = auth.uid()` para SELECT, INSERT, UPDATE e DELETE.
 -- Não há exceção, não há tabela pública, não há política "somente leitura para
 -- todos". Num app que guarda dado de saúde, a única pergunta que o banco precisa
--- responder é "isto é seu?" — e a resposta é sempre a mesma coluna.
+-- responder é "isto é seu?" - e a resposta é sempre a mesma coluna.
 --
 -- `DELETE` é permitido, mas o app não o usa: exclusão é lógica (`deleted_at`),
 -- porque uma linha apagada some sem deixar recado e voltaria do servidor na
@@ -115,7 +115,7 @@ create table if not exists public.dose_schedules (
 );
 
 -- -----------------------------------------------------------------------------
--- REGISTROS DE INGESTÃO — o coração do histórico clínico
+-- REGISTROS DE INGESTÃO - o coração do histórico clínico
 -- -----------------------------------------------------------------------------
 create table if not exists public.intake_logs (
   id uuid primary key,
@@ -200,7 +200,7 @@ create table if not exists public.patient_profiles (
 );
 
 -- -----------------------------------------------------------------------------
--- CONSENTIMENTO LGPD — a prova de que houve aceite, e de qual versão
+-- CONSENTIMENTO LGPD - a prova de que houve aceite, e de qual versão
 -- -----------------------------------------------------------------------------
 create table if not exists public.consent_records (
   id uuid primary key,
@@ -232,7 +232,7 @@ create index if not exists idx_consent_records_sync on public.consent_records (u
 -- ROW LEVEL SECURITY
 --
 -- A mesma política em todas as nove tabelas. `auth.uid()` é o id do usuário
--- autenticado no token JWT — sem token, `auth.uid()` é NULL e nenhuma linha
+-- autenticado no token JWT - sem token, `auth.uid()` é NULL e nenhuma linha
 -- casa, então o banco nasce fechado.
 --
 -- `with check` no INSERT/UPDATE é o que impede alguém de gravar uma linha
@@ -288,7 +288,7 @@ end $$;
 --
 -- Sintoma de não ter rodado: o app registra
 -- `Could not find the 'X' column of 'Y' in the schema cache` e a sincronização
--- para — o dado fica no aparelho e não sobe.
+-- para - o dado fica no aparelho e não sobe.
 -- =============================================================================
 alter table public.prescriptions
   add column if not exists renewal_reminder_enabled boolean not null default true;
