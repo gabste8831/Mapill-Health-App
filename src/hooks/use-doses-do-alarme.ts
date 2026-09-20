@@ -14,58 +14,28 @@ export type DoseDoAlarme = {
   doseScheduleId: string;
   medicationId: string;
   medicationName: string;
-  /**
-   * A foto da caixa, quando existe. O alarme dispara com a pessoa recém-acordada, e **reconhecer a
-   * caixa é mais rápido que ler o nome** - ainda mais para quem toma cinco remédios de nomes
-   * parecidos.
-   */
+  /** Reconhecer a caixa e mais rapido que ler o nome, ainda mais recem-acordado. */
   photoUri: string | null;
-  /**
-   * Onde a caixa está guardada ("armário da cozinha", "na bolsa"), quando preenchido.
-   *
-   * O alarme é o único momento em que essa informação vale de verdade: quem acorda às 6h para tomar
-   * o remédio precisa saber para onde ir, e é justamente aí que ela não está à mão - o campo mora na
-   * tela de estoque, que ninguém abre no meio da noite.
-   */
+  /** O alarme e o unico momento em que saber onde a caixa esta guardada vale de verdade. */
   storageLocation: string | null;
   quantidadeFormatada: string;
   amount: number;
-  /**
-   * As orientações da lista fechada, já em texto ("Em jejum · Com bastante água").
-   *
-   * **Chegaram à tela do alarme em 14/09.** O campo era gravado no cadastro e não aparecia em tela
-   * nenhuma do app - quem marcava "em jejum" preenchia para ninguém. É aqui que ele vale, porque é
-   * aqui que a pergunta "esse era em jejum?" acontece, como o próprio tipo já dizia.
-   */
   orientacoes: string[];
   intakeNote: string | null;
-  /** Observação do paciente sobre o tratamento. Também só chegou ao alarme em 14/09. */
   notes: string | null;
   latestStatus: IntakeStatus | null;
   latestLogId: string | null;
   resolvida: boolean;
-  /**
-   * Quantas vezes este horário já foi adiado - a trava é de **um** por horário.
-   *
-   * A tela usa isto para esconder o botão de adiar quando ele não teria efeito, em vez de oferecer
-   * e recusar: é a mesma regra que governa a ação da notificação (`semAcoesRapidas`).
-   */
+  /** A trava e de um adiamento por horario; a tela esconde o botao em vez de oferecer e recusar. */
   snoozeCount: number;
 };
 
 /**
- * As doses de um horário, para a **tela de alarme** - que vive fora do roteador.
+ * As doses de um horario para a tela de alarme, que vive fora do roteador.
  *
- * ## Por que não reusa o `use-doses-do-horario`
- *
- * Os dois carregam a mesma coisa, e a duplicação incomoda. Mas aquele recarrega com
- * `useFocusEffect`, que é do `expo-router` e depende de haver uma rota em foco. Esta tela é montada
- * por `AppRegistry`, **fora da árvore de navegação** - ali não existe rota, e o `useFocusEffect`
- * quebra ou nunca dispara.
- *
- * A diferença entre "tela consultada" e "tela que irrompe" é real, e é ela que separa os dois: um
- * recarrega ao voltar ao foco, o outro por intervalo e por anúncio (ver o efeito abaixo), porque
- * aqui não há foco a que voltar.
+ * Nao reusa o `use-doses-do-horario` porque aquele recarrega com `useFocusEffect`, que depende de
+ * haver rota em foco. Esta tela e montada por `AppRegistry`, fora da arvore de navegacao: ali o
+ * `useFocusEffect` nunca dispara, e a recarga vem por intervalo e por anuncio.
  */
 export function useDosesDoAlarme(instanteIso: string) {
   const [doses, setDoses] = useState<DoseDoAlarme[]>([]);
@@ -74,16 +44,11 @@ export function useDosesDoAlarme(instanteIso: string) {
   const carregar = useCallback(async () => {
     try {
       /**
-       * A janela é o **minuto**, alinhado - e o alinhamento é o que a torna à prova de deslocamento.
+       * A janela e o minuto inteiro, alinhado.
        *
-       * As doses nascem sempre em `:00.000` (a grade é construída a partir de `HH:MM`), mas o
-       * instante que a notificação carrega pode trazer segundos: o piso do gatilho empurra o aviso
-       * de uma dose vencida para "agora + 1 s". Ancorando a busca no instante cru, a janela começava
-       * **depois** da dose que a originou, e a tela subia vazia - o defeito de 15/09.
-       *
-       * `setSeconds(0, 0)` faz a janela cobrir o minuto inteiro em que a dose está, venha o instante
-       * como vier. A correção em `planejar-avisos-de-dose` faz os dois coincidirem de novo; esta
-       * aqui é o que impede o mesmo defeito de voltar por um caminho que ninguém previu.
+       * As doses nascem em `:00.000`, mas o instante que a notificacao carrega pode trazer segundos
+       * porque o piso do gatilho empurra a dose vencida para "agora + 1s". Ancorada no instante
+       * cru, a janela comecava depois da dose que a originou e a tela subia vazia.
        */
       const inicio = new Date(instanteIso);
       inicio.setSeconds(0, 0);
@@ -137,32 +102,17 @@ export function useDosesDoAlarme(instanteIso: string) {
   }, [instanteIso]);
 
   /**
-   * Carrega ao montar **e a cada poucos segundos enquanto o alarme está na tela**.
+   * Carrega ao montar e a cada tres segundos enquanto o alarme esta na tela.
    *
-   * A tela não recarrega por foco (não há rota a que voltar), mas ela fica aberta tocando enquanto
-   * a pessoa decide - e nesse intervalo a dose pode ser resolvida em outro lugar: pelo botão da
-   * notificação, que continua na bandeja, ou pela Home em outro aparelho depois de sincronizar.
-   *
-   * Sem revalidar, a tela seguia mostrando a dose como pendente e oferecendo "Tomei" para o que já
-   * fora confirmado - e o alarme continuava tocando depois de respondido, que é o oposto do que ele
-   * promete.
-   *
-   * Três segundos: rápido o bastante para o alarme sumir logo após a confirmação, e uma consulta
-   * local a cada três segundos não pesa numa tela que vive minutos, não horas.
+   * A dose pode ser resolvida em outro lugar enquanto o alarme toca: pelo botao da notificacao, ou
+   * pela Home em outro aparelho. Sem revalidar, a tela seguia oferecendo "Tomei" para o que ja
+   * fora confirmado, com o alarme tocando depois de respondido.
    */
   useEffect(() => {
     void carregar();
     const intervalo = setInterval(() => void carregar(), 3_000);
-    /**
-     * O anúncio fecha a janela que o intervalo deixa aberta.
-     *
-     * Confirmar a dose pela tela do horário - aberta pelo corpo da notificação, enquanto o alarme
-     * toca - resolvia o registro, mas o som continuava até a próxima revalidação. Alguns segundos
-     * de alarme depois de respondido leem como defeito, e é o que o teste em aparelho apontou.
-     *
-     * O intervalo fica como rede: se o anúncio se perder (esta tela montou depois da gravação),
-     * a revalidação ainda corrige.
-     */
+    // O anuncio fecha a janela que o intervalo deixa aberta; o intervalo fica como rede para o caso
+    // de esta tela ter montado depois da gravacao.
     const pararDeOuvir = ouvirDosesResolvidas(() => void carregar());
     return () => {
       clearInterval(intervalo);
