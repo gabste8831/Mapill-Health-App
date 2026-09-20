@@ -20,30 +20,15 @@ export const surfaceShadowElevada = "0px 2px 8px rgba(25, 28, 30, 0.10)";
 export const surfaceShadowFlutuante = "0px 4px 8px rgba(25, 28, 30, 0.20)";
 
 /**
- * O par **sombra ou contorno**, para qualquer superfície que não seja o cartão inteiro.
+ * O par sombra ou contorno, para superficie que nao e o cartao inteiro.
  *
- * `superficieDeCartao` já resolvia isso para o cartão, mas ele traz junto `borderRadius`, `padding`
- * e cor de fundo - o que serve ao cartão e atrapalha a pílula da busca, um botão de contorno ou
- * uma linha de menu, que têm forma própria. Este devolve **só** a fronteira, e é o que permite a
- * mesma regra alcançar tudo o mais.
+ * A regra do app e sombra e nunca borda, e ela pressupoe enxergar 8% de opacidade. Quem escolheu
+ * alto contraste nao enxerga: ali a sombra nao e discricao, e a fronteira apagada, e um campo de
+ * busca vira faixa branca sobre fundo branco.
  *
- * ## Por que a fronteira é a linguagem do alto contraste
- *
- * A regra do app é sombra e nunca borda (21/08), e ela pressupõe enxergar 8% de opacidade. Quem
- * escolheu alto contraste não enxerga: ali a sombra não é discrição, é a fronteira **apagada**. Um
- * campo de busca sem contorno vira uma faixa branca sobre fundo branco, e nada diz onde tocar.
- *
- * `intensidade` existe porque nem toda superfície pede a mesma ênfase, e ela muda **as duas coisas**
- * - espessura e tom:
- *
- * - `1` é a fronteira que apenas delimita: 1px em `outlineVariant`, para o que já tem fundo próprio
- *   ou forma reconhecível (o cartão, a pílula da busca). 4.31:1 sobre a superfície tingida do alto
- *   contraste, folgado nos 3:1 que a WCAG pede de elemento gráfico.
- * - `2` é a fronteira que **chama**: 2px em `outline`, para o que precisa ser encontrado de relance
- *   e não tem outra pista de que é tocável - o botão de contorno, que sem ela é texto sobre branco.
- *
- * Somar as duas ênfases onde uma basta engorda a peça a ponto de ela pesar mais que o conteúdo: foi
- * o que aconteceu com a busca em 2px, que passou a disputar atenção com a lista que ela filtra.
+ * `intensidade` muda espessura e tom: `1` apenas delimita o que ja tem forma reconhecivel, `2`
+ * chama o que precisa ser encontrado de relance e nao tem outra pista de que e tocavel. Somar as
+ * duas onde uma basta faz a peca pesar mais que o conteudo.
  */
 export function fronteiraDeSuperficie(
   cores: PaletaDeTema,
@@ -57,16 +42,12 @@ export function fronteiraDeSuperficie(
 }
 
 /**
- * O cartão padrão do app: fundo branco, cantos arredondados, sombra e respiro interno.
+ * O cartao padrao do app: fundo, cantos, sombra e respiro interno.
  *
- * Existe como token, e não como cópia em cada arquivo de estilo, porque foi exatamente a cópia que
- * fez as telas divergirem - sete lugares desenhavam o próprio cartão com borda cinza enquanto o
- * `Card` do kit já usava sombra. Espalhar (`...surfaceCard`) mantém a decisão num lugar só.
+ * Token e nao copia em cada folha, porque foi a copia que fez sete telas divergirem, desenhando o
+ * proprio cartao com borda cinza enquanto o `Card` do kit ja usava sombra.
  *
- * O `padding` é `gutter` (24) e não `md` (16): é o respiro que separa um cartão que se lê de um
- * cartão que se aperta, e a diferença aparece mais em lista, onde vários se sucedem.
- *
- * Reativa ao tema: no alto contraste a sombra é invisível, então o contorno assume o papel dela.
+ * Reativa ao tema: no alto contraste a sombra e invisivel, e o contorno assume o papel dela.
  */
 export function superficieDeCartao(cores: PaletaDeTema, ajustes?: AjustesDeTema) {
   return {
@@ -80,11 +61,10 @@ export function superficieDeCartao(cores: PaletaDeTema, ajustes?: AjustesDeTema)
 }
 
 /**
- * A versão estática, para os arquivos que ainda não foram migrados para temas.
+ * A versao estatica, para o que ainda nao foi migrado para temas.
  *
- * Ela lê a paleta padrão uma vez, na importação - ou seja, **não responde a troca de tema**. É o
- * andaime da migração gradual: enquanto uma tela ainda a usa, ela funciona no tema padrão em vez
- * de quebrar. `node scripts/tema-pendente.mjs` lista quem ainda depende disto.
+ * Le a paleta uma vez na importacao, entao nao responde a troca de tema. `node
+ * scripts/tema-pendente.mjs` lista quem ainda depende disto.
  */
 export const surfaceCard = superficieDeCartao(colors);
 

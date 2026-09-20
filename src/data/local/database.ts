@@ -10,32 +10,15 @@ let migrationsReady: Promise<void> | null = null;
 /**
  * O que o banco precisa saber antes da primeira escrita.
  *
- * ## `journal_mode = WAL`
+ * `WAL` porque no modo padrao o SQLite permite um escritor por vez e recusa o segundo na hora, com
+ * `database is locked`. Ele separa leitura de escrita, e o banco aguenta concorrencia real.
  *
- * No modo padrão (`DELETE`), o SQLite permite **um escritor por vez** e recusa o segundo na hora,
- * com `database is locked`. O WAL separa leitura de escrita: leitores não bloqueiam o escritor, e o
- * banco aguenta concorrência real em vez de recusá-la.
+ * `busy_timeout` porque mesmo com WAL duas escritas ainda disputam, e sem ele a segunda falha em
+ * vez de esperar. Quinze segundos e nao cinco: a importacao do catalogo e uma transacao unica de
+ * ~21 mil insercoes, e num aparelho lento ela passa de cinco.
  *
- * ## `busy_timeout = 15000`
- *
- * Mesmo com WAL, duas **escritas** simultâneas ainda disputam. Sem timeout o SQLite falha
- * imediatamente; com ele, a segunda espera pela primeira em vez de desistir.
- *
- * Quinze segundos, e não cinco: a importação do catálogo é uma transação única de ~21 mil
- * inserções, e num aparelho lento ela passa de cinco. Esperar mais é sempre melhor que falhar -
- * quem espera termina a operação, quem falha perde o dado.
- *
- * ## Por que isto apareceu só agora
- *
- * O catálogo da CMED (21 mil inserções) roda em segundo plano na primeira abertura, de propósito -
- * ele não pode ficar entre a pessoa e a Home. Enquanto ele escrevia, nada mais tentava escrever ao
- * mesmo tempo. Isso mudou quando a **sincronização passou a rodar no login** (06/09): as duas
- * caíram no mesmo instante, e três erros apareceram de uma vez - a importação da CMED, o push e o
- * pull, todos com `database is locked`.
- *
- * O defeito era latente desde sempre: qualquer usuário que tocasse "Entrar com o Google" durante a
- * primeira importação encontraria o mesmo, e a única razão de nunca ter aparecido é que ninguém
- * tinha feito exatamente isso.
+ * O caso que junta os dois e a sincronizacao no login caindo junto com a importacao da CMED, que
+ * roda em segundo plano na primeira abertura.
  */
 const PRAGMAS_DE_ABERTURA = `
 PRAGMA journal_mode = WAL;
@@ -46,10 +29,8 @@ PRAGMA busy_timeout = 15000;
 export function getDatabase(): SQLite.SQLiteDatabase {
   if (!database) {
     database = SQLite.openDatabaseSync(DATABASE_NAME);
-    /**
-     * Síncrono, e na mesma função que abre: os PRAGMAs precisam valer para **toda** consulta, e
-     * qualquer coisa assíncrona aqui abriria uma janela em que a primeira escrita chega antes deles.
-     */
+    // Sincrono e na mesma funcao que abre: assincrono abriria uma janela em que a primeira escrita
+    // chega antes dos PRAGMAs.
     database.execSync(PRAGMAS_DE_ABERTURA);
   }
   return database;
@@ -64,13 +45,11 @@ export function initializeDatabase(): Promise<void> {
 }
 
 /**
- * A preparação inteira da abertura - migrations e o que mais precisa estar pronto antes da tela.
+ * A preparacao inteira da abertura: migrations e o que mais precisa estar pronto antes da tela.
  *
- * Memoizada como um todo, e não só nas partes: `initializeDatabase()` já era, mas o `.then()` que
- * a segue não. Em desenvolvimento o React monta o efeito duas vezes, e a segunda montagem recebia
- * a promessa das migrations já cumprida e seguia direto para o `.then()` - duas preparações
- * correndo juntas, escrevendo no mesmo banco. Memoizar aqui faz a segunda montagem esperar pela
- * primeira em vez de repeti-la.
+ * Memoizada como um todo, e nao so nas partes. Em desenvolvimento o React monta o efeito duas
+ * vezes, e a segunda montagem recebia as migrations ja cumpridas e seguia direto para o `.then()`:
+ * duas preparacoes correndo juntas, escrevendo no mesmo banco.
  */
 let preparacaoDaAbertura: Promise<void> | null = null;
 
@@ -82,26 +61,14 @@ export function prepararBanco(depoisDasMigrations: () => Promise<void>): Promise
 }
 
 /**
- * Roda várias escritas como uma só: ou todas valem, ou nenhuma vale.
+ * Roda varias escritas como uma so: ou todas valem, ou nenhuma vale.
  *
- * ## Onde usar, e onde não
+ * So quando varias escritas precisam existir juntas, como o cadastro de um medicamento. Escrita
+ * avulsa nao entra: o SQLite ja a executa atomicamente, e embrulha-la nao acrescenta garantia.
  *
- * Só quando **várias** escritas precisam existir juntas - o cadastro de um medicamento, que grava
- * remédio, tratamento, estoque e um horário por dose; a baixa de estoque, que insere o ajuste e
- * atualiza a quantidade. Escrita avulsa **não** entra aqui: o SQLite já a executa atomicamente, e
- * embrulhá-la em `BEGIN`/`COMMIT` não acrescenta garantia nenhuma.
- *
- * Essa distinção não é preciosismo. Toda operação do expo-sqlite - leitura inclusive - é um
- * statement preparado, executado e finalizado (`prepareAsync` → `executeAsync` → `finalizeAsync`),
- * e o app dispara operações em paralelo em vários pontos: a Home faz cinco leituras de uma vez, o
- * reagendamento de avisos faz três. Cada transação aberta é uma janela em que esses statements
- * podem esbarrar na trava, e o erro sai como
- * `NativeStatement.finalizeAsync ... database is locked`.
- *
- * Uma tentativa anterior transformou **toda** escrita do app em transação, na esperança de
- * serializar tudo. O efeito foi o oposto: numa base com dados, a sincronização passou a abrir
- * centenas de transações enquanto a pessoa usava o app, e confirmar uma dose falhava a cada toque.
- * Menos transações é mais seguro que mais, e é por isso que esta função tem uso restrito.
+ * A distincao importa porque cada transacao aberta e uma janela em que os statements paralelos do
+ * app esbarram na trava. Transformar toda escrita em transacao ja foi tentado, e o efeito foi o
+ * oposto: a sincronizacao abria centenas delas e confirmar uma dose falhava a cada toque.
  */
 export async function escreverEmTransacao<T>(
   executar: (database: SQLite.SQLiteDatabase) => Promise<T>,
