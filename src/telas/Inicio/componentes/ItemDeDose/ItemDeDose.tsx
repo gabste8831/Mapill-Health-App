@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
   Easing,
@@ -86,6 +86,46 @@ export function ItemDeDose({
   }, [opacidade, resolvida, semMovimento]);
 
   const estiloAnimado = useAnimatedStyle(() => ({ opacity: opacidade.value }));
+
+  /**
+   * Os botões só **entram** quando a dose acaba de se tornar acionável — nunca quando ela já
+   * estava assim e a linha apenas re-renderizou.
+   *
+   * `FadeIn` parte de `opacity: 0`. Se um re-render reapresenta esse nó ao Reanimated no meio da
+   * animação, ele pode ficar preso no valor inicial, e aí "Pular" e "Confirmar" somem de uma linha
+   * que continua ali — os dois alvos mais tocados do app, invisíveis. Foi o mesmo mecanismo que
+   * esvaziava os cartões da Home (ver `entradaDaLinha` em `InicioScreen`), e aqui o gatilho é o
+   * mesmo: trocar o esquema de cores em Ajustes recria o tema inteiro e re-renderiza a tela toda.
+   *
+   * A distinção importa porque a animação **tem** um motivo legítimo: uma dose vira "É AGORA"
+   * sozinha, pelo relógio, e sem transição os botões brotariam no meio de uma linha quieta. Esse
+   * caso é o único em que `acionavel` passa de falso para verdadeiro com a linha já montada.
+   *
+   * Em **estado**, e não em ref: o valor decide o que é renderizado, e ler `.current` durante o
+   * render é justamente o que o compilador proíbe.
+   *
+   * O estado guarda a **decisão**, e não o valor anterior. Guardar o anterior e comparar no render
+   * não funcionaria aqui: o `set` durante o render faz o React repetir o render antes de pintar, e
+   * na repetição o anterior já é igual ao atual — a animação legítima seria descartada no mesmo
+   * quadro em que nasceu. Com a decisão guardada, ela sobrevive ao re-render e chega à tela.
+   *
+   * Montada já acionável (o caso comum: a Home abre com uma dose de agora), nasce `false` e não
+   * anima, que é o certo — ali os botões não "chegaram", eles sempre estiveram lá.
+   */
+  const [acabouDeFicarAcionavel, setAcabouDeFicarAcionavel] = useState(false);
+  /**
+   * O valor do render anterior. Começa igual ao atual porque **montar não é "acabar de ficar"**:
+   * a linha que nasce acionável já mostra os botões desde o primeiro quadro, e ali eles não
+   * chegaram — sempre estiveram lá.
+   */
+  const [acionavelAntes, setAcionavelAntes] = useState(acionavel);
+  if (acionavelAntes !== acionavel) {
+    setAcionavelAntes(acionavel);
+    // Só a subida anima. Na descida (a dose foi respondida) os botões saem, e não há entrada a
+    // encenar — mas a decisão precisa voltar a `false`, senão a próxima subida encontraria a
+    // marca já levantada e não animaria.
+    setAcabouDeFicarAcionavel(acionavel);
+  }
 
   /**
    * Sem agrupar, o TalkBack para quatro vezes na linha e anuncia o estado antes do nome do remédio.
@@ -181,7 +221,11 @@ export function ItemDeDose({
          */
         <Animated.View
           style={styles.actions}
-          entering={semMovimento ? undefined : FadeIn.duration(ACOMODAR_MS)}>
+          entering={
+            semMovimento || !acabouDeFicarAcionavel
+              ? undefined
+              : FadeIn.duration(ACOMODAR_MS)
+          }>
           {/* "Pular" à esquerda e "Confirmar" à direita: o destrutivo-ish primeiro e a ação
               esperada no canto onde o polegar chega — a mesma ordem de Cancelar/OK que o sistema
               usa, e que a mão já conhece sem precisar ler. */}

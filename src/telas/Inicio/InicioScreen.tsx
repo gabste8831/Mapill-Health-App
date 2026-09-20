@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -112,6 +112,56 @@ export function InicioScreen() {
   const progresso = total === 0 ? 0 : agenda.resolvidas / total;
 
   const semMovimento = useReducedMotion();
+
+  /**
+   * A cascata de entrada roda **uma vez**, na primeira montagem da tela — e nunca mais.
+   *
+   * ## O card que sumia
+   *
+   * `entering` não é um estilo, é uma animação que começa com o nó **invisível** (`FadeInDown`
+   * parte de `opacity: 0`) e o traz até o opaco. Enquanto ela vale, qualquer re-render da Home
+   * reapresenta os nós ao Reanimated, e a animação recomeça do zero. Se um segundo re-render chega
+   * no meio do primeiro — que é exatamente o que uma troca de tema provoca —, o nó fica preso no
+   * valor inicial: **opacidade 0**. O cartão continua lá, com a sombra e o tamanho certos, e o
+   * conteúdo não aparece. É o "card todo em branco" — e ele é intermitente porque depende de os
+   * dois renders caírem dentro dos 260ms da animação.
+   *
+   * Trocar o esquema de cores em Ajustes é o gatilho mais confiável porque `tema` é recriado
+   * inteiro a cada escolha de par (ver `tema-contexto.tsx`): todo `useEstilos` do app recalcula, e
+   * a Home inteira re-renderiza de uma vez, com os `Animated.View` no meio.
+   *
+   * ## Por que congelar, e não ajustar a animação
+   *
+   * A entrada existe para o momento em que a lista **chega**: ela dá ao olho a ordem de leitura de
+   * cima para baixo na primeira vez que a tela se monta. Reanimá-la porque uma cor mudou não é o
+   * que ela promete — a lista já estava na tela, e vê-la piscar e subir de novo a cada ajuste lê
+   * como a tela tendo recarregado sozinha. Congelar depois do primeiro quadro preserva o efeito
+   * onde ele informa e o remove de onde ele só podia atrapalhar.
+   *
+   * Estado, e não `useRef`: o valor **decide o que é renderizado** (se o `entering` existe ou
+   * não), e é exatamente isso que um ref não pode fazer — ler `.current` durante o render é o que
+   * a regra `react-hooks/refs` proíbe, porque o React não tem como saber que precisa repintar
+   * quando ele muda.
+   */
+  const [podeAnimarEntrada, setPodeAnimarEntrada] = useState(true);
+  useEffect(() => {
+    // Depois do primeiro quadro pintado, a tela "chegou". O que vier daqui em diante é
+    // atualização, e atualização não reencena a entrada.
+    const quadro = requestAnimationFrame(() => setPodeAnimarEntrada(false));
+    return () => cancelAnimationFrame(quadro);
+  }, []);
+
+  /**
+   * O `entering` de uma linha da agenda, já considerando as duas razões de não animar: a
+   * preferência de movimento reduzido do sistema e a entrada que já aconteceu.
+   *
+   * Centralizado porque são sete chamadas espalhadas pela tela, e uma que esquecesse a segunda
+   * condição traria o card em branco de volta só naquele bloco.
+   */
+  function entradaDaLinha(indice: number) {
+    if (semMovimento || !podeAnimarEntrada) return undefined;
+    return entradaEscalonada(indice);
+  }
 
   /**
    * O `SuccessOverlay` do dia fechado — a pausa que celebra **algo que de fato terminou**.
@@ -516,7 +566,7 @@ export function InicioScreen() {
             {atrasadas.map((dose, indice) => (
               <Animated.View
                 key={dose.doseScheduleId}
-                entering={semMovimento ? undefined : entradaEscalonada(indice)}>
+                entering={entradaDaLinha(indice)}>
                 <ItemDeDose
                   time={dose.time}
                   medicationName={dose.medicationName}
@@ -564,7 +614,7 @@ export function InicioScreen() {
                  * blocos visuais distintos, mas uma sequência só descendo a tela. Reiniciar o atraso
                  * no zero faria a segunda lista brotar junto com o meio da primeira.
                  */
-                entering={semMovimento ? undefined : entradaEscalonada(atrasadas.length + indice)}>
+                entering={entradaDaLinha(atrasadas.length + indice)}>
                 <ItemDeDose
                   time={dose.time}
                   medicationName={dose.medicationName}
@@ -594,11 +644,7 @@ export function InicioScreen() {
 
                 Mesma forma da agenda do Calendário, onde o enxugamento já tinha funcionado. */}
             <Animated.View
-              entering={
-                semMovimento
-                  ? undefined
-                  : entradaEscalonada(atrasadas.length + pendentesDeHoje.length)
-              }>
+              entering={entradaDaLinha(atrasadas.length + pendentesDeHoje.length)}>
               <ListaDeDosesRegistradas
                 doses={registradasDeHoje.map((dose) => ({
                   doseScheduleId: dose.doseScheduleId,
@@ -639,17 +685,13 @@ export function InicioScreen() {
                  * A cascata continua de onde a agenda parou: as três listas são blocos distintos,
                  * mas uma sequência só descendo a tela.
                  */
-                entering={
-                  semMovimento
-                    ? undefined
-                    : entradaEscalonada(
-                        atrasadas.length +
-                          pendentesDeHoje.length +
-                          // As registradas entram como **um** bloco, não uma por uma.
-                          (registradasDeHoje.length > 0 ? 1 : 0) +
-                          indice,
-                      )
-                }>
+                entering={entradaDaLinha(
+                  atrasadas.length +
+                    pendentesDeHoje.length +
+                    // As registradas entram como **um** bloco, não uma por uma.
+                    (registradasDeHoje.length > 0 ? 1 : 0) +
+                    indice,
+                )}>
                 {/* O **mesmo** card de "Se aproximando", com `emDias={0}`.
                     Eram dois desenhos para a mesma coisa na mesma tela, a um scroll de distância um
                     do outro. O card já tratava o caso de hoje (barra e bloco de data em verde), e
@@ -693,17 +735,13 @@ export function InicioScreen() {
             {compromissosProximos.map(({ compromisso, emDias }, indice) => (
               <Animated.View
                 key={compromisso.id}
-                entering={
-                  semMovimento
-                    ? undefined
-                    : entradaEscalonada(
-                        atrasadas.length +
-                          pendentesDeHoje.length +
-                          (registradasDeHoje.length > 0 ? 1 : 0) +
-                          compromissosDeHoje.length +
-                          indice,
-                      )
-                }>
+                entering={entradaDaLinha(
+                  atrasadas.length +
+                    pendentesDeHoje.length +
+                    (registradasDeHoje.length > 0 ? 1 : 0) +
+                    compromissosDeHoje.length +
+                    indice,
+                )}>
                 <CardCompromissoProximo
                   quando={new Date(compromisso.scheduledFor)}
                   title={compromisso.title}
