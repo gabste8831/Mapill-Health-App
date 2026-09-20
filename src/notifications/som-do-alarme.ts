@@ -5,52 +5,35 @@ import { Platform } from "react-native";
 const SOM_DO_ALARME = require("../../assets/sounds/alarme_de_dose.wav");
 
 /**
- * Quem toca o som do alarme - **o app, e não o sistema**.
+ * Quem toca o som do alarme: o app, e nao o sistema.
  *
- * ## Por que existe
+ * Pelo canal da notificacao havia dois defeitos que sao o mesmo. O volume errado, porque o
+ * `AudioAttributes` do canal pede `USAGE_ALARM` e o Android trata como dica, nao ordem; e o
+ * silencio com o celular em uso, em que ele rebaixa a tela cheia e nao toca nada, com o canal
+ * sonoro e os volumes altos.
  *
- * O som vinha do canal da notificação, tocado pelo NotificationManager. Isso trouxe dois defeitos
- * que são o mesmo defeito:
- *
- * - **O volume errado.** O `AudioAttributes` do canal pede `USAGE_ALARM` e o Android ignora - ali o
- *   atributo é dica, não ordem. Duas builds foram gastas provando isso, e a issue #297 do Notifee,
- *   pedindo exatamente isto, foi fechada como *not planned*.
- * - **O silêncio com o celular em uso.** Testado em 14/09: com o aparelho destravado o Android
- *   rebaixa a tela cheia para heads-up e **não toca som nenhum**, com o canal sonoro e todos os
- *   volumes altos. Sem causa documentada, e sem conserto pelo lado do canal.
- *
- * Tocando daqui, os dois somem de uma vez: o stream é escolha do app (ver
- * `plugins/som-do-alarme-em-despertador.js`), e o disparo não depende de o Android decidir tocar.
- *
- * ## Por que dentro de um foreground service
- *
- * Porque a tela do alarme **nem sempre monta**: com o celular em uso o Android rebaixa o full-screen
- * intent, e com o app fechado não há processo para navegar. Um player preso ao ciclo de vida de uma
- * tela emudeceria exatamente nos casos em que o alarme mais importa.
- *
- * O serviço é o que os [requisitos do Play para apps de
- * alarme](https://support.google.com/googleplay/android-developer/answer/13392821) descrevem, e o
- * que mantém o processo vivo enquanto o som toca.
+ * Dentro de um foreground service porque a tela do alarme nem sempre monta, e um player preso ao
+ * ciclo de vida dela emudeceria nos casos em que o alarme mais importa. E o que os requisitos do
+ * Play para apps de alarme descrevem.
  */
 
-/** O player em curso. Fora de componente: quem o para pode ser um handler de segundo plano. */
+/** Fora de componente: quem o para pode ser um handler de segundo plano. */
 let tocando: AudioPlayer | null = null;
 
 /**
- * Rede de segurança do loop, igual à que a tela do alarme já tinha.
+ * Rede de seguranca do loop.
  *
- * `loop` é resolvido do lado nativo e funciona. Mas um alarme de medicação não pode depender de uma
- * garantia só: se o sistema pausar o player - foco de áudio disputado com outro app -, o alarme
- * emudece sem sinal nenhum, e a pessoa continua dormindo.
+ * `loop` e resolvido do lado nativo e funciona, mas um alarme de medicacao nao pode depender de uma
+ * garantia so: com o foco de audio disputado por outro app, o player pausa sem sinal nenhum e a
+ * pessoa continua dormindo.
  */
 let vigia: ReturnType<typeof setInterval> | null = null;
 
 /**
- * Começa a tocar. Idempotente: chamar de novo com o som já tocando não cria um segundo player.
+ * Comeca a tocar. Idempotente.
  *
- * A idempotência importa porque há dois caminhos que podem pedir o som - o serviço, quando a
- * notificação é entregue, e a tela do alarme, quando ela monta. Dois players tocando o mesmo arquivo
- * é o som duplicado relatado em 10/09.
+ * Dois caminhos pedem o som: o servico, quando a notificacao e entregue, e a tela, quando ela
+ * monta. Sem isto, dois players tocando o mesmo arquivo.
  */
 export function comecarASoar(): void {
   if (Platform.OS !== "android" || tocando !== null) return;
@@ -68,10 +51,8 @@ export function comecarASoar(): void {
 /**
  * Para o som e libera o recurso nativo.
  *
- * **Chamado de todo caminho que resolve o alarme** - os botões da tela, o toque na notificação, a
- * dose respondida em outro lugar. Som que sobrevive à resposta é o defeito que faz desinstalar o
- * app, e aqui ele é mais fácil de produzir que antes: o som deixou de morrer junto com a
- * notificação, então parar virou responsabilidade nossa.
+ * Chamado de todo caminho que resolve o alarme. O som nao morre junto com a notificacao, entao
+ * para-lo e responsabilidade do app, e som que sobrevive a resposta faz desinstalar.
  */
 export function pararDeSoar(): void {
   if (vigia !== null) {
@@ -99,13 +80,8 @@ export function registrarServicoDeSom(): void {
     return new Promise<void>((resolve) => {
       comecarASoar();
 
-      /**
-       * Enquanto o som toca, o serviço vive. A promessa resolve quando ele para.
-       *
-       * Checar por intervalo em vez de expor um `resolve` para fora é deliberado: o `runner` pode
-       * ser chamado mais de uma vez pelo Android, e guardar um `resolve` global faria a segunda
-       * chamada encerrar a primeira. Aqui cada execução observa o próprio estado.
-       */
+      // Por intervalo, e nao expondo um `resolve` para fora: o `runner` pode ser chamado mais de
+      // uma vez pelo Android, e um `resolve` global faria a segunda chamada encerrar a primeira.
       const aguardar = setInterval(() => {
         if (tocando === null) {
           clearInterval(aguardar);

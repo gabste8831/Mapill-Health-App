@@ -2,24 +2,14 @@ import type { PosologyUnit } from "./medication";
 import type { SyncableEntity } from "./syncable";
 
 /**
- * Livre por prescrição, não global - cada tratamento tem sua própria criticidade
- * (ex: insulina pede alarme, suplemento de rotina pode ser só notificação ou nada).
+ * Livre por prescricao, e nao global: insulina pede alarme, suplemento de rotina talvez nada.
  *
- * ## `both` está aposentado
+ * `both` esta aposentado. Ele emitia alarme e notificacao para o mesmo horario, e o problema nao
+ * era emitir os dois, era mante-los consistentes: a dose confirmada pela notificacao era descontada
+ * de novo pelo alarme, que seguia aberto com a lista de antes.
  *
- * Ele emitia um alarme **e** uma notificação para o mesmo horário. A escolha saiu da tela em 05/09:
- * o problema nunca foi emitir os dois, e sim mantê-los consistentes - dois avisos vivos, cada um
- * com botão de confirmar, e a mesma dose podendo ser respondida por qualquer um. O teste em
- * aparelho mostrou o preço: a dose confirmada pela notificação era descontada **de novo** pelo
- * alarme, que seguia aberto com a lista de antes.
- *
- * A redundância que ele prometia já existe sem ele: o alarme é criado com `ongoing: true`, então
- * fica na bandeja depois de tocar. O que `both` acrescentava era um segundo aviso, não a
- * permanência - e cada caminho a mais para confirmar a mesma dose é um caminho a mais para divergir.
- *
- * O valor continua no tipo porque pode estar gravado em tratamentos salvos antes da remoção;
- * `planejar-avisos-de-dose` o lê como `alarm`, que é o modo mais forte e o que aquela escolha
- * buscava.
+ * Continua no tipo porque pode estar gravado em tratamentos antigos; `planejar-avisos-de-dose` o le
+ * como `alarm`, que e o modo mais forte e o que aquela escolha buscava.
  */
 export type ReminderMode = "alarm" | "notification" | "both" | "none";
 
@@ -27,12 +17,10 @@ export type ReminderMode = "alarm" | "notification" | "both" | "none";
 export type TimeOfDay = string;
 
 /**
- * Uma dose a cada duas horas já é o limite do que uma pessoa acordada consegue cumprir - acima
- * disso o cadastro descreveria uma rotina que ninguém executa.
+ * Uma dose a cada duas horas ja e o limite do que uma pessoa acordada cumpre.
  *
- * Quem pensa a posologia por intervalo ("de 8 em 8 horas") continua atendido: o seletor de
- * horários converte o intervalo nos horários equivalentes, sem que exista uma frequência separada
- * levando ao mesmo agendamento.
+ * Quem pensa por intervalo ("de 8 em 8 horas") continua atendido: o seletor converte o intervalo
+ * nos horarios equivalentes, sem uma frequencia separada levando ao mesmo agendamento.
  */
 export const MAX_DOSES_PER_DAY = 12;
 
@@ -43,12 +31,11 @@ export const COMMON_DOSES_PER_DAY = 4;
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 /**
- * Um horário do dia e quanto se toma nele.
+ * Um horario do dia e quanto se toma nele.
  *
- * `amount: null` = "o mesmo de sempre", isto é, o `doseAmount` da prescrição. Existe porque a
- * esmagadora maioria dos tratamentos tem dose uniforme, e repetir o mesmo número em cada horário
- * criaria três lugares onde a verdade pode divergir. Preenchido, ele vale só para este horário -
- * é o que permite insulina 10 UI de manhã e 8 UI à noite num cadastro só.
+ * `amount: null` e "o mesmo de sempre", o `doseAmount` da prescricao: repetir o numero em cada
+ * horario criaria varios lugares onde a verdade pode divergir. Preenchido, vale so para este
+ * horario, e e o que permite insulina 10 UI de manha e 8 UI a noite num cadastro so.
  */
 export type ScheduledDose = {
   at: TimeOfDay;
@@ -58,11 +45,9 @@ export type ScheduledDose = {
 /**
  * As quatro formas de posologia que o app aceita.
  *
- * Todas as três que agendam respondem à mesma pergunta - **em quais dias** -, e os horários do
- * dia são um eixo separado, comum às três. Foi essa separação que eliminou "a cada X horas":
- * ela misturava os dois eixos, e como todo intervalo oferecido dividia o dia por igual, produzia
- * exatamente o mesmo resultado que `daily` com os horários equivalentes. Dois caminhos para o
- * mesmo destino é dúvida na hora de escolher, e nada além disso.
+ * As tres que agendam respondem a mesma pergunta, em quais dias, e os horarios sao um eixo
+ * separado. Foi essa separacao que eliminou "a cada X horas", que misturava os dois e produzia o
+ * mesmo resultado que `daily` com os horarios equivalentes.
  */
 export type PosologySchedule =
   /** Todo dia, nos mesmos horários. Ex: 08:00 e 20:00. */
@@ -70,16 +55,16 @@ export type PosologySchedule =
   /** Só em certos dias da semana. Ex: segunda e quinta às 09:00. */
   | { kind: "weekly"; weekdays: Weekday[]; doses: ScheduledDose[] }
   /**
-   * Repete a cada `cycleLengthDays`, tomando nos `activeDays` primeiros. Um mecanismo só para
-   * três coisas que as pessoas dizem de jeitos diferentes: cartela de anticoncepcional (28 e 21),
-   * dia sim dia não (2 e 1) e injeção "de 30 em 30 dias" (30 e 1).
+   * Repete a cada `cycleLengthDays`, tomando nos `activeDays` primeiros.
    *
-   * `cycleStartDate` é o primeiro dia do ciclo atual, e não o dia do cadastro - quem cadastra no
-   * quinto dia da cartela receberia a pausa cinco dias atrasada, sem nada na tela denunciando.
+   * Um mecanismo so para tres coisas que as pessoas dizem diferente: cartela de anticoncepcional,
+   * dia sim dia nao, e injecao de 30 em 30 dias.
    *
-   * Contado em dias, o ciclo escorrega no calendário: "a cada 30 dias" a partir de 25/01 cai em
-   * 24/02. É o preço de não ter uma frequência mensal separada - e o que se ganha é não ter duas
-   * opções que respondem à mesma pergunta.
+   * `cycleStartDate` e o primeiro dia do ciclo atual, e nao o do cadastro: quem cadastra no quinto
+   * dia da cartela receberia a pausa cinco dias atrasada, sem nada denunciando.
+   *
+   * Contado em dias, o ciclo escorrega no calendario. E o preco de nao ter uma frequencia mensal
+   * separada respondendo a mesma pergunta.
    */
   | {
       kind: "cycle";
