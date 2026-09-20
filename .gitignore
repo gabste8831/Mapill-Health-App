@@ -63,3 +63,6 @@ docs/logcat-*.txt
 # Artefatos de build local e logs de investigacao.
 .claude-scratch/
 modules/*/android/build/
+
+# APKs compilados localmente para teste em aparelho
+/builds
