@@ -7,7 +7,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    *
    * Antes, três telas desenhavam o próprio: a Home num cartão branco, Medicações e Estoque em
    * texto solto sobre o fundo. Lado a lado, o vazio da Home parecia um bloco de conteúdo e o das
-   * outras parecia a tela não ter carregado — a mesma situação dizendo duas coisas diferentes.
+   * outras parecia a tela não ter carregado - a mesma situação dizendo duas coisas diferentes.
    */
   container: {
     ...superficieDeCartao(cores, ajustes),

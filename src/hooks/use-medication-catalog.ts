@@ -12,7 +12,7 @@ const temCatalogo = Platform.OS !== "web";
  *
  * Quatro, e não seis: a lista abre logo abaixo do campo, com o teclado ocupando a metade de baixo
  * da tela. Seis linhas cobriam o próprio campo que estava sendo digitado, e a escolha entre tantos
- * nomes parecidos — a CMED lista dezenas de variações do mesmo remédio — atrapalhava mais do que
+ * nomes parecidos - a CMED lista dezenas de variações do mesmo remédio - atrapalhava mais do que
  * ajudava. Quem não encontra nas quatro primeiras continua digitando, que é o caminho normal.
  */
 const MAX_SUGESTOES = 4;
@@ -20,7 +20,7 @@ const MAX_SUGESTOES = 4;
 /**
  * Espera entre a última tecla e a consulta.
  *
- * Sem isso, digitar "losartana" dispararia nove buscas — as oito primeiras jogadas fora. 250 ms é
+ * Sem isso, digitar "losartana" dispararia nove buscas - as oito primeiras jogadas fora. 250 ms é
  * abaixo do que se percebe como lentidão e acima do intervalo entre teclas de quem digita rápido.
  */
 const ESPERA_EM_MS = 250;
@@ -30,7 +30,7 @@ const ESPERA_EM_MS = 250;
  *
  * O catálogo é **opcional por construção**: se ele ainda não terminou de importar, ou se a busca
  * falhar, a lista fica vazia e o cadastro segue normalmente. Nada aqui pode impedir alguém de
- * cadastrar um remédio que a base não conhece — manipulados, importados e o que a CMED ainda não
+ * cadastrar um remédio que a base não conhece - manipulados, importados e o que a CMED ainda não
  * listou existem, e o app não pode negá-los.
  */
 export function useMedicationCatalog(termo: string) {
@@ -61,7 +61,7 @@ export function useMedicationCatalog(termo: string) {
   return sugestoes;
 }
 
-/** Busca por código de barras — o caminho do scanner (B3). */
+/** Busca por código de barras - o caminho do scanner (B3). */
 export function useBuscaPorEan() {
   return useCallback(async (ean: string): Promise<CatalogEntry | null> => {
     if (!temCatalogo) return null;

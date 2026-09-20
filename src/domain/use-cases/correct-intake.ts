@@ -10,7 +10,7 @@ type CorrectIntakeInput = {
   medicationId: string;
   newStatus: IntakeStatus;
   occurredAt: string;
-  /** Quanto a dose consome — mesma razão de `RegisterIntake`: a dose varia por horário. */
+  /** Quanto a dose consome - mesma razão de `RegisterIntake`: a dose varia por horário. */
   amount: number;
 };
 
@@ -21,8 +21,8 @@ function consumptionDelta(status: IntakeStatus, amount: number): number {
 
 /**
  * Corrige um IntakeLog já registrado (ex: paciente confirma um dia depois que esqueceu de
- * marcar). Nunca sobrescreve o log antigo — grava um novo apontando pra ele via `correctsLogId`
- * — e, se a mudança de status altera o consumo, aplica só a diferença (delta) no estoque, com
+ * marcar). Nunca sobrescreve o log antigo - grava um novo apontando pra ele via `correctsLogId`
+ * - e, se a mudança de status altera o consumo, aplica só a diferença (delta) no estoque, com
  * `reason: "intake_correction"`, preservando auditoria completa de tudo que já foi ajustado.
  */
 export class CorrectIntake {

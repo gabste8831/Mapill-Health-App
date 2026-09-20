@@ -40,8 +40,8 @@ export const UNIT_LABELS: Record<PosologyUnit, string> = {
 };
 
 /**
- * O plural curto, pro meio de uma frase ("2 comprimidos"). Abreviação de medida não flexiona —
- * "2 mgs" não existe —, então ml, mg, g e UI repetem o singular de propósito.
+ * O plural curto, pro meio de uma frase ("2 comprimidos"). Abreviação de medida não flexiona -
+ * "2 mgs" não existe -, então ml, mg, g e UI repetem o singular de propósito.
  */
 export const UNIT_PLURALS: Record<PosologyUnit, string> = {
   tablet: "comprimidos",
@@ -86,7 +86,7 @@ export function formatarQuantidade(amount: number, unit: PosologyUnit): string {
 }
 
 /**
- * Igual, mas para a unidade do estoque, que é `string` no banco e não `PosologyUnit` — ela foi
+ * Igual, mas para a unidade do estoque, que é `string` no banco e não `PosologyUnit` - ela foi
  * gravada em cadastros antigos e pode não estar na tabela. Desconhecida, sai como está: mostrar o
  * que o paciente gravou é melhor que esconder a quantidade porque o rótulo não bate.
  */
@@ -96,7 +96,7 @@ export function formatarQuantidadeLivre(amount: number, unit: string): string {
 }
 
 /**
- * Em quais dias o tratamento cai, sem os horários — o eixo "quando" da posologia. Os horários
+ * Em quais dias o tratamento cai, sem os horários - o eixo "quando" da posologia. Os horários
  * saem em `horariosDaPosologia` porque a lista mostra os dois em lugares diferentes.
  */
 export function resumirFrequencia(schedule: PosologySchedule): string {
@@ -110,7 +110,7 @@ export function resumirFrequencia(schedule: PosologySchedule): string {
     return enumerar(dias);
   }
 
-  // "Dia sim, dia não" é como as pessoas dizem — "1 dia a cada 2" seria a mesma coisa dita de um
+  // "Dia sim, dia não" é como as pessoas dizem - "1 dia a cada 2" seria a mesma coisa dita de um
   // jeito que ninguém usa.
   if (schedule.activeDays === 1 && schedule.cycleLengthDays === 2) return "Dia sim, dia não";
   if (schedule.activeDays === 1) return `A cada ${schedule.cycleLengthDays} dias`;
@@ -125,11 +125,11 @@ export function horariosDaPosologia(schedule: PosologySchedule): string[] {
 }
 
 /**
- * Os horários com a quantidade de cada um — `"08:00 · 10 UI"`.
+ * Os horários com a quantidade de cada um - `"08:00 · 10 UI"`.
  *
  * Existe separado de `horariosDaPosologia` porque responde outra pergunta: aquele diz **quando**,
  * este diz **quando e quanto**. Numa lista onde a dose varia de um horário para o outro, a hora
- * sozinha esconde exatamente a informação que faz a pessoa conferir a fichinha — e onde a dose é
+ * sozinha esconde exatamente a informação que faz a pessoa conferir a fichinha - e onde a dose é
  * igual em todos, repetir o número em cada ficha seria ruído, então ele só aparece quando muda.
  */
 export function horariosComDose(
@@ -151,7 +151,7 @@ export function horariosComDose(
 
 /**
  * A dose de um tratamento em uma linha. Quando os horários têm quantidades diferentes, o número
- * único seria mentira — então diz que varia, e a tela mostra horário a horário.
+ * único seria mentira - então diz que varia, e a tela mostra horário a horário.
  */
 export function resumirDose(
   doseAmount: number,
@@ -167,14 +167,14 @@ export function resumirDose(
 }
 
 /**
- * Palavras que ficam em minúscula no meio de um nome — preposições e artigos.
+ * Palavras que ficam em minúscula no meio de um nome - preposições e artigos.
  *
  * A primeira palavra é exceção e sempre sobe: "A Saúde da Mulher", não "a Saúde da Mulher".
  */
 const PALAVRAS_MINUSCULAS = new Set(["de", "da", "do", "das", "dos", "e", "em", "com", "para", "a", "o"]);
 
 /**
- * Siglas e unidades que **não** viram capitalizadas — elas significam algo em caixa alta.
+ * Siglas e unidades que **não** viram capitalizadas - elas significam algo em caixa alta.
  *
  * A lista é curta de propósito: cobre o que aparece de fato na base da CMED. Uma heurística
  * genérica ("toda palavra de até 3 letras é sigla") transformaria "AAS" em sigla junto com "SAL",
@@ -192,10 +192,10 @@ const SIGLAS = new Set([
  *
  * **Só a exibição muda.** O que é gravado continua sendo o texto original da Anvisa: é base pública
  * de referência, a busca por EAN depende dela, e normalizar na ingestão apagaria a rastreabilidade
- * da fonte — o dado deixaria de ser o que o órgão publicou.
+ * da fonte - o dado deixaria de ser o que o órgão publicou.
  *
  * A razão de existir é de leitura: um nome longo em caixa alta ocupa mais largura, quebra em três
- * linhas na lista de sugestões, e se lê mais devagar — caixa alta elimina a silhueta das palavras,
+ * linhas na lista de sugestões, e se lê mais devagar - caixa alta elimina a silhueta das palavras,
  * que é por onde se reconhece um nome familiar de relance.
  */
 export function capitalizarNome(texto: string): string {
@@ -218,7 +218,7 @@ export function capitalizarNome(texto: string): string {
 /**
  * O princípio ativo de uma sugestão, em uma linha.
  *
- * A CMED separa múltiplas substâncias por `;`, e alguns produtos trazem cinco ou seis — a lista
+ * A CMED separa múltiplas substâncias por `;`, e alguns produtos trazem cinco ou seis - a lista
  * inteira ocupa três linhas e empurra a próxima sugestão para fora da tela. A primeira substância
  * mais a contagem diz o que a pessoa precisa saber ali: **qual remédio é este**. A fórmula completa
  * pertence à bula, não a uma lista de escolha rápida.

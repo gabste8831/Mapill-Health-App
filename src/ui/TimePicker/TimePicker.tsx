@@ -34,7 +34,7 @@ function paraHorario(data: Date): string {
  * **O mostrador é o único modo que existe aqui, e não dá para escolher outro.** `variant` e
  * `showVariantToggle` são aceitos pelo TypeScript mas o Android os ignora para hora:
  * `DatePickerView.kt` só lê `props.variant` no caminho da data. Passá-los dava a impressão de que
- * o popup abriria em digitação e ofereceria o botão de alternar — nenhum dos dois acontecia.
+ * o popup abriria em digitação e ofereceria o botão de alternar - nenhum dos dois acontecia.
  * Quem precisa digitar usa o campo do `TimeField`, que é o caminho principal.
  */
 export function TimePicker({ initialValue, onChange }: TimePickerProps) {

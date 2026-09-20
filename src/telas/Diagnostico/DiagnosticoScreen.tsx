@@ -43,7 +43,7 @@ function Linha({
 }: {
   rotulo: string;
   valor: string;
-  /** `ok` e `ruim` pintam o valor — é o que se lê de relance ao varrer a tela. */
+  /** `ok` e `ruim` pintam o valor - é o que se lê de relance ao varrer a tela. */
   estado?: "ok" | "ruim";
 }) {
   const styles = useEstilos(criarEstilos);
@@ -51,7 +51,7 @@ function Linha({
     <View style={styles.linha}>
       {/* `String(...)` nos dois: um valor não-string chegando aqui derruba a árvore inteira, e esta
           é a tela que a pessoa abre **quando algo já está errado**. Ela tem de sobreviver a dado
-          ruim — foi o que faltou em 13/09, quando uma linha malformada apagou o diagnóstico todo. */}
+          ruim - foi o que faltou em 13/09, quando uma linha malformada apagou o diagnóstico todo. */}
       <Text style={styles.rotulo}>{String(rotulo ?? "")}</Text>
       <Text
         style={[
@@ -107,7 +107,7 @@ function ItemAgendado({
  * o processo) e nenhuma forma de distinguir entre elas sem cabo e Metro ligados.
  *
  * Aqui a resposta vem antes da espera: o que está agendado **neste instante**, para quando, em que
- * canal, com quais permissões — e quantos avisos *deveriam* existir. Um alarme que não aparece na
+ * canal, com quais permissões - e quantos avisos *deveriam* existir. Um alarme que não aparece na
  * lista nunca ia tocar, e isso se descobre em cinco segundos.
  *
  * Os botões disparam pelo **mesmo caminho da produção** (`NotifeeGateway.agendar`). Um atalho que
@@ -130,7 +130,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
      * As doses direto do banco, sem passar pelo planejador de avisos.
      *
      * É de propósito que não venham de `diagnosticarAvisos`: aquilo lista o que o **sistema** tem
-     * agendado, e com a permissão negada é sempre vazio — como no teste de 13/09, que mostrou
+     * agendado, e com a permissão negada é sempre vazio - como no teste de 13/09, que mostrou
      * "Agendados: 0" e não distinguia "a grade está vazia" de "não há permissão para agendar".
      */
     const agora = new Date();
@@ -143,7 +143,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
       comStatus.slice(0, 5).map(({ doseSchedule }) => {
         // `String(...)` e o fallback não são zelo excessivo: uma linha vinda de sincronização ou de
         // migration antiga pode trazer o campo ausente, e um `Text` com valor não-string derruba a
-        // tela inteira — que é justamente o que não pode acontecer numa tela de diagnóstico.
+        // tela inteira - que é justamente o que não pode acontecer numa tela de diagnóstico.
         const iso = String(doseSchedule.scheduledFor ?? "");
         const data = new Date(iso);
         return {
@@ -179,7 +179,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
    * Agenda um aviso daqui a 30 s, pelo caminho de produção.
    *
    * `texto` reproduz o que o planejador de verdade escreveria. Não é enfeite: metade do que este
-   * teste responde é se a frase **cabe** e se lê bem na barra de avisos — um corpo que o Android
+   * teste responde é se a frase **cabe** e se lê bem na barra de avisos - um corpo que o Android
    * trunca no meio da palavra só aparece no aparelho, e um "Teste de notificação" genérico nunca
    * mostraria isso.
    *
@@ -196,7 +196,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
       const quando = new Date(Date.now() + SEGUNDOS_DO_TESTE * 1000);
       await new NotifeeGateway().agendar({
         // Chave própria, com prefixo de teste: o `reagendarTodosOsAvisos` reconstrói a janela a
-        // partir do banco e cancela o que não reconhece — sem um prefixo distinto, o aviso de teste
+        // partir do banco e cancela o que não reconhece - sem um prefixo distinto, o aviso de teste
         // sumiria na primeira volta ao app, que é justamente quando se vai testá-lo.
         chave: `teste-${modo}-${quando.getTime()}`,
         quando,
@@ -207,7 +207,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
         corpo:
           texto?.corpo ??
           `Disparado às ${quando.toLocaleTimeString("pt-BR")}. Se você está lendo isto, o agendamento funcionou.`,
-        // Vazio: não é aviso de dose, então o toque abre o app em vez da tela de horário — que
+        // Vazio: não é aviso de dose, então o toque abre o app em vez da tela de horário - que
         // procuraria doses inexistentes e abriria vazia.
         doseScheduleIds: [],
         semAcoesRapidas: true,
@@ -232,7 +232,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
    *
    * Os textos são os mesmos dos planejadores (`planejar-avisos-de-estoque` e
    * `planejar-avisos-de-compromisso`), com um remédio de exemplo no lugar do nome real. Se a
-   * redação mudar lá e não aqui, este teste deixa de medir o que a pessoa vai receber — vale mais
+   * redação mudar lá e não aqui, este teste deixa de medir o que a pessoa vai receber - vale mais
    * corrigir os dois do que deixar o de teste "genérico o bastante para nunca desatualizar".
    */
   const AVISOS_DE_PLANEJAMENTO = [
@@ -299,7 +299,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
         </View>
 
         {/**
-         * Qual build está rodando — a primeira pergunta de toda sessão de teste.
+         * Qual build está rodando - a primeira pergunta de toda sessão de teste.
          *
          * Em 13/09 o Gabriel instalou uma build nova e não tinha como confirmar, de dentro do app,
          * que era ela: a saída era conferir o versionCode nas configurações do Android. Um teste
@@ -312,7 +312,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
           <Text style={styles.secaoTitulo}>Esta build</Text>
           <View style={styles.cartao}>
             {/* De `expo-application`, e não de `Constants.expoConfig`: o `eas.json` usa
-                `appVersionSource: "remote"`, então o `versionCode` não existe no `app.json` — quem o
+                `appVersionSource: "remote"`, então o `versionCode` não existe no `app.json` - quem o
                 atribui é o EAS, na build. Lido do APK instalado, ele é o número que de fato
                 identifica o binário, e o único que sobe a cada build. */}
             <Linha
@@ -324,8 +324,8 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
             {/**
              * O alarme **sai no volume de mídia**, e esta linha diz isso em vez de esconder.
              *
-             * O patch de `USAGE_ALARM` no canal está aplicado — verificado rodando `expo prebuild`
-             * em 13/09 —, e mesmo assim não funciona: quem toca o som da notificação é o
+             * O patch de `USAGE_ALARM` no canal está aplicado - verificado rodando `expo prebuild`
+             * em 13/09 -, e mesmo assim não funciona: quem toca o som da notificação é o
              * NotificationManager, e ele usa o stream dele independente do que o canal peça. A
              * correção é o app tocar o próprio som (ver E.1 em `docs/O-QUE-FALTA-TESTAR.md`).
              *
@@ -360,7 +360,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                 ) : (
                   <Linha rotulo="Estado" valor="Sem erro" estado="ok" />
                 )}
-                {/* Zero tratamentos explica um reabastecimento que não fez nada — e é diferente de
+                {/* Zero tratamentos explica um reabastecimento que não fez nada - e é diferente de
                     ter tratamentos e não gravar, que significa grade já completa. */}
                 <Linha
                   rotulo="Tratamentos ativos"
@@ -372,7 +372,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                  * **Esta é a linha que responde o D.3**, e não a de cima.
                  *
                  * "Doses gravadas: 0" é ambíguo: pode ser grade já completa (certo) ou
-                 * reabastecimento que não fez nada (errado) — o mesmo número para os dois casos, que
+                 * reabastecimento que não fez nada (errado) - o mesmo número para os dois casos, que
                  * foi o que travou o teste de 13/09. A data do fim distingue: perto de 30 dias, a
                  * grade alcança o horizonte; a poucos dias, o tratamento vai emudecer.
                  */}
@@ -394,11 +394,11 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               </>
             )}
             {/**
-             * O fuso do aparelho e o deslocamento — sempre visíveis, mesmo sem manutenção.
+             * O fuso do aparelho e o deslocamento - sempre visíveis, mesmo sem manutenção.
              *
              * No teste de 13/09 a dose das 18:00 apareceu às 15:00, e isso **não** é a conversão de
              * Rio do Sul para Manaus, que daria 17:00. Três horas é o próprio deslocamento de Rio do
-             * Sul, o que aponta para um instante UTC sendo lido como hora de parede em algum ponto —
+             * Sul, o que aponta para um instante UTC sendo lido como hora de parede em algum ponto -
              * e não para a troca de fuso em si.
              *
              * Sem ver o fuso que o app enxerga, distinguir essas duas explicações é chute. Estas
@@ -411,7 +411,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
              *
              * É a leitura que faltava para o fuso. A Home mostra a hora já convertida, então quando
              * ela diz "15:00" não dá para saber se o instante gravado está errado ou se a conversão
-             * é que erra — e essas duas causas pedem correções opostas. Aqui aparecem os dois: se o
+             * é que erra - e essas duas causas pedem correções opostas. Aqui aparecem os dois: se o
              * ISO disser `21:00Z` e a local disser `17:00`, o banco está certo e o problema é de
              * exibição; se o ISO já vier errado, foi a gravação.
              */}
@@ -450,7 +450,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
               estado={dados.alarmeExato ? "ok" : "ruim"}
             />
             {/* A permissão que faz a tela azul irromper sozinha. Bloqueada, o Android rebaixa todo
-                full-screen intent para um aviso no topo — o alarme toca e a tela não sobe, que é o
+                full-screen intent para um aviso no topo - o alarme toca e a tela não sobe, que é o
                 sintoma investigado em 12/09. Ver a nota em `diagnostico-de-avisos`. */}
             <Linha
               rotulo="Tela cheia"
@@ -470,7 +470,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                 <View key={canal.id} style={styles.agendado}>
                   <Text style={styles.agendadoQuando}>{canal.nome}</Text>
                   {/* O id carrega a versão do canal (`dose-alarm-v7`), e ela é a única forma de saber
-                      **qual** canal o aparelho está usando — dois canais com o mesmo nome e versões
+                      **qual** canal o aparelho está usando - dois canais com o mesmo nome e versões
                       diferentes são indistinguíveis sem isto.
 
                       Importa porque canal no Android é imutável: uma correção de som, importância ou
@@ -486,7 +486,7 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
 
                       **Mudo é quando as duas leituras estão vazias.** `sound` é o nome que pedimos
                       na criação; `soundURI` é o que o Android resolveu e vai tocar. Pedindo
-                      `"default"`, alguns aparelhos devolvem `sound` vazio e a URI preenchida — o
+                      `"default"`, alguns aparelhos devolvem `sound` vazio e a URI preenchida - o
                       canal toca, e olhar só a primeira dizia "MUDO" num canal saudável. Julgar pelo
                       campo errado aqui manda consertar o que não está quebrado. */}
                   <Linha
@@ -599,11 +599,11 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
             {/* Um botão por aviso de planejamento.
 
                 Os quatro caem às 00:01 do dia, então testá-los de verdade custa uma madrugada por
-                tentativa — e é justamente o tipo de espera que fez o diagnóstico existir. Aqui
+                tentativa - e é justamente o tipo de espera que fez o diagnóstico existir. Aqui
                 chegam em trinta segundos, no mesmo canal e com o texto que a pessoa receberia.
 
                 Vale conferir três coisas em cada um: se chega com **som**, se a frase cabe sem
-                truncar, e se o que aparece na tela bloqueada é o esperado — o canal de lembrete é
+                truncar, e se o que aparece na tela bloqueada é o esperado - o canal de lembrete é
                 `PRIVATE`, então o conteúdo fica oculto se o aparelho estiver configurado para
                 esconder informação sensível. */}
             <Text style={styles.secaoNota}>

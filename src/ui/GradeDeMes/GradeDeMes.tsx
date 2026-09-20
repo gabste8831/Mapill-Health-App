@@ -4,7 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./GradeDeMes.styles";
 
-/** O que existe num dia — decide quais pontinhos ele mostra. */
+/** O que existe num dia - decide quais pontinhos ele mostra. */
 export type MarcasDoDia = {
   temCompromisso: boolean;
   temDose: boolean;
@@ -47,7 +47,7 @@ function paraIsoDay(data: Date): string {
 
 /**
  * As células da grade: os dias do mês, mais o preenchimento para a primeira semana começar no
- * domingo certo. `null` é espaço vazio — não é dia deste mês e não recebe toque.
+ * domingo certo. `null` é espaço vazio - não é dia deste mês e não recebe toque.
  */
 function celulasDoMes(mes: Date): (Date | null)[] {
   const primeiro = new Date(mes.getFullYear(), mes.getMonth(), 1);
@@ -64,8 +64,8 @@ function celulasDoMes(mes: Date): (Date | null)[] {
  *
  * Substitui a lista corrida como ponto de entrada da agenda (E1). A lista respondia bem "o que é o
  * próximo", mas com remédio de uso contínuo ela vira dezenas de dias iguais, e a consulta do dia 27
- * se perde no meio. O mês responde outra pergunta — "como está minha semana", "quando é o retorno"
- * — e mostra isso de relance, com o dia cheio marcado e o vazio visivelmente vazio.
+ * se perde no meio. O mês responde outra pergunta - "como está minha semana", "quando é o retorno"
+ * - e mostra isso de relance, com o dia cheio marcado e o vazio visivelmente vazio.
  *
  * Dois pontos e não um: compromisso e dose são coisas diferentes, e um ponto só faria "tenho
  * consulta" parecer igual a "tenho remédio pra tomar", que é o que acontece todo dia.
@@ -129,13 +129,13 @@ export function GradeDeMes({
              * O `Pressable` envolve **só o círculo**, e não a célula inteira.
              *
              * Envolvendo a célula, o realce do toque era desenhado na área retangular da grade e
-             * aparecia como um quadrado claro atrás do dia — inclusive com `android_ripple={null}`,
+             * aparecia como um quadrado claro atrás do dia - inclusive com `android_ripple={null}`,
              * porque o que sobrava não era o ripple e sim o próprio fundo do pressionado, que segue
              * a forma do componente tocado. Com o toque no círculo, o realce não tem como ser
              * quadrado: ele herda o `borderRadius` de quem o desenha.
              *
              * O `hitSlop` devolve a área de dedo que a célula dava. O alvo continua tendo os 34pt
-             * do círculo mais 6 de folga em volta — o que se perdeu foi só o retângulo do canto,
+             * do círculo mais 6 de folga em volta - o que se perdeu foi só o retângulo do canto,
              * que ninguém mira.
              */
             <View key={isoDay} style={styles.celula}>
@@ -161,7 +161,7 @@ export function GradeDeMes({
 
                     Hoje **e** selecionado é o caso que quebrava: `numeroHoje` só desenha o contorno
                     e não mexe no texto, então a leitura de qual cor usar tem que vir do fundo real
-                    do círculo — que é o `numeroSelecionado`, ganhe ele de quem ganhar. */}
+                    do círculo - que é o `numeroSelecionado`, ganhe ele de quem ganhar. */}
                 <Text style={estaSelecionado ? styles.numeroSelecionadoTexto : styles.numero}>
                   {data.getDate()}
                 </Text>

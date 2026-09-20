@@ -16,13 +16,13 @@ const CAMPOS_DE_ARQUIVO = [
  * ## Por que existe
  *
  * Os anexos não sobem para a nuvem (decisão E9). O **caminho** deles subia, e num aparelho
- * reinstalado o app recebia `file:///data/user/0/…/foto.jpg` — uma string que aponta para nada.
+ * reinstalado o app recebia `file:///data/user/0/…/foto.jpg` - uma string que aponta para nada.
  * A tela então oferecia "Trocar foto da caixa" e "Remover" para uma imagem que não existe, e o
  * quadrado ficava vazio sem dizer por quê.
  *
  * A origem já foi corrigida: esses campos sobem como `null`, e o `receber` confere a existência do
  * arquivo antes de gravar. Mas quem sincronizou **antes** dessas correções tem o caminho gravado, e
- * o pull só revisita linhas cujo `updated_at` mudou — nelas o defeito ficaria para sempre.
+ * o pull só revisita linhas cujo `updated_at` mudou - nelas o defeito ficaria para sempre.
  *
  * ## Por que aqui, e não numa migration
  *
@@ -32,7 +32,7 @@ const CAMPOS_DE_ARQUIVO = [
  *
  * ## Por que não incomoda
  *
- * Roda na abertura, depois das migrations, e o caso comum é não encontrar nada — três consultas que
+ * Roda na abertura, depois das migrations, e o caso comum é não encontrar nada - três consultas que
  * não retornam linha nenhuma. Só faz trabalho quando há o que consertar.
  */
 export async function limparAnexosPerdidos(): Promise<void> {
@@ -53,7 +53,7 @@ export async function limparAnexosPerdidos(): Promise<void> {
       try {
         existe = new File(caminho).exists;
       } catch {
-        // Caminho malformado — de outra instalação, ou de um formato que o app não usa mais.
+        // Caminho malformado - de outra instalação, ou de um formato que o app não usa mais.
         existe = false;
       }
 
@@ -61,7 +61,7 @@ export async function limparAnexosPerdidos(): Promise<void> {
         /**
          * `updated_at` **não** é tocado, de propósito.
          *
-         * Mexer nele marcaria a linha como alterada e a mandaria de volta ao servidor — subindo uma
+         * Mexer nele marcaria a linha como alterada e a mandaria de volta ao servidor - subindo uma
          * "edição" que a pessoa não fez, e que num segundo aparelho apagaria a foto que lá existe.
          * A limpeza é local porque o problema é local: o arquivo sumiu **neste** aparelho.
          */

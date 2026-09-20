@@ -14,7 +14,7 @@ import { criarEstilos } from "./DateField.styles";
 export type DateFieldProps = {
   label: string;
   required?: boolean;
-  /** `DD/MM/AAAA` como está digitado — a tela continua dona do texto, com máscara e tudo. */
+  /** `DD/MM/AAAA` como está digitado - a tela continua dona do texto, com máscara e tudo. */
   value: string;
   onChangeText: (value: string) => void;
   placeholder?: string;
@@ -28,12 +28,12 @@ export type DateFieldProps = {
 /**
  * Data com as duas entradas: digitação e calendário.
  *
- * O calendário existe porque campo digitado aceita o que não existe — 31 de fevereiro, 30/02, o ano
- * pela metade —, e cada um desses só vira erro depois, longe de onde foi digitado. No calendário o
+ * O calendário existe porque campo digitado aceita o que não existe - 31 de fevereiro, 30/02, o ano
+ * pela metade -, e cada um desses só vira erro depois, longe de onde foi digitado. No calendário o
  * dia impossível não está lá para ser tocado.
  *
  * A digitação **não sai**, e isso é decisão e não sobra: quem sabe a data de cor a digita em três
- * segundos, enquanto no calendário precisa navegar meses para trás — o caso da data de nascimento,
+ * segundos, enquanto no calendário precisa navegar meses para trás - o caso da data de nascimento,
  * que é a pior de todas para se caçar em calendário. É também o caminho que continua funcionando
  * se o componente nativo não carregar.
  */
@@ -85,7 +85,7 @@ export function DateField({
       {/* Ao lado do campo, e não no lugar dele: as duas entradas convivem. O alvo tem a altura do
           input inteiro porque um ícone pequeno ao lado de um campo alto é o toque que erra.
 
-          A coluna existe para o rótulo invisível poder empurrar o botão até a altura do input —
+          A coluna existe para o rótulo invisível poder empurrar o botão até a altura do input -
           ver `rotuloFantasma`. Sem rótulo (`label=""`) ela não desenha nada e o botão já nasce
           alinhado. */}
       <View style={styles.colunaDoBotao}>

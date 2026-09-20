@@ -23,7 +23,7 @@ const DIA_EM_MS = 24 * 60 * 60_000;
 /**
  * Quanto o calendário olha para trás e para frente.
  *
- * O passado é curto porque a agenda serve para se organizar, não para navegar no histórico — esse
+ * O passado é curto porque a agenda serve para se organizar, não para navegar no histórico - esse
  * é o papel do relatório de adesão (D2). O futuro é longo porque tratamento com prazo e consulta
  * marcada moram lá, e uma agenda que acaba em 30 dias não responde "quando é meu retorno".
  */
@@ -36,7 +36,7 @@ const DIAS_PARA_FRENTE = 90;
  * `doseScheduleId: null` marca a **projetada**: além dos 30 dias que o app grava de fato
  * (`SCHEDULE_HORIZON_DAYS`), os horários são calculados na hora a partir da posologia, com a mesma
  * função pura que gera os reais. Sem isso a agenda apareceria vazia a partir do dia 31, o que leria
- * como "não tenho remédio em outubro" — mentira silenciosa, que é o modo de falha que este app
+ * como "não tenho remédio em outubro" - mentira silenciosa, que é o modo de falha que este app
  * evita a qualquer custo. Projetada não se confirma: não existe registro para apontar.
  */
 export type DoseDaAgenda = {
@@ -55,19 +55,19 @@ export type DoseDaAgenda = {
 /**
  * Um marco no dia: a receita que vence, o estoque que acaba.
  *
- * Separado de `compromissos` e `doses` porque **não é um evento** — ninguém faz nada às 14h por
+ * Separado de `compromissos` e `doses` porque **não é um evento** - ninguém faz nada às 14h por
  * causa dele. É uma data que vale a pena ver ao planejar o mês, e por isso entra no calendário;
  * mas listá-lo junto das doses o faria parecer algo a confirmar, que não é.
  *
  * `ehEstimativa` separa o que é fato do que é previsão. A validade da receita está escrita no
  * papel: 20/09 é 20/09. O fim do estoque é uma projeção que se move a cada dose confirmada e a
- * cada recontagem — desenhá-la com o mesmo peso de uma consulta marcada daria a ela uma certeza
+ * cada recontagem - desenhá-la com o mesmo peso de uma consulta marcada daria a ela uma certeza
  * que ela não tem. A tela usa isto para dizer "por volta de" em vez de afirmar o dia.
  */
 export type MarcoDoDia = {
   id: string;
   tipo: "receita" | "estoque";
-  /** O que vence ou acaba — o nome do medicamento. */
+  /** O que vence ou acaba - o nome do medicamento. */
   titulo: string;
   ehEstimativa: boolean;
 };
@@ -92,7 +92,7 @@ function horaLocal(isoTimestamp: string): string {
 /**
  * A agenda completa: compromissos e doses, agrupados pelo dia em que acontecem.
  *
- * As duas coisas na mesma lista porque é assim que o dia acontece — quem tem consulta às 14h e
+ * As duas coisas na mesma lista porque é assim que o dia acontece - quem tem consulta às 14h e
  * dose às 14h30 precisa ver isso junto, e não em duas telas que nunca se cruzam.
  */
 async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
@@ -111,7 +111,7 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
   const medicamentoPorId = new Map(medications.map((m) => [m.id, m]));
 
   const doses: DoseDaAgenda[] = [];
-  /** Até onde cada prescrição já tem horário gravado — é daí que a projeção começa. */
+  /** Até onde cada prescrição já tem horário gravado - é daí que a projeção começa. */
   const ultimoGravado = new Map<string, string>();
 
   for (const { doseSchedule, latestStatus, latestLogId } of armazenadas) {
@@ -139,7 +139,7 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
     });
   }
 
-  // A projeção começa depois do último horário gravado de cada prescrição, nunca antes de agora —
+  // A projeção começa depois do último horário gravado de cada prescrição, nunca antes de agora -
   // senão ela duplicaria o que já veio do banco.
   for (const prescription of prescriptions) {
     const medication = medicamentoPorId.get(prescription.medicationId);
@@ -187,7 +187,7 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
   }
 
   /**
-   * A validade da receita — um fato com data, como um compromisso.
+   * A validade da receita - um fato com data, como um compromisso.
    *
    * Entra mesmo sem pedido de aviso: quem não quis notificação continua querendo ver a data ao
    * planejar o mês. O aviso é sobre ser interrompido; o calendário é sobre consultar.
@@ -205,7 +205,7 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
   }
 
   /**
-   * O fim do estoque — uma **previsão**, e o calendário diz isso.
+   * O fim do estoque - uma **previsão**, e o calendário diz isso.
    *
    * Só para quem controla estoque: sem quantidade não há o que projetar. A conta vem da mesma
    * `estimateStockDepletion` que alimenta a Home e a tela de estoque, para as três não
@@ -247,7 +247,7 @@ async function carregarAgenda(agora: Date): Promise<DiaDaAgenda[]> {
 }
 
 /**
- * A agenda do calendário, recarregada no foco da tela — é o que faz um compromisso ou remédio
+ * A agenda do calendário, recarregada no foco da tela - é o que faz um compromisso ou remédio
  * recém-cadastrado já estar lá quando o formulário fecha.
  */
 export function useCalendarAgenda() {
@@ -278,7 +278,7 @@ export function useCalendarAgenda() {
    * (`gravarDesfecho`): registro clínico com duas implementações divergiria, e a auditoria do
    * histórico é o que o TCC mede.
    *
-   * Só as reais — uma dose projetada não tem registro para apontar.
+   * Só as reais - uma dose projetada não tem registro para apontar.
    */
   const registrarDose = useCallback(
     async (dose: DoseDaAgenda, status: IntakeStatus) => {
@@ -300,7 +300,7 @@ export function useCalendarAgenda() {
   return { dias, isLoading, error, reload, registrarDose };
 }
 
-/** Se a dose já teve desfecho — o que decide se a linha oferece ação ou mostra o resultado. */
+/** Se a dose já teve desfecho - o que decide se a linha oferece ação ou mostra o resultado. */
 export function doseResolvida(dose: DoseDaAgenda): boolean {
   return resolvesDose(dose.latestStatus);
 }

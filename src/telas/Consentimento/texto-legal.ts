@@ -23,7 +23,7 @@ import type { LegalSection } from "@/ui";
  *
  * **1.2.0 (30/08/2026)**: a cópia em nuvem deixou de ser promessa e passou a existir (D1). O texto
  * anterior afirmava que os dados de saúde não saíam do aparelho, e prometia consultar de novo
- * antes de qualquer envio começar — este bump é essa consulta. Sem ele, o primeiro upload
+ * antes de qualquer envio começar - este bump é essa consulta. Sem ele, o primeiro upload
  * aconteceria sob um consentimento dado para outra coisa.
  */
 export const CURRENT_TERMS_VERSION = "1.2.0";

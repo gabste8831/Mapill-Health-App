@@ -28,7 +28,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * O mesmo respiro da contagem em Remédios: `md` acima, `sm` abaixo.
    *
    * As duas telas são a mesma lista em abas diferentes, e a contagem tinha aqui só o espaço que
-   * sobrava do `listHeader` — colada na busca em cima e no primeiro card embaixo.
+   * sobrava do `listHeader` - colada na busca em cima e no primeiro card embaixo.
    */
   contagem: {
     ...typography.label,
@@ -79,7 +79,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.md,
-    // Azul principal com o número em branco — a mesma cor de ação do resto do app, e não mais o
+    // Azul principal com o número em branco - a mesma cor de ação do resto do app, e não mais o
     // container secundário: é o que dá à data o mesmo peso que a foto tem na lista de remédios.
     backgroundColor: cores.corDeDestaque,
   },

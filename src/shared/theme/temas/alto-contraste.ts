@@ -24,7 +24,7 @@ export const temaAltoContraste: Tema = {
      * `#0044A3`, e não o `#00337A` de antes.
      *
      * O anterior dava **11.97:1** sobre branco, quando o teto que este tema persegue é o AAA da
-     * WCAG: **7:1**. Ou seja, ele estava pagando escuridão por um contraste que ninguém exige — e
+     * WCAG: **7:1**. Ou seja, ele estava pagando escuridão por um contraste que ninguém exige - e
      * o preço aparece onde o azul cobre área grande (a faixa do calendário, o card de próxima
      * dose, a capa do alarme), que num tom quase marinho lê como bloco preto e não como a cor da
      * ação. Um app inteiro em azul-marinho não é mais legível, é só mais sombrio.
@@ -78,7 +78,7 @@ export const temaAltoContraste: Tema = {
      * Aqui o vivo quase não se afasta do normal, e é o ponto do tema.
      *
      * Quem escolhe alto contraste está dizendo que precisa de separação máxima entre figura e
-     * fundo. Ganhar vivacidade custa contraste — é a mesma troca do tema padrão, só que aqui ela vai
+     * fundo. Ganhar vivacidade custa contraste - é a mesma troca do tema padrão, só que aqui ela vai
      * na direção contrária ao que o tema promete. Então o passo é curto: `#046B36` e `#C21118`
      * ficam em 5.70:1 e 4.93:1 na pior superfície, contra os 8.04 e 6.80 dos escuros. Mais vivo que
      * isso começaria a desfazer a razão de o tema existir.

@@ -9,12 +9,12 @@ import type { Appointment } from "@/domain/entities/appointment";
 const persistsLocally = Platform.OS !== "web";
 
 /**
- * Todos os compromissos cadastrados, recarregados toda vez que a tela volta ao foco — é o que faz
+ * Todos os compromissos cadastrados, recarregados toda vez que a tela volta ao foco - é o que faz
  * o compromisso recém-cadastrado ou recém-editado já estar na lista quando o formulário fecha.
  *
  * A ordenação vem pronta do repositório (`findAllOrderedByDate`, do mais próximo ao mais
  * distante): é o banco que tem o índice, e não há escolha de ordem nesta tela como há em
- * `useMedicationList` — um compromisso só tem uma data que importa.
+ * `useMedicationList` - um compromisso só tem uma data que importa.
  */
 export function useAppointmentList() {
   const [items, setItems] = useState<Appointment[]>([]);

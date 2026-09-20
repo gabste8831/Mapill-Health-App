@@ -39,7 +39,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * **Duas por linha**, com os quatro conjuntos alternativos formando um quadrado.
    *
    * Já foram três por linha, quando o conjunto original também estava na grade: cinco opções em
-   * colunas de um terço deixavam uma órfã embaixo. Com o original virando botão, sobram quatro —
+   * colunas de um terço deixavam uma órfã embaixo. Com o original virando botão, sobram quatro -
    * e quatro em 2x2 dá o dobro de largura a cada amostra, que é o que se veio comparar.
    */
   grade: {
@@ -69,7 +69,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    *
    * Eram 26dp fixos com um vão entre eles, o que sobrava espaço morto nas laterais e dava à amostra
    * menos área do que a opção tinha para oferecer. Aqui ela ocupa a largura inteira em três terços
-   * encostados, do jeito de uma bandeira: mais pigmento na tela, e as cores se tocando — que é a
+   * encostados, do jeito de uma bandeira: mais pigmento na tela, e as cores se tocando - que é a
    * condição em que a diferença entre duas delas fica mais fácil de ver, sem o fundo se intrometendo
    * entre uma e outra.
    *

@@ -4,7 +4,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * O cartão de uma dose: os dados em cima, as duas ações embaixo dividindo a largura.
    *
-   * `superficieDeCartao` sem nada por cima — o mesmo cartão do "Acompanhamento semanal" logo
+   * `superficieDeCartao` sem nada por cima - o mesmo cartão do "Acompanhamento semanal" logo
    * abaixo na Home, e o mesmo de Remédios, Compromissos e Estoque. Repetir fundo, raio e sombra à
    * mão aqui era o que fazia esta linha destoar dos cartões vizinhos, e é a cópia que o token
    * existe para evitar. De quebra, ele troca a sombra por contorno no alto contraste, onde sombra

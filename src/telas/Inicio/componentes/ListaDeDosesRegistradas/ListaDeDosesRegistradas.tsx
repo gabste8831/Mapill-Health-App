@@ -8,7 +8,7 @@ export type DoseRegistrada = {
   doseScheduleId: string;
   time: string;
   medicationName: string;
-  /** Dose e orientação — "1 comprimido · com bastante água". */
+  /** Dose e orientação - "1 comprimido · com bastante água". */
   note: string;
   /** `true` = tomada, `false` = pulada. */
   tomada: boolean;
@@ -26,7 +26,7 @@ type ListaDeDosesRegistradasProps = {
  * ## Por que não são cartões como as pendentes
  *
  * As duas listas respondem perguntas diferentes. A de cima pergunta "o que falta?" e precisa de
- * botões, cor de urgência e área de toque generosa. Esta responde "o que eu já fiz?" — é conferência,
+ * botões, cor de urgência e área de toque generosa. Esta responde "o que eu já fiz?" - é conferência,
  * e quem confere varre a coluna de horários de cima a baixo em vez de ler cartão por cartão.
  *
  * Em cartões, o efeito era perverso: quanto mais em dia a pessoa estivesse, mais cheia ficava a
@@ -51,8 +51,8 @@ export function ListaDeDosesRegistradas({ doses, onCorrigir }: ListaDeDosesRegis
           /**
            * A linha inteira num nó só, na ordem em que se lê: que horas, o quê, quanto, como ficou.
            *
-           * Sem agrupar, o TalkBack para quatro vezes na mesma linha, e o desfecho — que é a
-           * informação pela qual se veio até aqui — sairia solto no fim sem se ligar ao remédio.
+           * Sem agrupar, o TalkBack para quatro vezes na mesma linha, e o desfecho - que é a
+           * informação pela qual se veio até aqui - sairia solto no fim sem se ligar ao remédio.
            */
           accessibilityLabel={`${dose.time}, ${dose.medicationName}, ${dose.note}, ${
             dose.tomada ? "tomada" : "pulada"
@@ -69,7 +69,7 @@ export function ListaDeDosesRegistradas({ doses, onCorrigir }: ListaDeDosesRegis
           </View>
 
           {/* O ícone é o único portador do desfecho na linha, e o rótulo falado dele já está no
-              `accessibilityLabel` do grupo — marcá-lo aqui de novo faria o TalkBack repetir
+              `accessibilityLabel` do grupo - marcá-lo aqui de novo faria o TalkBack repetir
               "tomada" duas vezes na mesma parada. */}
           <Ionicons
             name={dose.tomada ? "checkmark-circle" : "close-circle"}

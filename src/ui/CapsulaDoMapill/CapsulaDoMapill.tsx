@@ -2,7 +2,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
 type CapsulaDoMapillProps = {
-  /** Lado do quadro em pt — o desenho e quadrado (1000x1000). */
+  /** Lado do quadro em pt - o desenho e quadrado (1000x1000). */
   tamanho?: number;
   /**
    * Sobre o azul da splash a metade escura da capsula some no fundo. Ligado, ela vira branca e o
@@ -17,7 +17,7 @@ type CapsulaDoMapillProps = {
  *
  * Nasceu de dentro do `MarcaDoMapill` quando a splash precisou dela sozinha: ate entao o unico
  * jeito de mostrar a marca numa tela de carregamento era o PNG `mark-transparent-a`, que e o
- * lockup inteiro em 1000x333 — e desenhado num quadro quase quadrado ele cortava a palavra pela
+ * lockup inteiro em 1000x333 - e desenhado num quadro quase quadrado ele cortava a palavra pela
  * metade, mostrando "Mapi".
  */
 export function CapsulaDoMapill({ tamanho = 96, sobreAzul = false, style }: CapsulaDoMapillProps) {

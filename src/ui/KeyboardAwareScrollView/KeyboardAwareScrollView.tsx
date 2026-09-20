@@ -21,7 +21,7 @@ export const KeyboardAwareScrollView = forwardRef<ScrollViewType, ScrollViewProp
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
         {/**
          * `keyboardDismissMode="on-drag"` e `keyboardShouldPersistTaps="handled"` vêm **antes** do
-         * spread, então uma tela pode sobrescrevê-los — mas nenhuma precisa, e é por isso que eles
+         * spread, então uma tela pode sobrescrevê-los - mas nenhuma precisa, e é por isso que eles
          * moram aqui.
          *
          * Juntos resolvem o teclado grudado: arrastar a lista o dispensa (o gesto de quem quer ver
@@ -35,7 +35,7 @@ export const KeyboardAwareScrollView = forwardRef<ScrollViewType, ScrollViewProp
           keyboardShouldPersistTaps="handled"
           {...scrollViewProps}>
           {/**
-           * **Tocar em área vazia dispensa o teclado** — o terceiro gesto, e o que faltava.
+           * **Tocar em área vazia dispensa o teclado** - o terceiro gesto, e o que faltava.
            *
            * O app tinha só dois saídas: arrastar a lista e tocar direto noutro controle. Faltava
            * justamente a que as pessoas tentam primeiro, e o relato foi exatamente esse: "preciso
@@ -51,10 +51,10 @@ export const KeyboardAwareScrollView = forwardRef<ScrollViewType, ScrollViewProp
            * `contentContainerStyle` vem **daqui**, e não do `ScrollView` acima.
            *
            * O bug: o `ScrollView` do RN Web aplica `contentContainerStyle` no `<div>` de conteúdo
-           * — mas esse `<div>` só tem **um filho**, este `Pressable`, então `gap` e `padding`
+           * - mas esse `<div>` só tem **um filho**, este `Pressable`, então `gap` e `padding`
            * definidos ali não valem para nada (não há irmãos para espaçar). Os campos e cards de
            * verdade ficam um nível abaixo, dentro do `Pressable`, que antes não herdava layout
-           * nenhum — o resultado era cards colados um no outro em toda tela que usa este
+           * nenhum - o resultado era cards colados um no outro em toda tela que usa este
            * componente (Ficha de Saúde, cadastro de medicação, cadastro de compromisso, Remédios).
            */}
           <Pressable

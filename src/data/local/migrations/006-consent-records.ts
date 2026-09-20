@@ -1,5 +1,5 @@
 /**
- * Tabela de prova de consentimento LGPD. Sem vínculo com patient_profiles de propósito — o
+ * Tabela de prova de consentimento LGPD. Sem vínculo com patient_profiles de propósito - o
  * consentimento acontece ANTES da ficha de saúde no fluxo (login → consentimento → ficha), tem
  * que existir mesmo que o paciente ainda não tenha nenhum outro dado salvo.
  */

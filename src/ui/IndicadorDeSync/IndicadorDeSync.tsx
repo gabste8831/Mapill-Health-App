@@ -11,7 +11,7 @@ export type IndicadorDeSyncProps = {
   onSincronizar: () => void;
 };
 
-/** "há 3 minutos", "ontem" — quando, em relação a agora. */
+/** "há 3 minutos", "ontem" - quando, em relação a agora. */
 function quandoFoi(iso: string): string {
   const minutos = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
   if (minutos < 1) return "agora mesmo";
@@ -26,7 +26,7 @@ function quandoFoi(iso: string): string {
  * O estado da cópia na nuvem, em uma linha.
  *
  * **Diz o que é verdade agora, e não o que se espera.** Com pendências, ele não chama isso de erro:
- * offline-first significa que ficar sem enviar é o funcionamento normal, não uma falha — o dado
+ * offline-first significa que ficar sem enviar é o funcionamento normal, não uma falha - o dado
  * está salvo no aparelho de qualquer jeito, e é isso que a frase precisa deixar claro. Chamar de
  * problema o que é comportamento esperado ensina a pessoa a ignorar o indicador justamente quando
  * ele tiver algo a dizer.
@@ -65,7 +65,7 @@ export function IndicadorDeSync({ estado, sincronizando, onSincronizar }: Indica
             Ele contava **linhas de banco**, e um único cadastro produz dezenas: o medicamento, a
             prescrição, o estoque e um registro por dose gerada. Cadastrar um remédio de 2×/dia por
             um mês mostrava "62 alterações para enviar", e quem leu isso fez uma coisa só. O número
-            era exato e comunicava errado — sugeria trabalho acumulado, ou perda iminente.
+            era exato e comunicava errado - sugeria trabalho acumulado, ou perda iminente.
 
             O que a pessoa precisa saber é binário: está tudo salvo, ou ainda falta subir. */}
         <Text style={styles.titulo}>

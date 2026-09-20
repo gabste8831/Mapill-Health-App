@@ -65,7 +65,7 @@ function ItemDeCompromisso({
      *
      * Antes havia um lápis e uma lixeira no canto. Saíram os dois: numa lista onde se percorre o
      * mês com o polegar, um alvo destrutivo de 20px ao lado do conteúdo é um erro esperando
-     * acontecer — e ele desenhava dois botões em cima de cada compromisso, o que era metade do peso
+     * acontecer - e ele desenhava dois botões em cima de cada compromisso, o que era metade do peso
      * visual da lista. Editar e excluir vivem na listagem de Compromissos, que o toque abre já no
      * compromisso certo.
      *
@@ -190,13 +190,13 @@ function ItemDeCompromisso({
  * A agenda de compromissos: o que vem primeiro, o que já passou depois.
  *
  * Não é uma grade de mês. O calendário mensal mostra bem a distribuição, mas a pergunta que se faz
- * abrindo esta tela é "o que é o próximo, e quando" — e uma lista responde isso sem precisar
+ * abrindo esta tela é "o que é o próximo, e quando" - e uma lista responde isso sem precisar
  * navegar entre meses para descobrir que o próximo compromisso é só em outubro.
  */
 type LinhaDeDoseProps = {
   dose: DoseDaAgenda;
   primeira: boolean;
-  /** Ausente quando a dose não aceita ação — futura, ou projetada e sem registro para apontar. */
+  /** Ausente quando a dose não aceita ação - futura, ou projetada e sem registro para apontar. */
   onRegistrar?: (status: IntakeStatus) => void;
 };
 
@@ -226,11 +226,11 @@ function LinhaDeDose({ dose, primeira, onRegistrar }: LinhaDeDoseProps) {
         /**
          * O ícone **precisa falar**: ele é o único portador do desfecho nesta linha.
          *
-         * Ícones do `@expo/vector-icons` são glifos de fonte — sem rótulo o TalkBack lê nada ou um
+         * Ícones do `@expo/vector-icons` são glifos de fonte - sem rótulo o TalkBack lê nada ou um
          * caractere sem sentido, e a linha seria anunciada como "08:00, Losartana, 1 comprimido"
          * sem dizer se foi tomada ou pulada, que é exatamente a informação que se veio buscar.
          *
-         * Vale a regra de sempre: estado nunca só por cor — aqui, nunca só por glifo.
+         * Vale a regra de sempre: estado nunca só por cor - aqui, nunca só por glifo.
          */
         <Ionicons
           name={tomada ? "checkmark-circle" : "close-circle"}
@@ -277,7 +277,7 @@ function dataDoDia(isoDay: string): Date {
   return new Date(ano, mes - 1, dia);
 }
 
-/** "Hoje", "Amanhã", "Ontem" ou o dia por extenso — é assim que se fala de uma data próxima. */
+/** "Hoje", "Amanhã", "Ontem" ou o dia por extenso - é assim que se fala de uma data próxima. */
 function tituloDoDia(isoDay: string, hoje: string, amanha: string, ontem: string): string {
   if (isoDay === hoje) return "Hoje";
   if (isoDay === amanha) return "Amanhã";
@@ -315,7 +315,7 @@ export function CalendarioScreen() {
   const mostraDoses = filtro !== "compromissos";
 
   /**
-   * Os pontinhos do mês. Respeita o filtro porque a grade e a lista falam da mesma agenda — um mês
+   * Os pontinhos do mês. Respeita o filtro porque a grade e a lista falam da mesma agenda - um mês
    * pintado de doses com a lista mostrando só compromissos seria duas respostas para a mesma
    * pergunta.
    */
@@ -329,7 +329,7 @@ export function CalendarioScreen() {
     return mapa;
   }, [dias, mostraCompromissos, mostraDoses]);
 
-  /** O dia aberto embaixo da grade. Vazio quando não há nada — e não `undefined`, que quebraria. */
+  /** O dia aberto embaixo da grade. Vazio quando não há nada - e não `undefined`, que quebraria. */
   const diaEncontrado = dias.find((item) => item.isoDay === diaSelecionado);
   const dia = {
     isoDay: diaSelecionado,
@@ -338,7 +338,7 @@ export function CalendarioScreen() {
     /**
      * Os marcos ignoram o filtro, de propósito.
      *
-     * O filtro escolhe entre compromissos e doses, e um marco não é nenhum dos dois — esconder a
+     * O filtro escolhe entre compromissos e doses, e um marco não é nenhum dos dois - esconder a
      * validade da receita ao filtrar por "só doses" seria esconder algo que a pessoa não pediu
      * para esconder. São poucos por mês, e o que eles dizem não compete com a lista.
      */
@@ -349,7 +349,7 @@ export function CalendarioScreen() {
 
   /**
    * Trocar de mês leva a seleção junto, para o dia 1º do mês visitado. Sem isso a lista embaixo
-   * continuaria mostrando um dia que não está mais na grade — a tela diria duas coisas.
+   * continuaria mostrando um dia que não está mais na grade - a tela diria duas coisas.
    */
   function mudarMes(passo: -1 | 1) {
     const novo = new Date(mesVisivel.getFullYear(), mesVisivel.getMonth() + passo, 1);
@@ -368,7 +368,7 @@ export function CalendarioScreen() {
   /**
    * Registrar dose direto do calendário, e só onde "tomei" descreve algo que já aconteceu: hoje e
    * nos dias passados. Oferecer o botão numa dose da semana que vem convidaria a marcar o que não
-   * aconteceu, e o app passaria a registrar intenção em vez de ingestão — a mesma regra que já
+   * aconteceu, e o app passaria a registrar intenção em vez de ingestão - a mesma regra que já
    * governa a Home.
    */
   async function registrar(dose: DoseDaAgenda, status: IntakeStatus) {
@@ -388,7 +388,7 @@ export function CalendarioScreen() {
    * É deliberadamente diferente de confirmar uma dose, que pede confirmação: lá o toque move
    * estoque e entra no cálculo de adesão, e desfazer exige uma correção que gera outro registro.
    * Aqui o desfecho é um estado do próprio compromisso, corrigível em um toque na linha logo
-   * abaixo — cobrar um diálogo por algo tão reversível só faria a pessoa parar de responder.
+   * abaixo - cobrar um diálogo por algo tão reversível só faria a pessoa parar de responder.
    */
   async function responder(appointment: Appointment, outcome: AppointmentOutcome) {
     try {
@@ -428,7 +428,7 @@ export function CalendarioScreen() {
   }
 
   /* A exclusão saiu desta tela junto com a lixeira do card (06/09). Ela vive na listagem de
-     Compromissos, que o toque no card abre já no compromisso certo — um só caminho para excluir, e
+     Compromissos, que o toque no card abre já no compromisso certo - um só caminho para excluir, e
      não um alvo destrutivo de 20px dentro de uma lista que se percorre com o polegar. */
 
   if (isLoading) return <CenteredLoader />;
@@ -438,7 +438,7 @@ export function CalendarioScreen() {
       <Header
         title="Calendário"
         onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
-        // A agenda do dia só mostra o que está selecionado na grade — faltava um jeito de ver
+        // A agenda do dia só mostra o que está selecionado na grade - faltava um jeito de ver
         // todos os compromissos cadastrados de uma vez, igual a lista de Remédios já oferece
         // para as medicações.
         action={{
@@ -455,7 +455,7 @@ export function CalendarioScreen() {
       ) : (
         <>
           {/* A grade rola junto com a lista, e só o filtro gruda no topo (`stickyHeaderIndices`).
-              Fixa, ela custava mais de um terço da tela em toda rolagem — e quem já escolheu o dia
+              Fixa, ela custava mais de um terço da tela em toda rolagem - e quem já escolheu o dia
               está lendo o que tem nele, não procurando outro. O filtro fica porque governa as duas
               coisas ao mesmo tempo: os pontinhos do mês e o que a lista mostra. */}
           {/* As duas props de teclado existem por causa do popup de revisão: fechá-lo enquanto o
@@ -529,7 +529,7 @@ export function CalendarioScreen() {
                   key={appointment.id}
                   appointment={appointment}
                   // Comparado por instante, e não pelo dia: a consulta das 8h de hoje já aconteceu
-                  // às 9h, e é justamente aí — saindo do consultório — que a pessoa tem o que
+                  // às 9h, e é justamente aí - saindo do consultório - que a pessoa tem o que
                   // responder. Pelo dia, "Você foi?" só apareceria amanhã.
                   passado={appointment.scheduledFor < agoraIso}
                   // Para a listagem, e não direto para o formulário: é lá que estão editar **e**
@@ -596,7 +596,7 @@ export function CalendarioScreen() {
 
           <Button label="Salvar" onPress={() => void salvarRevisao()} />
           {/* Apagar a resposta devolve o compromisso a "ainda não respondido", que é diferente de
-              "não fui" — quem marcou por engano precisa poder voltar ao estado sem resposta. */}
+              "não fui" - quem marcou por engano precisa poder voltar ao estado sem resposta. */}
           <Button
             label="Apagar esta resposta"
             variant="text"

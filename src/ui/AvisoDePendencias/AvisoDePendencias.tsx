@@ -10,7 +10,7 @@ export type AvisoDePendenciasProps = {
 };
 
 /**
- * "Ainda não subiu para a nuvem" — uma linha só, no topo da lista.
+ * "Ainda não subiu para a nuvem" - uma linha só, no topo da lista.
  *
  * **Um aviso para a tela, e não um selo por item.** Marcar cada card individualmente encheria a
  * lista de ícones para dizer algo que raramente muda a decisão de quem está lendo: a pessoa quer
@@ -18,7 +18,7 @@ export type AvisoDePendenciasProps = {
  * dados estão salvos?", e ela se responde uma vez, no topo.
  *
  * **Não é erro, e o texto diz isso.** Ficar com alterações por enviar é o funcionamento normal de
- * um app offline-first — o dado está no aparelho, que é a fonte de verdade. Pintar isso de
+ * um app offline-first - o dado está no aparelho, que é a fonte de verdade. Pintar isso de
  * vermelho ensinaria a pessoa a se preocupar com o que está certo, e a ignorar o indicador quando
  * ele tiver algo real a dizer.
  *

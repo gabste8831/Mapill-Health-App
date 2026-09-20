@@ -9,7 +9,7 @@ export class DoseAlarmAlreadySnoozedError extends Error {
 
 /**
  * Adia o alarme de uma dose em 5 minutos. Regra do domínio: no máximo um adiamento por dose
- * (o alarme toca no máximo duas vezes) — depois disso o paciente precisa confirmar, marcar
+ * (o alarme toca no máximo duas vezes) - depois disso o paciente precisa confirmar, marcar
  * como não tomada, ou usar "ignorar por agora" (vira IntakeLog "deferred").
  */
 export class SnoozeDoseAlarm {

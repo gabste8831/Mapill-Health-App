@@ -5,7 +5,7 @@ import type { AuthUser } from "../../domain/entities/auth-user";
 import type { AuthGateway } from "../../domain/ports/auth-gateway";
 import { isSupabaseConfigured, supabase } from "./supabase-client";
 
-// Fecha a aba do navegador automaticamente quando o Google redireciona de volta pro app —
+// Fecha a aba do navegador automaticamente quando o Google redireciona de volta pro app -
 // necessário no fluxo com `expo-web-browser`, ver docs do Supabase para Expo.
 WebBrowser.maybeCompleteAuthSession();
 
@@ -24,7 +24,7 @@ function toAuthUser(user: SupabaseAuthUser): AuthUser {
 }
 
 /**
- * `asserts x is T` só é válido sobre parâmetro (ou `this`), não sobre um import de módulo —
+ * `asserts x is T` só é válido sobre parâmetro (ou `this`), não sobre um import de módulo -
  * daí retornar o cliente em vez de tentar estreitar o tipo da variável importada.
  */
 function ensureSupabaseConfigured(): NonNullable<typeof supabase> {
@@ -63,7 +63,7 @@ export class SupabaseAuthGateway implements AuthGateway {
       throw new Error("Login cancelado.");
     }
 
-    // O Supabase devolve os tokens no fragmento da URL (depois do #), não na query (?) — troca
+    // O Supabase devolve os tokens no fragmento da URL (depois do #), não na query (?) - troca
     // pra poder ler com URLSearchParams igual.
     const fragment = result.url.split("#")[1] ?? "";
     const params = new URLSearchParams(fragment);

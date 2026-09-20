@@ -8,7 +8,7 @@ import { apagarNaNuvem, SQL_LIMPAR_MARCA_DAGUA } from "../remote/apagar-na-nuvem
 /**
  * Tabelas com dado clínico, na ordem em que precisam morrer: filhas antes das mães. As chaves
  * estrangeiras não são impostas pelo SQLite aqui, mas apagar de baixo para cima mantém o banco
- * consistente em qualquer instante intermediário — inclusive se o processo for morto no meio.
+ * consistente em qualquer instante intermediário - inclusive se o processo for morto no meio.
  */
 const TABELAS_CLINICAS = [
   "intake_logs",
@@ -27,12 +27,12 @@ const TABELAS_DE_IDENTIDADE = ["patient_profiles", "consent_records"];
  * Desmarca do sistema os avisos que acabaram de perder o dado que os justificava.
  *
  * Apagar as tabelas não desagenda nada: o agendamento vive no Android, não no banco. Sem isto, o
- * alarme toca depois do apagamento e **anuncia pelo nome** um remédio que a pessoa mandou apagar —
+ * alarme toca depois do apagamento e **anuncia pelo nome** um remédio que a pessoa mandou apagar -
  * o dado sensível volta pela tela de bloqueio, que é justamente o que o apagamento deveria impedir.
  *
  * **A falha aqui não derruba o apagamento.** O dado já morreu quando esta função roda, e é ele que
  * a LGPD protege; um aviso órfão que sobreviva a um erro do agendador é ruim, mas desfazer a
- * exclusão por causa dele seria pior. Por isso o `catch` engole — e é a única razão para engolir.
+ * exclusão por causa dele seria pior. Por isso o `catch` engole - e é a única razão para engolir.
  *
  * O import é dinâmico porque o módulo de avisos carrega o Notifee, que só existe no aparelho: no
  * topo do arquivo ele quebraria o repositório em ambiente sem nativo.
@@ -56,7 +56,7 @@ async function cancelarAvisosOrfaos(): Promise<void> {
 const PREFIXOS_DE_ARQUIVO = ["ficha-foto", "medicamento-caixa", "medicamento-receita"];
 
 /**
- * Apagamento real dos dados locais — o direito de exclusão da LGPD (art. 18) do lado que existe
+ * Apagamento real dos dados locais - o direito de exclusão da LGPD (art. 18) do lado que existe
  * hoje, e também o botão que torna o app testável sem desinstalar.
  *
  * É **hard delete**, não `deleted_at`. Exclusão lógica é a ferramenta certa para o item que o
@@ -67,7 +67,7 @@ const PREFIXOS_DE_ARQUIVO = ["ficha-foto", "medicamento-caixa", "medicamento-rec
  * ocultar da UI".
  *
  * ⚠️ **Quando o D1 existir, isto deixa de bastar.** Com sincronização ligada, apagar só o local
- * faria o próximo `pull` trazer tudo de volta do servidor — o apagamento tem que acontecer nos
+ * faria o próximo `pull` trazer tudo de volta do servidor - o apagamento tem que acontecer nos
  * dois lados, e o de lá primeiro. Ver o D3.
  */
 export class LocalDataRepository {
@@ -76,12 +76,12 @@ export class LocalDataRepository {
    * ficam.
    *
    * **A nuvem é apagada primeiro, e a ordem não é detalhe.** Com o D1 ligado, apagar só o local
-   * faria o próximo `pull` trazer tudo de volta — e a pessoa veria os dados que mandou apagar
+   * faria o próximo `pull` trazer tudo de volta - e a pessoa veria os dados que mandou apagar
    * reaparecerem sozinhos, que é a pior coisa que um botão de exclusão pode fazer. Apagando lá
    * primeiro, mesmo que o app feche no meio, o que sobra localmente sobe como exclusão na próxima
    * sincronização.
    *
-   * **E quando a nuvem não pode ser limpa** — offline, sessão expirada, erro de permissão —, o
+   * **E quando a nuvem não pode ser limpa** - offline, sessão expirada, erro de permissão -, o
    * apagamento local acontece do mesmo jeito, mas a marca d'água da sincronização é **preservada**.
    * É ela que impede o pull seguinte de rebaixar o servidor inteiro de volta para o aparelho. Sem
    * isso, o botão de apagar virava um apagamento temporário: tudo sumia e voltava na sincronização
@@ -104,7 +104,7 @@ export class LocalDataRepository {
   }
 
   /**
-   * Numa transação só: apagar metade deixaria o app num estado que nenhuma tela sabe desenhar —
+   * Numa transação só: apagar metade deixaria o app num estado que nenhuma tela sabe desenhar -
    * tratamento sem medicamento, dose sem tratamento.
    */
   private async eraseTables(tabelas: string[], nuvemLimpa: boolean): Promise<void> {
@@ -113,16 +113,16 @@ export class LocalDataRepository {
         await database.runAsync(`DELETE FROM ${tabela}`);
       }
       /**
-       * A marca d'água da sincronização vai junto — **mas só se a nuvem tiver sido limpa**.
+       * A marca d'água da sincronização vai junto - **mas só se a nuvem tiver sido limpa**.
        *
        * Ela diz "já baixei tudo até tal instante". Mantida depois de esvaziar o banco, o próximo
-       * pull pularia exatamente as linhas mais antigas que ela — e o app ficaria com metade dos
+       * pull pularia exatamente as linhas mais antigas que ela - e o app ficaria com metade dos
        * dados se algum dia eles voltassem. Por isso ela sai no caminho normal.
        *
        * **Com a nuvem intacta, apagá-la é o defeito.** Offline, sem sessão ou com erro de permissão,
        * `apagarNaNuvem` falha e o servidor continua cheio; zerar a marca d'água aí faz o pull
        * seguinte baixar tudo de volta, e a pessoa vê reaparecer o que mandou apagar. Preservando-a,
-       * o servidor fica alto demais para ser rebaixado e nada ressuscita — os dados remotos seguem
+       * o servidor fica alto demais para ser rebaixado e nada ressuscita - os dados remotos seguem
        * lá até a exclusão por contato, que é o que o texto legal descreve.
        *
        * O `catch` cobre quem nunca vinculou conta: a tabela só nasce na primeira sincronização.
@@ -135,7 +135,7 @@ export class LocalDataRepository {
        * Resto da tentativa de regerar a grade por fuso, abandonada em 13/09.
        *
        * Nada escreve nesta chave hoje, mas os aparelhos que rodaram aquela versão têm a linha
-       * gravada — e ela descrevia as doses, que este apagamento remove. Sai junto para não deixar
+       * gravada - e ela descrevia as doses, que este apagamento remove. Sai junto para não deixar
        * lixo de uma feature que não existe mais. O `catch` cobre quem não tem a tabela.
        */
       await database
@@ -146,7 +146,7 @@ export class LocalDataRepository {
 
   /**
    * As fotos e as receitas anexadas. Ficam fora da transação de propósito: sistema de arquivos não
-   * participa dela, e falhar em apagar um arquivo não pode desfazer o apagamento do banco — o
+   * participa dela, e falhar em apagar um arquivo não pode desfazer o apagamento do banco - o
    * arquivo órfão é recuperável, o banco meio apagado não.
    */
   private eraseFiles(prefixos: string[]): void {

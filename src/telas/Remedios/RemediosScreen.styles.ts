@@ -96,14 +96,14 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    * O nome e o sino do lembrete na mesma linha.
    *
    * `flexShrink` no nome (via `flex: 1` do `Text`) e nada no ícone: com nome comprido, quem corta é
-   * o texto, que já tem reticências. O sino é 15dp e não tem como encolher sem sumir — e ele é a
+   * o texto, que já tem reticências. O sino é 15dp e não tem como encolher sem sumir - e ele é a
    * única informação da linha que não existe em nenhum outro lugar da lista.
    */
   nomeComSino: {
     flexDirection: "row",
     /* `flex-start` e não `center`: com o nome quebrando em duas ou três linhas, centralizar deixaria
        o sino flutuando no meio do bloco, longe da linha do nome. O `paddingTop` o desce o bastante
-       para ficar na altura da primeira linha — o ícone tem 15px e a linha do nome é mais alta. */
+       para ficar na altura da primeira linha - o ícone tem 15px e a linha do nome é mais alta. */
     alignItems: "flex-start",
     gap: 6,
   },

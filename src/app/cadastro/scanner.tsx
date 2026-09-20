@@ -7,7 +7,7 @@ import { ScannerScreen } from "@/telas/Scanner/ScannerScreen";
  * O scanner **não salva nada**: ele lê, encontra e passa adiante.
  *
  * O que foi lido viaja para o formulário como parâmetros de rota, e não por estado global. É a
- * forma que sobrevive ao ciclo de vida do Android — se o sistema descartar a tela do scanner
+ * forma que sobrevive ao ciclo de vida do Android - se o sistema descartar a tela do scanner
  * enquanto o formulário está aberto, o cadastro continua com o que já foi preenchido.
  *
  * `replace` e não `push`: terminada a leitura, voltar do formulário tem que levar à escolha de
@@ -30,7 +30,7 @@ export default function ScannerRoute() {
                   /**
                    * Capitalizado aqui, e não só na exibição: **este** é o valor que o formulário
                    * abre no campo e que vai para o banco. Era o único caminho da CMED que gravava
-                   * o uppercase cru — quem chegava pela busca passava por `aceitarSugestao`, que
+                   * o uppercase cru - quem chegava pela busca passava por `aceitarSugestao`, que
                    * já capitalizava, e os dois cadastros do mesmo remédio saíam com nomes
                    * diferentes conforme a pessoa tivesse escaneado ou digitado.
                    */

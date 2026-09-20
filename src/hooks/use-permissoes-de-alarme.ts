@@ -18,12 +18,12 @@ const VAZIO: DiagnosticoDeAlarme = {
  * O estado das permissões do alarme, sempre atualizado.
  *
  * **Reconsulta a cada volta ao primeiro plano**, e isso é o coração do hook. As quatro permissões
- * vivem em telas do sistema, e é para lá que o app manda a pessoa quando falta alguma — então
+ * vivem em telas do sistema, e é para lá que o app manda a pessoa quando falta alguma - então
  * "voltar ao app" é exatamente o momento em que o estado mudou. Sem esta releitura, ela concederia
  * a permissão e voltaria para um aviso dizendo que ainda falta.
  *
  * Também cobre o caminho inverso, que é o mais perigoso: permissão revogada nas configurações
- * enquanto o app estava fechado. O alarme deixa de tocar e ninguém percebe — a pessoa segue
+ * enquanto o app estava fechado. O alarme deixa de tocar e ninguém percebe - a pessoa segue
  * confiando num lembrete que não existe mais.
  */
 export function usePermissoesDeAlarme() {

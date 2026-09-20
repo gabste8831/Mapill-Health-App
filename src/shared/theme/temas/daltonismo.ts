@@ -45,7 +45,7 @@ export const temaDaltonismo: Tema = {
     /**
      * Aqui o aceso é **laranja**, e não amarelo.
      *
-     * Amarelo puro é o que a protanopia mais confunde com verde — e neste tema o verde já virou
+     * Amarelo puro é o que a protanopia mais confunde com verde - e neste tema o verde já virou
      * turquesa justamente para se separar. Puxar o alerta para 38° o afasta dos dois, e a
      * luminosidade alta mantém o efeito de "lâmpada" que o token existe para dar.
      */
@@ -70,7 +70,7 @@ export const temaDaltonismo: Tema = {
     onErrorSurface: "#7A0033",
 
     /**
-     * Turquesa e magenta mais vivos — **não** verde grama e vermelho fogo.
+     * Turquesa e magenta mais vivos - **não** verde grama e vermelho fogo.
      *
      * O tema inteiro existe para trocar o par verde/vermelho, que é justamente o que a deuteranopia
      * e a protanopia não separam. Trazer as cores vivas do tema padrão para cá desfaria isso: o
@@ -78,7 +78,7 @@ export const temaDaltonismo: Tema = {
      * não enxerga.
      *
      * Então o que fica mais vivo é o par deste tema, mantendo a distância de matiz que o faz
-     * funcionar. `#00838A` e `#D81B60` dão 4.02:1 e 4.22:1 na superfície tingida — acima dos 3:1 da
+     * funcionar. `#00838A` e `#D81B60` dão 4.02:1 e 4.22:1 na superfície tingida - acima dos 3:1 da
      * forma, e ainda separados por luminosidade além do matiz, que é a segunda pista para quem lê
      * as duas como tons de cinza.
      */

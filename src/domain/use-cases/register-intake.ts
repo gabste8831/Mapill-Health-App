@@ -11,7 +11,7 @@ type RegisterIntakeInput = {
   status: IntakeStatus;
   occurredAt: string;
   /**
-   * Quanto esta dose consome, na unidade do estoque — vem de `DoseSchedule.amount`, e não de um
+   * Quanto esta dose consome, na unidade do estoque - vem de `DoseSchedule.amount`, e não de um
    * "1" implícito. Desde que a dose passou a variar por horário (migration 012), descontar uma
    * unidade fixa erraria o estoque em todo tratamento que não seja de um comprimido por vez:
    * confirmar 10 UI de insulina baixaria 1.

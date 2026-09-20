@@ -8,7 +8,7 @@ import { Easing } from "react-native-reanimated";
  * Movimento aqui tem uma função só: **mostrar que algo mudou**. A barra que cresce diz "seu dia
  * avançou"; o check que aparece diz "ficou registrado". Nada se move para enfeitar.
  *
- * Isto não é purismo — é o público. Este app abre na mão de quem tem catarata, tremor, ou está
+ * Isto não é purismo - é o público. Este app abre na mão de quem tem catarata, tremor, ou está
  * com pressa porque esqueceu o remédio. Animação que atrasa uma confirmação de dose é atrito num
  * fluxo que precisa ser instantâneo, e animação que se repete a cada rolagem vira ruído que ensina
  * a ignorar a tela. Por isso os tempos são curtos e o gatilho é sempre uma mudança de estado real.
@@ -21,7 +21,7 @@ import { Easing } from "react-native-reanimated";
  */
 
 /**
- * Os três tempos. Não há um quarto — quando cada animação escolhe o próprio número, o app perde o
+ * Os três tempos. Não há um quarto - quando cada animação escolhe o próprio número, o app perde o
  * compasso e a interface parece feita por pessoas diferentes.
  */
 export const duracao = {
@@ -33,21 +33,21 @@ export const duracao = {
   lenta: 420,
 } as const;
 
-/** A curva padrão. Desacelera no fim — o elemento chega, não é largado. */
+/** A curva padrão. Desacelera no fim - o elemento chega, não é largado. */
 export const curva = Easing.out(Easing.cubic);
 
 /** Para o que precisa de um empurrão extra no começo (o check que "carimba"). */
 export const curvaEnfatica = Easing.out(Easing.back(1.4));
 
 /**
- * **A preferência de "reduzir movimento" é lida com `useReducedMotion()`**, do Reanimated — não
+ * **A preferência de "reduzir movimento" é lida com `useReducedMotion()`**, do Reanimated - não
  * por um helper daqui.
  *
  * Havia um `duracaoRespeitandoMovimento(ms, reduzir)` neste arquivo e um `use-reduzir-movimento`
  * nos hooks, escritos para ser o caminho padrão. Os componentes acabaram usando o hook da
- * biblioteca, que faz o mesmo e já roda na thread de UI — e as duas peças próprias ficaram sem
+ * biblioteca, que faz o mesmo e já roda na thread de UI - e as duas peças próprias ficaram sem
  * consumidor. Duas formas de responder à mesma pergunta divergem em silêncio; ficou a da lib.
  *
  * O padrão, em quem anima: `const semMovimento = useReducedMotion();` e a duração vira `0`.
- * Com duração zero o valor salta para o destino — o estado final continua correto e nada pisca.
+ * Com duração zero o valor salta para o destino - o estado final continua correto e nada pisca.
  */

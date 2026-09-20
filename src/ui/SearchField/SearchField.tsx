@@ -9,7 +9,7 @@ export type SearchFieldProps = {
   value: string;
   onChangeText: (value: string) => void;
   placeholder: string;
-  /** Rótulo do botão de limpar pro leitor de tela — o X sozinho não diz o que apaga. */
+  /** Rótulo do botão de limpar pro leitor de tela - o X sozinho não diz o que apaga. */
   clearAccessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
 };
@@ -38,7 +38,7 @@ export function SearchField({
       {/**
        * A lupa acompanha o foco: cinza em repouso, azul enquanto se escreve.
        *
-       * Ela é o elemento que diz "aqui se busca", e estava na cor mais apagada do componente — o
+       * Ela é o elemento que diz "aqui se busca", e estava na cor mais apagada do componente - o
        * campo inteiro lia como desligado. Junto do anel de foco, é o que dá sinal de vida à busca
        * sem acrescentar enfeite nenhum.
        */}

@@ -12,7 +12,7 @@ type CardEstoqueProps = {
  * Porta de entrada permanente para o estoque, na Home.
  *
  * O acesso morava só num ícone no topo da aba Medicações, e o teste em aparelho mostrou que
- * ninguém o encontrava. Um ícone sem rótulo depende de a pessoa já saber que ele existe — e quem
+ * ninguém o encontrava. Um ícone sem rótulo depende de a pessoa já saber que ele existe - e quem
  * precisa conferir quanto resta de um remédio normalmente está justamente na Home.
  *
  * Diferente do `CardEstoqueBaixo`, este não é alerta: ele não muda de cor nem cobra ação, e some
@@ -36,7 +36,7 @@ export function CardEstoque({ onPress }: CardEstoqueProps) {
       {/* Só o título.
 
           O subtítulo dizia o que o rótulo da seção acima já diz, e a contagem que ele carregava não
-          muda o que a pessoa faz aqui: com uma medicação ou com seis, o toque leva à mesma tela — e
+          muda o que a pessoa faz aqui: com uma medicação ou com seis, o toque leva à mesma tela - e
           o número exato está do outro lado. Sem ele o card cai de três linhas para uma, e passa a
           ler como o que é: um atalho, não um aviso. */}
       <Text style={styles.titulo}>Gerenciar estoque</Text>

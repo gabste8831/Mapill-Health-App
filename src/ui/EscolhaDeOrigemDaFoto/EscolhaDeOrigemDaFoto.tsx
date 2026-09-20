@@ -13,13 +13,13 @@ export type EscolhaDeOrigemDaFotoProps = {
   onEscolher: (origin: PhotoOrigin) => void;
   /**
    * Terceira origem: um arquivo já salvo no aparelho (PDF, principalmente). Só existe onde faz
-   * sentido — a receita chega por e-mail em PDF, a caixa do remédio não.
+   * sentido - a receita chega por e-mail em PDF, a caixa do remédio não.
    */
   onEscolherArquivo?: () => void;
 };
 
 /**
- * De onde vem o anexo: câmera, galeria ou — onde couber — um arquivo do aparelho.
+ * De onde vem o anexo: câmera, galeria ou - onde couber - um arquivo do aparelho.
  *
  * Popup em vez de botões soltos na tela porque a pergunta só existe **depois** de a pessoa decidir
  * que quer anexar algo: sempre visível, ela faria o cadastro carregar três ações para um campo

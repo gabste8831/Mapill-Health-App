@@ -22,7 +22,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * `bodyLg` e não `headlineSmRegular`: um degrau abaixo na escala (16 em vez de 18).
    *
-   * "ESTOQUE", "ANEXOS", "LEMBRETE" nomeiam a seção — não competem com o conteúdo dela. A 18 eles
+   * "ESTOQUE", "ANEXOS", "LEMBRETE" nomeiam a seção - não competem com o conteúdo dela. A 18 eles
    * pesavam como título de tela num formulário que já tem muitos, e o mesmo token servia aos
    * títulos de Ajustes, onde o efeito era o mesmo.
    */
@@ -64,12 +64,12 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     gap: spacing.md,
   },
   /**
-   * O quadro da mídia, **igual com e sem imagem** — ver a mesma decisão na ficha de saúde.
+   * O quadro da mídia, **igual com e sem imagem** - ver a mesma decisão na ficha de saúde.
    *
    * Eram dois estilos trocados no lugar, e a troca recriava o contêiner no instante em que a
    * `Image` montava: no Android o `overflow: "hidden"` chegava depois do primeiro paint, e a foto
    * era pintada fora da área visível do pai. Daí a **primeira** foto ficar branca enquanto trocar
-   * uma existente funcionava — trocar não muda de estilo, estrear muda.
+   * uma existente funcionava - trocar não muda de estilo, estrear muda.
    */
   photoQuadro: {
     width: TAMANHO_DA_FOTO,
@@ -90,7 +90,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     height: TAMANHO_DA_FOTO,
   },
   /**
-   * As duas maneiras de anexar a receita, lado a lado — são alternativas, não sequência.
+   * As duas maneiras de anexar a receita, lado a lado - são alternativas, não sequência.
    *
    * `flexWrap` porque em tela estreita os dois rótulos não cabem na largura que sobra ao lado da
    * miniatura de 72px: sem ele, o segundo era espremido até quebrar no meio da palavra.

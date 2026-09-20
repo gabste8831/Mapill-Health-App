@@ -14,7 +14,7 @@ export type TemaScreenProps = {
 /**
  * A escolha de aparência do app, isolada em tela própria.
  *
- * Morava dentro de Ajustes, expandida — mas o seletor completo é o bloco mais alto da tela, e a
+ * Morava dentro de Ajustes, expandida - mas o seletor completo é o bloco mais alto da tela, e a
  * maioria de quem abre Ajustes está atrás de outra coisa (conta, dados). Um botão em
  * Acessibilidade que leva pra cá deixa Ajustes como um menu curto de novo.
  *
@@ -22,7 +22,7 @@ export type TemaScreenProps = {
  *
  * **Aparência** é gosto e conforto: claro, escuro, alto contraste. **Preferências visuais** é
  * necessidade: quais cores o app usa para dizer "tudo certo", "fique atento" e "urgente". As duas
- * são independentes de propósito — quem não distingue verde de vermelho também usa o app à noite,
+ * são independentes de propósito - quem não distingue verde de vermelho também usa o app à noite,
  * e antes precisava abrir mão do tema escuro para enxergar os estados.
  */
 export function TemaScreen({ onBack }: TemaScreenProps) {

@@ -37,7 +37,7 @@ import {
 import { criarEstilos } from "./EstoqueScreen.styles";
 
 /**
- * Minúsculas e sem acento, pra "acido folico" achar "Ácido fólico" — a mesma regra da lista de
+ * Minúsculas e sem acento, pra "acido folico" achar "Ácido fólico" - a mesma regra da lista de
  * medicações, porque é a mesma pessoa procurando o mesmo remédio.
  */
 function normalizar(texto: string): string {
@@ -49,7 +49,7 @@ function normalizar(texto: string): string {
 
 
 /**
- * A frase que o número de estoque vira. O que interessa não é a quantidade — é quanto tempo ela
+ * A frase que o número de estoque vira. O que interessa não é a quantidade - é quanto tempo ela
  * ainda dá, porque é isso que decide se dá pra esperar a próxima ida à farmácia.
  */
 function resumirPrevisao(quantity: number, depletion: StockDepletion | null): string {
@@ -74,13 +74,13 @@ const DIAS_DE_ALERTA_PADRAO = 7;
 /**
  * Acaba nos próximos dias: nem alarme, nem informação neutra.
  *
- * Sem este meio-termo, "acaba em 3 dias" era pintado igual a "acaba em 90" — e a diferença entre os
+ * Sem este meio-termo, "acaba em 3 dias" era pintado igual a "acaba em 90" - e a diferença entre os
  * dois é justamente o que a pessoa veio a esta tela descobrir. O vermelho continua reservado ao que
  * já não dá pra resolver a tempo, para não gastar o alarme no que ainda tem solução.
  *
  * A janela é a que **a própria pessoa configurou** no cadastro daquele remédio (`Avisar com N dias
- * de antecedência`), e não um número igual pra todos: quem pediu aviso com 30 dias tem motivo — uma
- * receita que precisa ser renovada, um remédio que a farmácia encomenda —, e pintar de âmbar só no
+ * de antecedência`), e não um número igual pra todos: quem pediu aviso com 30 dias tem motivo - uma
+ * receita que precisa ser renovada, um remédio que a farmácia encomenda -, e pintar de âmbar só no
  * sétimo dia contradiria o que ela mesma definiu como "está acabando".
  */
 function previsaoEhAlerta(item: ItemDeEstoque): boolean {
@@ -95,10 +95,10 @@ function previsaoEhAlerta(item: ItemDeEstoque): boolean {
   return depletion.daysRemaining > 0 && depletion.daysRemaining <= janela;
 }
 
-/** O estado do aviso em uma frase — o que a linha do card mostra sem precisar abrir o popup. */
+/** O estado do aviso em uma frase - o que a linha do card mostra sem precisar abrir o popup. */
 function rotuloDoAviso(inventory: InventoryItem): string {
   if (!inventory.lowStockAlertEnabled) return "Sem aviso de estoque baixo";
-  // Sem antecedência escolhida o aviso existe do mesmo jeito, só chega no dia em que acaba — e o
+  // Sem antecedência escolhida o aviso existe do mesmo jeito, só chega no dia em que acaba - e o
   // rótulo precisa dizer isso, senão a linha nega um aviso que a pessoa vai receber.
   if (inventory.lowStockAlertLeadDays === null) return "Avisar quando acabar";
   const dias = inventory.lowStockAlertLeadDays;
@@ -116,7 +116,7 @@ const LEAD_DAYS_OPTIONS: OptionGroupOption<string>[] = [
 /**
  * Duas ordens, e não três. Urgência primeiro: é a pergunta que traz a pessoa a esta tela.
  *
- * "Menos na caixa" saiu. Ela quase sempre produzia a mesma ordem de "Acaba primeiro" — e quando
+ * "Menos na caixa" saiu. Ela quase sempre produzia a mesma ordem de "Acaba primeiro" - e quando
  * divergia, era por um motivo que a torna a pior das duas: dez comprimidos de um remédio tomado uma
  * vez por semana duram mais que trinta de um tomado três vezes ao dia. O que interessa é quando
  * acaba, não quanto sobrou, e oferecer as duas fazia escolher entre uma resposta certa e uma quase.
@@ -143,14 +143,14 @@ function CartaoDeEstoque({ item, onRecontar, onRepor, onConfigurarAviso }: ItemD
 
   return (
     <View style={styles.item}>
-      {/* Nome em cima, quantidade embaixo — e não lado a lado.
+      {/* Nome em cima, quantidade embaixo - e não lado a lado.
 
           Na mesma linha, um nome longo espremia o número contra a borda ou o empurrava para fora.
           Empilhados, cada um tem a largura inteira, e a hierarquia vem do peso da fonte em vez da
           posição.
 
           O local saiu do cartão: é dado de quem já foi buscar a caixa, não de quem compara
-          estoques, e continua no cadastro da medicação. O traço divisor saiu junto — nada aqui é de
+          estoques, e continua no cadastro da medicação. O traço divisor saiu junto - nada aqui é de
           assunto tão diferente que precise de separador. */}
       <View style={styles.identificacao}>
         <Text style={styles.name} numberOfLines={2}>
@@ -170,7 +170,7 @@ function CartaoDeEstoque({ item, onRecontar, onRepor, onConfigurarAviso }: ItemD
 
           Sempre em selo, e não só nos dois estados de aviso: com o fundo aparecendo apenas quando
           há problema, o cartão mudava de anatomia conforme o estoque, e a lista ficava com uma
-          coluna irregular. O que muda entre os três é a cor, não a forma — e é a cor que se lê de
+          coluna irregular. O que muda entre os três é a cor, não a forma - e é a cor que se lê de
           relance ao varrer a tela.
 
           O ícone acompanha o estado: relógio quando ainda dá tempo, alerta quando aperta. Cor
@@ -225,13 +225,13 @@ function CartaoDeEstoque({ item, onRecontar, onRepor, onConfigurarAviso }: ItemD
       {/* O aviso de estoque baixo, editável aqui e não só no cadastro.
 
           Quem entra em "Gerenciar estoques" para mudar quando o app avisa procura por isto nesta
-          tela — e, sem a linha, não encontrava: o ajuste só existia dentro do formulário do
+          tela - e, sem a linha, não encontrava: o ajuste só existia dentro do formulário do
           medicamento. A tela ainda por cima já mostrava o efeito dele (é o que decide a etiqueta
           âmbar do prazo), o que deixava a pergunta "por que este está âmbar?" sem resposta ao
           alcance.
 
           Terceira linha e não terceiro botão ao lado dos outros dois: "Recontar" e "Repor" dividem
-          a largura em dois, e um terceiro espremeria os rótulos — que já são o que corta primeiro
+          a largura em dois, e um terceiro espremeria os rótulos - que já são o que corta primeiro
           com a fonte do sistema ampliada. Aqui ela também tem espaço para dizer o estado atual em
           vez de só oferecer a ação. */}
       <Pressable
@@ -328,7 +328,7 @@ export function EstoqueScreen() {
    *
    * Era `router.back()` com `/remedios` só de reserva, e por isso o botão cumpria a promessa
    * apenas para quem tinha chegado ao estoque vindo da própria listagem. Quem veio da Home
-   * tocava em "Ver minhas medicações" e era devolvido à Home — o rótulo nomeia um destino, e o
+   * tocava em "Ver minhas medicações" e era devolvido à Home - o rótulo nomeia um destino, e o
    * gesto de voltar não é um destino: ele depende de onde a pessoa esteve antes.
    *
    * `navigate` e não `push`: a listagem é uma aba, e empilhar uma segunda cópia dela deixaria o
@@ -342,7 +342,7 @@ export function EstoqueScreen() {
    * A seta do cabeçalho, que é outra coisa: ela desfaz o passo que trouxe a pessoa até aqui.
    *
    * Voltar e "ver minhas medicações" coincidem para quem veio da listagem, e é por isso que os
-   * dois compartilhavam uma função só. Para quem veio da Home eles divergem — e aí a seta deve
+   * dois compartilhavam uma função só. Para quem veio da Home eles divergem - e aí a seta deve
    * devolver à Home, que é de onde a pessoa veio. `/remedios` fica como reserva para quando não
    * há histórico (link direto, retomada do app).
    */
@@ -396,7 +396,7 @@ export function EstoqueScreen() {
 
             {/* A contagem **não** fica aqui: ela desceu para o cabeçalho da lista, encostada no
                 primeiro card. Ela descreve a lista, e entre a busca e o seletor de ordem parecia
-                legenda dos controles — mesma correção feita na lista de medicações. */}
+                legenda dos controles - mesma correção feita na lista de medicações. */}
 
             {items.length > 1 ? (
               <SeletorDeOrdem value={ordem} onChange={setOrdem} options={ORDENS_DE_ESTOQUE} />
@@ -434,13 +434,13 @@ export function EstoqueScreen() {
            *
            * **Aqui e não na Home**, e sem notificação: conferir uma caixa é tarefa que se faz de
            * pé na frente do armário, não algo que justifique interromper o dia. Quem abre esta
-           * tela já está pensando em estoque — é o único momento em que a pergunta chega na hora
+           * tela já está pensando em estoque - é o único momento em que a pergunta chega na hora
            * certa. Some sozinho quando não há nada a perguntar, que é o caso comum.
            */
           /**
            * O que rola junto com a lista: o lembrete de recontagem e, por último, a contagem.
            *
-           * A contagem vem no fim, encostada no primeiro card — é a lista que ela descreve. Fixos
+           * A contagem vem no fim, encostada no primeiro card - é a lista que ela descreve. Fixos
            * no topo ficam só a busca e o seletor de ordem, que são o que se opera.
            */
           ListHeaderComponent={
@@ -454,7 +454,7 @@ export function EstoqueScreen() {
                     </View>
                     {/* Uma frase, não três: quem lê isto está de pé na frente do armário. O "por
                         quê" (a estimativa envelhece) cabia no texto longo, mas custava a leitura
-                        toda vez — e a ação pedida é a mesma sabendo ou não o motivo. */}
+                        toda vez - e a ação pedida é a mesma sabendo ou não o motivo. */}
                     <Text style={styles.lembreteTexto}>
                       {aRecontar.length === 1
                         ? `${aRecontar[0].medicationName}: ${aRecontar[0].diasSemConferir} dias sem conferir.`
@@ -488,7 +488,7 @@ export function EstoqueScreen() {
               />
             )
           }
-          // O rodapé é o único lugar onde um remédio sem controle de estoque aparece — como
+          // O rodapé é o único lugar onde um remédio sem controle de estoque aparece - como
           // caminho, não como linha na lista. Listá-lo aqui misturaria o que tem número com o
           // que não tem, e a tela existe justamente pra comparar números.
           //
@@ -532,7 +532,7 @@ export function EstoqueScreen() {
               />
 
               {/* O resultado antes de confirmar. Sem isto, recontar é digitar um número e torcer
-                  — e a diferença gravada é justamente o que a pessoa não vê acontecer. */}
+                  - e a diferença gravada é justamente o que a pessoa não vê acontecer. */}
               <Text style={styles.sheetPrevia}>{previaDaMudanca(edicao, digitado, unidade)}</Text>
 
               <Button label="Confirmar" onPress={confirmar} disabled={mudanca === null} />
@@ -542,7 +542,7 @@ export function EstoqueScreen() {
       </BottomSheet>
 
       {/* O aviso de estoque baixo. Mesmas opções e mesma ordem do cadastro (`ConfiguracaoDeEstoque`)
-          — é a mesma decisão, e vê-la escrita de dois jeitos diferentes faria duvidar se são a
+          - é a mesma decisão, e vê-la escrita de dois jeitos diferentes faria duvidar se são a
           mesma coisa. O componente de lá não é reaproveitado inteiro porque ele carrega os campos
           de quantidade e local, que aqui já têm caminho próprio em "Repor" e "Recontar". */}
       <BottomSheet
@@ -554,7 +554,7 @@ export function EstoqueScreen() {
             <>
               <Text style={styles.sheetMedicamento}>{aviso.item.medication.name}</Text>
 
-              {/* Escolha explícita, nunca ligado sozinho — a mesma regra do cadastro. */}
+              {/* Escolha explícita, nunca ligado sozinho - a mesma regra do cadastro. */}
                             <Checkbox
                 checked={aviso.habilitado}
                 onChange={(habilitado) => setAviso({ ...aviso, habilitado })}
@@ -570,8 +570,8 @@ export function EstoqueScreen() {
                   /**
                    * **Tocar na opção já marcada desmarca.**
                    *
-                   * A antecedência é opcional — sem ela o aviso existe e chega no dia em que o
-                   * estoque acaba —, mas até aqui não havia como voltar a esse estado: escolhido um
+                   * A antecedência é opcional - sem ela o aviso existe e chega no dia em que o
+                   * estoque acaba -, mas até aqui não havia como voltar a esse estado: escolhido um
                    * prazo, a única saída era desligar o aviso inteiro e ligar de novo, o que não é
                    * óbvio e apaga junto o que a pessoa não queria mudar.
                    *
@@ -596,7 +596,7 @@ export function EstoqueScreen() {
               <Button
                 label="Salvar"
                 onPress={confirmarAviso}
-                // Ligado sem antecedência não tem quando disparar — é o mesmo bloqueio do cadastro.
+                // Ligado sem antecedência não tem quando disparar - é o mesmo bloqueio do cadastro.
                 disabled={aviso.habilitado && aviso.dias === null}
               />
             </>

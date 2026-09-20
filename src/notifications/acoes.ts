@@ -1,15 +1,15 @@
 /**
- * As ações rápidas do aviso — os identificadores que viajam com a notificação e voltam no toque.
+ * As ações rápidas do aviso - os identificadores que viajam com a notificação e voltam no toque.
  *
  * **"Tomei" confirma direto, sem abrir o app.** Isso pula a confirmação visual que o projeto exige
  * para ações críticas, e é uma exceção consciente: tocar num botão rotulado "Tomei" já é uma ação
  * deliberada, e a fricção extra num app de adesão custa exatamente o que ele existe para
- * conseguir — doses registradas. O que torna a exceção aceitável é a Home oferecer correção óbvia
+ * conseguir - doses registradas. O que torna a exceção aceitável é a Home oferecer correção óbvia
  * (`correct-intake` já existe), então nada aqui é irreversível.
  *
  * **"Adiar" não registra nada.** Ele só reagenda o aviso; nenhum log é gravado, nem `deferred`.
  * Isso importa quando o horário tem mais de uma dose: quem tomou uma e não a outra não está
- * afirmando nada sobre nenhuma delas ao adiar — está dizendo "me lembra de novo". Registrar um
+ * afirmando nada sobre nenhuma delas ao adiar - está dizendo "me lembra de novo". Registrar um
  * desfecho ali inventaria uma resposta que ninguém deu. O aviso que volta em 5 minutos traz só o
  * que ainda estiver pendente.
  *
@@ -19,7 +19,7 @@
  * ## Por que este arquivo encolheu
  *
  * Ele registrava **quatro categorias** no `expo-notifications`, para cobrir as combinações de "uma
- * ou várias doses" × "pode adiar ou não" — categorias precisavam existir no sistema *antes* do
+ * ou várias doses" × "pode adiar ou não" - categorias precisavam existir no sistema *antes* do
  * agendamento, e a escolha era feita por uma função que traduzia contagem em nome de categoria.
  *
  * No Notifee os botões vão **na própria notificação**, montados na hora a partir do aviso. A
@@ -29,7 +29,7 @@
 
 export const ACAO_TOMEI = "tomei";
 /**
- * "Pulei" — o par de "Tomei" na notificação, e a resposta que faltava ali.
+ * "Pulei" - o par de "Tomei" na notificação, e a resposta que faltava ali.
  *
  * A notificação oferecia "Tomei" e "Adiar", o que dava saída para quem tomou e para quem quer ser
  * lembrado depois, mas nenhuma para **quem não tomou**. Registrar isso importa tanto quanto o
@@ -39,5 +39,5 @@ export const ACAO_TOMEI = "tomei";
 export const ACAO_PULEI = "pulei";
 export const ACAO_ADIAR = "adiar";
 
-/** Quanto tempo o adiamento empurra o aviso. Um só por horário — ver `snoozeCount`. */
+/** Quanto tempo o adiamento empurra o aviso. Um só por horário - ver `snoozeCount`. */
 export const MINUTOS_DE_ADIAMENTO = 5;

@@ -22,7 +22,7 @@ export type TermosScreenProps = {
  * `2026-08-20T12:00:00.000Z` → `20/08/2026 às 09:00`.
  *
  * A hora entra junto da data porque isto é prova de consentimento: o que ela precisa identificar é
- * o **ato**, e duas versões aceitas no mesmo dia — o que acontece a cada bump de termos — ficariam
+ * o **ato**, e duas versões aceitas no mesmo dia - o que acontece a cada bump de termos - ficariam
  * indistinguíveis só pelo dia.
  */
 function toDisplayDate(isoTimestamp: string): string {
@@ -34,7 +34,7 @@ function toDisplayDate(isoTimestamp: string): string {
 
 /**
  * Consulta dos termos aceitos. Não há revogação aqui: o consentimento é a base legal de tudo
- * que o app faz com dado de saúde, então revogar equivale a parar de usar e apagar os dados —
+ * que o app faz com dado de saúde, então revogar equivale a parar de usar e apagar os dados -
  * uma ação de exclusão, e não um botão perdido numa tela de leitura.
  */
 export function TermosScreen({ acceptedVersion, acceptedAt, onBack }: TermosScreenProps) {
@@ -76,8 +76,8 @@ export function TermosScreen({ acceptedVersion, acceptedAt, onBack }: TermosScre
         </Card>
 
         {/* Superfície de cartão nos dois: o fundo padrão do acordeão (`surfaceContainerLow`) quase
-            empata com o da tela, e aqui — onde eles são os únicos blocos abaixo do cartão de
-            versão — nada indicava que havia algo a abrir. */}
+            empata com o da tela, e aqui - onde eles são os únicos blocos abaixo do cartão de
+            versão - nada indicava que havia algo a abrir. */}
         <LegalAccordion
           title="Termos de Uso"
           sections={TERMS_OF_USE_SECTIONS}

@@ -9,7 +9,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   /**
    * Mesma altura do `TextField` (52), para o botão ao lado de um campo não ficar mais baixo que
-   * ele — era o desalinhamento que motivou este tamanho.
+   * ele - era o desalinhamento que motivou este tamanho.
    */
   md: {
     width: 52,

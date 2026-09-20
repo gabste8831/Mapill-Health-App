@@ -57,7 +57,7 @@ function ItemDeCompromisso({
   const horas = String(quando.getHours()).padStart(2, "0");
   const minutos = String(quando.getMinutes()).padStart(2, "0");
 
-  // A data já está na coluna colorida — aqui só o que falta dizer: horário e onde/com quem.
+  // A data já está na coluna colorida - aqui só o que falta dizer: horário e onde/com quem.
   // Duas linhas de leitura corrida, e não três colunas disputando largura entre si, que era o que
   // fazia o título quebrar sem necessidade num nome um pouco mais longo.
   const localEProfissional = [appointment.location, appointment.professional]
@@ -66,7 +66,7 @@ function ItemDeCompromisso({
 
   return (
     <View style={[styles.item, passado && styles.itemPassado]}>
-      {/* O card inteiro (menos a faixa de ações abaixo) abre o detalhe completo — é onde cabe o
+      {/* O card inteiro (menos a faixa de ações abaixo) abre o detalhe completo - é onde cabe o
           que a lista não tem espaço para mostrar: observação, antecedência do aviso, desfecho. */}
       <Pressable
         style={styles.itemHeader}
@@ -180,7 +180,7 @@ function DetalheDoCompromisso({ appointment }: { appointment: Appointment }) {
 }
 
 /**
- * Todos os compromissos cadastrados, num lugar só — o que faltava desde que a agenda do Calendário
+ * Todos os compromissos cadastrados, num lugar só - o que faltava desde que a agenda do Calendário
  * só mostra o dia selecionado. Mesmo modelo da tela de Remédios: lista, editar e excluir.
  *
  * A resposta de desfecho ("foi" / "não foi") **não mora aqui**: ela é uma ação do dia, e pertence
@@ -210,7 +210,7 @@ export function CompromissosScreen({ onBack, detalheInicialId }: CompromissosScr
    * O detalhe pedido pela rota, assim que a lista o contém.
    *
    * Ajuste no render em vez de `useEffect` com `setState`: o React Compiler recusa efeitos que só
-   * derivam estado de props, e aqui não há nada a sincronizar com o mundo de fora — é só semear o
+   * derivam estado de props, e aqui não há nada a sincronizar com o mundo de fora - é só semear o
    * mesmo estado que o toque na lista alimenta, para que fechar o popup funcione igual nos dois
    * caminhos.
    */
@@ -228,7 +228,7 @@ export function CompromissosScreen({ onBack, detalheInicialId }: CompromissosScr
    *
    * Os três porque são as três formas de lembrar de uma consulta: pelo que é ("cardiologista"), por
    * quem atende ("Dra. Helena") ou por onde é ("Clínica São José"). Quem procura raramente lembra
-   * qual dos três digitou no cadastro — e exigir o campo certo transformaria a busca num quiz.
+   * qual dos três digitou no cadastro - e exigir o campo certo transformaria a busca num quiz.
    */
   const encontrados =
     termo.length === 0
@@ -242,18 +242,18 @@ export function CompromissosScreen({ onBack, detalheInicialId }: CompromissosScr
   /**
    * Próximos em cima, anteriores dobrados embaixo.
    *
-   * Compromisso passado é registro clínico — "fui ao cardiologista em março, ele pediu hemograma" é
+   * Compromisso passado é registro clínico - "fui ao cardiologista em março, ele pediu hemograma" é
    * o que se leva à consulta seguinte, e é para isso que existe `outcomeNotes`. Some da lista e o
    * app perde o histórico que promete; riscado, fica ilegível. Mas ele também não pode competir com
    * o que ainda vai acontecer, que é o motivo de alguém abrir esta tela.
    *
-   * Então o histórico fica íntegro e recolhido, com a contagem no título — mesmo padrão das doses
+   * Então o histórico fica íntegro e recolhido, com a contagem no título - mesmo padrão das doses
    * não tomadas na tela de adesão.
    */
   const proximos = encontrados.filter((item) => item.scheduledFor >= agoraIso);
   const anteriores = encontrados.filter((item) => item.scheduledFor < agoraIso);
 
-  /** O total de próximos ignorando a busca — o denominador do "X de Y" enquanto se digita. */
+  /** O total de próximos ignorando a busca - o denominador do "X de Y" enquanto se digita. */
   const totalDeProximos = items.filter((item) => item.scheduledFor >= agoraIso).length;
 
   function confirmarExclusao(appointment: Appointment) {
@@ -320,13 +320,13 @@ export function CompromissosScreen({ onBack, detalheInicialId }: CompromissosScr
                   onChangeText={setBusca}
                   // Curto para caber numa linha: o placeholder que enumerava os três campos
                   // ("consulta, profissional ou local") quebrava e desalinhava a caixa. A busca
-                  // continua olhando os três — o texto é convite, não especificação.
+                  // continua olhando os três - o texto é convite, não especificação.
                   placeholder="Buscar compromisso"
                   style={styles.busca}
                 />
                 {/* Conta só o que ainda não passou.
 
-                    A contagem descreve a lista logo abaixo dela, e ali só estão os próximos — o
+                    A contagem descreve a lista logo abaixo dela, e ali só estão os próximos - o
                     histórico tem a própria contagem no título do acordeão. Somando os dois, "2
                     compromissos" com um único cartão visível parecia erro.
 
@@ -349,7 +349,7 @@ export function CompromissosScreen({ onBack, detalheInicialId }: CompromissosScr
               />
             ) : /* Só quando a busca não achou nada em lugar nenhum. Sem busca, a contagem logo
                   acima já diz "0 compromissos agendados", e repetir isso num bloco próprio seria
-                  dizer duas vezes o mesmo — ainda mais com o histórico visível logo abaixo. */
+                  dizer duas vezes o mesmo - ainda mais com o histórico visível logo abaixo. */
             termo.length > 0 && anteriores.length === 0 ? (
               <Text style={styles.semResultado}>Nenhum compromisso encontrado.</Text>
             ) : null
@@ -393,7 +393,7 @@ export function CompromissosScreen({ onBack, detalheInicialId }: CompromissosScr
       )}
 
       {/* Vai direto ao formulário de compromisso, sem passar pela pergunta "medicação ou
-          compromisso?": quem está nesta lista já respondeu, ao estar aqui, o que vai cadastrar —
+          compromisso?": quem está nesta lista já respondeu, ao estar aqui, o que vai cadastrar -
           mesma razão pela qual o + da lista de Remédios pula a escolha.
 
           Fora do `FlatList` para existir também com a lista vazia, que era justamente o caso em que

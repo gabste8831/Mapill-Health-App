@@ -5,7 +5,7 @@ type GoogleLogoProps = {
 };
 
 /**
- * "G" oficial multicolor do Google — path padrão usado em botões de login social
+ * "G" oficial multicolor do Google - path padrão usado em botões de login social
  * ("Sign in with Google"), conforme as diretrizes de marca do Google. Precisa de
  * `react-native-svg` porque Ionicons (`logo-google`) só tem versão monocromática.
  */

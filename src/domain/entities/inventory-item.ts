@@ -15,7 +15,7 @@ export type InventoryItem = SyncableEntity & {
    *
    * É o que impede o aviso de se repetir: a previsão de estoque muda a cada dose confirmada, e
    * sem esta memória cada confirmação geraria uma notificação nova. Só uma **reposição** (a
-   * quantidade subir acima deste valor) rearma o aviso — ver `planejarAvisosDeEstoque`.
+   * quantidade subir acima deste valor) rearma o aviso - ver `planejarAvisosDeEstoque`.
    */
   lowStockAlertedAtQuantity: number | null;
 };
@@ -27,7 +27,7 @@ export type InventoryAdjustmentReason =
   /** Gerado quando uma correção retroativa de IntakeLog muda o delta de estoque já aplicado. */
   | "intake_correction";
 
-/** Log de todo evento que mexe em quantity — separado pra distinguir recontagem manual de consumo real. */
+/** Log de todo evento que mexe em quantity - separado pra distinguir recontagem manual de consumo real. */
 export type InventoryAdjustment = SyncableEntity & {
   inventoryItemId: string;
   delta: number;

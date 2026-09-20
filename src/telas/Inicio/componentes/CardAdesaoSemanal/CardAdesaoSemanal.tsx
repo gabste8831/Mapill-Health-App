@@ -6,7 +6,7 @@ import { barRowHeight, criarEstilos } from "./CardAdesaoSemanal.styles";
 
 type DiaDeAdesao = {
   label: string;
-  /** 0 a 1 — proporção de doses confirmadas no dia. `null` = não havia dose agendada. */
+  /** 0 a 1 - proporção de doses confirmadas no dia. `null` = não havia dose agendada. */
   ratio: number | null;
   isToday?: boolean;
 };
@@ -19,11 +19,11 @@ type CardAdesaoSemanalProps = {
 };
 
 /**
- * Mini-gráfico de barras sem lib externa — só Views com altura proporcional.
+ * Mini-gráfico de barras sem lib externa - só Views com altura proporcional.
  *
  * Virou porta de entrada do relatório de adesão: sete barras respondem "como foi a semana", e quem
  * quer saber mais já está olhando exatamente para o lugar certo. Sem isso, o relatório precisaria
- * de um item novo em algum menu — e a pergunta que ele responde nasce aqui.
+ * de um item novo em algum menu - e a pergunta que ele responde nasce aqui.
  */
 export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesaoSemanalProps) {
   const styles = useEstilos(criarEstilos);
@@ -77,7 +77,7 @@ export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesa
 
       {/* Um botão nomeado, além do card inteiro ser tocável.
 
-          A seta no canto diz que **algo** abre, mas não o quê — e o que abre é a tela onde a adesão
+          A seta no canto diz que **algo** abre, mas não o quê - e o que abre é a tela onde a adesão
           se lê por dia e o relatório para a consulta se gera. Nenhuma dessas duas coisas se adivinha
           de um mini-gráfico com uma seta. O card continua clicável para quem já sabe; o botão é
           para quem ainda não.
@@ -89,7 +89,7 @@ export function CardAdesaoSemanal({ days, summary, onAbrirRelatorio }: CardAdesa
         <View style={styles.chamada} pointerEvents="none">
           {/* "Ver o relatório", e não "Ver minha adesão": o título do card já diz "Minha adesão", e
               repetir a mesma palavra a dois centímetros dela desperdiça a linha. Aqui ela serve para
-              dizer o que **mais** existe lá — o dia a dia e o PDF da consulta. */}
+              dizer o que **mais** existe lá - o dia a dia e o PDF da consulta. */}
           <Text style={styles.chamadaTexto}>Ver o relatório completo</Text>
           <Ionicons name="arrow-forward" size={16} color={cores.corDeDestaque} />
         </View>

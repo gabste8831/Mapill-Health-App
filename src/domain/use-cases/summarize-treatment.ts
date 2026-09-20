@@ -9,13 +9,13 @@ export type TreatmentSummary = {
   totalDoses: number;
   /**
    * Quanto o tratamento consome no total, na unidade da dose. Não é `totalDoses × doseAmount`
-   * quando a dose varia de um horário para outro — e é este número, não a contagem, que decide
+   * quando a dose varia de um horário para outro - e é este número, não a contagem, que decide
    * se o estoque alcança.
    */
   totalAmount: number;
 };
 
-/** Data local de um instante em ISO `YYYY-MM-DD` — `toISOString()` devolveria UTC e erraria o dia. */
+/** Data local de um instante em ISO `YYYY-MM-DD` - `toISOString()` devolveria UTC e erraria o dia. */
 function toIsoDay(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -27,7 +27,7 @@ function toIsoDay(date: Date): string {
  *
  * Existe por causa de uma ambiguidade que confunde na hora de cadastrar: "por 2 dias" começando
  * hoje termina amanhã, o que só faz sentido se o dia de hoje contar. E ele conta apenas em parte
- * — se todos os horários de hoje já passaram, a primeira dose é amanhã, e o tratamento entrega
+ * - se todos os horários de hoje já passaram, a primeira dose é amanhã, e o tratamento entrega
  * menos doses do que a conta ingênua "vezes por dia × dias" sugere.
  *
  * Devolver a primeira dose junto com o total é o que permite a tela dizer isso em vez de mostrar

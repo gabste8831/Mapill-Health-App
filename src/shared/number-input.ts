@@ -21,7 +21,7 @@ export function formatDecimalInput(rawValue: string, maxDecimals = 3): string {
   return `${inteira.slice(0, 8)},${resto.join("").slice(0, maxDecimals)}`;
 }
 
-/** `"1,5"` → `1.5`. `NaN` quando não é número — quem chama decide o que fazer com isso. */
+/** `"1,5"` → `1.5`. `NaN` quando não é número - quem chama decide o que fazer com isso. */
 export function parseDecimalInput(value: string): number {
   return Number(value.replace(",", "."));
 }

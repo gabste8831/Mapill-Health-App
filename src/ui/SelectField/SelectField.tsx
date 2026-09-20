@@ -18,7 +18,7 @@ export type SelectFieldProps<TValue extends string> = {
 
 /**
  * Campo "select": em vez de abrir o teclado, abre um `BottomSheet` com as opções. Usado onde
- * antes existiam fileiras de chips (tipo sanguíneo, sexo biológico) — mais compacto e mais
+ * antes existiam fileiras de chips (tipo sanguíneo, sexo biológico) - mais compacto e mais
  * fácil de escanear visualmente.
  */
 export function SelectField<TValue extends string>({

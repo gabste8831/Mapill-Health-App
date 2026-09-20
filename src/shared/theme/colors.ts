@@ -103,9 +103,9 @@ export const colors = {
    * O que se lê **sobre** `errorPreenchido`.
    *
    * Nasceu tarde, e a falta dele era um defeito: o card de estoque baixo usava `onError`, que
-   * significa "o que se lê sobre `error`" — outro fundo. Nos temas claros os dois calham de ser
+   * significa "o que se lê sobre `error`" - outro fundo. Nos temas claros os dois calham de ser
    * branco e ninguém notava; no escuro, `error` é um vermelho **claro** (`#FF9A92`), então `onError`
-   * é quase preto — e o texto do card saía a **1.51:1** contra o fundo, ilegível.
+   * é quase preto - e o texto do card saía a **1.51:1** contra o fundo, ilegível.
    *
    * Um token de preenchimento precisa do seu par de tinta. Sem ele, quem escreve a tela escolhe o
    * "on" mais parecido e o erro só aparece no tema onde as duas cores divergem.
@@ -116,7 +116,7 @@ export const colors = {
    * As versões **diluídas** de sucesso e erro, para fundo de cartão numa lista.
    *
    * `successContainer` e `errorContainer` são os tons do Material para um chip ou um selo pequeno
-   * — numa área grande eles gritam, e dois cartões saturados em sequência (a dose atrasada logo
+   * - numa área grande eles gritam, e dois cartões saturados em sequência (a dose atrasada logo
    * acima da que é agora) anulam a hierarquia que a cor deveria criar. Estes são claros o
    * bastante para tingir sem chamar mais atenção que o texto que carregam.
    */
@@ -125,7 +125,7 @@ export const colors = {
   // que agora tinge o ícone e a faixa em cima dele.
   errorSurface: "#FDEAEA",
   /**
-   * O que se lê **sobre** `errorSurface` — o par que faltava, como o `onErrorPreenchido`.
+   * O que se lê **sobre** `errorSurface` - o par que faltava, como o `onErrorPreenchido`.
    *
    * Quem escrevia sobre essa superfície usava `error`, o vermelho de texto da tela. Os dois valem
    * enquanto o fundo da tela e a superfície tingida forem ambos claros; no tema escuro `error` é
@@ -140,7 +140,7 @@ export const colors = {
    * O fundo da tela, e a hierarquia de superfícies acima dele.
    *
    * `background` escureceu de `#F7F9FB` para `#F1F4F8` e ganhou um toque de azul. Com o fundo
-   * quase branco, o cartão branco em cima dele dependia inteiramente da sombra para existir — e
+   * quase branco, o cartão branco em cima dele dependia inteiramente da sombra para existir - e
    * sombra sutil some na luz do sol, que é onde metade do uso de um app de remédio acontece.
    * Agora o contraste entre fundo e cartão faz sozinho o trabalho que a sombra só reforça.
    */
@@ -148,7 +148,7 @@ export const colors = {
   onBackground: "#141719",
   surface: "#F1F4F8",
   surfaceBright: "#FFFFFF",
-  /** O cartão. A superfície mais alta e mais clara — é onde o conteúdo mora. */
+  /** O cartão. A superfície mais alta e mais clara - é onde o conteúdo mora. */
   surfaceContainerLowest: "#FFFFFF",
   /** Bloco de apoio *dentro* de um cartão: resumo, campo preenchido, chip não selecionado. */
   surfaceContainerLow: "#F5F7FA",
@@ -164,7 +164,7 @@ export const colors = {
    * resumo da ficha, a finalidade no consentimento, o status dos termos), sempre dentro de cartão.
    *
    * ⚠️ Sobre o `background` da tela ele cai para 4.38:1 e **não** passa em AA para texto. Ali só
-   * serve como contorno — para texto recuado direto sobre o fundo existe o `onSurfaceMuted`.
+   * serve como contorno - para texto recuado direto sobre o fundo existe o `onSurfaceMuted`.
    */
   outline: "#6B7280",
   outlineVariant: "#CBD2DE",
@@ -173,13 +173,13 @@ export const colors = {
    * O véu que cobre a tela quando um popup ou uma folha se abre.
    *
    * Existe como token porque a regra de "escurecer o que está atrás" **não sobrevive à troca de
-   * tema sozinha**. O véu era `onSurface` a 40% — o cinza-azulado do texto, escolhido para não ser
+   * tema sozinha**. O véu era `onSurface` a 40% - o cinza-azulado do texto, escolhido para não ser
    * um preto que a paleta não tem. Funciona em três temas e inverte no quarto: no escuro
    * `onSurface` é quase branco (`#E6E9EE`), então o "escurecedor" **clareava** o fundo, de
    * `#0F1319` para `#65696E`. Abrir um popup à noite acendia a tela atrás dele.
    *
    * Aqui a cor é dita para cada tema, e é o único jeito de a intenção ("o que está atrás recua")
-   * sobreviver a uma paleta invertida — derivar de qualquer token de conteúdo repete o erro na
+   * sobreviver a uma paleta invertida - derivar de qualquer token de conteúdo repete o erro na
    * primeira inversão.
    */
   scrim: "rgba(20, 23, 25, 0.45)",
@@ -192,17 +192,17 @@ export type ColorToken = keyof typeof colors;
  *
  * Até aqui, "atrasada", "é agora", "atenção" e "erro" eram ditos por uma **barra colorida de 4px
  * na borda esquerda**. Ela saiu do app inteiro (7 lugares). O motivo não é gosto: a faixa grossa
- * é um enfeite que carrega significado — quem não repara nela não recebe a informação, e ela
+ * é um enfeite que carrega significado - quem não repara nela não recebe a informação, e ela
  * empurra todo o conteúdo do bloco 4px para a direita, o que desalinha um cartão com estado do
  * cartão sem estado logo abaixo. Numa lista de doses isso lê como defeito de renderização.
  *
  * No lugar dela, três sinais que se somam e que **sobrevivem ao daltonismo** (o app tem público
  * idoso, e deuteranopia atinge 1 em 12 homens):
  *
- * 1. **Fundo tingido** — a superfície inteira recebe a cor diluída. Área grande, impossível de
+ * 1. **Fundo tingido** - a superfície inteira recebe a cor diluída. Área grande, impossível de
  *    não ver, e não desloca nada.
- * 2. **Ícone** — desenhado, com a forma dizendo o que a cor diz.
- * 3. **Rótulo em texto** — "ATRASADA", "É AGORA". Já existia; agora ele herda a cor do estado em
+ * 2. **Ícone** - desenhado, com a forma dizendo o que a cor diz.
+ * 3. **Rótulo em texto** - "ATRASADA", "É AGORA". Já existia; agora ele herda a cor do estado em
  *    vez de ficar cinza.
  *
  * `estadoVisual` reúne o par fundo/tinta de cada estado, para que nenhuma tela precise escolher
@@ -229,7 +229,7 @@ export function estadosVisuais(paleta: { readonly [K in ColorToken]: string }) {
      * O estado "isto é o próximo/o foco", que é azul porque é a cor da ação.
      *
      * `tinta` usa `corDeDestaque`, e não `primary`: este bloco tinge um fundo já claro
-     * (`primarySurface`) no tema claro, mas no escuro o mesmo fundo é escuro — e ali `primary`
+     * (`primarySurface`) no tema claro, mas no escuro o mesmo fundo é escuro - e ali `primary`
      * (o navy) mal se distingue dele. `corDeDestaque` é o azul pensado para continuar lendo como
      * tinta em qualquer um dos dois casos.
      */
@@ -242,7 +242,7 @@ export function estadosVisuais(paleta: { readonly [K in ColorToken]: string }) {
 }
 
 /**
- * Versão estática, para o código ainda não migrado para temas — ver a nota em `surfaceCard`.
+ * Versão estática, para o código ainda não migrado para temas - ver a nota em `surfaceCard`.
  * Código migrado chama `estadosVisuais(cores)` dentro da receita de estilos.
  */
 export const estadoVisual = estadosVisuais(colors);

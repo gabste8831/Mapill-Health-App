@@ -19,7 +19,7 @@ export type AvisoAgendado = {
   quando: string | null;
   /** `alarme:` no id, ou seja: vai abrir a tela cheia em vez de só notificar. */
   ehAlarme: boolean;
-  /** O que o aviso diz — para conferir de relance se é o remédio certo. */
+  /** O que o aviso diz - para conferir de relance se é o remédio certo. */
   titulo: string | null;
 };
 
@@ -34,7 +34,7 @@ export type EstadoDeUmCanal = {
    * A URI que o Android **resolveu** para esse som, e é ela que diz se o canal toca.
    *
    * As duas coisas existem porque `sound` sozinho engana: pedindo `"default"`, o Android guarda a
-   * URI do som padrão e pode devolver `sound` vazio — o canal toca, e o diagnóstico dizia "MUDO".
+   * URI do som padrão e pode devolver `sound` vazio - o canal toca, e o diagnóstico dizia "MUDO".
    * Um canal mudo de verdade vem com **as duas** vazias.
    *
    * É a terceira vez que a palavra "default" confunde a leitura neste projeto (ver o topo de
@@ -53,15 +53,15 @@ export type DiagnosticoDeAvisos = {
   /** Se o app pode agendar alarme exato. Sem isso o horário escorrega. */
   alarmeExato: boolean;
   /**
-   * Se o sistema autoriza a **tela cheia** — a permissão que faz a tela azul irromper sozinha.
+   * Se o sistema autoriza a **tela cheia** - a permissão que faz a tela azul irromper sozinha.
    *
    * Entrou em 12/09, e é a única leitura que responde o relato do Gabriel: com o celular bloqueado,
    * a tela azul aparecia quando o Mapill **não** estava nos recentes, e não aparecia quando estava.
    * Sem esta linha, "a tela não subiu" tem meia dúzia de causas possíveis e nenhuma forma de
-   * distingui-las — que é exatamente o tipo de adivinhação que este diagnóstico existe para acabar.
+   * distingui-las - que é exatamente o tipo de adivinhação que este diagnóstico existe para acabar.
    *
    * Negada, o Android rebaixa **todo** `fullScreenAction` para heads-up, e a tela azul depende
-   * inteiramente do caminho JavaScript — que por sua vez só age com o app em primeiro plano. É a
+   * inteiramente do caminho JavaScript - que por sua vez só age com o app em primeiro plano. É a
    * combinação que produz o alarme sem tela.
    *
    * Não vira linha de permissão no painel: a tela de destino não existe em todo aparelho (ver a nota
@@ -69,7 +69,7 @@ export type DiagnosticoDeAvisos = {
    */
   telaCheia: boolean;
   /**
-   * Quantos avisos deveriam existir na janela, por tipo — o número esperado.
+   * Quantos avisos deveriam existir na janela, por tipo - o número esperado.
    *
    * Os quatro separados, e não um total: quando o agendado não bate com o esperado, saber **qual**
    * tipo falhou é metade do diagnóstico. Estoque zerado com receita cheia aponta para a previsão
@@ -92,7 +92,7 @@ const PREFIXO_DE_ALARME = "alarme:";
  * ## Por que isto existe
  *
  * Testar alarme é caro: exige esperar o horário, bloquear o aparelho, às vezes reiniciar. Quando
- * não toca, a pergunta que fica é *por quê* — e havia meia dúzia de respostas possíveis (não foi
+ * não toca, a pergunta que fica é *por quê* - e havia meia dúzia de respostas possíveis (não foi
  * agendado, foi agendado errado, o canal está mudo, falta permissão, o Android matou), sem como
  * distinguir entre elas. Cada teste virava uma sessão de adivinhação.
  *
@@ -100,7 +100,7 @@ const PREFIXO_DE_ALARME = "alarme:";
  * em que canal, e compara com quantos avisos deveriam existir. Um alarme que não aparece aqui nunca
  * ia tocar, e isso se descobre em cinco segundos em vez de vinte minutos.
  *
- * Lê tudo do sistema operacional e do banco — não guarda estado próprio, porque um diagnóstico que
+ * Lê tudo do sistema operacional e do banco - não guarda estado próprio, porque um diagnóstico que
  * depende do próprio registro mente junto com o defeito que deveria encontrar.
  */
 export async function diagnosticarAvisos(): Promise<DiagnosticoDeAvisos> {
@@ -222,11 +222,11 @@ async function contarEsperados(): Promise<{
    * As duas regras têm casos que um filtro simples erraria: a receita gera dois avisos (na
    * antecedência e no dia), mas **um só** quando a antecedência é zero; o estoque depende de uma
    * previsão que pode não existir e de uma trava que o cala depois do primeiro aviso. Reescrever
-   * isso aqui faria o diagnóstico discordar do agendador no dia em que a regra mudasse — e um
+   * isso aqui faria o diagnóstico discordar do agendador no dia em que a regra mudasse - e um
    * diagnóstico que mente é pior que nenhum, porque manda procurar defeito onde não há.
    *
    * As doses e os compromissos continuam por filtro porque a regra deles é "tem lembrete pedido e
-   * ainda não passou", sem ramificação — e a contagem por dose é o que a comparação usa.
+   * ainda não passou", sem ramificação - e a contagem por dose é o que a comparação usa.
    */
   const receitas = planejarAvisosDeCompromisso({
     compromissos: [],

@@ -70,7 +70,7 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   /**
    * A frase que diz **quando** as autorizações importam.
    *
-   * Texto de apoio é raro nesta tela de propósito — o menu de seções não explica o óbvio a quem já
+   * Texto de apoio é raro nesta tela de propósito - o menu de seções não explica o óbvio a quem já
    * sabe o que quer. Aqui ele se justifica porque a seção é a única que não reage a nada: três das
    * cinco autorizações o app não consegue verificar, então ela nunca sabe se há problema, e sem uma
    * condição escrita fica um bloco permanente sem motivo aparente.

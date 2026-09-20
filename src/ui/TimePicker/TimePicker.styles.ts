@@ -8,7 +8,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     gap: spacing.sm,
   },
   /**
-   * A roda do Material só se desenha dentro de um host de dimensões finitas — sem largura, ela
+   * A roda do Material só se desenha dentro de um host de dimensões finitas - sem largura, ela
    * colapsa e não aparece nada na tela.
    *
    * O `minHeight` resolve o mesmo problema no outro eixo: o host abre dentro do `ScrollView` do

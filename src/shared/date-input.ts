@@ -1,5 +1,5 @@
 /**
- * Máscara e conversão de data digitada (`DD/MM/AAAA`) — sem depender de lib de máscara.
+ * Máscara e conversão de data digitada (`DD/MM/AAAA`) - sem depender de lib de máscara.
  *
  * Aqui só existe validade de calendário. Regra de domínio (não pode ser futuro, não pode ser
  * antes de 1900) é de quem chama: nascimento e início de tratamento têm limites opostos, e
@@ -50,7 +50,7 @@ export function toDateInput(isoDate: string): string {
 
 /**
  * Em que unidade a duração de um tratamento é dita. Existe porque "por 90 dias" não é como
- * ninguém pensa um tratamento de três meses — e porque mês não tem tamanho fixo, então converter
+ * ninguém pensa um tratamento de três meses - e porque mês não tem tamanho fixo, então converter
  * pra dias na entrada erraria a conta.
  */
 export type DurationUnit = "days" | "weeks" | "months";
@@ -78,7 +78,7 @@ function addMonths(date: Date, months: number): Date {
 
 /**
  * Último dia de um tratamento que dura `amount` unidades a partir de `startIso`. O primeiro dia
- * conta, então "por 7 dias" a partir de hoje termina no sexto dia seguinte, não no sétimo — e
+ * conta, então "por 7 dias" a partir de hoje termina no sexto dia seguinte, não no sétimo - e
  * "por 3 meses" a partir de 21/08 termina em 20/11, não em 21/11.
  */
 export function lastDayOfTreatment(
@@ -100,7 +100,7 @@ export function lastDayOfTreatment(
 }
 
 /**
- * Inverso de `lastDayOfTreatment` — usado ao abrir um cadastro que já tem data de fim gravada.
+ * Inverso de `lastDayOfTreatment` - usado ao abrir um cadastro que já tem data de fim gravada.
  * Tenta meses e semanas antes de cair em dias, senão um tratamento cadastrado como "3 meses"
  * reabriria como "91 dias", que está certo e não é o que a pessoa escreveu.
  */
@@ -115,7 +115,7 @@ export function treatmentDuration(
   const days = Math.round((Date.parse(end) - Date.parse(start)) / 86_400_000) + 1;
   if (days < 1) return null;
 
-  // Abaixo de duas semanas, dia é a unidade natural — quem escreveu "7 dias" não quer reabrir
+  // Abaixo de duas semanas, dia é a unidade natural - quem escreveu "7 dias" não quer reabrir
   // vendo "1 semana", ainda que seja o mesmo tratamento.
   if (days < 14) return { amount: days, unit: "days" };
 
@@ -131,7 +131,7 @@ export function treatmentDuration(
  * As duas viradas de um ciclo, contadas a partir de **hoje**.
  *
  * Existe porque "a cada 28 dias, 21 tomando" não diz nada sozinho: quem cadastra no quinto dia
- * da cartela precisa ver a pausa cinco dias mais cedo, e é a data que ela reconhece — não a
+ * da cartela precisa ver a pausa cinco dias mais cedo, e é a data que ela reconhece - não a
  * regra, que ela acabou de digitar. Devolver as duas datas é o que permite a tela mostrar a
  * consequência antes de salvar.
  *
@@ -160,7 +160,7 @@ export function cycleTurningPoints(
   const resumesOn = somarDias(cycleLengthDays - dayInCycle);
   const emPausa = dayInCycle >= activeDays;
 
-  // Já na pausa, o trecho de uso que interessa é o do ciclo seguinte — dizer "você toma até
+  // Já na pausa, o trecho de uso que interessa é o do ciclo seguinte - dizer "você toma até
   // ontem" seria tecnicamente verdade e inútil.
   return emPausa
     ? { lastDay: somarDias(cycleLengthDays - dayInCycle + activeDays - 1), resumesOn, emPausa }

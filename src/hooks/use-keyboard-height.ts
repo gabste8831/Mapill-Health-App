@@ -9,7 +9,7 @@ import { Keyboard, Platform } from "react-native";
  * embaixo do teclado. Medir a altura e empurrar o conteúdo à mão funciona nos dois sistemas.
  *
  * No iOS o evento é `Will` (dispara antes da animação, então a tela sobe junto com o teclado); no
- * Android só `Did` é confiável — `keyboardWillShow` não é emitido lá.
+ * Android só `Did` é confiável - `keyboardWillShow` não é emitido lá.
  */
 export function useKeyboardHeight(): number {
   const [height, setHeight] = useState(0);

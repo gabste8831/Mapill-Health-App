@@ -36,7 +36,7 @@ function escurecer(hex: string, peso: number): string {
  * O par tem duas cores, mas o app usa **onze** tokens de estado: a cor de texto, a viva (para
  * ícone e barra de gráfico), a preenchida (fundo de card), a superfície tingida, e os "on" de cada
  * uma. Pedir onze cores por par seria pedir que alguém escolhesse uma paleta inteira a cada opção
- * nova — e a chance de uma delas reprovar em contraste cresce com cada valor escrito à mão.
+ * nova - e a chance de uma delas reprovar em contraste cresce com cada valor escrito à mão.
  *
  * Aqui os vizinhos saem da cor escolhida por mistura com branco ou preto, nas mesmas proporções
  * que separam os tons do tema padrão. Assim um par novo entra em `pares-de-estado.ts` com duas
@@ -46,7 +46,7 @@ function escurecer(hex: string, peso: number): string {
  *
  * Os pesos abaixo pressupõem uma superfície clara (fundo quase branco, texto escuro). No tema
  * escuro as superfícies de estado são escuras, e clarear a cor produziria o inverso do que se quer
- * — por isso a derivação só entra em tema de esquema claro, e no escuro o par escolhido muda
+ * - por isso a derivação só entra em tema de esquema claro, e no escuro o par escolhido muda
  * apenas o que é **tinta** (`success`, `error` e as versões vivas). Quem chama decide, passando
  * `esquema`.
  */
@@ -65,7 +65,7 @@ export function aplicarParDeEstado(
    * As superfícies de estado ali são tons escuros calibrados contra o fundo da tela, e clarear a
    * cor escolhida geraria pastéis que não pertencem àquele tema. A cor de texto e a viva são o que
    * carregam a distinção que a pessoa veio buscar, e as duas já leem sobre fundo escuro porque o
-   * par é validado sobre branco — o mesmo contraste que as torna legíveis lá as separa aqui.
+   * par é validado sobre branco - o mesmo contraste que as torna legíveis lá as separa aqui.
    */
   if (esquema === "escuro") {
     return {
@@ -85,7 +85,7 @@ export function aplicarParDeEstado(
     successVivo: afirmativo,
     successContainer: clarear(afirmativo, 0.28),
     onSuccessContainer: escurecer(afirmativo, 0.55),
-    // 0.18 e nao 0.06: a 6% a superficie ficava a 1.10:1 do cartao branco — o bloco tingido
+    // 0.18 e nao 0.06: a 6% a superficie ficava a 1.10:1 do cartao branco - o bloco tingido
     // sumia, e o lembrete que era amarelo virava um retangulo da cor do fundo. O ambar fixo do
     // app da 1.12, e este peso da 1.33: visivel sem virar area de cor cheia.
     successSurface: clarear(afirmativo, 0.18),

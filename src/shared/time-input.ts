@@ -32,7 +32,7 @@ export const MAX_INTERVALO_EM_HORAS = 23;
  * Os horários de "de X em X horas", a partir do primeiro.
  *
  * Existe porque "de 3 em 3 horas" é como o médico fala, e traduzir isso em oito horários exige
- * uma conta que ninguém deveria fazer de cabeça na frente do formulário — o erro de somar errado
+ * uma conta que ninguém deveria fazer de cabeça na frente do formulário - o erro de somar errado
  * cairia direto no lembrete. **Não é sugestão**: os dois números saem de quem está preenchendo, e
  * a lista resultante fica à vista antes de ser aplicada.
  *
@@ -54,14 +54,14 @@ export function horariosEmSerie(
 
 /**
  * Se a série cabe num dia sem repetir horário. `4 doses de 8 em 8 horas` daria a volta completa e
- * a quarta cairia em cima da primeira — o app agendaria duas doses no mesmo instante, que é
+ * a quarta cairia em cima da primeira - o app agendaria duas doses no mesmo instante, que é
  * exatamente o conflito que o seletor barra quando os horários são escolhidos à mão.
  */
 export function serieCabeNoDia(intervaloEmHoras: number, quantidade: number): boolean {
   return intervaloEmHoras * quantidade <= 24;
 }
 
-/** `null` se não for um horário real — 25:00 e 08:70 são recusados. */
+/** `null` se não for um horário real - 25:00 e 08:70 são recusados. */
 export function parseTimeInput(displayValue: string): string | null {
   const match = displayValue.match(/^(\d{2}):(\d{2})$/);
   if (!match) return null;

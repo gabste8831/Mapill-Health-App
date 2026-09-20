@@ -15,7 +15,7 @@ import { criarEstilos } from "./SeletorDeAparencia.styles";
 /**
  * As opções na ordem em que aparecem: "Automático" primeiro, depois os quatro temas.
  *
- * O automático vem antes porque é a escolha que a maioria quer sem saber que quer — o app
+ * O automático vem antes porque é a escolha que a maioria quer sem saber que quer - o app
  * acompanha o aparelho e ninguém precisa decidir nada. Os temas de acessibilidade vêm depois do
  * padrão porque quem precisa deles vai procurar; quem não precisa não deve tropeçar neles.
  */
@@ -55,7 +55,7 @@ function montarOpcoes(esquemaDoSistema: "claro" | "escuro"): Opcao[] {
  * A escolha de aparência do app.
  *
  * O tema **Padrão** é o visual próprio do Mapill; os outros três são alternativas de
- * acessibilidade que preservam a mesma estrutura e mudam só o necessário — ver os cabeçalhos em
+ * acessibilidade que preservam a mesma estrutura e mudam só o necessário - ver os cabeçalhos em
  * `shared/theme/temas/`.
  *
  * A troca é imediata e sem confirmação: é reversível num toque, e um diálogo de "tem certeza?"

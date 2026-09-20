@@ -14,7 +14,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
      * `gutter` (24) e não `lg` (32).
      *
      * A Home usa 40 entre seções porque lá cada bloco é um assunto independente que disputa
-     * atenção. Aqui todas as seções são a mesma coisa — uma lista de opções de configuração —, e o
+     * atenção. Aqui todas as seções são a mesma coisa - uma lista de opções de configuração -, e o
      * vão grande fazia cada título nascer isolado no meio de um vazio, sobretudo depois do
      * indicador de sincronização, que já tem respiro próprio.
      */
@@ -98,7 +98,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
-  /** Um degrau abaixo na escala — a mesma decisão do cadastro de medicação. */
+  /** Um degrau abaixo na escala - a mesma decisão do cadastro de medicação. */
   sectionTitle: {
     ...typography.bodyLg,
     color: cores.onSurfaceVariant,

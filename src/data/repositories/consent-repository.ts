@@ -36,7 +36,7 @@ export class ConsentRepository
   }
 
   async getCurrent(): Promise<ConsentRecord | null> {
-    // Sempre o consentimento mais recente — se houver mais de um (ex: reconsentiu após troca
+    // Sempre o consentimento mais recente - se houver mais de um (ex: reconsentiu após troca
     // de versão dos termos), só o último importa pra liberar o uso do app.
     const row = await this.database.getFirstAsync<ConsentRecordRow>(
       `SELECT * FROM ${this.tableName} WHERE deleted_at IS NULL ORDER BY accepted_at DESC LIMIT 1`,

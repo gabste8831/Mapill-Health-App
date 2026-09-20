@@ -22,7 +22,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * `minHeight` de 44, e não `height` de 36. Eram dois problemas na mesma linha: 36 fica abaixo do
    * piso de alvo de toque, e **altura fixa com texto dentro corta a letra** quando a pessoa aumenta
-   * a fonte do sistema — que é justamente o ajuste que o público deste app mais usa. Com `minHeight`
+   * a fonte do sistema - que é justamente o ajuste que o público deste app mais usa. Com `minHeight`
    * e padding vertical, a chip cresce junto com o texto em vez de recortá-lo.
    */
   chip: {

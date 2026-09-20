@@ -46,7 +46,7 @@ const ORDENS_DE_REMEDIO: OpcaoDeOrdem<OrdemDeRemedios>[] = [
 type ItemDeRemedioProps = {
   item: ItemDaListaDeRemedios;
   onAbrirDetalhe: () => void;
-  /** Ausente quando não há tratamento pra editar — o botão fica inerte. */
+  /** Ausente quando não há tratamento pra editar - o botão fica inerte. */
   onEdit?: () => void;
   onDelete: () => void;
   /** Amplia a foto da caixa. Só chamado quando existe foto. */
@@ -62,7 +62,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
 
   return (
     <View style={styles.item}>
-      {/* O card inteiro (menos a faixa de ações abaixo) abre o detalhe completo — é onde cabe o
+      {/* O card inteiro (menos a faixa de ações abaixo) abre o detalhe completo - é onde cabe o
           que a lista não tem espaço para mostrar por extenso. */}
       <Pressable
         onPress={onAbrirDetalhe}
@@ -70,7 +70,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
         accessibilityLabel={`Ver detalhes de ${medication.name}`}>
         <View style={styles.itemHeader}>
           {/**
-           * Sem foto, um marcador neutro ocupa o lugar — e **não** iniciais, que repetiriam o nome
+           * Sem foto, um marcador neutro ocupa o lugar - e **não** iniciais, que repetiriam o nome
            * ao lado.
            *
            * Antes não entrava nada, e a consequência era a lista desalinhar: numa tela onde a
@@ -78,14 +78,14 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
            * coluna do nome no mesmo lugar em todos os itens, e o azul claro dá à lista a cor que
            * faltava sem inventar superfície nova.
            */}
-          {/* `key` na presença da foto — a mesma correção da ficha de saúde, e aqui ela vale
+          {/* `key` na presença da foto - a mesma correção da ficha de saúde, e aqui ela vale
               dobrado: numa `FlatList` a view é **reciclada** entre itens, então o quadro que
               exibe o marcador de um remédio sem foto pode ser reaproveitado para outro que tem.
               O `key` garante que o React remonte em vez de reaproveitar. */}
           <View key={medication.photoUri !== null ? "com-foto" : "sem-foto"}>
             {medication.photoUri !== null ? (
               /* A foto da caixa existe para responder "é este o remédio?", e numa miniatura de 56px
-                 essa pergunta às vezes não se responde — caixas da mesma família são quase iguais.
+                 essa pergunta às vezes não se responde - caixas da mesma família são quase iguais.
                  Ampliar é um toque próprio, dentro do card que abre o detalhe: o `Pressable` de
                  dentro vence o de fora, então tocar a foto amplia e tocar o resto abre o detalhe. */
               <Pressable
@@ -104,7 +104,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
 
           <View style={styles.itemHeaderText}>
             {/**
-             * O nome e, ao lado, o sino de que **este remédio avisa** — proposta do Gabriel em 12/09.
+             * O nome e, ao lado, o sino de que **este remédio avisa** - proposta do Gabriel em 12/09.
              *
              * Antes, saber se um tratamento tinha lembrete exigia abrir a edição dele, um por um. É
              * exatamente o que a heurística de *reconhecimento em vez de recordação* (Nielsen) pede
@@ -114,7 +114,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
              * O ícone distingue os dois modos em vez de só dizer "tem aviso", porque a diferença é a
              * que importa quando algo não toca: `alarm` para o que irrompe em tela cheia, `notifications`
              * para o que chega na barra. Quem estranha um remédio que não acordou ninguém consegue ver,
-             * na lista, que ele estava em modo notificação — sem abrir nada.
+             * na lista, que ele estava em modo notificação - sem abrir nada.
              *
              * Fica fora do nome, num nó próprio: quebrar o nome em mais linhas é aceitável, perder
              * o sino não, porque ele é justamente o que não se descobre de outro jeito.
@@ -123,7 +123,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
               {/* Sem `numberOfLines`: o nome quebra em quantas linhas precisar. Nome de remédio
                   carrega dosagem e forma ("Losartana Potássica 50mg comprimido revestido"), e o
                   corte em "..." escondia justamente a parte que distingue duas caixas do mesmo
-                  princípio ativo — que é o erro que importa evitar numa lista de medicação. */}
+                  princípio ativo - que é o erro que importa evitar numa lista de medicação. */}
               <Text style={styles.name}>{medication.name}</Text>
               {prescription !== null && prescription.reminderMode !== "none" ? (
                 /* `both` conta como alarme: o modo inclui a tela cheia, e é ela que define o que
@@ -143,7 +143,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
               ) : null}
             </View>
             {/* Quando, não quanto: no lugar do princípio ativo, que não diz nada sobre a rotina do
-                dia a dia — é dado de identificação, não de uso, e já está no popup de detalhe. A
+                dia a dia - é dado de identificação, não de uso, e já está no popup de detalhe. A
                 dose por tomada ("1 comprimido") também não entra aqui: ao lado do estoque no
                 rodapé, ela lia como "quanto tenho guardado". */}
             {prescription !== null ? (
@@ -158,7 +158,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
         </View>
 
         {/* O card mostra cinco coisas e só elas: foto (ou o marcador), nome, frequência com os
-            horários, estoque, e as duas ações. Onde o remédio está guardado saiu daqui — é dado de
+            horários, estoque, e as duas ações. Onde o remédio está guardado saiu daqui - é dado de
             quem já foi buscar a caixa, não de quem está percorrendo a lista, e continua no popup de
             detalhe junto do resto. */}
         {inventory !== null ? (
@@ -270,7 +270,7 @@ export function RemediosScreen() {
   const { items, isLoading, error, reload } = useMedicationList();
   const [busca, setBusca] = useState("");
   const [ordem, setOrdem] = useState<OrdemDeRemedios>("alfabetica");
-  /** A foto da caixa ampliada sobre a lista — o título é o nome do remédio. */
+  /** A foto da caixa ampliada sobre a lista - o título é o nome do remédio. */
   const [midiaAberta, setMidiaAberta] = useState<{ uri: string; titulo: string } | null>(null);
   const [detalheAberto, setDetalheAberto] = useState<ItemDaListaDeRemedios | null>(null);
 
@@ -342,7 +342,7 @@ export function RemediosScreen() {
             />
             {/* A contagem **não** fica aqui: ela desceu para o cabeçalho da lista, logo acima do
                 primeiro card. Ela descreve a lista, e no bloco fixo do topo ficava colada na busca
-                e no seletor de ordem — parecia legenda dos controles, não da lista. */}
+                e no seletor de ordem - parecia legenda dos controles, não da lista. */}
 
             {/* Só com mais de um: ordenar uma lista de um item é oferecer uma escolha sem efeito. */}
             {items.length > 1 ? (
@@ -364,7 +364,7 @@ export function RemediosScreen() {
           keyExtractor={(item) => item.medication.id}
           /**
            * As mesmas duas props do `KeyboardAwareScrollView`, aqui à mão: esta tela tem campo de
-           * busca mas não é formulário, então não passa por aquele componente — e ficava sem saída
+           * busca mas não é formulário, então não passa por aquele componente - e ficava sem saída
            * nenhuma para o teclado. Arrastar a lista dispensa (o gesto de quem quer ver o que está
            * embaixo), e `handled` faz o primeiro toque num remédio valer em vez de ser gasto só
            * fechando o teclado.
@@ -393,7 +393,7 @@ export function RemediosScreen() {
           /**
            * O que rola junto com a lista: o atalho do estoque e a contagem.
            *
-           * Só a busca e o seletor de ordem ficam fixos no topo — eles se opera. Estes dois se lê
+           * Só a busca e o seletor de ordem ficam fixos no topo - eles se opera. Estes dois se lê
            * uma vez, e parados custariam altura em toda rolagem.
            *
            * A contagem vem **por último**, encostada no primeiro card: ela descreve a lista, e é
@@ -407,7 +407,7 @@ export function RemediosScreen() {
             items.length > 0 ? (
               <View style={styles.listHeader}>
                 {/* Só com estoque cadastrado: o atalho leva a uma tela que, sem isso, abriria
-                    vazia — e oferecer caminho para o vazio é pior que não oferecer.
+                    vazia - e oferecer caminho para o vazio é pior que não oferecer.
 
                     É o mesmo componente da Home, e não um `Button` próprio: os dois são o mesmo
                     atalho para a mesma tela, e tê-los com desenhos diferentes fazia o app parecer
@@ -443,7 +443,7 @@ export function RemediosScreen() {
       )}
 
       {/* Vai direto para "escanear ou manual": quem está na lista de remédios já respondeu, ao
-          estar aqui, que o que vai cadastrar é um remédio — passar pela pergunta "medicação ou
+          estar aqui, que o que vai cadastrar é um remédio - passar pela pergunta "medicação ou
           compromisso?" seria pedir de novo o que a tela já diz. */}
       <Fab
         accessibilityLabel="Cadastrar medicação"

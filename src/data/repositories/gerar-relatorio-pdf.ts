@@ -27,7 +27,7 @@ function percentual(taxa: number): string {
  *
  * Nome de remédio, título de compromisso e nome do titular são **texto livre digitado pela
  * pessoa**. Sem isto, um `&` num nome ("Vitamina A & D") quebraria o documento, e um `<` o
- * truncaria em silêncio — o modo de falhar mais perigoso aqui, porque um PDF que gera sem erro mas
+ * truncaria em silêncio - o modo de falhar mais perigoso aqui, porque um PDF que gera sem erro mas
  * perde uma linha de tratamento é pior que um que não gera.
  */
 function esc(texto: string): string {
@@ -46,7 +46,7 @@ function plural(n: number, singular: string, plural_: string): string {
  * O estilo do documento.
  *
  * **Preto sobre branco, sem cor.** O relatório é feito para ser impresso e lido em papel, e a
- * impressora da clínica é preto e branco — cor que vira cinza claro perde a distinção que ela
+ * impressora da clínica é preto e branco - cor que vira cinza claro perde a distinção que ela
  * deveria criar. Pela mesma razão não há gráfico: número em texto atravessa qualquer impressão.
  *
  * Tipografia grande (12pt de corpo) porque quem lê pode ser o paciente idoso, e não só o médico.
@@ -90,7 +90,7 @@ function secaoAdesao(relatorio: Relatorio): string {
   const { adesao } = relatorio;
 
   // RN20: sem dose vencida não há percentual. "0%" é uma afirmação sobre o comportamento do
-  // paciente; ausência de dados não é — e num documento que vai ao médico a diferença importa
+  // paciente; ausência de dados não é - e num documento que vai ao médico a diferença importa
   // ainda mais, porque ninguém está lá para explicar.
   if (adesao.taxa === null) {
     return `<h2>Média de adesão aos medicamentos</h2>
@@ -111,7 +111,7 @@ function secaoAdesao(relatorio: Relatorio): string {
    * "Média de adesão aos medicamentos", e não "Adesão ao tratamento".
    *
    * O documento traz duas coisas que se poderia chamar de adesão: as doses e o comparecimento às
-   * consultas. Um titulo que não diz qual das duas o número mede deixa a leitura ambígua — e este
+   * consultas. Um titulo que não diz qual das duas o número mede deixa a leitura ambígua - e este
    * número é o que decide conduta clínica. O rótulo nomeia o que ele de fato agrega: a média das
    * doses dos medicamentos incluídos no recorte.
    */
@@ -222,7 +222,7 @@ export function montarHtml(relatorio: Relatorio): string {
    *
    * "Cobre 0 de 1 tratamentos" é gramaticalmente torto e, pior, faz o médico procurar uma seção de
    * adesão que o documento não tem. Quando ninguém foi incluído, o que ele precisa saber é o que o
-   * papel **é** — um relatório de compromissos —, e não quantos tratamentos ficaram de fora.
+   * papel **é** - um relatório de compromissos -, e não quantos tratamentos ficaram de fora.
    */
   const recorte = !relatorio.recorte
     ? ""
@@ -262,7 +262,7 @@ export function montarHtml(relatorio: Relatorio): string {
 export type RelatorioGerado = {
   /** Caminho do PDF, pronto para ser compartilhado. */
   uri: string;
-  /** Nome legível, com a data — é o que a pessoa vê ao salvar. */
+  /** Nome legível, com a data - é o que a pessoa vê ao salvar. */
   nome: string;
 };
 
@@ -270,7 +270,7 @@ export type RelatorioGerado = {
  * Gera o PDF do relatório clínico.
  *
  * **Por que PDF e não outra coisa.** A exportação em JSON do D3 cumpre o direito de portabilidade
- * (LGPD art. 18, II e V) e é ilegível para um médico; este arquivo é o oposto — não se importa em
+ * (LGPD art. 18, II e V) e é ilegível para um médico; este arquivo é o oposto - não se importa em
  * lugar nenhum, e se lê em qualquer lugar. Os dois não competem: um é a saída para máquina, o
  * outro para humano. É também o único artefato do app que existe **fora** do celular, e continua
  * servindo com o aparelho descarregado na sala de espera.

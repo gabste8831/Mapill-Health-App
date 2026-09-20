@@ -31,7 +31,7 @@ type VariacaoDeDose = {
   onChange: (ativa: boolean) => void;
   /** Substantivo da unidade, já flexionado ("comprimidos", "unidades (UI)"). */
   unitNoun: string;
-  /** A dose geral já respondida — é o que cada horário vale enquanto ninguém mexe nele. */
+  /** A dose geral já respondida - é o que cada horário vale enquanto ninguém mexe nele. */
   defaultAmount: string;
   /** Meio comprimido existe, meia gota não. Vem da unidade, não do campo. */
   aceitaFracao: boolean;
@@ -41,12 +41,12 @@ type ModoDoPopup = { tipo: "lista" } | { tipo: "serie" } | { tipo: "relogioDaSer
 
 type SeletorDeHorariosProps = {
   label: string;
-  /** O tamanho da lista é a quantidade de doses — vem de fora, decidido pela frequência. */
+  /** O tamanho da lista é a quantidade de doses - vem de fora, decidido pela frequência. */
   values: EntradaDeDose[];
   onChange: (values: EntradaDeDose[]) => void;
   /** Índices em conflito (mesmo horário duas vezes), marcados sem mensagem individual. */
   duplicateIndexes?: number[];
-  /** Ausente onde dose por horário não faz sentido — no intervalo só existe uma dose. */
+  /** Ausente onde dose por horário não faz sentido - no intervalo só existe uma dose. */
   variacao?: VariacaoDeDose;
 };
 

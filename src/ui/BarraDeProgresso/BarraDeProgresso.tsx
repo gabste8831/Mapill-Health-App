@@ -11,15 +11,15 @@ import Animated, {
 /**
  * Quanto tempo a barra leva para alcançar o novo valor.
  *
- * Longo o bastante para o olho pegar o movimento — abaixo de ~250ms a transição vira um salto com
- * borrão —, e curto o bastante para não competir com o toque seguinte: na agenda do dia é comum
+ * Longo o bastante para o olho pegar o movimento - abaixo de ~250ms a transição vira um salto com
+ * borrão -, e curto o bastante para não competir com o toque seguinte: na agenda do dia é comum
  * confirmar duas ou três doses em sequência, e uma barra ainda correndo quando a próxima começa
  * pareceria travada.
  */
 const DURACAO_MS = 420;
 
 type BarraDeProgressoProps = {
-  /** De 0 a 1. Valores fora da faixa são presos nela — quem calcula não precisa saber disso. */
+  /** De 0 a 1. Valores fora da faixa são presos nela - quem calcula não precisa saber disso. */
   valor: number;
   trackStyle: ViewStyle;
   fillStyle: ViewStyle;
@@ -40,7 +40,7 @@ type BarraDeProgressoProps = {
  * ## A largura vive na thread de UI
  *
  * `width` em porcentagem é animável pelo Reanimated e roda fora da thread de JS, então a barra não
- * engasga enquanto o registro da dose escreve no banco — que é exatamente quando ela anima.
+ * engasga enquanto o registro da dose escreve no banco - que é exatamente quando ela anima.
  */
 export function BarraDeProgresso({
   valor,
@@ -54,7 +54,7 @@ export function BarraDeProgresso({
   /**
    * Respeita "reduzir movimento" do sistema.
    *
-   * Quem liga essa opção costuma fazê-lo por enjoo ou vertigem causados por animação — e um app de
+   * Quem liga essa opção costuma fazê-lo por enjoo ou vertigem causados por animação - e um app de
    * saúde é o último lugar onde ignorar isso seria aceitável. Com ela ligada o valor é atribuído
    * direto: a barra continua correta, só não se move.
    */

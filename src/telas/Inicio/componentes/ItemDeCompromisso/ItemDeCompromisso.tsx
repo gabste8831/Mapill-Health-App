@@ -6,7 +6,7 @@ import { useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./ItemDeCompromisso.styles";
 
 export type ItemDeCompromissoProps = {
-  /** `HH:MM` local — a agenda do dia só precisa da hora, o dia é o cabeçalho. */
+  /** `HH:MM` local - a agenda do dia só precisa da hora, o dia é o cabeçalho. */
   time: string;
   title: string;
   /** Onde é. Ausente quando o compromisso não tem endereço útil. */
@@ -20,18 +20,18 @@ export type ItemDeCompromissoProps = {
  *
  * ## Por que ele não se parece com uma dose
  *
- * A dose pede uma resposta agora — confirmar ou pular — e por isso carrega dois botões e muda de
+ * A dose pede uma resposta agora - confirmar ou pular - e por isso carrega dois botões e muda de
  * cor conforme o relógio. O compromisso é o oposto: não há o que fazer no app na hora da consulta,
  * e responder "você foi?" só faz sentido **depois** que ela aconteceu, o que já existe no
  * Calendário.
  *
- * Então aqui ele é informação: que horas, o quê, e onde. Sem botões e sem cor de urgência — se
+ * Então aqui ele é informação: que horas, o quê, e onde. Sem botões e sem cor de urgência - se
  * ficasse igual a uma dose, a agenda passaria a cobrar ação de algo que não a aceita, e o vermelho
  * de "atrasada" ao lado de uma consulta das 14h diria que se perdeu algo que talvez tenha
  * acontecido normalmente.
  *
  * O ícone à esquerda é o que separa os dois tipos de linha de relance, no lugar onde a dose tem a
- * hora — as duas colunas se alinham porque a hora vem logo em seguida nos dois.
+ * hora - as duas colunas se alinham porque a hora vem logo em seguida nos dois.
  */
 export function ItemDeCompromisso({ time, title, location, outcome }: ItemDeCompromissoProps) {
   const styles = useEstilos(criarEstilos);
@@ -41,7 +41,7 @@ export function ItemDeCompromisso({ time, title, location, outcome }: ItemDeComp
    * Lido como uma frase só, na mesma ordem da linha de dose: o que é, que horas, como está.
    *
    * Sem isto o TalkBack para três vezes na mesma linha e anuncia a hora antes de dizer do que se
-   * trata — o contrário do que se quer ouvir ao varrer a agenda.
+   * trata - o contrário do que se quer ouvir ao varrer a agenda.
    */
   const partes = [title, time, location, outcome === null ? null : ROTULO_DO_DESFECHO[outcome]];
   const descricaoFalada = partes.filter((parte) => parte !== null).join(", ");
@@ -66,7 +66,7 @@ export function ItemDeCompromisso({ time, title, location, outcome }: ItemDeComp
       </View>
 
       {/* O desfecho, quando já existe. Selo e não texto solto: ele responde uma pergunta diferente
-          das outras duas linhas — não é sobre o compromisso, é sobre o que aconteceu com ele. */}
+          das outras duas linhas - não é sobre o compromisso, é sobre o que aconteceu com ele. */}
       {outcome !== null ? (
         <View style={[styles.selo, outcome === "missed" && styles.seloAusente]}>
           <Text style={[styles.seloTexto, outcome === "missed" && styles.seloTextoAusente]}>

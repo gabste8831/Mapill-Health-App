@@ -26,7 +26,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     alignItems: "center",
     gap: spacing.md,
   },
-  // Largura máxima acompanhando a logo (os mesmos 220 do `LogoDoMapill`) — os dois botões de ação
+  // Largura máxima acompanhando a logo (os mesmos 220 do `LogoDoMapill`) - os dois botões de ação
   // ficam visualmente ancorados à marca em vez de esticar a largura toda da tela.
   actionButtonWidth: {
     width: "100%",

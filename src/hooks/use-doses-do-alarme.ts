@@ -16,7 +16,7 @@ export type DoseDoAlarme = {
   medicationName: string;
   /**
    * A foto da caixa, quando existe. O alarme dispara com a pessoa recém-acordada, e **reconhecer a
-   * caixa é mais rápido que ler o nome** — ainda mais para quem toma cinco remédios de nomes
+   * caixa é mais rápido que ler o nome** - ainda mais para quem toma cinco remédios de nomes
    * parecidos.
    */
   photoUri: string | null;
@@ -24,7 +24,7 @@ export type DoseDoAlarme = {
    * Onde a caixa está guardada ("armário da cozinha", "na bolsa"), quando preenchido.
    *
    * O alarme é o único momento em que essa informação vale de verdade: quem acorda às 6h para tomar
-   * o remédio precisa saber para onde ir, e é justamente aí que ela não está à mão — o campo mora na
+   * o remédio precisa saber para onde ir, e é justamente aí que ela não está à mão - o campo mora na
    * tela de estoque, que ninguém abre no meio da noite.
    */
   storageLocation: string | null;
@@ -34,7 +34,7 @@ export type DoseDoAlarme = {
    * As orientações da lista fechada, já em texto ("Em jejum · Com bastante água").
    *
    * **Chegaram à tela do alarme em 14/09.** O campo era gravado no cadastro e não aparecia em tela
-   * nenhuma do app — quem marcava "em jejum" preenchia para ninguém. É aqui que ele vale, porque é
+   * nenhuma do app - quem marcava "em jejum" preenchia para ninguém. É aqui que ele vale, porque é
    * aqui que a pergunta "esse era em jejum?" acontece, como o próprio tipo já dizia.
    */
   orientacoes: string[];
@@ -45,7 +45,7 @@ export type DoseDoAlarme = {
   latestLogId: string | null;
   resolvida: boolean;
   /**
-   * Quantas vezes este horário já foi adiado — a trava é de **um** por horário.
+   * Quantas vezes este horário já foi adiado - a trava é de **um** por horário.
    *
    * A tela usa isto para esconder o botão de adiar quando ele não teria efeito, em vez de oferecer
    * e recusar: é a mesma regra que governa a ação da notificação (`semAcoesRapidas`).
@@ -54,13 +54,13 @@ export type DoseDoAlarme = {
 };
 
 /**
- * As doses de um horário, para a **tela de alarme** — que vive fora do roteador.
+ * As doses de um horário, para a **tela de alarme** - que vive fora do roteador.
  *
  * ## Por que não reusa o `use-doses-do-horario`
  *
  * Os dois carregam a mesma coisa, e a duplicação incomoda. Mas aquele recarrega com
  * `useFocusEffect`, que é do `expo-router` e depende de haver uma rota em foco. Esta tela é montada
- * por `AppRegistry`, **fora da árvore de navegação** — ali não existe rota, e o `useFocusEffect`
+ * por `AppRegistry`, **fora da árvore de navegação** - ali não existe rota, e o `useFocusEffect`
  * quebra ou nunca dispara.
  *
  * A diferença entre "tela consultada" e "tela que irrompe" é real, e é ela que separa os dois: um
@@ -74,12 +74,12 @@ export function useDosesDoAlarme(instanteIso: string) {
   const carregar = useCallback(async () => {
     try {
       /**
-       * A janela é o **minuto**, alinhado — e o alinhamento é o que a torna à prova de deslocamento.
+       * A janela é o **minuto**, alinhado - e o alinhamento é o que a torna à prova de deslocamento.
        *
        * As doses nascem sempre em `:00.000` (a grade é construída a partir de `HH:MM`), mas o
        * instante que a notificação carrega pode trazer segundos: o piso do gatilho empurra o aviso
        * de uma dose vencida para "agora + 1 s". Ancorando a busca no instante cru, a janela começava
-       * **depois** da dose que a originou, e a tela subia vazia — o defeito de 15/09.
+       * **depois** da dose que a originou, e a tela subia vazia - o defeito de 15/09.
        *
        * `setSeconds(0, 0)` faz a janela cobrir o minuto inteiro em que a dose está, venha o instante
        * como vier. A correção em `planejar-avisos-de-dose` faz os dois coincidirem de novo; esta
@@ -131,7 +131,7 @@ export function useDosesDoAlarme(instanteIso: string) {
     } finally {
       // Sem estado de erro, e é deliberado: um alarme que disparou não pode virar uma tela de erro
       // sem saída às três da manhã. Falhando a leitura, a lista fica vazia e os botões continuam
-      // ali — silenciar e sair seguem funcionando, que é o mínimo que esta tela deve garantir.
+      // ali - silenciar e sair seguem funcionando, que é o mínimo que esta tela deve garantir.
       setLoading(false);
     }
   }, [instanteIso]);
@@ -140,11 +140,11 @@ export function useDosesDoAlarme(instanteIso: string) {
    * Carrega ao montar **e a cada poucos segundos enquanto o alarme está na tela**.
    *
    * A tela não recarrega por foco (não há rota a que voltar), mas ela fica aberta tocando enquanto
-   * a pessoa decide — e nesse intervalo a dose pode ser resolvida em outro lugar: pelo botão da
+   * a pessoa decide - e nesse intervalo a dose pode ser resolvida em outro lugar: pelo botão da
    * notificação, que continua na bandeja, ou pela Home em outro aparelho depois de sincronizar.
    *
    * Sem revalidar, a tela seguia mostrando a dose como pendente e oferecendo "Tomei" para o que já
-   * fora confirmado — e o alarme continuava tocando depois de respondido, que é o oposto do que ele
+   * fora confirmado - e o alarme continuava tocando depois de respondido, que é o oposto do que ele
    * promete.
    *
    * Três segundos: rápido o bastante para o alarme sumir logo após a confirmação, e uma consulta
@@ -156,8 +156,8 @@ export function useDosesDoAlarme(instanteIso: string) {
     /**
      * O anúncio fecha a janela que o intervalo deixa aberta.
      *
-     * Confirmar a dose pela tela do horário — aberta pelo corpo da notificação, enquanto o alarme
-     * toca — resolvia o registro, mas o som continuava até a próxima revalidação. Alguns segundos
+     * Confirmar a dose pela tela do horário - aberta pelo corpo da notificação, enquanto o alarme
+     * toca - resolvia o registro, mas o som continuava até a próxima revalidação. Alguns segundos
      * de alarme depois de respondido leem como defeito, e é o que o teste em aparelho apontou.
      *
      * O intervalo fica como rede: se o anúncio se perder (esta tela montou depois da gravação),

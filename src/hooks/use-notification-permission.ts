@@ -6,14 +6,14 @@ import { NotifeeGateway } from "@/notifications/notifee-gateway";
 
 const gateway = new NotifeeGateway();
 
-/** No navegador não há permissão de notificação a gerenciar (§5.1 — web é vitrine). */
+/** No navegador não há permissão de notificação a gerenciar (§5.1 - web é vitrine). */
 const temNotificacoes = Platform.OS !== "web";
 
 /**
  * O estado da permissão de avisos, e como pedi-la.
  *
  * Reconsulta a cada volta ao primeiro plano porque a permissão pode ser **revogada nas
- * configurações do sistema** enquanto o app está em segundo plano — e quando isso acontece o app
+ * configurações do sistema** enquanto o app está em segundo plano - e quando isso acontece o app
  * precisa parar de prometer avisos que não vai entregar. Falhar em silêncio aqui é o pior
  * comportamento possível: a pessoa continua confiando num lembrete que não existe mais.
  */
@@ -53,7 +53,7 @@ export function useNotificationPermission() {
   }, []);
 
   /**
-   * Pede a permissão. Chamado no momento em que a pessoa escolhe ser avisada — nunca no
+   * Pede a permissão. Chamado no momento em que a pessoa escolhe ser avisada - nunca no
    * onboarding: pedido sem contexto é pedido negado, e no Android a negativa **não se desfaz** por
    * diálogo. Uma recusa cedo demais custa o recurso central do app para sempre.
    */
@@ -69,7 +69,7 @@ export function useNotificationPermission() {
   }, []);
 
   /**
-   * Leva à tela do sistema que concede acesso à política do Não Perturbe — a permissão que faz o
+   * Leva à tela do sistema que concede acesso à política do Não Perturbe - a permissão que faz o
    * alarme atravessar o DND. O Android não a pede sozinho, então o app precisa apontar o caminho.
    */
   const abrirAcessoAoNaoPerturbe = useCallback(async () => {

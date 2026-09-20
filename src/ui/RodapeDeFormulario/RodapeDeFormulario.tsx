@@ -11,7 +11,7 @@ export type RodapeDeFormularioProps = {
 };
 
 /**
- * O rodapé fixo de um formulário longo — onde mora o botão de salvar.
+ * O rodapé fixo de um formulário longo - onde mora o botão de salvar.
  *
  * ## O problema que ele resolve
  *
@@ -27,12 +27,12 @@ export type RodapeDeFormularioProps = {
  * 1. **Ele rouba espaço de quem está digitando.** Num formulário longo, o teclado já ocupa metade
  *    da tela; um rodapé fixo acima dele deixa uma faixa estreita para o campo em uso.
  * 2. **Ele promete o que não deveria.** O botão diz "salvar", e num formulário de cadastro clínico
- *    salvar no meio da digitação de um campo é quase sempre engano — o valor que está sendo
+ *    salvar no meio da digitação de um campo é quase sempre engano - o valor que está sendo
  *    digitado ainda não foi confirmado.
  *
  * Então ele **sai de cena** enquanto o teclado está aberto, e volta assim que fecha. E fechar agora
  * é fácil: tocar em qualquer área vazia dispensa o teclado (ver `KeyboardAwareScrollView`), o que
- * antes não existia — era o que tornava o rodapé colado a única coisa visível ali.
+ * antes não existia - era o que tornava o rodapé colado a única coisa visível ali.
  *
  * ⚠️ **Isto vale para o formulário longo, não para popup curto.** Numa folha de decisão rápida
  * (escolher um horário, ajustar o estoque) o botão precisa continuar à vista com o teclado aberto,

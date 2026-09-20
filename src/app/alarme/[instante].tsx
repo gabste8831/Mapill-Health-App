@@ -12,11 +12,11 @@ import { AlarmeScreen } from "@/telas/Alarme/AlarmeScreen";
  *
  * São o mesmo componente por dois caminhos, porque o Android trata os dois casos de forma
  * diferente. Com o aparelho ocioso, o `fullScreenAction` abre a tela por cima do bloqueio, fora do
- * roteador. Com a pessoa **usando** o celular, o sistema rebaixa aquilo para um aviso no topo — e
+ * roteador. Com a pessoa **usando** o celular, o sistema rebaixa aquilo para um aviso no topo - e
  * essa decisão não se contorna pela API de notificação.
  *
  * Mas o app rodando tem um recurso que o sistema não controla: ele pode navegar. Então o handler de
- * `DELIVERED` empurra esta rota, e o alarme aparece igual — mesma tela, mesmo som em loop, mesmos
+ * `DELIVERED` empurra esta rota, e o alarme aparece igual - mesma tela, mesmo som em loop, mesmos
  * botões. É o que mantém a promessa de trazer a atenção de volta para a dose, em vez de um aviso
  * discreto que se ignora sem perceber.
  *
@@ -32,7 +32,7 @@ export default function AlarmeRoute() {
    *
    * O listener já evita empurrar a rota quando a Activity está em cena (ver `alarme-em-cena`), mas
    * existe uma corrida: o `DELIVERED` pode chegar **antes** de a Activity terminar de montar, e aí
-   * a guarda de lá não vê nada e a rota entra. Esta é a outra ponta — se a Activity apareceu no
+   * a guarda de lá não vê nada e a rota entra. Esta é a outra ponta - se a Activity apareceu no
    * meio, a rota sai.
    *
    * A Activity tem precedência porque é ela que o Android colocou na frente, por cima da tela de
@@ -50,7 +50,7 @@ export default function AlarmeRoute() {
      * ao navegar, e neste ponto a árvore desta rota ainda está montando. `setTimeout(…, 0)` joga a
      * navegação para o fim da fila, quando a montagem terminou.
      *
-     * O `clearTimeout` cobre o caso de a tela sair antes do disparo — por resposta na Activity, por
+     * O `clearTimeout` cobre o caso de a tela sair antes do disparo - por resposta na Activity, por
      * exemplo. Navegar a partir de um componente já desmontado é o mesmo aviso pelo outro lado.
      */
     const sair = setTimeout(() => {
@@ -65,7 +65,7 @@ export default function AlarmeRoute() {
       instanteIso={instante}
       /**
        * Aqui **há** pilha atrás: o alarme entrou por cima do que a pessoa estava fazendo. Voltar é
-       * o certo — diferente da versão do Notifee, que encerra a Activity porque nasceu sozinha.
+       * o certo - diferente da versão do Notifee, que encerra a Activity porque nasceu sozinha.
        */
       onFechar={() => {
         if (router.canGoBack()) router.back();

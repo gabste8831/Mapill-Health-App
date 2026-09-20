@@ -6,7 +6,7 @@ import { Button } from "../Button/Button";
 import { criarEstilos } from "./EstadoDeErro.styles";
 
 export type EstadoDeErroProps = {
-  /** A mensagem que veio do erro. Vai como está — quem a escreveu sabe o que aconteceu. */
+  /** A mensagem que veio do erro. Vai como está - quem a escreveu sabe o que aconteceu. */
   mensagem: string;
   /** Tentar de novo. Sem isto o componente vira só um texto vermelho, que é o que ele substitui. */
   onTentarDeNovo: () => void;
@@ -16,7 +16,7 @@ export type EstadoDeErroProps = {
  * Erro numa tela de leitura, **com saída**.
  *
  * Existe porque seis telas mostravam a mensagem e paravam ali. Quem caía num erro de leitura do
- * banco — o que acontece, por exemplo, se a tela abre no meio da importação do catálogo — ficava
+ * banco - o que acontece, por exemplo, se a tela abre no meio da importação do catálogo - ficava
  * olhando um texto vermelho sem nada a fazer além de sair e voltar, torcendo. Uma mensagem de erro
  * sem ação é uma parede.
  *

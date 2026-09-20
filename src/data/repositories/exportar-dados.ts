@@ -26,7 +26,7 @@ const TABELAS_EXPORTAVEIS: { tabela: string; rotulo: string }[] = [
 /**
  * Um valor do banco vira uma célula de CSV.
  *
- * Aspas duplicadas e o campo inteiro entre aspas quando há vírgula, aspas ou quebra de linha — a
+ * Aspas duplicadas e o campo inteiro entre aspas quando há vírgula, aspas ou quebra de linha - a
  * regra do RFC 4180. Sem isso, uma observação com vírgula ("tomar em jejum, com água") desloca
  * todas as colunas seguintes daquela linha, e a planilha abre torta sem dizer por quê.
  */
@@ -44,7 +44,7 @@ function tabelaParaCsv(linhas: Record<string, unknown>[]): string {
   /**
    * As colunas saem da **união** das chaves, e não da primeira linha.
    *
-   * O SQLite devolve as colunas da tabela, então na prática todas as linhas têm as mesmas chaves —
+   * O SQLite devolve as colunas da tabela, então na prática todas as linhas têm as mesmas chaves -
    * mas se uma migração deixar uma coluna nova só nos registros recentes, ler apenas a primeira
    * linha silenciaria esse campo no arquivo inteiro.
    */
@@ -57,7 +57,7 @@ function tabelaParaCsv(linhas: Record<string, unknown>[]): string {
   return [cabecalho, ...corpo].join("\r\n") + "\r\n";
 }
 
-/** "Horários de dose" → "horarios-de-dose.csv" — nome de arquivo sem acento nem espaço. */
+/** "Horários de dose" → "horarios-de-dose.csv" - nome de arquivo sem acento nem espaço. */
 function nomeDoArquivo(rotulo: string): string {
   const semAcento = rotulo.normalize("NFD").replace(/[̀-ͯ]/g, "");
   return `${semAcento.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.csv`;
@@ -66,7 +66,7 @@ function nomeDoArquivo(rotulo: string): string {
 export type DadosExportados = {
   /** Caminho do arquivo gerado, pronto para ser compartilhado. */
   uri: string;
-  /** Nome legível, com a data — é o que a pessoa vê ao salvar. */
+  /** Nome legível, com a data - é o que a pessoa vê ao salvar. */
   nome: string;
   /** Quantos registros o arquivo contém, somando todas as tabelas. */
   totalDeRegistros: number;
@@ -85,7 +85,7 @@ function dataLegivel(iso: string): string {
  *
  * É o direito de acesso e de portabilidade da LGPD (art. 18, II e V). As decisões:
  *
- * **CSV, e não JSON.** O JSON cumpria a lei — "formato de uso comum e leitura por máquina" — mas
+ * **CSV, e não JSON.** O JSON cumpria a lei - "formato de uso comum e leitura por máquina" - mas
  * cumpria só a metade que importa a um programador. Quem baixa a própria cópia quer *abrir* e
  * *olhar*, e um JSON de nove tabelas aninhadas não se lê no celular nem se importa em lugar nenhum
  * que o paciente use. CSV abre no Excel, no Google Planilhas e no LibreOffice, e continua sendo
@@ -95,14 +95,14 @@ function dataLegivel(iso: string): string {
  * vez; nove exportações separadas seriam nove idas ao menu. O zip é um anexo só, e o LEIA-ME dentro
  * dele explica o que é cada planilha.
  *
- * **Uma planilha por tabela**, e não uma só com tudo. As nove têm colunas diferentes — juntá-las
+ * **Uma planilha por tabela**, e não uma só com tudo. As nove têm colunas diferentes - juntá-las
  * daria uma tabela com dezenas de colunas quase todas vazias em cada linha.
  *
  * **Tudo, inclusive o que foi apagado.** As linhas com `deleted_at` entram: elas ainda são dado do
  * titular guardado pelo app, e uma exportação que as escondesse não seria a cópia completa que a
  * lei pede. A coluna vai junto, então dá para distinguir o que está ativo do que foi removido.
  *
- * Os anexos (fotos, receita) **não** vão dentro do pacote — só o caminho deles. Embutir imagens
+ * Os anexos (fotos, receita) **não** vão dentro do pacote - só o caminho deles. Embutir imagens
  * produziria um arquivo de dezenas de MB, e elas seguem acessíveis no aparelho.
  */
 export async function exportarDados(): Promise<DadosExportados> {
@@ -132,7 +132,7 @@ export async function exportarDados(): Promise<DadosExportados> {
      *
      * Sem ele o Excel no Windows lê o arquivo como ANSI e "Medicação" vira "MedicaÃ§Ã£o". É o
      * detalhe que faz a diferença entre uma planilha utilizável e uma que a pessoa desiste de abrir
-     * — e o LibreOffice e o Google Sheets ignoram o BOM sem reclamar.
+     * - e o LibreOffice e o Google Sheets ignoram o BOM sem reclamar.
      */
     arquivos[nomeDoArquivo(rotulo)] = codificador.encode("﻿" + tabelaParaCsv(linhas));
     totalDeRegistros += linhas.length;
@@ -143,7 +143,7 @@ export async function exportarDados(): Promise<DadosExportados> {
    * Um LEIA-ME dentro do pacote.
    *
    * Quem abre o zip encontra nove arquivos com nomes técnicos e nenhum contexto. Esta folha diz de
-   * onde vieram, quando foram gerados e por que há linhas que a pessoa não vê mais no app — sem
+   * onde vieram, quando foram gerados e por que há linhas que a pessoa não vê mais no app - sem
    * ela, um registro com `deleted_at` preenchido parece dado que o app se recusou a apagar.
    */
   arquivos["LEIA-ME.txt"] = codificador.encode(

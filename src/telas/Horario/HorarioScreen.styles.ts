@@ -63,7 +63,7 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    * Cada orientação da lista fechada, com fundo próprio.
    *
    * Aqui o fundo é o da superfície clara, então a etiqueta usa a cor de destaque com pouca opacidade
-   * — na tela do alarme ela é branco sobre azul. A forma é a mesma nos dois lugares; o que muda é o
+   * - na tela do alarme ela é branco sobre azul. A forma é a mesma nos dois lugares; o que muda é o
    * contraste que cada fundo pede.
    */
   etiqueta: {
@@ -93,7 +93,7 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
    *
    * Um degrau abaixo da orientação de tomada, e não igual a ela: uma é instrução da dose ("em
    * jejum"), a outra é anotação de quem cuida. Empatadas em cor e corpo, as duas viram um parágrafo
-   * só e a instrução se perde dentro da anotação — que é o oposto do que esta tela precisa.
+   * só e a instrução se perde dentro da anotação - que é o oposto do que esta tela precisa.
    */
   observacao: {
     ...typography.bodySm,

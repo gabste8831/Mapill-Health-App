@@ -12,7 +12,7 @@ export function rotuloDeAntecedencia(leadDays: number): string {
 }
 
 /**
- * O aviso inteiro numa frase — "7 dias antes e no dia", "no dia", "7 dias antes".
+ * O aviso inteiro numa frase - "7 dias antes e no dia", "no dia", "7 dias antes".
  *
  * Os dois canais são independentes, então a frase precisa dar conta das quatro combinações sem
  * que a agenda tenha que montar o texto por conta própria em cada lugar onde ele aparece.

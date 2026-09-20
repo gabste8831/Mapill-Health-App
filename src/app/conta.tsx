@@ -23,7 +23,7 @@ export default function ContaRoute() {
   /**
    * Vincular conta reapresenta os termos antes de entrar (P2). Não é burocracia repetida: é o
    * momento em que a pessoa manifesta intenção de usar a nuvem, e o aceite fica registrado com a
-   * data — o "Ler os termos" ao lado existe para que confirmar não seja assinar às cegas.
+   * data - o "Ler os termos" ao lado existe para que confirmar não seja assinar às cegas.
    */
   function handleSignIn() {
     if (!isSupabaseConfigured) {
@@ -59,7 +59,7 @@ export default function ContaRoute() {
   /**
    * Grava um novo registro de consentimento a cada vinculação de conta (decisão P2, de 26/08).
    *
-   * O login por si só não muda a base legal — o texto vigente diz que os dados não saem do
+   * O login por si só não muda a base legal - o texto vigente diz que os dados não saem do
    * aparelho, e isso continua verdade. O registro existe pelo **rastro**: vincular conta é o
    * momento em que a pessoa manifesta intenção de usar a nuvem, e ter a data disso guardada é o
    * que permite provar depois desde quando ela consentiu com o quê.
@@ -67,7 +67,7 @@ export default function ContaRoute() {
    * Registro novo, e não atualização do anterior: consentimento é evento, não estado. Sobrescrever
    * apagaria justamente a linha do tempo que ele existe para preservar.
    *
-   * Falhar aqui não desfaz o login — a conta já está vinculada, e derrubar a tela deixaria a
+   * Falhar aqui não desfaz o login - a conta já está vinculada, e derrubar a tela deixaria a
    * pessoa sem saber em que pé ficou.
    */
   async function registrarAceiteDaVinculacao() {
@@ -103,7 +103,7 @@ export default function ContaRoute() {
   }
 
   /**
-   * Apagar é irreversível, então o diálogo diz **o que some e o que fica** — é a distinção que
+   * Apagar é irreversível, então o diálogo diz **o que some e o que fica** - é a distinção que
    * decide se a pessoa toca ou não, e sem ela o medo de perder a ficha faria abandonar a ação que
    * ela realmente queria.
    */
@@ -156,9 +156,9 @@ export default function ContaRoute() {
 
       await localData.eraseEverything();
       // Desvincula depois de apagar: se o apagamento falhar, a pessoa continua com a conta
-      // ligada, que é o estado em que ela estava — falhar não pode mudar duas coisas pela metade.
+      // ligada, que é o estado em que ela estava - falhar não pode mudar duas coisas pela metade.
       await desvincular();
-      // Sem ficha nem consentimento, nenhuma tela do app tem o que desenhar — e seguir em uso sem
+      // Sem ficha nem consentimento, nenhuma tela do app tem o que desenhar - e seguir em uso sem
       // consentimento registrado é justamente o que a LGPD não admite.
       restartFirstRun();
     } catch (error) {

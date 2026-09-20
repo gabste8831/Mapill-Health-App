@@ -1,7 +1,7 @@
 /**
  * O que o app precisa do sistema operacional para avisar na hora da dose.
  *
- * O domínio define o contrato e a infraestrutura o cumpre (§2.6.1 — inversão de dependência).
+ * O domínio define o contrato e a infraestrutura o cumpre (§2.6.1 - inversão de dependência).
  * Nenhum use-case importa `expo-notifications`; quem o importa é `src/notifications/`, e só.
  *
  * Existe também para deixar o app testável fora do aparelho: a regra de *quando* avisar é
@@ -11,7 +11,7 @@
 /** Resposta do sistema ao pedido de permissão. */
 export type NotificationPermission =
   | "concedida"
-  /** Ainda não foi pedida — dá para perguntar. */
+  /** Ainda não foi pedida - dá para perguntar. */
   | "naoPedida"
   /**
    * Negada. No Android **o diálogo não aparece de novo** depois da primeira recusa, então este
@@ -30,7 +30,7 @@ export type NotificationPermission =
 export type AvisoDeDose = {
   /**
    * Identifica o aviso. Deriva do que ele avisa (o instante da dose, o id do compromisso), então
-   * recalcular o mesmo aviso produz a mesma chave — o que torna o cancelamento idempotente.
+   * recalcular o mesmo aviso produz a mesma chave - o que torna o cancelamento idempotente.
    */
   chave: string;
   /** Quando tocar. */
@@ -38,7 +38,7 @@ export type AvisoDeDose = {
   titulo: string;
   corpo: string;
   /**
-   * Ids das doses cobertas por este aviso — é o que a tela do horário abre.
+   * Ids das doses cobertas por este aviso - é o que a tela do horário abre.
    *
    * **Vazio** nos avisos que não são de dose (compromisso, receita vencendo): eles não apontam
    * para dose nenhuma, e é isso que faz o toque abrir o app em vez da tela de horário.
@@ -51,14 +51,14 @@ export type AvisoDeDose = {
    * toque em "Adiar", mas as doses continuam sendo as do horário original.
    *
    * **E nos avisos da grade, sempre que a dose está vencida ou quase.** Aqui morava a afirmação de
-   * que "nos avisos da grade os dois coincidem, e este campo fica ausente" — e ela era falsa: o
+   * que "nos avisos da grade os dois coincidem, e este campo fica ausente" - e ela era falsa: o
    * piso de `pisoDoGatilho` empurra o gatilho para "agora + 1 s" quando o horário já passou, e os
    * dois divergem por segundos. Bastava isso para a tela do alarme subir vazia, porque ela procura
    * doses numa janela de 60 s a partir do que recebe. Medido em 15/09, com teste de dose para um
    * minuto depois.
    *
    * A distinção não é acadêmica. A tela de alarme localiza o que mostrar pelo instante que recebe,
-   * e usar a hora de tocar a fazia procurar doses no minuto do adiamento — onde não há nenhuma. O
+   * e usar a hora de tocar a fazia procurar doses no minuto do adiamento - onde não há nenhuma. O
    * alarme adiado voltava a tocar **sem nome, sem dose e sem foto**, e "Tomei" não registrava nada
    * porque não havia dose a registrar.
    */
@@ -75,7 +75,7 @@ export type AvisoDeDose = {
   /**
    * Se este aviso **não** deve oferecer as ações rápidas de dose (Tomei / Adiar).
    *
-   * Duas situações o ligam, e as duas pelo mesmo motivo — não há o que oferecer: a dose já gastou
+   * Duas situações o ligam, e as duas pelo mesmo motivo - não há o que oferecer: a dose já gastou
    * seu único adiamento, ou o aviso nem é de dose (compromisso, receita). Botão que aparece e não
    * funciona é pior que botão nenhum.
    */
@@ -90,20 +90,20 @@ export interface NotificationGateway {
    * onboarding: pedido sem contexto é pedido negado, e no Android a negativa não se desfaz.
    */
   pedirPermissao(): Promise<NotificationPermission>;
-  /** Abre as configurações do app no sistema — a única saída depois de uma negativa. */
+  /** Abre as configurações do app no sistema - a única saída depois de uma negativa. */
   abrirConfiguracoesDoSistema(): Promise<void>;
 
   agendar(aviso: AvisoDeDose): Promise<void>;
   /**
    * Apaga **tudo** que o app agendou e reagenda do zero.
    *
-   * Parece grosseiro e é deliberado: o pior defeito possível aqui é o alarme órfão — lembrete de
+   * Parece grosseiro e é deliberado: o pior defeito possível aqui é o alarme órfão - lembrete de
    * um remédio que a pessoa já parou de tomar. Cancelar tudo e reagendar é idempotente, e
    * idempotência é a única forma barata de garantir que nenhum sobreviva a uma edição.
    */
   cancelarTudo(): Promise<void>;
   /**
-   * Apaga todo agendamento, sem preservar nada — inclusive o lembrete adiado, que o `cancelarTudo`
+   * Apaga todo agendamento, sem preservar nada - inclusive o lembrete adiado, que o `cancelarTudo`
    * poupa de propósito.
    *
    * É o par do apagamento de dados, e não do reagendamento: quando o dado que dava sentido ao

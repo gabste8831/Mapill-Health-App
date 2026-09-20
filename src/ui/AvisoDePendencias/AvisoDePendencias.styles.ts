@@ -3,7 +3,7 @@ import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
-   * Discreto de propósito: fundo neutro, ícone pequeno, texto de apoio. Ele informa, não alerta —
+   * Discreto de propósito: fundo neutro, ícone pequeno, texto de apoio. Ele informa, não alerta -
    * e um aviso que compete com o conteúdo da lista seria lido uma vez e ignorado nas seguintes.
    */
   container: {

@@ -17,14 +17,14 @@ import { savePatientProfileDraft } from "@/hooks/use-patient-profile";
  *
  * `indeciso` é o estado antes de o SQLite ter sido lido: ainda não se sabe se há ficha e
  * consentimento. Existe porque começar em `login` fazia a tela de login **piscar** por um quadro
- * em toda abertura de quem já tinha passado por ela — o gate corrigia em seguida, mas o susto já
+ * em toda abertura de quem já tinha passado por ela - o gate corrigia em seguida, mas o susto já
  * tinha acontecido. Nenhuma tela desenha nesse estado; quem espera é o splash, que já está lá.
  */
 export type FirstRunStep = "indeciso" | "login" | "consent" | "profile" | "app";
 
 /**
  * Resultado do login com Google. O que mostrar em cada caso é decisão da camada de
- * apresentação — este hook não conhece `Alert` nem texto de UI.
+ * apresentação - este hook não conhece `Alert` nem texto de UI.
  */
 export type GoogleSignInResult = "signed-in" | "not-configured";
 
@@ -34,7 +34,7 @@ export type FirstRunGate = {
    * A restauração da nuvem está em curso.
    *
    * A tela usa isto para cobrir a espera. Sem cobrir, quem entra com o Google vê a tela de login
-   * **voltar** por alguns segundos antes de a Home aparecer — o gate ainda não sabe para onde ir,
+   * **voltar** por alguns segundos antes de a Home aparecer - o gate ainda não sabe para onde ir,
    * porque a ficha só chega quando o pull termina. Uma tela de login que reaparece depois de você
    * ter entrado lê como falha, e não como espera.
    */
@@ -55,7 +55,7 @@ export type FirstRunGate = {
  * Assinatura viva do gate, para quem está longe dele na árvore poder mandá-lo recomeçar.
  *
  * Existe por causa do apagamento de dados: quem apaga a ficha e o consentimento pela tela de
- * Ajustes deixa o app num estado que nenhuma tela sabe desenhar — a aba Home abriria consultando
+ * Ajustes deixa o app num estado que nenhuma tela sabe desenhar - a aba Home abriria consultando
  * um paciente que não existe mais, e pior, o app seguiria em uso **sem consentimento registrado**,
  * que é exatamente o que a LGPD não admite.
  *
@@ -70,7 +70,7 @@ export function restartFirstRun(): void {
   restartListener?.();
 }
 
-/** Etapa anterior de cada passo — `null` quando não há retorno possível. */
+/** Etapa anterior de cada passo - `null` quando não há retorno possível. */
 const PREVIOUS_STEP: Record<FirstRunStep, FirstRunStep | null> = {
   // Ninguém volta para "ainda não sei": é estado de leitura, não etapa do fluxo.
   indeciso: null,
@@ -99,7 +99,7 @@ async function hasValidConsent(): Promise<boolean> {
   if (!persistsLocally) return false;
   const consentRepository = new ConsentRepository();
   const currentConsent = await consentRepository.getCurrent();
-  // Bump em CURRENT_TERMS_VERSION invalida o consentimento anterior e força reconsentimento —
+  // Bump em CURRENT_TERMS_VERSION invalida o consentimento anterior e força reconsentimento -
   // exigência da LGPD quando a finalidade/texto do tratamento muda.
   return currentConsent?.termsVersion === CURRENT_TERMS_VERSION;
 }
@@ -123,7 +123,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
    * Se a etapa inicial já foi decidida uma vez.
    *
    * O efeito abaixo existe para responder **uma** pergunta, na abertura: onde esta pessoa está no
-   * onboarding. Sem esta trava ele reavaliava a cada mudança de `step` — e como o próprio efeito
+   * onboarding. Sem esta trava ele reavaliava a cada mudança de `step` - e como o próprio efeito
    * chama `setStep`, ele se reexecutava sozinho.
    *
    * Isso quebrava o login. Quem entrava com o Google numa instalação nova via a tela de login
@@ -141,13 +141,13 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
    *
    * **É aqui que o catálogo da CMED entra**, e não na abertura do app. Ele já carregou de três
    * jeitos diferentes, e os dois primeiros falharam pela mesma razão: escrevia ao mesmo tempo que
-   * outra coisa. Em segundo plano, disputava com a restauração da nuvem — `database is locked` para
+   * outra coisa. Em segundo plano, disputava com a restauração da nuvem - `database is locked` para
    * quem entra com uma conta que já tinha dados. Antes da tela abrir, disputava consigo mesmo, com
    * o efeito montado duas vezes em desenvolvimento.
    *
    * Este ponto é o único do app em que nada mais escreve: o login já terminou, a restauração
    * também, e nenhuma tela subiu ainda. São ~20 mil inserções, medidas em ~100 ms fora do aparelho,
-   * e só na primeira execução — depois a função sai na primeira linha, vendo a tabela cheia.
+   * e só na primeira execução - depois a função sai na primeira linha, vendo a tabela cheia.
    *
    * `catch` e não `throw`: sem catálogo o campo de busca apenas não sugere, e o cadastro manual
    * funciona igual. Falhar aqui não pode impedir alguém de entrar no app.
@@ -173,7 +173,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
    * O que decide pular a primeira execução é o **onboarding cumprido**, não a sessão.
    *
    * Antes só a sessão do Supabase avançava o gate, e isso fazia a tela de login reaparecer a cada
-   * abertura para todo mundo que escolheu "continuar sem login" — uma escolha que o app oferece e
+   * abertura para todo mundo que escolheu "continuar sem login" - uma escolha que o app oferece e
    * depois esquecia. Pior, num build sem as credenciais do Supabase ela reaparecia sempre, para
    * todos, sem que houvesse botão que resolvesse: o de entrar não funciona, e o de seguir sem
    * conta precisava ser tocado de novo todo dia.
@@ -209,7 +209,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
         if (!ativo) return;
         if (user) {
           /**
-           * Há sessão, mas o banco local não tem ficha — é o caminho de quem reinstalou o app com a
+           * Há sessão, mas o banco local não tem ficha - é o caminho de quem reinstalou o app com a
            * sessão ainda válida, ou de quem apagou os dados. Restaurar antes de perguntar, pelo
            * mesmo motivo do `signInWithGoogle`: perguntar primeiro produz uma ficha duplicada.
            *
@@ -231,12 +231,12 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
       } catch (cause) {
         /**
          * Qualquer falha aqui **precisa sair de `indeciso`**. Nenhuma tela desenha nesse estado, e
-         * o layout devolve `null` enquanto ele durar — então uma promessa rejeitada deixava o app
+         * o layout devolve `null` enquanto ele durar - então uma promessa rejeitada deixava o app
          * parado na splash azul para sempre, sem erro visível e sem saída. Foi o que travava a
          * reabertura depois de tirar dos recentes.
          *
          * O destino é `login`, o mesmo de quem abre o app pela primeira vez: se não deu para ler
-         * ficha nem sessão, tratar como instalação nova é a suposição mais conservadora — pede de
+         * ficha nem sessão, tratar como instalação nova é a suposição mais conservadora - pede de
          * novo o que já foi respondido, mas nunca libera o app pulando o consentimento.
          */
         console.error("Falha ao decidir a etapa inicial:", cause);
@@ -258,7 +258,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     /**
      * Baixa os dados **antes** de decidir o que perguntar.
      *
-     * Sem isto, o app reinstalado perguntava ao banco local "tem ficha? tem consentimento?" — e num
+     * Sem isto, o app reinstalado perguntava ao banco local "tem ficha? tem consentimento?" - e num
      * banco vazio a resposta é não, então mandava preencher tudo de novo. Depois o pull rodava (na
      * volta ao foco) e trazia a ficha antiga: o paciente terminava com **duas**, uma da nuvem e uma
      * que acabara de digitar. Era o que aparecia no export como duas fichas de saúde.
@@ -266,7 +266,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
      * O sintoma parecia "a sincronização não funciona", mas era o contrário: ela funcionava e
      * chegava tarde. Restaurar é a primeira coisa que um login deve fazer, não a última.
      *
-     * `catch` e não `throw`: sem internet no momento do login, o app segue para o onboarding — que
+     * `catch` e não `throw`: sem internet no momento do login, o app segue para o onboarding - que
      * é o que ele sabe fazer offline. O pull da próxima abertura reconcilia, e o LWW por
      * `updated_at` resolve o encontro das duas versões.
      */
@@ -275,7 +275,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
       const { recebidos, erro } = await sincronizar();
       if (erro !== null) {
         // `sincronizar` não relança: ela devolve o erro no resultado, para a UI decidir. Aqui a
-        // decisão é seguir — o onboarding é o que o app sabe fazer offline.
+        // decisão é seguir - o onboarding é o que o app sabe fazer offline.
         console.error("Não foi possível restaurar os dados no login:", erro);
       } else if (__DEV__) {
         console.log(`[Mapill] login restaurou ${recebidos} registro(s) da nuvem`);
@@ -296,7 +296,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     if (persistsLocally && !(await hasValidConsent())) {
       const consentRepository = new ConsentRepository();
       const now = new Date().toISOString();
-      // Prova de consentimento persistida e versionada — é o registro que comprova o
+      // Prova de consentimento persistida e versionada - é o registro que comprova o
       // cumprimento do art. 11 da LGPD (tratamento de dado sensível de saúde).
       await consentRepository.save({
         id: Crypto.randomUUID(),
@@ -307,7 +307,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
         deletedAt: null,
       });
     }
-    // Cobre reconsentimento (termos mudaram de versão) de quem já tinha ficha preenchida —
+    // Cobre reconsentimento (termos mudaram de versão) de quem já tinha ficha preenchida -
     // não faz sentido pedir a ficha de novo só porque o texto legal mudou.
     setStep((await hasCompletedProfile()) ? "app" : "profile");
   }, []);
@@ -331,7 +331,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
   /**
    * Retorno explícito entre as etapas da primeira execução. Existe porque a escolha de entrada
    * é arrependível: quem clicou em "continuar sem login" precisa poder voltar e entrar com o
-   * Google sem reinstalar o app. Nada é desfeito ao voltar — o consentimento já registrado
+   * Google sem reinstalar o app. Nada é desfeito ao voltar - o consentimento já registrado
    * continua válido (ver `acceptConsent`), só a tela exibida muda.
    *
    * Heurística de Nielsen nº3 ("controle e liberdade do usuário"): saída de emergência clara
@@ -341,7 +341,7 @@ export function useFirstRunGate(isDatabaseReady: boolean): FirstRunGate {
     setStep((current) => PREVIOUS_STEP[current] ?? current);
   }, []);
 
-  // No Android o botão físico de voltar precisa fazer a mesma coisa que o botão da tela —
+  // No Android o botão físico de voltar precisa fazer a mesma coisa que o botão da tela -
   // sem isso ele fecharia o app no meio do onboarding, que é justamente o que o usuário não
   // espera. Só registramos o handler quando há pra onde voltar, pra não sequestrar o gesto
   // na tela de login (lá fechar o app é o comportamento correto).

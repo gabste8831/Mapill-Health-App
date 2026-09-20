@@ -2,7 +2,7 @@ import type { DoseDoPeriodo, ResumoDeAdesao } from "./resumir-adesao";
 import { resumirAdesao } from "./resumir-adesao";
 
 /**
- * Um tratamento como o relatório o descreve — já em português, não na estrutura do banco.
+ * Um tratamento como o relatório o descreve - já em português, não na estrutura do banco.
  *
  * As três linhas são o que o médico pergunta: o quê, quanto e quando. A montagem em texto acontece
  * fora daqui (`rotulos-de-medicamento`), porque é a mesma tradução que a lista de remédios usa e
@@ -33,7 +33,7 @@ export type CompromissoDoRelatorio = {
  * **Contadas, nunca listadas uma a uma.** É a decisão 6.4 aplicada ao papel: a tela de adesão usa
  * cinza em vez de vermelho porque a lista inteira já é de doses perdidas, e colorir cada linha
  * transformaria registro clínico em fileira de repreensões. Num documento que a pessoa entrega na
- * mão de outra, o efeito é maior — quem se envergonha do relatório não o mostra, e um relatório que
+ * mão de outra, o efeito é maior - quem se envergonha do relatório não o mostra, e um relatório que
  * não se mostra não serve para nada.
  *
  * `puladas` e `semResposta` continuam separadas porque pedem condutas opostas: "decidi não tomar" é
@@ -56,7 +56,7 @@ export type RelatorioInput = {
   /**
    * Quantos tratamentos existem no total, para o recorte poder ser declarado.
    *
-   * Quando o relatório é filtrado por medicamento, `tratamentos.length` é menor que este número — e
+   * Quando o relatório é filtrado por medicamento, `tratamentos.length` é menor que este número - e
    * o cabeçalho precisa dizer isso. Ver `recorte`.
    */
   totalDeTratamentos: number;
@@ -74,7 +74,7 @@ export type Relatorio = {
    * `null` quando o relatório cobre tudo; preenchido quando foi filtrado.
    *
    * Existe porque **um recorte muda o que o documento afirma**. Um PDF com 2 de 5 tratamentos não é
-   * "a adesão do paciente" — é a adesão daqueles dois, e um leitor que não souber disso tira uma
+   * "a adesão do paciente" - é a adesão daqueles dois, e um leitor que não souber disso tira uma
    * conclusão que os dados não sustentam. É a mesma regra da RN20: o app não afirma sobre o
    * paciente o que os dados não dizem.
    */
@@ -82,7 +82,7 @@ export type Relatorio = {
 };
 
 /**
- * Monta o conteúdo do relatório clínico — o que o PDF vai dizer, sem nada sobre como ele parece.
+ * Monta o conteúdo do relatório clínico - o que o PDF vai dizer, sem nada sobre como ele parece.
  *
  * Fica no domínio, e não no gerador do PDF, pelo mesmo motivo que `resumir-adesao` não mora na
  * tela: é conteúdo de documento clínico, e precisa ser verificável em Node sem aparelho, sem banco
@@ -90,7 +90,7 @@ export type Relatorio = {
  * HTML.
  *
  * **O princípio que decide o que entra:** o relatório é lido em consulta de quinze minutos, não
- * estudado. Ele responde *o que você está tomando, e você está tomando?* — e cada item a mais
+ * estudado. Ele responde *o que você está tomando, e você está tomando?* - e cada item a mais
  * compete com essa resposta. Por isso o histórico dose a dose fica de fora (é o que a exportação
  * em JSON faz) e as perdas vêm contadas, não enumeradas.
  */
@@ -107,7 +107,7 @@ export function montarRelatorio(input: RelatorioInput): Relatorio {
      * sozinho ao longo do dia.
      *
      * Uma dose futura **pulada** fica: a pessoa já disse que não vai tomar, e isso é uma perda
-     * real — some dela seria o papel do médico esconder uma decisão que aconteceu.
+     * real - some dela seria o papel do médico esconder uma decisão que aconteceu.
      */
     if (dose.scheduledFor > agoraIso && dose.latestStatus === null) continue;
     if (dose.latestStatus === "confirmed") continue;

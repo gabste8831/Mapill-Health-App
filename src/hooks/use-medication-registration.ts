@@ -36,7 +36,7 @@ export type MedicamentoIds = {
 /**
  * O que a exclusão precisa saber. `prescriptionId` é opcional porque um medicamento pode ter
  * ficado sem prescrição (cadastro interrompido, ou dado inconsistente vindo de uma sincronização
- * futura) — e nesse caso ele ainda tem que poder sair da lista, senão vira um item que a pessoa
+ * futura) - e nesse caso ele ainda tem que poder sair da lista, senão vira um item que a pessoa
  * vê e não consegue remover.
  */
 export type MedicamentoAExcluir = {
@@ -49,7 +49,7 @@ function syncFields() {
 }
 
 /**
- * Grava um cadastro inteiro — medicamento, tratamento, estoque e horários. Cria quando `ids` é
+ * Grava um cadastro inteiro - medicamento, tratamento, estoque e horários. Cria quando `ids` é
  * omitido e atualiza quando vem preenchido; é a mesma operação porque a tela é a mesma, e
  * duplicar isso em "salvar" e "atualizar" faria as duas divergirem com o tempo.
  *
@@ -67,11 +67,11 @@ export async function salvarMedicamento(
   /**
    * O cadastro inteiro numa transação só, por duas razões.
    *
-   * **Atomicidade**: são muitas escritas — medicamento, tratamento, estoque e um horário por dose
+   * **Atomicidade**: são muitas escritas - medicamento, tratamento, estoque e um horário por dose
    * de trinta dias (90 numa posologia de 8/8h, 120 numa de 6/6h). Soltas, uma falha no meio deixava
    * o remédio salvo com metade dos horários, e nada desfazia o que já tinha entrado. É o mesmo
-   * estado inconsistente que a exclusão já evitava — tratamento sem medicamento, dose sem
-   * tratamento —, aqui pelo lado da criação.
+   * estado inconsistente que a exclusão já evitava - tratamento sem medicamento, dose sem
+   * tratamento -, aqui pelo lado da criação.
    *
    * **Custo**: fora de transação, cada escrita é um commit em disco. Noventa commits para gravar um
    * cadastro é o que fazia a tela demorar a responder, e é a mesma conta que já levou a importação
@@ -140,7 +140,7 @@ export async function salvarMedicamento(
          *
          * Quem corrige o estoque no cadastro está fazendo o mesmo que "Repor" na tela de estoque:
          * dizendo que há mais caixa do que o app pensava. Manter a memória do aviso anterior
-         * deixaria a pessoa sem aviso na próxima vez que baixasse — calada justamente porque um
+         * deixaria a pessoa sem aviso na próxima vez que baixasse - calada justamente porque um
          * dia já avisou. Ver `planejarAvisosDeEstoque`.
          */
         lowStockAlertedAtQuantity:
@@ -171,7 +171,7 @@ export async function salvarMedicamento(
     await registrarDosesJaTomadas(draft, prescription, from);
   });
 
-  // A posologia mudou, então a janela de avisos inteira é refeita — é o gatilho nº1 e nº3 do ciclo
+  // A posologia mudou, então a janela de avisos inteira é refeita - é o gatilho nº1 e nº3 do ciclo
   // de vida do C1. Refazer tudo, e não corrigir o que mudou, é o que garante zero alarme órfão.
   await reagendarTodosOsAvisos();
 
@@ -185,7 +185,7 @@ export async function salvarMedicamento(
 /**
  * Grava as doses de hoje que o paciente disse já ter tomado antes de cadastrar (E10).
  *
- * O horário já passou, então `generateDoseSchedules` não o produz para o futuro — o agendamento é
+ * O horário já passou, então `generateDoseSchedules` não o produz para o futuro - o agendamento é
  * recriado aqui, para o dia inteiro, e só os horários marcados são aproveitados. Cada um vira um
  * `DoseSchedule` **mais** um `IntakeLog` confirmado, exatamente como uma dose confirmada pela
  * Home: sem o agendamento, o registro de ingestão apontaria para nada, e o histórico deixaria de
@@ -197,13 +197,13 @@ export async function salvarMedicamento(
  * "tomei às 8", e é isso que fica gravado.
  *
  * **O estoque não é descontado, de propósito.** Quem cadastra conta a caixa no momento do cadastro,
- * então o número informado já reflete a dose que foi tomada de manhã — descontar de novo tiraria
+ * então o número informado já reflete a dose que foi tomada de manhã - descontar de novo tiraria
  * duas de uma. Por isso escreve o `IntakeLog` direto em vez de passar pelo `RegisterIntake`: o que
  * o E10 preenche é a lacuna de **adesão e histórico** do primeiro dia, não a de estoque, que já
  * nasce certa.
  *
  * O ganho maior nem é o registro: é a pergunta existir. Quem cadastra às 12h um remédio das 08h e
- * vê "você já tomou a dose das 08:00?" descobre ali que tinha uma dose hoje — inclusive quem ainda
+ * vê "você já tomou a dose das 08:00?" descobre ali que tinha uma dose hoje - inclusive quem ainda
  * não tomou (decisão de 27/08).
  */
 async function registrarDosesJaTomadas(
@@ -247,7 +247,7 @@ async function registrarDosesJaTomadas(
 }
 
 /**
- * Remonta o formulário a partir do que está gravado. É o inverso exato de `salvarMedicamento` —
+ * Remonta o formulário a partir do que está gravado. É o inverso exato de `salvarMedicamento` -
  * as duas funções precisam andar juntas, e é por isso que moram no mesmo arquivo.
  *
  * `null` quando o medicamento não existe mais (excluído noutra tela, por exemplo).
@@ -306,15 +306,15 @@ export async function carregarMedicamento(
 }
 
 /**
- * Exclui um cadastro inteiro — medicamento, tratamento e estoque.
+ * Exclui um cadastro inteiro - medicamento, tratamento e estoque.
  *
  * Exclusão **lógica** (`deletedAt`), nunca física, por dois motivos que se somam: o registro de
  * ingestão já gravado aponta pra essa prescrição e viraria órfão, e a sincronização (bloco D1)
- * precisa da linha marcada pra contar ao servidor que ela morreu — linha apagada some sem deixar
+ * precisa da linha marcada pra contar ao servidor que ela morreu - linha apagada some sem deixar
  * recado, e voltaria do servidor na sincronização seguinte.
  *
  * A exceção são os horários futuros, apagados de vez pelo mesmo motivo que já valia na edição:
- * dose que nunca chegou a acontecer não é histórico (ver `deleteUpcoming`). Os passados ficam —
+ * dose que nunca chegou a acontecer não é histórico (ver `deleteUpcoming`). Os passados ficam -
  * são a memória de quando a dose era pra ter sido tomada, que é o que o histórico referencia.
  */
 export async function excluirMedicamento(ids: MedicamentoAExcluir): Promise<void> {
@@ -339,7 +339,7 @@ export async function excluirMedicamento(ids: MedicamentoAExcluir): Promise<void
    * A exclusão é o que **mais** precisa subir logo.
    *
    * Ela é lógica (`softDelete`), e o que a torna real na nuvem é o push carregando o `deletedAt`.
-   * Enquanto ele não sobe, o servidor ainda tem a linha viva — e um `pull` antes disso traz o
+   * Enquanto ele não sobe, o servidor ainda tem a linha viva - e um `pull` antes disso traz o
    * remédio excluído de volta, com os avisos junto.
    */
   void sincronizar().catch(() => {});

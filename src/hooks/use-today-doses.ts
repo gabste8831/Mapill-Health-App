@@ -28,12 +28,12 @@ const persistsLocally = Platform.OS !== "web";
 /**
  * Como a dose aparece na agenda do dia.
  *
- * `late` é estado próprio, e não uma variação de `pending`, porque é o único que pede ação agora —
+ * `late` é estado próprio, e não uma variação de `pending`, porque é o único que pede ação agora -
  * e a decisão nº11.5 é explícita: dose atrasada nunca vira "pulada" sozinha, ela fica devendo
  * resposta até alguém dar uma.
  *
  * `now` é a dose **na hora**: dentro da janela de tolerância em torno do horário marcado. Sem ele,
- * a dose das 08:00 virava "atrasada" às 08:01 — e chamar de atraso o que está rigorosamente em dia
+ * a dose das 08:00 virava "atrasada" às 08:01 - e chamar de atraso o que está rigorosamente em dia
  * ensina a ignorar o vermelho, que é justamente o oposto do que ele existe para fazer.
  */
 export type DoseVisualStatus = "confirmed" | "skipped" | "late" | "now" | "next" | "upcoming";
@@ -41,12 +41,12 @@ export type DoseVisualStatus = "confirmed" | "skipped" | "late" | "now" | "next"
 /**
  * A janela do "na hora", em minutos: **15 antes e 30 depois** do horário marcado.
  *
- * Antes da hora a dose ainda não é para ser tomada, então a folga é curta — só o bastante para quem
+ * Antes da hora a dose ainda não é para ser tomada, então a folga é curta - só o bastante para quem
  * viu o alerta e foi buscar o copo d'água.
  *
  * Depois do horário a folga é **menor ainda**: cinco minutos, o tempo de confirmar a dose que se
  * está tomando agora. Eram trinta, e o efeito em aparelho foi três doses vencidas em verde ao mesmo
- * tempo, às 19:35, com horários de 19:31 a 19:34 — meia hora de tolerância faz a tela contradizer o
+ * tempo, às 19:35, com horários de 19:31 a 19:34 - meia hora de tolerância faz a tela contradizer o
  * relógio que a pessoa tem na mão, e verde é a cor que menos pode enganar num app de medicação,
  * porque é a que diz "está tudo em ordem".
  */
@@ -64,7 +64,7 @@ export type DoseDoDia = {
   doseUnit: PosologyUnit;
   intakeNote: string | null;
   status: DoseVisualStatus;
-  /** Log que registrou o desfecho atual — presente quando a dose já foi resolvida ou adiada. */
+  /** Log que registrou o desfecho atual - presente quando a dose já foi resolvida ou adiada. */
   latestLogId: string | null;
   latestStatus: IntakeStatus | null;
 };
@@ -78,7 +78,7 @@ export type EstoqueBaixo = {
    * O dia da última dose que o estoque cobre, ISO `YYYY-MM-DD`. `null` quando ele já zerou.
    *
    * Vem junto dos dias porque "8 dias" obriga a pessoa a fazer a conta no calendário para saber se
-   * dá para esperar a próxima ida à farmácia — e é essa a decisão que o aviso existe para apoiar.
+   * dá para esperar a próxima ida à farmácia - e é essa a decisão que o aviso existe para apoiar.
    * A tela de estoque já mostrava as duas coisas; aqui só os dias apareciam.
    */
   lastDay: string | null;
@@ -93,7 +93,7 @@ export type DiaDaSemana = {
 
 export type AgendaDoDia = {
   doses: DoseDoDia[];
-  /** Quantas já foram resolvidas (confirmadas ou puladas) — numerador do progresso. */
+  /** Quantas já foram resolvidas (confirmadas ou puladas) - numerador do progresso. */
   resolvidas: number;
   /** Os últimos 7 dias, terminando em hoje. */
   semana: DiaDaSemana[];
@@ -101,22 +101,22 @@ export type AgendaDoDia = {
   estoquesBaixos: EstoqueBaixo[];
   /**
    * Quantos remédios têm estoque controlado. Separado de `estoquesBaixos` porque responde outra
-   * pergunta: aquele diz o que está acabando, este diz se a tela de estoque tem o que mostrar —
+   * pergunta: aquele diz o que está acabando, este diz se a tela de estoque tem o que mostrar -
    * e zero é o que faz o acesso a ela desaparecer da Home.
    */
   estoquesControlados: number;
-  /** Se existe pelo menos um medicamento cadastrado — separa "dia vazio" de "app vazio". */
+  /** Se existe pelo menos um medicamento cadastrado - separa "dia vazio" de "app vazio". */
   temMedicamentos: boolean;
   /**
    * Quantos avisos a pessoa pediu, somando **as quatro fontes**: lembrete de dose, renovação de
    * receita, estoque acabando e compromisso marcado.
    *
    * Existe para a Home saber se vale avisar que a permissão de notificações está desligada. Sem
-   * isso, o aviso apareceria para quem nunca pediu lembrete nenhum — cobrando uma permissão que
+   * isso, o aviso apareceria para quem nunca pediu lembrete nenhum - cobrando uma permissão que
    * não muda nada na vida dessa pessoa, que é o jeito mais rápido de ensinar a ignorar avisos.
    *
    * Contava só o lembrete de dose até 12/09, e isso deixava sem painel quem usa o app de outro
-   * jeito — sem alarme de dose, mas com aviso de estoque ou de consulta. Os avisos dessa pessoa
+   * jeito - sem alarme de dose, mas com aviso de estoque ou de consulta. Os avisos dessa pessoa
    * dependiam da mesma permissão e sumiam em silêncio, sem nada na tela explicando por quê.
    */
   tratamentosComLembrete: number;
@@ -136,23 +136,23 @@ const AGENDA_VAZIA: AgendaDoDia = {
 const SIGLAS_DOS_DIAS = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SAB"];
 
 /**
- * Os últimos sete dias, do mais antigo até hoje — pelo **mesmo cálculo** da tela "Minha adesão".
+ * Os últimos sete dias, do mais antigo até hoje - pelo **mesmo cálculo** da tela "Minha adesão".
  *
  * Já foi uma consulta própria (`findDailyAdherence`), e as duas divergiam em dois pontos que a
  * pessoa via lado a lado:
  *
- * - a consulta contava **todas** as doses do dia, inclusive as que ainda não venceram — então uma
+ * - a consulta contava **todas** as doses do dia, inclusive as que ainda não venceram - então uma
  *   dose das 22h derrubava a barra às 15h, e o número subia de novo à noite sozinho;
  * - ela **não filtrava medicamento excluído**, enquanto a tela de adesão filtra. Depois de excluir
  *   um remédio, as doses dele continuavam no denominador do gráfico e em nenhum outro lugar da
- *   tela — a taxa que ninguém consegue explicar.
+ *   tela - a taxa que ninguém consegue explicar.
  *
  * Agora as duas telas passam por `adesaoPorDia`, sobre a mesma lista já filtrada. Um cálculo só, e
  * o gráfico da Home não tem como discordar do da tela de adesão.
  *
  * ⚠️ **Isto não é a mesma conta da barra de progresso do topo da Home**, e a diferença é
  * deliberada: a barra mede *quantas doses você já respondeu* (confirmadas **e** puladas), porque
- * ela existe para dizer o que ainda falta fazer hoje. O gráfico mede *quantas você tomou* — é
+ * ela existe para dizer o que ainda falta fazer hoje. O gráfico mede *quantas você tomou* - é
  * adesão, e pular não é aderir. Duas perguntas diferentes sobre o mesmo dia.
  */
 function montarSemana(doses: DoseParaDia[], agora: Date): DiaDaSemana[] {
@@ -177,7 +177,7 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
   /**
    * A janela vai até o **fim de hoje**, e não até agora.
    *
-   * O dia em andamento se mede inteiro — uma de duas doses é 50%, mesmo que a segunda só vença às
+   * O dia em andamento se mede inteiro - uma de duas doses é 50%, mesmo que a segunda só vença às
    * 22h. Parar em `agora` traria só a dose da manhã, e o gráfico marcaria 100% num dia pela metade.
    */
   const fimDeHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
@@ -262,7 +262,7 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
     // **Não** marca `proximaMarcada`: "agora" e "próxima" respondem a perguntas diferentes. A dose
     // na hora já está na agenda, em verde, pedindo ação; o card do topo responde "e depois desta,
     // o que vem?". Enquanto uma consumia a outra, ter qualquer dose na janela apagava o card azul
-    // da tela inteira — foi o que sumiu com ele quando três doses ficaram "na hora" juntas.
+    // da tela inteira - foi o que sumiu com ele quando três doses ficaram "na hora" juntas.
     if (dose.scheduledFor <= inicioDaJanela) {
       dose.status = "now";
       continue;
@@ -288,7 +288,7 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
      * Eram só as prescrições com `reminderMode`, e isso deixava sem painel de permissões quem usa o
      * app de outro jeito: sem lembrete de dose, mas com aviso de estoque acabando ou de compromisso
      * marcado. Esses avisos precisam da mesma permissão de notificação, e sem ela sumiam em
-     * silêncio — o app prometia avisar, não avisava, e não havia nada na tela explicando por quê.
+     * silêncio - o app prometia avisar, não avisava, e não havia nada na tela explicando por quê.
      *
      * Relatado em 12/09. As três fontes entram porque as três dependem da mesma autorização; o que
      * a segunda condição do painel evita é cobrar permissão de quem não pediu aviso **nenhum**.
@@ -323,7 +323,7 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
  * Os estoques que merecem aviso agora: os que acabam dentro da antecedência que o próprio
  * paciente escolheu, mais os que já zeraram.
  *
- * O alerta desligado não é ignorado por completo — estoque em zero aparece de qualquer forma,
+ * O alerta desligado não é ignorado por completo - estoque em zero aparece de qualquer forma,
  * porque aí não é previsão, é o remédio ter acabado.
  */
 function estoquesQueVaoAcabar(
@@ -364,7 +364,7 @@ function estoquesQueVaoAcabar(
     /**
      * **Sem prazo escolhido, o cartão aparece na semana do fim.**
      *
-     * A antecedência é opcional desde 08/09 — quem marca a caixa sem escolher prazo quer ser
+     * A antecedência é opcional desde 08/09 - quem marca a caixa sem escolher prazo quer ser
      * avisado no dia em que o estoque acabar. Aqui ela era exigida (`leadDays === null` pulava o
      * item), e o efeito era a pessoa marcar o aviso e não ver cartão nenhum: nem o antecipado, nem
      * o do fim.
@@ -388,18 +388,18 @@ function estoquesQueVaoAcabar(
 }
 
 /**
- * Grava o desfecho de uma dose. Quando já existe log — inclusive um "adiar" —, grava uma
+ * Grava o desfecho de uma dose. Quando já existe log - inclusive um "adiar" -, grava uma
  * **correção** em vez de um registro solto: assim o estoque é ajustado pela diferença e o
  * registro anterior continua consultável, que é o que torna o histórico auditável.
  *
  * `occurredAt` é agora, e não o horário agendado, mesmo numa dose atrasada: o que o app tem para
  * registrar é o instante em que a pessoa respondeu. Carimbar o horário previsto seria inventar
- * um dado clínico que ninguém observou (§2.3.3 — o valor do eMEM está justamente no timestamp
+ * um dado clínico que ninguém observou (§2.3.3 - o valor do eMEM está justamente no timestamp
  * ser do evento real).
  */
 /**
  * O mínimo para registrar um desfecho. Existe como tipo próprio para que o calendário possa
- * registrar pelo mesmo caminho da Home sem carregar tudo que a linha da Home precisa desenhar —
+ * registrar pelo mesmo caminho da Home sem carregar tudo que a linha da Home precisa desenhar -
  * duas implementações de registro clínico é o que este tipo existe para evitar.
  */
 export type DoseParaRegistrar = {
@@ -422,7 +422,7 @@ export async function gravarDesfecho(
    * O desfecho atual vem do **banco**, e não do que a tela carregou.
    *
    * `dose.latestLogId` é a memória de quando a tela montou, e entre aquele instante e este toque a
-   * dose pode ter sido resolvida em outro lugar — pela notificação, por outra tela, pelo handler de
+   * dose pode ter sido resolvida em outro lugar - pela notificação, por outra tela, pelo handler de
    * segundo plano. A tela de alarme é o caso extremo: ela carrega uma vez e não recarrega (não há
    * foco a que voltar), então sua cópia envelhece por todo o tempo em que o alarme toca.
    *
@@ -436,7 +436,7 @@ export async function gravarDesfecho(
   /**
    * Repetir o mesmo desfecho não faz nada.
    *
-   * Confirmar o que já está confirmado não é uma correção — é o mesmo fato dito duas vezes, e
+   * Confirmar o que já está confirmado não é uma correção - é o mesmo fato dito duas vezes, e
    * gravá-lo somaria um registro ao histórico que o médico vai ler. Acontece de verdade: o alarme
    * continua tocando depois de a dose ser confirmada pela notificação, e responder na tela é o
    * gesto natural para calar o som.
@@ -461,7 +461,7 @@ export async function gravarDesfecho(
      * Avisa quem estiver mostrando esta dose agora.
      *
      * É a tela de alarme que precisa: ela toca em loop, e continuar tocando depois de a dose ser
-     * confirmada em outro lugar — pelo corpo da notificação, que leva à tela do horário — é o app
+     * confirmada em outro lugar - pelo corpo da notificação, que leva à tela do horário - é o app
      * contradizendo o que acabou de gravar. Ela revalida sozinha a cada poucos segundos, mas
      * esses segundos de som depois da resposta leem como defeito.
      *
@@ -492,11 +492,11 @@ export async function gravarDesfecho(
  * Manda o desfecho para a nuvem sem segurar quem gravou.
  *
  * O histórico de ingestão é o que o médico lê, e é o dado que menos pode existir só num aparelho.
- * Até 14/09 ele esperava alguém abrir a tela de Conta para subir — e quem confirma doses todo dia
+ * Até 14/09 ele esperava alguém abrir a tela de Conta para subir - e quem confirma doses todo dia
  * não tem motivo para abrir aquela tela nunca.
  *
  * Sem `await` e com o erro engolido, de propósito: a gravação local já aconteceu e é ela que vale.
- * Falhar aqui deixa a linha pendente, e a próxima passada da sincronização a leva — que é como o
+ * Falhar aqui deixa a linha pendente, e a próxima passada da sincronização a leva - que é como o
  * offline-first do app funciona em todo o resto.
  */
 function subirDesfecho() {
@@ -504,7 +504,7 @@ function subirDesfecho() {
 }
 
 /**
- * A agenda de hoje, recarregada quando a tela volta ao foco — é o que faz um cadastro feito agora
+ * A agenda de hoje, recarregada quando a tela volta ao foco - é o que faz um cadastro feito agora
  * já aparecer, e o que sincroniza a Home com o que foi confirmado na tela de dose.
  */
 export function useTodayDoses() {
@@ -528,7 +528,7 @@ export function useTodayDoses() {
    * Recarrega ao ganhar foco **e a cada minuto enquanto a tela está aberta**.
    *
    * O status da dose depende da hora que é agora: às 18:15 ela é "É AGORA", às 18:46 é "ATRASADA".
-   * Só com `useFocusEffect`, o `agora` congelava no instante em que a tela abriu — quem deixava a
+   * Só com `useFocusEffect`, o `agora` congelava no instante em que a tela abriu - quem deixava a
    * Home aberta via a dose presa em verde muito depois de o horário passar, que é justamente a cor
    * que não pode mentir num app de medicação.
    *
@@ -542,10 +542,10 @@ export function useTodayDoses() {
       /**
        * A dose resolvida **em outro lugar** também atualiza a Home, sem esperar o minuto.
        *
-       * O `useFocusEffect` cobre o caminho normal — voltar da tela do horário devolve o foco e
+       * O `useFocusEffect` cobre o caminho normal - voltar da tela do horário devolve o foco e
        * recarrega. O que ele não cobre é a Home **já em foco** quando algo é confirmado fora dela:
        * o botão da notificação com o app aberto, ou o handler de segundo plano. Aí a tela ficaria
-       * mostrando como pendente, por até um minuto, uma dose já registrada — e num app de medicação
+       * mostrando como pendente, por até um minuto, uma dose já registrada - e num app de medicação
        * essa defasagem convida a confirmar de novo.
        *
        * O intervalo continua como rede, para o caso de o anúncio não chegar.
@@ -571,7 +571,7 @@ export function useTodayDoses() {
   );
 
   /**
-   * Várias doses de uma vez, para quem só voltou ao celular depois — o caso que este atalho existe
+   * Várias doses de uma vez, para quem só voltou ao celular depois - o caso que este atalho existe
    * pra resolver é o das doses atrasadas, não o das futuras.
    *
    * Uma a uma e em sequência, pelo mesmo caminho de `registrarDose`: cada baixa de estoque é um

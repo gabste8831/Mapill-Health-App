@@ -20,7 +20,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * O rótulo repetido **invisível** acima do botão, para empurrá-lo até a altura do input.
    *
-   * Era um `marginTop: 22` cravado, medido para a altura de um rótulo de 12px — e o `DateField`
+   * Era um `marginTop: 22` cravado, medido para a altura de um rótulo de 12px - e o `DateField`
    * já tinha abandonado essa conta justamente porque ela só acerta no caso para o qual foi feita.
    * O comentário aqui dizia "mesma medida do `DateField`", e havia deixado de ser verdade: o
    * rótulo passou a 13px, e os 22 desalinhavam o botão do relógio do campo ao lado.

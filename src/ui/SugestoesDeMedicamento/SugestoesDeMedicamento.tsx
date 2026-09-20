@@ -15,11 +15,11 @@ export type SugestoesDeMedicamentoProps = {
  * O que a CMED sabe sobre o que está sendo digitado.
  *
  * **Sugestão, e nunca autocompletar.** A lista aparece abaixo do campo e não mexe no que a pessoa
- * escreveu até ela tocar numa linha — escrever por cima do que alguém está digitando é a forma mais
+ * escreveu até ela tocar numa linha - escrever por cima do que alguém está digitando é a forma mais
  * rápida de fazer um cadastro clínico sair errado sem ninguém perceber.
  *
  * Some quando não há o que sugerir. Um bloco vazio dizendo "nenhum resultado" enquanto se digita as
- * primeiras letras seria uma mensagem de erro para quem ainda nem terminou de escrever — e o
+ * primeiras letras seria uma mensagem de erro para quem ainda nem terminou de escrever - e o
  * cadastro manual é caminho legítimo, não plano B.
  */
 export function SugestoesDeMedicamento({ sugestoes, onEscolher }: SugestoesDeMedicamentoProps) {
@@ -43,13 +43,13 @@ export function SugestoesDeMedicamento({ sugestoes, onEscolher }: SugestoesDeMed
           accessibilityLabel={`Usar ${capitalizarNome(entrada.name)} ${entrada.strength}`}>
           {/**
            * O nome vem da CMED **inteiro em maiúsculas**, e assim ele ocupa mais largura, quebra
-           * em três linhas e se lê mais devagar — caixa alta apaga a silhueta da palavra, que é
+           * em três linhas e se lê mais devagar - caixa alta apaga a silhueta da palavra, que é
            * por onde se reconhece um nome familiar de relance.
            *
            * `numberOfLines={1}`: a lista aparece sob o dedo de quem está digitando, e cada linha
            * a mais empurra a sugestão seguinte para fora da tela.
            *
-           * Só nome e dosagem — sem o princípio ativo. Cada sugestão já é o suficiente pra
+           * Só nome e dosagem - sem o princípio ativo. Cada sugestão já é o suficiente pra
            * reconhecer o remédio, e a informação a mais alargava a decisão em vez de facilitá-la.
            */}
           <Text style={styles.nome} numberOfLines={1}>

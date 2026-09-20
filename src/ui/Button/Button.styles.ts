@@ -6,7 +6,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * `minHeight`, e nunca `height`.
    *
    * Com altura travada em 52, o rótulo de **todo botão do app** era recortado quando a pessoa
-   * aumenta a fonte nas configurações do Android — inclusive o "Confirmar" da dose, que é a ação
+   * aumenta a fonte nas configurações do Android - inclusive o "Confirmar" da dose, que é a ação
    * mais importante que existe aqui. E quem aumenta a fonte do sistema é exatamente o público que
    * este app atende: a acessibilidade quebrava justo em quem mais depende dela.
    *
@@ -30,8 +30,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * Sombra em vez de borda, mesma lógica do Card: lê como superfície, não como contorno.
    *
    * No alto contraste inverte: a sombra ali não existe, e um botão branco sobre fundo branco perde
-   * a única coisa que dizia que ele era tocável. Ganha contorno de 2px — a intensidade forte,
-   * porque botão é para ser encontrado de relance — e o fundo desce um degrau.
+   * a única coisa que dizia que ele era tocável. Ganha contorno de 2px - a intensidade forte,
+   * porque botão é para ser encontrado de relance - e o fundo desce um degrau.
    */
   outline: {
     backgroundColor: ajustes.contornarSuperficies
@@ -40,7 +40,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     ...fronteiraDeSuperficie(cores, ajustes, 2),
   },
   /**
-   * O mesmo botão, mas dentro de um `BottomSheet` — onde a sombra desaparece.
+   * O mesmo botão, mas dentro de um `BottomSheet` - onde a sombra desaparece.
    *
    * A folha já é uma superfície clara elevada, então uma sombra sutil sobre ela não se vê, e o
    * botão sumia junto: "Cancelar" virava um texto solto ao lado do "Confirmar", justamente onde

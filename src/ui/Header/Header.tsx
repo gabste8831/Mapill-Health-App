@@ -13,14 +13,14 @@ export type HeaderAction = {
 };
 
 export type HeaderProps = {
-  /** Omitir mostra a marca do app no lugar do título — é a variante da Home. */
+  /** Omitir mostra a marca do app no lugar do título - é a variante da Home. */
   title?: string;
   onBack?: () => void;
   /** Atalho pra conta/configurações. Só a Home usa hoje. */
   onAccount?: () => void;
   /**
    * Ação própria da tela, no mesmo slot direito da conta. As duas não convivem: ou a tela é a
-   * Home e oferece a conta, ou ela tem um destino seu — e nesse caso `action` tem precedência,
+   * Home e oferece a conta, ou ela tem um destino seu - e nesse caso `action` tem precedência,
    * porque é dela que a tela está falando.
    */
   action?: HeaderAction;
@@ -28,7 +28,7 @@ export type HeaderProps = {
 
 /**
  * Topo padrão das telas. Duas variantes: marca (Home) e título com retorno (todo o resto).
- * A tela não decide se há pra onde voltar — quem passa `onBack` é quem conhece a navegação.
+ * A tela não decide se há pra onde voltar - quem passa `onBack` é quem conhece a navegação.
  */
 export function Header({ title, onBack, onAccount, action }: HeaderProps) {
   const styles = useEstilos(criarEstilos);

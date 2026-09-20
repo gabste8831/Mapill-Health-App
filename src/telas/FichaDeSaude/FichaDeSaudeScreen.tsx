@@ -158,7 +158,7 @@ function EmergencyContactsField({
               </View>
               <Pressable
                 // Ícone de lixeira: alvo autocontido, e o fundo ao toque é o que o faz parecer
-                // botão — sem ele, um ícone solto não anuncia que é tocável.
+                // botão - sem ele, um ícone solto não anuncia que é tocável.
                 style={estadoDePressao(styles.contactRemove, { escala: true, superficie: true })}
                 onPress={() => onRemove(index)}
                 accessibilityRole="button"
@@ -187,7 +187,7 @@ function EmergencyContactsField({
         title="Novo contato de emergência"
       >
         {/* O popup empilha os filhos sem respiro próprio, então os três campos e o botão ficavam
-            colados uns nos outros — o mesmo `gap` que as outras folhas do app já usam. */}
+            colados uns nos outros - o mesmo `gap` que as outras folhas do app já usam. */}
         <View style={styles.sheetBody}>
         <TextField
           label="Nome"
@@ -239,7 +239,7 @@ export function FichaDeSaudeScreen({
     useScrollToFocusedInput();
   const [fullName, setFullName] = useState(initialValue?.fullName ?? "");
   const [photoUri, setPhotoUri] = useState<string | null>(initialValue?.photoUri ?? null);
-  /** Câmera ou galeria — a pergunta só existe depois de decidir que quer uma foto. */
+  /** Câmera ou galeria - a pergunta só existe depois de decidir que quer uma foto. */
   const [escolhendoOrigem, setEscolhendoOrigem] = useState(false);
   /** A foto da ficha ampliada sobre o formulário. */
   const [vendoFoto, setVendoFoto] = useState(false);
@@ -275,7 +275,7 @@ export function FichaDeSaudeScreen({
   const canContinue =
     fullName.trim().length > 0 && dateOfBirthError === undefined;
 
-  // Texto de UI fica aqui (camada de apresentação) — o hook só devolve o motivo da falha.
+  // Texto de UI fica aqui (camada de apresentação) - o hook só devolve o motivo da falha.
   async function handlePickPhoto(origin: PhotoOrigin) {
     setEscolhendoOrigem(false);
     const result = await pickPhoto(origin, photoUri);
@@ -323,7 +323,7 @@ export function FichaDeSaudeScreen({
     /**
      * A alergia digitada e **não adicionada** entra junto ao salvar.
      *
-     * O campo tem um `+` ao lado, e quem não o toca perde o que escreveu — a ficha salvava e o
+     * O campo tem um `+` ao lado, e quem não o toca perde o que escreveu - a ficha salvava e o
      * texto sumia sem aviso. Num campo de alergias isso é grave por dois motivos: é o dado que
      * existe justamente para ser lido por outra pessoa numa emergência, e o silêncio faz a pessoa
      * acreditar que informou.
@@ -381,7 +381,7 @@ export function FichaDeSaudeScreen({
             formulário vive dentro do `Pressable` que dispensa o teclado (ver
             `KeyboardAwareScrollView`), e no Android essa árvore não recompunha esta linha quando
             `photoUri` deixava de ser `null`: a caixa nativa continuava a que fora medida vazia.
-            Medido em aparelho — o `onLayout` do quadro disparou uma vez, com `foto=false`, e nunca
+            Medido em aparelho - o `onLayout` do quadro disparou uma vez, com `foto=false`, e nunca
             mais, enquanto a imagem dentro dele reportava 72×72 e completava o ciclo até
             `onDisplay`. Um bloco de cor sólida no lugar da miniatura também não pintava, o que
             provou que a imagem não era o assunto.
@@ -396,11 +396,11 @@ export function FichaDeSaudeScreen({
           {/* O quadro da foto, refeito em 08/09.
 
               **A caixa é uma `View` fixa, e o toque mora dentro dela.** Antes o `Pressable` era o
-              próprio quadro, com `style` na forma funcional que `estadoDePressao` devolve — e essa
+              próprio quadro, com `style` na forma funcional que `estadoDePressao` devolve - e essa
               forma custa caro aqui: quando `photoUri` deixava de ser `null`, os irmãos desta linha
               atualizavam (o texto vira "Trocar foto", "Remover" aparece), mas o `Pressable` não
               recompunha a própria caixa nativa. O log de aparelho mostrou isso sem margem: o
-              `onLayout` do quadro disparou **uma vez, vazio**, e nunca mais — enquanto a imagem
+              `onLayout` do quadro disparou **uma vez, vazio**, e nunca mais - enquanto a imagem
               dentro dele reportava 72×72 e completava o ciclo até `onDisplay`.
 
               O que provou que a imagem nunca foi o assunto foi trocá-la por um bloco de cor sólida:
@@ -409,13 +409,13 @@ export function FichaDeSaudeScreen({
 
               Com a `View` de fora carregando a medida e a borda, a caixa existe desde o primeiro
               render e não depende de recomposição para ter área. O `Pressable` interno só recebe
-              toque e opacidade — ele preenche o que já foi medido, em vez de ser o que mede. */}
+              toque e opacidade - ele preenche o que já foi medido, em vez de ser o que mede. */}
           <View style={[styles.photoQuadro, photoUri === null && styles.photoVazio]}>
             <Pressable
               // `flex: 1` preenche a caixa já medida pela `View` de fora.
               style={({ pressed }) => [styles.photoToque, pressed && !isPicking && styles.photoPressionada]}
               /* Com foto, o toque amplia; sem foto, escolhe a origem. O link ao lado ("Trocar foto")
-                 continua sendo o caminho da troca — antes os dois faziam a mesma coisa, e não havia
+                 continua sendo o caminho da troca - antes os dois faziam a mesma coisa, e não havia
                  como simplesmente olhar a foto da ficha. */
               onPress={() => (photoUri ? setVendoFoto(true) : setEscolhendoOrigem(true))}
               // Não responde enquanto a foto está sendo escolhida: o toque já foi aceito, e reagir
@@ -444,7 +444,7 @@ export function FichaDeSaudeScreen({
 
               Os dois rótulos lado a lado disputavam a largura que sobra ao lado da miniatura de
               72px, e com a fonte do sistema ampliada a linha quebrava. A palavra curta resolve
-              isso sem trocar texto por ícone — que exigiria decorar o desenho.
+              isso sem trocar texto por ícone - que exigiria decorar o desenho.
 
               O vermelho separa das outras ações da linha: apagar é a única daqui que não se
               desfaz. O `accessibilityLabel` diz o que está sendo excluído, porque "Excluir"

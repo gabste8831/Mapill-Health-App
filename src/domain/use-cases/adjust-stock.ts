@@ -10,11 +10,11 @@ export type StockChange = {
  * Recontagem física: a pessoa abriu a caixa, contou, e diz quanto tem **agora**.
  *
  * O que é gravado é a diferença, nunca o número contado. O estoque do Mapill é a soma dos seus
- * eventos — é isso que faz a correção retroativa de uma dose (`intake_correction`) compor com o
+ * eventos - é isso que faz a correção retroativa de uma dose (`intake_correction`) compor com o
  * resto em vez de brigar com ele. Gravar o valor absoluto quebraria essa soma: duas recontagens
  * concorrentes, ou uma dose confirmada no meio, sobrescreveriam uma à outra em silêncio.
  *
- * `null` quando não há evento a gravar — número inválido, negativo, ou a contagem bateu com o que
+ * `null` quando não há evento a gravar - número inválido, negativo, ou a contagem bateu com o que
  * já estava lá. Recontar e confirmar o mesmo número não é um acontecimento.
  */
 export function recountChange(current: number, counted: number): StockChange | null {
@@ -26,7 +26,7 @@ export function recountChange(current: number, counted: number): StockChange | n
 
 /**
  * Reabastecimento: quanto entrou de novo. Some ao que existe em vez de substituir, porque quem
- * comprou uma caixa não recontou o armário — o que sobrou da anterior continua valendo.
+ * comprou uma caixa não recontou o armário - o que sobrou da anterior continua valendo.
  */
 export function restockChange(added: number): StockChange | null {
   if (!Number.isFinite(added) || added <= 0) return null;

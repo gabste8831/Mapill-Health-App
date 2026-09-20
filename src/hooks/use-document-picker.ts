@@ -14,7 +14,7 @@ export type DocumentPick =
   | { status: "failed"; reason: "cancelled" | "failed" };
 
 /**
- * Seleção de um arquivo já salvo no aparelho — o caminho de quem recebeu a receita digital ou
+ * Seleção de um arquivo já salvo no aparelho - o caminho de quem recebeu a receita digital ou
  * escaneou na clínica. Diferente do seletor de fotos: não pede permissão de galeria, porque o
  * sistema entrega só o arquivo escolhido e nada mais.
  *
@@ -32,7 +32,7 @@ export function useDocumentPicker(prefix: string) {
         const result = await DocumentPicker.getDocumentAsync({
           type: ACCEPTED_DOCUMENT_TYPES,
           // Sem isto o arquivo pode vir de um provedor de nuvem sem cópia local, e a URI não
-          // sobrevive à tela — é o próprio aviso da documentação do SDK.
+          // sobrevive à tela - é o próprio aviso da documentação do SDK.
           copyToCacheDirectory: true,
           multiple: false,
         });

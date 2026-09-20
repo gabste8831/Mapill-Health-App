@@ -8,7 +8,7 @@ import { AjustesScreen } from "@/telas/Ajustes/AjustesScreen";
 
 /**
  * Ajustes ficou com o que é de uso corriqueiro: a ficha e o caminho para conta e dados. Vincular,
- * ler os termos e apagar mudaram-se para `/conta` (E4) — são decisões das quais não se volta, e
+ * ler os termos e apagar mudaram-se para `/conta` (E4) - são decisões das quais não se volta, e
  * elas ganharam tela própria em vez de dividir espaço com a edição da ficha.
  */
 export default function AjustesRoute() {
@@ -27,13 +27,13 @@ export default function AjustesRoute() {
       photoUri={draft?.photoUri ?? null}
       accountEmail={accountEmail}
       // Ajustes é aba: quem chegou pelo atalho da Home tem histórico pra voltar, quem tocou na
-      // aba não tem — aí o destino é a Home, que é de onde o atalho existe.
+      // aba não tem - aí o destino é a Home, que é de onde o atalho existe.
       onBack={() => (router.canGoBack() ? router.back() : router.replace("/"))}
       onEditProfile={() => router.push("/ficha")}
       onOpenAccount={() => router.push("/conta")}
       onOpenTheme={() => router.push("/tema")}
       onOpenAjudaDeAlertas={() => router.push("/cadastro/ajuda-de-alertas")}
-      // Fora de produção: `__DEV__` cobre o dev client, e a variável cobre a build `preview` — que
+      // Fora de produção: `__DEV__` cobre o dev client, e a variável cobre a build `preview` - que
       // é onde se testa alarme com o app fechado, e onde o diagnóstico mais importa (ver
       // `AjustesScreen`). Os dois entram no bundle como literais, então a linha some do binário de
       // produção em vez de ficar escondida.

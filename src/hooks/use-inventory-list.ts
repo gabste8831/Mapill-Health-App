@@ -31,14 +31,14 @@ const persistsLocally = Platform.OS !== "web";
 /**
  * Um estoque como a tela precisa dele: o número, de que remédio ele é, e até quando dura.
  *
- * `depletion` é `null` quando não há o que estimar — remédio "só quando precisar" não consome em
+ * `depletion` é `null` quando não há o que estimar - remédio "só quando precisar" não consome em
  * ritmo nenhum, e estoque que passa do horizonte de busca não tem data que valha ser dita.
  */
 export type ItemDeEstoque = {
   inventory: InventoryItem;
   medication: Medication;
   depletion: StockDepletion | null;
-  /** Meia caneta de insulina existe, meio adesivo não — vem da unidade da embalagem. */
+  /** Meia caneta de insulina existe, meio adesivo não - vem da unidade da embalagem. */
   aceitaFracao: boolean;
 };
 
@@ -125,7 +125,7 @@ async function carregarItens(): Promise<ItemDeEstoque[]> {
  * Como a tela de estoque pode ser ordenada.
  *
  * Havia uma terceira, `"quantidade"` (o que tem menos na caixa), e ela saiu: quase sempre dava a
- * mesma ordem de `"urgencia"`, e quando divergia era por um motivo que a tornava a pior das duas —
+ * mesma ordem de `"urgencia"`, e quando divergia era por um motivo que a tornava a pior das duas -
  * dez comprimidos de um remédio semanal duram mais que trinta de um tomado três vezes ao dia.
  */
 export type OrdemDeEstoque = "urgencia" | "alfabetica";
@@ -167,7 +167,7 @@ export async function aplicarMudancaDeEstoque(
 /**
  * Liga ou desliga o aviso de estoque baixo, e com quantos dias de antecedência.
  *
- * Escreve nos **mesmos campos** que o cadastro do medicamento edita — não há cópia de estado nem
+ * Escreve nos **mesmos campos** que o cadastro do medicamento edita - não há cópia de estado nem
  * segunda fonte de verdade: são dois caminhos até o mesmo dado, e é o que permite oferecer o ajuste
  * onde a pessoa procura por ele (aqui, gerenciando estoque) sem tirá-lo de onde ele nasce.
  *
@@ -188,7 +188,7 @@ export async function salvarAvisoDeEstoqueBaixo(
     ...atual,
     // Só a caixa decide, sem depender do prazo: sem antecedência o aviso continua existindo e sai
     // no dia em que o estoque acabar (ver `planejar-avisos-de-estoque`). O cadastro ainda exigia as
-    // duas coisas, e gravava `false` para quem marcava sem escolher prazo — corrigido em 11/09.
+    // duas coisas, e gravava `false` para quem marcava sem escolher prazo - corrigido em 11/09.
     lowStockAlertEnabled: aviso.habilitado,
     // Desligar o aviso limpa o prazo: guardá-lo deixaria um valor órfão que voltaria a valer sozinho
     // se alguém remarcasse a caixa, escolhendo por ela algo que ela não pediu desta vez.
@@ -200,14 +200,14 @@ export async function salvarAvisoDeEstoqueBaixo(
 }
 
 /**
- * Os estoques controlados, recarregados a cada volta ao foco — é o que faz a quantidade já estar
+ * Os estoques controlados, recarregados a cada volta ao foco - é o que faz a quantidade já estar
  * certa depois de uma dose confirmada em outra tela.
  */
 /**
  * Quais estoques estão há muito tempo sem conferência.
  *
  * Lê a última recontagem manual de cada um e entrega ao use-case puro, que decide o corte. Vazio
- * quando não há o que perguntar — e vazio é o caso comum, porque a pergunta é mensal.
+ * quando não há o que perguntar - e vazio é o caso comum, porque a pergunta é mensal.
  */
 async function carregarARecontar(agora: Date): Promise<EstoqueARecontar[]> {
   const inventoryRepository = new InventoryRepository();

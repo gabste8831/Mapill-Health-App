@@ -26,7 +26,7 @@ export const TEMAS: Record<TemaId, Tema> = {
  *
  * `temaDaltonismo` **não está aqui**, e continua existindo em `TEMAS`. Ele era um tema inteiro
  * para trocar duas cores, e a escolha do par virou uma preferência à parte
- * (`shared/theme/pares-de-estado.ts`) que vale em qualquer aparência — inclusive no escuro, que
+ * (`shared/theme/pares-de-estado.ts`) que vale em qualquer aparência - inclusive no escuro, que
  * antes era inacessível a quem precisava daquele modo.
  *
  * O tema segue no mapa porque alguém pode tê-lo escolhido antes desta mudança: removê-lo de

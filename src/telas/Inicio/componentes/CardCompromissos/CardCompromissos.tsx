@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 // Os mesmos estilos do card de estoque: são a mesma anatomia (ícone redondo, título, seta) e a
-// mesma função — um atalho para outra tela. Duas cópias do arquivo só criariam a chance de elas
+// mesma função - um atalho para outra tela. Duas cópias do arquivo só criariam a chance de elas
 // divergirem sem motivo.
 import { criarEstilos } from "@/ui/CardDeAtalho/CardDeAtalho.styles";
 
@@ -14,7 +14,7 @@ type CardCompromissosProps = {
 /**
  * Porta de entrada para a lista de compromissos, na Home.
  *
- * A Home mostra as consultas que já entraram na janela do lembrete, e só elas — uma consulta
+ * A Home mostra as consultas que já entraram na janela do lembrete, e só elas - uma consulta
  * marcada para daqui a três meses não pode ocupar a tela do dia. Mas ela **existe**, e sem este card
  * não haveria nada na Home dizendo isso: quem marcou algo distante ficava sem confirmação de que o
  * app guardou, a não ser procurando na aba certa.

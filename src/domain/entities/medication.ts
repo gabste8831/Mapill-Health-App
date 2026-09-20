@@ -1,7 +1,7 @@
 import type { SyncableEntity } from "./syncable";
 
 /**
- * Forma farmacêutica. Define quais unidades de dose fazem sentido — filtrar não é inferir valor
+ * Forma farmacêutica. Define quais unidades de dose fazem sentido - filtrar não é inferir valor
  * clínico, é evitar combinação sem significado como "3 jatos de pomada".
  */
 export type MedicationForm =
@@ -31,7 +31,7 @@ export type PosologyUnit =
   | "sachet";
 
 /**
- * Unidades oferecidas para cada forma, na ordem em que aparecem — a primeira é a mais provável.
+ * Unidades oferecidas para cada forma, na ordem em que aparecem - a primeira é a mais provável.
  * `other` oferece tudo: se o app não reconhece a apresentação, quem sabe é o paciente.
  */
 const UNITS_BY_FORM: Record<MedicationForm, PosologyUnit[]> = {
@@ -51,7 +51,7 @@ export function unitsForMedicationForm(form: MedicationForm): PosologyUnit[] {
   return UNITS_BY_FORM[form];
 }
 
-/** A unidade mais provável da forma — a primeira da lista. */
+/** A unidade mais provável da forma - a primeira da lista. */
 export function defaultUnitForMedicationForm(form: MedicationForm): PosologyUnit {
   return UNITS_BY_FORM[form][0];
 }
@@ -59,7 +59,7 @@ export function defaultUnitForMedicationForm(form: MedicationForm): PosologyUnit
 /**
  * Formas em que a unidade da dose é genuinamente ambígua: líquido pode ser medido em ml ou mg,
  * injeção em ml, UI ou mg. Nas demais a unidade é consequência da forma, e perguntar seria pedir
- * pro paciente confirmar o óbvio — quem marcou adesivo toma adesivo.
+ * pro paciente confirmar o óbvio - quem marcou adesivo toma adesivo.
  */
 const FORMS_WITH_AMBIGUOUS_UNIT: readonly MedicationForm[] = ["liquid", "injection", "other"];
 
@@ -84,7 +84,7 @@ export function allowsFractionalDose(unit: PosologyUnit): boolean {
 }
 
 /**
- * Unidade em que o estoque é contado — nem sempre a da dose. Gota se toma em gota mas se compra
+ * Unidade em que o estoque é contado - nem sempre a da dose. Gota se toma em gota mas se compra
  * em ml, e é o ml que está impresso no frasco. `null` = a forma é livre demais pra supor, então
  * segue a dose.
  *
@@ -115,7 +115,7 @@ export function stockUnitForMedicationForm(
  * Tarja / exigência de receita. Comanda quais campos de receita o cadastro mostra: quem cadastra
  * dipirona não deveria nem ver "validade da receita".
  *
- * Vem preenchido da CMED quando o medicamento está na base (bloco B1), e continua editável — a
+ * Vem preenchido da CMED quando o medicamento está na base (bloco B1), e continua editável - a
  * base pode estar desatualizada, e quem tem a caixa na mão é o paciente.
  */
 export type PrescriptionRequirement =
@@ -139,7 +139,7 @@ export type Medication = SyncableEntity & {
   presentation: string;
   form: MedicationForm;
   prescriptionRequirement: PrescriptionRequirement;
-  /** Foto da embalagem — identificação visual, não documento. Caminho local. */
+  /** Foto da embalagem - identificação visual, não documento. Caminho local. */
   photoUri: string | null;
   ean: string | null;
   fromCmed: boolean;

@@ -113,7 +113,7 @@ export function ScannerScreen({ onUsar, onBack }: ScannerScreenProps) {
         <View style={styles.centro}>
           <Text style={styles.rotulo}>Encontrado</Text>
           {/* Capitalizado, como na lista de sugestões: é o mesmo nome vindo da mesma base, e o
-              caixa alta da CMED ocupa mais largura, quebra em mais linhas e se lê mais devagar —
+              caixa alta da CMED ocupa mais largura, quebra em mais linhas e se lê mais devagar -
               caixa alta apaga a silhueta da palavra, que é por onde se reconhece um nome
               familiar de relance. Aqui isso pesa mais que em qualquer outra tela: esta é a
               pergunta "é este o remédio da sua caixa?", e a resposta se dá comparando o que está

@@ -13,19 +13,19 @@ type AjudaDeAlertasScreenProps = {
 };
 
 /**
- * O que o alerta faz na hora da dose — em tela, e não mais dobrado num acordeão dentro do popup.
+ * O que o alerta faz na hora da dose - em tela, e não mais dobrado num acordeão dentro do popup.
  *
  * ## Por que saiu de lá
  *
  * A folha "Como quer ser avisado?" é uma pergunta com três respostas. Ela vinha carregando quatro
- * camadas no mesmo nível — a decisão, o painel de permissões, um aviso sobre o aparelho e este
- * texto inteiro —, e quem abria para escolher um modo precisava atravessar tudo para achar a
+ * camadas no mesmo nível - a decisão, o painel de permissões, um aviso sobre o aparelho e este
+ * texto inteiro -, e quem abria para escolher um modo precisava atravessar tudo para achar a
  * escolha. Explicação empilhada sobre decisão não informa mais: ela adia a decisão.
  *
  * ## O que se ganhou além do espaço
  *
  * Enquanto isto vivia dentro do modal, ler os termos exigia uma máquina de estado inteira no
- * formulário — fechar o popup para navegar (dois modais empilhados travam a tela no Android),
+ * formulário - fechar o popup para navegar (dois modais empilhados travam a tela no Android),
  * lembrar que ele estava aberto, em que ponto a leitura tinha parado, e reabrir tudo no foco
  * seguinte. Como rota irmã dentro do mesmo stack do cadastro, "ler os termos" é um `push` comum e
  * o botão de voltar do Android faz o caminho de volta sozinho.
@@ -41,7 +41,7 @@ export function AjudaDeAlertasScreen({
   /**
    * O hook relê as permissões **a cada volta ao primeiro plano**, e é isso que faz esta tela
    * funcionar como página de conferência: a pessoa toca numa linha, vai à tela do sistema, concede,
-   * e ao voltar o estado já está atualizado — sem precisar sair e entrar de novo.
+   * e ao voltar o estado já está atualizado - sem precisar sair e entrar de novo.
    */
   const { itens } = usePermissoesDeAlarme();
 
@@ -78,11 +78,11 @@ export function AjudaDeAlertasScreen({
             <View style={styles.linhaTexto}>
               <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
               {/**
-               * **Uma linha de estado, e nada mais** — a consequência saiu daqui.
+               * **Uma linha de estado, e nada mais** - a consequência saiu daqui.
                *
                * A descrição ("sem isto o aviso pode atrasar dezenas de minutos") existe para
                * convencer, e ela já está na Home, no painel que trouxe a pessoa até aqui. Repetida
-               * dentro de cada botão, transformava cinco alvos de toque em cinco parágrafos — e foi
+               * dentro de cada botão, transformava cinco alvos de toque em cinco parágrafos - e foi
                * o que o Gabriel apontou em 12/09: denso demais para se ler como botão.
                *
                * O que fica é o que decide a ação: o nome da permissão e se ela falta.
@@ -143,7 +143,7 @@ export function AjudaDeAlertasScreen({
         showsVerticalScrollIndicator={false}
       >
         {/**
-         * **As permissões primeiro, a explicação depois** — e essa ordem é a decisão desta tela.
+         * **As permissões primeiro, a explicação depois** - e essa ordem é a decisão desta tela.
          *
          * Ela nasceu como texto explicativo, e as autorizações entraram no fim. O Gabriel corrigiu
          * em 12/09, e o argumento é de acessibilidade: quem chega aqui está tentando fazer o alarme
@@ -152,7 +152,7 @@ export function AjudaDeAlertasScreen({
          *
          * ⚠️ **Não há placar de progresso aqui, e isso é deliberado.**
          *
-         * Havia um — "2 de 3 ainda faltam", em vermelho, no topo. Ele contava só as verificáveis,
+         * Havia um - "2 de 3 ainda faltam", em vermelho, no topo. Ele contava só as verificáveis,
          * porque são as únicas que o app sabe contar, e por isso mentia sobre o total: quem lia "de
          * 3" concluía que três era o que havia, e que zerar aquele número deixava o app pronto. É
          * exatamente o engano que tirou a lista de permissões da Home no mesmo dia.
@@ -215,9 +215,9 @@ export function AjudaDeAlertasScreen({
 
         {/* O texto que era o aviso "Depende do seu aparelho" dentro do popup. Ali ele competia com
             o painel de permissões, que diz a mesma coisa e ainda leva à tela de cada ajuste; aqui
-            ele é o que sempre foi — uma condição explicada, não um alerta. */}
+            ele é o que sempre foi - uma condição explicada, não um alerta. */}
         {/**
-         * A lista completa das autorizações, **sempre visível** — e é isto que diferencia esta tela
+         * A lista completa das autorizações, **sempre visível** - e é isto que diferencia esta tela
          * do painel da Home.
          *
          * O painel é um alerta: ele aparece quando há algo a fazer e some quando não há. Três das
@@ -225,7 +225,7 @@ export function AjudaDeAlertasScreen({
          * bateria), e para essas o painel marca a **ida** à tela do sistema, não a permissão.
          *
          * O furo que isso abria, apontado pelo Gabriel em 12/09: quem abre a tela do Autostart e sai
-         * sem ligar a chave vê a linha desaparecer do painel — e fica sem aviso nenhum, com o app
+         * sem ligar a chave vê a linha desaparecer do painel - e fica sem aviso nenhum, com o app
          * silencioso e nada explicando por quê. O lugar onde ele orientava deixou de existir.
          *
          * Aqui as cinco estão sempre listadas, com o botão que leva à tela de cada uma. Não é um
@@ -233,7 +233,7 @@ export function AjudaDeAlertasScreen({
          * justamente quando a resposta é necessária.
          */}
         {/**
-         * **Duas seções, e a divisão é por quem sabe a resposta** — não por importância.
+         * **Duas seções, e a divisão é por quem sabe a resposta** - não por importância.
          *
          * A primeira lista o que o Android responde quando perguntado: o app afirma com certeza, em
          * verde ou vermelho. A segunda lista o que nenhuma API expõe, e onde só a pessoa pode
@@ -241,7 +241,7 @@ export function AjudaDeAlertasScreen({
          *
          * Separar foi decisão do Gabriel em 12/09, e resolve o furo que a versão anterior tinha:
          * lá as três não-verificáveis eram marcadas como concedidas ao serem **visitadas**, então
-         * quem abria o Autostart e saía sem ligar a chave via a linha desaparecer — e ficava com o
+         * quem abria o Autostart e saía sem ligar a chave via a linha desaparecer - e ficava com o
          * app silencioso e nada explicando por quê. Aqui elas nunca desaparecem, porque o app nunca
          * soube se foram atendidas.
          */}

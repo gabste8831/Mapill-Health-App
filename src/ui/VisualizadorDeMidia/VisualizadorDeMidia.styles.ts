@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
     /**
      * Preto a 80%, e não `onSurface` a 75%.
      *
-     * Aqui o véu não separa: ele é o que faz a foto ser **lida** — uma receita manuscrita com um
+     * Aqui o véu não separa: ele é o que faz a foto ser **lida** - uma receita manuscrita com um
      * formulário claro competindo por trás não se decifra. E `onSurface` invertia no tema escuro,
      * onde ele é quase branco: o fundo do visualizador clareava em vez de sumir, justamente no
      * tema em que a tela já está escura e a foto deveria dominar.
@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
   /**
-   * O quadro da imagem — largura toda, altura limitada a 70% da tela.
+   * O quadro da imagem - largura toda, altura limitada a 70% da tela.
    *
    * Não ocupa tudo de propósito: a moldura visível em volta é o que mantém o gesto de "tocar fora
    * para sair" descobrível. Uma imagem sangrando até as bordas não teria "fora" onde tocar.
@@ -57,7 +57,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   /**
-   * O X. Fundo próprio porque ele flutua sobre a imagem e sobre o fundo escuro — sem superfície,
+   * O X. Fundo próprio porque ele flutua sobre a imagem e sobre o fundo escuro - sem superfície,
    * um ícone claro sobre uma foto clara desaparece.
    */
   fechar: {
@@ -67,7 +67,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     // Branco translucido, e nao `onSurface` a 35%: o X e branco, e no tema escuro `onSurface`
-    // tambem — o botao virava branco sobre branco. Sobre o fundo preto do visualizador, o disco
+    // tambem - o botao virava branco sobre branco. Sobre o fundo preto do visualizador, o disco
     // claro e o que da forma ao icone.
     backgroundColor: "rgba(255, 255, 255, 0.25)",
   },

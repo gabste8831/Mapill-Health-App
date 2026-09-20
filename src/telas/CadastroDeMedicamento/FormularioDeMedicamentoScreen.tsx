@@ -1266,18 +1266,18 @@ export function FormularioDeMedicamentoScreen({
           : null,
       stockUnit: stockUnitForMedicationForm(form, doseUnit),
       /**
-       * **Marcar a caixa basta** — a antecedência é separada, e opcional.
+       * **Marcar a caixa basta** - a antecedência é separada, e opcional.
        *
        * Havia um `&& leadDays !== null` aqui, com a justificativa de que "alerta sem antecedência
        * não dispara nunca, então não fica ligado mentindo". Era verdade antes de 08/09, quando o
        * planejador descartava o estoque sem prazo; deixou de ser quando "quero ser avisado" foi
-       * separado de "quero ser avisado com N dias" — hoje `planejar-avisos-de-estoque` agenda o
+       * separado de "quero ser avisado com N dias" - hoje `planejar-avisos-de-estoque` agenda o
        * aviso do **fim** só com `querAviso`, sem olhar o prazo.
        *
        * A condição sobreviveu à correção e virou o defeito oposto: marcar sem escolher prazo
        * gravava `false`, e a interface confirmava uma intenção que o banco negava. Visto em
        * aparelho em 11/09, e é o mesmo caso que a receita (`renewalReminderEnabled`) já tratava
-       * certo — o que mostra que a correção passou por lá e não por aqui.
+       * certo - o que mostra que a correção passou por lá e não por aqui.
        */
       lowStockAlertEnabled: tracksStock && wantsLowStockAlert,
       lowStockAlertLeadDays:
@@ -2023,7 +2023,7 @@ export function FormularioDeMedicamentoScreen({
                         value={renewalLeadDays}
                         options={RENEWAL_LEAD_OPTIONS}
                         /**
-                         * Tocar na opção já marcada desmarca — a mesma regra da antecedência de
+                         * Tocar na opção já marcada desmarca - a mesma regra da antecedência de
                          * estoque.
                          *
                          * O rótulo diz "(opcional)" e o texto abaixo descreve os dois estados, mas

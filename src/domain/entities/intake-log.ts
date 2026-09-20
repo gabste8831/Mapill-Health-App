@@ -2,7 +2,7 @@ import type { SyncableEntity } from "./syncable";
 
 /**
  * "deferred" = paciente viu o alarme/notificação e escolheu resolver depois ("ignorar por
- * agora"), distinto de simplesmente nunca ter visto — fica pendente até virar confirmed/skipped.
+ * agora"), distinto de simplesmente nunca ter visto - fica pendente até virar confirmed/skipped.
  */
 export type IntakeStatus = "confirmed" | "skipped" | "deferred";
 

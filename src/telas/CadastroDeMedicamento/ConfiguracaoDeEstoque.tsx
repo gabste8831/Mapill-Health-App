@@ -27,7 +27,7 @@ export type EstoqueForm = {
   aviso: string | null;
   /** Cor de atenção em vez de apoio: a antecedência escolhida não cabe no estoque de hoje. */
   avisoEhConflito: boolean;
-  /** Pergunta pronta ("Quantos ml você tem") — a concordância é da tela, que conhece a unidade. */
+  /** Pergunta pronta ("Quantos ml você tem") - a concordância é da tela, que conhece a unidade. */
   quantityLabel: string;
   quantity: string;
   onQuantityChange: (value: string) => void;
@@ -50,7 +50,7 @@ type ConfiguracaoDeEstoqueProps = EstoqueForm & {
    * e quem monta a folha sem passar isto simplesmente não o mostra.
    */
   onAbrirAjudaDeAlertas?: () => void;
-  /** `true` quando o app comprova pendência — a folha não consulta o hook, quem monta já sabe. */
+  /** `true` quando o app comprova pendência - a folha não consulta o hook, quem monta já sabe. */
   avisoDePermissoesUrgente?: boolean;
 };
 
@@ -119,7 +119,7 @@ export function ConfiguracaoDeEstoque({
               label="Avisar antes também (opcional)"
               value={leadDays}
               options={LEAD_DAYS_OPTIONS}
-              // Tocar na opção já marcada desmarca — a mesma regra dos outros dois seletores de
+              // Tocar na opção já marcada desmarca - a mesma regra dos outros dois seletores de
               // antecedência (receita, e este mesmo aviso na tela de estoque). Onde o vazio é um
               // estado válido, ele precisa ser alcançável pelo mesmo gesto que o abandonou.
               onChange={(dias) => onLeadDaysChange(dias === leadDays ? null : dias)}
@@ -127,12 +127,12 @@ export function ConfiguracaoDeEstoque({
             {/* **Onde o aviso aparece**, e não só que ele existe.
 
                 O rótulo dizia "me avisar quando estiver acabando" e calava sobre o canal. Quem
-                marcava esperava notificação — e até 08/09 o app só mostrava o cartão da tela
+                marcava esperava notificação - e até 08/09 o app só mostrava o cartão da tela
                 inicial, uma promessa que o agendador não cumpria.
 
                 Agora cumpre, mas a notificação depende de permissão que pode estar negada, e a
                 estimativa depende de horários fixos. A tela inicial é o único canal que não
-                depende de nada, então é ela que a frase garante — o resto vem como acréscimo.
+                depende de nada, então é ela que a frase garante - o resto vem como acréscimo.
 
                 A frase muda com o prazo escolhido, porque a promessa muda: sem prazo é um aviso,
                 com prazo são dois. */}

@@ -10,7 +10,7 @@ type PainelDePermissoesProps = {
    * As pendentes que o app **consegue verificar**. Quem filtra é quem monta (ver `InicioScreen`).
    *
    * Elas não são exibidas: servem para decidir se o painel aparece. Com as três não-verificáveis
-   * aqui, ele nunca sairia da Home — nem para quem configurou tudo —, e um aviso que nunca sai
+   * aqui, ele nunca sairia da Home - nem para quem configurou tudo -, e um aviso que nunca sai
    * ensina a ignorar o aviso.
    */
   itens: ItemDePermissao[];
@@ -21,13 +21,13 @@ type PainelDePermissoesProps = {
 };
 
 /**
- * O aviso, na Home, de que o alarme não vai tocar — e o caminho único para resolver.
+ * O aviso, na Home, de que o alarme não vai tocar - e o caminho único para resolver.
  *
  * ## Por que ele não lista as permissões
  *
  * Listava, até 12/09: uma linha por autorização pendente, cada uma abrindo a tela do sistema. O
  * problema é que só as **verificáveis** podiam estar ali, porque as outras três (sobrepor apps,
- * início automático, bateria) não expõem estado a nenhuma API — e uma lista parcial de itens
+ * início automático, bateria) não expõem estado a nenhuma API - e uma lista parcial de itens
  * obrigatórios define o escopo errado do que falta fazer.
  *
  * O efeito, apontado pelo Gabriel: quem atendia as duas ou três listadas via o painel desaparecer e
@@ -39,7 +39,7 @@ type PainelDePermissoesProps = {
  *
  * ## O que ele decide, então
  *
- * Só se aparece. E aparece enquanto alguma das verificáveis estiver pendente — é o sinal mais
+ * Só se aparece. E aparece enquanto alguma das verificáveis estiver pendente - é o sinal mais
  * confiável que o app tem de que algo está errado com os avisos.
  */
 export function PainelDePermissoes({
@@ -69,7 +69,7 @@ export function PainelDePermissoes({
       {/**
        * O texto diz **"não funciona"**, e não "pode melhorar".
        *
-       * A versão anterior tinha dois tons — "deixe o alarme mais confiável" quando faltava só uma
+       * A versão anterior tinha dois tons - "deixe o alarme mais confiável" quando faltava só uma
        * secundária, "não vai tocar" quando faltava uma essencial. O Gabriel corrigiu em 12/09, e a
        * correção é factual: sem as autorizações o aviso **não chega**. Chamar isso de melhoria é o
        * app minimizando a própria falha, e quem lê "pode melhorar" deixa para depois.
@@ -83,7 +83,7 @@ export function PainelDePermissoes({
       </Text>
 
       {/**
-       * **O painel não lista mais as permissões** — ele avisa e leva ao lugar onde estão todas.
+       * **O painel não lista mais as permissões** - ele avisa e leva ao lugar onde estão todas.
        *
        * As linhas que ficavam aqui mostravam só as que o app consegue verificar, e isso enganava:
        * quem atendia as duas ou três listadas via o painel desaparecer e concluía que terminara,

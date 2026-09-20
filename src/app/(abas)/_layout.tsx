@@ -30,7 +30,7 @@ function AbasNativas() {
        *
        * `corDeDestaque`, e não `primary` puro: no tema escuro `primary` é o navy escurecido
        * (pedido do Gabriel, pensado para fundo de bloco), e usado como tinta de ícone/texto sobre
-       * a barra — que já é escura — ele quase some. `corDeDestaque` existe exatamente para isto:
+       * a barra - que já é escura - ele quase some. `corDeDestaque` existe exatamente para isto:
        * é `primary` em todo tema onde ele já é claro o bastante para ler como tinta, e um azul
        * mais claro só no escuro. Ver `shared/theme/colors.ts`.
        */
@@ -45,12 +45,12 @@ function AbasNativas() {
        * A pílula da aba ativa fica **invisível**.
        *
        * Ela ainda precisa ser declarada: sem `indicatorColor`, o Android a pinta com a cor dinâmica
-       * do Material You, que vem do papel de parede do aparelho — no teste saiu verde. A cor da
+       * do Material You, que vem do papel de parede do aparelho - no teste saiu verde. A cor da
        * marca não pode depender de qual foto a pessoa pôs no celular. Transparente resolve os dois:
        * mata o desenho e trava a cor.
        *
        * O que aponta a aba ativa continua sendo o azul do ícone e do rótulo, mais o próprio rótulo
-       * — que só aparece na selecionada. Três pistas para um estado já eram uma a mais, e a pílula
+       * - que só aparece na selecionada. Três pistas para um estado já eram uma a mais, e a pílula
        * era a que menos dizia: sendo um bloco de cor atrás do ícone, ela competia com o azul da
        * tinta em vez de reforçá-lo.
        *
@@ -70,11 +70,11 @@ function AbasNativas() {
 
       <NativeTabs.Trigger name="remedios">
         {/* `pill` e nao `medication`: o segundo e a caixinha de comprimidos com uma cruz, que le
-            como "farmacia" e nao como "remedio". A capsula e a forma que o app usa em todo lugar —
-            a marca, a marca-d'agua do card de proxima dose, o selo do rotulo —, e no iOS a aba ja
+            como "farmacia" e nao como "remedio". A capsula e a forma que o app usa em todo lugar -
+            a marca, a marca-d'agua do card de proxima dose, o selo do rotulo -, e no iOS a aba ja
             era `pills`. Uma aba com desenho diferente do resto do app e a que ninguem associa. */}
         <NativeTabs.Trigger.Icon sf="pills" md="pill" />
-        {/* "Medicações", como a tela se intitula. A aba dizia "Remédios" e a tela "Medicações" —
+        {/* "Medicações", como a tela se intitula. A aba dizia "Remédios" e a tela "Medicações" -
             dois nomes para o mesmo lugar, e quem toca na aba tem que confirmar que chegou onde
             queria. O rótulo da aba é a promessa; o título da tela, o cumprimento dela. */}
         <NativeTabs.Trigger.Label>Medicações</NativeTabs.Trigger.Label>
@@ -91,7 +91,7 @@ function AbasNativas() {
 /**
  * No navegador o `NativeTabs` vira uma lista de abas em texto (Radix) que não se parece com o
  * app. Aqui as mesmas abas são desenhadas em JS como barra inferior, só pro preview ficar
- * legível — o aparelho continua usando a barra nativa.
+ * legível - o aparelho continua usando a barra nativa.
  */
 function AbasWeb() {
   const cores = useCores();

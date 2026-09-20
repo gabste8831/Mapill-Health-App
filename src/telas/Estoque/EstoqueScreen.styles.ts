@@ -94,7 +94,7 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
     backgroundColor: cores.surfaceContainer,
   },
   /**
-   * Azul cheio: "Repor" é a ação que se vem fazer aqui — voltou da farmácia e quer somar o que
+   * Azul cheio: "Repor" é a ação que se vem fazer aqui - voltou da farmácia e quer somar o que
    * chegou. "Recontar" é conferência, e fica ao lado como alternativa, não como igual.
    *
    * O azul saiu do dado (a quantidade tinha fundo azul) e veio para a ação: num cartão que é todo

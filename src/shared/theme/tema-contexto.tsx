@@ -10,7 +10,7 @@ const CHAVE_DA_PREFERENCIA = "@mapill/preferencia-de-tema";
 const CHAVE_DO_PAR = "@mapill/par-de-estado";
 
 type ValorDoContexto = {
-  /** O tema em vigor agora — já resolvido, nunca "sistema". */
+  /** O tema em vigor agora - já resolvido, nunca "sistema". */
   tema: Tema;
   /** O que a pessoa escolheu, que pode ser "sistema". É isto que a tela de Ajustes marca. */
   preferencia: PreferenciaDeTema;
@@ -21,7 +21,7 @@ type ValorDoContexto = {
    * O que o **aparelho** está usando agora, independente do tema escolhido no app.
    *
    * Existe para a linha "Automático" em Ajustes poder mostrar a amostra do que ela produziria se
-   * fosse escolhida. Sem isto, aquela tela lia `tema.esquema` — o tema **em vigor** —, e com "Alto
+   * fosse escolhida. Sem isto, aquela tela lia `tema.esquema` - o tema **em vigor** -, e com "Alto
    * contraste" selecionado a amostra do automático saía clara mesmo com o celular no escuro:
    * dizia a cor errada justamente da opção cujo sentido é acompanhar o aparelho.
    */
@@ -38,7 +38,7 @@ type ValorDoContexto = {
 };
 
 /**
- * O padrão do contexto é o tema padrão — e não `undefined`.
+ * O padrão do contexto é o tema padrão - e não `undefined`.
  *
  * Assim, um componente renderizado fora do provider (um teste, um Storybook, uma tela que ainda
  * não foi migrada) continua funcionando com o visual padrão em vez de estourar. Numa migração
@@ -60,7 +60,7 @@ export function ProvedorDeTema({ children }: { children: ReactNode }) {
   const [idDoPar, setIdDoPar] = useState<string>(PAR_PADRAO.id);
   const [carregado, setCarregado] = useState(false);
 
-  // A preferência é lida uma vez, na abertura. Antes disso o app já desenha no tema padrão — é
+  // A preferência é lida uma vez, na abertura. Antes disso o app já desenha no tema padrão - é
   // melhor que segurar a tela: quem não escolheu nada (a maioria) não espera por nada.
   useEffect(() => {
     let ativo = true;
@@ -71,7 +71,7 @@ export function ProvedorDeTema({ children }: { children: ReactNode }) {
       .then(([salvo, parSalvo]) => {
         if (!ativo) return;
         if (salvo !== null && ehPreferenciaValida(salvo)) setPreferencia(salvo);
-        // `acharPar` cai no padrão quando o id não existe mais — um par removido da lista não
+        // `acharPar` cai no padrão quando o id não existe mais - um par removido da lista não
         // deixa o app sem cores de estado.
         if (parSalvo !== null) setIdDoPar(acharPar(parSalvo).id);
       })

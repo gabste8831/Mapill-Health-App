@@ -56,7 +56,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * A dose, abaixo do nome e um degrau mais apagada.
    *
-   * Ela responde "quanto", que so importa depois de saber "o que" — a opacidade e o que poe as
+   * Ela responde "quanto", que so importa depois de saber "o que" - a opacidade e o que poe as
    * duas linhas em ordem sem precisar de outro tamanho de fonte.
    */
   dose: {

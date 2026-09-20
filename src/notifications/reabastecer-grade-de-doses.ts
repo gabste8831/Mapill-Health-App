@@ -10,11 +10,11 @@ function syncFields() {
 }
 
 /**
- * O que o reabastecimento fez — para o Diagnóstico poder **mostrar**.
+ * O que o reabastecimento fez - para o Diagnóstico poder **mostrar**.
  *
  * Na rodada de 13/09 esta função rodou dentro de um `try/catch` que engolia o erro, e o passo D.3
  * falhou sem nada aparecer em lugar nenhum: nem a dose na Home, nem um aviso, nem uma linha. Uma
- * manutenção que falha calada é o mesmo modo de falha que o defeito original — e pior, porque agora
+ * manutenção que falha calada é o mesmo modo de falha que o defeito original - e pior, porque agora
  * há código dando a impressão de que o problema foi resolvido.
  */
 export type ResultadoDoReabastecimento = {
@@ -25,7 +25,7 @@ export type ResultadoDoReabastecimento = {
   /**
    * A dose mais distante que existe no banco, depois do reabastecimento.
    *
-   * É o que responde "a grade alcança o horizonte?" — a pergunta do passo D.3. `gravadas: 0` sozinho
+   * É o que responde "a grade alcança o horizonte?" - a pergunta do passo D.3. `gravadas: 0` sozinho
    * é ambíguo: pode ser grade completa (certo) ou reabastecimento que não fez nada (errado), e os
    * dois casos têm o mesmo número. A data do fim distingue: se ela está a ~30 dias, a grade está
    * cheia; se está a 2 dias, o tratamento vai emudecer e ninguém foi avisado.
@@ -49,20 +49,20 @@ const HORIZONTE_EM_DIAS = 30;
  * ## O defeito que isto corrige
  *
  * Até 13/09 a grade era gerada num lugar só: o fluxo de salvar cadastro, que gravava 30 dias de
- * `DoseSchedule` e terminava ali. Nada a reabastecia — o comentário que prometia "a janela é
+ * `DoseSchedule` e terminava ali. Nada a reabastecia - o comentário que prometia "a janela é
  * reabastecida depois" descrevia código que nunca existiu.
  *
  * A consequência, confirmada em aparelho pelo Gabriel (passo A.4, relógio adiantado 37 dias): um
  * tratamento contínuo **para de avisar por volta do 30º dia**, sem erro, sem aviso, sem nada. A
  * pessoa não descobre que parou; ela só deixa de ser lembrada. É o pior modo de falhar deste app,
- * porque a confiança já foi transferida para ele — e o calendário ainda mostrava doses futuras,
+ * porque a confiança já foi transferida para ele - e o calendário ainda mostrava doses futuras,
  * porque projeta os horários na hora a partir da posologia, o que tranquilizava e escondia.
  *
  * ## Por que aqui
  *
  * Fica dentro de `reagendarTodosOsAvisos`, antes de agendar, porque essa função já é o único ponto
  * de entrada de todos os gatilhos do ciclo de vida e já roda a cada abertura do app. Reabastecer
- * ali significa que qualquer coisa que faça o app reagendar também mantém a grade cheia — não há um
+ * ali significa que qualquer coisa que faça o app reagendar também mantém a grade cheia - não há um
  * segundo caminho para esquecer de chamar. Agendar avisos a partir de uma grade vazia era justamente
  * o que acontecia.
  *
@@ -71,7 +71,7 @@ const HORIZONTE_EM_DIAS = 30;
  * Regerar apagaria e recriaria as doses futuras a cada abertura do app, e com elas o `snoozeCount`
  * (o adiamento já gasto voltaria a estar disponível) e o vínculo que os registros de ingestão
  * apontam. Esta função **só insere o que falta**: compara com o que já existe por instante e grava
- * a diferença. Rodar duas vezes seguidas não muda nada — a segunda não encontra buraco nenhum.
+ * a diferença. Rodar duas vezes seguidas não muda nada - a segunda não encontra buraco nenhum.
  *
  * Mudança de posologia continua sendo assunto do cadastro, que apaga as futuras e regera. Aqui não
  * se corrige horário: preenche-se vazio.
@@ -99,8 +99,8 @@ export async function reabastecerGradeDeDoses(agora: Date): Promise<ResultadoDoR
      * A janela começa **agora**, não no fim da grade existente.
      *
      * Poderia começar depois da última dose gravada, o que geraria menos candidatos. Mas então um
-     * buraco no meio — dose apagada por um caminho qualquer, ou grade gravada antes de a posologia
-     * ganhar um horário novo — nunca seria preenchido. Gerar a janela inteira e descartar o que já
+     * buraco no meio - dose apagada por um caminho qualquer, ou grade gravada antes de a posologia
+     * ganhar um horário novo - nunca seria preenchido. Gerar a janela inteira e descartar o que já
      * existe custa uma comparação em memória e não deixa buraco de pé.
      */
     const candidatos = generateDoseSchedules({ prescription, from: agora, until: ate });
@@ -111,19 +111,19 @@ export async function reabastecerGradeDeDoses(agora: Date): Promise<ResultadoDoR
      *
      * O banco guarda os dois formatos: o cadastro grava com `toISOString()`, que termina em `Z`, e o
      * que volta da sincronização vem com `+00:00`. Os dois descrevem o mesmo momento e são strings
-     * diferentes — foi o que o Diagnóstico do Gabriel mostrou em 13/09, com as duas formas lado a
+     * diferentes - foi o que o Diagnóstico do Gabriel mostrou em 13/09, com as duas formas lado a
      * lado na mesma lista.
      *
      * Comparando texto, `2026-09-14T02:00:00.000Z` nunca casaria com
      * `2026-09-14T02:00:00+00:00`, e o reabastecimento gravaria uma segunda dose para um horário que
-     * já existe — duplicando o alarme em vez de completar a grade.
+     * já existe - duplicando o alarme em vez de completar a grade.
      */
     /**
      * **Inclui as excluídas**, e é o que impede o reabastecimento de desfazer uma edição.
      *
      * Editar a posologia marca as doses futuras como excluídas (ver `deleteUpcoming`). Olhando só
      * as vivas, o reabastecimento veria aqueles instantes como buracos na grade e gravaria doses
-     * novas para eles — com id novo, imunes ao `deleted_at` que acabou de matá-las, e o horário
+     * novas para eles - com id novo, imunes ao `deleted_at` que acabou de matá-las, e o horário
      * removido voltaria a tocar.
      */
     const existentes = await doseScheduleRepository.findByPrescriptionIncluindoExcluidas(

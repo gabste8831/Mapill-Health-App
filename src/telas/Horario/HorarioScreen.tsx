@@ -13,7 +13,7 @@ type ItemProps = {
   dose: DoseDoHorario;
   onConfirmar: () => void;
   onPular: () => void;
-  /** "Ignorar por agora" — registra que viu, sem dizer se tomou. A dose segue pendente. */
+  /** "Ignorar por agora" - registra que viu, sem dizer se tomou. A dose segue pendente. */
   onAdiar: () => void;
 };
 
@@ -32,7 +32,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
        * remédio, quanto, como está.
        *
        * Sem isto o TalkBack para em quatro nós soltos e o selo "Tomada"/"Pulada" chega depois de um
-       * ícone mudo. É o mesmo tratamento que o `ItemDeDose` da Home já faz — e esta tela é o destino
+       * ícone mudo. É o mesmo tratamento que o `ItemDeDose` da Home já faz - e esta tela é o destino
        * do toque na notificação, então merece pelo menos o mesmo cuidado.
        *
        * O agrupamento fica **aqui**, e não no cartão inteiro: `accessible` no cartão engoliria
@@ -58,7 +58,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
         {/* A foto da caixa ao lado do nome, quando existe.
 
             Miniatura e não a foto larga do alarme: ali ela é o assunto da tela, aqui é uma
-            confirmação de que a linha é o remédio certo — e há uma por dose, então cada uma que
+            confirmação de que a linha é o remédio certo - e há uma por dose, então cada uma que
             crescesse empurraria as outras para fora. Sem foto, nada ocupa o lugar: o nome usa a
             largura toda em vez de ficar preso a uma coluna vazia. */}
         {dose.photoUri !== null ? (
@@ -66,7 +66,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
         ) : null}
 
         {/**
-         * **Tudo o que foi cadastrado aparece aqui** — pedido do Gabriel em 12/09.
+         * **Tudo o que foi cadastrado aparece aqui** - pedido do Gabriel em 12/09.
          *
          * Esta é a tela onde a dose se confirma, e é para onde o toque na notificação leva. Quem
          * chega aqui está com o remédio na mão, ou indo buscá-lo: cada campo que o app guarda e não
@@ -75,16 +75,16 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
          *
          * A ordem segue o uso: nome e dose para saber **o quê**, a orientação de tomada para saber
          * **como**, o local para saber **onde**, e a observação livre por último, porque é a única
-         * que não tem forma previsível — ela pode ser uma frase longa, e vindo antes empurraria o
+         * que não tem forma previsível - ela pode ser uma frase longa, e vindo antes empurraria o
          * resto para fora da vista.
          */}
         <View style={styles.cardTexto}>
           <Text style={styles.nome}>{dose.medicationName}</Text>
           <Text style={styles.quantidade}>{dose.quantidadeFormatada}</Text>
           {/* As orientações da lista fechada ("Em jejum · Com bastante água"). Entraram em 14/09:
-              eram gravadas no cadastro e não apareciam em tela nenhuma — e é este o lugar onde o
+              eram gravadas no cadastro e não apareciam em tela nenhuma - e é este o lugar onde o
               "tudo o que foi cadastrado aparece aqui" acima já as prometia. */}
-          {/* Uma etiqueta por orientação, como na tela do alarme — a mesma informação lida do mesmo
+          {/* Uma etiqueta por orientação, como na tela do alarme - a mesma informação lida do mesmo
               jeito nos dois lugares. */}
           {dose.orientacoes.length > 0 ? (
             <View style={styles.etiquetas}>
@@ -98,7 +98,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
           {dose.intakeNote !== null && dose.intakeNote.length > 0 ? (
             <Text style={styles.orientacao}>{dose.intakeNote}</Text>
           ) : null}
-          {/* Onde a caixa está: a mesma informação que a tela do alarme dá, e pelo mesmo motivo —
+          {/* Onde a caixa está: a mesma informação que a tela do alarme dá, e pelo mesmo motivo -
               é o que evita procurar pela casa com o alarme tocando. */}
           {dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
             <View style={styles.local}>
@@ -128,7 +128,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
       </View>
 
       {dose.resolvida ? (
-        // Corrigir continua possível — é o que torna aceitável confirmar direto pela notificação,
+        // Corrigir continua possível - é o que torna aceitável confirmar direto pela notificação,
         // sem passar por uma tela. Nada aqui é irreversível.
         <Text style={styles.corrigirDica}>
           Registrou errado? Toque em {confirmada ? "“Pulei”" : "“Tomei”"} para corrigir.
@@ -136,7 +136,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
       ) : null}
 
       {/* Adiada não é resolvida: ela continua pendente e volta a aparecer. O que muda é a tela
-          dizer que a pessoa **viu** — sem isso, "vi e resolvo depois" seria indistinguível de
+          dizer que a pessoa **viu** - sem isso, "vi e resolvo depois" seria indistinguível de
           "nunca abri o app", e a dose voltaria como se ninguém tivesse notado nada. */}
       {adiada ? (
         <Text style={styles.adiadaDica}>
@@ -145,22 +145,22 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
       ) : null}
 
       {/* O botão escolhido fica azul cheio; o outro, contornado. Enquanto nada foi respondido os
-          dois são contornados — nenhuma das duas respostas pode parecer a sugerida, porque o
+          dois são contornados - nenhuma das duas respostas pode parecer a sugerida, porque o
           registro só vale se for o que de fato aconteceu. */}
       {/* `emFolha` porque o cartão da dose é branco como o botão: sem o contorno, o `outline` some
-          no fundo e sobra um texto solto — o mesmo motivo pelo qual a prop existe para o
+          no fundo e sobra um texto solto - o mesmo motivo pelo qual a prop existe para o
           `BottomSheet`. */}
       {/* `accessibilityState.selected` porque o preenchimento é a **única** pista de qual resposta
           já está registrada, e "azul cheio vs. contornado" não existe para quem usa leitor de tela:
           os dois botões soariam idênticos antes e depois de responder. É a mesma regra que a lista
-          de doses perdidas segue — estado nunca só por cor. */}
-      {/* "Pulei" à esquerda e "Tomei" à direita, com ícone ao lado do texto — a mesma ordem e a
+          de doses perdidas segue - estado nunca só por cor. */}
+      {/* "Pulei" à esquerda e "Tomei" à direita, com ícone ao lado do texto - a mesma ordem e a
           mesma forma da tela de alarme. Quem responde nos dois lugares não deve precisar reaprender
           onde fica o quê.
 
           A cor muda porque o fundo muda: no alarme o cartão é azul, e ali "Tomei" é o botão
           branco; aqui o fundo é claro, então ele é o azul cheio do app. O que se mantém é a
-          hierarquia — um botão cheio, um neutro — e o par de ícones, que é o que se reconhece antes
+          hierarquia - um botão cheio, um neutro - e o par de ícones, que é o que se reconhece antes
           de ler. */}
       <View style={styles.acoes}>
         <Pressable
@@ -211,11 +211,11 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
         *
         * Existe porque as duas de cima obrigam a mentir quem ainda não sabe: quem está no ônibus
         * com o remédio em casa não tomou (então "Tomei" é falso) e não decidiu pular (então
-        * "Pulei" também é). Sem esta saída, essa pessoa fecha o app sem responder — e o app perde
+        * "Pulei" também é). Sem esta saída, essa pessoa fecha o app sem responder - e o app perde
         * a informação de que ela **viu**, que é diferente de nunca ter aberto.
         *
         * Fica embaixo e em `text`, com metade do peso visual das outras: é saída legítima, não
-        * atalho a ser incentivado. Some quando a dose já foi resolvida ou já está adiada — nos
+        * atalho a ser incentivado. Some quando a dose já foi resolvida ou já está adiada - nos
         * dois casos não há o que adiar.
         */}
       {!dose.resolvida && !adiada ? (
@@ -231,11 +231,11 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
 }
 
 /**
- * As doses de um horário — o destino do toque na notificação.
+ * As doses de um horário - o destino do toque na notificação.
  *
  * Existe porque o aviso é **por horário** e não por dose: com dois remédios às 08:00, o botão
  * "Tomei todas" da notificação resolve o caso comum, mas quem tomou um e não o outro não tem como
- * dizer isso num botão. Esta tela é onde a resposta parcial cabe — uma linha por remédio, com
+ * dizer isso num botão. Esta tela é onde a resposta parcial cabe - uma linha por remédio, com
  * Tomei e Pulei em cada.
  *
  * Ela também abre pela agenda, sem notificação nenhuma, e aí é a mesma tela: quem chegou por um
@@ -285,7 +285,7 @@ export function HorarioScreen() {
           </View>
         ) : (
           <>
-            {/* A contagem responde "acabou?" sem obrigar a percorrer a lista de novo — que é a
+            {/* A contagem responde "acabou?" sem obrigar a percorrer a lista de novo - que é a
                 pergunta de quem abriu a tela para resolver as doses. */}
             <Text style={styles.resumo}>
               {pendentes === 0
@@ -310,7 +310,7 @@ export function HorarioScreen() {
                 Chegou a sair sozinha depois da última resposta, e a ideia foi revertida em 05/09:
                 a dose respondida mostra a dica de correção ("Registrou errado? Toque em Pulei"), e
                 sair antes de ela ser lida torna a dica inútil. Quem responde por engano precisa do
-                tempo de perceber — e é a mesma razão pela qual as duas respostas ficam disponíveis
+                tempo de perceber - e é a mesma razão pela qual as duas respostas ficam disponíveis
                 depois de registradas, em vez de virarem um selo fixo.
 
                 Quem chegou pela notificação entrou direto nesta tela, sem passar pelo app: a seta

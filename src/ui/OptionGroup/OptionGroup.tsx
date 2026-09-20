@@ -11,7 +11,7 @@ export type OptionGroupOption<TValue extends string> = {
   hint?: string;
   /**
    * Ícone acima do rótulo, em `grade` e `coluna`. Serve pra escolha que se faz de relance depois
-   * da primeira vez — a forma do sino é reconhecida antes de a palavra ser lida.
+   * da primeira vez - a forma do sino é reconhecida antes de a palavra ser lida.
    */
   icon?: ReactNode;
 };
@@ -33,7 +33,7 @@ export type OptionGroupProps<TValue extends string> = {
    * Em `grade` com número ímpar de opções, deixa a **última ocupar a linha inteira** em vez de
    * ficar meia-largura ao lado de um vazio.
    *
-   * Só vale quando a última opção for mesmo a que resume as outras — "Os dois" depois de "Alarme"
+   * Só vale quando a última opção for mesmo a que resume as outras - "Os dois" depois de "Alarme"
    * e "Notificação". Aí a largura maior não é sobra de espaço: ela diz que aquela opção contém as
    * de cima. Fora desse caso o vazio é melhor, porque uma ficha maior sem motivo lê como a opção
    * recomendada.
@@ -41,7 +41,7 @@ export type OptionGroupProps<TValue extends string> = {
   ultimaOcupaLinha?: boolean;
   /**
    * Entra no fim da fileira, junto das opções. Existe pro caso "as opções cobrem o comum, e o
-   * resto se digita" — a alternativa era um botão "Mais" que revela um campo em outra linha, e
+   * resto se digita" - a alternativa era um botão "Mais" que revela um campo em outra linha, e
    * gastar dois toques e duas linhas pra dizer um número.
    */
   trailing?: ReactNode;
@@ -63,7 +63,7 @@ const OPTION_STYLE = {
  * Escolha única resolvida em um toque, com as opções à vista. Existe ao lado do `SelectField`
  * porque os dois resolvem problemas diferentes: o select esconde a lista pra caber (tipo
  * sanguíneo, 8 opções), este mostra tudo quando são poucas e a comparação entre elas é a
- * decisão — "contínuo ou com prazo" se responde vendo as duas juntas, não abrindo um popup.
+ * decisão - "contínuo ou com prazo" se responde vendo as duas juntas, não abrindo um popup.
  */
 export function OptionGroup<TValue extends string>({
   label,
@@ -104,7 +104,7 @@ export function OptionGroup<TValue extends string>({
               accessibilityRole="radio"
               accessibilityState={{ selected: isSelected }}>
               {option.icon}
-              {/* Centrado exceto no `alto`, que alinha o cartão inteiro à esquerda — ver
+              {/* Centrado exceto no `alto`, que alinha o cartão inteiro à esquerda - ver
                   `optionLabelCentrado`. */}
               <Text
                 style={[

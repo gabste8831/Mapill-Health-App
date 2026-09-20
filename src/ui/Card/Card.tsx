@@ -11,7 +11,7 @@ export type CardProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-/** Bloco de agrupamento padrão (borda + fundo + cantos) — usado pra separar seções de formulário. */
+/** Bloco de agrupamento padrão (borda + fundo + cantos) - usado pra separar seções de formulário. */
 export function Card({ children, style }: CardProps) {
   const styles = useEstilos(criarEstilos);
 

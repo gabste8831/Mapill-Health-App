@@ -1,4 +1,4 @@
-// Precisa ser o primeiro import do app — supabase-js depende de URL/URLSearchParams, que o
+// Precisa ser o primeiro import do app - supabase-js depende de URL/URLSearchParams, que o
 // runtime do React Native não implementa nativamente (ver data/remote/supabase-client.ts).
 import 'react-native-url-polyfill/auto';
 
@@ -47,10 +47,10 @@ function AvisosDeDose() {
  *
  * Até 14/09 o `useSync` era montado **só na tela de Conta**, e a sincronização acontecia apenas
  * enquanto ela estava aberta (e uma vez no login). Confirmar uma dose, editar a ficha, cadastrar um
- * remédio — nada disso subia. O dado ficava no aparelho até alguém abrir Conta e dados.
+ * remédio - nada disso subia. O dado ficava no aparelho até alguém abrir Conta e dados.
  *
  * O prejuízo apareceu em aparelho: o Gabriel editou o nome na ficha, e a alteração sumiu no login
- * seguinte. Não foi perda de escrita — o dado nunca saiu do celular, e o `pull` trouxe de volta a
+ * seguinte. Não foi perda de escrita - o dado nunca saiu do celular, e o `pull` trouxe de volta a
  * versão antiga do servidor, que era a única que existia lá.
  *
  * Sincronização que depende de a pessoa visitar uma tela específica não é backup. E o próprio app já
@@ -59,7 +59,7 @@ function AvisosDeDose() {
  *
  * ## Por que aqui, e não a cada gravação
  *
- * Montado no passo `app`, o `useSync` sincroniza ao abrir e a cada volta ao primeiro plano — que é
+ * Montado no passo `app`, o `useSync` sincroniza ao abrir e a cada volta ao primeiro plano - que é
  * quando o aparelho tem rede e a pessoa acabou de mexer no app. Disparar a cada escrita traria mais
  * consistência e mais bateria; esta é a troca barata que resolve o caso real, e o push acontece
  * antes do pull, então nada local é sobrescrito no caminho.
@@ -72,8 +72,8 @@ function SincronizacaoEmSegundoPlano() {
 /**
  * O provedor de tema envolve **tudo**, inclusive as esperas que devolvem `null`.
  *
- * Se ele ficasse dentro de `RootLayout`, qualquer tela do onboarding renderizada antes dele —
- * login, consentimento, ficha — não teria tema, e trocar para escuro deixaria o começo do app
+ * Se ele ficasse dentro de `RootLayout`, qualquer tela do onboarding renderizada antes dele -
+ * login, consentimento, ficha - não teria tema, e trocar para escuro deixaria o começo do app
  * claro e o resto escuro. Por isso a raiz de verdade é este componente, e o antigo `RootLayout`
  * virou o conteúdo dele.
  */
@@ -95,14 +95,14 @@ function ConteudoDaRaiz() {
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
-    // Comfortaa é só pro wordmark "Mapill" (a fonte da logo) — nunca pro resto da UI.
+    // Comfortaa é só pro wordmark "Mapill" (a fonte da logo) - nunca pro resto da UI.
     Comfortaa_400Regular,
     Comfortaa_700Bold,
   });
   const isDatabaseReady = useDatabaseReady();
   const gate = useFirstRunGate(isDatabaseReady);
 
-  // Splash continua visível (ver SplashOverlay) até fonte e migrations estarem prontas —
+  // Splash continua visível (ver SplashOverlay) até fonte e migrations estarem prontas -
   // evita FOUC de fonte e telas lendo o SQLite antes das migrations rodarem.
   //
   // `indeciso` entra na mesma espera: o gate ainda está lendo ficha e consentimento, e desenhar
@@ -111,13 +111,13 @@ function ConteudoDaRaiz() {
   //
   // Cada uma das três esperas tem que terminar de um jeito ou de outro: enquanto isto devolve
   // `null` nenhuma tela monta, ninguém chama `SplashScreen.hideAsync()`, e o app fica preso no
-  // fundo azul da splash sem saída — era o F7 na reabertura. Por isso a fonte que **falhou** conta
+  // fundo azul da splash sem saída - era o F7 na reabertura. Por isso a fonte que **falhou** conta
   // como resolvida: seguir com a fonte do sistema é feio, ficar na splash para sempre é quebrado.
   // As outras duas se garantem nos próprios hooks (`useDatabaseReady`, `useFirstRunGate`).
   const fontesResolvidas = fontsLoaded || fontError !== null;
   if (!fontesResolvidas || !isDatabaseReady || gate.step === 'indeciso') return null;
 
-  // Texto de UI e Alert ficam aqui (camada de apresentação) — o hook só devolve o resultado.
+  // Texto de UI e Alert ficam aqui (camada de apresentação) - o hook só devolve o resultado.
   async function handleGoogleSignIn() {
     try {
       const result = await gate.signInWithGoogle();
@@ -191,7 +191,7 @@ function ConteudoDaRaiz() {
    * O `SplashOverlay` fica **fora do passo**, e não dentro de um ramo só.
    *
    * Ele morava apenas no ramo `login`, e é ele quem chama `SplashScreen.hideAsync()`. Quem já tinha
-   * passado pelo onboarding caía direto em `app` — onde o overlay não existia —, ninguém escondia a
+   * passado pelo onboarding caía direto em `app` - onde o overlay não existia -, ninguém escondia a
    * splash nativa, e o app abria travado no fundo azul. Por ser a primeira abertura que passa por
    * `login`, o problema só aparecia ao **reabrir**, que é exatamente como você o encontrou.
    *
@@ -207,7 +207,7 @@ function ConteudoDaRaiz() {
       {conteudoDoPasso()}
       {/* Cobre a espera da restauração, e fica **fora do passo** pelo mesmo motivo do
           `SplashOverlay`: ela acontece entre dois passos, não dentro de um. Sem isto, quem entra
-          com o Google vê a tela de login voltar por alguns segundos antes da Home — o gate ainda
+          com o Google vê a tela de login voltar por alguns segundos antes da Home - o gate ainda
           não sabe para onde ir, porque a ficha só chega quando o pull termina. */}
       <OverlayDeProgresso
         visivel={gate.restaurando}
@@ -216,7 +216,7 @@ function ConteudoDaRaiz() {
       />
       {/* A carga do catálogo de medicamentos, uma vez por instalação. Overlay próprio e não o
           mesmo texto: quem entra sem conta nenhuma também espera por isto, e "restaurando seus
-          dados" seria mentira para essa pessoa — não há dados dela em lugar nenhum. */}
+          dados" seria mentira para essa pessoa - não há dados dela em lugar nenhum. */}
       <OverlayDeProgresso
         visivel={gate.preparando}
         titulo="Preparando o aplicativo"

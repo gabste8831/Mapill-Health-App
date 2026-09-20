@@ -17,13 +17,13 @@ export const ORIENTACOES_DE_TOMADA: Record<IntakeInstruction, string> = {
 };
 
 /**
- * As orientações marcadas, em texto legível — uma por item.
+ * As orientações marcadas, em texto legível - uma por item.
  *
  * Devolve a **lista**, e não uma frase pronta: na tela do alarme cada orientação vira uma etiqueta
  * com fundo próprio, e isso exige os itens separados. Quem precisar de uma linha só junta com
  * `juntarOrientacoes`.
  *
- * Lista vazia quando nada foi marcado — quem chama decide entre esconder o bloco ou não.
+ * Lista vazia quando nada foi marcado - quem chama decide entre esconder o bloco ou não.
  */
 export function formatarOrientacoes(instrucoes: IntakeInstruction[]): string[] {
   return instrucoes.map((instrucao) => ORIENTACOES_DE_TOMADA[instrucao]);

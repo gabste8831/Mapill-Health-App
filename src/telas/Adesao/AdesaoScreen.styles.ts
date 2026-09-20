@@ -231,7 +231,7 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   /**
    * O período dentro da seção do relatório: rótulo em cima, fileira embaixo.
    *
-   * O `fieldLabelGap` é o mesmo dos formulários — o rótulo pertence ao controle logo abaixo, e
+   * O `fieldLabelGap` é o mesmo dos formulários - o rótulo pertence ao controle logo abaixo, e
    * qualquer outro valor faria a fileira flutuar longe do que a nomeia.
    */
   periodoDoRelatorio: {
@@ -247,8 +247,8 @@ export const criarEstilos = estilosDoTema(({ cores , ajustes}) => ({
   /**
    * O ícone, **sem o quadrado colorido atrás**.
    *
-   * Ele já teve fundo `primaryContainer`, e o conjunto — quadradinho de cor com título em negrito
-   * ao lado — é o cabeçalho de card que todo gerador de site produz. Fora isso a cor não fazia
+   * Ele já teve fundo `primaryContainer`, e o conjunto - quadradinho de cor com título em negrito
+   * ao lado - é o cabeçalho de card que todo gerador de site produz. Fora isso a cor não fazia
    * trabalho nenhum: azul aqui não distingue esta seção de nada, porque não há outra seção com
    * ícone para ela contrastar. O app reserva cor para função (vermelho é atraso, verde é agora), e
    * um azul decorativo enfraquece essa regra em todo lugar onde ela importa.

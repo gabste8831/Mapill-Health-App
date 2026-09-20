@@ -5,7 +5,7 @@ import type { Repository } from "./repository";
 /**
  * Uma dose agendada junto do último desfecho registrado para ela.
  *
- * O status vem **cru**, incluindo `deferred` — que não resolve a dose, mas deixou log, e é esse
+ * O status vem **cru**, incluindo `deferred` - que não resolve a dose, mas deixou log, e é esse
  * log que uma correção retroativa precisa apontar. Quem lê decide o que conta como resolvido
  * usando `resolvesDose`.
  */
@@ -26,13 +26,13 @@ export interface DoseScheduleRepository extends Repository<DoseSchedule> {
    */
   findForDay(referenceDate: string): Promise<DoseScheduleWithStatus[]>;
   /**
-   * O mesmo, para uma faixa de instantes — a agenda do calendário, que mostra muitos dias de uma
+   * O mesmo, para uma faixa de instantes - a agenda do calendário, que mostra muitos dias de uma
    * vez. Uma consulta por dia faria a tela ficar mais lenta a cada dia visível.
    */
   findBetween(startTimestamp: string, endTimestamp: string): Promise<DoseScheduleWithStatus[]>;
   /**
    * Doses do dia (`referenceDate`) ainda sem IntakeLog resolutivo (nenhum "confirmed"/"skipped"
-   * mais recente) — inclui atrasadas do próprio dia. Alimenta a tela dedicada de gerenciamento
+   * mais recente) - inclui atrasadas do próprio dia. Alimenta a tela dedicada de gerenciamento
    * de dose: dose que disparou o alarme/notificação + demais pendentes do dia.
    */
   findPendingForDay(referenceDate: string): Promise<DoseSchedule[]>;
@@ -41,7 +41,7 @@ export interface DoseScheduleRepository extends Repository<DoseSchedule> {
    * chamador gastou o adiamento; `false` quando ele já tinha sido gasto.
    *
    * O retorno importa: sem ele a recusa acontecia calada no banco e quem chamava seguia agendando
-   * o lembrete assim mesmo — cinco toques em "Adiar" viravam cinco lembretes.
+   * o lembrete assim mesmo - cinco toques em "Adiar" viravam cinco lembretes.
    */
   incrementSnoozeCount(doseScheduleId: string): Promise<boolean>;
   /**

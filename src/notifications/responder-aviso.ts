@@ -18,14 +18,14 @@ import {
 import { reagendarTodosOsAvisos } from "./reagendar-avisos";
 
 /**
- * "Tomei" — confirma **todas** as doses do horário e desconta o estoque de cada uma.
+ * "Tomei" - confirma **todas** as doses do horário e desconta o estoque de cada uma.
  *
  * O botão só existe com esse rótulo ("Tomei todas" quando há mais de uma), então confirmar o
  * conjunto é exatamente o que foi pedido. Resposta parcial não passa por aqui: ela se resolve na
  * tela do horário, aberta ao tocar no corpo da notificação.
  *
  * O `occurredAt` é **agora**, e não o horário agendado: o que o app observou foi a resposta, e
- * carimbar o horário previsto inventaria um dado que ninguém forneceu (§2.3.3 — o registro é de
+ * carimbar o horário previsto inventaria um dado que ninguém forneceu (§2.3.3 - o registro é de
  * monitoramento eletrônico, e ele vale por ser fiel ao que aconteceu de fato).
  */
 export async function confirmarDosesDoAviso(
@@ -34,8 +34,8 @@ export async function confirmarDosesDoAviso(
    * O desfecho a gravar. `confirmed` desconta o estoque; `skipped` só registra.
    *
    * O parâmetro entrou quando a notificação ganhou o botão "Pulei": as duas respostas percorrem
-   * exatamente o mesmo caminho — mesma guarda contra repetição, mesmo anúncio, mesmo reagendamento
-   * —, e a única diferença é esta palavra. Duplicar a função para trocá-la abriria duas cópias de
+   * exatamente o mesmo caminho - mesma guarda contra repetição, mesmo anúncio, mesmo reagendamento
+   * -, e a única diferença é esta palavra. Duplicar a função para trocá-la abriria duas cópias de
    * uma regra que precisa continuar sendo uma.
    */
   status: "confirmed" | "skipped" = "confirmed",
@@ -58,7 +58,7 @@ export async function confirmarDosesDoAviso(
      *
      * No Android a notificação não some sozinha ao tocar num botão de ação: ela fica na bandeja, e
      * cada toque dispara esta função outra vez. Sem esta guarda, cinco toques em "Tomei" gravavam
-     * cinco ingestões e descontavam cinco doses do estoque — um remédio "consumido" cinco vezes
+     * cinco ingestões e descontavam cinco doses do estoque - um remédio "consumido" cinco vezes
      * por um dedo insistente. É o defeito mais caro possível num app que existe para manter o
      * estoque fiel.
      *
@@ -93,16 +93,16 @@ export async function confirmarDosesDoAviso(
 }
 
 /**
- * "Adiar" — empurra o aviso em alguns minutos, **sem registrar desfecho nenhum**.
+ * "Adiar" - empurra o aviso em alguns minutos, **sem registrar desfecho nenhum**.
  *
  * Nada é gravado no histórico: nem `confirmed`, nem `skipped`, nem `deferred`. Isso é deliberado e
  * importa mais quando o horário tem vários remédios. Quem tomou um e não o outro não está afirmando
- * nada sobre nenhum deles ao adiar — está dizendo "me lembra de novo daqui a pouco". Registrar um
+ * nada sobre nenhum deles ao adiar - está dizendo "me lembra de novo daqui a pouco". Registrar um
  * desfecho ali inventaria uma resposta que ninguém deu, e num app cujo valor é a fidelidade do
  * registro isso é o erro mais caro.
  *
  * O que muda no banco é só `snoozeCount`, que é a trava: **um adiamento por horário**. Marcá-la em
- * todas as doses do aviso é o que faz o segundo toque não existir — o botão some, em vez de
+ * todas as doses do aviso é o que faz o segundo toque não existir - o botão some, em vez de
  * aparecer e não funcionar.
  *
  * O aviso que volta é recalculado do zero, então traz só o que ainda estiver pendente: se a
@@ -116,7 +116,7 @@ export async function adiarAviso(doseScheduleIds: string[]): Promise<void> {
    *
    * O `UPDATE` já recusava o segundo adiamento, mas caladamente: o lembrete era agendado de
    * qualquer forma, e cinco toques em "Adiar" produziam cinco lembretes com um `snooze_count` que
-   * nunca passou de 1. Agora a trava do banco governa o comportamento — quem não gastou nada não
+   * nunca passou de 1. Agora a trava do banco governa o comportamento - quem não gastou nada não
    * agenda nada.
    */
   let alguemAdiou = false;
@@ -147,7 +147,7 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
 
   const linhas: string[] = [];
   /**
-   * O horário original das doses — o que a tela de alarme usa para encontrá-las.
+   * O horário original das doses - o que a tela de alarme usa para encontrá-las.
    *
    * Todas as doses de um aviso compartilham o instante (é o que as agrupa), então basta o da
    * primeira que existir.
@@ -184,7 +184,7 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
     corpo: linhas.join("\n"),
     doseScheduleIds,
     // Sem isto a tela de alarme procuraria as doses no minuto em que "Adiar" foi tocado, onde não
-    // existe nenhuma — e o alarme voltava sem nome, sem dose e sem foto, com o "Tomei" sem efeito.
+    // existe nenhuma - e o alarme voltava sem nome, sem dose e sem foto, com o "Tomei" sem efeito.
     instanteDasDoses,
     modo: "alarm",
     // Já foi adiado: o aviso que volta não oferece adiar de novo.
@@ -195,7 +195,7 @@ async function agendarLembreteAdiado(doseScheduleIds: string[]): Promise<void> {
 /** O que o app deve fazer com a resposta a uma notificação. */
 export type RespostaAoAviso =
   | { tipo: "abrirHorario"; dados: DadosDoAviso }
-  /** Resolvida em segundo plano — o app não precisa navegar para lugar nenhum. */
+  /** Resolvida em segundo plano - o app não precisa navegar para lugar nenhum. */
   | { tipo: "resolvida" };
 
 /**
@@ -205,23 +205,23 @@ export type RespostaAoAviso =
  * tela do horário, que é onde a resposta parcial cabe.
  *
  * **A notificação é dispensada antes de qualquer escrita.** No Android ela não sai da bandeja ao
- * receber toque num botão de ação, e enquanto estiver lá cada toque repete a resposta inteira —
+ * receber toque num botão de ação, e enquanto estiver lá cada toque repete a resposta inteira -
  * foi assim que cinco toques em "Adiar" viraram cinco lembretes. Tirar do caminho primeiro fecha a
  * janela entre o dedo e o banco; a guarda de idempotência em `confirmarDosesDoAviso` cobre o
  * resto, porque quem protege o dado é a regra, não a interface.
  */
 /**
- * Se **todas** as doses do aviso já foram respondidas — confirmadas ou puladas.
+ * Se **todas** as doses do aviso já foram respondidas - confirmadas ou puladas.
  *
  * Existe para o toque num aviso já resolvido não abrir tela nenhuma. O Android não remove a
  * notificação sozinho depois que ela é respondida por outro caminho (o botão dela mesma, a Home,
- * um segundo toque), e o aviso que fica na bandeja convida ao toque tardio — que abria a tela do
+ * um segundo toque), e o aviso que fica na bandeja convida ao toque tardio - que abria a tela do
  * alarme só para ela se fechar sozinha no quadro seguinte, produzindo o lampejo azul visto em
  * aparelho em 09/09.
  *
  * Lista vazia devolve `false`: um aviso sem dose vinculada não tem o que resolver, e tratá-lo como
  * resolvido faria o toque perder o efeito. É o caso dos avisos de estoque e receita, que aliás nem
- * chegam aqui — o destino deles é decidido antes, em `destinoDaChave`.
+ * chegam aqui - o destino deles é decidido antes, em `destinoDaChave`.
  */
 export async function todasAsDosesResolvidas(doseScheduleIds: string[]): Promise<boolean> {
   if (doseScheduleIds.length === 0) return false;

@@ -4,15 +4,15 @@ import { SqliteRepository, type SyncableRow } from "./sqlite-repository";
 
 type PatientProfileRow = SyncableRow & {
   full_name: string;
-  /** Nullable no schema por restrição de ALTER TABLE — obrigatório na camada de apresentação. */
+  /** Nullable no schema por restrição de ALTER TABLE - obrigatório na camada de apresentação. */
   date_of_birth: string | null;
   biological_sex: string | null;
   photo_uri: string | null;
   blood_type: string | null;
-  /** JSON array serializado — não há tabela própria de alergias, é texto livre do paciente. */
+  /** JSON array serializado - não há tabela própria de alergias, é texto livre do paciente. */
   allergies: string;
   /**
-   * JSON array serializado (migration 005) — as colunas soltas de um contato único (migration
+   * JSON array serializado (migration 005) - as colunas soltas de um contato único (migration
    * 004) ficaram pra trás, sem uso; não fazem mais parte do mapeamento.
    */
   emergency_contacts: string;
@@ -30,7 +30,7 @@ export class PatientProfileRepository
     return {
       id: row.id,
       fullName: row.full_name,
-      // Registros antigos (pré-migration 003) podem não ter data de nascimento salva — a UI
+      // Registros antigos (pré-migration 003) podem não ter data de nascimento salva - a UI
       // trata isso como perfil incompleto e pede o dado de novo, não infere nada.
       dateOfBirth: row.date_of_birth ?? "",
       biologicalSex: row.biological_sex as BiologicalSex,
@@ -51,14 +51,14 @@ export class PatientProfileRepository
       id: entity.id,
       full_name: entity.fullName,
       /**
-       * String vazia volta a ser `null` — **ausência é `null`, nunca `""`**.
+       * String vazia volta a ser `null` - **ausência é `null`, nunca `""`**.
        *
        * A entidade usa `""` para "não preenchido" porque a camada de apresentação trabalha com
        * campos de texto, e `fromRow` faz essa conversão na leitura. Gravar de volta sem desfazê-la
        * guardava `""` numa coluna de data, o que o SQLite aceita e o Postgres não: a sincronização
        * quebrava com `invalid input syntax for type date: ""`.
        *
-       * O erro só aparecia no push, longe da causa — e derrubava a sincronização inteira do
+       * O erro só aparecia no push, longe da causa - e derrubava a sincronização inteira do
        * usuário, porque o lote é recusado por completo.
        */
       date_of_birth: entity.dateOfBirth === "" ? null : entity.dateOfBirth,

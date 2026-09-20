@@ -7,7 +7,7 @@ import { criarEstilos } from "./TimePicker.styles";
 
 import type { TimePickerProps } from "./TimePicker";
 
-/** Mesmo ponto de partida do Android — posição da roda, nunca resposta gravada. */
+/** Mesmo ponto de partida do Android - posição da roda, nunca resposta gravada. */
 const HORARIO_NEUTRO = "08:00";
 
 function paraData(horario: string): Date {
@@ -25,7 +25,7 @@ function paraHorario(data: Date): string {
 
 /**
  * Relógio nativo do iOS. Mesmo contrato do Android, componente diferente: lá é Jetpack Compose,
- * aqui é SwiftUI, e as duas APIs não se parecem — o iOS recebe a data por `selection` (controlada,
+ * aqui é SwiftUI, e as duas APIs não se parecem - o iOS recebe a data por `selection` (controlada,
  * daí o estado local) e devolve por `onDateChange`, enquanto o Android recebe `initialDate` em ISO.
  *
  * Existe porque um `import` de `@expo/ui/jetpack-compose` não resolve no iPhone. O TCC é

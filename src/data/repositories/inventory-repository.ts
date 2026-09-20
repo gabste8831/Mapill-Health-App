@@ -90,7 +90,7 @@ export class InventoryRepository
    * Quando cada estoque foi **conferido à mão** pela última vez.
    *
    * Só `manual_recount` conta. Baixa por dose e reposição mexem no número sem que ninguém tenha
-   * aberto a caixa — e é exatamente a distância entre o número do app e o que está lá dentro que o
+   * aberto a caixa - e é exatamente a distância entre o número do app e o que está lá dentro que o
    * lembrete de recontagem existe para fechar.
    *
    * Devolve um mapa `inventoryItemId → ISO`. Estoque que nunca foi recontado simplesmente não

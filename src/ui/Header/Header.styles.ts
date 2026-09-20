@@ -10,7 +10,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     height: 60,
     paddingHorizontal: spacing.sm,
     // `surfaceContainerLowest`, e não `onPrimary`: aquele é o token de "texto sobre primary", não
-    // uma cor neutra de fundo — só parecia certo por coincidência enquanto `onPrimary` era escuro
+    // uma cor neutra de fundo - só parecia certo por coincidência enquanto `onPrimary` era escuro
     // no tema escuro. Virou branco puro quando `primary` escureceu, e o header ficava branco
     // sobre um app inteiro escuro. `surfaceContainerLowest` é a mesma cor que os cartões usam.
     backgroundColor: cores.surfaceContainerLowest,

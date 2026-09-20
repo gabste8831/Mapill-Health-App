@@ -18,19 +18,19 @@ export type CompromissoAAvisar = {
 };
 
 /**
- * Uma receita com validade e pedido de aviso. Vem da prescrição, e não do compromisso — mas o aviso
+ * Uma receita com validade e pedido de aviso. Vem da prescrição, e não do compromisso - mas o aviso
  * que ela gera é da mesma natureza: um ponto no tempo com antecedência em dias.
  */
 export type ReceitaAAvisar = {
   prescriptionId: string;
   medicationName: string;
-  /** `YYYY-MM-DD` — a validade é um dia, não um instante. */
+  /** `YYYY-MM-DD` - a validade é um dia, não um instante. */
   validUntil: string;
   /**
    * Se a pessoa marcou que quer ser avisada. Sozinho, garante o aviso **no dia do vencimento**.
    *
    * Separado da antecedência de propósito: enquanto os dois eram a mesma informação, marcar a
-   * caixa sem escolher prazo produzia silêncio total — nem o aviso do dia chegava.
+   * caixa sem escolher prazo produzia silêncio total - nem o aviso do dia chegava.
    */
   querAviso: boolean;
   /**
@@ -56,7 +56,7 @@ export type PlanejarAvisosDeCompromissoInput = {
  * cinco minutos antes, o que não é aviso, é constatação. A hora fixa só funcionava para a tarde.
  *
  * 00:01 é a única hora que serve para o dia inteiro, porque este aviso **não é para ser ouvido na
- * hora**. Ele é para já estar na tela quando a pessoa pegar o celular pela primeira vez no dia —
+ * hora**. Ele é para já estar na tela quando a pessoa pegar o celular pela primeira vez no dia -
  * e por isso o que importa é ele existir desde o começo do dia, não interromper em algum momento
  * dele. É notificação silenciosa e sem ação rápida (`semAcoesRapidas`), não alarme: ela espera.
  *
@@ -131,12 +131,12 @@ function dataPorExtenso(dia: Date): string {
 /**
  * Os avisos de compromisso e de renovação de receita.
  *
- * Reusa `AvisoDeDose` de propósito: a estrutura de um aviso agendado é a mesma — quando tocar, o
+ * Reusa `AvisoDeDose` de propósito: a estrutura de um aviso agendado é a mesma - quando tocar, o
  * que dizer, e o que ele carrega. O que muda é o **modo**, sempre `notification` e nunca `alarm`
  * (decisão de 24/08): interromper como despertador se justifica na dose, que tem hora exata e
  * consequência clínica imediata; para uma consulta na semana que vem seria só barulho.
  *
- * `doseScheduleIds` fica vazio nestes avisos — eles não apontam para dose nenhuma. É o que faz o
+ * `doseScheduleIds` fica vazio nestes avisos - eles não apontam para dose nenhuma. É o que faz o
  * toque abrir o app em vez da tela de horário, sem precisar de um segundo tipo de dado.
  *
  * Regra pura, com `agora` injetado: verificável em Node, sem aparelho.
@@ -151,7 +151,7 @@ export function planejarAvisosDeCompromisso(
   }
 
   for (const compromisso of input.compromissos) {
-    // Respondido não tem o que lembrar; passado, tampouco — e o formulário já impede configurar
+    // Respondido não tem o que lembrar; passado, tampouco - e o formulário já impede configurar
     // aviso para o que passou, mas a data pode ter chegado desde então.
     if (compromisso.jaRespondido) continue;
     const instante = new Date(compromisso.scheduledFor);
@@ -171,7 +171,7 @@ export function planejarAvisosDeCompromisso(
               : `Compromisso em ${compromisso.reminderLeadDays} dias`,
           /**
            * Aqui o título fica com o **prazo** e não com o nome, ao contrário dos avisos de
-           * estoque e receita — e a diferença é proposital: "daqui a 3 dias" é o que responde
+           * estoque e receita - e a diferença é proposital: "daqui a 3 dias" é o que responde
            * sozinho se dá tempo de remarcar o trabalho ou arranjar carona, e o compromisso já
            * tem nome próprio ("Cardiologista") logo na primeira linha do corpo.
            */
@@ -208,12 +208,12 @@ export function planejarAvisosDeCompromisso(
      * Dois avisos, e não um: **"planeje-se" e "acabou" pedem ações diferentes**.
      *
      * O antecipado dá tempo de marcar a consulta que renova a receita. O do próprio dia é o que
-     * diz que a partir de agora a receita não vale mais — quem não conseguiu renovar a tempo
+     * diz que a partir de agora a receita não vale mais - quem não conseguiu renovar a tempo
      * precisa saber disso antes de chegar à farmácia, não depois.
      *
      * **O do dia não depende da antecedência.** Quem pediu para ser avisado e não escolheu prazo
      * quer saber que a receita venceu; só não pediu para ser lembrado antes. Enquanto os dois
-     * viviam sob o mesmo `null`, marcar a caixa sem tocar no seletor produzia silêncio total —
+     * viviam sob o mesmo `null`, marcar a caixa sem tocar no seletor produzia silêncio total -
      * a interface confirmava uma intenção que o app não cumpria.
      *
      * Nenhum dos dois se repete. Um aviso que volta todo dia é o que faz desligar as notificações
@@ -230,7 +230,7 @@ export function planejarAvisosDeCompromisso(
         titulo: `Receita de ${receita.medicationName} vencendo`,
         // O remédio sobe para o título pelo mesmo motivo do aviso de estoque: é a parte que
         // sobrevive ao truncamento e à tela de bloqueio. A data e a ação ficam no corpo, porque
-        // o que se espera — marcar consulta para renovar — depende de saber quanto tempo há.
+        // o que se espera - marcar consulta para renovar - depende de saber quanto tempo há.
         corpo: `Sua receita de ${receita.medicationName} vence em ${dataPorExtenso(vencimento)}. Vale marcar a consulta de renovação.`,
         doseScheduleIds: [],
         modo: "notification",
@@ -241,7 +241,7 @@ export function planejarAvisosDeCompromisso(
     const noDia = inicioDoDia(vencimento);
     /**
      * Só quando os dois não caem no mesmo dia. Antecedência zero, ou uma receita cadastrada com
-     * a validade já dentro da janela de aviso, faria a mesma notificação chegar duas vezes — e
+     * a validade já dentro da janela de aviso, faria a mesma notificação chegar duas vezes - e
      * duas notificações idênticas no mesmo minuto leem como defeito, não como ênfase.
      */
     if (agendavel(noDia) && noDia.getTime() !== antecipado?.getTime()) {

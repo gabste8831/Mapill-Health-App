@@ -15,7 +15,7 @@ export type PhotoOrigin = "galeria" | "camera";
 
 /**
  * @param prefix identifica a origem da foto no diretório de documentos ("ficha-foto",
- * "medicamento-caixa"). O nome final leva um sufixo único — ver `persistPickedFile`.
+ * "medicamento-caixa"). O nome final leva um sufixo único - ver `persistPickedFile`.
  */
 export function usePhotoPicker(prefix: string) {
   const [isPicking, setPicking] = useState(false);
@@ -25,7 +25,7 @@ export function usePhotoPicker(prefix: string) {
    * que alguém já tenha a foto da caixa do remédio na galeria, e mandar sair do app para
    * fotografar e voltar era o caminho longo para a origem mais provável.
    *
-   * A permissão é pedida **só quando a origem escolhida precisa dela** — abrir a galeria não
+   * A permissão é pedida **só quando a origem escolhida precisa dela** - abrir a galeria não
    * dispara pedido de câmera. É o que sobra do princípio de minimização depois de a câmera passar
    * a ser usada de verdade: pedir o que se usa, quando se usa.
    *
@@ -62,7 +62,7 @@ export function usePhotoPicker(prefix: string) {
          * O erro **aparece**, em vez de virar um `failed` mudo.
          *
          * `persistPickedFile` lança quando a cópia não chega inteira ao destino, e este `catch`
-         * engolia essa mensagem — o sintoma que chegava era a miniatura branca, sem nada no console
+         * engolia essa mensagem - o sintoma que chegava era a miniatura branca, sem nada no console
          * que dissesse por quê. Duas correções da miniatura foram feitas às cegas por causa disto:
          * o defeito ficava indistinguível de um problema de cache do `expo-image`.
          *

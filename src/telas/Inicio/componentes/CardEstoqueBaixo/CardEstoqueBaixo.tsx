@@ -16,7 +16,7 @@ type CardEstoqueBaixoProps = {
 /**
  * A previsão em uma frase: quanto tempo dura, **e até quando**.
  *
- * A data vem junto dos dias porque é ela que responde a pergunta real — "dá para esperar a próxima
+ * A data vem junto dos dias porque é ela que responde a pergunta real - "dá para esperar a próxima
  * ida à farmácia?". Com "8 dias" a pessoa tem de abrir o calendário e contar; com "até 19 de set"
  * ela já sabe. A tela de estoque sempre disse as duas coisas, e aqui faltava.
  *
@@ -30,7 +30,7 @@ function resumirPrevisao(daysRemaining: number, lastDay: string | null): string 
 }
 
 /**
- * Alerta de estoque baixo — só aparece se o paciente ativou o lembrete pro medicamento
+ * Alerta de estoque baixo - só aparece se o paciente ativou o lembrete pro medicamento
  * (`InventoryItem.lowStockAlertEnabled`), e nunca bloqueia a tela.
  */
 export function CardEstoqueBaixo({
@@ -66,7 +66,7 @@ export function CardEstoqueBaixo({
           </View>
           <Text style={styles.label}>Alerta de estoque</Text>
         </View>
-        {/* Agrupado para o alerta ser lido como uma frase — "Losartana, 3 dias restantes" — em vez
+        {/* Agrupado para o alerta ser lido como uma frase - "Losartana, 3 dias restantes" - em vez
             de dois nós soltos que só fazem sentido juntos. */}
         <View accessible accessibilityLabel={`${medicationName}. ${previsao}`}>
           <Text style={styles.medicationName}>{medicationName}</Text>

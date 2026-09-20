@@ -26,7 +26,7 @@ type Migration = {
   sql: string;
 };
 
-/** Ordem de aplicação — nunca reordenar ou editar uma migration já publicada, só adicionar. */
+/** Ordem de aplicação - nunca reordenar ou editar uma migration já publicada, só adicionar. */
 const MIGRATIONS: Migration[] = [
   { version: 1, sql: MIGRATION_001_INIT },
   { version: 2, sql: MIGRATION_002_DOMAIN_EXTENSIONS },

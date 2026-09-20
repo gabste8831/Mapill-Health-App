@@ -11,7 +11,7 @@ import type { DatePickerProps } from "./DatePicker";
  * Versão de navegador do calendário: o campo mascarado de sempre.
  *
  * O componente nativo é do Jetpack Compose e não existe no web. Em vez de portá-lo (§5.1 do plano:
- * web é vitrine, não alvo), o preview fica com a digitação — o que se perde ali é a prevenção de
+ * web é vitrine, não alvo), o preview fica com a digitação - o que se perde ali é a prevenção de
  * erro, não a informação, e é no aparelho que a data é conferida de verdade.
  */
 export function DatePicker({ initialValue, onChange }: DatePickerProps) {

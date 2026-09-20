@@ -21,7 +21,7 @@ export type DoseDoHorario = {
   /**
    * A foto da caixa, quando existe.
    *
-   * A tela do alarme já a mostrava, e aqui ela faltava — mas esta tela é justamente o destino do
+   * A tela do alarme já a mostrava, e aqui ela faltava - mas esta tela é justamente o destino do
    * "Ver e confirmar no app" quando há quatro ou mais remédios no mesmo horário, que é o caso em
    * que reconhecer a caixa mais ajuda. Ler quatro nomes parecidos é mais lento que ver quatro
    * caixas.
@@ -44,7 +44,7 @@ export type DoseDoHorario = {
    * A observação livre do tratamento, quando houver.
    *
    * Diferente de `intakeNote`, que acompanha a dose ("em jejum"): esta é o que o paciente anotou
-   * sobre o tratamento como um todo. Pedido do Gabriel em 12/09 — na tela onde a dose se confirma,
+   * sobre o tratamento como um todo. Pedido do Gabriel em 12/09 - na tela onde a dose se confirma,
    * tudo o que ele cadastrou precisa estar visível, porque é ali que a informação vira orientação.
    */
   notes: string | null;
@@ -54,13 +54,13 @@ export type DoseDoHorario = {
 };
 
 /**
- * As doses de um horário — o destino do toque na notificação.
+ * As doses de um horário - o destino do toque na notificação.
  *
  * É aqui que a **resposta parcial** cabe: o botão da notificação só sabe dizer "tomei todas",
  * porque um rótulo curto não consegue distinguir dois remédios. Quem tomou um e não o outro abre
  * esta tela e responde um por um.
  *
- * A tela também abre sem notificação nenhuma, pela agenda — e aí é a mesma tela, sem destaque.
+ * A tela também abre sem notificação nenhuma, pela agenda - e aí é a mesma tela, sem destaque.
  */
 export function useDosesDoHorario(instanteIso: string) {
   const [doses, setDoses] = useState<DoseDoHorario[]>([]);
@@ -74,7 +74,7 @@ export function useDosesDoHorario(instanteIso: string) {
     }
 
     try {
-      // A janela é o **minuto**, alinhado — mesmo motivo de `use-doses-do-alarme`: o instante que a
+      // A janela é o **minuto**, alinhado - mesmo motivo de `use-doses-do-alarme`: o instante que a
       // notificação carrega pode trazer segundos, e as doses nascem sempre em `:00.000`. Esta tela
       // é o destino do toque na notificação, então o deslocamento a esvaziaria do mesmo jeito.
       const inicio = new Date(instanteIso);
@@ -137,7 +137,7 @@ export function useDosesDoHorario(instanteIso: string) {
     async (dose: DoseDoHorario, status: IntakeStatus) => {
       await gravarDesfecho(dose, status);
       await reload();
-      // Resolvida, a dose deixa de gerar aviso — e o horário some da fila se não sobrar nenhuma.
+      // Resolvida, a dose deixa de gerar aviso - e o horário some da fila se não sobrar nenhuma.
       await reagendarTodosOsAvisos();
     },
     [reload],

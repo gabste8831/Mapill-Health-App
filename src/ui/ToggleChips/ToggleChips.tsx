@@ -19,7 +19,7 @@ export type ToggleChipsProps<TValue extends string> = {
 
 /**
  * Escolha múltipla em chips. É o irmão do `OptionGroup` para quando as respostas se somam em vez
- * de se excluírem — e é o que substitui um campo de texto sempre que a lista de respostas é
+ * de se excluírem - e é o que substitui um campo de texto sempre que a lista de respostas é
  * conhecida: quem cadastra apressado não escreve "tomar em jejum", mas reconhece e toca.
  *
  * Não tem estado de "nenhuma escolhida" a preencher: lista vazia já é resposta válida.
@@ -54,7 +54,7 @@ export function ToggleChips<TValue extends string>({
               }
               accessibilityRole="checkbox"
               accessibilityState={{ checked: isSelected }}>
-              {/* O "certinho" desambigua marcado de apenas destacado — sem ele, um chip colorido
+              {/* O "certinho" desambigua marcado de apenas destacado - sem ele, um chip colorido
                   no meio de cinzas lê tanto como escolha quanto como sugestão do app. */}
               {isSelected ? (
                 <Ionicons name="checkmark-sharp" size={14} color={cores.onPrimary} />

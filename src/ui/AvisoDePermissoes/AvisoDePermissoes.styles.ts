@@ -6,7 +6,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    *
    * Era `warningSurface`, o mesmo amarelo do alerta de recontagem de estoque e do painel de
    * permissões. O Gabriel apontou o problema em 12/09: no vocabulário do app, amarelo significa
-   * "algo está pendente" — e aqui não há pendência conhecida. Este aviso aparece **sempre**, porque
+   * "algo está pendente" - e aqui não há pendência conhecida. Este aviso aparece **sempre**, porque
    * o app não consegue saber se as três autorizações foram atendidas.
    *
    * Amarelo permanente numa tela de cadastro lê como "você deixou algo em branco", inclusive para
@@ -14,7 +14,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * mesmo erro do placar e da lista da Home, em outra forma.
    *
    * `primarySurface` é a superfície de informação do app, e o par `onPrimarySurface` dá **8,73:1**
-   * sobre ela (medido) — folgado para AA. Azul aqui também diz a coisa certa: é a cor dos caminhos,
+   * sobre ela (medido) - folgado para AA. Azul aqui também diz a coisa certa: é a cor dos caminhos,
    * e este bloco é um caminho.
    *
    * 48dp de altura mínima pelo alvo de toque, e uma linha só de conteúdo: ele mora em telas cheias
@@ -35,7 +35,7 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
      * A borda do `CardDeAtalho`, e pelo mesmo motivo: **isto é um caminho, não um conteúdo.**
      *
      * Pedida pelo Gabriel em 12/09, comparando com o atalho de estoque. Sem ela o bloco lia como
-     * um aviso a ser lido, e não como algo a ser tocado — o mesmo problema que as linhas da tela de
+     * um aviso a ser lido, e não como algo a ser tocado - o mesmo problema que as linhas da tela de
      * permissões tinham, em outra escala.
      *
      * `corDeDestaque` e não `primary`: no tema escuro `primary` é o navy de fundo, e uma borda dele
@@ -51,13 +51,13 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    *
    * Decisão do Gabriel em 12/09, e ela é coerente com tudo o que a gente corrigiu hoje: a cor só
    * afirma o que o app sabe. Enquanto o painel "Seus alarmes não vão funcionar" estiver na Home,
-   * existe pendência **provada** — e aí o vermelho é factual, não dramatização.
+   * existe pendência **provada** - e aí o vermelho é factual, não dramatização.
    *
    * Quando as verificáveis são atendidas, volta ao azul. As três restantes o app não consegue ler, e
    * manter o vermelho por elas seria pintar de erro um estado desconhecido.
    *
    * A borda é `error` cheio (6,03:1 sobre branco, medido) porque aqui ela carrega significado, e não
-   * só separação — é o mesmo critério que faz o painel crítico usar a cor cheia.
+   * só separação - é o mesmo critério que faz o painel crítico usar a cor cheia.
    */
   avisoUrgente: {
     backgroundColor: cores.errorSurface,

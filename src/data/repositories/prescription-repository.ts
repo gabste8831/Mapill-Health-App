@@ -13,12 +13,12 @@ type PrescriptionRow = SyncableRow & {
   medication_id: string;
   dose_amount: number;
   dose_unit: string;
-  /** JSON serializado de `PosologySchedule` — ver migration 008. */
+  /** JSON serializado de `PosologySchedule` - ver migration 008. */
   schedule: string;
   start_date: string;
   end_date: string | null;
   reminder_mode: string;
-  /** JSON serializado de `IntakeInstruction[]` — ver migration 011. */
+  /** JSON serializado de `IntakeInstruction[]` - ver migration 011. */
   intake_instructions: string;
   intake_note: string | null;
   notes: string | null;
@@ -65,14 +65,14 @@ function diasDepois(isoDate: string, days: number): string {
 
 /**
  * Converte o que está gravado para a forma atual do schedule. Acontece na leitura, e não numa
- * migration, porque reescrever JSON dentro do SQLite não é verificável fora do aparelho — e uma
+ * migration, porque reescrever JSON dentro do SQLite não é verificável fora do aparelho - e uma
  * função é. A linha volta pro banco já convertida na próxima gravação.
  *
  * Três formas antigas passam por aqui:
  * - `times: string[]` → `doses`, com `amount: null` (= a dose da prescrição), que é exatamente o
  *   que ela sempre significou, já que dose por horário não existia.
  * - `interval` → os horários equivalentes. Todo intervalo que o app chegou a oferecer divide o
- *   dia por igual, então "a cada 8h desde 06:00" *é* 06:00, 14:00 e 22:00 — a conversão não
+ *   dia por igual, então "a cada 8h desde 06:00" *é* 06:00, 14:00 e 22:00 - a conversão não
  *   aproxima nada. A exceção é 48h, que vira o ciclo de dois dias que ele já era.
  * - `cyclic` com `daysOn`/`daysOff` → `cycle`, com a data de início do ciclo reconstruída a
  *   partir de onde o tratamento caía dentro dele.

@@ -1,5 +1,5 @@
 /**
- * O catálogo da CMED — a base pública de medicamentos, importada uma vez na primeira abertura.
+ * O catálogo da CMED - a base pública de medicamentos, importada uma vez na primeira abertura.
  *
  * **Fica fora do modelo sincronizável de propósito.** Não tem `updated_at`, `synced_at` nem
  * `deleted_at`: não é dado do paciente, é dado de referência que vem embutido no app e é igual em
@@ -8,7 +8,7 @@
  *
  * `search` é a coluna que a busca usa: nome e princípio ativo juntos, sem acento e em maiúsculas.
  * Guardar isso pronto, em vez de normalizar a cada consulta, é o que faz a busca responder no tempo
- * de uma tecla — o `LIKE` roda sobre texto já preparado.
+ * de uma tecla - o `LIKE` roda sobre texto já preparado.
  */
 export const MIGRATION_015_CMED_CATALOG = `
 CREATE TABLE IF NOT EXISTS cmed_entries (

@@ -75,7 +75,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
    * A opção que fecha a grade ocupando a linha toda (`ultimaOcupaLinha`). `flexBasis: "100%"` é o
    * que força a quebra: com 40% ela subiria para o lado da anterior, e é justamente por baixo
-   * delas que ela precisa ficar — "Os dois" só faz sentido lido depois das duas que ele soma.
+   * delas que ela precisa ficar - "Os dois" só faz sentido lido depois das duas que ele soma.
    */
   optionLinhaInteira: {
     flexBasis: "100%",
@@ -107,7 +107,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    *
    * Existe separado de `optionLabel` porque `alignItems` não alcança o texto que quebra: o
    * container centraliza o bloco do `Text`, e não as linhas dentro dele. Com uma linha só os dois
-   * efeitos coincidem e ninguém nota; quando o rótulo quebra, cada linha volta ao padrão — à
+   * efeitos coincidem e ninguém nota; quando o rótulo quebra, cada linha volta ao padrão - à
    * esquerda. Era o que fazia "Só quando precisar", o único dos quatro rótulos da frequência longo
    * o bastante para quebrar numa ficha de 40% da largura, parecer encostado à esquerda ao lado de
    * "Todo dia".
@@ -132,15 +132,15 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * **`onPrimary` a 85%, e não `secondaryContainer`** (12/09). O token anterior é uma cor de
    * *fundo*, e o valor dele muda de papel conforme o tema: no escuro ele é `#2C374A`, um navy
    * escuro, e como o cartão selecionado é azul em todos os temas, o resultado era **2,08:1**
-   * (medido) — texto escuro sobre fundo escuro. Foi o que o Gabriel encontrou ao testar o cadastro
+   * (medido) - texto escuro sobre fundo escuro. Foi o que o Gabriel encontrou ao testar o cadastro
    * de medicação no modo escuro.
    *
    * O defeito também existia no tema claro, em 4,34:1, abaixo dos 4,5 que a WCAG pede para texto
-   * normal — só era menos visível. A lição é a mesma da tela de alertas: uma cor só está segura
+   * normal - só era menos visível. A lição é a mesma da tela de alertas: uma cor só está segura
    * quando é definida **contra a superfície em que vai pousar**, e um `container` nunca foi isso.
    *
    * Com `onPrimary` a 85% o par é sempre o mesmo par, em qualquer tema: 4,59:1 nos três de fundo
-   * azul e 6,88:1 no alto contraste, com o título cheio em 5,75:1 e 8,91:1 — a hierarquia continua
+   * azul e 6,88:1 no alto contraste, com o título cheio em 5,75:1 e 8,91:1 - a hierarquia continua
    * legível porque a diferença entre os dois textos é de peso, não de legibilidade.
    */
   optionHintSelected: {

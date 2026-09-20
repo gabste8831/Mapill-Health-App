@@ -12,7 +12,7 @@ export type DoseAAvisar = {
   scheduledFor: string;
   medicationName: string;
   /**
-   * O texto pronto da quantidade — "1 comprimido", "2 comprimidos", "7,5 ml".
+   * O texto pronto da quantidade - "1 comprimido", "2 comprimidos", "7,5 ml".
    *
    * Chega formatado em vez de o domínio flexionar aqui: quem sabe pluralizar é
    * `formatarQuantidade` (em `shared/`), que já trata o caso de abreviação não flexionar ("2 mg",
@@ -29,11 +29,11 @@ export type DoseAAvisar = {
 
 export type PlanejarAvisosInput = {
   doses: DoseAAvisar[];
-  /** Nada no passado é agendado — o sistema recusaria, e prometer o impossível é pior que calar. */
+  /** Nada no passado é agendado - o sistema recusaria, e prometer o impossível é pior que calar. */
   agora: Date;
   /**
    * Até quando agendar. A janela existe porque "3x ao dia por 6 meses" são 540 avisos para **uma**
-   * prescrição, e um paciente polimedicado passaria de 2.500 — acima do que qualquer sistema
+   * prescrição, e um paciente polimedicado passaria de 2.500 - acima do que qualquer sistema
    * operacional aceita manter pendente. A janela é reabastecida a cada abertura do app.
    */
   ate: Date;
@@ -42,7 +42,7 @@ export type PlanejarAvisosInput = {
 /**
  * Minutos de tolerância para o aviso que "acabou de passar".
  *
- * Sem isso, reabrir o app às 08:00:30 cancelaria e não reagendaria o aviso das 08:00 — a dose
+ * Sem isso, reabrir o app às 08:00:30 cancelaria e não reagendaria o aviso das 08:00 - a dose
  * ficaria sem lembrete nenhum justamente no minuto em que ele importa. Com a folga, o aviso é
  * reagendado para daqui a instantes e ainda chega.
  */
@@ -53,7 +53,7 @@ const TOLERANCIA_DE_ATRASO_EM_MINUTOS = 2;
  *
  * Exportada porque a tela do alarme precisa dispensar da bandeja **o aviso daquele horário**, e
  * para isso tem de nomeá-lo. Reescrever o formato lá criaria um segundo lugar onde a chave é
- * construída, e no dia em que um mudasse a dispensa erraria o alvo em silêncio — sem erro de
+ * construída, e no dia em que um mudasse a dispensa erraria o alvo em silêncio - sem erro de
  * compilação, sem teste falhando, só o som duplicado voltando.
  */
 export function chaveDoHorario(scheduledFor: string): string {
@@ -62,7 +62,7 @@ export function chaveDoHorario(scheduledFor: string): string {
 
 
 /**
- * O canal que o horário dispara — **um só**, sempre.
+ * O canal que o horário dispara - **um só**, sempre.
  *
  * Duas doses no mesmo minuto, uma marcada como alarme e outra como notificação, não viram dois
  * avisos: seriam dois toques seguidos dizendo a mesma coisa. O horário sobe para o alarme, porque
@@ -72,7 +72,7 @@ export function chaveDoHorario(scheduledFor: string): string {
  * ## Por que "Os dois" deixou de existir
  *
  * A opção emitia um alarme **e** uma notificação para o mesmo horário, e chegou a funcionar. O
- * problema não era emitir — era manter os dois consistentes: dois avisos vivos, cada um com botão
+ * problema não era emitir - era manter os dois consistentes: dois avisos vivos, cada um com botão
  * de confirmar, e a mesma dose podendo ser respondida por qualquer um deles. Sincronizar uma
  * Activity de tela cheia com a bandeja do sistema em tempo real é frágil por construção, e o teste
  * em aparelho (05/09) mostrou o preço: a dose confirmada pela notificação era descontada de novo
@@ -80,7 +80,7 @@ export function chaveDoHorario(scheduledFor: string): string {
  *
  * A redundância que a opção prometia já existe sem ela: o alarme é criado com `ongoing: true`, então
  * ele **fica** na bandeja depois de tocar. O que "Os dois" acrescentava era um segundo aviso, não a
- * permanência — e cada caminho a mais para confirmar a mesma dose é um caminho a mais para
+ * permanência - e cada caminho a mais para confirmar a mesma dose é um caminho a mais para
  * divergir.
  */
 function modoDoHorario(modos: ReminderMode[]): "alarm" | "notification" | null {
@@ -96,11 +96,11 @@ function modoDoHorario(modos: ReminderMode[]): "alarm" | "notification" | null {
  *
  * **Um aviso por horário, e não por dose.** Quem toma quatro remédios às 08:00 receberia quatro
  * notificações idênticas em sequência, e o quarto aviso ensina a ignorar o primeiro. O aviso lista
- * o que há para tomar, e a tela do horário — aberta ao tocar nele — é onde cada dose se resolve
+ * o que há para tomar, e a tela do horário - aberta ao tocar nele - é onde cada dose se resolve
  * individualmente.
  *
  * Regra pura: nenhuma dependência de Expo, banco ou relógio do sistema (o `agora` é injetado).
- * É o que permite provar o agendamento em Node, sem aparelho — a mesma abordagem de
+ * É o que permite provar o agendamento em Node, sem aparelho - a mesma abordagem de
  * `generate-dose-schedules`.
  */
 export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] {
@@ -131,14 +131,14 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
     /**
      * O instante do aviso **nunca é no passado**, mesmo quando a dose já venceu.
      *
-     * A tolerância acima deixa passar a dose que acabou de vencer — e ela existe por um bom motivo:
+     * A tolerância acima deixa passar a dose que acabou de vencer - e ela existe por um bom motivo:
      * reabrir o app às 08:00:30 não pode cancelar o aviso das 08:00 e deixar a dose sem lembrete
      * nenhum no minuto em que ele importa. Mas o instante cru já venceu, e o Notifee **recusa** um
      * gatilho no passado com `trigger timestamp date must be in the future`.
      *
      * O erro derrubava o reagendamento **inteiro**: uma exceção no meio do laço, e nenhum dos
      * avisos seguintes era agendado. Foi o que apareceu em aparelho em 09/09, junto do alarme
-     * tocando duas vezes — o app tentava reagendar a dose que acabara de tocar, falhava, e o
+     * tocando duas vezes - o app tentava reagendar a dose que acabara de tocar, falhava, e o
      * estado do sistema ficava pela metade.
      *
      * `agora + 1s` é o piso: perto o bastante para o aviso tolerado ainda chegar "agora", e no
@@ -165,13 +165,13 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
     /**
      * O alarme diz **como se desliga**; a notificação comum não precisa.
      *
-     * O alarme toca em loop até alguém responder, e a resposta mora na tela cheia — que nem sempre
+     * O alarme toca em loop até alguém responder, e a resposta mora na tela cheia - que nem sempre
      * irrompe: com o aparelho em uso, o Android rebaixa o full-screen intent e o que aparece é só
      * esta notificação. Quem a recebe vê o remédio e a dose, e nada que diga onde parar o som.
      *
      * `ongoing: true` já impede que ela saia com um deslize (ver `notifee-gateway`), então ninguém
      * fica com o alarme tocando e sem caminho. Mas não sair não é o mesmo que **saber o que
-     * fazer** — e essa frase é a diferença entre tocar na notificação e ir procurar no app.
+     * fazer** - e essa frase é a diferença entre tocar na notificação e ir procurar no app.
      *
      * A notificação comum fica sem ela de propósito: ali estão os botões "Tomei" e "Pulei", e o
      * caminho já é visível.
@@ -183,17 +183,17 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
       chave: chaveDoHorario(scheduledFor),
       quando,
       /**
-       * **O instante da dose, que nem sempre é o de tocar** — e confundir os dois esvaziava a tela.
+       * **O instante da dose, que nem sempre é o de tocar** - e confundir os dois esvaziava a tela.
        *
        * `quando` passa pelo piso de `pisoDoGatilho` acima: uma dose que já venceu, ou que vence em
        * menos de um segundo, é agendada para "agora + 1s" em vez do horário dela. Aí os dois
-       * divergem — `10:31:00.000` na grade, `10:31:00.500` no gatilho — e a tela do alarme, que
+       * divergem - `10:31:00.000` na grade, `10:31:00.500` no gatilho - e a tela do alarme, que
        * busca doses numa janela de 60 s a partir do que a notificação carrega, começava a procurar
        * **depois** da dose que a originou. Lista vazia, tela azul sem remédio nenhum.
        *
        * Foi o defeito medido em 15/09, e ele só aparecia em teste de intervalo curto: com a dose
        * daqui a horas, `quando` e `scheduledFor` coincidem e nada denuncia a diferença. O Gabriel
-       * cadastrava sempre para um minuto depois — exatamente a janela em que o piso age.
+       * cadastrava sempre para um minuto depois - exatamente a janela em que o piso age.
        *
        * O campo já existia para isto, e o lembrete adiado já o preenchia pelo mesmo motivo (ver
        * `responder-aviso.ts`). O que faltava era a grade fazer o mesmo: a premissa de que "nos
@@ -203,7 +203,7 @@ export function planejarAvisosDeDose(input: PlanejarAvisosInput): AvisoDeDose[] 
       /**
        * O título diz **o que é**, e o corpo diz **o que tomar**.
        *
-       * Antes o título era `08:00 — Losartana`, o que repetia duas informações que o sistema já
+       * Antes o título era `08:00 - Losartana`, o que repetia duas informações que o sistema já
        * mostra: a hora aparece no canto da própria notificação, e o nome do remédio reaparecia na
        * linha de baixo. Sobrava um aviso que dizia três vezes a mesma coisa e nenhuma vez o que
        * ele queria de quem estava lendo.

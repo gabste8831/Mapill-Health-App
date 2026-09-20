@@ -13,7 +13,7 @@ import { criarEstilos } from "./ContaScreen.styles";
 export type ContaScreenProps = {
   /** E-mail da conta Google, ou `null` quando o app está sendo usado sem conta. */
   accountEmail: string | null;
-  /** `false` num build que saiu sem as credenciais do Supabase — ver `LoginScreen`. */
+  /** `false` num build que saiu sem as credenciais do Supabase - ver `LoginScreen`. */
   googleDisponivel: boolean;
   onBack: () => void;
   onOpenTerms: () => void;
@@ -40,7 +40,7 @@ function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
   const cores = useCores();
 
   return (
-    // Linha de largura total: escurece, mas não encolhe — escalar faria o texto vizinho tremer.
+    // Linha de largura total: escurece, mas não encolhe - escalar faria o texto vizinho tremer.
     <Pressable style={estadoDePressao(styles.row)} onPress={onPress} accessibilityRole="button">
       <View style={styles.rowIcon}>{icon}</View>
       <View style={styles.rowText}>
@@ -56,7 +56,7 @@ function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
  * Tudo que é da **conta e do dado**, numa tela só: vincular, ler o que foi consentido e apagar.
  *
  * Estava espalhado em três seções dentro de Ajustes, no meio de coisas de uso diário. Juntar não é
- * arrumação: são as decisões das quais não se volta — apagar não tem desfazer, e o consentimento é
+ * arrumação: são as decisões das quais não se volta - apagar não tem desfazer, e o consentimento é
  * a base legal do app inteiro. Tirá-las do caminho de quem só queria editar a ficha reduz o toque
  * acidental, e dá a elas o espaço de explicar o que fazem.
  *
@@ -84,7 +84,7 @@ export function ContaScreen({
    * Gera o arquivo e abre a folha de compartilhamento do sistema.
    *
    * **Compartilhar, e não "salvar em Downloads".** O app não escolhe o destino: quem escolhe é a
-   * pessoa, no menu do Android — Drive, e-mail para si mesma, WhatsApp, arquivos locais. Escolher
+   * pessoa, no menu do Android - Drive, e-mail para si mesma, WhatsApp, arquivos locais. Escolher
    * por ela criaria um arquivo com dado de saúde num lugar que ela talvez não esperasse.
    */
   async function exportar() {
@@ -122,8 +122,8 @@ export function ContaScreen({
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* A abertura da tela, antes da primeira seção.
 
-            Sem ela a tela começava direto num rótulo de seção em maiúsculas, e o assunto — que é
-            delicado: conta, privacidade, apagar dados — chegava sem uma frase que o enquadrasse.
+            Sem ela a tela começava direto num rótulo de seção em maiúsculas, e o assunto - que é
+            delicado: conta, privacidade, apagar dados - chegava sem uma frase que o enquadrasse.
             Diz o que se resolve aqui, e a cor tira o topo do aspecto de lista uniforme, como a
             faixa do hero faz na tela de Ajustes. */}
         <View style={styles.intro}>

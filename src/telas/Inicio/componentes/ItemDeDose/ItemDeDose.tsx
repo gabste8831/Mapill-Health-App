@@ -88,12 +88,12 @@ export function ItemDeDose({
   const estiloAnimado = useAnimatedStyle(() => ({ opacity: opacidade.value }));
 
   /**
-   * Os botões só **entram** quando a dose acaba de se tornar acionável — nunca quando ela já
+   * Os botões só **entram** quando a dose acaba de se tornar acionável - nunca quando ela já
    * estava assim e a linha apenas re-renderizou.
    *
    * `FadeIn` parte de `opacity: 0`. Se um re-render reapresenta esse nó ao Reanimated no meio da
    * animação, ele pode ficar preso no valor inicial, e aí "Pular" e "Confirmar" somem de uma linha
-   * que continua ali — os dois alvos mais tocados do app, invisíveis. Foi o mesmo mecanismo que
+   * que continua ali - os dois alvos mais tocados do app, invisíveis. Foi o mesmo mecanismo que
    * esvaziava os cartões da Home (ver `entradaDaLinha` em `InicioScreen`), e aqui o gatilho é o
    * mesmo: trocar o esquema de cores em Ajustes recria o tema inteiro e re-renderiza a tela toda.
    *
@@ -106,23 +106,23 @@ export function ItemDeDose({
    *
    * O estado guarda a **decisão**, e não o valor anterior. Guardar o anterior e comparar no render
    * não funcionaria aqui: o `set` durante o render faz o React repetir o render antes de pintar, e
-   * na repetição o anterior já é igual ao atual — a animação legítima seria descartada no mesmo
+   * na repetição o anterior já é igual ao atual - a animação legítima seria descartada no mesmo
    * quadro em que nasceu. Com a decisão guardada, ela sobrevive ao re-render e chega à tela.
    *
    * Montada já acionável (o caso comum: a Home abre com uma dose de agora), nasce `false` e não
-   * anima, que é o certo — ali os botões não "chegaram", eles sempre estiveram lá.
+   * anima, que é o certo - ali os botões não "chegaram", eles sempre estiveram lá.
    */
   const [acabouDeFicarAcionavel, setAcabouDeFicarAcionavel] = useState(false);
   /**
    * O valor do render anterior. Começa igual ao atual porque **montar não é "acabar de ficar"**:
    * a linha que nasce acionável já mostra os botões desde o primeiro quadro, e ali eles não
-   * chegaram — sempre estiveram lá.
+   * chegaram - sempre estiveram lá.
    */
   const [acionavelAntes, setAcionavelAntes] = useState(acionavel);
   if (acionavelAntes !== acionavel) {
     setAcionavelAntes(acionavel);
     // Só a subida anima. Na descida (a dose foi respondida) os botões saem, e não há entrada a
-    // encenar — mas a decisão precisa voltar a `false`, senão a próxima subida encontraria a
+    // encenar - mas a decisão precisa voltar a `false`, senão a próxima subida encontraria a
     // marca já levantada e não animaria.
     setAcabouDeFicarAcionavel(acionavel);
   }
@@ -149,7 +149,7 @@ export function ItemDeDose({
       <AnimatedPressable
         /**
          * O `done` saiu da lista: a opacidade do estado resolvido agora vem de `estiloAnimado`, e
-         * manter as duas faria a linha resolvida chegar a 0.25 — o estilo estático multiplicando o
+         * manter as duas faria a linha resolvida chegar a 0.25 - o estilo estático multiplicando o
          * valor animado.
          *
          * O toque só responde quando há o que tocar: linha não resolvida não navega para lugar
@@ -167,7 +167,7 @@ export function ItemDeDose({
            * olho espera de um toque.
            *
            * Sem `scale`: esta é uma linha de largura total, e encolhê-la faz o texto vizinho
-           * parecer tremer (ver `pressedScale`). E só quando há o que tocar — linha não resolvida
+           * parecer tremer (ver `pressedScale`). E só quando há o que tocar - linha não resolvida
            * não navega para lugar nenhum, e responder ao toque prometeria uma ação que não existe.
            */
           pressed && resolvida && styles.pressionada,
@@ -211,7 +211,7 @@ export function ItemDeDose({
         /**
          * Os botões **entram** quando a dose se torna acionável.
          *
-         * Uma dose vira "É AGORA" sozinha, com a tela aberta e sem ninguém tocar em nada — é o
+         * Uma dose vira "É AGORA" sozinha, com a tela aberta e sem ninguém tocar em nada - é o
          * relógio que muda o estado. Sem transição, dois botões simplesmente aparecem no meio de
          * uma linha que estava quieta, e o movimento mais brusco da tela seria justamente o que
          * ninguém pediu. `FadeIn` faz a mesma aparição ser lida como algo que chegou.
@@ -227,7 +227,7 @@ export function ItemDeDose({
               : FadeIn.duration(ACOMODAR_MS)
           }>
           {/* "Pular" à esquerda e "Confirmar" à direita: o destrutivo-ish primeiro e a ação
-              esperada no canto onde o polegar chega — a mesma ordem de Cancelar/OK que o sistema
+              esperada no canto onde o polegar chega - a mesma ordem de Cancelar/OK que o sistema
               usa, e que a mão já conhece sem precisar ler. */}
           {/* `hitSlop` vertical devolve os 44 de alvo que a caixa de 36 não tem mais: estes são os
               dois alvos mais tocados do app, e errar entre eles falseia o registro clínico. */}
@@ -241,7 +241,7 @@ export function ItemDeDose({
           </Pressable>
           <Pressable
             /**
-             * Estes dois são os alvos mais tocados do app, e eram os únicos sem resposta ao toque —
+             * Estes dois são os alvos mais tocados do app, e eram os únicos sem resposta ao toque -
              * o mesmo defeito que a varredura de 31/08 corrigiu no kit e não alcançou aqui, porque
              * a tela desenha os próprios botões (frente #3 do passe).
              *

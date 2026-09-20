@@ -8,13 +8,13 @@ import { criarEstilos } from "./Checkbox.styles";
 export type CheckboxProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
-  /** Texto simples ou JSX (ex: com um trecho em negrito/link) — a área de toque cobre tudo. */
+  /** Texto simples ou JSX (ex: com um trecho em negrito/link) - a área de toque cobre tudo. */
   label: ReactNode;
   accessibilityLabel: string;
 };
 
 /**
- * Checkbox padrão do app — toda a linha (quadrado + label) é clicável, não só o quadrado, pra
+ * Checkbox padrão do app - toda a linha (quadrado + label) é clicável, não só o quadrado, pra
  * facilitar o toque (relevante pro público idoso/polimedicado do Mapill).
  */
 export function Checkbox({ checked, onChange, label, accessibilityLabel }: CheckboxProps) {

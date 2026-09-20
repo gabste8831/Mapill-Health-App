@@ -2,7 +2,7 @@ import { supabase } from "./supabase-client";
 import { TABELAS_SINCRONIZAVEIS, type TabelaSincronizavel } from "./tabelas-sincronizaveis";
 
 /**
- * Apaga **de verdade** as linhas do usuário na nuvem — `DELETE`, não `deleted_at`.
+ * Apaga **de verdade** as linhas do usuário na nuvem - `DELETE`, não `deleted_at`.
  *
  * O soft delete é a ferramenta certa para a exclusão do dia a dia, em que a linha precisa
  * sobreviver para contar ao outro aparelho que morreu. Aqui é outra coisa: é o direito de exclusão
@@ -18,7 +18,7 @@ import { TABELAS_SINCRONIZAVEIS, type TabelaSincronizavel } from "./tabelas-sinc
  * explícito está aqui de qualquer forma, porque segurança que depende de uma camada só é
  * segurança que ninguém revisou.
  *
- * **Não lança.** Sem conta vinculada, ou offline, não há nuvem a limpar — e nos dois casos o
+ * **Não lança.** Sem conta vinculada, ou offline, não há nuvem a limpar - e nos dois casos o
  * apagamento local precisa acontecer do mesmo jeito. Falhar aqui e abortar tudo deixaria a pessoa
  * sem conseguir apagar nem o que está no próprio aparelho.
  */
@@ -43,7 +43,7 @@ export async function apagarNaNuvem(tabelasDesejadas: readonly string[]): Promis
     return true;
   } catch (cause) {
     /**
-     * Registrado, e o **fracasso é devolvido** — não engolido.
+     * Registrado, e o **fracasso é devolvido** - não engolido.
      *
      * Seguir em frente continua certo: travar o apagamento local por causa da nuvem deixaria os
      * dados nos dois lugares. O que mudou em 14/09 é quem sabe que a nuvem não foi limpa.
@@ -51,7 +51,7 @@ export async function apagarNaNuvem(tabelasDesejadas: readonly string[]): Promis
      * O texto que estava aqui dizia que "as linhas locais são apagadas de vez, então a próxima
      * sincronização não as ressuscita". **Isso estava errado:** a marca d'água é apagada junto
      * (`SQL_LIMPAR_MARCA_DAGUA`), e sem ela o pull seguinte baixa o servidor inteiro de volta. Com a
-     * nuvem intacta, o botão de apagar virava um apagamento temporário — a pessoa via tudo sumir e
+     * nuvem intacta, o botão de apagar virava um apagamento temporário - a pessoa via tudo sumir e
      * voltar, que é o que o comentário de `eraseHealthData` chama de a pior coisa que um botão de
      * exclusão pode fazer.
      *

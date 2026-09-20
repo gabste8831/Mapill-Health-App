@@ -1,6 +1,6 @@
 import type { SyncableEntity } from "./syncable";
 
-/** Compareceu ou não. Sem `null` aqui — a ausência de resposta é a ausência do próprio campo. */
+/** Compareceu ou não. Sem `null` aqui - a ausência de resposta é a ausência do próprio campo. */
 export type AppointmentOutcome = "attended" | "missed";
 
 /**
@@ -11,7 +11,7 @@ export const APPOINTMENT_REMINDER_LEAD_DAYS: readonly number[] = [1, 3, 7];
 
 export type Appointment = SyncableEntity & {
   /**
-   * O que é o compromisso, em texto livre — "Consulta com cardiologista", "Coleta de sangue",
+   * O que é o compromisso, em texto livre - "Consulta com cardiologista", "Coleta de sangue",
    * "Sessão de terapia".
    *
    * Deixou de ser lista fechada em 2026-08-24: a lista real não fecha, e cada opção que falta
@@ -21,9 +21,9 @@ export type Appointment = SyncableEntity & {
   title: string;
   /** Instante do compromisso, em ISO. Data e hora juntas: consulta sem hora não é compromisso. */
   scheduledFor: string;
-  /** Onde é — "Clínica São José, sala 12". Opcional: nem todo exame tem endereço útil. */
+  /** Onde é - "Clínica São José, sala 12". Opcional: nem todo exame tem endereço útil. */
   location: string | null;
-  /** Nome do profissional — "Dra. Ana Martins, cardiologista". */
+  /** Nome do profissional - "Dra. Ana Martins, cardiologista". */
   professional: string | null;
   /** Preparo e o que levar: "jejum de 12h", "levar exames antigos". Escrita **antes**. */
   notes: string | null;
@@ -36,7 +36,7 @@ export type Appointment = SyncableEntity & {
    */
   reminderLeadDays: number | null;
   /**
-   * Avisar também no próprio dia. Independente da antecedência de propósito — são pedidos
+   * Avisar também no próprio dia. Independente da antecedência de propósito - são pedidos
    * diferentes, e quem marca consulta costuma querer os dois: uma semana antes para se organizar,
    * e no dia para não esquecer o que já estava planejado.
    */
@@ -49,7 +49,7 @@ export type Appointment = SyncableEntity & {
    */
   outcome: AppointmentOutcome | null;
   /**
-   * O que saiu dali — "médico pediu hemograma", "remarcado para o dia 12".
+   * O que saiu dali - "médico pediu hemograma", "remarcado para o dia 12".
    *
    * Separado de `notes` porque são de tempos diferentes: `notes` é preparação, escrita antes, e
    * perde utilidade quando o compromisso passa; esta nasce depois, e é a que vale a longo prazo
@@ -58,7 +58,7 @@ export type Appointment = SyncableEntity & {
   outcomeNotes: string | null;
 };
 
-/** Se o compromisso tem algum aviso pedido — qualquer um dos dois canais. */
+/** Se o compromisso tem algum aviso pedido - qualquer um dos dois canais. */
 export function hasReminder(appointment: Appointment): boolean {
   return appointment.reminderLeadDays !== null || appointment.reminderOnDay;
 }

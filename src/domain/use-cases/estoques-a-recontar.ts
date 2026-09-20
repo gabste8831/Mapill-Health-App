@@ -2,7 +2,7 @@
  * Um estoque controlado, com a data da última vez que alguém conferiu a caixa de verdade.
  *
  * "Conferir" é só a recontagem manual (`manual_recount`). Baixa por dose e reposição mexem no
- * número sem que ninguém tenha olhado dentro da caixa — e é justamente a distância entre o número
+ * número sem que ninguém tenha olhado dentro da caixa - e é justamente a distância entre o número
  * do app e o que está lá que este lembrete existe para fechar.
  */
 export type EstoqueParaConferir = {
@@ -14,10 +14,10 @@ export type EstoqueParaConferir = {
   /**
    * O marco zero de quem nunca recontou.
    *
-   * É o `updatedAt` do estoque, e não uma data de criação — o schema não tem `created_at`, e
+   * É o `updatedAt` do estoque, e não uma data de criação - o schema não tem `created_at`, e
    * acrescentá-lo exigiria uma migration para um lembrete que tolera aproximação. A diferença
    * aparece em um caso: mexer no estoque (repor, tomar dose) empurra o relógio deste lembrete para
-   * frente. É aceitável, e até desejável — quem acabou de repor olhou a caixa há pouco.
+   * frente. É aceitável, e até desejável - quem acabou de repor olhou a caixa há pouco.
    */
   referencia: string;
 };
@@ -38,10 +38,10 @@ export type EstoqueARecontar = {
 /**
  * De quanto em quanto tempo vale perguntar.
  *
- * Trinta dias, e não sete. O erro que este lembrete corrige — o app achar que tem 20 comprimidos e
- * a caixa ter 17 — se acumula devagar: nasce de uma dose tomada sem confirmar, de um comprimido
+ * Trinta dias, e não sete. O erro que este lembrete corrige - o app achar que tem 20 comprimidos e
+ * a caixa ter 17 - se acumula devagar: nasce de uma dose tomada sem confirmar, de um comprimido
  * que caiu, de uma cartela que veio com um a menos. Perguntar toda semana transformaria uma
- * conferência útil numa tarefa doméstica, e a resposta viraria automática — que é exatamente o
+ * conferência útil numa tarefa doméstica, e a resposta viraria automática - que é exatamente o
  * oposto de conferir.
  *
  * Um mês também casa com o ritmo de quem compra caixa de 30: a pergunta chega perto de quando a
@@ -56,7 +56,7 @@ const DIA_EM_MS = 24 * 60 * 60_000;
  *
  * **É lembrete, não cobrança.** O plano registra isso como não obrigatório (decisão nº6): o app
  * funciona igual se ninguém nunca recontar, e o número dele continua sendo a melhor estimativa
- * disponível. O que a conferência dá é confiança na previsão de esgotamento — e essa é a única
+ * disponível. O que a conferência dá é confiança na previsão de esgotamento - e essa é a única
  * coisa que ela promete.
  *
  * Regra pura, com `agora` injetado: verificável em Node, sem aparelho.

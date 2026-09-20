@@ -34,12 +34,12 @@ function contar(prescription: SchedulablePrescription, from: Date, fimInclusivo:
 }
 
 /**
- * Quantas doses o prazo perde por o tratamento ter sido cadastrado com o dia já em curso — e até
+ * Quantas doses o prazo perde por o tratamento ter sido cadastrado com o dia já em curso - e até
  * quando ele precisaria ir para entregar o tratamento inteiro.
  *
  * O problema que isto resolve: "3 vezes ao dia por 7 dias" é uma prescrição de **21 doses**, mas
  * quem cadastra às 15h já perdeu as duas primeiras de hoje. Terminando na mesma data, o
- * tratamento entrega 19 — e uma pessoa tomando antibiótico encerra o ciclo antes da hora sem
+ * tratamento entrega 19 - e uma pessoa tomando antibiótico encerra o ciclo antes da hora sem
  * nada na tela ter avisado. Em vitamina não muda nada; em antimicrobiano, é o caminho da
  * resistência bacteriana.
  *
@@ -61,14 +61,14 @@ export function doseFaltanteDoPrazo(
   const fim = parseIsoDay(prescription.endDate);
   if (inicio === null || fim === null) return null;
 
-  // O nominal parte do começo do primeiro dia — é o tratamento como a receita o descreve, sem o
+  // O nominal parte do começo do primeiro dia - é o tratamento como a receita o descreve, sem o
   // recorte de ter sido cadastrado no meio do dia.
   const nominais = contar(prescription, inicio, fim);
   const planejadas = contar(prescription, now, fim);
   if (nominais === 0 || planejadas >= nominais) return null;
 
   // Um dia de cada vez em vez de calcular: com semana e ciclo, "quantos dias faltam" não é
-  // divisão — pode haver pausa no meio, e só o gerador sabe onde.
+  // divisão - pode haver pausa no meio, e só o gerador sabe onde.
   for (let dias = 1; dias <= MAX_DIAS_DE_EXTENSAO; dias += 1) {
     const candidato = new Date(fim.getFullYear(), fim.getMonth(), fim.getDate() + dias);
     if (contar(prescription, now, candidato) >= nominais) {

@@ -6,7 +6,7 @@
  * o aviso da dose carregar texto que não tem nada a ver com aquele momento.
  *
  * `renewal_reminder_lead_days` fica nulo por padrão porque querer o aviso é decisão, não
- * consequência de ter anexado a receita — a de um antibiótico de 7 dias vence sem que isso
+ * consequência de ter anexado a receita - a de um antibiótico de 7 dias vence sem que isso
  * importe.
  */
 export const MIGRATION_013_PRESCRIPTION_INTAKE_NOTE_AND_RENEWAL = `

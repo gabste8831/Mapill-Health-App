@@ -6,7 +6,7 @@ import { spacing, useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./TextField.styles";
 
 export type TextFieldProps = Omit<TextInputProps, "style"> & {
-  /** Vazia (`""`) omite a linha de label — útil quando o campo já está rotulado por fora (ex: alergias). */
+  /** Vazia (`""`) omite a linha de label - útil quando o campo já está rotulado por fora (ex: alergias). */
   label?: string;
   required?: boolean;
   /**
@@ -21,7 +21,7 @@ export type TextFieldProps = Omit<TextInputProps, "style"> & {
 
 /**
  * Campo de texto padrão do app: label + input + (opcional) mensagem de erro, sempre no mesmo
- * layout. Altura, borda e cores vêm de `TextField.styles.ts` — mudar ali afeta todo o app;
+ * layout. Altura, borda e cores vêm de `TextField.styles.ts` - mudar ali afeta todo o app;
  * `style`/`containerStyle` ajustam só uma instância quando precisar.
  */
 export const TextField = forwardRef<TextInput, TextFieldProps>(
@@ -44,7 +44,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
             error ? styles.inputError : null,
             style,
           ]}
-          // Mais sutil que o label (onSurfaceVariant) de propósito — o placeholder é uma dica,
+          // Mais sutil que o label (onSurfaceVariant) de propósito - o placeholder é uma dica,
           // não deve competir visualmente com o texto que o paciente já preencheu. Mas sem
           // opacidade: a 0.6 ele dava **2.38:1**, ilegível para quem tem baixa visão, e a dica de
           // um campo de dose é onde isso menos pode acontecer. Em cheio dá 5.09:1 e continua
@@ -52,7 +52,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
           placeholderTextColor={cores.outline}
           multiline={multiline}
           /**
-           * **A tecla do teclado fecha o teclado** — o gesto que faltava, junto do toque em área
+           * **A tecla do teclado fecha o teclado** - o gesto que faltava, junto do toque em área
            * vazia e do arrastar a lista.
            *
            * Só em campo de uma linha: em `multiline` o Enter é quebra de linha, e trocar isso
@@ -71,7 +71,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
 );
 TextField.displayName = "TextField";
 
-// Só o ajuste de altura/alinhamento específico de multiline — não vale a pena estar no
+// Só o ajuste de altura/alinhamento específico de multiline - não vale a pena estar no
 // TextField.styles.ts compartilhado porque é condicional, não um "padrão" fixo.
 const localStyles = StyleSheet.create({
   multiline: {

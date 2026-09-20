@@ -20,7 +20,7 @@ type LoginScreenProps = {
 };
 
 // Só existe um único caminho de conta (Google), então não faz sentido pedir e-mail/senha
-// próprios do app — quem não quer login/backup usa "Continuar sem login" direto.
+// próprios do app - quem não quer login/backup usa "Continuar sem login" direto.
 export function LoginScreen({
   onAuthenticated,
   onContinueWithoutLogin,
@@ -68,7 +68,7 @@ export function LoginScreen({
 
         <View style={styles.footer}>
           <View style={styles.footerDivider} />
-          {/* Dizia que o login habilita backup e sincronização — e não habilita, porque não há
+          {/* Dizia que o login habilita backup e sincronização - e não habilita, porque não há
               sincronização ainda. Num app de medicação, prometer cópia inexistente faz alguém
               trocar de aparelho confiando e perder o histórico. O texto descreve o que existe. */}
           <Text style={styles.footerCaption}>

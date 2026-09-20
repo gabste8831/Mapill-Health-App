@@ -31,7 +31,7 @@ export type AccordionProps = {
   /**
    * Ajuste do bloco externo, para telas onde o fundo padrão não contrasta.
    *
-   * O padrão é `surfaceContainerLow`, que fica quase igual ao fundo da tela — de propósito nos
+   * O padrão é `surfaceContainerLow`, que fica quase igual ao fundo da tela - de propósito nos
    * textos longos (termos, consentimento), onde o acordeão é parágrafo e não cartão. Numa tela de
    * cartões ele desaparece, e aí quem usa passa a superfície de cartão por aqui.
    */
@@ -39,7 +39,7 @@ export type AccordionProps = {
 };
 
 /**
- * O tempo da abertura — **zero quando a pessoa pediu menos movimento**.
+ * O tempo da abertura - **zero quando a pessoa pediu menos movimento**.
  *
  * Com duração zero o bloco aparece aberto em vez de descer: o estado final é o mesmo, sem o
  * movimento que para quem tem enjoo vestibular é sintoma e não estilo.
@@ -74,7 +74,7 @@ export function Accordion({
    * fade: a altura saltava de uma vez e só a opacidade animava, o que lê como pulo. O conteúdo
    * fica sempre montado e é recortado por `overflow: hidden`.
    *
-   * Enquanto a medida não chega, `null` — e aí o clipe não impõe altura nenhuma, deixando o
+   * Enquanto a medida não chega, `null` - e aí o clipe não impõe altura nenhuma, deixando o
    * conteúdo se medir sozinho. Fixar `0` antes da primeira medição faria o bloco abrir vazio no
    * primeiro toque, que é o que acontecia quando o conteúdo montava depois do layout.
    */
@@ -130,7 +130,7 @@ export function Accordion({
           um pai de altura 0 não o comprima e estrague a medida.
 
           `collapsable={false}` é o que faz o `ScrollView` pai enxergar a mudança: sem ele o Android
-          funde a árvore e o `contentSize` do scroll não é recalculado quando o bloco cresce — a
+          funde a árvore e o `contentSize` do scroll não é recalculado quando o bloco cresce - a
           rolagem descia mas não subia mais, que era o travamento em "Como funcionam os alertas". */}
       <Animated.View style={[styles.bodyClip, bodyStyle]} collapsable={false}>
         <View style={styles.bodyMeasure} onLayout={measureContent}>

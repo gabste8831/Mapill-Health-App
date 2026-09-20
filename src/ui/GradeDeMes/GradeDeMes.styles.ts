@@ -6,7 +6,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * Faixa de destaque, como o topo de Ajustes: separa o calendário da lista sem precisar de
    * borda. `superficieDeDestaque`, e não `primary` direto: no tema escuro esse bloco é o que
    * ocupa a maior fatia de tela do app inteiro pintado de uma cor só, e um fundo cinza discreto
-   * ali evita competir com o resto da paleta escura — ver o cabeçalho de `superficieDeDestaque`
+   * ali evita competir com o resto da paleta escura - ver o cabeçalho de `superficieDeDestaque`
    * em `shared/theme/colors.ts`. No tema claro o valor é idêntico ao `primary` de sempre.
    */
   container: {
@@ -50,7 +50,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flexDirection: "row",
     flexWrap: "wrap",
   },
-  /** Sete colunas exatas. `14.2857%` é 100/7 — porcentagem em vez de largura fixa para a grade
+  /** Sete colunas exatas. `14.2857%` é 100/7 - porcentagem em vez de largura fixa para a grade
    *  acompanhar telas estreitas sem estourar para uma oitava coluna. */
   celula: {
     width: "14.2857%",
@@ -72,7 +72,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   numeroSelecionado: {
     backgroundColor: cores.onSuperficieDeDestaque,
   },
-  /** O realce do toque, no círculo — o ripple do Android desenharia na célula, que é quadrada. */
+  /** O realce do toque, no círculo - o ripple do Android desenharia na célula, que é quadrada. */
   numeroPressionado: {
     opacity: 0.5,
   },
@@ -84,7 +84,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * O número dentro do círculo branco: **estilo completo**, e não só a cor por cima do `numero`.
    *
    * Era um `color` solto num array (`[numero, selecionado && numeroTextoSelecionado]`), e no dia
-   * de hoje selecionado o resultado saía branco sobre branco — uma bolinha lisa, sem número. Um
+   * de hoje selecionado o resultado saía branco sobre branco - uma bolinha lisa, sem número. Um
    * estilo inteiro não depende de qual condição do array venceu: se o círculo está branco, o texto
    * é azul, e não há combinação de flags que produza outra coisa.
    */
@@ -107,7 +107,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   pontoDeCompromisso: {
     backgroundColor: cores.onSuperficieDeDestaque,
   },
-  /** A dose é rotina, então fica mais discreta — senão o mês inteiro vira uma parede de pontos. */
+  /** A dose é rotina, então fica mais discreta - senão o mês inteiro vira uma parede de pontos. */
   pontoDeDose: {
     backgroundColor: withOpacity(cores.onSuperficieDeDestaque, 0.45),
   },

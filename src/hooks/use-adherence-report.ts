@@ -20,7 +20,7 @@ const persistsLocally = Platform.OS !== "web";
  * Os períodos que a tela oferece, em dias.
  *
  * Três, e não um seletor de datas: escolher "de 12/07 a 09/08" é trabalho, e ninguém tem essa
- * pergunta. As perguntas reais são "como foi esta semana", "como foi o mês" e "como tem sido" — e
+ * pergunta. As perguntas reais são "como foi esta semana", "como foi o mês" e "como tem sido" - e
  * 7, 30 e 90 dias as respondem. Noventa é o limite útil: além disso a agenda de doses do banco
  * começa a ficar incompleta para quem instalou o app há pouco.
  */
@@ -44,13 +44,13 @@ const RESUMO_VAZIO: ResumoDeAdesao = {
 /** Quantas doses perdidas a tela lista antes de resumir o resto. */
 const MAX_PERDIDAS_LISTADAS = 30;
 
-/** Quantos dias a lista diária cobre. Fixo, e não o período escolhido — ver `setPorDia`. */
+/** Quantos dias a lista diária cobre. Fixo, e não o período escolhido - ver `setPorDia`. */
 const DIAS_DETALHADOS = 7;
 
 /**
  * O relatório de adesão de um período.
  *
- * Lê o mesmo `findBetween` que a Home e o calendário usam — não há consulta nova nem tabela nova.
+ * Lê o mesmo `findBetween` que a Home e o calendário usam - não há consulta nova nem tabela nova.
  * O que este hook faz é buscar a janela e entregar ao use-case puro, que é onde a conta mora
  * (§2.3.3: o percentual é calculado por regra testável, e não dentro da tela).
  */
@@ -77,7 +77,7 @@ export function useAdherenceReport(periodo: PeriodoDeAdesao) {
        *
        * Isso **não** afeta o resumo nem a lista de perdidas: `resumirAdesao` e `listarDosesPerdidas`
        * descartam por conta própria tudo que ainda não venceu (`scheduledFor > agora`), que é a
-       * regra certa para elas — uma taxa de trinta dias não pode cair porque a dose das 22h de hoje
+       * regra certa para elas - uma taxa de trinta dias não pode cair porque a dose das 22h de hoje
        * ainda não chegou.
        */
       const fimDeHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
@@ -98,13 +98,13 @@ export function useAdherenceReport(periodo: PeriodoDeAdesao) {
         /**
          * Medicamento excluído sai do relatório, e isso é decisão e não descuido.
          *
-         * As doses dele continuam no banco como histórico — o registro de que existiram não se
+         * As doses dele continuam no banco como histórico - o registro de que existiram não se
          * apaga. Mas um relatório que some com o remédio e mantém a estatística dele mostraria uma
          * taxa que ninguém consegue explicar: o denominador não bate com nada visível na tela.
          *
          * **Confirmado pelo Gabriel em 14/09**, ao auditar a exclusão com sincronização ligada:
          * quem exclui o remédio exclui o histórico dele junto. O dado permanece no banco e na
-         * exportação — o que sai é a leitura, não o registro.
+         * exportação - o que sai é a leitura, não o registro.
          */
         if (!prescription || !medication) continue;
 
@@ -122,12 +122,12 @@ export function useAdherenceReport(periodo: PeriodoDeAdesao) {
       /**
        * Os últimos sete dias, **independente do período escolhido**.
        *
-       * A taxa geral responde "como tem sido"; esta lista responde "qual dia falhou" — e essa
+       * A taxa geral responde "como tem sido"; esta lista responde "qual dia falhou" - e essa
        * segunda pergunta só tem resposta útil enquanto a pessoa lembra do dia. Ninguém reconstrói o
        * que aconteceu em 12 de julho, então estender a lista até 90 dias daria 90 linhas para
        * responder uma pergunta que ali já não se faz.
        *
-       * Os dados existem para qualquer período — não há retenção de sete dias no banco; o que há é
+       * Os dados existem para qualquer período - não há retenção de sete dias no banco; o que há é
        * uma janela de leitura, aqui e no gráfico da Home.
        */
       setPorDia(adesaoPorDia({ doses, agora, dias: DIAS_DETALHADOS }));

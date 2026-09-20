@@ -23,7 +23,7 @@ export const surfaceShadowFlutuante = "0px 4px 8px rgba(25, 28, 30, 0.20)";
  * O par **sombra ou contorno**, para qualquer superfície que não seja o cartão inteiro.
  *
  * `superficieDeCartao` já resolvia isso para o cartão, mas ele traz junto `borderRadius`, `padding`
- * e cor de fundo — o que serve ao cartão e atrapalha a pílula da busca, um botão de contorno ou
+ * e cor de fundo - o que serve ao cartão e atrapalha a pílula da busca, um botão de contorno ou
  * uma linha de menu, que têm forma própria. Este devolve **só** a fronteira, e é o que permite a
  * mesma regra alcançar tudo o mais.
  *
@@ -34,13 +34,13 @@ export const surfaceShadowFlutuante = "0px 4px 8px rgba(25, 28, 30, 0.20)";
  * campo de busca sem contorno vira uma faixa branca sobre fundo branco, e nada diz onde tocar.
  *
  * `intensidade` existe porque nem toda superfície pede a mesma ênfase, e ela muda **as duas coisas**
- * — espessura e tom:
+ * - espessura e tom:
  *
  * - `1` é a fronteira que apenas delimita: 1px em `outlineVariant`, para o que já tem fundo próprio
  *   ou forma reconhecível (o cartão, a pílula da busca). 4.31:1 sobre a superfície tingida do alto
  *   contraste, folgado nos 3:1 que a WCAG pede de elemento gráfico.
  * - `2` é a fronteira que **chama**: 2px em `outline`, para o que precisa ser encontrado de relance
- *   e não tem outra pista de que é tocável — o botão de contorno, que sem ela é texto sobre branco.
+ *   e não tem outra pista de que é tocável - o botão de contorno, que sem ela é texto sobre branco.
  *
  * Somar as duas ênfases onde uma basta engorda a peça a ponto de ela pesar mais que o conteúdo: foi
  * o que aconteceu com a busca em 2px, que passou a disputar atenção com a lista que ela filtra.
@@ -60,7 +60,7 @@ export function fronteiraDeSuperficie(
  * O cartão padrão do app: fundo branco, cantos arredondados, sombra e respiro interno.
  *
  * Existe como token, e não como cópia em cada arquivo de estilo, porque foi exatamente a cópia que
- * fez as telas divergirem — sete lugares desenhavam o próprio cartão com borda cinza enquanto o
+ * fez as telas divergirem - sete lugares desenhavam o próprio cartão com borda cinza enquanto o
  * `Card` do kit já usava sombra. Espalhar (`...surfaceCard`) mantém a decisão num lugar só.
  *
  * O `padding` é `gutter` (24) e não `md` (16): é o respiro que separa um cartão que se lê de um
@@ -82,7 +82,7 @@ export function superficieDeCartao(cores: PaletaDeTema, ajustes?: AjustesDeTema)
 /**
  * A versão estática, para os arquivos que ainda não foram migrados para temas.
  *
- * Ela lê a paleta padrão uma vez, na importação — ou seja, **não responde a troca de tema**. É o
+ * Ela lê a paleta padrão uma vez, na importação - ou seja, **não responde a troca de tema**. É o
  * andaime da migração gradual: enquanto uma tela ainda a usa, ela funciona no tema padrão em vez
  * de quebrar. `node scripts/tema-pendente.mjs` lista quem ainda depende disto.
  */
@@ -100,7 +100,7 @@ export const listGap = spacing.md;
 /**
  * A margem lateral de toda tela de conteúdo.
  *
- * Um valor, e não `md` em umas telas e `gutter` em outras — o que fazia o conteúdo "pular" de lado
+ * Um valor, e não `md` em umas telas e `gutter` em outras - o que fazia o conteúdo "pular" de lado
  * ao navegar entre abas, e é o tipo de inconsistência que se sente sem se nomear.
  */
 export const screenPadding = spacing.md;

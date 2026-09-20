@@ -15,7 +15,7 @@ import type { Tema } from "./temas";
  * });
  * ```
  *
- * Vira assim — **três linhas mudam**, o corpo do objeto fica idêntico:
+ * Vira assim - **três linhas mudam**, o corpo do objeto fica idêntico:
  *
  * ```ts
  * export const criarEstilos = estilosDoTema(({ cores }) => ({
@@ -32,7 +32,7 @@ import type { Tema } from "./temas";
  * ## Por que uma função, e não `StyleSheet.create` direto
  *
  * `StyleSheet.create` roda **uma vez**, quando o módulo é importado. As cores lidas ali ficam
- * congeladas para sempre — trocar de tema não repinta nada. É a razão de a migração ser
+ * congeladas para sempre - trocar de tema não repinta nada. É a razão de a migração ser
  * necessária, e não apenas conveniente.
  *
  * O `useMemo` por tema garante que a folha só é recriada quando o tema muda de fato: rolar uma
@@ -44,7 +44,7 @@ export type ReceitaDeEstilos<T extends StyleSheet.NamedStyles<T>> = (tema: Tema)
 
 /**
  * Marca uma função como receita de estilos. Só existe para dar inferência de tipo ao objeto
- * devolvido — sem isso, cada arquivo teria de anotar o próprio tipo à mão.
+ * devolvido - sem isso, cada arquivo teria de anotar o próprio tipo à mão.
  */
 export function estilosDoTema<T extends StyleSheet.NamedStyles<T>>(
   receita: (tema: Tema) => T,
@@ -59,7 +59,7 @@ export function useEstilos<T extends StyleSheet.NamedStyles<T>>(receita: Receita
 }
 
 /**
- * As cores do tema em vigor, para uso **fora** de uma folha de estilos — a cor de um `Ionicons`,
+ * As cores do tema em vigor, para uso **fora** de uma folha de estilos - a cor de um `Ionicons`,
  * o `color` de um `ActivityIndicator`, o `tintColor` de uma barra de abas.
  *
  * São 123 usos assim hoje, e eles precisam do mesmo cuidado que os estilos: um ícone que continua

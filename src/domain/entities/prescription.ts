@@ -2,20 +2,20 @@ import type { PosologyUnit } from "./medication";
 import type { SyncableEntity } from "./syncable";
 
 /**
- * Livre por prescrição, não global — cada tratamento tem sua própria criticidade
+ * Livre por prescrição, não global - cada tratamento tem sua própria criticidade
  * (ex: insulina pede alarme, suplemento de rotina pode ser só notificação ou nada).
  *
  * ## `both` está aposentado
  *
  * Ele emitia um alarme **e** uma notificação para o mesmo horário. A escolha saiu da tela em 05/09:
- * o problema nunca foi emitir os dois, e sim mantê-los consistentes — dois avisos vivos, cada um
+ * o problema nunca foi emitir os dois, e sim mantê-los consistentes - dois avisos vivos, cada um
  * com botão de confirmar, e a mesma dose podendo ser respondida por qualquer um. O teste em
  * aparelho mostrou o preço: a dose confirmada pela notificação era descontada **de novo** pelo
  * alarme, que seguia aberto com a lista de antes.
  *
  * A redundância que ele prometia já existe sem ele: o alarme é criado com `ongoing: true`, então
  * fica na bandeja depois de tocar. O que `both` acrescentava era um segundo aviso, não a
- * permanência — e cada caminho a mais para confirmar a mesma dose é um caminho a mais para divergir.
+ * permanência - e cada caminho a mais para confirmar a mesma dose é um caminho a mais para divergir.
  *
  * O valor continua no tipo porque pode estar gravado em tratamentos salvos antes da remoção;
  * `planejar-avisos-de-dose` o lê como `alarm`, que é o modo mais forte e o que aquela escolha
@@ -27,7 +27,7 @@ export type ReminderMode = "alarm" | "notification" | "both" | "none";
 export type TimeOfDay = string;
 
 /**
- * Uma dose a cada duas horas já é o limite do que uma pessoa acordada consegue cumprir — acima
+ * Uma dose a cada duas horas já é o limite do que uma pessoa acordada consegue cumprir - acima
  * disso o cadastro descreveria uma rotina que ninguém executa.
  *
  * Quem pensa a posologia por intervalo ("de 8 em 8 horas") continua atendido: o seletor de
@@ -47,7 +47,7 @@ export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
  *
  * `amount: null` = "o mesmo de sempre", isto é, o `doseAmount` da prescrição. Existe porque a
  * esmagadora maioria dos tratamentos tem dose uniforme, e repetir o mesmo número em cada horário
- * criaria três lugares onde a verdade pode divergir. Preenchido, ele vale só para este horário —
+ * criaria três lugares onde a verdade pode divergir. Preenchido, ele vale só para este horário -
  * é o que permite insulina 10 UI de manhã e 8 UI à noite num cadastro só.
  */
 export type ScheduledDose = {
@@ -58,7 +58,7 @@ export type ScheduledDose = {
 /**
  * As quatro formas de posologia que o app aceita.
  *
- * Todas as três que agendam respondem à mesma pergunta — **em quais dias** —, e os horários do
+ * Todas as três que agendam respondem à mesma pergunta - **em quais dias** -, e os horários do
  * dia são um eixo separado, comum às três. Foi essa separação que eliminou "a cada X horas":
  * ela misturava os dois eixos, e como todo intervalo oferecido dividia o dia por igual, produzia
  * exatamente o mesmo resultado que `daily` com os horários equivalentes. Dois caminhos para o
@@ -74,11 +74,11 @@ export type PosologySchedule =
    * três coisas que as pessoas dizem de jeitos diferentes: cartela de anticoncepcional (28 e 21),
    * dia sim dia não (2 e 1) e injeção "de 30 em 30 dias" (30 e 1).
    *
-   * `cycleStartDate` é o primeiro dia do ciclo atual, e não o dia do cadastro — quem cadastra no
+   * `cycleStartDate` é o primeiro dia do ciclo atual, e não o dia do cadastro - quem cadastra no
    * quinto dia da cartela receberia a pausa cinco dias atrasada, sem nada na tela denunciando.
    *
    * Contado em dias, o ciclo escorrega no calendário: "a cada 30 dias" a partir de 25/01 cai em
-   * 24/02. É o preço de não ter uma frequência mensal separada — e o que se ganha é não ter duas
+   * 24/02. É o preço de não ter uma frequência mensal separada - e o que se ganha é não ter duas
    * opções que respondem à mesma pergunta.
    */
   | {
@@ -96,12 +96,12 @@ export function dosesOfSchedule(schedule: PosologySchedule): ScheduledDose[] {
   return schedule.kind === "asNeeded" ? [] : schedule.doses;
 }
 
-/** Receita pode vir da câmera ou de um arquivo já salvo — muda como é aberta pra visualizar. */
+/** Receita pode vir da câmera ou de um arquivo já salvo - muda como é aberta pra visualizar. */
 export type PrescriptionAttachmentKind = "image" | "document";
 
 /**
  * Recomendações de como tomar, copiadas pelo paciente da bula ou do que o médico disse. São
- * **anotação**: não mudam horário, dose nem lembrete — existem pra aparecer junto da dose na
+ * **anotação**: não mudam horário, dose nem lembrete - existem pra aparecer junto da dose na
  * hora de tomar, que é quando a pergunta "esse era em jejum?" acontece.
  *
  * Lista fechada em vez de texto livre: quem cadastra apressado não escreve, mas reconhece e
@@ -136,16 +136,16 @@ export type Prescription = SyncableEntity & {
   /** Vazio = nenhuma marcada, não "não perguntamos". */
   intakeInstructions: IntakeInstruction[];
   /**
-   * O que a lista fechada não cobriu — "diluir em meio copo", "não partir o comprimido".
+   * O que a lista fechada não cobriu - "diluir em meio copo", "não partir o comprimido".
    * Separado de `notes` porque acompanha a dose na hora de tomar, e não o tratamento.
    */
   intakeNote: string | null;
   /** Observação livre do paciente sobre o tratamento como um todo. */
   notes: string | null;
-  /** Receita anexada. Caminho local — nunca URL remota direta, ver `attachmentSyncOptOut`. */
+  /** Receita anexada. Caminho local - nunca URL remota direta, ver `attachmentSyncOptOut`. */
   attachmentUri: string | null;
   attachmentKind: PrescriptionAttachmentKind | null;
-  /** Validade da receita em ISO `YYYY-MM-DD` — base do lembrete de renovação. */
+  /** Validade da receita em ISO `YYYY-MM-DD` - base do lembrete de renovação. */
   attachmentValidUntil: string | null;
   /**
    * Com quantos dias de antecedência avisar que a receita vence. `null` = não avisar.
@@ -159,14 +159,14 @@ export type Prescription = SyncableEntity & {
    * Se a pessoa quer ser avisada sobre esta receita vencer.
    *
    * Sozinho, garante o aviso **no dia do vencimento**. `renewalReminderLeadDays` acrescenta o
-   * lembrete antecipado quando ela também escolhe um prazo — e são duas perguntas diferentes:
+   * lembrete antecipado quando ela também escolhe um prazo - e são duas perguntas diferentes:
    * "quero saber" e "quero saber com quanto tempo". Enquanto as duas viviam na mesma coluna,
    * marcar sem escolher prazo produzia silêncio total.
    */
   renewalReminderEnabled: boolean;
   /**
    * LGPD: receita é dado sensível de saúde. Se true, o anexo nunca sobe pro Supabase Storage
-   * mesmo com backup habilitado — fica só no aparelho (decisão nº10).
+   * mesmo com backup habilitado - fica só no aparelho (decisão nº10).
    */
   attachmentSyncOptOut: boolean;
 };

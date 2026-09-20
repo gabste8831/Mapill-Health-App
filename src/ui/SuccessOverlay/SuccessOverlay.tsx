@@ -14,7 +14,7 @@ import { useCores, useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./SuccessOverlay.styles";
 
 /**
- * Quanto o aviso fica na tela antes de começar a sair. Tempo de ler a frase inteira sem pressa —
+ * Quanto o aviso fica na tela antes de começar a sair. Tempo de ler a frase inteira sem pressa -
  * mais curto que isso o aviso vira um susto, e a pessoa fica sem saber o que apareceu.
  */
 const VISIBLE_MS = 2800;
@@ -23,7 +23,7 @@ const FADE_OUT_MS = 200;
 export type SuccessOverlayProps = {
   title: string;
   description?: string;
-  /** Chamado quando a confirmação termina — é aqui que a tela decide pra onde ir. */
+  /** Chamado quando a confirmação termina - é aqui que a tela decide pra onde ir. */
   onDone: () => void;
 };
 
@@ -31,7 +31,7 @@ export type SuccessOverlayProps = {
  * Confirmação de tela cheia, no estilo do comprovante de transferência de banco: some sozinha
  * depois de alguns segundos.
  *
- * Não é um `Alert` porque confirmar algo que deu certo não deveria exigir um toque — o botão "OK"
+ * Não é um `Alert` porque confirmar algo que deu certo não deveria exigir um toque - o botão "OK"
  * de um alerta é trabalho pedido à pessoa para receber uma notícia boa. E não é um toast porque o
  * cadastro de um medicamento é o fim de um fluxo longo: merece a pausa que diz "acabou, deu certo".
  */
@@ -40,7 +40,7 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
   const cores = useCores();
 
   /**
-   * **A animação some quando a pessoa pediu menos movimento** — o aviso, não.
+   * **A animação some quando a pessoa pediu menos movimento** - o aviso, não.
    *
    * Com duração zero o símbolo aparece no lugar certo em vez de crescer até ele: o estado final
    * é o mesmo, sem o movimento que para quem tem enjoo vestibular é sintoma e não estilo.
@@ -61,12 +61,12 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
       withTiming(1, { duration: semMovimento ? 0 : 140 }),
     );
 
-    // Quem usa leitor de tela não vê o símbolo nem o sumiço automático — o anúncio é o que
+    // Quem usa leitor de tela não vê o símbolo nem o sumiço automático - o anúncio é o que
     // entrega a mesma informação por outro canal.
     AccessibilityInfo.announceForAccessibility(description ? `${title}. ${description}` : title);
 
     // Dois timers em vez do callback do `withTiming`: aquele roda na thread de UI, e `onDone`
-    // navega — o que só pode acontecer na thread de JS.
+    // navega - o que só pode acontecer na thread de JS.
     const fadeOut = setTimeout(() => {
       opacity.value = withTiming(0, { duration: semMovimento ? 0 : FADE_OUT_MS });
     }, VISIBLE_MS);
@@ -86,13 +86,13 @@ export function SuccessOverlay({ title, description, onDone }: SuccessOverlayPro
      * `Modal`, e não uma `View` absoluta.
      *
      * `position: absolute` cobre o **pai**, e a Home vive dentro do navegador de abas: a barra de
-     * navegação ficava por cima da comemoração, à mostra e tocável no meio da animação — exatamente
+     * navegação ficava por cima da comemoração, à mostra e tocável no meio da animação - exatamente
      * o que o comentário do estilo dizia estar evitando. O `Modal` renderiza acima de toda a
      * árvore, inclusive da barra.
      *
      * `transparent` porque quem pinta o fundo é o próprio overlay, que precisa esmaecer junto com o
      * conteúdo; e `animationType="none"` porque a entrada e a saída são as do Reanimated logo
-     * abaixo — deixar as duas ativas daria duas animações sobrepostas.
+     * abaixo - deixar as duas ativas daria duas animações sobrepostas.
      */
     <Modal visible transparent animationType="none" statusBarTranslucent onRequestClose={onDone}>
       <Animated.View

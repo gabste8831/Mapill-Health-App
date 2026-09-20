@@ -81,13 +81,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * Antes eram dois estilos trocados no lugar (`photoPlaceholder` → `photoFrame`), e a diferença
    * entre eles não era só decorativa: um tinha borda tracejada e centralizava o ícone, o outro
    * ligava `overflow: "hidden"` para recortar a imagem no círculo. Trocar de um para o outro
-   * recriava o contêiner no mesmo instante em que a `Image` montava — e no Android o recorte
+   * recriava o contêiner no mesmo instante em que a `Image` montava - e no Android o recorte
    * chegava depois do primeiro paint, deixando a foto pintada fora da área visível do pai.
    *
    * O sintoma era preciso: a **primeira** foto ficava branca, e trocar uma já existente
    * funcionava. Trocar mantém `photoFrame` nos dois renders; estrear muda de estilo.
    *
-   * Com uma base só — mesma medida, mesmo raio, `overflow` sempre ligado — o quadro deixa de ter
+   * Com uma base só - mesma medida, mesmo raio, `overflow` sempre ligado - o quadro deixa de ter
    * dois estados de layout. O que muda é a borda, que é pintura e não geometria.
    */
   photoQuadro: {

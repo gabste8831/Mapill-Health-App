@@ -28,7 +28,7 @@ type CardCompromissoProximoProps = {
   /**
    * O horário já passou? Decide se a pergunta "você foi?" aparece.
    *
-   * Vem de fora porque a tela que monta a lista já tem o instante e o relógio — recalcular aqui
+   * Vem de fora porque a tela que monta a lista já tem o instante e o relógio - recalcular aqui
    * faria dois lugares lerem a hora e discordarem por um segundo.
    */
   jaAconteceu: boolean;
@@ -42,15 +42,15 @@ type CardCompromissoProximoProps = {
  *
  * ## Por que ele não é o card azul
  *
- * O azul cheio da próxima dose é a única quebra da paleta neutra da Home — é o que a faz saltar. Um
+ * O azul cheio da próxima dose é a única quebra da paleta neutra da Home - é o que a faz saltar. Um
  * segundo card azul não somaria destaque, dividiria o que existe, e a dose perderia a vaga que a
  * torna a próxima coisa a fazer. Aqui a presença vem da barra lateral e do bloco de data, que é a
  * assinatura visual do compromisso na listagem: quem já viu a lista reconhece o card antes de ler.
  *
  * ## O que ele mostra que a linha não mostrava
  *
- * O **preparo**. É a única informação do compromisso que exige ação antecipada — jejum, levar
- * exames, chegar mais cedo — e descobri-la só ao abrir o detalhe é descobrir tarde. Um aviso de
+ * O **preparo**. É a única informação do compromisso que exige ação antecipada - jejum, levar
+ * exames, chegar mais cedo - e descobri-la só ao abrir o detalhe é descobrir tarde. Um aviso de
  * "jejum de 12h" que aparece cinco dias antes é o que evita a consulta perdida por ter tomado café.
  *
  * No dia, a barra e o bloco de data viram verdes, como o cartão de dose de agora: é o mesmo sinal
@@ -74,14 +74,14 @@ export function CardCompromissoProximo({
    * "Hoje" para a cor, mas **só enquanto não aconteceu**.
    *
    * Verde no app quer dizer "é agora". Depois que a hora passou e a pessoa respondeu, o compromisso
-   * não é mais o que está acontecendo — o card volta ao neutro e quem diz o que houve é o selo.
+   * não é mais o que está acontecendo - o card volta ao neutro e quem diz o que houve é o selo.
    */
   const ehHoje = emDias === 0 && outcome === null;
   const horas = String(quando.getHours()).padStart(2, "0");
   const minutos = String(quando.getMinutes()).padStart(2, "0");
 
   /**
-   * "HOJE" continua sendo verdade mesmo depois da hora — o que muda é a cor, não o fato. Já
+   * "HOJE" continua sendo verdade mesmo depois da hora - o que muda é a cor, não o fato. Já
    * respondido, o rótulo some: quem responde já sabe que foi hoje, e o selo passa a ser a
    * informação nova daquela linha.
    */
@@ -126,7 +126,7 @@ export function CardCompromissoProximo({
         </View>
 
         {/* O selo toma o lugar do chevron quando há desfecho: os dois vivem no mesmo canto, e o que
-            aconteceu é mais informativo que a seta de "abre detalhes" — que o toque no card já
+            aconteceu é mais informativo que a seta de "abre detalhes" - que o toque no card já
             oferece de qualquer jeito. */}
         {outcome !== null ? (
           <View style={[styles.selo, outcome === "missed" && styles.seloAusente]}>
@@ -151,7 +151,7 @@ export function CardCompromissoProximo({
       {/* A pergunta só depois que o horário passou, e só enquanto não houver resposta. Antes da
           hora, ela convidaria a responder o que ainda não aconteceu.
 
-          Fora do `Pressable`? Não — ele é o card inteiro. Os botões param a propagação por conta
+          Fora do `Pressable`? Não - ele é o card inteiro. Os botões param a propagação por conta
           própria: um `Pressable` filho consome o toque antes de o pai o receber, então tocar em
           "Fui" grava a resposta em vez de abrir o detalhe. */}
       {jaAconteceu && outcome === null && onResponder !== undefined ? (

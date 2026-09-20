@@ -2,7 +2,7 @@
  * Quanto se toma em cada dose agendada.
  *
  * Estava implícito na prescrição, o que funcionava só enquanto toda dose de um tratamento era
- * igual. Insulina 10 UI de manhã e 8 UI à noite não cabe num número por prescrição — e ler da
+ * igual. Insulina 10 UI de manhã e 8 UI à noite não cabe num número por prescrição - e ler da
  * prescrição na hora de exibir traria um segundo problema: editar a posologia amanhã reescreveria
  * o que estava agendado ontem.
  *

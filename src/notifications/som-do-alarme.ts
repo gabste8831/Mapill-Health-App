@@ -5,14 +5,14 @@ import { Platform } from "react-native";
 const SOM_DO_ALARME = require("../../assets/sounds/alarme_de_dose.wav");
 
 /**
- * Quem toca o som do alarme — **o app, e não o sistema**.
+ * Quem toca o som do alarme - **o app, e não o sistema**.
  *
  * ## Por que existe
  *
  * O som vinha do canal da notificação, tocado pelo NotificationManager. Isso trouxe dois defeitos
  * que são o mesmo defeito:
  *
- * - **O volume errado.** O `AudioAttributes` do canal pede `USAGE_ALARM` e o Android ignora — ali o
+ * - **O volume errado.** O `AudioAttributes` do canal pede `USAGE_ALARM` e o Android ignora - ali o
  *   atributo é dica, não ordem. Duas builds foram gastas provando isso, e a issue #297 do Notifee,
  *   pedindo exatamente isto, foi fechada como *not planned*.
  * - **O silêncio com o celular em uso.** Testado em 14/09: com o aparelho destravado o Android
@@ -40,7 +40,7 @@ let tocando: AudioPlayer | null = null;
  * Rede de segurança do loop, igual à que a tela do alarme já tinha.
  *
  * `loop` é resolvido do lado nativo e funciona. Mas um alarme de medicação não pode depender de uma
- * garantia só: se o sistema pausar o player — foco de áudio disputado com outro app —, o alarme
+ * garantia só: se o sistema pausar o player - foco de áudio disputado com outro app -, o alarme
  * emudece sem sinal nenhum, e a pessoa continua dormindo.
  */
 let vigia: ReturnType<typeof setInterval> | null = null;
@@ -48,7 +48,7 @@ let vigia: ReturnType<typeof setInterval> | null = null;
 /**
  * Começa a tocar. Idempotente: chamar de novo com o som já tocando não cria um segundo player.
  *
- * A idempotência importa porque há dois caminhos que podem pedir o som — o serviço, quando a
+ * A idempotência importa porque há dois caminhos que podem pedir o som - o serviço, quando a
  * notificação é entregue, e a tela do alarme, quando ela monta. Dois players tocando o mesmo arquivo
  * é o som duplicado relatado em 10/09.
  */
@@ -68,7 +68,7 @@ export function comecarASoar(): void {
 /**
  * Para o som e libera o recurso nativo.
  *
- * **Chamado de todo caminho que resolve o alarme** — os botões da tela, o toque na notificação, a
+ * **Chamado de todo caminho que resolve o alarme** - os botões da tela, o toque na notificação, a
  * dose respondida em outro lugar. Som que sobrevive à resposta é o defeito que faz desinstalar o
  * app, e aqui ele é mais fácil de produzir que antes: o som deixou de morrer junto com a
  * notificação, então parar virou responsabilidade nossa.
@@ -89,7 +89,7 @@ export function pararDeSoar(): void {
  * Registra o serviço. Chamado uma vez, no `index.js`, antes de qualquer aviso poder chegar.
  *
  * O `runner` fica vivo enquanto o serviço estiver de pé, e é o que segura o processo. Ele resolve
- * quando `pararDeSoar` é chamado e o serviço é encerrado — daí o laço de espera abaixo, que é o
+ * quando `pararDeSoar` é chamado e o serviço é encerrado - daí o laço de espera abaixo, que é o
  * formato que a biblioteca pede.
  */
 export function registrarServicoDeSom(): void {

@@ -16,7 +16,7 @@ type MeasurableNode = {
 
 /**
  * Padrão reutilizável pra qualquer formulário do app: ao focar um campo, centraliza ele na área
- * da tela que sobra visível acima do teclado — em vez de só empurrá-lo pra logo abaixo do topo,
+ * da tela que sobra visível acima do teclado - em vez de só empurrá-lo pra logo abaixo do topo,
  * o que ainda deixava a sensação de "campo jogado lá em cima". Importante pro público
  * idoso/polimedicado (heurística de prevenção de erros, `usability-heuristics-health-ui`).
  *
@@ -51,7 +51,7 @@ export function useScrollToFocusedInput() {
     const inputNode = event.target as unknown as MeasurableNode;
     if (scrollView === null || typeof inputNode?.measure !== "function") return;
 
-    // Espera o teclado terminar de abrir pra saber a altura real da área visível — medir cedo
+    // Espera o teclado terminar de abrir pra saber a altura real da área visível - medir cedo
     // demais ainda usa a tela cheia e centraliza errado.
     setTimeout(() => {
       inputNode.measure((_x, _y, _width, fieldHeight, _pageX, fieldPageY) => {

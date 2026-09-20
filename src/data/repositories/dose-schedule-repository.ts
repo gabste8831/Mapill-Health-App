@@ -22,7 +22,7 @@ type DoseScheduleRow = SyncableRow & {
 };
 
 /**
- * O instante sempre na **mesma forma** — `2026-09-14T02:00:00.000Z`.
+ * O instante sempre na **mesma forma** - `2026-09-14T02:00:00.000Z`.
  *
  * ## O defeito que isto corrige
  *
@@ -31,18 +31,18 @@ type DoseScheduleRow = SyncableRow & {
  * momento. O Diagnóstico do Gabriel em 13/09 mostrou as duas lado a lado na mesma lista.
  *
  * Isso quebra **toda comparação de texto** sobre a coluna, e o SQLite só compara texto aqui. Em
- * `deleteUpcoming`, `'...T02:00:00+00:00' >= '...T20:00:00.000Z'` é falso — `+` (0x2B) vem antes de
+ * `deleteUpcoming`, `'...T02:00:00+00:00' >= '...T20:00:00.000Z'` é falso - `+` (0x2B) vem antes de
  * qualquer dígito na tabela ASCII. As doses gravadas com `+00:00` **não eram apagadas**.
  *
  * Foi o que fez a regeração por fuso falhar sem erro nenhum: ela apagava parte da grade, regravava
  * no fuso novo, e as linhas sobreviventes continuavam com o horário antigo. O Gabriel trocou para
- * Manaus e viu as 21:00 virarem 20:00 — que é a conversão de instante absoluto, a marca de uma dose
+ * Manaus e viu as 21:00 virarem 20:00 - que é a conversão de instante absoluto, a marca de uma dose
  * que ninguém regerou.
  *
  * ## Por que na escrita, e não na comparação
  *
  * Corrigir cada consulta seria remendar um sintoma de cada vez, e a próxima comparação escrita
- * esqueceria. Normalizando aqui — o único ponto por onde toda escrita passa — a coluna passa a ter
+ * esqueceria. Normalizando aqui - o único ponto por onde toda escrita passa - a coluna passa a ter
  * uma forma só, e as comparações de texto voltam a ser válidas por construção.
  *
  * Linhas gravadas antes disto continuam com a forma antiga até serem reescritas. A regeração por
@@ -56,7 +56,7 @@ function normalizarInstante(iso: string): string {
   return Number.isNaN(data.getTime()) ? iso : data.toISOString();
 }
 
-/** Status resolutivo do log mais recente (por updated_at) de uma dose — ou null se não há log. */
+/** Status resolutivo do log mais recente (por updated_at) de uma dose - ou null se não há log. */
 const LATEST_LOG_STATUS_SUBQUERY = `(
   SELECT il.status FROM intake_logs il
   WHERE il.dose_schedule_id = ds.id AND il.deleted_at IS NULL
@@ -106,12 +106,12 @@ export class DoseScheduleRepository
   }
 
   /**
-   * Como `findByPrescription`, mas **incluindo as excluídas** — só para não recriá-las.
+   * Como `findByPrescription`, mas **incluindo as excluídas** - só para não recriá-las.
    *
    * Existe por causa do reabastecimento da grade, e é o único lugar que deve usá-la. Ele completa a
    * janela de doses comparando o que já existe com o que deveria existir; enxergando só as vivas,
    * ele recriaria exatamente as que a edição de posologia acabou de excluir, e a dose voltaria com
-   * id novo — imune ao `deleted_at` que a matou.
+   * id novo - imune ao `deleted_at` que a matou.
    *
    * Nenhuma tela usa isto: para desenhar, dose excluída não existe. Aqui o que importa é que ela
    * **já ocupou** aquele instante.
@@ -128,7 +128,7 @@ export class DoseScheduleRepository
    * As doses de uma faixa de instantes, com o desfecho de cada uma.
    *
    * Faixa de instantes, e não comparação de datas: `scheduled_for` é gravado em UTC e o dia que a
-   * tela pergunta é local, então `date(scheduled_for) = date(?)` erra o tamanho do fuso — em
+   * tela pergunta é local, então `date(scheduled_for) = date(?)` erra o tamanho do fuso - em
    * Brasília, a dose das 22:00 caía no dia seguinte.
    */
   async findBetween(startTimestamp: string, endTimestamp: string): Promise<DoseScheduleWithStatus[]> {
@@ -164,7 +164,7 @@ export class DoseScheduleRepository
 
   async findPendingForDay(referenceDate: string): Promise<DoseSchedule[]> {
     // "confirmed"/"skipped" resolvem a dose; "deferred" (ou nenhum log) continua pendente.
-    // Dose não resolvida nunca some sozinha — some só por ação do paciente.
+    // Dose não resolvida nunca some sozinha - some só por ação do paciente.
     const dia = localDayRangeUtc(referenceDate);
     const rows = await this.database.getAllAsync<DoseScheduleRow>(
       // `julianday` pelo mesmo motivo de `findBetween` e `deleteUpcoming`: a coluna tem dois
@@ -181,7 +181,7 @@ export class DoseScheduleRepository
   }
 
   /**
-   * Some com os horários futuros de uma prescrição — por **soft delete**, desde 14/09.
+   * Some com os horários futuros de uma prescrição - por **soft delete**, desde 14/09.
    *
    * ## Por que deixou de ser hard delete
    *
@@ -190,11 +190,11 @@ export class DoseScheduleRepository
    *
    * **Linha apagada some sem deixar recado.** O push envia o que está na tabela
    * (`WHERE synced_at IS NULL OR updated_at > synced_at`), e o que não existe mais nunca é
-   * selecionado — a exclusão nunca chega ao servidor, e a linha continua viva lá com
+   * selecionado - a exclusão nunca chega ao servidor, e a linha continua viva lá com
    * `deleted_at NULL`. Qualquer aparelho cuja marca d'água seja anterior a baixa de volta: um
    * segundo celular, ou o mesmo depois de reinstalar.
    *
-   * Nenhuma delas toca alarme nem aparece em tela — todo leitor filtra `deleted_at IS NULL` —, mas
+   * Nenhuma delas toca alarme nem aparece em tela - todo leitor filtra `deleted_at IS NULL` -, mas
    * elas se acumulam a cada edição de posologia, incham o primeiro pull de todo aparelho novo e
    * saem no **CSV de exportação**, que não filtra excluídos: horários de um remédio que a pessoa
    * mandou apagar, num arquivo que existe para cumprir a LGPD.
@@ -215,11 +215,11 @@ export class DoseScheduleRepository
      * A comparação de texto deixava escapar toda linha gravada com `+00:00` em vez de `Z`: o `+`
      * (0x2B) vem antes de qualquer dígito em ASCII, então `'...+00:00' >= '...Z'` é falso mesmo
      * quando o momento é posterior. A regeração por fuso apagava parte da grade, regravava, e as
-     * sobreviventes ficavam com o horário antigo — o defeito que o Gabriel viu em 13/09, com as
+     * sobreviventes ficavam com o horário antigo - o defeito que o Gabriel viu em 13/09, com as
      * 21:00 virando 20:00 ao trocar para Manaus.
      *
      * `normalizarInstante` no `toRow` impede que a coluna volte a ter duas formas, mas as linhas
-     * **já gravadas** continuam como estão até serem reescritas — e é justamente esta consulta que
+     * **já gravadas** continuam como estão até serem reescritas - e é justamente esta consulta que
      * precisa alcançá-las. As duas correções são necessárias: uma para o futuro, outra para o que já
      * existe.
      *

@@ -6,12 +6,12 @@
  * concorrência no SQLite virou o diálogo `Call to function 'NativeStatement.finalizeAsync' has been
  * rejected. → Caused by: Error code : database is locked` para quem só queria confirmar um remédio.
  *
- * A regra é o **destinatário**: erro de domínio é escrito para ser lido — "Sem estoque suficiente" —
+ * A regra é o **destinatário**: erro de domínio é escrito para ser lido - "Sem estoque suficiente" -
  * e passa. Erro nativo, de rede ou de banco é diagnóstico, e vira uma frase que diz o que fazer.
  * Não há como distingui-los com certeza, então a heurística é conservadora: só passa o que tem cara
  * de frase (curta, sem jargão típico de stack).
  *
- * O texto original nunca se perde — vai para o console, onde serve a quem depura.
+ * O texto original nunca se perde - vai para o console, onde serve a quem depura.
  */
 const MARCAS_DE_ERRO_TECNICO = [
   "Call to function",

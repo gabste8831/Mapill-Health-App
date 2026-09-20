@@ -13,7 +13,7 @@ export type DoseScheduleDraft = Omit<DoseSchedule, keyof SyncableEntity>;
 /**
  * Só o que a regra realmente lê. Deixa a prescrição inteira passar, e um rascunho também.
  *
- * `doseUnit` não é usado aqui — entra porque `estimateStockDepletion` percorre estas mesmas doses
+ * `doseUnit` não é usado aqui - entra porque `estimateStockDepletion` percorre estas mesmas doses
  * e precisa recusar a conta quando o estoque está em outra unidade.
  */
 export type SchedulablePrescription = Pick<
@@ -56,10 +56,10 @@ function parseIsoDate(isoDate: string): Date | null {
   return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 }
 
-/** Um instante agendado e quanto se toma nele — a dose já resolvida, sem `null`. */
+/** Um instante agendado e quanto se toma nele - a dose já resolvida, sem `null`. */
 type Occurrence = { at: Date; amount: number };
 
-/** Só os dias em que este schedule tem dose. `weekday` é 0–6, igual ao `Date.getDay()`. */
+/** Só os dias em que este schedule tem dose. `weekday` é 0-6, igual ao `Date.getDay()`. */
 function ehDiaDeTomar(schedule: PosologySchedule, day: Date): boolean {
   if (schedule.kind === "weekly") return schedule.weekdays.includes(day.getDay() as Weekday);
   if (schedule.kind !== "cycle") return true;
@@ -109,12 +109,12 @@ function occurrencesInWindow(
 
 /**
  * Deriva os horários de dose de uma prescrição dentro de uma janela. É regra de negócio pura:
- * não conhece banco, notificação nem React — quem persiste e quem agenda no OS são outros.
+ * não conhece banco, notificação nem React - quem persiste e quem agenda no OS são outros.
  *
  * "Se necessário" não gera nada de propósito: o paciente toma quando precisa, e agendar um
  * horário para isso inventaria um compromisso que a prescrição não estabeleceu.
  *
- * A vigência da prescrição (`startDate`/`endDate`) recorta a janela — pedir 30 dias de um
+ * A vigência da prescrição (`startDate`/`endDate`) recorta a janela - pedir 30 dias de um
  * tratamento que acaba em 5 devolve só os 5.
  */
 export function generateDoseSchedules({

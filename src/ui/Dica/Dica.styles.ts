@@ -3,7 +3,7 @@ import { estilosDoTema, radius, spacing, typography } from "@/shared/theme";
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
-   * Fundo âmbar diluído e o ícone na tinta cheia — **sem faixa lateral**.
+   * Fundo âmbar diluído e o ícone na tinta cheia - **sem faixa lateral**.
    *
    * A faixa de 4px saiu do app inteiro: ela empurra o conteúdo para a direita, desalinhando uma
    * dica do campo logo acima dela, e quem não repara na borda não recebe o aviso. Aqui o ícone

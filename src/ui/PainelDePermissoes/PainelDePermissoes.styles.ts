@@ -53,7 +53,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
    * `itemComoFazer`, `selo`, `seloTexto` e o respiro do topo), e carregavam decisões de contraste
    * que valem registro caso a lista volte: a tinta era sempre `onWarningSurface`, porque no tema
    * escuro o `onSurface` é quase branco e sobre o âmbar dava 1.09:1. O fundo do item era branco
-   * cravado pelo mesmo motivo — token de superfície vira escuro no tema escuro.
+   * cravado pelo mesmo motivo - token de superfície vira escuro no tema escuro.
    *
    * O histórico completo está no git; aqui fica só a razão de não existirem mais: uma lista parcial
    * de permissões obrigatórias enganava sobre o que faltava fazer (ver `PainelDePermissoes`).

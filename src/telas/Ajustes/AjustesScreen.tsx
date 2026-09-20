@@ -22,7 +22,7 @@ export type AjustesScreenProps = {
   /** Abre a ajuda de alertas, onde as cinco autorizações do aparelho estão sempre listadas. */
   onOpenAjudaDeAlertas: () => void;
   /**
-   * Abre o diagnóstico de avisos. Ausente em produção — a rota nem existe lá.
+   * Abre o diagnóstico de avisos. Ausente em produção - a rota nem existe lá.
    *
    * Opcional, e não obrigatório com `__DEV__` dentro da tela: a decisão de expor a ferramenta é de
    * quem monta a rota, e uma prop opcional deixa isso explícito na assinatura.
@@ -32,7 +32,7 @@ export type AjustesScreenProps = {
 
 type LinhaProps = {
   label: string;
-  /** Só quando é informação real (ex: o e-mail da conta vinculada) — nunca texto de instrução. */
+  /** Só quando é informação real (ex: o e-mail da conta vinculada) - nunca texto de instrução. */
   hint?: string;
   /** Nó em vez de nome de ícone: a linha do Google usa a marca real, não um ícone genérico. */
   icon: ReactNode;
@@ -46,7 +46,7 @@ function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
   const cores = useCores();
 
   return (
-    // Linha de largura total: escurece, mas não encolhe — escalar faria o texto vizinho tremer.
+    // Linha de largura total: escurece, mas não encolhe - escalar faria o texto vizinho tremer.
     <Pressable
       style={estadoDePressao(styles.row)}
       onPress={onPress}
@@ -66,7 +66,7 @@ function Linha({ label, hint, icon, destrutiva = false, onPress }: LinhaProps) {
   );
 }
 
-/** Iniciais como retrato de reserva enquanto não há foto — evita o vazio de um avatar cinza. */
+/** Iniciais como retrato de reserva enquanto não há foto - evita o vazio de um avatar cinza. */
 function Iniciais({ name }: { name: string }) {
   const styles = useEstilos(criarEstilos);
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -103,7 +103,7 @@ export function AjustesScreen({
             retrato dele é o ponto de entrada mais óbvio que existe. */}
         <View style={styles.hero}>
           <View style={styles.heroHeader}>
-            {/* Ajustes é aba, mas também é destino do atalho de conta da Home — quem chegou por
+            {/* Ajustes é aba, mas também é destino do atalho de conta da Home - quem chegou por
                 lá espera poder voltar de onde veio, e não caçar a aba anterior na barra. */}
             <Pressable
               // Ícone solto sobre o azul do hero: alvo autocontido, encolhe ao toque.
@@ -123,7 +123,7 @@ export function AjustesScreen({
             onPress={onEditProfile}
             accessibilityRole="button"
           >
-            {/* `key` na presença da foto — a mesma correção da ficha de saúde. O avatar troca as
+            {/* `key` na presença da foto - a mesma correção da ficha de saúde. O avatar troca as
                 iniciais pela imagem dentro de um `Pressable`, que é a estreia que não recompunha
                 no Android: a foto recém-salva ficava invisível até a tela remontar. */}
             <View
@@ -152,14 +152,14 @@ export function AjustesScreen({
 
         {/* O aviso de pendências de sincronização saiu daqui.
 
-            Ele contava as alterações ainda não enviadas à nuvem — mas o contador roda **mesmo sem
+            Ele contava as alterações ainda não enviadas à nuvem - mas o contador roda **mesmo sem
             conta vinculada**, e aí anunciava um problema que não existe e que a pessoa não pode
             resolver: usar o app só localmente é uma escolha legítima, não um estado pendente. Com
             conta vinculada ele também não se justificava, porque a sincronização é automática a
             cada volta ao app; o que resta de útil é o **estado** da cópia, e isso a tela de Conta
-            já mostra no `IndicadorDeSync` — que, ao contrário deste, só aparece com conta. */}
+            já mostra no `IndicadorDeSync` - que, ao contrário deste, só aparece com conta. */}
 
-        {/* Menu curto de botões — sem texto de instrução abaixo de cada seção. Quem já sabe o
+        {/* Menu curto de botões - sem texto de instrução abaixo de cada seção. Quem já sabe o
             que quer (conta, tema) reconhece o rótulo e toca; quem não sabe, abre e descobre lá
             dentro. Texto de apoio aqui só repetia o óbvio no caminho de quem já ia direto. */}
         <View style={styles.section}>
@@ -167,7 +167,7 @@ export function AjustesScreen({
           <Card style={styles.cartaoDeLinhas}>
             {/* Ícone de conta nos dois casos, e não o logo do Google quando vinculado: a linha leva
                 a conta, dados e termos, e o logo prometia que ela era sobre login. O e-mail, quando
-                existe, é a única informação que vale manter como subtítulo — dizer *qual* conta
+                existe, é a única informação que vale manter como subtítulo - dizer *qual* conta
                 está vinculada é dado real, diferente do texto genérico que instruía a tocar. */}
             <Linha
               icon={
@@ -189,7 +189,7 @@ export function AjustesScreen({
          *
          * O painel da Home é um alerta: aparece quando há algo a fazer e some quando não há. Três
          * das cinco autorizações não expõem estado a nenhuma API, e para elas o painel marca a ida
-         * à tela do sistema — então quem abre o Autostart e sai sem ligar a chave vê a linha
+         * à tela do sistema - então quem abre o Autostart e sai sem ligar a chave vê a linha
          * desaparecer, e fica sem aviso nenhum com o app silencioso.
          *
          * Aqui a entrada não depende de haver pendência: é a página de consulta de "por que o aviso
@@ -214,7 +214,7 @@ export function AjustesScreen({
         </View>
 
         {/* Os temas de acessibilidade (escuro, alto contraste, sem depender de cor) só servem a
-            quem os procura — por isso moram atrás de um botão nomeado, e não expandidos no corpo
+            quem os procura - por isso moram atrás de um botão nomeado, e não expandidos no corpo
             de Ajustes, onde a maioria de quem abre a tela está atrás de outra coisa. */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Acessibilidade</Text>
@@ -240,12 +240,12 @@ export function AjustesScreen({
             do app, então fica fora dela.
 
             **Vale também na `preview`**, e é essa a diferença: antes a condição era só `__DEV__`, e
-            a tela desaparecia justamente na build que serve para testar alarme com o app fechado —
+            a tela desaparecia justamente na build que serve para testar alarme com o app fechado -
             onde o Metro não existe e o diagnóstico é a única forma de saber se um aviso foi
             agendado. Foi o que faltou na noite de 11/09, ao investigar o alarme que não tocava.
 
             As duas condições são resolvidas em tempo de compilação (`__DEV__` e a variável de
-            ambiente entram no bundle como literais), então na produção a tela sai do binário — não
+            ambiente entram no bundle como literais), então na produção a tela sai do binário - não
             fica escondida atrás de um `if` que alguém possa contornar. */}
         {(__DEV__ || process.env.EXPO_PUBLIC_DIAGNOSTICO === "1") &&
         onOpenDiagnostico ? (

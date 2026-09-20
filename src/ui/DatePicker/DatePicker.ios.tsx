@@ -19,11 +19,11 @@ function paraIsoDay(data: Date): string {
 
 /**
  * Calendário nativo do iOS. Mesmo contrato do Android, componente diferente: lá é Jetpack Compose,
- * aqui é SwiftUI, e as duas APIs não se parecem — o iOS recebe a data por `selection` (controlada,
+ * aqui é SwiftUI, e as duas APIs não se parecem - o iOS recebe a data por `selection` (controlada,
  * daí o estado local) e devolve por `onDateChange`, enquanto o Android recebe `initialDate` em ISO.
  *
  * Os limites de `minimo`/`maximo` não têm equivalente direto nesta ponte, então a data fora da
- * faixa continua escolhível aqui e é a validação da tela que recusa — a mesma que já existia antes
+ * faixa continua escolhível aqui e é a validação da tela que recusa - a mesma que já existia antes
  * de qualquer calendário. iOS segue **compilável, não verificado**: nada disso vira promessa até
  * existir um build.
  */

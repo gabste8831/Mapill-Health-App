@@ -11,7 +11,7 @@ import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
  *
  * O lembrete de dose depende de **quatro** autorizações diferentes, concedidas em quatro telas
  * diferentes do Android, e nenhuma delas avisa quando é revogada. Antes disso elas estavam
- * espalhadas — a permissão de notificação no cadastro, o Não Perturbe num link solto — e o
+ * espalhadas - a permissão de notificação no cadastro, o Não Perturbe num link solto - e o
  * resultado era o app prometendo um alarme que o sistema não deixava tocar, sem que ninguém
  * soubesse por quê.
  *
@@ -20,7 +20,7 @@ import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
  * ## O limite que não dá para contornar
  *
  * No Android, permissão negada **não pode ser pedida de novo**. `requestPermission` retorna na hora,
- * sem abrir diálogo nenhum. Não é escolha do app, é da plataforma — e por isso "pedir de novo" não
+ * sem abrir diálogo nenhum. Não é escolha do app, é da plataforma - e por isso "pedir de novo" não
  * é uma opção que exista.
  *
  * O que existe, e é o que este módulo faz: **detectar** o que falta e **levar** a pessoa até a tela
@@ -28,15 +28,15 @@ import { CANAL_ALARME, registrarCanais } from "./canais-notifee";
  */
 
 /**
- * As autorizações cujo estado o Android **não deixa ler** — só dá para registrar a ida até a tela.
+ * As autorizações cujo estado o Android **não deixa ler** - só dá para registrar a ida até a tela.
  *
  * Três itens caem aqui, e o mecanismo é o mesmo do `sobreporApps` original: o app anota que levou a
  * pessoa até a tela do sistema e considera atendido. Não é uma leitura de verdade, e assume que quem
- * foi lá concedeu — mas erra para o lado recuperável. Quem não conceder fica com o comportamento de
+ * foi lá concedeu - mas erra para o lado recuperável. Quem não conceder fica com o comportamento de
  * antes, e o item volta se o app for reinstalado.
  *
  * A alternativa seria o item nunca sair do painel, e um painel que cobra o que já foi feito ensina a
- * ignorar o painel inteiro — inclusive as linhas que de fato impedem o alarme de tocar.
+ * ignorar o painel inteiro - inclusive as linhas que de fato impedem o alarme de tocar.
  */
 const CHAVES_DE_IDA = {
   sobreposicao: "mapill:sobreposicao-pedida",
@@ -74,7 +74,7 @@ function fabricanteMataApps(): boolean {
  *
  * A intent é tentada na ordem: a específica do fabricante primeiro, e as configurações do app como
  * último recurso. `sendIntent` rejeita quando a Activity não existe, e é isso que faz a cascata
- * funcionar — não há como perguntar antes se ela está lá.
+ * funcionar - não há como perguntar antes se ela está lá.
  *
  * Os nomes vêm do dontkillmyapp.com e mudam entre versões da MIUI/One UI, e é justamente por isso
  * que existe o fallback: uma Activity renomeada faz o toque cair nas configurações do app, onde a
@@ -92,7 +92,7 @@ const TELAS_DE_AUTOSTART = [
 /**
  * Tenta cada intent em ordem, e cai nas configurações do app quando nenhuma existe.
  *
- * Um `for` com `await` de propósito, e não `Promise.all`: a ordem **é** a regra — a tela do
+ * Um `for` com `await` de propósito, e não `Promise.all`: a ordem **é** a regra - a tela do
  * fabricante primeiro, a genérica no fim. Disparar em paralelo abriria duas telas em quem tem as
  * duas.
  */
@@ -116,13 +116,13 @@ async function abrirPrimeiraTelaQueExistir(intents: readonly string[]): Promise<
  * ## A regra que define quem entra nesta lista
  *
  * **Só entra o que o app consegue acompanhar.** Um item que continua cobrando depois de atendido
- * ensina a ignorar o painel inteiro — inclusive as linhas que de fato impedem o alarme de tocar.
+ * ensina a ignorar o painel inteiro - inclusive as linhas que de fato impedem o alarme de tocar.
  *
  * Há duas formas de acompanhar, e a diferença importa:
  *
- * 1. **Lendo o estado** — notificações, alarme exato, Não Perturbe. O Android responde se estão
+ * 1. **Lendo o estado** - notificações, alarme exato, Não Perturbe. O Android responde se estão
  *    concedidas, então a linha some quando de fato foram.
- * 2. **Registrando a ida** — sobreposição, início automático, bateria. Essas telas não expõem
+ * 2. **Registrando a ida** - sobreposição, início automático, bateria. Essas telas não expõem
  *    estado a nenhuma API, e o app anota que levou a pessoa até lá (ver `CHAVES_DE_IDA`). Não é
  *    leitura de verdade, mas erra para o lado recuperável: quem não conceder fica com o
  *    comportamento de antes, e a linha volta se o app for reinstalado.
@@ -134,7 +134,7 @@ async function abrirPrimeiraTelaQueExistir(intents: readonly string[]): Promise<
  * leva a lugar reconhecível. Sem uma tela de destino confiável, não há o que oferecer.
  *
  * A **economia de bateria** saiu pelo motivo errado e voltou em 12/09. O defeito da versão antiga
- * era **abrir uma tela e verificar outra** — mandava para o início automático do fabricante e lia
+ * era **abrir uma tela e verificar outra** - mandava para o início automático do fabricante e lia
  * `isBatteryOptimizationEnabled()`, a otimização do Android, que é ajuste independente. Com as duas
  * separadas em linhas próprias, cada uma abre a sua tela e registra a sua ida.
  */
@@ -154,7 +154,7 @@ export type ItemDePermissao = {
    *
    * As telas do Android não explicam por que alguém chegou nelas: a de política do Não Perturbe é
    * uma lista de dezenas de apps, e a de bateria abre numa página de opções onde nada diz respeito
-   * ao alarme. Sem esta linha, o toque no item levava a pessoa a um lugar estranho e a deixava lá —
+   * ao alarme. Sem esta linha, o toque no item levava a pessoa a um lugar estranho e a deixava lá -
    * era o que fazia o painel parecer quebrado mesmo abrindo a tela certa.
    *
    * Ausente nos itens em que a própria tela já é a resposta (o interruptor de notificações do app).
@@ -169,7 +169,7 @@ export type ItemDePermissao = {
    * de concedido, com o convite a abrir e olhar.
    *
    * Sem esta distinção, o painel dizia "concedida" para quem abriu a tela do Autostart e saiu sem
-   * ligar a chave — e o app ficava silencioso sem nada que explicasse por quê (achado de 12/09).
+   * ligar a chave - e o app ficava silencioso sem nada que explicasse por quê (achado de 12/09).
    */
   verificavel: boolean;
   /**
@@ -185,13 +185,13 @@ export type DiagnosticoDeAlarme = {
   itens: ItemDePermissao[];
   /** O alarme dispara? Falso quando falta alguma essencial. */
   vaiTocar: boolean;
-  /** Falta algo, essencial ou não — incluindo as que o app não consegue verificar. */
+  /** Falta algo, essencial ou não - incluindo as que o app não consegue verificar. */
   temPendencia: boolean;
   /**
    * Falta alguma das que o app **comprova**, e é isso que autoriza a interface a alarmar.
    *
    * `temPendencia` inclui as três não-verificáveis, que nunca contam como atendidas enquanto a
-   * pessoa não visita a tela do sistema — usá-lo para pintar algo de vermelho deixaria o alerta
+   * pessoa não visita a tela do sistema - usá-lo para pintar algo de vermelho deixaria o alerta
    * permanente, inclusive para quem autorizou tudo.
    *
    * Este campo existe porque três telas precisavam da mesma conta (a Home, a folha de lembrete e o
@@ -215,7 +215,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
   /**
    * Recria o canal **antes** de ler, se ele estiver desatualizado.
    *
-   * O diagnóstico roda a cada volta ao primeiro plano — que é exatamente quando a pessoa volta de
+   * O diagnóstico roda a cada volta ao primeiro plano - que é exatamente quando a pessoa volta de
    * ter autorizado o Não Perturbe. Sem isto, o canal continuaria com o `bypassDnd: false` com que
    * nasceu, e o item ficaria pendente para sempre, cobrando algo já feito.
    */
@@ -243,7 +243,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
     {
       /**
        * `alarmEnabled` é o "Alarmes e lembretes" do Android 14+. Sem ele o aviso ainda chega, mas
-       * o sistema pode adiá-lo para a próxima janela de manutenção — e uma dose lembrada meia hora
+       * o sistema pode adiá-lo para a próxima janela de manutenção - e uma dose lembrada meia hora
        * depois, em silêncio, é pior que um lembrete que não veio: a pessoa confia num horário que o
        * app não cumpriu.
        */
@@ -271,12 +271,12 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        * Lido do **canal**, e não de uma API de permissão.
        *
        * O app pede `bypassDnd: true` ao criar o canal, mas o Android só o mantém se a autorização
-       * de política do Não Perturbe estiver concedida — sem ela, o canal nasce com `false` e a flag
+       * de política do Não Perturbe estiver concedida - sem ela, o canal nasce com `false` e a flag
        * é ignorada em silêncio. Então ler o canal de volta responde exatamente a pergunta que
        * interessa: *o alarme atravessa o silencioso?*
        *
        * Antes disto o item era `false` fixo, e ficava na lista **para sempre**, mesmo depois de
-       * concedido — cobrando algo que a pessoa já tinha feito, que é o jeito mais rápido de ensinar
+       * concedido - cobrando algo que a pessoa já tinha feito, que é o jeito mais rápido de ensinar
        * a ignorar o painel inteiro.
        */
       concedida: canal?.bypassDnd === true,
@@ -285,7 +285,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
       /**
        * A tela de **acesso à política do Não Perturbe**, e não as notificações do app.
        *
-       * `openNotificationSettings()` levava às notificações do Mapill — onde esta autorização não
+       * `openNotificationSettings()` levava às notificações do Mapill - onde esta autorização não
        * existe. Quem chegava lá via as categorias de notificação, não achava nada sobre silencioso,
        * e voltava sem ter feito o que o item pedia. O item continuava pendente, e o motivo era
        * invisível.
@@ -310,7 +310,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        *
        * O `fullScreenAction` sobe sozinho sobre a tela de bloqueio (é o que `showWhenLocked` no
        * manifesto garante), mas com o aparelho **em uso** o Android o rebaixa para um aviso no topo
-       * — a própria documentação do Notifee diz isso, e não há API que force o contrário. Quando o
+       * - a própria documentação do Notifee diz isso, e não há API que force o contrário. Quando o
        * Mapill é o app aberto, ele contorna navegando por conta própria; em outro aplicativo, não há
        * o que navegar.
        *
@@ -321,10 +321,10 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        *
        * Nem o Notifee nem o `expo-intent-launcher` expõem `canDrawOverlays`, então não há como
        * perguntar ao Android se a permissão está concedida. A alternativa seria o item nunca sair do
-       * painel — o defeito que fez a linha de tela cheia ser removida em 05/09.
+       * painel - o defeito que fez a linha de tela cheia ser removida em 05/09.
        *
        * A saída é registrar a ida: quem tocou no item foi levado à tela do sistema, e o app anota
-       * isso. Não é uma leitura de verdade, e assume que quem foi até lá concedeu — mas erra para o
+       * isso. Não é uma leitura de verdade, e assume que quem foi até lá concedeu - mas erra para o
        * lado recuperável. Quem não conceder continua com o comportamento de hoje (o aviso no topo),
        * e o item volta a aparecer se o app for reinstalado.
        */
@@ -340,7 +340,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
        * `Linking.sendIntent`, e **não** `expo-intent-launcher`.
        *
        * O pacote faria o mesmo, mas é módulo nativo: importá-lo derruba o app inteiro em qualquer
-       * binário que não o contenha, e foi o que aconteceu em 05/09 — o import quebrou a Home, que
+       * binário que não o contenha, e foi o que aconteceu em 05/09 - o import quebrou a Home, que
        * levou o layout junto, num aparelho rodando a build anterior. `sendIntent` já vem no React
        * Native e é o que os outros itens deste painel usam.
        */
@@ -361,11 +361,11 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
    * As duas linhas que **só aparecem em fabricante que mata apps**.
    *
    * Elas entram no painel por decisão do Gabriel em 12/09, depois de o Autostart desligado ter
-   * impedido **qualquer** aviso de chegar num Xiaomi — nem alarme, nem notificação, nem com o app
+   * impedido **qualquer** aviso de chegar num Xiaomi - nem alarme, nem notificação, nem com o app
    * nos recentes. O agendamento existia e o sistema recusava acordar o processo.
    *
    * Ficaram fora até aqui pela regra do painel: só entra o que o app lê de volta, e estas telas são
-   * proprietárias e não expõem estado. O que muda é o mecanismo — elas usam a mesma lembrança do
+   * proprietárias e não expõem estado. O que muda é o mecanismo - elas usam a mesma lembrança do
    * `sobreporApps`, que registra a ida em vez de ler a permissão. Assim a linha some depois de
    * atendida, que é o que a regra protegia.
    *
@@ -408,7 +408,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
            *
            * Era `IGNORE_BATTERY_OPTIMIZATION_SETTINGS`, a lista de todos os apps do Android puro.
            * O Gabriel apontou em 12/09 que no aparelho dele a restrição que importa não fica ali:
-           * mora **dentro dos detalhes do app**, na linha de economia de bateria — e a MIUI trata as
+           * mora **dentro dos detalhes do app**, na linha de economia de bateria - e a MIUI trata as
            * duas como ajustes independentes, então a lista geral abria uma tela onde mexer não
            * resolvia nada.
            *
@@ -437,7 +437,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
  *
  * Só a de notificações abre diálogo, e só enquanto nunca foi negada. As outras não têm diálogo
  * nenhum: são telas do sistema, e a pessoa precisa ir até lá. Por isso esta função devolve o
- * diagnóstico completo — quem chama usa o que sobrou para mostrar o que ainda falta.
+ * diagnóstico completo - quem chama usa o que sobrou para mostrar o que ainda falta.
  */
 export async function pedirPermissoesDeAlarme(): Promise<DiagnosticoDeAlarme> {
   if (Platform.OS !== "android") {

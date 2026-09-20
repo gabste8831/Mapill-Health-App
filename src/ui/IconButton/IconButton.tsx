@@ -8,7 +8,7 @@ import { criarEstilos } from "./IconButton.styles";
 /**
  * `sutil` é o ícone dentro de um cartão de lista: fundo neutro, sem borda, sem sombra.
  *
- * Existe porque as telas desenhavam esse botão à mão — em Remédios e no Calendário — e o
+ * Existe porque as telas desenhavam esse botão à mão - em Remédios e no Calendário - e o
  * resultado era um ícone **sem fundo nenhum**, flutuando, diferenciado do vizinho só pela cor. O
  * sintoma que denunciava isso era o texto de apoio da tela precisar explicar em prosa o que os
  * ícones fazem: quando a interface precisa de legenda, ela falhou. O fundo é o que transforma um
@@ -28,7 +28,7 @@ export type IconButtonProps = Omit<PressableProps, "style"> & {
   style?: StyleProp<ViewStyle>;
 };
 
-/** Botão circular só com ícone — usado em ações compactas (ex: "adicionar alergia", FAB). */
+/** Botão circular só com ícone - usado em ações compactas (ex: "adicionar alergia", FAB). */
 export function IconButton({
   icon,
   variant = "primary",

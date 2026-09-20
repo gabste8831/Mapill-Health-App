@@ -10,7 +10,7 @@ const DURATION = 600;
 
 /**
  * Cobre a splash nativa e some com fade, evitando o corte seco entre a splash e a primeira
- * tela. Só desmonta depois da animação terminar (`withCallback`) — desmontar antes deixaria
+ * tela. Só desmonta depois da animação terminar (`withCallback`) - desmontar antes deixaria
  * um flash branco.
  */
 export function SplashOverlay() {
@@ -20,13 +20,13 @@ export function SplashOverlay() {
   /**
    * Esconder a splash nativa é feito **na montagem**, e não num `onLayout`.
    *
-   * O `onLayout` só dispara quando a view é medida, e ao voltar de morte fria — fechar o app, tirar
-   * dos recentes e abrir de novo — o Android pode restaurar a árvore sem uma nova passada de
+   * O `onLayout` só dispara quando a view é medida, e ao voltar de morte fria - fechar o app, tirar
+   * dos recentes e abrir de novo - o Android pode restaurar a árvore sem uma nova passada de
    * layout nesta view. Aí `hideAsync` nunca era chamado e o app ficava preso no fundo azul, sem
    * saída a não ser fechar tudo outra vez. Um efeito de montagem não depende de medição: se este
    * componente existe, a splash tem que sair.
    *
-   * `hideAsync` é idempotente e rejeita quando já não há splash — daí o `catch` vazio: chamar duas
+   * `hideAsync` é idempotente e rejeita quando já não há splash - daí o `catch` vazio: chamar duas
    * vezes é normal, e não é erro que precise ser tratado.
    */
   useEffect(() => {
@@ -54,10 +54,10 @@ export function SplashOverlay() {
    * A capsula desenhada, e nao mais o PNG do lockup.
    *
    * `mark-transparent-a.png` e a marca inteira em **1000x333** (a capsula e a palavra ao lado), e
-   * aqui ela era desenhada num quadro de 76x71 — quase quadrado. A imagem entrava espremida e
+   * aqui ela era desenhada num quadro de 76x71 - quase quadrado. A imagem entrava espremida e
    * recortada, e o que aparecia na tela era "Mapi": a palavra cortada no meio.
    *
-   * A capsula sozinha e quadrada, entao cabe no quadro sem deformar — e e a mesma forma que a
+   * A capsula sozinha e quadrada, entao cabe no quadro sem deformar - e e a mesma forma que a
    * splash nativa mostra, o que faz a troca entre as duas deixar de existir aos olhos de quem
    * abre o app.
    */
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   splashOverlay: {
     ...StyleSheet.absoluteFill,
     /**
-     * Mesmo azul do `expo-splash-screen` no `app.json` — se um mudar, o outro tem que mudar junto,
+     * Mesmo azul do `expo-splash-screen` no `app.json` - se um mudar, o outro tem que mudar junto,
      * senão aparece um pisca de cor na troca.
      *
      * **Estava divergente até 02/09**: o `app.json` usa `#196FF3` e aqui havia `#208AEF`, então o

@@ -1,7 +1,7 @@
 import type { AuthUser } from "../entities/auth-user";
 
 /**
- * Abstração de autenticação — nenhuma implementação concreta (Supabase, etc.) é importada
+ * Abstração de autenticação - nenhuma implementação concreta (Supabase, etc.) é importada
  * aqui, seguindo o mesmo princípio dos outros ports (ver `ports/README.md`).
  */
 export interface AuthGateway {

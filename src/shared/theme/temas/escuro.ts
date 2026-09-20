@@ -30,20 +30,20 @@ export const temaEscuro: Tema = {
     primarySurface: "#16233A",
     onPrimarySurface: "#B9D5FF",
     /**
-     * O azul claro que `primary` era antes de escurecer — 8.1:1 de contraste contra o fundo.
+     * O azul claro que `primary` era antes de escurecer - 8.1:1 de contraste contra o fundo.
      * Reservado para onde a cor precisa **ler como tinta** sobre uma superfície já escura (a aba
      * ativa da barra de navegação, o horário em destaque de uma dose): ali o navy de `primary`
      * quase não se distingue do resto da paleta escura.
      */
     corDeDestaque: "#7FB2FF",
     /**
-     * Cinza, e não azul, para o bloco que domina a tela sozinho — hoje só a faixa do calendário.
+     * Cinza, e não azul, para o bloco que domina a tela sozinho - hoje só a faixa do calendário.
      * Pedido do Gabriel depois de ver o tema escuro de verdade: um bloco tão grande no azul do
      * tema competia com o resto da paleta escura em vez de se somar a ela.
      *
      * É o **mesmo `surfaceContainer`** das fichas de filtro não selecionadas, logo abaixo da
      * grade. Já foi `surfaceContainerHigh`, um degrau acima, e a diferença de um degrau entre dois
-     * blocos vizinhos não lê como hierarquia — lê como desalinho, duas superfícies quase iguais
+     * blocos vizinhos não lê como hierarquia - lê como desalinho, duas superfícies quase iguais
      * sem motivo aparente para não serem iguais. Sendo a mesma cor, a faixa e as fichas passam a
      * ser um bloco só de "controles do calendário".
      */
@@ -57,7 +57,7 @@ export const temaEscuro: Tema = {
 
 
     /**
-     * A superfície de aviso é **clara**, a mesma do tema padrão — e não um marrom escuro.
+     * A superfície de aviso é **clara**, a mesma do tema padrão - e não um marrom escuro.
      *
      * Já foi `#2B2718`, seguindo a regra geral do tema ("superfícies de estado ficam tingidas, não
      * pastel"). A regra vale para superfície que cobre área grande; falha para **bloco de aviso**,
@@ -72,7 +72,7 @@ export const temaEscuro: Tema = {
     warningSurface: "#FDF3C4",
     onWarningSurface: "#5C4A0F",
     /**
-     * O amarelo aceso vale igual no escuro — é a mesma lâmpada, e o texto escuro contra ela
+     * O amarelo aceso vale igual no escuro - é a mesma lâmpada, e o texto escuro contra ela
      * continua sendo o que se lê. Um selo pequeno em amarelo cheio não incomoda à noite; o que
      * incomodaria é um bloco inteiro, e esse continua com a superfície escura acima.
      */
@@ -93,11 +93,11 @@ export const temaEscuro: Tema = {
     /**
      * Clara como no padrão, pelo mesmo motivo do `warningSurface` acima: ela tinge o bloco de
      * permissão faltando dentro do popup de lembrete, e em `#2E1618` (luminância 0.01) aquilo era
-     * um retângulo preto — a cor que deveria dizer "isto impede o alarme de tocar" não chegava.
+     * um retângulo preto - a cor que deveria dizer "isto impede o alarme de tocar" não chegava.
      *
      * ⚠️ Quem escreve sobre ela precisa de tinta **escura**: o `error` deste tema é claro
      * (`#FF9A92`) e daria 1.4:1 aqui. O `PainelDePermissoes` usa `error`, então a linha de texto
-     * dele passou a `onErrorContainerEscuro` — ver o uso no componente.
+     * dele passou a `onErrorContainerEscuro` - ver o uso no componente.
      */
     errorSurface: "#FDEAEA",
     /**
@@ -111,7 +111,7 @@ export const temaEscuro: Tema = {
     /**
      * No escuro, "vivo" é **mais saturado**, e não mais escuro.
      *
-     * Aqui a cor já é clara por necessidade — ela vive sobre fundo escuro. O que faltava ao
+     * Aqui a cor já é clara por necessidade - ela vive sobre fundo escuro. O que faltava ao
      * `#68DE94` e ao `#FF9A92` não era luz, era saturação: os dois são pastéis, quase menta e
      * salmão. Estes têm o mesmo brilho com o croma que dá o tom de semáforo (9.7:1 e 6.7:1 sobre o
      * fundo, folgados nos 3:1 que a forma pede).
@@ -121,7 +121,7 @@ export const temaEscuro: Tema = {
     /**
      * No escuro o alerta preenchido é um vermelho **escuro** com texto claro, e não o contrário.
      *
-     * Um bloco de vermelho vivo aceso numa tela escura é o que se olha à noite e dói — e este card
+     * Um bloco de vermelho vivo aceso numa tela escura é o que se olha à noite e dói - e este card
      * aparece na Home, que é a primeira tela do app. `#8C1017` (o `errorContainer` do tema) carrega
      * o mesmo sinal com o brilho que o resto da interface tem.
      */
@@ -129,7 +129,7 @@ export const temaEscuro: Tema = {
     /**
      * Branco, e nao o `onError` deste tema.
      *
-     * Aqui os dois divergem: `error` e claro (`#FF9A92`), entao `onError` e quase preto — e era
+     * Aqui os dois divergem: `error` e claro (`#FF9A92`), entao `onError` e quase preto - e era
      * ele que o card de estoque baixo usava, saindo a 1.51:1 contra o proprio fundo. Sobre o
      * vermelho escuro do preenchimento quem se le e o branco: 9.54:1.
      */
@@ -152,7 +152,7 @@ export const temaEscuro: Tema = {
     /**
      * Mais opaco que no claro, e preto de verdade.
      *
-     * Sobre um fundo que ja e escuro, um veu translucido quase nao muda nada — e o que separa o
+     * Sobre um fundo que ja e escuro, um veu translucido quase nao muda nada - e o que separa o
      * popup do resto da tela e justamente esse recuo. 65% de preto leva o fundo de `#0F1319` para
      * quase `#000`, e a folha clara por cima ganha o contraste que no tema claro vem de graca.
      */

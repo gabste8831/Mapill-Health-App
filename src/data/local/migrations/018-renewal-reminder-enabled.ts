@@ -6,7 +6,7 @@
  * silêncio.
  *
  * Enquanto as duas informações moravam na mesma coluna, marcar "me avisar antes de a receita
- * vencer" sem tocar no seletor de antecedência gravava `null` — e o planejador descartava a
+ * vencer" sem tocar no seletor de antecedência gravava `null` - e o planejador descartava a
  * receita inteira, incluindo o aviso do dia do vencimento. A interface confirmava uma intenção
  * que o app não cumpria, em silêncio.
  *

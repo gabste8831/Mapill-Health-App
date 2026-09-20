@@ -13,17 +13,17 @@ import { useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./ConsentimentoScreen.styles";
 
 type ConsentimentoScreenProps = {
-  /** Só chamado depois dos dois checkboxes marcados — registra o consentimento e libera o app. */
+  /** Só chamado depois dos dois checkboxes marcados - registra o consentimento e libera o app. */
   onAccept: () => void;
   /**
-   * Volta pra tela de login. Omitir esconde o botão — a tela não decide sozinha se há
+   * Volta pra tela de login. Omitir esconde o botão - a tela não decide sozinha se há
    * retorno possível, quem sabe isso é o gate (`useFirstRunGate.canGoBack`).
    */
   onBack?: () => void;
 };
 
 // Bloqueante de propósito: sem "pular" nem "decidir depois". Dado de saúde é sensível por
-// definição legal e atravessa toda funcionalidade central — não existe modo sem consentimento.
+// definição legal e atravessa toda funcionalidade central - não existe modo sem consentimento.
 export function ConsentimentoScreen({ onAccept, onBack }: ConsentimentoScreenProps) {
   const styles = useEstilos(criarEstilos);
 

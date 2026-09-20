@@ -41,15 +41,15 @@ export const COLUNAS_LOCAIS = ["synced_at"] as const;
 /**
  * Colunas que **sobraram no SQLite** e não existem no servidor.
  *
- * O SQLite não remove coluna, e a regra do projeto é que migration publicada não se edita — então
+ * O SQLite não remove coluna, e a regra do projeto é que migration publicada não se edita - então
  * uma coluna substituída fica lá, vazia, para sempre. A 004 criou `emergency_contact_name/phone/
  * relationship` e a 005 as trocou por `emergency_contacts` (uma lista JSON); as três antigas
- * continuam na tabela local, e o schema do Supabase — escrito a partir do modelo **atual** — nunca
+ * continuam na tabela local, e o schema do Supabase - escrito a partir do modelo **atual** - nunca
  * as teve.
  *
  * Foi o que quebrou a sincronização na validação de 01/09:
  * `Could not find the 'emergency_contact_name' column of 'patient_profiles' in the schema cache`.
- * O push mandava a linha inteira, incluindo o que morreu na 005, e o PostgREST recusa o lote todo —
+ * O push mandava a linha inteira, incluindo o que morreu na 005, e o PostgREST recusa o lote todo -
  * uma coluna órfã bloqueava a sincronização inteira do usuário.
  *
  * Listar em vez de filtrar por schema remoto é deliberado: falha de sincronização por coluna nova
@@ -78,7 +78,7 @@ export const COLUNAS_ORFAS: Partial<Record<TabelaSincronizavel, string[]>> = {
 /**
  * Colunas cujo conteúdo é um caminho de arquivo **no aparelho** (`file:///data/user/0/…`).
  *
- * Sobem como estão, e é inútil do outro lado — um caminho do aparelho A não abre no aparelho B.
+ * Sobem como estão, e é inútil do outro lado - um caminho do aparelho A não abre no aparelho B.
  * Ficam listadas aqui porque é o que o E9 vai precisar trocar por uma URL do Storage, e porque
  * quem lê o código precisa saber que esses campos não significam nada depois de restaurados.
  */

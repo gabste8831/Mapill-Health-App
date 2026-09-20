@@ -21,10 +21,10 @@ export type BottomSheetProps = {
 
 /**
  * Popup padrão do app pra qualquer decisão pontual (escolher uma opção, preencher um mini
- * formulário) sem sair da tela — sobe do rodapé, com fundo escurecido que fecha ao tocar fora.
+ * formulário) sem sair da tela - sobe do rodapé, com fundo escurecido que fecha ao tocar fora.
  *
  * Ele mesmo se ajusta ao teclado: `KeyboardAvoidingView` não resolveria aqui porque o `Modal`
- * abre em outra janela no Android, que não recebe o redimensionamento da activity — o campo
+ * abre em outra janela no Android, que não recebe o redimensionamento da activity - o campo
  * ficava embaixo do teclado e a pessoa digitava sem ver o que escrevia. A altura real do teclado
  * empurra o popup pra cima, e o conteúdo rola dentro do que sobrou.
  */
@@ -42,13 +42,13 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
 
   /**
    * O respiro do fim do conteúdo. O popup encosta na base da tela, onde ainda ficam a barra de
-   * gestos e o queixo do aparelho — e o último elemento costuma ser justamente o botão que confirma
+   * gestos e o queixo do aparelho - e o último elemento costuma ser justamente o botão que confirma
    * a decisão. Com só um `padding` fixo ele ficava rente à borda, difícil de acertar e fácil de
    * confundir com o gesto de voltar do sistema.
    *
    * Com o teclado aberto o inset não se aplica (a barra de gestos fica atrás dele), mas o respiro
    * continua precisando existir: sem ele o botão "Salvar" encosta direto na borda do teclado, sem
-   * nenhuma separação visual entre os dois — o que lia como os elementos estarem "grudados" por
+   * nenhuma separação visual entre os dois - o que lia como os elementos estarem "grudados" por
    * engano, e não como decisão de layout.
    */
   const respiroInferior =
@@ -59,7 +59,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
       <Pressable style={[styles.overlay, { paddingBottom: keyboardHeight }]} onPress={onClose}>
         {/* Pressable próprio (em vez de View) + stopPropagation: sem isso, um toque em
             qualquer área do sheet que não seja ela mesma interativa (ex: entre o label e o
-            input de um TextField) borbulha pro Pressable do fundo e fecha o popup — foi
+            input de um TextField) borbulha pro Pressable do fundo e fecha o popup - foi
             exatamente o que quebrava o campo "Nome" do contato de emergência. */}
         <Pressable
           style={[styles.sheet, { maxHeight: alturaDisponivel }]}
@@ -70,7 +70,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
              *
              * O `stopPropagation` sozinho fazia o toque morrer aqui: ele não fechava o popup (certo)
              * mas também não dispensava o teclado (errado). O resultado era um teclado grudado,
-             * ocupando metade da tela, sem lugar nenhum onde tocar para dispensá-lo — nem fora do
+             * ocupando metade da tela, sem lugar nenhum onde tocar para dispensá-lo - nem fora do
              * popup, que fecha tudo, nem dentro, que não fazia nada.
              */
             Keyboard.dismiss();

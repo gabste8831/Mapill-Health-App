@@ -27,11 +27,11 @@ import { CenteredLoader } from "@/ui";
 import { AlarmeScreen } from "./AlarmeScreen";
 
 /**
- * A raiz da tela de alarme — o que o Notifee monta quando o alarme dispara.
+ * A raiz da tela de alarme - o que o Notifee monta quando o alarme dispara.
  *
  * **É um segundo ponto de entrada do app**, e por isso repete coisas que o `_layout.tsx` faz para o
  * resto: abrir o banco e prover o contexto de área segura. Quando este componente sobe, o roteador
- * pode nem existir — o alarme das 8h dispara com o aplicativo fechado desde ontem à noite.
+ * pode nem existir - o alarme das 8h dispara com o aplicativo fechado desde ontem à noite.
  *
  * O que ele deliberadamente **não** repete é o gate de primeira execução (login, consentimento,
  * ficha). Um alarme só existe se alguém já cadastrou um remédio, o que só é possível depois de
@@ -39,7 +39,7 @@ import { AlarmeScreen } from "./AlarmeScreen";
  * consentiu.
  */
 /**
- * O que a `MainActivity` passa como `initialProps` — ver
+ * O que a `MainActivity` passa como `initialProps` - ver
  * `plugins/tela-do-alarme-na-main-activity.js`.
  *
  * O bundle da notificação vem inteiro, do intent que abriu a Activity. Só o `data.scheduledFor`
@@ -53,18 +53,18 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   const bancoPronto = useDatabaseReady();
 
   /**
-   * **Carrega a fonte do app — e é isto que conserta o texto cortado.**
+   * **Carrega a fonte do app - e é isto que conserta o texto cortado.**
    *
    * ## O defeito
    *
    * Com o app **nos recentes**, a tela azul subia com tudo truncado: "Hora do seu" em vez de "Hora
    * do seu remédio", "Tome" em vez de "Tomei", "Sem" em vez de "Silenciar", e as orientações
-   * cortadas no meio ("Depois de", "Junto da"). O conteúdo estava certo — o nome do remédio e a
-   * dose apareciam inteiros —, o que faltava era o fim de cada frase.
+   * cortadas no meio ("Depois de", "Junto da"). O conteúdo estava certo - o nome do remédio e a
+   * dose apareciam inteiros -, o que faltava era o fim de cada frase.
    *
    * ## A causa, e por que é a mesma da splash
    *
-   * Todo o `typography` pede `PlusJakartaSans`, e quem a carrega é o `useFonts` do `_layout.tsx` —
+   * Todo o `typography` pede `PlusJakartaSans`, e quem a carrega é o `useFonts` do `_layout.tsx` -
    * dentro da árvore do `expo-router`. Esta Activity monta por `AppRegistry`, fora dela: a família
    * nunca é registrada aqui, o Android cai na fonte do sistema, e as métricas da folha de estilos
    * (lineHeight fixo, letterSpacing negativo) passam a valer para uma fonte mais larga. O texto não
@@ -76,7 +76,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
    * ## Por que não espera a fonte para montar
    *
    * O valor de retorno é ignorado de propósito. Um alarme que espera a fonte carregar para mostrar
-   * qual remédio tomar é pior que um alarme com a fonte do sistema — e o `_layout` já trata a
+   * qual remédio tomar é pior que um alarme com a fonte do sistema - e o `_layout` já trata a
    * fonte que **falha** como resolvida, pelo mesmo motivo. A tela sobe na hora e redesenha quando a
    * família chega.
    */
@@ -93,7 +93,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
    *
    * As três buscas do efeito abaixo dependem de coisas que podem não existir no arranque frio: a
    * notificação inicial, a bandeja, e um evento que o JS pode não ter chegado a ouvir. Com o app
-   * fechado, as três vinham vazias e a tela subia só azul — o defeito de 14 e 15/09.
+   * fechado, as três vinham vazias e a tela subia só azul - o defeito de 14 e 15/09.
    *
    * Esta prop vem do intent que abriu a Activity, já preenchida na primeira renderização. Quando
    * ela existe, o efeito nem precisa correr atrás de nada.
@@ -106,23 +106,23 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   const [instanteIso, setInstanteIso] = useState<string | null>(daProp);
 
   /**
-   * **Anuncia a Activity antes de saber de qual horário ela é** — e essa ordem é a correção.
+   * **Anuncia a Activity antes de saber de qual horário ela é** - e essa ordem é a correção.
    *
    * O efeito abaixo é assíncrono: abre o banco, consulta `getInitialNotification` e às vezes varre a
    * bandeja. Só no fim `AlarmeScreen` monta e se registra em `alarme-em-cena`. Durante toda essa
-   * espera, `jaEstaEmCena` respondia `false` — e o listener de avisos concluía que não havia tela
+   * espera, `jaEstaEmCena` respondia `false` - e o listener de avisos concluía que não havia tela
    * nenhuma para o horário.
    *
    * Foi o defeito que o Gabriel descreveu em 12/09, com um detalhe que mudou o diagnóstico: o que ele
    * via **não** era a ausência da tela azul, era a tela de "Hora do remédio" no lugar dela. Isso
    * aponta para o caminho do `PRESS` em `escutar-avisos`, que fecha a tela cheia e abre a de horário
-   * — e que só age porque a guarda de `jaEstaEmCena` respondia `false` cedo demais.
+   * - e que só age porque a guarda de `jaEstaEmCena` respondia `false` cedo demais.
    *
    * O padrão dos recentes é a assinatura da corrida: app nos recentes, o processo já está de pé e o
    * `PRESS` (que a MIUI entrega sozinha na tela de bloqueio) chega antes da montagem; app fora dos
    * recentes, o processo sobe inteiro primeiro, a Activity ganha, e a tela azul fica.
    *
-   * Este efeito roda **antes** do de baixo — a ordem de declaração é a ordem de execução no React —
+   * Este efeito roda **antes** do de baixo - a ordem de declaração é a ordem de execução no React -
    * e sem `await` nenhum, então não há janela entre o nascimento da Activity e o anúncio dela.
    */
   useEffect(() => {
@@ -131,7 +131,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
   }, []);
 
   /**
-   * **O sticky órfão deixou de decidir qualquer coisa** — e por isso a guarda que vivia aqui saiu.
+   * **O sticky órfão deixou de decidir qualquer coisa** - e por isso a guarda que vivia aqui saiu.
    *
    * Ela existia porque a `MainActivity` servia a dois donos, e precisava adivinhar qual tela montar:
    * o Notifee posta o `MainComponentEvent` quando a notificação é **exibida**, não quando alguém
@@ -149,7 +149,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
    * desbloqueia o aparelho para responder o alarme.
    */
   /**
-   * **Esconde a splash nativa — e é isto que tira a tela azul vazia.**
+   * **Esconde a splash nativa - e é isto que tira a tela azul vazia.**
    *
    * ## O defeito
    *
@@ -163,23 +163,23 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
    * 20:36:05.003  AlarmeScreen render: doses:1 pendentes:1 nomes:["Losartana Potássica 50 MG"]
    * ```
    *
-   * O React montava certo, com a dose carregada, revalidando a cada três segundos — atrás de uma
+   * O React montava certo, com a dose carregada, revalidando a cada três segundos - atrás de uma
    * janela que nunca saiu. Nenhuma linha de remoção da splash no log inteiro.
    *
    * ## Por que acontece só aqui
    *
    * `_layout.tsx` chama `preventAutoHideAsync()` **no topo do módulo**, e o `index.js` importa
-   * `expo-router/entry` — então a trava vale em qualquer processo, inclusive neste. Mas quem chama
+   * `expo-router/entry` - então a trava vale em qualquer processo, inclusive neste. Mas quem chama
    * `hideAsync()` é o `SplashOverlay`, que vive dentro da árvore do `expo-router`. Esta Activity
    * monta por `AppRegistry`, fora dela: a splash é impedida de sumir e ninguém a esconde.
    *
-   * É o mesmo defeito que os comentários de `_layout.tsx` e `use-database-ready` já descrevem —
-   * "o app fica preso no fundo azul da splash" —, chegando pelo caminho que não passa pelo roteador.
+   * É o mesmo defeito que os comentários de `_layout.tsx` e `use-database-ready` já descrevem -
+   * "o app fica preso no fundo azul da splash" -, chegando pelo caminho que não passa pelo roteador.
    *
    * ## Por que aqui, e sem esperar o banco
    *
    * Sem `await` nenhum e fora de qualquer guarda: o alarme já está tocando, e uma splash sobre o
-   * `CenteredLoader` é igual a uma splash sobre a tela pronta — em ambos os casos a pessoa acordou
+   * `CenteredLoader` é igual a uma splash sobre a tela pronta - em ambos os casos a pessoa acordou
    * com um fundo azul mudo. `hideAsync` é idempotente e rejeita quando não há splash, daí o
    * `catch` vazio: chamar sem ter o que esconder é normal, não é erro.
    */
@@ -197,7 +197,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
      *
      * Não custa tempo de tela: `AlarmeRaiz` já renderiza o loader enquanto `bancoPronto` for falso
      * (ver o `return` lá embaixo), então a busca não poderia mostrar nada antes disso de qualquer
-     * forma. E o som já está tocando — quem o toca é o serviço, não esta tela.
+     * forma. E o som já está tocando - quem o toca é o serviço, não esta tela.
      */
     if (!bancoPronto) return;
 
@@ -218,7 +218,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
        * Sem notificação inicial, procura entre as que estão **na bandeja**.
        *
        * `getInitialNotification` só responde quando a Activity nasceu de um toque. Vindo do
-       * `fullScreenAction` com o app já rodando, ou se o sistema remontar a tela, ela volta nula — e
+       * `fullScreenAction` com o app já rodando, ou se o sistema remontar a tela, ela volta nula - e
        * cair direto para "agora" abriria um alarme **sem dose nenhuma**, porque dificilmente existe
        * uma agendada para este exato minuto. Uma tela de alarme vazia é pior que nenhuma: ela toca,
        * assusta, e não diz o que tomar.
@@ -234,11 +234,11 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
       if (usar(doAlarme?.notification.data)) return;
 
       /**
-       * **O horário que o listener anotou na entrega** — a rede contra a tela azul vazia.
+       * **O horário que o listener anotou na entrega** - a rede contra a tela azul vazia.
        *
        * O caminho do `PRESS` cancela a notificação ao tratar o toque, e as duas buscas acima
        * dependem dela. Medido em aparelho em 14/09: 70 ms entre esta tela montar e a notificação
-       * sumir, e a tela subia **só azul**, sem remédio nenhum — exatamente o que o Gabriel
+       * sumir, e a tela subia **só azul**, sem remédio nenhum - exatamente o que o Gabriel
        * descreveu ao tocar no aviso em vez de esperar o alarme irromper.
        *
        * `anotarHorarioEntregue` grava no `DELIVERED`, antes de existir toque para cancelar coisa
@@ -253,13 +253,13 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
       /**
        * **Último recurso: a dose agendada mais próxima de agora**, e não o instante atual.
        *
-       * "Agora" garantia tela vazia — dificilmente existe dose no minuto exato em que o efeito roda,
+       * "Agora" garantia tela vazia - dificilmente existe dose no minuto exato em que o efeito roda,
        * e o alarme costuma chegar alguns segundos depois do horário marcado. A tela subia azul, sem
        * remédio nenhum, que é o pior desfecho possível para quem foi acordado por ela.
        *
        * Uma janela de duas horas para cada lado cobre o alarme que atrasou e o que a pessoa demorou
        * a atender, sem alcançar a dose do turno seguinte. Se nada houver ali, aí sim cai no instante
-       * atual — a tela fica vazia, mas silenciar e sair continuam funcionando.
+       * atual - a tela fica vazia, mas silenciar e sair continuam funcionando.
        */
       const agora = new Date();
       const duasHoras = 2 * 60 * 60_000;
@@ -300,7 +300,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
         ehActivityDeAlarme
         /**
          * Fechar a tela do alarme é **encerrar esta Activity**, e não navegar para trás: não há
-         * pilha atrás dela — ela nasceu de uma notificação, em task própria.
+         * pilha atrás dela - ela nasceu de uma notificação, em task própria.
          *
          * ## Por que não é mais `exitApp`
          *
@@ -308,7 +308,7 @@ export function AlarmeRaiz({ notificacaoDoAlarme }: AlarmeRaizProps) {
          * dividiam a mesma Activity isso era aceitável; com a `AlarmeActivity` em task própria
          * (16/09) passaria a matar o app aberto atrás e o serviço que toca o som.
          *
-         * `finishAndRemoveTask` fecha só esta task e devolve o aparelho ao que estava antes — o
+         * `finishAndRemoveTask` fecha só esta task e devolve o aparelho ao que estava antes - o
          * bloqueio, quando foi dali que a tela veio. **É a metade que faltava** para responder a
          * dose com o celular bloqueado não deixar o app acessível: a outra é o `showWhenLocked`
          * ter saído da `MainActivity`.

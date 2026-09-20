@@ -27,7 +27,7 @@ const ESTADOS = [
 /**
  * Os conjuntos que a grade mostra: todos menos o original, que vira o botão de restaurar.
  *
- * Calculado fora do componente — a lista não muda em execução, e recalcular a cada render seria
+ * Calculado fora do componente - a lista não muda em execução, e recalcular a cada render seria
  * trabalho por nada.
  */
 const ALTERNATIVOS = PARES_DE_ESTADO.filter((par) => par.id !== PAR_PADRAO.id);
@@ -40,8 +40,8 @@ const ALTERNATIVOS = PARES_DE_ESTADO.filter((par) => par.id !== PAR_PADRAO.id);
  * Havia aqui um tema "Sem depender de cor" que trocava o par por turquesa e magenta, fixo. A
  * medição desmontou a ideia: simulando as três formas de daltonismo (Viénot-Mollon, 1999) e
  * comparando com CIEDE2000, aquele par não era melhor que o verde e vermelho que substituía em
- * todos os casos. Daltonismo não é uma condição só — o que resolve a protanopia não é o mesmo que
- * resolve a tritanopia —, e nenhum conjunto fixo é ótimo para as três.
+ * todos os casos. Daltonismo não é uma condição só - o que resolve a protanopia não é o mesmo que
+ * resolve a tritanopia -, e nenhum conjunto fixo é ótimo para as três.
  *
  * Quem sabe qual funciona é quem está olhando a tela. Por isso a escolha é oferecida, com as três
  * cores de cada conjunto lado a lado: a pessoa não precisa saber o nome da própria condição, só
@@ -50,14 +50,14 @@ const ALTERNATIVOS = PARES_DE_ESTADO.filter((par) => par.id !== PAR_PADRAO.id);
  * ## A grade, e não a lista
  *
  * Quatro conjuntos em 2x2, cada um com as três cores empilhadas sob o nome. É a forma que permite
- * **comparar os conjuntos entre si** de relance — em lista, cada linha se lê sozinha e a
+ * **comparar os conjuntos entre si** de relance - em lista, cada linha se lê sozinha e a
  * comparação exige percorrer a tela de cima a baixo, que é justamente o que se quer evitar de
  * quem tem dificuldade em ver a diferença.
  *
  * ## O conjunto original fica fora da grade
  *
  * Ele não é uma alternativa entre iguais: é o estado de onde se parte, e ao qual se volta. Na
- * grade, ele seria a quinta opção — e uma grade de cinco deixa uma coluna órfã na segunda linha,
+ * grade, ele seria a quinta opção - e uma grade de cinco deixa uma coluna órfã na segunda linha,
  * além de esconder no meio das outras justamente a que desfaz a escolha. Como botão embaixo, ele
  * diz o que faz ("voltar ao normal") em vez de disputar a comparação.
  */

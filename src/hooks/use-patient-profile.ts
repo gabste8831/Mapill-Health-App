@@ -7,7 +7,7 @@ import { PatientProfileRepository } from "@/data/repositories/patient-profile-re
 import { sincronizar } from "@/data/remote/sync-service";
 import type { PatientProfileDraft } from "@/domain/entities/patient-profile";
 
-/** Web nunca persiste no SQLite (ver `useDatabaseReady`) — lá a ficha é sempre vazia. */
+/** Web nunca persiste no SQLite (ver `useDatabaseReady`) - lá a ficha é sempre vazia. */
 const persistsLocally = Platform.OS !== "web";
 
 /** Ficha salva no formato que a tela usa, ou `null` se ainda não existe. */
@@ -31,7 +31,7 @@ export async function loadPatientProfileDraft(): Promise<PatientProfileDraft | n
  * Grava a ficha, criando na primeira vez e atualizando nas seguintes. Conta única por paciente:
  * o `id` existente é reaproveitado, então editar nunca gera um segundo registro.
  *
- * Foto e opt-out de nuvem não vêm do formulário — são preservados do registro anterior pra
+ * Foto e opt-out de nuvem não vêm do formulário - são preservados do registro anterior pra
  * não serem apagados por uma edição que não os tocou.
  */
 export async function savePatientProfileDraft(draft: PatientProfileDraft): Promise<void> {
@@ -48,7 +48,7 @@ export async function savePatientProfileDraft(draft: PatientProfileDraft): Promi
     emergencyContacts: draft.emergencyContacts,
     notes: draft.notes,
     photoUri: draft.photoUri,
-    // Escolha de privacidade feita fora do formulário — preservada pra não ser desfeita por
+    // Escolha de privacidade feita fora do formulário - preservada pra não ser desfeita por
     // uma edição que não a tocou.
     photoSyncOptOut: existingProfile?.photoSyncOptOut ?? false,
     updatedAt: new Date().toISOString(),
@@ -60,18 +60,18 @@ export async function savePatientProfileDraft(draft: PatientProfileDraft): Promi
    * Sobe agora, sem esperar o app sair e voltar.
    *
    * A ficha é o caso em que a espera mais custa: quem a edita costuma ficar no app depois, então o
-   * gatilho de "voltou ao primeiro plano" pode demorar horas — e se a pessoa trocar de conta nesse
+   * gatilho de "voltou ao primeiro plano" pode demorar horas - e se a pessoa trocar de conta nesse
    * meio-tempo, o `pull` traz a versão antiga e a edição some. Foi o que aconteceu com o Gabriel em
    * 14/09, com o nome que ele tinha acabado de corrigir.
    *
-   * Sem `await`: a tela não deve esperar a rede para dizer que salvou — o dado já está no SQLite, e
+   * Sem `await`: a tela não deve esperar a rede para dizer que salvou - o dado já está no SQLite, e
    * é ele que manda. Falhando aqui, a linha continua pendente e a próxima passada a leva.
    */
   void sincronizar().catch(() => {});
 }
 
 export type PatientProfileState = {
-  /** A tela de edição não pode montar o formulário antes disso — os campos nasceriam vazios. */
+  /** A tela de edição não pode montar o formulário antes disso - os campos nasceriam vazios. */
   isLoading: boolean;
   draft: PatientProfileDraft | null;
   save: (draft: PatientProfileDraft) => Promise<void>;
@@ -86,7 +86,7 @@ export function usePatientProfile(): PatientProfileState {
    *
    * Era um `useEffect` com lista vazia, e isso bastava para a ficha, que é empurrada com `push` e
    * monta a cada abertura. Mas Ajustes e a Home são **abas**: elas ficam montadas em segundo
-   * plano e não remontam quando se navega até elas — então o efeito não rodava de novo, o `draft`
+   * plano e não remontam quando se navega até elas - então o efeito não rodava de novo, o `draft`
    * continuava o de antes, e a foto recém-salva simplesmente não existia para elas.
    *
    * O sintoma era a foto da ficha "não aparecer nem depois de salvar" no avatar de Ajustes,

@@ -114,7 +114,7 @@ export function ConfiguracaoDeLembrete({
         />
 
         {/**
-         * **Um bloco de permissões por vez** — nunca os dois.
+         * **Um bloco de permissões por vez** - nunca os dois.
          *
          * Os dois conviviam aqui, e o Gabriel encontrou o resultado em 12/09: quem abria o app pela
          * primeira vez e ia cadastrar um remédio via a mesma cobrança duplicada nesta folha, o
@@ -135,7 +135,7 @@ export function ConfiguracaoDeLembrete({
          *
          * Negada, o app não insiste: no Android o diálogo não abre de novo, então o painel leva às
          * configurações do sistema. E só as verificáveis entram na conta do painel, pelo mesmo
-         * motivo da Home — com as outras três ele nunca sairia desta folha.
+         * motivo da Home - com as outras três ele nunca sairia desta folha.
          */}
         {dependeDoAparelho ? (
           permissoes.temPendenciaVerificavel ? (

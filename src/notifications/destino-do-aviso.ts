@@ -1,13 +1,13 @@
 /**
  * Para onde o toque leva, quando o aviso **não** é de dose.
  *
- * Estoque, receita e compromisso não têm o que responder na notificação — não há "tomei" nem
+ * Estoque, receita e compromisso não têm o que responder na notificação - não há "tomei" nem
  * "pulei". O que a pessoa quer ao tocar é chegar onde se resolve aquilo, e cada um resolve num
  * lugar: repor estoque é na tela de estoque, renovar receita é no cadastro do remédio, e um
  * compromisso se confere na lista com o detalhe aberto.
  *
  * Sem isto o toque abria a Home, e a pessoa tinha de reencontrar sozinha o assunto que a
- * notificação acabara de nomear — pior justamente no caso que o aviso existe para cobrir, quem
+ * notificação acabara de nomear - pior justamente no caso que o aviso existe para cobrir, quem
  * abriu o celular por causa dele e não estava no app.
  *
  * Mora em arquivo próprio, separado de `escutar-avisos`, porque é **regra pura**: não toca no
@@ -33,7 +33,7 @@ const SUFIXOS = /-(baixo|acabou|antes|no-dia)$/;
  *
  * A chave já carrega o tipo e o id (`estoque-<inventoryId>-baixo`, `receita-<prescriptionId>-antes`,
  * `compromisso-<appointmentId>-no-dia`), montada pelos planejadores. Ler dali evita gravar um campo
- * novo em cada aviso só para dizer o que a chave já diz — e um campo a mais é mais uma coisa que
+ * novo em cada aviso só para dizer o que a chave já diz - e um campo a mais é mais uma coisa que
  * pode divergir do que o planejador escreveu.
  *
  * `null` para dose é deliberado: ela abre a tela do horário ou a do alarme, e quem decide entre as
@@ -42,7 +42,7 @@ const SUFIXOS = /-(baixo|acabou|antes|no-dia)$/;
  */
 export function destinoDaChave(chave: string): DestinoDoAviso | null {
   if (chave.startsWith("estoque-")) {
-    // A tela de estoque lista tudo e é onde se repõe — não há detalhe por item que valha mais.
+    // A tela de estoque lista tudo e é onde se repõe - não há detalhe por item que valha mais.
     return { tela: "estoque" };
   }
   if (chave.startsWith("receita-")) {

@@ -10,7 +10,7 @@ type LogoDoMapillProps = {
   /** Largura em pt. A altura acompanha, na proporção do lockup. */
   largura?: number;
   /**
-   * Força a versão para fundo escuro, quando o fundo **não** é o da tela — o azul cheio de um
+   * Força a versão para fundo escuro, quando o fundo **não** é o da tela - o azul cheio de um
    * card, por exemplo. Sem isto a escolha vem do tema em vigor.
    */
   sobreFundoEscuro?: boolean;
@@ -22,14 +22,14 @@ type LogoDoMapillProps = {
  *
  * ## Dois arquivos, e não um com a cor trocada
  *
- * O que muda entre eles é **só a palavra** — escura na versão para fundo claro, branca na versão
+ * O que muda entre eles é **só a palavra** - escura na versão para fundo claro, branca na versão
  * para fundo escuro. O quadrado azul e a cápsula são idênticos nos dois: eles são a marca, e marca
  * que muda de cor conforme a tela deixa de ser reconhecida. É a mesma lógica do ícone do app, que
  * não vira outro desenho quando o celular entra no modo escuro.
  *
  * ## Por que dois arquivos resolvem o defeito antigo
  *
- * A marca já foi um PNG só (`mark-transparent-a.png`), com a palavra em preto congelado — e por
+ * A marca já foi um PNG só (`mark-transparent-a.png`), com a palavra em preto congelado - e por
  * isso ela **desaparecia** no tema escuro, onde o cabeçalho é quase preto. Foi esse defeito que
  * levou a desenhar a wordmark em texto e, agora, a ter uma versão por esquema: a escolha do
  * arquivo é feita aqui, uma vez, em vez de cada tela lembrar de qual usar.

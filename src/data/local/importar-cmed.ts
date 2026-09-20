@@ -8,14 +8,14 @@ import { normalizarBusca } from "../repositories/cmed-catalog-repository";
  *
  * Chaves de uma letra porque são 7 mil registros: `{"name":…,"activeIngredient":…}` custaria
  * ~300 KB a mais no bundle só em nomes de campo repetidos. É a única parte do projeto onde
- * abreviação se justifica — o arquivo é gerado por script e lido em um lugar só, logo abaixo.
+ * abreviação se justifica - o arquivo é gerado por script e lido em um lugar só, logo abaixo.
  */
 type CmedJson = {
   /** Nome comercial. */
   n: string;
   /** Substância / princípio ativo. */
   s: string;
-  /** Dosagem — "500 MG". */
+  /** Dosagem - "500 MG". */
   d: string;
   /** Requisito de receita, já mapeado da tarja. */
   r: string;
@@ -27,18 +27,18 @@ type CmedJson = {
  * Carrega o catálogo da CMED no SQLite, uma vez por instalação.
  *
  * **Idempotente por contagem**: se a tabela já tem linhas, não faz nada. É o suficiente porque o
- * arquivo é embutido no app — mudou a base, muda a versão do app, e aí a tabela é recriada por uma
+ * arquivo é embutido no app - mudou a base, muda a versão do app, e aí a tabela é recriada por uma
  * migration nova. Não há caso de "importar de novo o mesmo arquivo".
  *
  * Roda **antes** de a tela ser liberada, e quem chama espera.
  *
  * Já foi assíncrona, para não segurar a splash. A premissa era que 21 mil inserções custariam
- * caro — e ela não se sustentou na medição: o arquivo tem 6.992 registros e 13.810 códigos de
+ * caro - e ela não se sustentou na medição: o arquivo tem 6.992 registros e 13.810 códigos de
  * barras, e as 20.802 inserções levam ~100 ms numa transação. O custo real é de uma abertura só,
  * porque a segunda chamada sai na primeira linha, vendo a tabela cheia.
  *
  * O que a versão assíncrona custava era muito pior: ela escrevia ao mesmo tempo que a restauração
- * dos dados na nuvem, e as duas transações se atropelavam na mesma conexão — `database is locked`
+ * dos dados na nuvem, e as duas transações se atropelavam na mesma conexão - `database is locked`
  * ao entrar com uma conta que já tinha dados, e `cannot start a transaction within a transaction`
  * ao salvar qualquer coisa nesse intervalo. Esperar remove a concorrência em vez de administrá-la.
  */
@@ -64,7 +64,7 @@ async function executarImportacao(): Promise<void> {
    * A contagem roda **dentro** da mesma transação que insere, e não antes dela.
    *
    * Fora, era uma janela aberta: duas chamadas quase simultâneas contavam zero as duas, e as duas
-   * seguiam para importar. `importacaoEmCurso` não fecha essa janela sozinho — em desenvolvimento o
+   * seguiam para importar. `importacaoEmCurso` não fecha essa janela sozinho - em desenvolvimento o
    * React monta o efeito duas vezes, e a segunda chamada chegava com a promessa da primeira já
    * cumprida. Uma transação escrevia enquanto a outra tentava, e o erro saía como
    * `NativeStatement.finalizeAsync ... database is locked` antes mesmo da tela de login.
@@ -87,7 +87,7 @@ async function executarImportacao(): Promise<void> {
  *
  * **É aqui que estava o tempo.** Uma chamada de `runAsync` por registro são 20.802 idas e voltas
  * pela ponte entre o JavaScript e o código nativo, e cada uma custa muito mais que a inserção em
- * si — no aparelho isso passava de trinta segundos. O SQLite nunca foi o gargalo: as mesmas
+ * si - no aparelho isso passava de trinta segundos. O SQLite nunca foi o gargalo: as mesmas
  * inserções levam ~60 ms quando agrupadas.
  *
  * O agrupamento exige o `id` **explícito**, e é por isso que ele é calculado aqui em vez de vir do
@@ -139,7 +139,7 @@ async function inserirCatalogo(transacao: SQLite.SQLiteDatabase): Promise<void> 
   for (let i = 0; i < eans.length; i += EANS_POR_INSTRUCAO * 2) {
     const lote = eans.slice(i, i + EANS_POR_INSTRUCAO * 2);
     // `OR IGNORE`: o mesmo EAN pode aparecer em dois registros da base original, e a chave primária
-    // recusaria o segundo. Perder o vínculo duplicado é irrelevante — o primeiro já leva ao produto
+    // recusaria o segundo. Perder o vínculo duplicado é irrelevante - o primeiro já leva ao produto
     // certo.
     await transacao.runAsync(
       `INSERT OR IGNORE INTO cmed_eans (ean, entry_id)

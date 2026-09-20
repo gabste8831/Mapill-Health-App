@@ -23,7 +23,7 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   },
   /**
    * A frase que evita a conclusão errada. Num app de saúde, "não consegui carregar" pode ser lido
-   * como "seus dados sumiram" — e essa leitura é pior que o erro em si.
+   * como "seus dados sumiram" - e essa leitura é pior que o erro em si.
    */
   tranquilizador: {
     ...typography.bodySm,

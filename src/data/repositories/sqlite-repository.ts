@@ -4,7 +4,7 @@ import { getDatabase } from "../local/database";
 import type { Repository } from "../../domain/ports/repository";
 import type { SyncableEntity } from "../../domain/entities/syncable";
 
-/** Linha crua de qualquer tabela sincronizável — nomes de coluna em snake_case. */
+/** Linha crua de qualquer tabela sincronizável - nomes de coluna em snake_case. */
 export type SyncableRow = Record<string, unknown> & {
   id: string;
   updated_at: string;
@@ -14,7 +14,7 @@ export type SyncableRow = Record<string, unknown> & {
 
 /**
  * Base comum a todo repositório SQLite: implementa o CRUD genérico de `Repository<T>` a
- * partir só do nome da tabela e dos mapeadores linha↔entidade — cada repositório concreto só
+ * partir só do nome da tabela e dos mapeadores linha↔entidade - cada repositório concreto só
  * precisa declarar isso e adicionar os métodos extras do seu port específico.
  */
 export abstract class SqliteRepository<TEntity extends SyncableEntity, TRow extends SyncableRow>

@@ -14,7 +14,7 @@ export type EstoqueAAvisar = {
   /** `YYYY-MM-DD` do último dia coberto. */
   ultimoDia: string;
   /**
-   * O mesmo dia escrito como se fala — "19 de set" —, para entrar no texto do aviso.
+   * O mesmo dia escrito como se fala - "19 de set" -, para entrar no texto do aviso.
    *
    * Chega formatado, como `quantidadeFormatada` em `planejar-avisos-de-dose`: quem sabe escrever
    * data por extenso é `shared/`, e `shared/` importa **do** domínio. Chamá-lo daqui inverteria a
@@ -41,7 +41,7 @@ export type EstoqueAAvisar = {
    * destrava o próximo: ver `precisaAvisar`.
    */
   quantidadeQuandoAvisou: number | null;
-  /** Quanto há na caixa agora — comparado com `quantidadeQuandoAvisou`. */
+  /** Quanto há na caixa agora - comparado com `quantidadeQuandoAvisou`. */
   quantidadeAtual: number;
 };
 
@@ -54,7 +54,7 @@ export type PlanejarAvisosDeEstoqueInput = {
 
 const PREFIXO_ESTOQUE = "estoque-";
 
-/** A mesma hora dos avisos de compromisso e receita — ver `planejar-avisos-de-compromisso`. */
+/** A mesma hora dos avisos de compromisso e receita - ver `planejar-avisos-de-compromisso`. */
 const HORA_DO_AVISO = 0;
 const MINUTO_DO_AVISO = 1;
 
@@ -75,7 +75,7 @@ function inicioDoDia(dia: Date): Date {
  *
  * **O problema que isto resolve:** ao contrário da receita, cuja validade é uma data fixa, a
  * previsão de estoque é recalculada a cada dose confirmada e a cada recontagem. Sem trava, um
- * estoque baixo geraria um aviso novo a cada toque em "confirmar" — o caminho mais curto para a
+ * estoque baixo geraria um aviso novo a cada toque em "confirmar" - o caminho mais curto para a
  * pessoa desligar as notificações do app e perder junto os alarmes de dose.
  *
  * **A trava:** avisado uma vez, fica calado enquanto a quantidade não **subir**. Repor a caixa é
@@ -92,14 +92,14 @@ function precisaAvisar(estoque: EstoqueAAvisar): boolean {
  *
  * Dois por estoque, no máximo, e cada um uma vez só:
  *
- * - **entrando na janela** — a previsão diz que o estoque dura menos que a antecedência pedida.
+ * - **entrando na janela** - a previsão diz que o estoque dura menos que a antecedência pedida.
  *   É o aviso que dá tempo de ir à farmácia.
- * - **acabou** — a previsão chegou a zero. Aqui não há mais o que planejar; é constatação, e a
+ * - **acabou** - a previsão chegou a zero. Aqui não há mais o que planejar; é constatação, e a
  *   dose de amanhã depende de resolver hoje.
  *
  * O cartão da Home continua sendo o canal garantido: ele não depende de permissão de notificação
  * e mostra o estado atual em vez de um instante passado. Estes avisos são o que alcança quem não
- * abriu o app — e é por isso que o texto do formulário não pode prometer só um dos dois.
+ * abriu o app - e é por isso que o texto do formulário não pode prometer só um dos dois.
  */
 export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): AvisoDeDose[] {
   const avisos: AvisoDeDose[] = [];
@@ -111,7 +111,7 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
     if (!precisaAvisar(estoque)) continue;
 
     /**
-     * O dia em que a previsão entra na janela — e não "hoje" nem o dia do fim.
+     * O dia em que a previsão entra na janela - e não "hoje" nem o dia do fim.
      *
      * Um estoque que dura 20 dias com aviso pedido para 7 tem o seu aviso marcado para daqui a
      * 13 dias. Agendar para hoje seria avisar cedo demais sobre algo que ainda não é problema;
@@ -139,24 +139,24 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
         /**
          * O nome do remédio no **título**, e a frase começando por "seu estoque".
          *
-         * Antes o título era "Estoque acabando" e o remédio vinha no corpo — que é a parte que o
+         * Antes o título era "Estoque acabando" e o remédio vinha no corpo - que é a parte que o
          * Android trunca primeiro, e a que some quando a tela de bloqueio esconde conteúdo. Quem
          * toma quatro remédios recebia um aviso que não dizia qual, justamente na situação em que
          * ele tem menos espaço para dizer.
          *
-         * O número de dias fica: é ele que decide se dá para esperar a próxima ida à farmácia —
+         * O número de dias fica: é ele que decide se dá para esperar a próxima ida à farmácia -
          * mais útil que a quantidade, que exigiria fazer a conta da posologia de cabeça.
          */
         // `diasRestantes` e não `avisoLeadDays`: são iguais no dia em que o aviso dispara, mas o
         // primeiro é o fato (quanto o estoque dura) e o segundo é a preferência (quando avisar).
         // Usar a preferência para descrever o fato só funciona por coincidência.
         // A data junto dos dias: é ela que responde "dá para esperar a próxima ida à farmácia?".
-        // Com só o número, a pessoa tem de contar no calendário — e a notificação existe justamente
+        // Com só o número, a pessoa tem de contar no calendário - e a notificação existe justamente
         // para ser lida de relance, sem abrir o app.
         //
         // `ultimoDiaFormatado` chega pronto de quem chama, como `quantidadeFormatada` em
         // `planejar-avisos-de-dose`: quem sabe escrever data por extenso é `shared/`, e `shared/`
-        // importa **do** domínio — chamá-lo aqui inverteria a direção da dependência.
+        // importa **do** domínio - chamá-lo aqui inverteria a direção da dependência.
         corpo: `Seu estoque de ${estoque.medicationName} dura cerca de ${estoque.diasRestantes} ${estoque.diasRestantes === 1 ? "dia" : "dias"}, até ${estoque.ultimoDiaFormatado}. Vale repor antes que acabe.`,
         doseScheduleIds: [],
         modo: "notification",
@@ -172,7 +172,7 @@ export function planejarAvisosDeEstoque(input: PlanejarAvisosDeEstoqueInput): Av
       ),
     );
     /**
-     * Só quando o fim não cai no mesmo dia da entrada na janela — pela mesma razão da receita:
+     * Só quando o fim não cai no mesmo dia da entrada na janela - pela mesma razão da receita:
      * duas notificações iguais no mesmo minuto leem como defeito, não como ênfase. É o caso de
      * quem pede aviso com antecedência maior do que o estoque que tem.
      */

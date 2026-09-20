@@ -39,7 +39,7 @@ const LEAD_OPTIONS: OptionGroupOption<string>[] = APPOINTMENT_REMINDER_LEAD_DAYS
   label: rotuloDeAntecedencia(days),
 }));
 
-/** Cadastro inteiro numa estrutura só — a mesma tela cria e edita. */
+/** Cadastro inteiro numa estrutura só - a mesma tela cria e edita. */
 export type CompromissoDraft = {
   title: string;
   /** Instante do compromisso em ISO, já com data e hora juntas. */
@@ -67,7 +67,7 @@ function paraInstante(isoDate: string, time: string): string {
   return new Date(ano, mes - 1, dia, horas, minutos, 0, 0).toISOString();
 }
 
-/** "a descrição, a data e o horário" — lista em português, com "e" antes do último. */
+/** "a descrição, a data e o horário" - lista em português, com "e" antes do último. */
 function emLista(itens: string[]): string {
   if (itens.length <= 1) return itens[0] ?? "";
   return `${itens.slice(0, -1).join(", ")} e ${itens[itens.length - 1]}`;
@@ -77,7 +77,7 @@ function emLista(itens: string[]): string {
  * Cadastro e edição de compromisso na mesma tela.
  *
  * Muito mais curto que o de medicamento, e de propósito: um compromisso é um ponto no tempo, não
- * uma regra que se repete. Não há posologia para derivar nem estoque para conciliar — por isso
+ * uma regra que se repete. Não há posologia para derivar nem estoque para conciliar - por isso
  * aqui não existe a revelação em dois estados, que lá serve para conter um formulário que de
  * outra forma seria longo demais.
  *
@@ -128,7 +128,7 @@ export function FormularioDeCompromissoScreen({
   /**
    * O aviso é uma cascata de três respostas, e cada uma só existe se a anterior foi sim. Três
    * estados em vez de booleano em todas: "não quero" é **resposta** e precisa ficar marcada na
-   * tela — com booleano, quem toca em "Não" vê a opção voltar ao cinza de não respondida e não
+   * tela - com booleano, quem toca em "Não" vê a opção voltar ao cinza de não respondida e não
    * sabe se o toque valeu.
    */
   const querAvisoInicial =
@@ -147,7 +147,7 @@ export function FormularioDeCompromissoScreen({
   const [leadDays, setLeadDays] = useState<string | null>(
     initialValue?.reminderLeadDays == null ? null : String(initialValue.reminderLeadDays),
   );
-  /** Antecedência fora dos atalhos — "quero ser avisado 15 dias antes". */
+  /** Antecedência fora dos atalhos - "quero ser avisado 15 dias antes". */
   const [leadDaysLivre, setLeadDaysLivre] = useState(() => {
     const gravado = initialValue?.reminderLeadDays;
     if (gravado == null) return "";
@@ -172,7 +172,7 @@ export function FormularioDeCompromissoScreen({
    * Compromisso no passado **avisa, não bloqueia** (E8).
    *
    * Antes era erro e travava o salvar, o que impedia o caso legítimo de registrar a consulta que
-   * já aconteceu — e esse é justamente o uso que o desfecho ("você foi?" e a anotação do que o
+   * já aconteceu - e esse é justamente o uso que o desfecho ("você foi?" e a anotação do que o
    * médico disse) existe para servir. Agenda que só aceita o futuro não é histórico clínico.
    *
    * O aviso continua porque a data passada também é o erro de digitação mais comum, o ano trocado.
@@ -180,7 +180,7 @@ export function FormularioDeCompromissoScreen({
    *
    * **É o instante completo, e não o dia.** Comparar só a data deixava passar a consulta de hoje
    * de manhã marcada à tarde: `dateIso` é o de hoje, a seção de lembretes continuava aberta, e o
-   * app gravava um aviso para um horário que já tinha passado — uma notificação que nunca dispara.
+   * app gravava um aviso para um horário que já tinha passado - uma notificação que nunca dispara.
    * Enquanto o horário não foi preenchido não há o que julgar, e uma **data** anterior a hoje já
    * basta, porque nenhum horário do dia a salvaria.
    */
@@ -193,7 +193,7 @@ export function FormularioDeCompromissoScreen({
 
   /**
    * A antecedência escolhida cabe? "7 dias antes" numa consulta que é depois de amanhã descreve um
-   * aviso que já passou — e gravá-lo em silêncio seria prometer um lembrete que nunca chega.
+   * aviso que já passou - e gravá-lo em silêncio seria prometer um lembrete que nunca chega.
    */
   const avisoChegaEm =
     instante === null || !querAntecedencia || leadEscolhido === null || leadInvalido
@@ -201,7 +201,7 @@ export function FormularioDeCompromissoScreen({
       : new Date(instante.getTime() - leadEscolhido * 24 * 60 * 60_000);
   const avisoJaPassou = avisoChegaEm !== null && avisoChegaEm < agora;
 
-  /** O compromisso é hoje? Comparado por **dia**, e não por instante — é a data que decide. */
+  /** O compromisso é hoje? Comparado por **dia**, e não por instante - é a data que decide. */
   const ehHoje = dateIso !== null && dateIso === todayIsoDate();
 
   /**
@@ -213,13 +213,13 @@ export function FormularioDeCompromissoScreen({
    * 1. **O compromisso já passou.** Perguntar "deseja ser lembrado?" de uma consulta da semana
    *    passada seria pedir uma resposta sem destino.
    *
-   * 2. **O compromisso é hoje.** Todo aviso deste formulário cai às 00:01 do dia — o "no dia", no
+   * 2. **O compromisso é hoje.** Todo aviso deste formulário cai às 00:01 do dia - o "no dia", no
    *    próprio dia; o de antecedência, N dias antes. Cadastrando hoje, **os dois instantes já
    *    passaram**, e o planejador os descarta (`agendavel`). Não existe lembrete configurável aqui,
    *    qualquer que seja a resposta.
    *
    * Esconder é melhor que oferecer com ressalva. Uma opção que aparece, aceita o toque e não produz
-   * nada transfere para a pessoa a tarefa de descobrir que sua escolha não teve efeito — e o pior
+   * nada transfere para a pessoa a tarefa de descobrir que sua escolha não teve efeito - e o pior
    * resultado possível num app de lembrete é alguém deixar de anotar em outro lugar porque marcou
    * aqui. Quem marca uma consulta para hoje já sabe dela hoje; o que serve nesse caso é o
    * compromisso **aparecer na Home**, e isso continua acontecendo.
@@ -227,7 +227,7 @@ export function FormularioDeCompromissoScreen({
   const aceitaLembrete = !jaPassou && !ehHoje;
 
   /**
-   * A pessoa configurou o lembrete e **depois** mudou a data — para trás, ou para hoje. As respostas
+   * A pessoa configurou o lembrete e **depois** mudou a data - para trás, ou para hoje. As respostas
    * continuam no estado, mas a seção sumiu, então elas não são mais visíveis nem editáveis, e
    * `handleSubmit` as descarta. Guardar isso calado é o que o F5 fazia: dizer que o lembrete some é
    * o que separa "o app decidiu por mim" de "o app me avisou".
@@ -252,7 +252,7 @@ export function FormularioDeCompromissoScreen({
     title.trim().length === 0 ? "a descrição" : null,
     dateIso === null || dateError !== undefined ? "a data" : null,
     time === null ? "o horário" : null,
-    // Nada de lembrete é cobrado num compromisso já passado — a seção nem aparece.
+    // Nada de lembrete é cobrado num compromisso já passado - a seção nem aparece.
     aceitaLembrete && querAviso === null ? "se deseja ser lembrado" : null,
     aceitaLembrete && querAviso === "sim" && avisoNoDia === null ? "o lembrete no dia" : null,
     aceitaLembrete && querAviso === "sim" && avisoAntes === null ? "o lembrete antecipado" : null,
@@ -337,8 +337,8 @@ export function FormularioDeCompromissoScreen({
             <Text style={styles.confirmacao}>{dataEHoraPorExtenso(instante)}</Text>
           ) : null}
 
-          {/* Avisa sem impedir: registrar a consulta que já aconteceu é uso legítimo — é para isso
-              que existe o "você foi?" —, mas data passada também é o erro de digitação mais comum,
+          {/* Avisa sem impedir: registrar a consulta que já aconteceu é uso legítimo - é para isso
+              que existe o "você foi?" -, mas data passada também é o erro de digitação mais comum,
               o ano trocado. Dizer deixa quem errou perceber e quem quis registrar seguir. */}
           {jaPassou ? (
             <Text style={styles.aviso}>
@@ -349,7 +349,7 @@ export function FormularioDeCompromissoScreen({
 
           {/* O compromisso é hoje: a seção de lembretes não vai aparecer, e a razão precisa estar
               **aqui**, junto da data que a causou. Sem isto a seção some do nada, e um formulário
-              que muda de tamanho sem explicação parece defeito — ou pior, faz a pessoa achar que o
+              que muda de tamanho sem explicação parece defeito - ou pior, faz a pessoa achar que o
               lembrete foi configurado em algum lugar que ela não viu.
 
               O texto diz o que **acontece**, não o que falta: o compromisso aparece na Home hoje, e
@@ -362,7 +362,7 @@ export function FormularioDeCompromissoScreen({
           ) : null}
 
           {/* Só quando havia mesmo algo configurado: dizer "o lembrete foi descartado" para quem
-              nunca configurou um inventa uma perda que não houve. Vale para os dois casos — data
+              nunca configurou um inventa uma perda que não houve. Vale para os dois casos - data
               movida para o passado, ou para hoje. */}
           {lembreteDescartado ? (
             <Text style={styles.aviso}>
@@ -421,7 +421,7 @@ export function FormularioDeCompromissoScreen({
             onChange={(value) => {
               setQuerAviso(value);
               // Recusar o aviso apaga o que só existia por causa dele: sozinhas, as respostas de
-              // baixo não descrevem nada, e reapareceriam marcadas se a pessoa mudasse de ideia —
+              // baixo não descrevem nada, e reapareceriam marcadas se a pessoa mudasse de ideia -
               // resposta que ninguém deu desta vez.
               if (value === "nao") {
                 setAvisoNoDia(null);
@@ -474,7 +474,7 @@ export function FormularioDeCompromissoScreen({
 
                   {/* O campo livre saiu de dentro da fileira de atalhos e ganhou linha própria.
                       Espremido ao lado deles, ele disputava a largura com três fichas e ficava
-                      pequeno demais para o dedo — e é onde se digita 15, 30 ou 45 dias. */}
+                      pequeno demais para o dedo - e é onde se digita 15, 30 ou 45 dias. */}
                   <TextField
                     label="Outro prazo, em dias"
                     placeholder="Ex: 15"
@@ -508,10 +508,10 @@ export function FormularioDeCompromissoScreen({
 
               {/* Diz **quando**, **como** e **onde** o aviso aparece, agora que ele chega de
                   verdade. A hora importa: quem pede "3 dias antes" precisa saber que o aviso é
-                  do começo do dia, e não no mesmo horário da consulta — senão parece atrasado.
+                  do começo do dia, e não no mesmo horário da consulta - senão parece atrasado.
 
                   "Assim que o dia virar" e não "às 00:01": a hora exata é detalhe de implementação,
-                  e o que a pessoa precisa entender é a **garantia** — o aviso está lá desde o
+                  e o que a pessoa precisa entender é a **garantia** - o aviso está lá desde o
                   começo do dia, qualquer que seja o horário da consulta. Era 08:00, e para uma
                   consulta às 06:00 o aviso chegava depois de ela já ter começado.
 

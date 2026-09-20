@@ -17,7 +17,7 @@ export type CompromissoDaHome = {
 /** Um compromisso aprovado para a Home, com a distância que a tela mostra. */
 export type CompromissoNaHome = {
   appointmentId: string;
-  /** Dias inteiros até o compromisso. `0` = hoje. Nunca negativo — passados não entram. */
+  /** Dias inteiros até o compromisso. `0` = hoje. Nunca negativo - passados não entram. */
   emDias: number;
   ehHoje: boolean;
 };
@@ -43,7 +43,7 @@ function diasDeDiferenca(de: Date, ate: Date): number {
  *
  * ## A janela é o lembrete que a pessoa pediu
  *
- * Um compromisso marcado com três meses de antecedência não pode ocupar a Home por três meses — ela
+ * Um compromisso marcado com três meses de antecedência não pode ocupar a Home por três meses - ela
  * é a tela do **dia**, e o que não é acionável hoje vira ruído que empurra as doses para baixo. Mas
  * também não basta mostrar só no próprio dia: quem pede aviso de sete dias está pedindo tempo para
  * se organizar (remarcar o trabalho, arrumar carona), e esse pedido vale tanto para a notificação
@@ -51,21 +51,21 @@ function diasDeDiferenca(de: Date, ate: Date): number {
  *
  * Então a antecedência do aviso **é** a janela do card: `reminderLeadDays: 7` põe o compromisso na
  * Home nos sete dias que antecedem a consulta. A regra fica com um só lugar para ser ajustada, e a
- * notificação e a Home nunca discordam — que era o problema de tê-las com critérios separados.
+ * notificação e a Home nunca discordam - que era o problema de tê-las com critérios separados.
  *
  * Quem não pediu lembrete nenhum não recebe card **antes** do dia. Não pedir aviso é uma resposta,
  * e ignorá-la seria decidir pela pessoa que ela quer ser avisada com antecedência.
  *
  * O próprio dia é a exceção, e entra sempre. A Home é a tela do que acontece hoje: um compromisso
  * marcado para hoje é do dia de hoje, tenha sido pedido lembrete ou não. Quem não marcou aviso
- * dispensou a *antecedência* — não dispensou ver a própria agenda quando ela chega.
+ * dispensou a *antecedência* - não dispensou ver a própria agenda quando ela chega.
  *
  * ## Por que sai depois da data
  *
  * Passou o compromisso, o card sai da Home mesmo sem resposta. A Home mostra o que **ainda dá para
  * fazer**; registrar que a consulta aconteceu é conversa da listagem de compromissos, onde o
  * histórico vive. Um card de ontem cobrando desfecho competiria com as doses de hoje pelo mesmo
- * espaço, e perderia — vira aquele aviso que se aprende a ignorar.
+ * espaço, e perderia - vira aquele aviso que se aprende a ignorar.
  *
  * Respondido não entra em nenhuma hipótese: não há o que lembrar.
  */
@@ -87,7 +87,7 @@ export function compromissosAMostrarNaHome(input: CompromissosNaHomeInput): Comp
      * A janela em dias, sempre incluindo hoje (`0`).
      *
      * `reminderLeadDays` estende para trás a partir do dia; `reminderOnDay` não muda a janela,
-     * porque hoje já está dentro dela de qualquer forma — o que ele governa é a **notificação**, que
+     * porque hoje já está dentro dela de qualquer forma - o que ele governa é a **notificação**, que
      * é outro canal. Quem marcou antecedência de 7 dias tem janela de 7; quem não marcou nada tem
      * janela de 0, que é só o próprio dia.
      */

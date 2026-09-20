@@ -14,7 +14,7 @@ type CmedRow = {
 };
 
 /**
- * Sem acento, maiúsculas — a mesma normalização usada ao gravar a coluna `search`.
+ * Sem acento, maiúsculas - a mesma normalização usada ao gravar a coluna `search`.
  *
  * Precisa ser idêntica à do script que gera `cmed.json`, senão a busca não acha o que está lá. É a
  * duplicação inevitável entre o preparo (Node) e a consulta (app); o teste em Node cobre o formato.
@@ -43,7 +43,7 @@ function toEntry(row: CmedRow, eans: string[]): CatalogEntry {
  *
  * A busca é `LIKE` sobre uma coluna já normalizada, e não um `FTS`: com 7 mil linhas curtas o
  * ganho do índice de texto completo não paga a complexidade de manter uma tabela virtual em
- * sincronia — e `LIKE 'TERMO%'` usa o índice comum quando ancorado no começo.
+ * sincronia - e `LIKE 'TERMO%'` usa o índice comum quando ancorado no começo.
  *
  * A ordenação favorece **quem começa com o termo**: quem digita "aas" quer o AAS, e não os doze
  * remédios cujo princípio ativo contém "aas" no meio.

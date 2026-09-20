@@ -8,7 +8,7 @@ export type DoseParaDia = {
 
 /** Um dia do recorte, com a adesão dele. */
 export type AdesaoDeUmDia = {
-  /** `YYYY-MM-DD` local — a chave que agrupa as doses do dia. */
+  /** `YYYY-MM-DD` local - a chave que agrupa as doses do dia. */
   dia: string;
   previstas: number;
   confirmadas: number;
@@ -37,7 +37,7 @@ function diaLocal(data: Date): string {
  *
  * "86% nos últimos 7 dias" descreve o conjunto e esconde a forma dele: seis dias perfeitos e um
  * zerado dão quase o mesmo número que sete dias irregulares, e as duas situações pedem conversas
- * clínicas diferentes. Quem olha o próprio tratamento quer saber **qual dia** falhou — é isso que
+ * clínicas diferentes. Quem olha o próprio tratamento quer saber **qual dia** falhou - é isso que
  * liga o número a um acontecimento ("na quarta eu viajei") em vez de deixá-lo como um veredito.
  *
  * O mini-gráfico da Home já mostra isso em barras, mas barra não se lê como número: dá para ver que
@@ -45,16 +45,16 @@ function diaLocal(data: Date): string {
  *
  * ## O que conta
  *
- * **Todas as doses do dia**, tenham vencido ou não — e é aqui que esta conta difere da taxa geral.
+ * **Todas as doses do dia**, tenham vencido ou não - e é aqui que esta conta difere da taxa geral.
  *
  * A taxa geral olha só o que venceu, porque ela responde "como foi a adesão até agora" sobre um
  * período inteiro. Esta responde outra coisa: "como está **este dia**". E um dia com duas doses em
- * que uma foi tomada está pela metade, não completo — mesmo que a segunda só vença às 22h.
+ * que uma foi tomada está pela metade, não completo - mesmo que a segunda só vença às 22h.
  *
  * A regra anterior contava só as vencidas, e o efeito em aparelho foi o app se contradizer na mesma
  * tela: a barra de progresso do topo da Home marcava 50% (uma de duas doses do dia) e o gráfico
  * logo abaixo marcava 100% (uma de uma dose vencida). Duas barras lado a lado, o mesmo dia, números
- * diferentes — e quem lê não tem como saber em qual acreditar.
+ * diferentes - e quem lê não tem como saber em qual acreditar.
  *
  * Dias **inteiramente** no futuro continuam sem taxa: ali não há nem o que ter começado. O que
  * mudou é só o dia em andamento, que agora se mede pelo que ele tem, e não pelo que já passou.

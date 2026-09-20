@@ -1,7 +1,7 @@
 import { ActivityIndicator, Modal, Text, View } from "react-native";
 
 import { useCores, useEstilos } from "@/shared/theme";
-// Os mesmos estilos do `SuccessOverlay`: são a mesma tela cheia azul, no mesmo momento do fluxo —
+// Os mesmos estilos do `SuccessOverlay`: são a mesma tela cheia azul, no mesmo momento do fluxo -
 // o fim de uma operação longa. O que muda é que uma comemora e a outra pede paciência.
 import { criarEstilos } from "@/ui/SuccessOverlay/SuccessOverlay.styles";
 
@@ -23,7 +23,7 @@ export type OverlayDeProgressoProps = {
  * ## Por que existe
  *
  * O login restaura os dados antes de decidir para onde ir. Sem cobrir esse intervalo, quem entra
- * com o Google vê a tela de login **voltar** por alguns segundos antes de a Home aparecer — e uma
+ * com o Google vê a tela de login **voltar** por alguns segundos antes de a Home aparecer - e uma
  * tela de login que reaparece depois de você ter entrado lê como falha, não como espera.
  *
  * Sem barra de progresso e sem porcentagem: não há como saber quantos registros virão antes de

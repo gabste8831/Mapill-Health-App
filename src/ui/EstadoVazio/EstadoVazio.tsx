@@ -8,7 +8,7 @@ import { criarEstilos } from "./EstadoVazio.styles";
 export type EstadoVazioProps = {
   titulo: string;
   descricao: string;
-  /** O ícone do assunto — "pílula" para medicações, "cubo" para estoque. */
+  /** O ícone do assunto - "pílula" para medicações, "cubo" para estoque. */
   icone?: keyof typeof Ionicons.glyphMap;
   /** Ligar quando o bloco já está dentro de um cartão: evita cartão dentro de cartão. */
   semCartao?: boolean;
@@ -16,7 +16,7 @@ export type EstadoVazioProps = {
 };
 
 /**
- * "Não há nada aqui ainda" — e o que fazer a respeito.
+ * "Não há nada aqui ainda" - e o que fazer a respeito.
  *
  * Existe como componente porque três telas escreviam o próprio, com o mesmo texto centralizado e
  * o mesmo `maxWidth: 320` copiado, mas uma delas num cartão e as outras soltas no fundo. A mesma

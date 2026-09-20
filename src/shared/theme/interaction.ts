@@ -8,7 +8,7 @@ import { colors } from "./colors";
  * ## Por que isto existe
  *
  * Até 02/09 **nada no app respondia ao toque**: 75 `Pressable` e nenhum `pressed`, nenhum
- * `android_ripple`. O sintoma não era feio, era pior — um app que não confirma o toque ensina a
+ * `android_ripple`. O sintoma não era feio, era pior - um app que não confirma o toque ensina a
  * duvidar se o toque funcionou. E num público que já duvida da própria memória, a resposta a essa
  * dúvida é **tocar de novo**: no botão de confirmar dose, isso registrava duas vezes.
  *
@@ -18,20 +18,20 @@ import { colors } from "./colors";
  * ## Por que opacidade e escala, e não ripple
  *
  * O `ripple` do Android é de uma plataforma só (e o projeto mantém irmãos `.ios.tsx`), e exige
- * `overflow: hidden` para respeitar canto arredondado — o que apagaria as sombras dos cartões.
+ * `overflow: hidden` para respeitar canto arredondado - o que apagaria as sombras dos cartões.
  * `Pressable` já entrega o estado `pressed` de graça, nas duas plataformas, sem worklet e sem
  * biblioteca.
  *
  * O `reanimated` está instalado, mas para um toggle de opacidade seria peso sem ganho: a diferença
  * entre uma transição de 100ms e uma troca imediata, no tempo de um toque, ninguém percebe. Ele
- * fica guardado para onde ganha de verdade — a barra de progresso que cresce.
+ * fica guardado para onde ganha de verdade - a barra de progresso que cresce.
  */
 
 /** Superfície colorida cheia (botão primário, chip selecionado, cartão azul) escurece ao toque. */
 export const pressedOpacity = 0.85;
 
 /**
- * O fundo que aparece sob um alvo transparente — é o que faz um ícone solto virar botão no
+ * O fundo que aparece sob um alvo transparente - é o que faz um ícone solto virar botão no
  * instante do toque, sem precisar de fundo permanente.
  */
 export const pressedSurface = colors.surfaceContainer;
@@ -45,7 +45,7 @@ export const pressedSurface = colors.surfaceContainer;
 export const pressedScale = 0.97;
 
 export type EstadoDePressaoOpcoes = {
-  /** Encolhe ao toque. Ligar só em alvo autocontido — ver `pressedScale`. */
+  /** Encolhe ao toque. Ligar só em alvo autocontido - ver `pressedScale`. */
   escala?: boolean;
   /** Escurece por opacidade. O padrão para o que já tem cor de fundo. */
   opacidade?: boolean;

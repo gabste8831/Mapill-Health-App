@@ -25,14 +25,14 @@ export type ResumirAdesaoInput = {
 
 /** Quantas doses de cada desfecho, num recorte qualquer. */
 export type ContagemDeDoses = {
-  /** Doses que já venceram — o denominador honesto da adesão. */
+  /** Doses que já venceram - o denominador honesto da adesão. */
   previstas: number;
   confirmadas: number;
   puladas: number;
   /**
    * Venceram e ninguém respondeu. Ficam separadas de `puladas` de propósito: para a adesão as duas
    * contam igual (o remédio não foi tomado), mas para a **conversa com o médico** elas são
-   * diferentes — "decidi não tomar" e "esqueci" pedem condutas opostas.
+   * diferentes - "decidi não tomar" e "esqueci" pedem condutas opostas.
    */
   semResposta: number;
 };
@@ -40,7 +40,7 @@ export type ContagemDeDoses = {
 export type AdesaoPorMedicamento = ContagemDeDoses & {
   medicationId: string;
   medicationName: string;
-  /** `0` a `1`. `null` quando não houve dose prevista — sem denominador não há percentual. */
+  /** `0` a `1`. `null` quando não houve dose prevista - sem denominador não há percentual. */
   taxa: number | null;
 };
 
@@ -52,7 +52,7 @@ export type ResumoDeAdesao = ContagemDeDoses & {
    * acabou de cadastrar o primeiro remédio. A tela decide como dizer "ainda não há o que medir".
    */
   taxa: number | null;
-  /** Por medicamento, do pior para o melhor — quem precisa de atenção aparece primeiro. */
+  /** Por medicamento, do pior para o melhor - quem precisa de atenção aparece primeiro. */
   porMedicamento: AdesaoPorMedicamento[];
 };
 
@@ -72,7 +72,7 @@ function contarVazio(): ContagemDeDoses {
 /**
  * `deferred` conta como **sem resposta**, e não como categoria própria.
  *
- * Ele registra "vi e resolvo depois" — informação sobre o alarme, não sobre a dose. Se o horário
+ * Ele registra "vi e resolvo depois" - informação sobre o alarme, não sobre a dose. Se o horário
  * passou e a pessoa nunca voltou para dizer se tomou, o que se sabe é que ela não respondeu; dar a
  * isso uma terceira coluna no resumo do médico separaria duas coisas que, do ponto de vista
  * clínico, são a mesma: o remédio não foi tomado e ninguém disse por quê.
@@ -102,24 +102,24 @@ function taxaDe(contagem: ContagemDeDoses): number | null {
  *    **Mas dose futura já respondida conta.** Quem toma às 20h a dose marcada para as 22h fez um
  *    acerto, e o app permite registrar isso de propósito. Descartar essa dose apagava o acerto: com
  *    duas tomadas hoje (uma antes da hora) e uma pulada ontem, o resumo dizia "1 de 2 doses
- *    tomadas — 50%", enquanto o gráfico logo acima já mostrava 100% no dia. O que aconteceu foram
+ *    tomadas - 50%", enquanto o gráfico logo acima já mostrava 100% no dia. O que aconteceu foram
  *    duas doses tomadas e uma pulada, e é isso que a tela precisa dizer.
  *
  * 2. **Pular reduz a adesão.** Pular é uma resposta legítima e o app nunca a trata como erro, mas
- *    adesão mede o que foi *tomado* — e um resumo que contasse a pulada como sucesso mentiria
+ *    adesão mede o que foi *tomado* - e um resumo que contasse a pulada como sucesso mentiria
  *    justamente para quem vai levá-lo ao médico.
  *
  * 3. **Não responder conta igual a pular, no número, e diferente na lista.** Para a taxa as duas
  *    significam "não tomou". Para a conversa clínica são opostas: "decidi não tomar" e "esqueci"
  *    pedem condutas diferentes, e é por isso que `semResposta` existe como campo próprio.
  *
- * Regra pura, com `agora` injetado — é o que o "pronto quando" do D2 pede: o percentual calculado
+ * Regra pura, com `agora` injetado - é o que o "pronto quando" do D2 pede: o percentual calculado
  * por um use-case testável, e não dentro da tela (§2.3.3, auditoria clínica).
  */
 /**
  * O que fica de fora das contas: a dose que ainda não venceu **e** que ninguém respondeu.
  *
- * As duas condições juntas, e não só a primeira. Uma dose futura sem resposta é uma promessa — não
+ * As duas condições juntas, e não só a primeira. Uma dose futura sem resposta é uma promessa - não
  * diz nada sobre o comportamento de quem a tomaria. Já uma dose futura confirmada ou pulada é um
  * fato: aconteceu, e some da conta seria esconder o que a pessoa fez.
  */
@@ -161,7 +161,7 @@ export function resumirAdesao(input: ResumirAdesaoInput): ResumoDeAdesao {
 }
 
 /**
- * As doses que venceram e não foram tomadas — puladas ou sem resposta.
+ * As doses que venceram e não foram tomadas - puladas ou sem resposta.
  *
  * Mais recentes primeiro: o que aconteceu ontem explica mais sobre o tratamento de hoje do que o
  * que aconteceu há três semanas.
@@ -169,7 +169,7 @@ export function resumirAdesao(input: ResumirAdesaoInput): ResumoDeAdesao {
 export function listarDosesPerdidas(input: ResumirAdesaoInput): DosePerdida[] {
   const agoraIso = input.agora.toISOString();
 
-  // `deferred` entra aqui, e não fica de fora: o horário passou e a dose continua sem resposta —
+  // `deferred` entra aqui, e não fica de fora: o horário passou e a dose continua sem resposta -
   // é o mesmo caso do `null`. A intenção de "resolver depois" não muda o que aconteceu com o
   // remédio, e esconder essas doses da lista deixaria de fora justamente as que a pessoa viu e
   // não resolveu. Mesma regra que `acumular` usa no resumo.

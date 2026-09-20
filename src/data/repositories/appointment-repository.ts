@@ -69,7 +69,7 @@ export class AppointmentRepository
     const rows = await this.database.getAllAsync<AppointmentRow>(
       // `julianday` pelo mesmo motivo das doses: `scheduled_for` é texto e pode chegar em duas
       // formas de ISO (`Z` do cadastro, `+00:00` da sincronização), e comparar texto deixa de fora
-      // as linhas em `+00:00` — aqui, compromissos futuros que sumiriam da lista.
+      // as linhas em `+00:00` - aqui, compromissos futuros que sumiriam da lista.
       `SELECT * FROM ${this.tableName}
        WHERE deleted_at IS NULL AND julianday(scheduled_for) >= julianday(?)
        ORDER BY julianday(scheduled_for) ASC`,

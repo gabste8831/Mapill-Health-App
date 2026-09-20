@@ -163,7 +163,7 @@ function paraLocal(
   return saida;
 }
 
-/** As colunas booleanas de cada tabela — o SQLite as guarda como 0/1. */
+/** As colunas booleanas de cada tabela - o SQLite as guarda como 0/1. */
 const COLUNAS_BOOLEANAS: Record<TabelaSincronizavel, string[]> = {
   patient_profiles: ["photo_sync_opt_out"],
   consent_records: [],

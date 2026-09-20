@@ -14,7 +14,7 @@ import { criarEstilos } from "./TimeField.styles";
 export type TimeFieldProps = {
   label: string;
   required?: boolean;
-  /** `HH:MM` como está digitado — a tela continua dona do texto, com máscara e tudo. */
+  /** `HH:MM` como está digitado - a tela continua dona do texto, com máscara e tudo. */
   value: string;
   onChange: (value: string) => void;
   error?: string | boolean;
@@ -24,12 +24,12 @@ export type TimeFieldProps = {
 };
 
 /**
- * Horário com as duas entradas: digitação e relógio — o mesmo padrão do `DateField`.
+ * Horário com as duas entradas: digitação e relógio - o mesmo padrão do `DateField`.
  *
  * **A digitação é o caminho principal.** Quem sabe que a dose é às 8 da manhã digita `0800` em dois
  * segundos; no relógio precisa abrir um popup, girar (ou preencher) e confirmar. A revisão em
  * aparelho apontou isso duas vezes, de ângulos opostos: primeiro que o mostrador analógico era
- * confuso, depois que o campo de digitação sozinho tinha virado etapas demais — tocar no campo para
+ * confuso, depois que o campo de digitação sozinho tinha virado etapas demais - tocar no campo para
  * abrir um popup que abre outro popup.
  *
  * O relógio fica no ícone ao lado, para quem preferir. É a mesma decisão do calendário no campo de
@@ -82,7 +82,7 @@ export function TimeField({
       {/* Ao lado do campo, e não no lugar dele. O alvo tem a altura do input inteiro porque um
           ícone pequeno ao lado de um campo alto é o toque que erra.
 
-          O rótulo repetido invisível acima é o que empurra o botão até a altura do input — a mesma
+          O rótulo repetido invisível acima é o que empurra o botão até a altura do input - a mesma
           solução do `DateField`, e pelo mesmo motivo: um `marginTop` cravado só acerta a altura de
           rótulo para a qual foi medido. */}
       <View style={styles.colunaDoBotao}>

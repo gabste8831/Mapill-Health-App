@@ -20,7 +20,7 @@ export default function CompromissoScreen() {
         description="Ele já está na sua agenda, no Calendário."
         onDone={() => {
           // Fecha o fluxo inteiro e leva pro Calendário, onde o que acabou de ser criado está
-          // visível — voltar pra Home devolveria a pessoa ao ponto de partida sem mostrar o
+          // visível - voltar pra Home devolveria a pessoa ao ponto de partida sem mostrar o
           // resultado do que ela fez.
           router.dismissAll();
           router.replace("/calendario");

@@ -16,7 +16,7 @@ const persistsLocally = Platform.OS !== "web";
 /**
  * Um remédio como a lista precisa dele: o cadastro, o tratamento vigente e o estoque.
  *
- * `prescription` é nulo só em cadastro corrompido (medicamento sem tratamento) — a tela mostra o
+ * `prescription` é nulo só em cadastro corrompido (medicamento sem tratamento) - a tela mostra o
  * que tem em vez de esconder a linha, senão o remédio some sem explicação.
  */
 export type ItemDaListaDeRemedios = {
@@ -27,7 +27,7 @@ export type ItemDaListaDeRemedios = {
 
 /**
  * Qual tratamento representa o medicamento na lista. Um mesmo remédio pode ter mais de uma
- * prescrição gravada — a que interessa é a que está valendo hoje; sem nenhuma vigente, a mais
+ * prescrição gravada - a que interessa é a que está valendo hoje; sem nenhuma vigente, a mais
  * recente, que é a que conta a história de por que ele ainda está cadastrado.
  */
 function prescricaoVigente(prescriptions: Prescription[], hoje: string): Prescription | null {
@@ -70,7 +70,7 @@ export type OrdemDeRemedios = "alfabetica" | "cadastro" | "estoque";
 /**
  * Ordena a lista já carregada.
  *
- * Fora do hook porque a ordem é escolha de quem está olhando, não propriedade do dado — e
+ * Fora do hook porque a ordem é escolha de quem está olhando, não propriedade do dado - e
  * reordenar em memória custa nada perto de reconsultar o SQLite a cada toque na fileira.
  *
  * `estoque` põe na frente o que está acabando, e **empurra para o fim quem não controla estoque**:
@@ -99,7 +99,7 @@ export function ordenarRemedios(
 }
 
 /**
- * A lista de remédios cadastrados, recarregada toda vez que a tela volta ao foco — é o que faz o
+ * A lista de remédios cadastrados, recarregada toda vez que a tela volta ao foco - é o que faz o
  * medicamento recém-cadastrado já estar lá quando o fluxo de cadastro fecha.
  */
 export function useMedicationList() {

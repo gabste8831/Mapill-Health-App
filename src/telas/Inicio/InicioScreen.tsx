@@ -30,7 +30,7 @@ import { mensagemParaAPessoa } from "@/shared/mensagem-de-erro";
 
 /**
  * Quantas doses o diálogo do lote nomeia antes de resumir o resto. Além disso o texto vira uma
- * parede que ninguém lê — e um alerta que não é lido deixa de prevenir o erro que ele existe pra
+ * parede que ninguém lê - e um alerta que não é lido deixa de prevenir o erro que ele existe pra
  * prevenir.
  */
 const MAXIMO_LISTADO_NO_LOTE = 6;
@@ -50,7 +50,7 @@ const MAXIMO_ESCALONADO = 6;
 /**
  * A entrada de uma linha da agenda: sobe um pouco enquanto aparece, atrasada pela posição.
  *
- * O deslocamento é pequeno de propósito — a lista chega de baixo o suficiente para o olho seguir a
+ * O deslocamento é pequeno de propósito - a lista chega de baixo o suficiente para o olho seguir a
  * ordem de cima para baixo, sem que a tela pareça montar-se peça por peça toda vez que alguém abre
  * a Home.
  */
@@ -65,14 +65,14 @@ function primeiroNome(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] ?? "";
 }
 
-/** "1 comprimido · Com bastante água" — a dose, e a orientação quando existe. */
+/** "1 comprimido · Com bastante água" - a dose, e a orientação quando existe. */
 function descricaoDaDose(dose: DoseDoDia): string {
   const quantidade = formatarQuantidade(dose.amount, dose.doseUnit);
   return dose.intakeNote ? `${quantidade} · ${dose.intakeNote}` : quantidade;
 }
 
 /**
- * A frase do gráfico semanal. Média só dos dias que tiveram dose — incluir os dias vazios como
+ * A frase do gráfico semanal. Média só dos dias que tiveram dose - incluir os dias vazios como
  * zero faria a adesão de quem toma remédio só às segundas parecer catastrófica.
  */
 function resumoDaSemana(semana: DiaDaSemana[]): string {
@@ -92,7 +92,7 @@ export function InicioScreen() {
   const { draft } = usePatientProfile();
   const { agenda, isLoading, error, reload, registrarDose, registrarDoses } = useTodayDoses();
   // O carregamento e o erro ficam de fora: aquele é coberto pelo da agenda, e um erro de
-  // compromisso não pode esconder as doses do dia — a seção simplesmente não aparece. `reload` vem
+  // compromisso não pode esconder as doses do dia - a seção simplesmente não aparece. `reload` vem
   // junto porque responder "fui" precisa reler a lista para o cartão refletir a resposta.
   const { items: compromissos, reload: recarregarCompromissos } = useAppointmentList();
   const { registrarDesfecho } = useAppointmentRegistration();
@@ -101,7 +101,7 @@ export function InicioScreen() {
    *
    * Ele servia para decidir se o diálogo do sistema ainda podia abrir. Sem o botão, a Home não pede
    * permissão nenhuma: ela avisa e leva à ajuda de alertas, onde cada linha abre a tela do sistema.
-   * O diálogo continua sendo pedido onde faz sentido — na folha de lembrete, no instante em que a
+   * O diálogo continua sendo pedido onde faz sentido - na folha de lembrete, no instante em que a
    * pessoa escolhe ser avisada.
    */
   const permissoesDoAlarme = usePermissoesDeAlarme();
@@ -114,16 +114,16 @@ export function InicioScreen() {
   const semMovimento = useReducedMotion();
 
   /**
-   * A cascata de entrada roda **uma vez**, na primeira montagem da tela — e nunca mais.
+   * A cascata de entrada roda **uma vez**, na primeira montagem da tela - e nunca mais.
    *
    * ## O card que sumia
    *
    * `entering` não é um estilo, é uma animação que começa com o nó **invisível** (`FadeInDown`
    * parte de `opacity: 0`) e o traz até o opaco. Enquanto ela vale, qualquer re-render da Home
    * reapresenta os nós ao Reanimated, e a animação recomeça do zero. Se um segundo re-render chega
-   * no meio do primeiro — que é exatamente o que uma troca de tema provoca —, o nó fica preso no
+   * no meio do primeiro - que é exatamente o que uma troca de tema provoca -, o nó fica preso no
    * valor inicial: **opacidade 0**. O cartão continua lá, com a sombra e o tamanho certos, e o
-   * conteúdo não aparece. É o "card todo em branco" — e ele é intermitente porque depende de os
+   * conteúdo não aparece. É o "card todo em branco" - e ele é intermitente porque depende de os
    * dois renders caírem dentro dos 260ms da animação.
    *
    * Trocar o esquema de cores em Ajustes é o gatilho mais confiável porque `tema` é recriado
@@ -134,12 +134,12 @@ export function InicioScreen() {
    *
    * A entrada existe para o momento em que a lista **chega**: ela dá ao olho a ordem de leitura de
    * cima para baixo na primeira vez que a tela se monta. Reanimá-la porque uma cor mudou não é o
-   * que ela promete — a lista já estava na tela, e vê-la piscar e subir de novo a cada ajuste lê
+   * que ela promete - a lista já estava na tela, e vê-la piscar e subir de novo a cada ajuste lê
    * como a tela tendo recarregado sozinha. Congelar depois do primeiro quadro preserva o efeito
    * onde ele informa e o remove de onde ele só podia atrapalhar.
    *
    * Estado, e não `useRef`: o valor **decide o que é renderizado** (se o `entering` existe ou
-   * não), e é exatamente isso que um ref não pode fazer — ler `.current` durante o render é o que
+   * não), e é exatamente isso que um ref não pode fazer - ler `.current` durante o render é o que
    * a regra `react-hooks/refs` proíbe, porque o React não tem como saber que precisa repintar
    * quando ele muda.
    */
@@ -164,7 +164,7 @@ export function InicioScreen() {
   }
 
   /**
-   * O `SuccessOverlay` do dia fechado — a pausa que celebra **algo que de fato terminou**.
+   * O `SuccessOverlay` do dia fechado - a pausa que celebra **algo que de fato terminou**.
    *
    * ## Por que aqui e não a cada dose
    *
@@ -176,24 +176,24 @@ export function InicioScreen() {
    * ## Por que comparar com o render anterior, e não testar `progresso === 1`
    *
    * A condição precisa ser a **transição** para o dia completo, não o estado. Quem abre a Home às
-   * 22h com tudo já confirmado não acabou de fazer nada — receberia uma comemoração por existir, e
+   * 22h com tudo já confirmado não acabou de fazer nada - receberia uma comemoração por existir, e
    * a mesma voltaria a cada `reload`.
    *
    * Guardar o valor anterior em **estado** é o padrão que o React documenta para isto (ajustar
    * estado quando algo muda entre renders): o `set` durante o render é descartado se o componente
    * renderizar de novo antes de pintar, então nenhum quadro chega à tela sem o overlay que deveria
-   * ter — e, ao contrário de um ref, nada é escondido do React.
+   * ter - e, ao contrário de um ref, nada é escondido do React.
    */
   const diaFechado = total > 0 && agenda.resolvidas === total;
 
   /**
-   * `null` enquanto a agenda não chegou — e é isso que separa "o dia fechou" de "a tela montou".
+   * `null` enquanto a agenda não chegou - e é isso que separa "o dia fechou" de "a tela montou".
    *
    * Era `useState(diaFechado)`, e o valor inicial só vale na **primeira** montagem. Voltar à Home
    * vindo de outra tela monta a `InicioScreen` de novo, e nesse instante `isLoading` ainda é
    * verdadeiro: `total` é 0, então `diaFechado` nasce `false`. Quando as doses chegam ele vira
    * `true`, a comparação abaixo lê isso como transição, e a comemoração aparecia a cada
-   * redirecionamento com o dia já completo — que foi o que o Gabriel viu em aparelho.
+   * redirecionamento com o dia já completo - que foi o que o Gabriel viu em aparelho.
    *
    * Com `null`, o primeiro valor real apenas **registra** o estado, sem comparar com nada: só há
    * transição depois de existir um valor anterior de verdade. Quem abre a Home com o dia já
@@ -207,7 +207,7 @@ export function InicioScreen() {
    *
    * A Home é uma aba: ela fica montada em segundo plano e relê a agenda a cada foco. Sem esta
    * marca, responder a última dose **na tela do alarme** e voltar produzia uma transição legítima
-   * aos olhos da comparação abaixo — `false` antes de sair, `true` ao voltar — e a tela azul
+   * aos olhos da comparação abaixo - `false` antes de sair, `true` ao voltar - e a tela azul
    * piscava por cima do alarme que estava se fechando. Foi o que o Gabriel viu em aparelho: o
    * "Dia completo" aparecendo ao responder "pulei" no alarme.
    *
@@ -240,7 +240,7 @@ export function InicioScreen() {
    * O que ainda espera resposta vem antes do que já foi registrado.
    *
    * A ordem era cronológica pura, e o efeito aparecia no fim do dia: quem já confirmou as doses da
-   * manhã abria a Home e via primeiro o que **já resolveu** — precisava rolar para achar o que
+   * manhã abria a Home e via primeiro o que **já resolveu** - precisava rolar para achar o que
    * falta, que é a única coisa que a tela pede dele. Invertido, a primeira linha é sempre uma
    * pergunta em aberto.
    *
@@ -259,13 +259,13 @@ export function InicioScreen() {
   /**
    * Os compromissos que a Home mostra: os de hoje, e os que já entraram na janela do lembrete.
    *
-   * A Home respondia "o que tomo hoje?" e deixava de fora a consulta das 14h — que é parte do mesmo
+   * A Home respondia "o que tomo hoje?" e deixava de fora a consulta das 14h - que é parte do mesmo
    * dia e, muitas vezes, o compromisso de saúde mais importante dele. Quem tinha os dois precisava
    * abrir o Calendário para lembrar de um deles.
    *
    * Depois passou a mostrar também o que se aproxima: quem pede aviso de sete dias está pedindo
    * tempo para se organizar, e antes disso a notificação chegava sem que a Home confirmasse nada.
-   * A antecedência do lembrete é a janela do card, então as duas nunca discordam — a regra inteira,
+   * A antecedência do lembrete é a janela do card, então as duas nunca discordam - a regra inteira,
    * com os casos de borda, mora em `compromissosAMostrarNaHome`.
    */
   const naHome = compromissosAMostrarNaHome({
@@ -293,7 +293,7 @@ export function InicioScreen() {
    * Quantos compromissos existem daqui para a frente, dentro da janela do lembrete ou fora dela.
    *
    * Conta pelo dia, e não pelo instante: uma consulta às 9h continua sendo compromisso de hoje às
-   * 15h — ela pode ter acontecido, e ainda falta responder o desfecho.
+   * 15h - ela pode ter acontecido, e ainda falta responder o desfecho.
    */
   const inicioDeHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString();
   const compromissosAgendados = compromissos.filter(
@@ -304,14 +304,14 @@ export function InicioScreen() {
    * O painel de permissões aparece quando falta algo **e** existe tratamento esperando aviso.
    *
    * A segunda condição é o que impede o app de cobrar autorização de quem nunca pediu lembrete
-   * nenhum — permissão que não muda nada na vida da pessoa é o tipo de aviso que ensina a ignorar
+   * nenhum - permissão que não muda nada na vida da pessoa é o tipo de aviso que ensina a ignorar
    * os próximos.
    */
   const cobrarPermissoes = permissoesDoAlarme.temPendencia && agenda.tratamentosComLembrete > 0;
 
   /**
    * Confirmar pede confirmação explícita: gravar ingestão é registro clínico, e um toque acidental
-   * na lista viraria um dado errado no histórico — que é justamente o que o app existe pra manter
+   * na lista viraria um dado errado no histórico - que é justamente o que o app existe pra manter
    * confiável.
    */
   function confirmar(dose: DoseDoDia) {
@@ -358,7 +358,7 @@ export function InicioScreen() {
    *
    * Só existe para as **atrasadas**: são as doses cujo horário já passou, ou seja, as únicas em
    * que "tomei" descreve algo que de fato aconteceu. Estender o lote às futuras transformaria o
-   * histórico num registro de intenção — o mesmo motivo que já mantém o botão de confirmar fora
+   * histórico num registro de intenção - o mesmo motivo que já mantém o botão de confirmar fora
    * das doses do fim do dia.
    *
    * A confirmação lista o que vai ser gravado, nome por nome. Uma ação que escreve vários
@@ -404,7 +404,7 @@ export function InicioScreen() {
   }
 
   /**
-   * "Fui" / "Não fui" gravam na hora, sem diálogo — o mesmo que o Calendário faz.
+   * "Fui" / "Não fui" gravam na hora, sem diálogo - o mesmo que o Calendário faz.
    *
    * É deliberadamente diferente de confirmar uma dose: lá o toque move estoque e entra no cálculo
    * de adesão. Aqui nada disso acontece, e corrigir é reabrir o compromisso no Calendário. Cobrar
@@ -432,14 +432,14 @@ export function InicioScreen() {
    * O estoque é desenhado em **uma de duas posições**, conforme haja alerta.
    *
    * Com algo acabando ele sobe para junto dos outros avisos, acima de "Minha adesão": o alerta
-   * pede ação, e adesão é leitura — quem abre a Home com um remédio prestes a acabar precisa
+   * pede ação, e adesão é leitura - quem abre a Home com um remédio prestes a acabar precisa
    * disso antes do gráfico da semana.
    *
    * Sem alerta ele volta ao fim, onde é consulta e não aviso: o atalho permanente no topo
    * ocuparia espaço nobre sem nada a dizer.
    *
    * A seção não se parte entre as duas posições. O "Gerenciar estoque" é para onde se vai depois
-   * de ler "acaba em 3 dias" — separá-los obrigaria a percorrer a tela para completar o gesto que
+   * de ler "acaba em 3 dias" - separá-los obrigaria a percorrer a tela para completar o gesto que
    * o alerta acabou de pedir.
    */
   const temAlertaDeEstoque = agenda.estoquesBaixos.length > 0;
@@ -462,7 +462,7 @@ export function InicioScreen() {
 
         {/* Acesso permanente, e não só quando algo está acabando: o ícone no topo da aba
             Medicações passou despercebido no teste em aparelho. Some quando não há estoque
-            controlado — aí a tela do outro lado abriria vazia. */}
+            controlado - aí a tela do outro lado abriria vazia. */}
         {agenda.estoquesControlados > 0 ? (
           <CardEstoque onPress={() => router.push("/estoque")} />
         ) : null}
@@ -520,7 +520,7 @@ export function InicioScreen() {
              *
              * As três que o app não consegue ler (sobrepor apps, início automático, bateria) nunca
              * seriam marcadas como atendidas, então com elas aqui o painel ficaria para sempre na
-             * Home — inclusive para quem configurou tudo. Um aviso que nunca sai ensina a ignorar o
+             * Home - inclusive para quem configurou tudo. Um aviso que nunca sai ensina a ignorar o
              * aviso, e aí ele deixa de proteger justamente as três que ele consegue verificar.
              *
              * Elas não desaparecem do app: vivem na ajuda de alertas, na seção "você mesmo precisa
@@ -555,7 +555,7 @@ export function InicioScreen() {
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={`Confirmar as ${atrasadas.length} doses atrasadas`}
-                  // O texto é curto e o alvo real precisa ser de dedo, não de letra — o público
+                  // O texto é curto e o alvo real precisa ser de dedo, não de letra - o público
                   // do app inclui quem já não acerta um toque pequeno.
                   hitSlop={spacing.sm}
                   onPress={confirmarAtrasadas}>
@@ -588,7 +588,7 @@ export function InicioScreen() {
               <Text style={styles.emptyTitle}>
                 {agenda.temMedicamentos ? "Nenhuma dose para hoje" : "Nenhum remédio cadastrado"}
               </Text>
-              {/* Com compromisso no dia, "não há nada hoje" seria falso — o bloco deles vem logo
+              {/* Com compromisso no dia, "não há nada hoje" seria falso - o bloco deles vem logo
                   abaixo. O texto muda para dizer que faltam doses, não o dia inteiro. */}
               <Text style={styles.emptyDescription}>
                 {agenda.temMedicamentos
@@ -639,7 +639,7 @@ export function InicioScreen() {
 
                 O que já foi respondido é registro, não tarefa: serve para conferir ("já tomei o das
                 8?"), e quem confere varre a coluna de horários em vez de ler cartão por cartão. Em
-                cartões o efeito era perverso — quanto mais em dia a pessoa estivesse, mais cheia
+                cartões o efeito era perverso - quanto mais em dia a pessoa estivesse, mais cheia
                 ficava a Home, e as doses pendentes iam sendo empurradas para longe pelas resolvidas.
 
                 Mesma forma da agenda do Calendário, onde o enxugamento já tinha funcionado. */}
@@ -665,7 +665,7 @@ export function InicioScreen() {
         {/* Os compromissos vêm **depois** das doses, e em bloco próprio.
 
             Depois porque a dose é o que o app cobra ação: ela tem horário curto, botões e um estado
-            que vence. O compromisso é do dia inteiro do ponto de vista de quem o lê aqui — saber que
+            que vence. O compromisso é do dia inteiro do ponto de vista de quem o lê aqui - saber que
             há consulta às 14h muda o planejamento, mas não pede toque nenhum agora.
 
             Em bloco próprio, e não intercalados por horário na mesma lista, porque as duas linhas se
@@ -725,7 +725,7 @@ export function InicioScreen() {
             pessoa se preparar hoje.
 
             Card, e não linha: aqui cabe o **preparo** ("jejum de 12h"), que é a única informação do
-            compromisso que exige ação antecipada — e descobri-la só ao abrir o detalhe é descobrir
+            compromisso que exige ação antecipada - e descobri-la só ao abrir o detalhe é descobrir
             tarde. A linha da agenda de hoje não tem onde colocá-lo. */}
         {compromissosProximos.length > 0 || compromissosAgendados > 0 ? (
           <View style={styles.doseList}>
@@ -749,7 +749,7 @@ export function InicioScreen() {
                   notes={compromisso.notes}
                   emDias={emDias}
                   outcome={compromisso.outcome}
-                  // Estes ainda não chegaram — não há o que responder, e a pergunta não aparece.
+                  // Estes ainda não chegaram - não há o que responder, e a pergunta não aparece.
                   jaAconteceu={false}
                   // Direto ao detalhe daquele compromisso, e não à lista: quem tocou já escolheu
                   // qual, e reencontrá-lo lá dentro anularia o atalho.
@@ -763,12 +763,12 @@ export function InicioScreen() {
               </Animated.View>
             ))}
 
-            {/* A agenda inteira, para além do que já entrou na janela do lembrete — e **dentro** da
+            {/* A agenda inteira, para além do que já entrou na janela do lembrete - e **dentro** da
                 mesma seção dos que se aproximam, porque respondem à mesma pergunta: "o que eu tenho
                 marcado?". Solto no meio dos cards de estoque, ele obrigava a percorrer a tela para
                 juntar duas coisas do mesmo assunto.
 
-                Este responde "e a consulta de novembro, o app guardou?" — sem ele, a janela do
+                Este responde "e a consulta de novembro, o app guardou?" - sem ele, a janela do
                 lembrete, que é o que mantém a tela do dia enxuta, viraria a sensação de que o
                 compromisso se perdeu. */}
             {compromissosAgendados > 0 ? (
@@ -785,7 +785,7 @@ export function InicioScreen() {
         {/* Só com algum dia medido: um gráfico de sete traços vazios não informa nada. */}
         {agenda.semana.some((dia) => dia.ratio !== null) ? (
           <View style={styles.doseList}>
-            {/* O rótulo nomeia o **escopo**, como "Se aproximando" e "Estoque" — é o que dá à Home
+            {/* O rótulo nomeia o **escopo**, como "Se aproximando" e "Estoque" - é o que dá à Home
                 uma leitura de índice, em que cada assunto se anuncia antes de aparecer. O título
                 dentro do card segue descrevendo o gráfico, que é outra coisa. */}
             <Text style={styles.sectionLabel}>Minha adesão</Text>
@@ -807,11 +807,11 @@ export function InicioScreen() {
         {!temAlertaDeEstoque ? secaoDeEstoque : null}
 
         {/**
-         * O aviso das autorizações que o app não consegue verificar — **no fim, e não no topo**.
+         * O aviso das autorizações que o app não consegue verificar - **no fim, e não no topo**.
          *
          * Ele é permanente: as três (sobrepor apps, início automático, bateria) não expõem estado a
          * nenhuma API, então não há o que ele espere para desaparecer. Um aviso permanente acima da
-         * agenda tomaria para sempre o lugar do que a pessoa abriu o app para ver — e é justamente
+         * agenda tomaria para sempre o lugar do que a pessoa abriu o app para ver - e é justamente
          * essa inversão que o Gabriel apontou em 12/09.
          *
          * No rodapé ele cumpre o papel de quem chegou até aqui procurando por que o alarme não
@@ -829,7 +829,7 @@ export function InicioScreen() {
              *
              * Pedida pelo Gabriel em 12/09, e resolve o que faltava aqui. Três das cinco
              * autorizações o app não consegue verificar, então esta seção nunca sabe se há algo
-             * errado — e sem uma condição escrita, ela é um bloco permanente sem motivo aparente,
+             * errado - e sem uma condição escrita, ela é um bloco permanente sem motivo aparente,
              * do tipo que se aprende a pular.
              *
              * Condicional e não imperativa: "se algum aviso não chegou" só interpela quem está com
@@ -861,7 +861,7 @@ export function InicioScreen() {
       {/**
        * A comemoração do dia fechado.
        *
-       * Fica **fora** do `ScrollView` e depois do `Fab` para cobrir a tela inteira, e some sozinha —
+       * Fica **fora** do `ScrollView` e depois do `Fab` para cobrir a tela inteira, e some sozinha -
        * `onDone` só desliga o estado, sem navegar: quem fechou o dia continua na Home, que é onde
        * ela já estava. Não há para onde levar alguém que acabou de terminar o que tinha para fazer.
        */}

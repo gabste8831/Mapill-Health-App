@@ -7,11 +7,11 @@ import { estadoDaSync, sincronizar, type EstadoDaSync } from "@/data/remote/sync
  * O estado da sincronização, e o gatilho manual.
  *
  * **Sincroniza ao voltar ao primeiro plano**, e não em intervalo fixo. É quando a conexão
- * costuma estar de volta e quando a pessoa vai olhar o app — um timer de 15 minutos gastaria
+ * costuma estar de volta e quando a pessoa vai olhar o app - um timer de 15 minutos gastaria
  * bateria para descobrir que nada mudou, num aparelho que passa a maior parte do dia no bolso.
  *
  * Nunca bloqueia nada: o app funciona inteiro offline, e a sincronização é backup e troca entre
- * aparelhos (§2.9 — consistência eventual).
+ * aparelhos (§2.9 - consistência eventual).
  */
 export function useSync() {
   const [estado, setEstado] = useState<EstadoDaSync>({ ultimaSync: null, pendentes: 0 });

@@ -13,7 +13,7 @@ type CardProximaDoseProps = {
   hint: string | null;
 };
 
-/** Card de maior destaque da Home — única quebra intencional da paleta neutra. */
+/** Card de maior destaque da Home - única quebra intencional da paleta neutra. */
 export function CardProximaDose({ time, medicationName, doseLabel, hint }: CardProximaDoseProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
@@ -21,7 +21,7 @@ export function CardProximaDose({ time, medicationName, doseLabel, hint }: CardP
   return (
     <View style={styles.container}>
       {/* Antes do conteúdo para ficar **atrás**: no React Native a ordem no JSX é a ordem de
-          pintura. Escondida do leitor de tela — ela repete o ícone do cabeçalho, e anunciá-la seria
+          pintura. Escondida do leitor de tela - ela repete o ícone do cabeçalho, e anunciá-la seria
           dizer a mesma coisa duas vezes. */}
       <MaterialCommunityIcons
         name="pill"
@@ -35,7 +35,7 @@ export function CardProximaDose({ time, medicationName, doseLabel, hint }: CardP
       <View style={styles.conteudo}>
         {/* O rótulo e a hora andam juntos: "Próxima dose" nomeia o número logo abaixo, e afastá-lo
             dele o deixava boiando entre o topo do card e um horário distante. Sem `gap` entre os
-            dois — o `lineHeight` do horário já abre o bastante. */}
+            dois - o `lineHeight` do horário já abre o bastante. */}
         <View>
           <View style={styles.header}>
             <View style={styles.headerEsquerda}>
