@@ -13,24 +13,13 @@ type AjudaDeAlertasScreenProps = {
 };
 
 /**
- * O que o alerta faz na hora da dose - em tela, e não mais dobrado num acordeão dentro do popup.
+ * O que o alerta faz na hora da dose, em tela propria e nao dobrado dentro do popup de escolha.
  *
- * ## Por que saiu de lá
+ * Dentro do modal, ler os termos exigia uma maquina de estado no formulario: fechar o popup para
+ * navegar, porque dois modais empilhados travam a tela no Android, lembrar que ele estava aberto e
+ * reabri-lo no foco seguinte. Como rota irma, e um `push` comum.
  *
- * A folha "Como quer ser avisado?" é uma pergunta com três respostas. Ela vinha carregando quatro
- * camadas no mesmo nível - a decisão, o painel de permissões, um aviso sobre o aparelho e este
- * texto inteiro -, e quem abria para escolher um modo precisava atravessar tudo para achar a
- * escolha. Explicação empilhada sobre decisão não informa mais: ela adia a decisão.
- *
- * ## O que se ganhou além do espaço
- *
- * Enquanto isto vivia dentro do modal, ler os termos exigia uma máquina de estado inteira no
- * formulário - fechar o popup para navegar (dois modais empilhados travam a tela no Android),
- * lembrar que ele estava aberto, em que ponto a leitura tinha parado, e reabrir tudo no foco
- * seguinte. Como rota irmã dentro do mesmo stack do cadastro, "ler os termos" é um `push` comum e
- * o botão de voltar do Android faz o caminho de volta sozinho.
- *
- * A tela não conhece rota: quem navega é quem a monta (§2.6.1).
+ * A tela nao conhece rota: quem navega e quem a monta.
  */
 export function AjudaDeAlertasScreen({
   onBack,
@@ -38,22 +27,15 @@ export function AjudaDeAlertasScreen({
 }: AjudaDeAlertasScreenProps) {
   const cores = useCores();
   const styles = useEstilos(criarEstilos);
-  /**
-   * O hook relê as permissões **a cada volta ao primeiro plano**, e é isso que faz esta tela
-   * funcionar como página de conferência: a pessoa toca numa linha, vai à tela do sistema, concede,
-   * e ao voltar o estado já está atualizado - sem precisar sair e entrar de novo.
-   */
+  // O hook rele a cada volta ao primeiro plano, e e isso que faz esta tela funcionar como pagina de
+  // conferencia: concedeu na tela do sistema, voltou, o estado ja esta atualizado.
   const { itens } = usePermissoesDeAlarme();
 
   const verificaveis = itens.filter((item) => item.verificavel);
   const naoVerificaveis = itens.filter((item) => !item.verificavel);
 
-  /**
-   * As duas seções de autorização, montadas aqui e renderizadas **antes** das explicações.
-   *
-   * Numa variável porque o JSX delas é longo, e no meio da árvore empurraria as explicações para
-   * fora da vista de quem lê o arquivo. A ordem na tela é o que importa, e ela está no `return`.
-   */
+  // Numa variavel porque o JSX e longo e no meio da arvore empurraria o resto para fora da vista.
+  // A ordem na tela esta no `return`.
   const SECOES_DE_PERMISSAO = (
     <>
       <View style={styles.condicoes}>
@@ -77,16 +59,9 @@ export function AjudaDeAlertasScreen({
             />
             <View style={styles.linhaTexto}>
               <Text style={styles.linhaTitulo}>{permissao.titulo}</Text>
-              {/**
-               * **Uma linha de estado, e nada mais** - a consequência saiu daqui.
-               *
-               * A descrição ("sem isto o aviso pode atrasar dezenas de minutos") existe para
-               * convencer, e ela já está na Home, no painel que trouxe a pessoa até aqui. Repetida
-               * dentro de cada botão, transformava cinco alvos de toque em cinco parágrafos - e foi
-               * o que o Gabriel apontou em 12/09: denso demais para se ler como botão.
-               *
-               * O que fica é o que decide a ação: o nome da permissão e se ela falta.
-               */}
+              {/* Uma linha de estado, e nada mais: a descricao existe para convencer e ja esta no
+                  painel que trouxe a pessoa ate aqui. Repetida, virava cinco paragrafos em cinco
+                  alvos de toque. */}
               <Text style={permissao.concedida ? styles.linhaOk : styles.linhaPendente}>
                 {permissao.concedida ? "Autorizada" : "Toque para autorizar"}
               </Text>
@@ -101,8 +76,7 @@ export function AjudaDeAlertasScreen({
           <Text style={styles.condicoesTitulo}>
             Você precisa conferir estas
           </Text>
-          {/* Uma frase, e curta: o parágrafo de três linhas que estava aqui somava ao peso que o
-              Gabriel apontou em 12/09. O essencial é que o app não sabe o estado delas. */}
+          {/* Uma frase, e curta: o essencial e que o app nao sabe o estado delas. */}
           <Text style={styles.texto}>
             O dispositivo não deixa o Mapill ver se estão ligadas.
           </Text>

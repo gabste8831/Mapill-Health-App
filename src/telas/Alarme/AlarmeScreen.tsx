@@ -18,54 +18,30 @@ import { CenteredLoader, FotoLocal } from "@/ui";
 import { criarEstilos } from "./AlarmeScreen.styles";
 
 /**
- * A tela tem **três formas**, e o número de doses escolhe qual.
+ * A tela tem tres formas, e o numero de doses escolhe qual. O que muda entre elas e a escala, e
+ * nao o conteudo.
  *
- * A de uma dose é a que o alarme foi desenhado para ser: foto grande, nome em corpo 30, tudo o que
- * ajuda a reconhecer a caixa sem óculos e recém-acordado. Ela funciona, e não muda.
- *
- * O problema aparecia ao repetir esse bloco. Com três remédios eram três fotos de 132dp, três nomes
- * em corpo 30, três quantidades e três orientações empilhadas - cada um desenhado como se fosse o
- * único. Visto em aparelho em 12/09: a tela vira uma parede de texto, e uma lista que não se lê como
- * lista é pior que nenhuma.
- *
- * Então:
- *
- * - **1 dose** - a tela cheia de sempre, com foto de 132dp e nome em corpo 30.
- * - **2 ou 3** - uma lista: miniatura de 44dp à esquerda, e à direita nome, quantidade, orientação
- *   de tomada e onde a caixa está. **Nada é omitido** - o que muda é a escala. A foto fica porque
- *   distinguir uma caixa da outra importa mais aqui do que na tela de uma dose só.
- * - **4 ou mais** - nem lista. Só quantos remédios são, e o caminho para o app. Acima de três, a
- *   pessoa não decide olhando a tela do alarme: ela vai conferir onde cada dose se resolve.
+ * Uma dose e a tela cheia de sempre. Duas ou tres viram lista, com miniatura a esquerda: repetir o
+ * bloco de uma dose tres vezes fazia da tela uma parede de texto. Acima disso nem lista, so os
+ * nomes e o caminho para o app, porque ali a pessoa nao decide olhando o alarme.
  */
 const MAXIMO_PARA_LISTAR = 3;
 
 /**
- * Até quantos remédios se responde pela própria tela do alarme. Ver `podeResponderAqui`.
+ * Ate quantos remedios se responde pela propria tela do alarme.
  *
- * **Um, desde 09/09** - antes eram três, com os botões "Tomei todas" e "Pulei todas".
- *
- * Decisão do Gabriel, tomada depois de uma sessão inteira caçando um defeito que aparecia
- * justamente ali: o alarme com mais de um remédio mostrava duas telas e o som saía duplicado. A
- * causa era outra (ver `alarme-em-cena`) e está corrigida, mas a resposta em lote deixou de valer o
- * risco - ela é o caminho menos usado do alarme e o que mais custou para manter de pé.
- *
- * O que se perde é o atalho de quem toma vários remédios no mesmo horário. O que fica é o
- * `Ver e confirmar no app`, que já existia e já era a saída para quatro ou mais: leva à tela do
- * horário, onde cada dose se resolve individualmente. Nenhum caminho desapareceu - o que mudou é
- * que ele passou a ser o único quando há mais de uma dose.
- *
- * A tela cheia continua inteira: ela irrompe, toca em loop, mostra a foto e silencia. Só a resposta
- * em lote saiu.
+ * Um: a resposta em lote e o caminho menos usado e o que mais custou para manter de pe. O que fica
+ * e o "Ver e confirmar no app", que leva a tela do horario, onde cada dose se resolve
+ * individualmente.
  */
 const MAXIMO_PARA_RESPONDER_NO_ALARME = 1;
 
 /**
- * Quanto tempo o alarme toca antes de silenciar sozinho.
+ * Quanto o alarme toca antes de silenciar sozinho.
  *
- * Ele **não** para de existir aos cinco minutos: a tela continua aberta e a dose continua pendente.
- * O que acaba é o barulho. Um alarme que toca indefinidamente num aparelho esquecido em cima da mesa
- * vira uma tortura para quem está por perto - e a pessoa que precisa dele já não está ali para
- * ouvir.
+ * Ele nao para de existir: a tela continua aberta e a dose pendente, o que acaba e o barulho. Um
+ * alarme indefinido num aparelho esquecido na mesa e tortura para quem esta por perto, e quem
+ * precisa dele ja nao esta ali para ouvir.
  */
 const SILENCIA_SOZINHO_EM_MS = 5 * 60_000;
 

@@ -240,13 +240,7 @@ export function ItemDeDose({
             <Text style={styles.skipButtonText}>Pular</Text>
           </Pressable>
           <Pressable
-            /**
-             * Estes dois são os alvos mais tocados do app, e eram os únicos sem resposta ao toque -
-             * o mesmo defeito que a varredura de 31/08 corrigiu no kit e não alcançou aqui, porque
-             * a tela desenha os próprios botões (frente #3 do passe).
-             *
-             * `escala` é seguro: são alvos autocontidos, não linhas de largura total.
-             */
+            // `escala` e seguro aqui: sao alvos autocontidos, nao linhas de largura total.
             style={estadoDePressao(styles.confirmButton, { escala: true })}
             onPress={onConfirm}
             hitSlop={{ top: 4, bottom: 4 }}
