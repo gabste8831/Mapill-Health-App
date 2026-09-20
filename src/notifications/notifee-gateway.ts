@@ -30,50 +30,30 @@ import {
 import { pararDeSoar } from "./som-do-alarme";
 
 /**
- * O agendador de avisos do app - **um só**, para os dois modos que o cadastro promete.
+ * O agendador de avisos do app, um so para os dois modos que o cadastro promete.
  *
- * ## Por que uma biblioteca, e não duas
- *
- * Entre 01 e 02/09 o app teve as duas: o Notifee para o alarme de tela cheia (a única coisa que o
- * `expo-notifications` não faz) e o `expo-notifications` para todo o resto. Funcionava, e a escrita
- * no banco já era única - as duas chamavam `confirmarDosesDoAviso`, com a mesma guarda contra
- * confirmação repetida.
- *
- * O que não era bom vivia no **cancelamento**. Cada biblioteca só enxerga a própria lista de
- * agendamentos, então a RN14 ("nunca editar, sempre reconstruir") dependia de lembrar de cancelar
- * dos dois lados. Isso é convenção, não construção: um terceiro ponto de cancelamento que
- * esquecesse uma das linhas traria de volta o **alarme órfão** - o pior defeito deste domínio, o
- * lembrete de um remédio que a pessoa já parou de tomar - e nada no compilador denunciaria.
- *
- * Com um agendador só, `cancelarTudo` é literalmente tudo. O defeito deixa de ser possível em vez
- * de ser evitado por disciplina.
- *
- * ## O que se ganha de quebra
- *
- * `onBackgroundEvent` processa a resposta **com o app fechado**. O caminho anterior dependia de
- * `getLastNotificationResponseAsync` no bootstrap, isto é, da pessoa abrir o app para a resposta
- * ser processada. Para um botão "Tomei" que promete não abrir o app, essa diferença é a promessa.
+ * Uma biblioteca e nao duas porque cada uma so enxerga a propria lista de agendamentos: com duas, a
+ * regra de nunca editar e sempre reconstruir dependia de lembrar de cancelar dos dois lados, e
+ * esquecer uma linha traz de volta o alarme orfao sem o compilador denunciar. Com um agendador so,
+ * `cancelarTudo` e literalmente tudo.
  */
 
-/** O lembrete adiado - um dos avisos que **sobrevivem** a um reagendamento. Ver `cancelarTudo`. */
+/** O lembrete adiado sobrevive ao reagendamento. Ver `cancelarTudo`. */
 export const PREFIXO_ADIADO = "adiado-";
 
 /**
- * O aviso disparado pela tela de diagnóstico.
+ * O aviso disparado pela tela de diagnostico, que tambem sobrevive.
  *
- * Sobrevive ao reagendamento pelo mesmo motivo do adiado, e por um mais imediato: `cancelarTudo`
- * roda a cada volta do app ao primeiro plano, e testar um alarme exige justamente sair do app. Sem
- * esta exceção, o aviso de teste seria cancelado no instante em que se faz o gesto que o teste
- * pede.
+ * `cancelarTudo` roda a cada volta ao primeiro plano, e testar um alarme exige sair do app: sem a
+ * excecao, o aviso de teste morreria no gesto que o proprio teste pede.
  */
 const PREFIXO_DE_TESTE = "teste-";
 
 /**
- * Prefixo do alarme de tela cheia, aplicado **aqui** e não no domínio.
+ * Aplicado aqui, e nao no dominio.
  *
- * `planejar-avisos-de-dose` produz a chave do horário (`dose-<instante>`) sem saber que existe tela
- * cheia - ele decide *quando* avisar, não *como*. Marcar o id nesta camada é o que permite ao
- * listener reconhecer um alarme sem que a regra pura conheça o Notifee (§2.6.1).
+ * `planejar-avisos-de-dose` decide quando avisar, nao como. Marcar o id nesta camada e o que deixa
+ * o listener reconhecer um alarme sem que a regra pura conheca o Notifee.
  */
 const PREFIXO_ALARME = "alarme:";
 
@@ -92,11 +72,10 @@ function chaveDoId(id: string): string {
 }
 
 /**
- * Os avisos que a reconstrução da janela **não** apaga.
+ * Os avisos que a reconstrucao da janela nao apaga.
  *
- * Compara a chave e não o id cru: o lembrete adiado é agendado com `modo: "alarm"` (precisa
- * interromper como o aviso original), então seu id vem `alarme:adiado-…`. Testar o id inteiro
- * apagaria justamente o que esta regra existe para preservar.
+ * Compara a chave e nao o id cru: o adiado e agendado como alarme, entao seu id vem
+ * `alarme:adiado-...`, e testar o id inteiro apagaria o que esta regra existe para preservar.
  */
 function sobreviveAoReagendamento(id: string): boolean {
   const chave = chaveDoId(id);
@@ -148,49 +127,22 @@ async function prepararSistema(): Promise<void> {
   jaPreparado = true;
 }
 
-/**
- * Os botões do aviso.
- *
- * No Notifee eles vão **na notificação**, e não numa categoria registrada antes - o que elimina a
- * indireção que o `expo-notifications` exigia (quatro categorias pré-registradas para cobrir as
- * combinações de "uma ou várias doses" × "pode adiar ou não"). Aqui a combinação é montada na hora.
- *
- * `TOMEI` confirma direto, sem abrir o app: é exceção consciente à confirmação visual que o projeto
- * exige para ações críticas, porque tocar num botão rotulado "Tomei" já é deliberado e a fricção
- * extra custaria justamente o que o app existe para conseguir - doses registradas. O que a torna
- * aceitável é a correção retroativa ser sempre óbvia na Home (RN06).
- */
+/** Os botoes do aviso, montados na hora a partir dele. */
 function acoesDoAviso(aviso: AvisoDeDose): AndroidAction[] | undefined {
   if (aviso.doseScheduleIds.length === 0) return undefined;
 
   /**
-   * O alarme **não** carrega botões de ação. A resposta dele acontece na tela cheia.
+   * O alarme nao carrega botoes: a resposta dele acontece na tela cheia.
    *
-   * O Android exibe a mesma notificação de duas formas: a tela cheia, e um heads-up no topo quando
-   * o aparelho está em uso. Com botões anexados, o heads-up virava um segundo caminho para
-   * responder a mesma dose - e foi isso que descontou o estoque duas vezes no teste de 05/09, não a
-   * opção "Os dois" que chegamos a culpar. São a mesma notificação, exibida duas vezes.
-   *
-   * Sem os botões, o heads-up continua aparecendo (é o Android quem decide), mas ele só informa: a
-   * resposta é uma só, na tela que o alarme abre. A notificação comum mantém os seus, porque ali
-   * não há tela cheia - os botões são o único caminho rápido que ela tem.
+   * O Android exibe a mesma notificacao de duas formas, a tela cheia e um heads-up no topo. Com
+   * botoes anexados o heads-up virava um segundo caminho para responder a mesma dose, e foi isso
+   * que descontou o estoque duas vezes. A notificacao comum mantem os seus, porque ali nao ha tela
+   * cheia e eles sao o unico caminho rapido.
    */
   if (aviso.modo === "alarm") return undefined;
 
-  /**
-   * **Tomei e Pulei** - as duas respostas, e nada além.
-   *
-   * "Adiar 5 min" saiu daqui. Ele fazia sentido no alarme, que interrompe e pode pegar alguém longe
-   * do remédio; a notificação é o modo de quem não quer ser interrompido, e adiar um aviso discreto
-   * é resolver com dois toques o que um toque já resolve. O adiar continua na tela do alarme, onde
-   * a pergunta "agora não posso" tem razão de existir.
-   *
-   * Rótulos curtos também ajudam a caber: o Android colapsa as ações atrás de uma seta quando elas
-   * não cabem na largura, e "Adiar 5 min" era a mais larga das três.
-   *
-   * Os dois pares mudam junto com a contagem - confirmar duas doses achando que confirmou uma é o
-   * tipo de erro que o rótulo tem de impedir.
-   */
+  // Os rotulos mudam com a contagem: confirmar duas doses achando que confirmou uma e o erro que
+  // eles tem de impedir. "Adiar" fica so na tela do alarme, onde "agora nao posso" faz sentido.
   const varias = aviso.doseScheduleIds.length > 1;
   return [
     { title: varias ? "Tomei todas" : "Tomei", pressAction: { id: ACAO_TOMEI } },
@@ -202,9 +154,8 @@ export class NotifeeGateway implements NotificationGateway {
   async consultarPermissao(): Promise<NotificationPermission> {
     const { authorizationStatus } = await notifee.getNotificationSettings();
     if (authorizationStatus === AuthorizationStatus.AUTHORIZED) return "concedida";
-    // `NOT_DETERMINED` é ausência de resposta; `DENIED` é recusa, tenha ela vindo do diálogo ou das
-    // configurações. A distinção importa: foi confundi-la que fez o card de avisos bloqueados
-    // nunca aparecer na Home (bloco 10.1, 01/09).
+    // `NOT_DETERMINED` e ausencia de resposta; `DENIED` e recusa. Confundir os dois fazia o card de
+    // avisos bloqueados nunca aparecer na Home.
     if (authorizationStatus === AuthorizationStatus.NOT_DETERMINED) return "naoPedida";
     return "negada";
   }
@@ -224,14 +175,11 @@ export class NotifeeGateway implements NotificationGateway {
   }
 
   /**
-   * Abre a tela do Android onde se concede **acesso à política do Não Perturbe**.
+   * Abre a tela onde se concede acesso a politica do Nao Perturbe.
    *
-   * É permissão especial: o `bypassDnd` do canal só passa a valer depois dela, e o Android **nunca
-   * a pede sozinho** - não há diálogo, só esta tela. Sem ela o alarme toca normalmente, mas fica
-   * mudo com o Não Perturbe ligado, que é justamente quando ele mais importaria.
-   *
-   * Tem que ser este intent, e não `openSettings()`: as configurações do app não mostram essa
-   * permissão. Ela vive numa lista do sistema, junto de todos os apps que a pedem.
+   * Permissao especial: o `bypassDnd` do canal so vale depois dela, e o Android nunca a pede
+   * sozinho. Tem que ser este intent, porque as configuracoes do app nao a mostram: ela vive numa
+   * lista do sistema, junto dos outros apps que a pedem.
    */
   async abrirAcessoAoNaoPerturbe(): Promise<void> {
     if (Platform.OS !== "android") return;
@@ -249,18 +197,12 @@ export class NotifeeGateway implements NotificationGateway {
     const ehAlarme = aviso.modo === "alarm";
 
     /**
-     * O gatilho **nunca no passado**, aconteça o que acontecer com quem chama.
+     * O gatilho nunca no passado.
      *
-     * O Notifee recusa um timestamp vencido com `trigger timestamp date must be in the future`, e a
-     * exceção derruba o laço inteiro de `reagendarTodosOsAvisos` - um aviso impossível deixa
-     * **todos** os seguintes sem agendar. Foi o que apareceu em aparelho em 09/09.
-     *
-     * `planejarAvisosDeDose` já garante o piso na origem, e esta é a segunda camada: aqui passa
-     * também o lembrete adiado e o aviso de teste do diagnóstico, e um erro de aritmética em
-     * qualquer um deles não pode custar a grade de avisos do dia.
-     *
-     * Cinco segundos, e não um: este ponto é mais tarde no caminho, depois de `prepararSistema`,
-     * que faz I/O.
+     * O Notifee recusa timestamp vencido com uma excecao, e ela derruba o laco inteiro de
+     * `reagendarTodosOsAvisos`: um aviso impossivel deixa todos os seguintes sem agendar. Segunda
+     * camada, porque `planejarAvisosDeDose` ja garante o piso na origem, mas por aqui passam o
+     * adiado e o aviso de teste.
      */
     const agora = Date.now();
     const pedido = aviso.quando.getTime();
@@ -271,32 +213,12 @@ export class NotifeeGateway implements NotificationGateway {
       timestamp: quandoAgendar,
       alarmManager: {
         /**
-         * `SET_ALARM_CLOCK` para o alarme: é a categoria que o Android trata como **despertador**,
-         * a mesma do relógio nativo.
+         * `SET_ALARM_CLOCK`, a categoria que o Android trata como despertador.
          *
-         * Antes eram todos com `allowWhileIdle`, que a própria API já marca como *deprecated* em
-         * favor de `type`. Ele permite disparar em Doze, mas não impede o sistema de **agrupar** o
-         * disparo com outros e adiá-lo até a próxima janela de manutenção. Em aparelho (05/09) o
-         * efeito apareceu no lembrete adiado: com o celular bloqueado, ele só tocou quando a tela
-         * foi ligada de novo. Num despertador de medicação, um alarme que espera a pessoa acordar
-         * para avisar não é um alarme.
-         *
-         * `SET_ALARM_CLOCK` é imune a esse agrupamento, e é o que justifica a permissão
-         * `USE_EXACT_ALARM` que o app já declara. O custo é ser visível ao sistema como alarme
-         * (aparece no ícone de despertador da barra de status), o que aqui é honesto: é o que ele é.
-         *
-         * **A notificação usa a mesma categoria**, e não uma mais fraca.
-         *
-         * Chegou a ficar com `SET_EXACT_AND_ALLOW_WHILE_IDLE`, com o argumento de que ela não
-         * promete acordar ninguém. O teste em aparelho derrubou o argumento: com a tela desligada,
-         * ela simplesmente **não chegava** - o Doze agrupava o disparo, e o lembrete só aparecia
-         * quando o celular era usado de novo. Um lembrete de remédio que espera a pessoa pegar o
-         * aparelho para avisar não lembra de nada.
-         *
-         * A diferença entre os dois modos continua onde ela sempre esteve, e é real: o **canal**.
-         * O alarme atravessa o Não Perturbe, toca alto pelo volume de despertador e abre tela
-         * cheia; a notificação sai pelo volume de avisos e respeita o silencioso. O que os iguala
-         * aqui é só a pontualidade - os dois têm hora marcada, e essa hora é a promessa.
+         * `SET_EXACT_AND_ALLOW_WHILE_IDLE` dispara em Doze mas nao impede o sistema de agrupar o
+         * disparo e adia-lo ate a proxima janela de manutencao: com a tela desligada o aviso so
+         * chegava quando o celular era usado de novo. Vale para os dois modos, porque os dois tem
+         * hora marcada; o que os diferencia e o canal, nao a pontualidade.
          */
         type: AlarmType.SET_ALARM_CLOCK,
       },
@@ -323,95 +245,48 @@ export class NotifeeGateway implements NotificationGateway {
         android: {
           channelId: aviso.modo === "alarm" ? CANAL_ALARME : CANAL_LEMBRETE,
           importance: AndroidImportance.HIGH,
-          /**
-           * `category: ALARM` diz ao Android que isto **é um despertador**, e não um aviso - é o
-           * que autoriza a tela cheia a aparecer. Só no modo `alarm`: dar categoria de alarme a um
-           * lembrete de consulta seria pedir para interromper quem não pediu para ser interrompido
-           * (RN16).
-           */
+          // `category: ALARM` e o que autoriza a tela cheia a aparecer. So no modo alarme: dar isto
+          // a um lembrete de consulta seria interromper quem nao pediu para ser interrompido.
           ...(ehAlarme ? { category: AndroidCategory.ALARM } : {}),
-          /**
-           * `notification_icon` é o drawable gerado a partir do `icon` do `app.json`. Sem declarar,
-           * o Notifee cai no ícone padrão do sistema e o aviso aparece com cara de "app genérico"
-           * no meio dos outros.
-           */
+          // Drawable gerado a partir do `icon` do `app.json`. Sem declarar, cai no icone padrao do
+          // sistema e o aviso fica com cara de app generico.
           smallIcon: "notification_icon",
           color: colors.primary,
           ...(ehAlarme
             ? {
-                /**
-                 * `ongoing` **não** garante mais que a notificação fique. Ela ainda vale: sobe o
-                 * aviso acima dos outros, tira o "X" e o protege do "Limpar tudo" - e na **tela de
-                 * bloqueio** o deslize continua barrado, que é onde o alarme mais importa.
-                 *
-                 * Mas o Android 14 passou a permitir dispensar notificações `ongoing` com o gesto
-                 * de arrastar, e confirmamos isso em aparelho (10/09): com o celular desbloqueado,
-                 * ela sai. As exceções que continuam presas são `CallStyle`, mídia e apps de
-                 * política corporativa - nenhuma alcançável por esta biblioteca.
-                 *
-                 * Dispensada com o alarme tocando, o som **continua** - quem o toca é o serviço, e a
-                 * tela cheia segue acessível pelo app. Tentamos trazer a notificação de volta pelo
-                 * evento `DISMISSED`, mas ele não chega no gesto de arrastar (testado em 10/09), e
-                 * a peça saiu do escopo em vez de ficar como contorno que não cumpre o que promete.
-                 */
+                // `ongoing` sobe o aviso acima dos outros e barra o deslize na tela de bloqueio,
+                // que e onde o alarme mais importa. Nao garante mais que ele fique: o Android 14
+                // permite arrastar notificacoes `ongoing` com o aparelho desbloqueado.
                 autoCancel: false,
                 ongoing: true,
-                /**
-                 * **O alarme sobe como foreground service, e é ele quem toca o som.**
-                 *
-                 * O canal é mudo de propósito (ver `canais-notifee`), então não há som de sistema a
-                 * repetir. O serviço toca independente de tela e no volume de despertador - e a tela
-                 * cheia nem sempre sobe: com o aparelho em uso o Android a rebaixa para heads-up.
-                 */
+                // O alarme sobe como foreground service, e e ele quem toca o som: o canal e mudo, e
+                // a tela cheia nem sempre sobe, porque com o aparelho em uso o Android a rebaixa.
                 asForegroundService: true,
                 foregroundServiceTypes: [
                   AndroidForegroundServiceType.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
                 ],
                 /**
-                 * **Explícito para contornar um defeito da biblioteca**, e não por preferência.
+                 * Explicito para contornar um defeito da ponte, e nao por preferencia.
                  *
-                 * A lib já injeta `IMMEDIATE` sozinha quando `asForegroundService` é `true` (ver
-                 * `validateAndroidNotification.js`), justamente para evitar o atraso de até 10 s que
-                 * o Android 12+ impõe à notificação de um foreground service. Só que o valor
-                 * atravessa a ponte como `Double` - todo número em JS é -, e o lado Java lê com
-                 * `getInt()` (`NotificationAndroidModel.java:117`), que não aceita `Double` e
-                 * devolve o padrão.
+                 * A lib ja injeta `IMMEDIATE` sozinha, para evitar o atraso de ate 10s que o
+                 * Android 12+ impoe a notificacao de um foreground service. Mas o valor atravessa
+                 * como `Double`, todo numero em JS e, e o lado Java le com `getInt()`, que devolve
+                 * o padrao: justamente o adiamento que o `IMMEDIATE` existia para evitar.
                  *
-                 * O logcat de 14/09 registra a perda no instante do disparo:
-                 *
-                 * ```
-                 * W/Bundle: Key foregroundServiceBehavior expected Integer but value was a
-                 *           java.lang.Double. The default value 0 was returned.
-                 * ```
-                 *
-                 * `0` é `FOREGROUND_SERVICE_DEFAULT` - exatamente o adiamento que o `IMMEDIATE`
-                 * existia para evitar. Num despertador de medicação, até 10 s entre o disparo e o
-                 * aviso aparecer é a diferença entre acordar alguém e não acordar.
-                 *
-                 * Passar o valor daqui não conserta a ponte: o `Double` continua sendo `Double`. O
-                 * que ele garante é que **a intenção fique escrita no nosso código**, onde este
-                 * comentário pode explicá-la, em vez de depender de um default da biblioteca que se
-                 * perde em silêncio. A correção de verdade é do lado que lê, e está em
-                 * `scripts/patch-servico-sem-atraso.js`.
+                 * Passar daqui nao conserta a ponte; garante que a intencao fique escrita. A
+                 * correcao real esta em `scripts/patch-servico-sem-atraso.js`.
                  */
                 foregroundServiceBehavior: AndroidForegroundServiceBehavior.IMMEDIATE,
                 /**
-                 * A peça que sustenta a promessa central: abre a tela do alarme **por cima da tela
-                 * de bloqueio**, sem passar pelo roteador do app.
+                 * A peca que sustenta a promessa central: a tela do alarme por cima do bloqueio,
+                 * sem passar pelo roteador.
                  *
-                 * `launchActivity` aponta a Activity própria do alarme, e é o que devolve o
-                 * aparelho ao bloqueio depois de responder - ver
-                 * `plugins/activity-propria-do-alarme.js`. A lib usa o nome literalmente:
-                 * `IntentUtils.getLaunchActivity` só cai na launcher activity quando o valor é
-                 * ausente ou `"default"`.
+                 * O `mainComponent` nao e redundancia: o extra que leva o horario da dose a tela
+                 * por `initialProps` so e anexado ao intent quando ele esta presente.
                  *
-                 * O `mainComponent` fica, e **não** é redundância: o extra `notification` - que
-                 * leva o horário da dose à tela por `initialProps` - só é anexado ao intent quando
-                 * ele está presente (`NotificationManager.java`, no ramo do full-screen).
-                 *
-                 * `NEW_TASK` é explícito porque o caminho do full-screen **não** o aplica sozinho,
-                 * ao contrário do toque na notificação. Sem ele a Activity não nasce em task
-                 * própria, e fechá-la voltaria a revelar o app em vez do bloqueio.
+                 * `NEW_TASK` e explicito porque o caminho do full-screen nao o aplica sozinho, ao
+                 * contrario do toque. Sem ele a Activity nao nasce em task propria, e fecha-la
+                 * revelaria o app em vez do bloqueio.
                  */
                 fullScreenAction: {
                   id: "alarme",
@@ -420,29 +295,18 @@ export class NotifeeGateway implements NotificationGateway {
                   mainComponent: COMPONENTE_DE_ALARME,
                 },
                 /**
-                 * O toque no corpo **não** abre o componente nativo - ele abre o app.
+                 * O toque no corpo abre o app, e nao o componente nativo.
                  *
-                 * Aqui estavam **duas telas de alarme ao mesmo tempo**, e era a causa do lampejo
-                 * azul que sobreviveu a duas correções (09/09). Com `mainComponent` também no
-                 * `pressAction`, tocar na notificação fazia o Notifee subir a Activity nativa
-                 * (`AlarmeRaiz`) **e** o listener receber o `PRESS` e empurrar a rota
-                 * `/alarme/[instante]` - a mesma tela por dois caminhos, uma por cima da outra.
-                 * Responder na de cima a fechava e revelava a de baixo por um quadro, que então
-                 * também se fechava por ver tudo resolvido.
-                 *
-                 * `default` deixa o toque abrir o app, e quem decide para onde ir é o listener em
-                 * `escutar-avisos`: alarme vai para a rota do alarme, notificação comum vai para a
-                 * tela do horário. Uma decisão, num lugar só.
-                 *
-                 * O `fullScreenAction` fica: ele é outra coisa - a Activity que irrompe sobre a
-                 * tela de bloqueio, sem toque nenhum, e é a promessa central do app.
+                 * Com `mainComponent` tambem aqui, tocar fazia o Notifee subir a Activity nativa e
+                 * o listener empurrar a rota do alarme: a mesma tela por dois caminhos, uma sobre a
+                 * outra, que era a causa do lampejo azul. Com `default`, quem decide para onde ir e
+                 * o listener, num lugar so. O `fullScreenAction` fica porque e outra coisa.
                  */
                 pressAction: { id: "default" },
-                // Acorda a tela: um alarme que dispara com o celular na mesa precisa ser visto.
+                // Um alarme que dispara com o celular na mesa precisa ser visto.
                 lightUpScreen: true,
-                // Conteúdo visível na tela de bloqueio: um alarme que aparece como "notificação
-                // oculta" obriga a desbloquear para saber que remédio é - e o canal já é PUBLIC,
-                // então esconder aqui contrariaria o que ele declara.
+                // Oculto na tela de bloqueio obrigaria a desbloquear para saber que remedio e, e o
+                // canal ja e PUBLIC.
                 visibility: AndroidVisibility.PUBLIC,
               }
             : {
@@ -457,16 +321,11 @@ export class NotifeeGateway implements NotificationGateway {
   }
 
   /**
-   * Cancela **tudo que será reconstruído**, preservando só o lembrete adiado.
+   * Cancela tudo que sera reconstruido, preservando so o adiado e o de teste.
    *
-   * A regra é por exclusão, e não por inclusão. Listar o que apagar exigiria lembrar de acrescentar
-   * cada tipo novo de aviso (dose, compromisso, receita…), e o preço de esquecer um é o alarme
-   * órfão. Esquecer de **preservar** algo custa, no máximo, um lembrete adiado que não volta -
-   * recuperável, e visível na hora.
-   *
-   * Com um agendador só, esta função vê **todos** os agendamentos do app. Era essa a garantia que
-   * faltava quando havia duas bibliotecas: cada uma enxergava só a própria lista, e a completude
-   * dependia de lembrar de chamar as duas.
+   * Por exclusao, e nao por inclusao: listar o que apagar exigiria lembrar de acrescentar cada tipo
+   * novo de aviso, e o preco de esquecer um e o alarme orfao. Esquecer de preservar custa, no
+   * maximo, um lembrete adiado que nao volta.
    */
   async cancelarTudo(): Promise<void> {
     if (Platform.OS !== "android") return;
@@ -482,14 +341,11 @@ export class NotifeeGateway implements NotificationGateway {
   }
 
   /**
-   * Cancela **tudo**, sem as exceções do `cancelarTudo`.
+   * Cancela tudo, sem as excecoes do `cancelarTudo`.
    *
-   * A diferença é o propósito. `cancelarTudo` prepara uma reconstrução: o que ela preserva - o
-   * lembrete adiado - volta a fazer sentido logo depois, porque a grade é regerada em seguida.
-   * Aqui não há "depois": os dados que davam sentido ao aviso deixaram de existir.
-   *
-   * Preservar o adiado neste caminho é o defeito, e não a regra: era ele que tocava depois de a
-   * pessoa apagar tudo, anunciando pelo nome um remédio que ela mandou apagar.
+   * Aquele prepara uma reconstrucao, e o que preserva volta a fazer sentido logo depois. Aqui nao
+   * ha depois: os dados que davam sentido ao aviso deixaram de existir. Preservar o adiado neste
+   * caminho era o que fazia um remedio apagado voltar a ser anunciado pelo nome.
    */
   async cancelarTodosOsAgendamentos(): Promise<void> {
     if (Platform.OS !== "android") return;
@@ -504,13 +360,9 @@ export class NotifeeGateway implements NotificationGateway {
   /**
    * Tira o aviso da bandeja depois de respondido.
    *
-   * **No Android ele não sai sozinho** ao tocar num botão de ação - fica lá, e cada toque dispara o
-   * handler outra vez. Foi assim que cinco toques em "Adiar" geraram cinco lembretes em 29/08, e o
-   * mesmo teria acontecido com "Tomei": cinco ingestões gravadas e cinco doses descontadas.
-   *
-   * Aqui a busca é pelo **id que nós demos**, e não pelo que o sistema atribuiu. É uma simplificação
-   * real em relação ao caminho anterior: no `expo-notifications` o identificador do agendamento e o
-   * da notificação exibida eram coisas diferentes, e a dispensa mirava o alvo errado em silêncio.
+   * No Android ele nao sai sozinho ao tocar num botao de acao: fica la, e cada toque dispara o
+   * handler outra vez, o que geraria uma ingestao gravada por toque. A busca e pelo id que o app
+   * deu, e nao pelo que o sistema atribuiu.
    */
   async dispensar(chave: string): Promise<void> {
     if (Platform.OS !== "android") return;
@@ -523,32 +375,20 @@ export class NotifeeGateway implements NotificationGateway {
 }
 
 /**
- * Tira da bandeja o alarme que está tocando agora.
+ * Tira da bandeja o alarme que esta tocando agora.
  *
- * Separado da dispensa por chave porque a tela de alarme nem sempre sabe qual chave disparou - ela
- * recebe o horário, e o alarme daquele horário é o que precisa sair.
+ * Separado da dispensa por chave porque a tela nem sempre sabe qual chave disparou: ela recebe o
+ * horario, e o alarme daquele horario e o que precisa sair.
  */
 export async function dispensarAlarmeAtivo(): Promise<void> {
   if (Platform.OS !== "android") return;
 
-  /**
-   * **O som para aqui, e não em cada chamador.**
-   *
-   * Desde o `v8` o áudio é do app, não do canal - ele deixou de morrer junto com a notificação, e
-   * pará-lo virou responsabilidade nossa. Esta função é o funil por onde passam todos os caminhos
-   * que encerram um alarme: os botões da tela, o toque na notificação, a dose respondida em outro
-   * lugar. Espalhar a chamada por cada um deles abriria caminho para alguém esquecer - e o que se
-   * esquece aqui é um alarme que continua berrando depois de respondido.
-   */
+  // O som para aqui, e nao em cada chamador: o audio e do app e nao morre com a notificacao, e esta
+  // funcao e o funil de todos os caminhos que encerram um alarme.
   pararDeSoar();
 
-  /**
-   * Tira **só os alarmes**, e não tudo.
-   *
-   * `cancelDisplayedNotifications()` sem argumento apaga todas as notificações do app - inclusive
-   * lembretes de outros horários que ainda esperam resposta, e avisos de consulta. Responder um
-   * alarme não é motivo para limpar a bandeja inteira: a pessoa perderia avisos que nunca viu.
-   */
+  // So os alarmes: sem argumento, `cancelDisplayedNotifications` apagaria lembretes de outros
+  // horarios e avisos de consulta que a pessoa ainda nao viu.
   const naBandeja = await notifee.getDisplayedNotifications();
   const nossos = naBandeja
     .map(({ notification }) => notification.id)

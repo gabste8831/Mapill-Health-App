@@ -14,31 +14,14 @@ import { destinoDaChave, type DestinoDoAviso } from "./destino-do-aviso";
 import { todasAsDosesResolvidas, tratarRespostaAoAviso } from "./responder-aviso";
 
 /**
- * O único ponto de escuta dos avisos - botões, toque no corpo e entrega com o app aberto.
+ * O unico ponto de escuta dos avisos: botoes, toque no corpo e entrega com o app aberto.
  *
- * ## O que a unificação resolveu aqui
- *
- * Antes eram dois listeners com regras parecidas e ciclos de vida diferentes: um do
- * `expo-notifications` (respostas do modo `notification`) e um do Notifee (alarme de tela cheia).
- * Regra parecida em dois lugares é como as coisas divergem em silêncio - uma correção entra num e
- * não no outro, e nada denuncia.
- *
- * ## O ganho que não era só arrumação
- *
- * `onBackgroundEvent` processa a resposta **com o app fechado**. O caminho anterior dependia de
- * `getLastNotificationResponseAsync` no bootstrap, isto é, da pessoa abrir o app para a resposta
- * ser processada - para um botão "Tomei" que promete não abrir o app, isso não é detalhe, é a
- * promessa. Um toque no botão com o celular bloqueado agora grava a dose na hora.
+ * O `onBackgroundEvent` processa a resposta com o app fechado, que e o que sustenta a promessa do
+ * botao "Tomei" de nao abrir o app. Um toque com o celular bloqueado grava a dose na hora.
  */
 
-/**
- * Avisa quem está ouvindo que um alarme foi entregue com o app aberto.
- *
- * Devolve se a tela **abriu de fato**: quem recebe pode recusar (app em segundo plano), e a trava
- * de "já abriu este horário" depende de saber a diferença.
- */
+/** Devolve se a tela abriu de fato: quem recebe pode recusar, e a trava depende dessa diferenca. */
 type AoDispararAlarme = (scheduledFor: string) => boolean;
-/** Avisa que o toque no corpo pede a tela do horário. */
 type AoAbrirHorario = (dados: DadosDoAviso) => void;
 
 type AoAbrirDestino = (destino: DestinoDoAviso) => void;
@@ -48,78 +31,54 @@ let aoAbrirHorario: AoAbrirHorario | null = null;
 let aoAbrirDestino: AoAbrirDestino | null = null;
 
 /**
- * Horários cuja tela de alarme já foi aberta nesta execução.
+ * Horarios cuja tela de alarme ja foi aberta nesta execucao.
  *
- * Vive no módulo, e não em estado de React, porque os handlers do Notifee também vivem: são
- * registrados uma vez e sobrevivem às montagens e desmontagens de tela. Um `Set` em componente
- * seria zerado a cada navegação, e a trava não travaria nada.
- *
- * Não é limpo: são poucas entradas por execução - um alarme por horário -, e esquecer o que já foi
- * aberto é justamente o defeito que ele evita.
+ * No modulo porque os handlers do Notifee tambem vivem ali: registrados uma vez, sobrevivem as
+ * montagens de tela. Um `Set` em componente seria zerado a cada navegacao.
  */
 const jaAbertos = new Set<string>();
 
 /**
- * Quanto atraso uma dose ainda pode ter para irromper em **tela cheia**.
+ * Quanto atraso uma dose ainda pode ter para irromper em tela cheia.
  *
- * Quatro horas é o intervalo em que o alarme ainda serve ao que ele promete: o da manhã ainda vale
- * se a pessoa pegou o celular no fim da manhã; o de ontem não irrompe hoje. Passado isso, o aviso
- * continua existindo - na bandeja, na Home, no histórico -, mas não como despertador.
+ * O da manha ainda vale se a pessoa pegou o celular ao meio-dia; o de ontem nao irrompe hoje.
+ * Passado isso o aviso continua na bandeja e no historico, mas nao como despertador.
  *
- * Não confundir com `TOLERANCIA_DE_ATRASO_EM_MINUTOS` (em `planejar-avisos-de-dose`), que resolve o
- * problema **oposto**: lá são 2 minutos para o aviso que acabou de vencer não se perder no
- * reagendamento. Um decide o que ainda deve ser agendado; este, o que ainda deve acordar alguém.
+ * Nao confundir com `TOLERANCIA_DE_ATRASO_EM_MINUTOS`, que resolve o oposto: aquele decide o que
+ * ainda deve ser agendado, este o que ainda deve acordar alguem.
  */
 const ATRASO_MAXIMO_PARA_TELA_CHEIA_EM_MS = 4 * 60 * 60 * 1000;
 
 /**
- * Esquece tudo o que já foi aberto - chamado a cada reconstrução da janela de avisos.
+ * Esquece o que ja foi aberto, a cada reconstrucao da janela de avisos.
  *
- * A trava existe para o mesmo `DELIVERED` não abrir duas telas, e isso vale **dentro de um
- * disparo**, não para sempre. Editar um tratamento apaga as doses futuras e gera outras: o horário
- * das 20:00 de amanhã volta a existir com o mesmo `scheduledFor` e outro `doseScheduleId`, e para a
- * trava é o mesmo horário de antes.
- *
- * Foi o defeito visto em aparelho em 12/09: alarme testado (o horário fica marcado), editado para
- * notificação, salvo, e editado de volta para alarme. Da segunda vez a tela azul não subia mais - o
- * som tocava, e o `DELIVERED` morria na trava. Um estado de memória sobrevivendo a uma mudança de
- * dados é o tipo de defeito que não aparece em teste nenhum, porque exige a sequência exata.
- *
- * O reagendamento é o lugar certo de limpar: ele é chamado sempre que o banco muda o que deve
- * tocar, que é exatamente quando a trava deixa de valer.
+ * A trava vale dentro de um disparo, e nao para sempre. Editar um tratamento apaga as doses futuras
+ * e gera outras com o mesmo `scheduledFor`: sem limpar, o horario editado de volta para alarme nao
+ * subia mais a tela, porque o `DELIVERED` morria na trava antiga.
  */
 export function esquecerAlarmesAbertos(): void {
   jaAbertos.clear();
 }
 
 /**
- * Marca que a tela deste horário foi aberta - para quem abre **depois** de `aoDispararAlarme`.
+ * Marca o horario como aberto para quem abre depois de `aoDispararAlarme`.
  *
- * O caminho normal marca sozinho, pelo retorno do callback: abriu, marca. Mas desde 12/09 existe um
- * caminho tardio, em `use-dose-notifications`: com o app fora do primeiro plano, ele espera um
- * instante para ver se a Activity nativa assume o alarme e, se ela não vier, abre a rota ele mesmo.
- *
- * Quando isso acontece o callback já respondeu `false` há muito - ele não podia esperar, porque o
- * retorno é síncrono. Sem esta função, o horário ficaria aberto e **não** marcado, e o `DELIVERED`
- * seguinte do mesmo alarme empilharia uma segunda tela.
+ * O caminho normal marca pelo retorno do callback. O caminho tardio de `use-dose-notifications`
+ * abre a rota depois de esperar a Activity nativa, quando o callback ja respondeu `false` - o
+ * retorno e sincrono e nao podia esperar. Sem isto o `DELIVERED` seguinte empilharia outra tela.
  */
 export function marcarAlarmeComoAberto(scheduledFor: string): void {
   jaAbertos.add(scheduledFor);
 }
 
 /**
- * Grava que o estoque **já foi avisado**, com a quantidade que havia no momento.
+ * Grava que o estoque ja foi avisado, com a quantidade que havia no momento.
  *
- * É a trava que impede uma notificação por dose confirmada: a previsão de estoque é recalculada a
- * cada ingestão, e sem isto cada toque em "confirmar" geraria um aviso novo. Só repor a caixa
- * rearma (ver `precisaAvisar` em `planejar-avisos-de-estoque`).
+ * E a trava que impede uma notificacao por dose confirmada, ja que a previsao e recalculada a cada
+ * ingestao. So repor a caixa rearma.
  *
- * **Na entrega, e não no agendamento.** Era gravada ao planejar, e isso matava o próprio aviso que
- * acabara de criar: reagendar roda a cada volta ao primeiro plano, e o segundo reagendamento
- * comparava a quantidade consigo mesma e concluía que já avisara. O aviso vivia segundos, e o
- * Diagnóstico mostrava compromisso e receita às 00:01 sem nenhum estoque.
- *
- * Falhar aqui é aceitável: o pior caso é o aviso repetir uma vez, e repetir é melhor que calar.
+ * Na entrega, e nao no agendamento: gravada ao planejar, ela matava o proprio aviso que acabara de
+ * criar, porque o reagendamento seguinte comparava a quantidade consigo mesma.
  */
 async function marcarEstoqueComoAvisado(chave: string): Promise<void> {
   const inventoryId = chave.replace(/^estoque-/, "").replace(/-(baixo|acabou)$/, "");
@@ -157,107 +116,53 @@ async function tratar(evento: Event): Promise<void> {
   }
 
   /**
-   * **O alarme chegou com o app aberto: o app abre a tela ele mesmo.**
+   * O alarme chegou com o app aberto: o app abre a tela ele mesmo.
    *
-   * O Android rebaixa o `fullScreenAction` para heads-up sempre que a pessoa está usando o celular,
-   * e essa decisão é do sistema - a API não deixa forçar. A regra existe para proteger quem está no
-   * meio de uma ligação, e faz sentido em geral.
-   *
-   * Mas aqui ela contraria o que o app existe para fazer. A dose tem hora, e o alarme é justamente
-   * o que traz a atenção de volta para a rotina posológica - a alternativa a usar o despertador do
-   * celular. Um aviso discreto no topo da tela é exatamente o que se ignora sem perceber.
-   *
-   * Com o app em primeiro plano existe um caminho que não depende do sistema: navegar. `DELIVERED`
-   * chega no instante em que o aviso é mostrado, e daí a própria tela do alarme entra por cima -
-   * mesma tela, mesmo som em loop, mesmos botões.
+   * O Android rebaixa o `fullScreenAction` para heads-up quando a pessoa esta usando o celular, e a
+   * API nao deixa forcar. Com o app em primeiro plano existe caminho que nao depende do sistema:
+   * navegar quando o `DELIVERED` chega.
    */
   if (evento.type === EventType.DELIVERED) {
     if (!ehAlarmeDeTelaCheia(id)) return;
 
     /**
-     * **Anota o horário antes de qualquer guarda**, e é a rede que impede a tela azul vazia.
+     * Antes de qualquer guarda, e e a rede que impede a tela azul vazia.
      *
-     * `AlarmeRaiz` lê o horário da notificação, mas o caminho do `PRESS` abaixo a **cancela** ao
-     * tratar o toque - e as duas coisas correm juntas quando a pessoa toca no aviso em vez de
-     * esperar o alarme irromper. Medido em aparelho em 14/09: 70 ms entre a tela montar e a
-     * notificação sumir, e a tela subia sem remédio nenhum.
-     *
-     * Aqui é o ponto mais cedo possível: o `DELIVERED` chega quando o aviso é mostrado, antes de
-     * existir toque para cancelar coisa alguma. Fica **antes das guardas** de propósito - todas
-     * elas (`jaAbertos`, dose resolvida, atraso, `jaEstaEmCena`) retornam cedo em casos em que a
-     * tela ainda pode subir por outro caminho, e o horário precisa estar guardado em todos.
+     * `AlarmeRaiz` le o horario da notificacao, mas o `PRESS` a cancela ao tratar o toque, e as
+     * duas coisas correm juntas. Aqui e o ponto mais cedo possivel; as guardas abaixo retornam em
+     * casos onde a tela ainda pode subir por outro caminho, e o horario precisa estar guardado.
      */
     anotarHorarioEntregue(dados.scheduledFor);
 
-    /**
-     * Um horário abre a tela **uma vez só**.
-     *
-     * `DELIVERED` pode chegar mais de uma vez para a mesma notificação - o Notifee reemite ao
-     * reentregar o aviso, e o handler de primeiro plano também dispara em algumas transições de
-     * estado. Sem esta trava, cada repetição empilharia outra tela de alarme sobre a anterior.
-     */
+    // `DELIVERED` chega mais de uma vez para a mesma notificacao, e cada repeticao empilharia outra
+    // tela sobre a anterior.
     if (jaAbertos.has(dados.scheduledFor)) return;
 
     /**
-     * **A dose já respondida não reabre o alarme** - e este é o caminho do lampejo azul.
+     * A dose ja respondida nao reabre o alarme: e o caminho do lampejo azul.
      *
-     * Visto em aparelho em 09/09, e a correção anterior (no toque) não o alcançou porque o gatilho
-     * não é o toque: é o **reagendamento**. Responder na tela do alarme faz, nesta ordem, gravar o
-     * desfecho → `reagendarTodosOsAvisos()` → fechar a tela (ver `responderTodas` em
-     * `AlarmeScreen`). O reagendamento cancela tudo e reagenda a partir do banco, e a dose que
-     * acabou de ser respondida ainda cai dentro da **tolerância de 2 minutos** que existe para o
-     * aviso "que acabou de passar" não se perder (ver `TOLERANCIA_DE_ATRASO_EM_MINUTOS`).
-     *
-     * O aviso reagendado dispara quase na hora, o `DELIVERED` chega, e o app abre a tela do alarme
-     * de novo - que monta, descobre que tudo está resolvido e se fecha sozinha. O lampejo é
-     * exatamente essa tela nascendo e morrendo.
-     *
-     * Ler o banco aqui custa uma consulta por entrega de alarme, o que é raro, e é o que distingue
-     * "há dose esperando" de "isto é o eco de uma resposta que já aconteceu".
+     * O gatilho nao e o toque, e o reagendamento. Responder grava o desfecho e reagenda tudo, e a
+     * dose recem-respondida ainda cai na tolerancia de 2 minutos que existe para o aviso que acabou
+     * de passar nao se perder. O aviso dispara quase na hora e a tela nasce e morre sozinha.
      */
     if (await todasAsDosesResolvidas(dados.doseScheduleIds)) {
       await notifee.cancelNotification(id).catch(() => {});
-      /**
-       * E **esquece** o horário: resolvido o que havia, a próxima entrega para este instante é um
-       * alarme novo, não a repetição do que já abriu.
-       *
-       * Sem isto o horário ficava marcado para sempre. Visto em aparelho em 12/09 pelo caminho da
-       * edição: testar com alarme (a tela abre, o horário é marcado), editar para notificação,
-       * salvar, e voltar para alarme recria **o mesmo `scheduledFor`** - mesma chave, já na lista.
-       * O `DELIVERED` seguinte batia na trava acima e a tela azul não subia mais, sobrando só a
-       * notificação. O alarme tocava, e o que o app prometia não acontecia.
-       */
+      // Esquece o horario: resolvido o que havia, a proxima entrega e um alarme novo. Sem isto ele
+      // ficava marcado para sempre, e a tela nao subia mais depois de uma edicao.
       jaAbertos.delete(dados.scheduledFor);
       return;
     }
 
     /**
-     * **A dose que venceu há muito tempo não irrompe em tela cheia.**
+     * A dose que venceu ha muito nao irrompe em tela cheia.
      *
-     * Relatado pelo Gabriel em 13/09: ao adiantar o relógio, **todos** os alarmes do intervalo
-     * tocaram juntos, um por cima do outro. A causa não é o replanejamento - é o Android. Os avisos
-     * são agendados com `SET_ALARM_CLOCK` (ver `notifee-gateway`), e quando o relógio ultrapassa o
-     * timestamp de vários alarmes de uma vez, o sistema entrega **todos**, antes de o app poder
-     * replanejar coisa alguma.
+     * Os avisos sao agendados com `SET_ALARM_CLOCK`, e quando o relogio ultrapassa varios de uma
+     * vez o sistema entrega todos antes de o app poder replanejar. Acontece de verdade com o
+     * celular desligado a noite toda: acordar com seis alarmes empilhados de horarios ja passados
+     * leva a tomar remedio fora de hora.
      *
-     * O relógio adiantado é artificial, mas o caso real não é: celular desligado a noite toda, sem
-     * bateria, ou um fim de semana em modo avião produzem a mesma pilha em menor escala. E o
-     * prejuízo é concreto - quem acorda com seis alarmes empilhados de doses cujo horário já passou
-     * não consegue distinguir a que ainda importa da que não importa mais, e a saída fácil (tomar o
-     * que o alarme pede) é tomar remédio fora de hora.
-     *
-     * A tela cheia é a resposta certa para "está na hora", não para "já passou". A dose atrasada
-     * **não some**: ela segue pendente na Home, no histórico e no próximo reagendamento, que é onde
-     * ela pode ser resolvida com o contexto do dia inteiro à vista. O que se recusa aqui é só o
-     * despertador - a notificação continua na bandeja, silenciosa, e ainda leva à tela do horário.
-     *
-     * Quatro horas: um alarme da manhã ainda irrompe se a pessoa pegou o celular no fim da manhã, e
-     * nenhum alarme de ontem irrompe hoje. Ver `TOLERANCIA_DE_ATRASO_EM_MINUTOS`, que resolve o
-     * problema oposto (o aviso que acabou de vencer e **deve** chegar) e por isso é muito menor.
-     *
-     * `cancelNotification(id)` mira **este** aviso, e não `dispensarAlarmeAtivo()`, que tira da
-     * bandeja todos os alarmes do app: numa pilha de atrasados, o primeiro a ser recusado levaria
-     * junto os seguintes - inclusive um que ainda estivesse dentro da janela e devesse tocar.
+     * `cancelNotification(id)` mira este aviso, e nao `dispensarAlarmeAtivo()`, que levaria junto
+     * os seguintes da pilha, inclusive um ainda dentro da janela.
      */
     const atrasoEmMs = Date.now() - new Date(dados.scheduledFor).getTime();
     if (atrasoEmMs > ATRASO_MAXIMO_PARA_TELA_CHEIA_EM_MS) {
@@ -266,64 +171,39 @@ async function tratar(evento: Event): Promise<void> {
     }
 
     /**
-     * **A Activity nativa já está na frente: não empurra a rota.**
+     * A Activity nativa ja esta na frente: nao empurra a rota por baixo dela.
      *
-     * O `fullScreenAction` monta `AlarmeRaiz` numa Activity, e o `index.js` sobe o app inteiro no
-     * **mesmo processo** - então este listener está vivo e recebe o `DELIVERED` do mesmo alarme que
-     * acabou de irromper. Sem a guarda, ele empurrava a rota `/alarme/[instante]` por baixo da
-     * Activity: duas telas, duas fontes de som.
-     *
-     * O `jaAbertos` não cobre isso - ele só sabe o que **este** listener abriu, e a Activity é
-     * montada pelo Android sem passar por aqui. `alarme-em-cena` é o registro que as duas
-     * compartilham.
+     * O `jaAbertos` nao cobre isto, porque so sabe o que este listener abriu, e a Activity e
+     * montada pelo Android sem passar por aqui. `alarme-em-cena` e o registro compartilhado.
      */
     if (jaEstaEmCena(dados.scheduledFor)) return;
 
-    /**
-     * Marca **depois**, e só se a tela tiver mesmo aberto.
-     *
-     * Quem abre pode não abrir agora: fora do primeiro plano, `use-dose-notifications` espera um
-     * instante para ver se a Activity nativa assume o alarme, e só então decide (ver
-     * `RESPIRO_DA_ACTIVITY_EM_MS`). Marcando antes, a recusa gravava o horário como "já aberto" e a
-     * trava passava a barrar a abertura de verdade - o alarme nunca mais mostraria a tela naquele
-     * horário, nem quando a pessoa voltasse ao app.
-     *
-     * O caminho tardio marca por conta própria, com `marcarAlarmeComoAberto`: o retorno daqui é
-     * síncrono e já respondeu quando ele age.
-     */
+    // Marca depois, e so se a tela abriu mesmo: marcando antes, a recusa do caminho tardio gravava
+    // o horario como aberto e a trava barrava a abertura de verdade. O tardio marca por conta
+    // propria, porque o retorno daqui e sincrono e ja respondeu quando ele age.
     const abriu = aoDispararAlarme?.(dados.scheduledFor);
     if (abriu === true) jaAbertos.add(dados.scheduledFor);
     return;
   }
 
   /**
-   * **Deslizar para o lado encerra o lembrete, e o som para junto.**
+   * Deslizar para o lado encerra o lembrete, e o som para junto.
    *
-   * Decisão do Gabriel em 10/09, e é a leitura honesta do gesto: quem arrasta o aviso para fora está
-   * dizendo "já vi, pode parar". O alarme insistir depois disso é o app discutindo com quem ele
-   * deveria servir - e foi o pior sintoma do bloco, som seguindo sem nada na tela para desligá-lo.
-   *
-   * O som é do serviço em primeiro plano, e quem o encerra é a tela. O que sobra, então, é a tela
-   * cheia, se estiver montada: `pedirParaEncerrarAlarme` é o que a faz silenciar e sair. A dose
-   * **não** é respondida aqui - dispensar não é "tomei" nem "pulei", e ela segue pendente na Home,
-   * no histórico e no próximo reagendamento.
+   * Quem arrasta o aviso para fora esta dizendo "ja vi, pode parar", e insistir depois disso deixa
+   * som tocando sem nada na tela para desliga-lo. A dose nao e respondida aqui: dispensar nao e
+   * "tomei" nem "pulei", e ela segue pendente.
    */
   if (evento.type === EventType.DISMISSED) {
     if (!ehAlarmeDeTelaCheia(id)) return;
-    // Sem argumento: o pedido é "saia de cena", e existe no máximo uma tela de alarme por vez (ver
-    // `alarme-em-cena`). Nunca há outra tela para acertar por engano.
+    // Sem argumento: existe no maximo uma tela de alarme por vez, entao nao ha outra a acertar.
     pedirParaEncerrarAlarme();
     return;
   }
 
   if (evento.type !== EventType.ACTION_PRESS && evento.type !== EventType.PRESS) return;
 
-  /**
-   * Aviso que não é de dose: o toque **navega** e não responde nada.
-   *
-   * Sai antes de `tratarRespostaAoAviso` porque não há resposta a tratar - a lista de doses é
-   * vazia, e passar por lá só produziria um "abrirHorario" para um horário que não existe.
-   */
+  // Aviso que nao e de dose: o toque navega e nao responde nada. Sai antes de
+  // `tratarRespostaAoAviso` porque a lista de doses e vazia.
   const destino = destinoDaChave(dados.chave);
   if (destino !== null) {
     await notifee.cancelNotification(id);
@@ -331,10 +211,7 @@ async function tratar(evento: Event): Promise<void> {
     return;
   }
 
-  /**
-   * `PRESS` é o toque no **corpo**: leva à tela do horário, onde a resposta parcial cabe ("tomei
-   * este, aquele não"). Nos botões, o `pressAction.id` diz qual foi.
-   */
+  // `PRESS` e o toque no corpo, que leva a tela do horario. Nos botoes, o `pressAction.id` diz qual.
   const acao =
     evento.type === EventType.PRESS ? "" : (evento.detail.pressAction?.id ?? "");
 
@@ -342,20 +219,11 @@ async function tratar(evento: Event): Promise<void> {
 
   if (resultado.tipo === "abrirHorario") {
     /**
-     * **Dose já resolvida não abre tela nenhuma.**
+     * Dose ja resolvida nao abre tela nenhuma.
      *
-     * Visto em aparelho (09/09): tocar no corpo do alarme abria a tela azul, e ao responder ela
-     * piscava - aparecia e sumia. A sequência era essa: a tela do alarme se fecha sozinha quando
-     * todas as doses estão resolvidas (ver `AlarmeScreen`), então abri-la para uma dose que **já**
-     * foi respondida produz exatamente um lampejo.
-     *
-     * Acontece sempre que a resposta chegou por outro caminho antes do toque: pelo botão da própria
-     * notificação, pela Home, ou por um segundo toque enquanto a primeira navegação ainda ia. O
-     * aviso continua na bandeja depois de respondido - o Android não o remove sozinho -, e é ele
-     * que convida ao toque tardio.
-     *
-     * Ler o banco aqui é o que distingue "ainda há o que responder" de "já foi": `dados` carrega os
-     * ids, mas não o desfecho, e o desfecho é o que decide.
+     * A tela se fecha sozinha quando tudo esta resolvido, entao abri-la para uma dose ja respondida
+     * produz um lampejo. Acontece sempre que a resposta chegou por outro caminho antes do toque, e
+     * o aviso continua na bandeja convidando ao toque tardio.
      */
     if (await todasAsDosesResolvidas(dados.doseScheduleIds)) {
       await notifee.cancelNotification(id).catch(() => {});
@@ -365,35 +233,21 @@ async function tratar(evento: Event): Promise<void> {
     }
 
     /**
-     * **A tela cheia já está na frente: o toque não a derruba.**
+     * A tela cheia ja esta na frente: o toque nao a derruba.
      *
-     * O `fullScreenAction` monta a tela azul, e o Android mostra **a mesma notificação** também na
-     * bandeja. A MIUI gera um `PRESS` dali por conta própria, na tela de bloqueio, sem ninguém ter
-     * tocado - e sem esta guarda o `pedirParaEncerrarAlarme()` abaixo fechava a tela certa para
-     * abrir outra, tão rápido que a azul parecia nunca ter aparecido.
-     *
-     * Com a tela em cena não há o que fazer: a pessoa já está diante de onde se responde, com foto,
-     * adiar e silenciar. Ignorar o toque também fecha o caminho que abria o app **sobre a tela de
-     * bloqueio**.
+     * A MIUI gera um `PRESS` da bandeja por conta propria, na tela de bloqueio, sem ninguem ter
+     * tocado. Sem esta guarda o `pedirParaEncerrarAlarme` abaixo fechava a tela certa para abrir
+     * outra. Tambem fecha o caminho que abria o app sobre a tela de bloqueio.
      */
     if (jaEstaEmCena(dados.scheduledFor)) return;
 
     /**
-     * **O toque leva à tela de confirmação, e o som para - alarme ou lembrete, sem distinção.**
+     * O toque leva a tela do horario, e o som para, sem distinguir alarme de lembrete.
      *
-     * O alarme desviava daqui para a tela cheia (`/alarme/[instante]`), pelo argumento de que quem
-     * foi interrompido por um despertador perderia foto, adiamento e silenciar ao cair num
-     * formulário de "tomou ou não?". Decisão do Gabriel em 10/09, testando em aparelho: não é isso
-     * que ele quer do gesto. Tocar no aviso é ir responder, e o lugar de responder é a tela do
-     * horário - a mesma dos dois botões, a que ele reconhece.
-     *
-     * Vale para o alarme que **não** irrompeu, que é o caso que sobra depois da guarda acima: com o
-     * aparelho em uso o Android rebaixa o full-screen intent, e aí o aviso na bandeja é tudo o que
-     * existe.
-     *
-     * Os três passos, nesta ordem, são o que torna o gesto imediato: tirar o aviso da bandeja (e com
-     * com ele o serviço que toca), pedir que a tela cheia saia de cena se montada, e só então abrir.
-     * Qualquer um que falte deixa som tocando enquanto a pessoa já está decidindo em outra tela.
+     * Vale para o alarme que nao irrompeu, o caso que sobra depois da guarda acima. Os tres passos
+     * nesta ordem sao o que torna o gesto imediato: tirar o aviso da bandeja junto com o servico
+     * que toca, pedir que a tela cheia saia, e so entao abrir. Qualquer um que falte deixa som
+     * tocando enquanto a pessoa ja decide em outra tela.
      */
     jaAbertos.delete(dados.scheduledFor);
     await notifee.cancelNotification(id).catch(() => {});
@@ -403,25 +257,19 @@ async function tratar(evento: Event): Promise<void> {
     return;
   }
 
-  /**
-   * Tira o aviso da bandeja **depois** de gravar.
-   *
-   * No Android a notificação não some sozinha ao tocar num botão de ação: ela fica lá, e cada toque
-   * dispara o handler de novo. Foi assim que cinco toques em "Adiar" viraram cinco lembretes, em
-   * 29/08. A guarda contra repetição vive em `confirmarDosesDoAviso` - esta linha é a segunda
-   * camada, para o aviso não ficar convidando ao toque depois de resolvido.
-   */
+  // Tira o aviso da bandeja depois de gravar: no Android a notificacao nao some ao tocar num botao
+  // de acao, e cada toque dispara o handler de novo. A guarda contra repeticao vive em
+  // `confirmarDosesDoAviso`; esta linha e a segunda camada.
   if (acao === ACAO_TOMEI || acao === ACAO_PULEI || acao === ACAO_ADIAR) {
     await notifee.cancelNotification(id).catch(() => {});
   }
 }
 
 /**
- * Liga os handlers. Chamado uma vez, no bootstrap.
+ * Liga os handlers, uma vez, no bootstrap.
  *
- * São **dois** porque o app pode estar em qualquer estado quando o aviso chega:
- * `onBackgroundEvent` cobre o app fechado ou em segundo plano - que é o caso normal de um alarme de
- * dose -, e `onForegroundEvent` cobre quem estava com o app aberto.
+ * Sao dois porque o app pode estar em qualquer estado quando o aviso chega: o de segundo plano
+ * cobre o app fechado, que e o caso normal de um alarme, e este cobre o app aberto.
  */
 export function escutarAvisos(opcoes: {
   aoAbrirHorario: AoAbrirHorario;
@@ -443,23 +291,20 @@ export function escutarAvisos(opcoes: {
 }
 
 /**
- * O evento em segundo plano, registrado **fora do ciclo de vida do React**.
+ * Registrado fora do ciclo de vida do React, no `index.js`.
  *
- * Precisa ser chamado no `index.js`, junto do registro do componente de alarme: quando o app está
- * fechado, não há componente montado para assinar nada, e é este handler que grava a dose. Registrar
- * dentro de um `useEffect` faria o botão "Tomei" não funcionar exatamente no caso mais comum - o
- * celular bloqueado, que é para o que o alarme existe.
+ * Com o app fechado nao ha componente montado para assinar nada, e e este handler que grava a dose.
+ * Dentro de um `useEffect`, o botao "Tomei" nao funcionaria no caso mais comum: celular bloqueado.
  */
 export function registrarEventosEmSegundoPlano(): void {
   notifee.onBackgroundEvent(tratar);
 }
 
 /**
- * A resposta que **abriu** o app, quando ele estava fechado.
+ * A resposta que abriu o app, quando ele estava fechado.
  *
- * Continua existindo porque o `onBackgroundEvent` resolve a *escrita*, mas não a *navegação*: quem
- * tocou no corpo de um lembrete com o app fechado precisa chegar na tela do horário, e a rota só
- * existe depois que o app monta.
+ * O `onBackgroundEvent` resolve a escrita, mas nao a navegacao: quem tocou no corpo com o app
+ * fechado precisa chegar na tela do horario, e a rota so existe depois que o app monta.
  */
 export async function consultarRespostaDeAbertura(): Promise<
   { tipo: "horario"; dados: DadosDoAviso } | { tipo: "destino"; destino: DestinoDoAviso } | null
@@ -467,34 +312,13 @@ export async function consultarRespostaDeAbertura(): Promise<
   const inicial = await notifee.getInitialNotification();
   if (inicial === null) return null;
 
-  /**
-   * **A guarda do alarme saiu daqui em 16/09, e a Activity própria é o motivo.**
-   *
-   * Ela existia porque `getInitialNotification` responde a duas perguntas com a mesma resposta:
-   * ela diz "esta notificação abriu a Activity", e enquanto o `fullScreenAction` montava a
-   * `MainActivity` isso era verdade **sem ninguém ter tocado em nada**. O bootstrap lia o alarme
-   * que irrompeu como toque e empurrava a tela do horário por cima da azul - o "pisca" de 15/09.
-   *
-   * O comentário que morava aqui previa que ela não alcançaria o toque real, "porque o `PRESS` é
-   * tratado pelo listener, que cancela a notificação antes". **Com o processo frio isso não vale:**
-   * não há listener de pé para cancelar coisa alguma. A notificação sobrevivia, a guarda a via como
-   * alarme e devolvia `null` - e o toque com o app fora dos recentes parava de navegar. Medido em
-   * aparelho em 16/09.
-   *
-   * Agora a pergunta não precisa mais ser feita: o `fullScreenAction` abre a `AlarmeActivity`, e
-   * este código só existe dentro do `_layout` do `expo-router`, que monta na `MainActivity`. Se ele
-   * está rodando, **a MainActivity subiu - e ela só sobe por toque**.
-   */
+  // Nao ha guarda de alarme aqui: o `fullScreenAction` abre a `AlarmeActivity`, e este codigo so
+  // roda dentro do `_layout`, que monta na `MainActivity`. Se ele esta rodando, ela subiu por toque.
   const dados = lerDadosDoAviso(inicial.notification.data);
   if (dados === null) return null;
 
-  /**
-   * Estoque, receita e compromisso: o app abre **onde se resolve aquilo**.
-   *
-   * É o caminho que mais importa dos três, porque é o caso típico - a notificação chega às 00:01,
-   * a pessoa vê de manhã com o app fechado, toca, e o app abria na Home. O assunto que a
-   * notificação nomeava ficava para ela reencontrar sozinha.
-   */
+  // Estoque, receita e compromisso abrem onde se resolve aquilo, e nao na Home: a notificacao chega
+  // de madrugada e e vista de manha com o app fechado.
   const destino = destinoDaChave(dados.chave);
   if (destino !== null) return { tipo: "destino", destino };
 
