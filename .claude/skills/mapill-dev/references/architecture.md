@@ -1,4 +1,4 @@
-# Arquitetura — Mapill
+# Arquitetura - Mapill
 
 Baseado em Clean Architecture (Martin, 2019) e princípios SOLID, adaptado para
 React Native + Expo. Objetivo: nenhuma tela conhece SQL, nenhuma regra de negócio
@@ -8,7 +8,7 @@ conhece React.
 
 ```
 src/
-├── app/                 # Rotas do expo-router — o nome do arquivo É a URL
+├── app/                 # Rotas do expo-router - o nome do arquivo É a URL
 │   ├── (abas)/          # Grupo de rotas: os parênteses tiram o segmento da URL
 │   └── cadastro/        # Sobe como modal por cima das abas
 │
@@ -29,14 +29,14 @@ src/
 ├── ui/                  # Componentes reutilizáveis por qualquer tela (kit + barrel index.ts)
 ├── hooks/               # Hooks compartilhados
 ├── shared/              # Tema e utilitários
-└── notifications/       # Camada de agendamento nativo (expo-notifications) — ainda não existe
+└── notifications/       # Camada de agendamento nativo (expo-notifications) - ainda não existe
 ```
 
 ### Convenção de nomenclatura
 
 **Domínio e dados em inglês; telas e rotas em português.** O núcleo técnico acompanha o
 vocabulário das libs e do artigo; a camada onde se navega no dia a dia acompanha o idioma de
-quem desenvolve. Nome vago é corrigido em qualquer idioma — `EntryChoiceScreen` virou
+quem desenvolve. Nome vago é corrigido em qualquer idioma - `EntryChoiceScreen` virou
 `EscolhaDeCadastroScreen` porque não dizia o que era.
 
 O nome do arquivo tem que dizer o que ele exporta. `animated-icon.tsx` exportando
@@ -52,7 +52,7 @@ que é.
 
 ## Comentários
 
-Comentário existe para registrar **por que**, nunca **o que** — o código já diz o que faz.
+Comentário existe para registrar **por que**, nunca **o que** - o código já diz o que faz.
 
 - Terceira pessoa, descrevendo o sistema. Nada de se dirigir a um leitor ("usar junto com",
   "copiar esse padrão", "preencha com", "não esquecer de").
@@ -73,7 +73,7 @@ Cada arquivo/módulo tem **uma única razão para mudar**:
 - Uma `screen` muda só se o layout/fluxo visual mudar.
 
 Se ao adicionar uma feature você perceber que precisa mexer em lógica de agendamento
-E em estilo de botão no mesmo arquivo, é sinal de que a separação de camadas quebrou —
+E em estilo de botão no mesmo arquivo, é sinal de que a separação de camadas quebrou -
 pare e refatore antes de continuar.
 
 ## Fluxo de uma escrita (ex: confirmar dose tomada)
@@ -85,10 +85,10 @@ pare e refatore antes de continuar.
 4. O `repository` enfileira o registro para sincronização assíncrona com Supabase
    (ver `sync-and-offline.md`)
 
-## Clean Code — convenções mínimas
+## Clean Code - convenções mínimas
 
-- Nomes de variáveis/funções em português ou inglês — escolha um idioma e mantenha
+- Nomes de variáveis/funções em português ou inglês - escolha um idioma e mantenha
   consistente no projeto todo (recomendação: inglês para código, português só em textos de UI).
 - Nunca números mágicos: `const MAX_DOSE_TOLERANCE_MINUTES = 30` em vez de `30` solto no código.
-- Nenhuma função de use-case deve ultrapassar responsabilidade única — se o nome precisa de "e"
+- Nenhuma função de use-case deve ultrapassar responsabilidade única - se o nome precisa de "e"
   ("registra dose E atualiza estoque"), considere separar em dois use-cases compostos.

@@ -3,13 +3,13 @@ const { getDefaultConfig } = require('expo/metro-config');
 
 const config = getDefaultConfig(__dirname);
 
-// expo-sqlite usa um módulo .wasm no build web (SQLite compilado via WebAssembly) — sem isso
+// expo-sqlite usa um módulo .wasm no build web (SQLite compilado via WebAssembly) - sem isso
 // o Metro não sabe resolver `./wa-sqlite/wa-sqlite.wasm` e o bundle web quebra.
 config.resolver.assetExts.push('wasm');
 
 // "Package exports" precisa continuar HABILITADO (padrão do Metro). O `NativeTabs` no web
 // (expo-router/unstable-native-tabs → NativeTabsView.web.js) usa @radix-ui/react-tabs, e
-// @radix-ui/primitive só expõe `./is-development` pelo mapa `exports` — não existe arquivo
+// @radix-ui/primitive só expõe `./is-development` pelo mapa `exports` - não existe arquivo
 // físico com esse nome. Desabilitar a flag quebra o bundle web inteiro na tela de tabs.
 //
 // O workaround antigo (`unstable_enablePackageExports = false`) existia por causa de
@@ -18,7 +18,7 @@ config.resolver.assetExts.push('wasm');
 // resolve esse subpath sozinha e o workaround ficou obsoleto.
 
 // O SQLite web roda num worker que depende de SharedArrayBuffer, só disponível no navegador
-// quando a página é "cross-origin isolated" — exige esses dois headers no servidor de dev.
+// quando a página é "cross-origin isolated" - exige esses dois headers no servidor de dev.
 // Sem isso: "SharedArrayBuffer is not defined" ao chamar openDatabaseSync no web.
 config.server = {
   ...config.server,

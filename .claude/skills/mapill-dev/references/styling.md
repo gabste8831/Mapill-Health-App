@@ -1,34 +1,34 @@
-# Estilização — Mapill
+# Estilização - Mapill
 
 Decisão do usuário: **sem Tailwind/NativeWind**. Preferência declarada: um estilo parecido
-com o do Angular — estilos "colados" ao componente, não classes utilitárias espalhadas no JSX.
+com o do Angular - estilos "colados" ao componente, não classes utilitárias espalhadas no JSX.
 
 ## Kit de UI compartilhado (`src/components/ui/`)
 
 **Decisão de 2026-08-11**: peças de formulário/interação genéricas (botão, campo de texto,
-select, card, chip) **não são reimplementadas em cada tela** — vivem uma vez em
+select, card, chip) **não são reimplementadas em cada tela** - vivem uma vez em
 `src/components/ui/`, cada uma com seu `.tsx` + `.styles.ts` co-localizado (mesmo padrão do
 resto do app), e são importadas via `@/components/ui`. Telas (`components/screens/*`) só
 compõem essas peças + layout específico da tela; o `.styles.ts` da tela fica só com o que é
 realmente único dela (linhas, espaçamento entre seções, etc.).
 
 Motivo: antes cada tela redefinia `height: 52` / `borderRadius: radius.full` / cores do zero
-pro próprio botão — mudar o padrão visual do app exigia editar N arquivos. Agora é um lugar só.
+pro próprio botão - mudar o padrão visual do app exigia editar N arquivos. Agora é um lugar só.
 
 Peças hoje disponíveis (ver `src/components/ui/index.ts`):
 
-- **`Button`** — `variant: "primary" | "outline" | "text"`, suporta `icon` e `loading`.
-- **`IconButton`** — botão circular só com ícone (ex: "adicionar alergia").
-- **`TextField`** — label + input + erro. `label=""` omite a linha de label (campo já rotulado
+- **`Button`** - `variant: "primary" | "outline" | "text"`, suporta `icon` e `loading`.
+- **`IconButton`** - botão circular só com ícone (ex: "adicionar alergia").
+- **`TextField`** - label + input + erro. `label=""` omite a linha de label (campo já rotulado
   por fora). `error` aceita `string` (mostra mensagem) ou `true` (só borda vermelha, pra campos
-  de um grupo que valida como conjunto — ex: contato de emergência).
-- **`SelectField`** — campo que abre um `BottomSheet` com opções em vez de teclado (tipo
+  de um grupo que valida como conjunto - ex: contato de emergência).
+- **`SelectField`** - campo que abre um `BottomSheet` com opções em vez de teclado (tipo
   sanguíneo, sexo biológico).
-- **`BottomSheet`** — popup em bottom-sheet genérico (fundo escurecido, fecha ao tocar fora).
+- **`BottomSheet`** - popup em bottom-sheet genérico (fundo escurecido, fecha ao tocar fora).
   Base do `SelectField` e de qualquer "adicionar item" pontual (ex: contato de emergência).
-- **`Card`** — bloco com borda/fundo/cantos, usado pra separar seções de formulário.
-- **`Chip`** — tag removível (alergias hoje, reutilizável pra qualquer lista curta de tags).
-- **`Checkbox`** — área de toque cobre label inteira, não só o quadrado (importante pro público
+- **`Card`** - bloco com borda/fundo/cantos, usado pra separar seções de formulário.
+- **`Chip`** - tag removível (alergias hoje, reutilizável pra qualquer lista curta de tags).
+- **`Checkbox`** - área de toque cobre label inteira, não só o quadrado (importante pro público
   idoso). Usado no consentimento LGPD (`OnboardingConsentScreen`).
 
 **Como ajustar**: mudar o padrão de TODAS as instâncias → editar o `.styles.ts` daquele
@@ -88,25 +88,25 @@ export function DoseCard() {
 ## Tema centralizado
 
 Manter um `shared/theme/` com tokens (`colors`, `spacing`, `typography`) importados pelos
-arquivos `.styles.ts` — isso evita repetir valores soltos e dá consistência visual, sem precisar
+arquivos `.styles.ts` - isso evita repetir valores soltos e dá consistência visual, sem precisar
 de um framework utility-first.
 
 ## Direção visual: "Clinical Precision" + gamificação leve
 
-Direção aprovada pelo usuário (meio-termo): a base visual é minimalista/clínica — transmite
-profissionalismo e confiabilidade — mas com pontos pontuais de gamificação (inspirados em
+Direção aprovada pelo usuário (meio-termo): a base visual é minimalista/clínica - transmite
+profissionalismo e confiabilidade - mas com pontos pontuais de gamificação (inspirados em
 Duolingo) para reforço positivo, já que isso é parte da fundamentação teórica do artigo (ver
 seção de UX/UI do `SKILL.md` principal sobre heurísticas de Nielsen e reforço positivo).
 
 **Regra de convivência dos dois estilos**: a base do app (formulários, listas, navegação,
 telas de configuração) segue o padrão clínico abaixo. A gamificação fica restrita a elementos
-específicos e funcionais — barra de progresso diário, indicador de streak, confirmação de dose —
+específicos e funcionais - barra de progresso diário, indicador de streak, confirmação de dose -
 nunca vira o layout inteiro nem compete com a legibilidade clínica.
 
 ### Tokens de tema (`shared/theme/`)
 
 **Atualizado em 2026-08-09** a partir dos protótipos HTML reais (Home/Dashboard, Escanear
-código, Cadastro manual) — sistema de cores Material 3 completo, não mais um placeholder.
+código, Cadastro manual) - sistema de cores Material 3 completo, não mais um placeholder.
 Mapeamento `role M3 → token do app`; manter os nomes dos roles (facilita comparar com specs
 futuras do mesmo protótipo):
 
@@ -123,7 +123,7 @@ export const colors = {
   secondaryContainer: '#D5E0F8',
   onSecondaryContainer: '#586377',
 
-  tertiary: '#994200',       // reservado — não usado nas 3 telas ainda recebidas
+  tertiary: '#994200',       // reservado - não usado nas 3 telas ainda recebidas
   tertiaryContainer: '#C05400',
   onTertiaryContainer: '#FFFBFF',
 
@@ -131,7 +131,7 @@ export const colors = {
   onError: '#FFFFFF',
   errorContainer: '#FFDAD6',
   onErrorContainer: '#93000A',
-  // error/onError é a cor do card de "Alerta de Estoque" na Home — fundo cheio vermelho,
+  // error/onError é a cor do card de "Alerta de Estoque" na Home - fundo cheio vermelho,
   // não um tom claro, porque é uma ação que pede atenção imediata (Nielsen: visibilidade
   // do status do sistema).
 
@@ -147,7 +147,7 @@ export const colors = {
   onSurfaceVariant: '#414754',   // texto secundário, labels, ícones neutros
 
   outline: '#727786',
-  outlineVariant: '#C1C6D7',     // bordas finas de card/input — o "border" antigo
+  outlineVariant: '#C1C6D7',     // bordas finas de card/input - o "border" antigo
 };
 ```
 
@@ -156,7 +156,7 @@ export const colors = {
 // Fonte: Plus Jakarta Sans (Google Fonts). ATENÇÃO: pesos leves (300) valem para telas de
 // apresentação/marketing (ex: título "Hello, David." na Home usa peso 300 no protótipo),
 // mas para o público idoso/polimedicado, priorizar peso 500-600 em qualquer texto que
-// carregue informação crítica (nome do remédio, horário, dose) — legibilidade tem
+// carregue informação crítica (nome do remédio, horário, dose) - legibilidade tem
 // prioridade sobre a estética editorial nesses pontos.
 export const typography = {
   headlineXl: { fontFamily: 'PlusJakartaSans_300Light', fontSize: 40, lineHeight: 48, letterSpacing: -0.02 },
@@ -167,7 +167,7 @@ export const typography = {
   bodyMd: { fontFamily: 'PlusJakartaSans_400Regular', fontSize: 14, lineHeight: 22 },
   label: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 12, lineHeight: 16, letterSpacing: 0.6 }, // uppercase no protótipo
   // Uso crítico (dose, horário, nome do medicamento em destaque): sempre 500+ de peso,
-  // nunca 300 — ex: "14:30" e "Metformina 500mg" no card de próxima dose usam bold/600+,
+  // nunca 300 - ex: "14:30" e "Metformina 500mg" no card de próxima dose usam bold/600+,
   // mesmo a headline de saudação ao lado usando peso leve.
 };
 ```
@@ -178,7 +178,7 @@ export const spacing = { unit: 4, xs: 4, sm: 8, md: 16, gutter: 24, lg: 32, xl: 
 export const marginMobile = 16;
 export const marginDesktop = 64; // só relevante se houver versão web/tablet do app
 
-// Radius do protótipo é sutil (quase "clínico", cantos quase retos) — bem mais discreto
+// Radius do protótipo é sutil (quase "clínico", cantos quase retos) - bem mais discreto
 // que o "full: 9999" antigo, que só se aplica a pílulas/avatares/FAB.
 export const radius = { sm: 2, md: 4, lg: 8, full: 12 };
 ```
@@ -186,7 +186,7 @@ export const radius = { sm: 2, md: 4, lg: 8, full: 12 };
 ### Padrões de componente observados no protótipo (referência ao implementar)
 
 - **Card de "Próxima Dose"** (Home): fundo `primary` cheio, texto branco, ícone de pílula
-  grande semi-transparente no canto — é a única exceção "chamativa" da paleta neutra
+  grande semi-transparente no canto - é a única exceção "chamativa" da paleta neutra
   (justificado por ser o elemento mais importante da tela).
 - **Lista de doses do dia**: item por linha com horário à esquerda, nome/nota no meio, ícone
   de status à direita. Três estados visuais claros: concluída (opacidade reduzida +
@@ -195,20 +195,20 @@ export const radius = { sm: 2, md: 4, lg: 8, full: 12 };
   `outlineVariant`, sem ação).
 - **Alerta de estoque baixo**: card cheio em `error`/`onError` (não um tom claro) com ação
   primária ("Atualizar Medicação", botão branco sobre vermelho) e ação secundária de texto
-  ("Ignorar Lembrete") — consistente com a decisão de que o alerta não bloqueia a tela mas
+  ("Ignorar Lembrete") - consistente com a decisão de que o alerta não bloqueia a tela mas
   precisa de destaque forte.
 - **Gráfico semanal de adesão**: barras simples em `primary` com opacidade variável por dia
-  (dia atual = opacidade cheia), sem biblioteca de gráficos — dá pra fazer só com `View`s de
+  (dia atual = opacidade cheia), sem biblioteca de gráficos - dá pra fazer só com `View`s de
   altura proporcional.
 - **Scanner de código de barras**: metade superior é a câmera com moldura de cantos
   destacados (`primary`, 4px) + linha de varredura animada; metade inferior é sempre visível
-  com campo de entrada manual — reforça que o manual nunca é "escondido" atrás da câmera
+  com campo de entrada manual - reforça que o manual nunca é "escondido" atrás da câmera
   (acessibilidade, conforme já documentado em `screens-and-flows.md`).
 - **Formulário de cadastro manual**: seções em cards separados (`surfaceContainerLowest` +
   borda `outlineVariant`) por bloco de responsabilidade (dados básicos / posologia / estoque)
-  — não um formulário corrido. Frequência é um seletor de chips (Diário/Intervalo/Semanal/SOS),
+  - não um formulário corrido. Frequência é um seletor de chips (Diário/Intervalo/Semanal/SOS),
   horários são chips removíveis com "+ Adicionar", estoque é um stepper (+/-) sem campo de
-  limiar — bate exatamente com o que já estava documentado.
+  limiar - bate exatamente com o que já estava documentado.
 - **Navegação inferior fixa** (mobile): Home / Calendário / Remédios / Ajustes, ícone
   preenchido (`FILL 1`) só no item ativo.
 
@@ -217,24 +217,24 @@ export const radius = { sm: 2, md: 4, lg: 8, full: 12 };
 - **Barra de progresso diário** (ex: "3 de 5 doses hoje"): usa `colors.primary` preenchido sobre
   trilho em `colors.border`. Nunca bloqueia a tela nem exige interação.
 - **Indicador de streak**: ícone (pílula/coração) + contador de dias, discreto, próximo ao
-  card de próxima dose — reforço visual, não modal ou pop-up interruptivo.
+  card de próxima dose - reforço visual, não modal ou pop-up interruptivo.
 - **Micro-animação de conclusão**: ao bater a meta do dia, uma animação leve e rápida (sem
-  bloquear navegação) — ex: preenchimento final da barra com uma transição suave.
+  bloquear navegação) - ex: preenchimento final da barra com uma transição suave.
 - Card de "Próxima Dose": pode romper a paleta neutra com `colors.primary` cheio (fundo azul,
-  texto branco) para se destacar — isso é o card mais importante da Home e justifica ser a
+  texto branco) para se destacar - isso é o card mais importante da Home e justifica ser a
   única exceção "chamativa" da tela.
 
 ### Logo / marca (pendente de aplicar o asset, fonte já integrada)
 
 Usuário tem uma referência de logo pronta: pílula em duas metades (uma inteira, uma clara),
 dentro de um quadrado azul (`primary`), ao lado do wordmark "Mapill" em **Comfortaa** (peso
-bold, arredondada — contraste proposital com a Plus Jakarta Sans do resto da UI).
+bold, arredondada - contraste proposital com a Plus Jakarta Sans do resto da UI).
 
 - **Fonte**: `Comfortaa` já instalada (`@expo-google-fonts/comfortaa`) e carregada em
-  `_layout.tsx`. Token `typography.brandWordmark` (`shared/theme/typography.ts`) — **uso
+  `_layout.tsx`. Token `typography.brandWordmark` (`shared/theme/typography.ts`) - **uso
   exclusivo da marca/wordmark**, nunca pro resto da UI (formulários, listas, texto corrido
   continuam em Plus Jakarta Sans).
-- **Imagem do ícone (pílula)**: ainda não aplicada — falta o arquivo em si. `LoginScreen` usa
+- **Imagem do ícone (pílula)**: ainda não aplicada - falta o arquivo em si. `LoginScreen` usa
   um "M" de texto como placeholder do `brandMark`. Quando o asset (PNG/SVG) for salvo em
   `assets/images/`, substituir esse placeholder por `<Image>`, gerar `icon.png`/
   `adaptive-icon`/`splash-icon` a partir dele (ver `app.json`), e considerar reusar a mesma
@@ -245,6 +245,6 @@ bold, arredondada — contraste proposital com a Plus Jakarta Sans do resto da U
 - Não usar `style={{ ... }}` inline exceto para valores verdadeiramente dinâmicos (ex: cor que
   muda conforme status de uma dose atrasada).
 - Não introduzir Tailwind, NativeWind, styled-components ou emotion sem o usuário pedir
-  explicitamente — a preferência já foi definida.
+  explicitamente - a preferência já foi definida.
 - Não misturar lógica de estilo condicional complexa dentro do JSX; extrair para uma função
   `getContainerStyle(status)` no próprio arquivo de estilos ou no componente.

@@ -4,14 +4,14 @@
  * **Existe para registrar duas coisas antes de o roteador subir**, e as duas pelo mesmo motivo: no
  * instante em que um aviso dispara, o app pode nem estar rodando.
  *
- * O `expo-router/entry` continua sendo quem monta o app inteiro — o `import` no fim deste arquivo é
+ * O `expo-router/entry` continua sendo quem monta o app inteiro - o `import` no fim deste arquivo é
  * exatamente o que o `package.json` apontava antes.
  *
  * ## 1. A tela de alarme
  *
  * O Notifee não navega para uma rota ao abrir a tela cheia: ele pede ao Android para montar um
  * componente React **avulso**, pelo nome, por cima da tela de bloqueio. Esse nome precisa estar
- * registrado antes de qualquer coisa acontecer — inclusive antes de existir navegação.
+ * registrado antes de qualquer coisa acontecer - inclusive antes de existir navegação.
  *
  * É também por isso que `AlarmeScreen` não é uma rota do `app/`: ela vive fora da árvore de
  * navegação, e é a única tela do projeto assim.
@@ -21,7 +21,7 @@
  * É ele que grava a dose quando alguém toca em "Tomei" com o celular bloqueado. Precisa ser
  * registrado **fora do ciclo de vida do React**: com o app fechado não há componente montado para
  * assinar nada, e registrá-lo dentro de um `useEffect` faria o botão não funcionar exatamente no
- * caso mais comum — que é para o que o alarme existe.
+ * caso mais comum - que é para o que o alarme existe.
  *
  * Foi o que a unificação em torno do Notifee destravou. Enquanto o `expo-notifications` cuidava dos
  * lembretes, a resposta dependia de `getLastNotificationResponseAsync` no bootstrap, isto é, de a
@@ -42,7 +42,7 @@ registrarEventosEmSegundoPlano();
  * ## 3. O serviço que toca o alarme
  *
  * Pelo mesmo motivo dos dois acima: quando o aviso dispara, o app pode não estar rodando. O serviço
- * é quem toca o som e segura o processo enquanto ele soa — e ele precisa estar registrado antes de
+ * é quem toca o som e segura o processo enquanto ele soa - e ele precisa estar registrado antes de
  * qualquer notificação poder chegar, senão o Android encontra um serviço que não existe.
  */
 registrarServicoDeSom();
