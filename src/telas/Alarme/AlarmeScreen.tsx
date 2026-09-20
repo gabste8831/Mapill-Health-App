@@ -86,28 +86,15 @@ type AlarmeScreenProps = {
 };
 
 /**
- * A tela do alarme: ocupa o aparelho inteiro, toca até alguém responder, e sai só com uma resposta.
+ * A tela do alarme: ocupa o aparelho inteiro, toca ate alguem responder, e sai so com uma resposta.
  *
- * ## Por que ela existe separada da tela de horário
+ * Separada da tela de horario porque as duas nascem de situacoes opostas: aquela e consultada, esta
+ * irrompe sobre o bloqueio, possivelmente de madrugada. Por isso nao ha cabecalho, voltar nem
+ * navegacao, os alvos sao grandes, e silenciar e a primeira acao.
  *
- * As duas mostram as mesmas doses e oferecem as mesmas ações, mas nascem de situações opostas. A
- * `HorarioScreen` é consultada - a pessoa foi até lá. Esta **irrompe**: aparece por cima da tela de
- * bloqueio, com o aparelho no bolso, possivelmente no meio da noite.
- *
- * Isso muda tudo o que importa. Aqui não há cabeçalho, não há voltar, não há navegação - sair
- * exige responder. Os alvos são grandes porque a pessoa acabou de acordar. E o silenciar é a
- * primeira ação, separada das outras, porque parar o barulho é o que ela quer fazer **antes** de
- * conseguir pensar em qualquer outra coisa.
- *
- * ## O som **não** mora aqui - desde 14/09
- *
- * Morava: esta tela criava o próprio player e o destruía ao fechar. O problema é que ela nem sempre
- * monta - com o celular em uso o Android rebaixa a tela cheia, e com o app fechado não há processo
- * para navegar -, e nesses casos o alarme ficava mudo.
- *
- * Agora quem toca é o foreground service (ver `som-do-alarme.ts`), que sobe com a notificação e
- * independe de tela. Esta tela **pede** o som ao montar (é idempotente) e o para ao ser respondida,
- * mas não o possui: fechá-la não cala um alarme que ninguém respondeu.
+ * O som nao mora aqui: quem toca e o foreground service, que sobe com a notificacao e independe de
+ * tela, porque esta nem sempre monta. Esta tela pede o som ao montar e o para ao ser respondida,
+ * mas nao o possui - fecha-la nao cala um alarme que ninguem respondeu.
  */
 export function AlarmeScreen({
   instanteIso,
@@ -121,14 +108,9 @@ export function AlarmeScreen({
   const [silenciado, setSilenciado] = useState(false);
 
   /**
-   * Anuncia que esta tela está em cena, para **nenhuma outra** abrir para o mesmo horário.
+   * Anuncia que esta tela esta em cena, para nenhuma outra abrir para o mesmo horario.
    *
-   * Os dois pontos de entrada da tela vivem no mesmo processo JS (ver `alarme-em-cena`), e sem este
-   * registro o alarme que irrompe com o app aberto produzia duas telas: a Activity do
-   * `fullScreenAction` e a rota empurrada pelo listener. Duas telas, **dois players de áudio** - o
-   * som duplicado relatado em aparelho em 09/09.
-   *
-   * Na montagem, e não em quem abre: é a montagem que prova que a tela existe. Quem abre pode
+   * Na montagem, e nao em quem abre: e a montagem que prova que a tela existe. Quem abre pode
    * falhar no meio, e marcar antes deixaria a trava presa num alarme que nunca apareceu.
    */
   useEffect(() => {
@@ -138,29 +120,14 @@ export function AlarmeScreen({
   }, [instanteIso, ehActivityDeAlarme]);
 
   /**
-   * A notificação do horário sai da bandeja - mas **só com a tela de fato visível**.
+   * A notificacao do horario sai da bandeja, mas so com a tela de fato visivel.
    *
-   * O serviço em primeiro plano e esta tela pediriam o mesmo som se coexistissem - por isso
-   * `comecarASoar` é idempotente. Quando esta tela está na frente, ela é quem responde, e a
-   * notificação pode sair da bandeja.
+   * A tela pergunta por si: como Activity do full-screen intent ela esta na frente por definicao;
+   * como rota, so dispensa com o app `active`. Se montasse sem estar visivel, dispensar apagaria o
+   * unico aviso visivel e deixaria o som sem rosto nem forma de parar.
    *
-   * ## Por que a condição virou explícita em 12/09
-   *
-   * Ela era garantida por quem abre: `use-dose-notifications` recusava montar a tela com o app fora
-   * do primeiro plano, então chegar aqui já significava estar visível. Isso mudou - agora, com o
-   * aparelho bloqueado e a Activity nativa ausente, o app abre a rota assim mesmo, porque era esse
-   * o defeito que fazia a tela azul não aparecer com o Mapill nos recentes.
-   *
-   * A condição continua valendo, mas deixou de ser garantida lá fora. Se a tela montar sem estar
-   * visível - o caso que a espera tenta evitar, e nenhuma heurística acerta sempre -, dispensar a
-   * notificação apagaria o **único** aviso visível e deixaria o som sem rosto nem forma de parar.
-   * Trocar o problema barulhento pelo mudo é o pior desfecho possível aqui.
-   *
-   * Então a tela pergunta por si: como Activity do full-screen intent ela está na frente por
-   * definição (o Android a colocou lá); como rota, ela só dispensa se o app estiver `active`.
-   *
-   * `dispensar(chave)` e não `dispensarAlarmeAtivo()`: aquela varre todos os alarmes da bandeja, e
-   * um alarme de outro horário ainda sem resposta não tem por que sumir porque esta tela abriu.
+   * `dispensar(chave)` e nao `dispensarAlarmeAtivo()`: aquela varre todos os alarmes da bandeja, e
+   * um de outro horario ainda sem resposta nao tem por que sumir porque esta tela abriu.
    */
   useEffect(() => {
     if (!ehActivityDeAlarme && AppState.currentState !== "active") return;
@@ -168,59 +135,31 @@ export function AlarmeScreen({
   }, [instanteIso, ehActivityDeAlarme]);
 
   /**
-   * O som, enquanto a dose não for respondida.
+   * O som, enquanto a dose nao for respondida.
    *
-   * Quem toca é o serviço em primeiro plano (`som-do-alarme.ts`), não esta tela - ver os dois
-   * blocos abaixo, que explicam por quê.
+   * `comecarASoar` e idempotente e o servico ja costuma estar tocando quando esta tela monta: a
+   * chamada serve para o caso em que ela abre sem o servico ter subido. Um player proprio aqui
+   * seria uma segunda fonte de audio, e silenciar pela tela calaria so uma delas.
+   *
+   * A limpeza nao para o som de proposito: com o celular em uso a tela nem monta, e parar na
+   * desmontagem faria a tela fechada calar um alarme que ninguem respondeu. Quem para e
+   * `dispensarAlarmeAtivo`.
    */
   useEffect(() => {
     if (silenciado) return;
-
-    /**
-     * **Pede o som ao módulo compartilhado, em vez de criar o próprio player.**
-     *
-     * Desde o `v8` quem toca é o foreground service (ver `som-do-alarme.ts`), e ele já está tocando
-     * quando esta tela monta - o alarme começa a soar com a notificação, antes de qualquer tela
-     * existir. `comecarASoar` é idempotente, então chamar aqui não cria um segundo player: serve
-     * para o caso em que a tela abre sem o serviço ter subido.
-     *
-     * Um player próprio aqui seria a segunda fonte de áudio tocando o mesmo arquivo - o som
-     * duplicado de 10/09, agora com o agravante de que silenciar pela tela calaria só um dos dois.
-     */
     comecarASoar();
-
-    /**
-     * **A limpeza não para o som**, e isso é a mudança de 14/09.
-     *
-     * O som deixou de pertencer a esta tela: ele é do serviço, e sobrevive a ela de propósito -
-     * com o celular em uso a tela nem chega a montar, e o alarme precisa soar do mesmo jeito.
-     * Parar na desmontagem faria a tela fechada calar um alarme que ninguém respondeu.
-     *
-     * Quem para é `dispensarAlarmeAtivo`, no funil por onde passam todos os caminhos que encerram
-     * o alarme - inclusive o `encerrar` e o `onFechar` desta tela.
-     */
   }, [silenciado]);
 
-  /**
-   * Vibra em ciclo enquanto o alarme está tocando.
-   *
-   * Independente do som, e é isso que a torna útil: se o volume estiver baixo, se o áudio falhar,
-   * ou se o aparelho estiver no bolso, a vibração é o que ainda avisa. O padrão longo é o mesmo do
-   * canal - vibração curta se confunde com mensagem, e a diferença entre "chegou um WhatsApp" e
-   * "está na hora do remédio" precisa ser sentida sem olhar a tela.
-   */
+  // Independente do som, e e isso que a torna util: volume baixo, audio falhando ou aparelho no
+  // bolso, a vibracao ainda avisa. Padrao longo, porque o curto se confunde com mensagem.
   useEffect(() => {
     if (silenciado) return;
     Vibration.vibrate([0, 600, 400, 600, 1200], true);
     return () => Vibration.cancel();
   }, [silenciado]);
 
-  /**
-   * Silencia sozinho depois de um tempo - ver `SILENCIA_SOZINHO_EM_MS`.
-   *
-   * Para o serviço junto, pelo mesmo motivo do botão: o som não é mais desta tela, e marcar o
-   * estado sem pará-lo deixaria o alarme tocando para sempre num aparelho que ninguém atendeu.
-   */
+  // Para o servico junto, pelo mesmo motivo do botao: marcar o estado sem para-lo deixaria o alarme
+  // tocando para sempre num aparelho que ninguem atendeu.
   useEffect(() => {
     if (silenciado) return;
     const timer = setTimeout(() => {
@@ -230,13 +169,8 @@ export function AlarmeScreen({
     return () => clearTimeout(timer);
   }, [silenciado]);
 
-  /**
-   * Silenciar **para o serviço**, e não só marca o estado desta tela.
-   *
-   * Antes do `v8` bastava o estado: o player era desta tela, e o efeito o destruía ao ver
-   * `silenciado`. Agora o som é do serviço e não pertence mais a ela - sem esta chamada, o botão
-   * mudaria a tela e o alarme seguiria berrando.
-   */
+  // Para o servico, e nao so marca o estado desta tela: o som nao pertence a ela, e sem esta
+  // chamada o botao mudaria a tela e o alarme seguiria tocando.
   const silenciar = useCallback(() => {
     pararDeSoar();
     setSilenciado(true);
@@ -263,21 +197,12 @@ export function AlarmeScreen({
       }
 
       /**
-       * **Fecha antes de reagendar**, e a ordem é o que evita o lampejo azul.
+       * Fecha antes de reagendar, e a ordem e o que evita o lampejo azul.
        *
-       * `reagendarTodosOsAvisos` cancela tudo e reagenda a partir do banco. A dose que acabou de
-       * ser respondida ainda cai dentro da tolerância de 2 minutos do "aviso que acabou de passar"
-       * (ver `TOLERANCIA_DE_ATRASO_EM_MINUTOS`), então o aviso volta a ser agendado e dispara quase
-       * na hora - e o `DELIVERED` dele abria esta tela outra vez, que montava, via tudo resolvido e
-       * se fechava. O piscar visto em aparelho em 09/09.
-       *
-       * Com o fechamento antes, a tela já saiu quando o eco chega. O listener também aprendeu a
-       * ignorá-lo (`escutar-avisos`, no `DELIVERED`), e as duas defesas são de camadas diferentes:
-       * aqui o alarme não fica esperando o reagendamento para sair de cena; lá o eco não abre nada
-       * mesmo que chegue por outro caminho.
-       *
-       * O reagendamento continua acontecendo - sem `await`, porque ninguém nesta tela depende do
-       * resultado dele, e ela está saindo.
+       * O reagendamento cancela tudo e reconstroi, e a dose recem-respondida ainda cai na
+       * tolerancia de 2 minutos: o aviso volta a ser agendado, dispara quase na hora, e o
+       * `DELIVERED` reabria esta tela. Fechando antes, ela ja saiu quando o eco chega. O listener
+       * tambem o ignora, e as duas defesas sao de camadas diferentes.
        */
       await encerrar();
       void reagendarTodosOsAvisos();
@@ -286,28 +211,19 @@ export function AlarmeScreen({
   );
 
   /**
-   * Leva à tela do horário dentro do app, onde cada dose se resolve individualmente.
+   * Leva a tela do horario dentro do app, onde cada dose se resolve individualmente.
    *
-   * Por deep link, e não pelo roteador: esta tela é um componente registrado no `AppRegistry` (ver
-   * `index.js`) e roda numa Activity própria, fora do `expo-router` - não há navegador a que pedir
-   * um `push`. O `Linking` entrega a rota ao app, que sobe já na tela certa.
+   * Por deep link, e nao pelo roteador: esta tela roda numa Activity propria, fora do `expo-router`,
+   * e nao ha navegador a que pedir um `push`.
    *
-   * Silencia e dispensa antes de sair, na mesma ordem do `encerrar`: sem isso o som continuaria
-   * tocando por cima do app recém-aberto.
-   *
-   * **Com o aparelho bloqueado, exige o desbloqueio primeiro.** Responder a dose daqui - "Tomei",
-   * "Pulei", adiar, silenciar - segue sem senha, porque é para isso que o alarme existe e o dado
-   * não sai da tela. Entrar no app é outra coisa: lá estão os medicamentos, o histórico e a ficha
-   * de saúde, e a tela azul sobe por cima do bloqueio sem que ninguém tenha se identificado.
-   *
-   * O pedido vem **antes** de silenciar e dispensar: quem desiste da senha continua com o alarme
-   * tocando e a tela no lugar, que é o estado em que estava. Desligar o alarme primeiro entregaria
-   * a quem cancelou exatamente o que o cancelamento recusou.
+   * Com o aparelho bloqueado, exige o desbloqueio: responder a dose daqui segue sem senha, porque e
+   * para isso que o alarme existe, mas entrar no app da acesso a medicamentos, historico e ficha de
+   * saude. O pedido vem antes de silenciar e dispensar, senao quem cancela a senha receberia o
+   * alarme desligado, que e parte do que o cancelamento recusou.
    */
   const abrirNoApp = useCallback(async () => {
-    // `!== false`: na dúvida, pede. O `null` é "não consegui perguntar", e aqui ele pesa para o
-    // lado oposto do que pesa em `use-dose-notifications` - lá a dúvida mostra o alarme, que é
-    // inofensivo; aqui ela guarda a ficha de saúde, e deixar passar é o defeito.
+    // `!== false`: na duvida, pede. O `null` e "nao consegui perguntar", e aqui ele pesa para o
+    // lado oposto do que pesa no alarme, onde a duvida so mostra a tela.
     if ((await estaBloqueado()) !== false && !(await pedirDesbloqueio())) return;
 
     setSilenciado(true);
@@ -323,62 +239,29 @@ export function AlarmeScreen({
     onFechar();
   }, [doses, onFechar]);
 
-  /**
-   * A dose respondida em **outro lugar** também encerra este alarme.
-   *
-   * O `useDosesDoAlarme` revalida a cada poucos segundos, então quando alguém confirma pelo botão
-   * da notificação - que continua na bandeja enquanto o alarme toca - a lista aqui esvazia sozinha.
-   * Sem isto, a tela permanecia tocando e oferecendo "Tomei" para uma dose já registrada: o segundo
-   * toque não gravaria nada (a regra barra), mas o alarme seguiria berrando o que já foi resolvido.
-   *
-   * `isLoading` na condição é o que impede o fechamento no primeiro quadro, antes de a lista chegar.
-   */
-  /**
-   * Tocar no corpo da notificação leva à tela do horário - e o alarme sai de cena no mesmo gesto.
-   *
-   * Escolher outro caminho para responder é uma resposta ao alarme: continuar tocando enquanto a
-   * pessoa decide na outra tela é cobrar algo que ela já foi atender. Equivale a "Responder
-   * depois" - a dose segue pendente, e é lá que ela será resolvida.
-   */
+  // Escolher outro caminho para responder e uma resposta ao alarme: seguir tocando enquanto a
+  // pessoa decide na outra tela e cobrar algo que ela ja foi atender.
   useEffect(() => ouvirPedidoDeEncerrarAlarme(onFechar), [onFechar]);
 
   /**
-   * **Perder o primeiro plano encerra o alarme.** É esta a garantia que funciona.
+   * Perder o primeiro plano encerra o alarme, e e esta a garantia que funciona.
    *
-   * O aviso interno (`ouvirPedidoDeEncerrarAlarme`, acima) não alcança esta tela quando o toque na
-   * notificação é processado pelo `onBackgroundEvent`: aquele handler roda num contexto JS separado
-   * da Activity do alarme, e o `Set` de ouvintes vive na memória de cada contexto - o anúncio se
-   * perde no caminho. Foi o que o teste em aparelho mostrou: o app abria por cima e o som
-   * continuava, obrigando a voltar telas para achar o alarme e desligá-lo.
-   *
-   * `AppState` não depende de contexto compartilhado: quando o app sobe por cima, esta Activity vai
-   * para segundo plano e o evento chega aqui. E a regra vale para **qualquer** saída - tocar na
-   * notificação, abrir outro app, atender uma chamada. Em todas, o alarme deixou de ser o que está
-   * na frente, e um despertador que continua tocando fora de cena é o que faz desinstalar o app.
-   *
-   * A dose segue pendente: sair não é responder, e ela reaparece na Home como atrasada.
+   * O aviso interno acima nao alcanca esta tela quando o toque e processado pelo
+   * `onBackgroundEvent`: aquele handler roda num contexto JS separado, e o `Set` de ouvintes vive
+   * na memoria de cada contexto. O `AppState` nao depende de contexto compartilhado, e vale para
+   * qualquer saida. A dose segue pendente: sair nao e responder.
    */
   useEffect(() => {
     /**
-     * Só vale para a Activity de tela cheia, e não para esta mesma tela aberta como rota.
+     * So para a Activity de tela cheia, e nao para esta tela aberta como rota.
      *
-     * Quando o alarme chega com o app já aberto, o Android rebaixa o full-screen intent e quem abre
-     * a tela é o roteador (ver `use-dose-notifications`). Ali o app **é** o primeiro plano, e um
-     * `inactive` passageiro - o heads-up que sobe por cima, a barra de notificações puxada -
-     * fecharia o alarme sem que ninguém tivesse saído dele.
-     *
-     * Na Activity própria a semântica é outra: ela existe sozinha, então perder o primeiro plano
-     * significa que outra coisa veio para a frente.
+     * Como rota, o app e o primeiro plano, e um `inactive` passageiro (o heads-up que sobe, a barra
+     * puxada) fecharia o alarme sem ninguem ter saido dele.
      */
     if (!ehActivityDeAlarme) return;
 
-    /**
-     * Só encerra depois de ter estado em primeiro plano ao menos uma vez.
-     *
-     * A Activity nasce enquanto o aparelho ainda desbloqueia, e nesse intervalo o `AppState` pode
-     * reportar `inactive` - fechar ali mataria o alarme antes de alguém vê-lo, que é o pior defeito
-     * possível nesta tela.
-     */
+    // So encerra depois de ter estado ativo uma vez: a Activity nasce enquanto o aparelho ainda
+    // desbloqueia, e fechar nesse intervalo mataria o alarme antes de alguem ve-lo.
     let esteveAtivo = AppState.currentState === "active";
 
     const assinatura = AppState.addEventListener("change", (estado) => {
@@ -392,39 +275,33 @@ export function AlarmeScreen({
     return () => assinatura.remove();
   }, [ehActivityDeAlarme, onFechar]);
 
+  /**
+   * A dose respondida em outro lugar tambem encerra este alarme.
+   *
+   * A lista revalida a cada poucos segundos, entao confirmar pelo botao da notificacao a esvazia
+   * sozinha. Sem isto a tela seguia tocando e oferecendo "Tomei" para uma dose ja registrada.
+   *
+   * `isLoading` impede o fechamento no primeiro quadro, antes de a lista chegar.
+   */
   useEffect(() => {
     if (isLoading) return;
     if (doses.length === 0) return;
     if (doses.some((dose) => !dose.resolvida)) return;
 
-    /**
-     * Fecha sem passar pelo `encerrar`: aquele chama `setSilenciado`, e escrever estado dentro de um
-     * efeito é o que a regra `set-state-in-effect` proíbe - com razão, porque aqui o componente está
-     * saindo e o re-render não teria para quem servir.
-     *
-     * O som para no `dispensarAlarmeAtivo` abaixo, que é o funil de todos os caminhos que
-     * encerram um alarme - a tela desmontando não o calaria, porque ele é do serviço.
-     */
+    // Sem passar pelo `encerrar`, que chama `setSilenciado`: escrever estado num efeito e o que a
+    // regra `set-state-in-effect` proibe. O som para no `dispensarAlarmeAtivo`.
     void dispensarAlarmeAtivo().then(onFechar);
   }, [doses, isLoading, onFechar]);
 
   /**
-   * Quantos remédios a tela **desenha**, decidido uma vez e mantido.
+   * Quantos remedios a tela desenha, decidido uma vez e mantido.
    *
-   * O número de pendentes cai enquanto a tela está aberta: o `useDosesDoAlarme` revalida a cada três
-   * segundos, e uma dose confirmada pelo botão da notificação ou por outra tela some da lista. Com a
-   * forma derivada direto dele, quatro remédios viravam três no meio do uso - e aí o botão único de
-   * "Ver e confirmar no app" virava dois botões, a lista mínima virava a lista com foto, e o rodapé
-   * inteiro se reorganizava debaixo do dedo de quem estava prestes a tocar.
+   * O numero de pendentes cai enquanto a tela esta aberta, e com a forma derivada direto dele o
+   * rodape inteiro se reorganizava debaixo do dedo de quem estava prestes a tocar. Congelar so a
+   * forma resolve sem mentir: a lista mostra as doses de verdade, o layout e que nao muda.
    *
-   * Congelar só a **forma** é o que resolve sem mentir: a lista mostra as doses de verdade, e é a
-   * escolha de layout que não muda. Uma tela de alarme vive segundos, e nesse intervalo a estrutura
-   * que a pessoa vê tem de ser a mesma em que ela toca.
-   *
-   * Vale para a montagem seguinte: fechada e reaberta, a tela recalcula com o que houver então.
-   *
-   * `useState` e não `useRef`: ler ref durante o render é o que a regra `react-hooks/refs` proíbe,
-   * e com o React Compiler ligado ela tem razão. O estado é escrito uma vez, quando a lista chega.
+   * `useState` e nao `useRef` porque ler ref durante o render e o que a regra `react-hooks/refs`
+   * proibe.
    */
   const [formaCongelada, setFormaCongelada] = useState<number | null>(null);
 
@@ -444,52 +321,27 @@ export function AlarmeScreen({
   const quantosDesenhar = formaCongelada ?? pendentes.length;
   const umaSo = quantosDesenhar === 1;
   /**
-   * **Com mais de uma dose, o alarme lista e não responde**: a confirmação passa a exigir o app.
+   * Com mais de uma dose o alarme lista e nao responde: confirmar passa a exigir o app.
    *
-   * O argumento original valia para cinco remédios e continua valendo para dois: marcar "tomei
-   * todas" no escuro e recém-acordado é assinar vários registros clínicos com um toque só, sem ter
-   * olhado nenhum deles. O que mudou em 09/09 foi onde a linha é traçada - de três para um.
-   *
-   * ⚠️ O custo é real e recai sobre quem tem mais remédios: o paciente polimedicado, que costuma
-   * ser idoso e é quem mais se beneficiaria do botão direto. O `Ver e confirmar no app` é o que
-   * torna isso aceitável - ele é a primeira coisa na tela e leva ao horário, onde cada dose se
-   * resolve individualmente.
+   * Marcar "tomei todas" no escuro e recem-acordado e assinar varios registros clinicos com um
+   * toque so, sem ter olhado nenhum. O custo recai sobre o paciente polimedicado, que e quem mais
+   * se beneficiaria do botao direto; o "Ver e confirmar no app" e o que torna isso aceitavel.
    */
   const podeResponderAqui = quantosDesenhar <= MAXIMO_PARA_RESPONDER_NO_ALARME;
-  /**
-   * Se a tela lista os remédios ou só diz quantos são. Ver `MAXIMO_PARA_LISTAR`.
-   *
-   * A outra forma - detalhada contra enxuta - é decidida por `umaSo`, e não por uma terceira
-   * variável: é a mesma pergunta ("há uma dose só?") que já governa o título e os botões.
-   */
+  // Detalhada contra enxuta e decidido por `umaSo`, e nao por uma terceira variavel: e a mesma
+  // pergunta que ja governa o titulo e os botoes.
   const listar = quantosDesenhar <= MAXIMO_PARA_LISTAR;
   // Um adiamento por horário: basta uma dose já ter gasto o dela para o botão não ter mais efeito.
   const podeAdiar = pendentes.length > 0 && pendentes.every((dose) => dose.snoozeCount === 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/**
-       * **Só os remédios rolam.** O cabeçalho fica parado no topo, as ações fixas no rodapé.
-       *
-       * A tela cabia justa com **um** remédio - e o bloco 4.1 do roteiro é justamente dois no mesmo
-       * horário, cada um com sua foto. Sem rolagem, o segundo cartão empurrava "Responder depois"
-       * para fora da tela, e não havia como alcançá-lo: numa tela que irrompe sobre o bloqueio e
-       * toca em loop, ficar sem saída visível é o pior defeito possível.
-       *
-       * As ações fora do scroll porque elas nunca podem depender de rolar: quem foi acordado tem
-       * que conseguir responder sem procurar.
-       *
-       * **O cabeçalho saiu do scroll em 14/09.** Ele diz que horário é este, e é a âncora da tela:
-       * rolando junto, a hora sumia justamente quando a lista era longa o bastante para a pessoa
-       * precisar rolar - e é aí que confirmar o horário mais importa. Quem rola procura um remédio
-       * na lista, não o cabeçalho.
-       */}
+      {/* So os remedios rolam: o cabecalho fica no topo e as acoes fixas no rodape, porque nenhum
+          dos dois pode depender de rolar. Sem rolagem, o segundo cartao empurrava "Responder
+          depois" para fora da tela, e ficar sem saida visivel aqui e o pior defeito possivel. */}
       <View style={styles.cabecalho}>
-        {/* Sem o círculo do despertador desde 14/09: ele custava 56dp de altura no topo de uma tela
-            que precisa caber três remédios, e não dizia nada que o título já não diga. Numa tela
-            que irrompe sozinha tocando, ninguém precisa de um ícone para saber que é um alarme. */}
-        {/* A contagem entra quando há mais de um: é ela que diz, antes de qualquer nome, quantas
-            respostas este horário espera. */}
+        {/* A contagem entra quando ha mais de um: diz, antes de qualquer nome, quantas respostas
+            este horario espera. */}
         <Text style={styles.titulo}>
           {umaSo ? "Hora do seu remédio" : `Hora dos seus ${pendentes.length} remédios`}
         </Text>
@@ -504,26 +356,10 @@ export function AlarmeScreen({
       <ScrollView
         contentContainerStyle={styles.conteudo}
         showsVerticalScrollIndicator={false}>
-        {/* Os remédios, em letra grande: é o que a pessoa precisa ler antes de responder, e ela
-            pode estar sem óculos, no escuro, recém-acordada. */}
-        {/**
-         * Acima de três, a tela mostra **nome e dose**, e nada além disso.
-         *
-         * A versão anterior não listava nada: só uma frase mandando abrir o app. O Gabriel testou
-         * com quatro remédios em 12/09 e o resultado era um vazio entre o horário e os botões - a
-         * tela do alarme deixava de dizer o que o alarme era. "Você tem 4 remédios" sem os nomes não
-         * é informação, é um aviso de que há informação em outro lugar.
-         *
-         * O argumento antigo - que listar cinco nomes de madrugada dá trabalho sem ajudar a decidir
-         * - vale para a **lista completa**, com foto, orientação de tomada e local. Não vale para o
-         * nome: ele é o que responde "é o remédio da pressão ou o do sono?", e essa pergunta a
-         * pessoa faz antes de decidir se levanta agora ou daqui a pouco.
-         *
-         * Então a escala cai mais um degrau, em vez de a informação sumir: sem foto, sem orientação,
-         * sem local, e o nome e a quantidade numa linha só por remédio. A resposta continua não
-         * acontecendo aqui (ver `podeResponderAqui`), e o botão de abrir o app segue sendo o
-         * caminho de confirmar cada uma.
-         */}
+        {/* Acima do limite, so nome e dose numa linha por remedio: sem foto, orientacao ou local.
+            "Voce tem 4 remedios" sem os nomes nao e informacao, e um aviso de que a informacao esta
+            em outro lugar - e o nome e o que responde "e o da pressao ou o do sono?", pergunta que
+            se faz antes de decidir se levanta agora. */}
         {!listar ? (
           <View style={styles.listaMinima}>
             {pendentes.map((dose) => (
@@ -538,19 +374,11 @@ export function AlarmeScreen({
             ))}
           </View>
         ) : null}
-        {/* Sem frase explicando o que fazer: o botão "Ver e confirmar no app", logo abaixo, já diz
-            - e dizer duas vezes numa tela que se lê de madrugada é ruído, não ajuda. */}
-
         <View style={styles.lista}>
           {(listar ? pendentes : []).map((dose) => {
-            /**
-             * Se há algo a dizer além do nome e da dose.
-             *
-             * Sem isto, a faixa de detalhes era desenhada vazia, e o `gap` do cartão abria um vão
-             * embaixo do nome - um cartão mais alto sem nada dentro. Remédio sem orientação, sem
-             * observação e sem local é o caso comum de quem cadastra apressado, e ele não pode
-             * parecer um cartão quebrado.
-             */
+            // Sem isto a faixa de detalhes era desenhada vazia e o `gap` abria um vao embaixo do
+            // nome. Remedio sem orientacao, observacao e local e o caso comum de quem cadastra
+            // apressado, e nao pode parecer cartao quebrado.
             const temDetalhes =
               dose.orientacoes.length > 0 ||
               (dose.intakeNote !== null && dose.intakeNote.length > 0) ||
@@ -582,31 +410,15 @@ export function AlarmeScreen({
                 </>
               ) : (
                 /**
-                 * Na lista, a foto vira **miniatura ao lado do texto**.
+                 * Duas faixas, e nao duas colunas.
                  *
-                 * Ela fica porque reconhecer a caixa vale igual com três remédios - é até mais útil
-                 * ali, onde a pessoa precisa distinguir uma caixa das outras. O que não cabe é o
-                 * tamanho: três fotos de 132dp empilhadas não deixam espaço para mais nada, e a tela
-                 * de 12/09 já estava poluída **sem** elas.
+                 * Em cima a foto ao lado do nome e da dose, que e o par que identifica o remedio;
+                 * embaixo o texto da tomada, na largura inteira. Presas a uma coluna ao lado da
+                 * foto, as linhas de texto quebravam cedo e o cartao crescia, e com tres remedios o
+                 * terceiro so aparecia rolando.
                  *
-                 * 48dp é o que se reconhece de relance sem tomar a linha, e `cover` porque nesse
-                 * tamanho a moldura inteira da caixa não se lê de qualquer forma - o que resta é a
-                 * cor e a forma, que é justamente o que distingue uma da outra.
-                 */
-                /**
-                 * **Duas faixas, e não duas colunas.**
-                 *
-                 * Em cima, a foto ao lado do nome e da dose - é o par que identifica o remédio, e a
-                 * foto tem altura para valer alguma coisa. Embaixo, o texto que explica a tomada,
-                 * ocupando a **largura inteira** do cartão.
-                 *
-                 * Presas à coluna de 66% ao lado da foto, as três linhas de texto quebravam cedo e
-                 * o cartão crescia em altura - com três remédios, o terceiro só aparecia rolando
-                 * (visto em aparelho em 14/09). A largura toda é o mesmo conteúdo em menos linhas,
-                 * e o que se ganha em altura é o terceiro cartão cabendo na tela.
-                 *
-                 * O vão abaixo da foto deixa de ser espaço morto: era ele que a coluna de texto
-                 * não alcançava.
+                 * A miniatura fica porque reconhecer a caixa vale ainda mais quando ha varias a
+                 * distinguir; o que nao cabe e o tamanho cheio.
                  */
                 <View style={styles.itemEmFaixas}>
                   <View style={styles.identificacao}>
@@ -619,24 +431,14 @@ export function AlarmeScreen({
                     </View>
                   </View>
 
-                  {/**
-                   * **Nada é omitido aqui** - o que muda é o corpo, não o conteúdo.
-                   *
-                   * Nome, dose, onde está e como tomar são informação clínica: quem toma em jejum
-                   * precisa saber disso no instante em que levanta, não depois de já ter comido.
-                   * Cheguei a cortar a orientação para a lista caber, e era a decisão errada -
-                   * caber é problema de tamanho, e se resolve reduzindo a escala do conjunto.
-                   */}
+                  {/* Nada e omitido aqui: o que muda e o corpo, nao o conteudo. Quem toma em jejum
+                      precisa saber no instante em que levanta, nao depois de ter comido. Caber e
+                      problema de tamanho, e se resolve reduzindo a escala. */}
                   {temDetalhes ? (
                   <View style={styles.detalhesDoItem}>
-                    {/**
-                     * As orientações marcadas no cadastro, **uma etiqueta cada**.
-                     *
-                     * Vêm antes do texto livre porque são a regra fechada; o livre é o complemento.
-                     * O fundo próprio as separa da observação logo abaixo, que é anotação de quem
-                     * cuida e não instrução da dose - duas coisas que, como texto corrido, se liam
-                     * como a mesma.
-                     */}
+                    {/* As orientacoes do cadastro vem antes do texto livre porque sao a regra
+                        fechada. O fundo proprio as separa da observacao, que e anotacao de quem
+                        cuida e nao instrucao da dose. */}
                     {dose.orientacoes.length > 0 ? (
                       <View style={styles.etiquetas}>
                         {dose.orientacoes.map((orientacao) => (
@@ -662,11 +464,8 @@ export function AlarmeScreen({
                   ) : null}
                 </View>
               )}
-              {/* Orientação de tomada, texto livre e observação: o que a pessoa precisa saber
-                  **antes** de engolir. Desde 14/09 aparecem também na lista de dois ou três (ver o
-                  bloco compacto acima) - cortá-las ali contradizia o "nada é omitido" que a própria
-                  lista promete, e "esse era em jejum?" é pergunta que se faz no instante do alarme,
-                  não depois. */}
+              {/* O que a pessoa precisa saber antes de engolir. "Esse era em jejum?" e pergunta
+                  que se faz no instante do alarme, nao depois. */}
               {umaSo && dose.orientacoes.length > 0 ? (
                 <View style={[styles.etiquetas, styles.etiquetasCentradas]}>
                   {dose.orientacoes.map((orientacao) => (
@@ -682,12 +481,9 @@ export function AlarmeScreen({
               {umaSo && dose.notes !== null && dose.notes.length > 0 ? (
                 <Text style={styles.observacao}>{dose.notes}</Text>
               ) : null}
-              {/* Onde a caixa está guardada.
-
-                  Pequeno e por último: não é o que se lê primeiro, mas é o que faz a pessoa sair do
-                  lugar. Quem acorda às 6h com o alarme precisa saber para onde ir, e este campo mora
-                  na tela de estoque - que ninguém abre no meio da noite. O ícone evita confundi-lo
-                  com a orientação de tomada logo acima, que também é texto miúdo em cinza. */}
+              {/* Pequeno e por ultimo: nao e o que se le primeiro, mas e o que faz a pessoa sair do
+                  lugar. O icone evita confundi-lo com a orientacao acima, que tambem e texto miudo
+                  em cinza. */}
               {umaSo && dose.storageLocation !== null && dose.storageLocation.length > 0 ? (
                 <View style={styles.local}>
                   <Ionicons name="location-outline" size={14} color={cores.onPrimary} />
@@ -741,27 +537,13 @@ export function AlarmeScreen({
           </View>
           ) : null}
 
-          {/* Silenciar e Adiar dividem a linha: nenhum dos dois registra desfecho, e juntos ocupam
-              a altura de um. O espaço economizado vai para a foto do remédio, que é o que a tela
-              tem de mais útil quando ela existe.
+          {/* Silenciar e Adiar dividem a linha: nenhum dos dois registra desfecho, e o espaco
+              economizado vai para a foto.
 
-              Silenciar vira aviso quando já foi tocado, e Adiar some quando o horário gastou seu
-              adiamento - então a linha pode ter dois, um ou nenhum botão. */}
-          {/**
-           * **O rodapé não muda de forma depois do toque.**
-           *
-           * Antes, silenciar tirava o botão da linha e inseria um aviso de texto no lugar: o Adiar
-           * ao lado esticava para a largura toda e tudo descia alguns dp. Quem tocou viu o layout
-           * se reorganizar debaixo do dedo - e, num alarme, o botão seguinte muda de lugar entre a
-           * intenção e o toque.
-           *
-           * Agora o botão **fica**, apagado e sem ação, dizendo o que aconteceu. A informação que
-           * o aviso dava - que a dose continua esperando - é o que a tela inteira já comunica ao
-           * permanecer aberta com os botões de resposta.
-           */}
-          {/* A linha existe sempre: o botão de silenciar fica nela do começo ao fim, mudando de
-              estado e não de presença. O Adiar ao lado é que pode faltar - quando o horário já
-              gastou seu adiamento, e isso é decidido antes de a tela abrir, não durante. */}
+              O botao de silenciar fica na linha do comeco ao fim, mudando de estado e nao de
+              presenca: tirando-o, o Adiar esticava e tudo descia alguns dp, reorganizando o rodape
+              debaixo do dedo de quem acabou de tocar. O Adiar e que pode faltar, quando o horario
+              ja gastou seu adiamento - e isso e decidido antes de a tela abrir. */}
           <View style={styles.linhaDeSaidas}>
               <Pressable
                 style={
