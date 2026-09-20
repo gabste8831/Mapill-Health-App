@@ -39,17 +39,12 @@ export const colors = {
      app que fala quatro, e manter o token convidaria a usá-lo de novo. */
 
   /**
-   * O amarelo de atenção, e ele é a luz, não a tinta.
+   * O amarelo de atencao e a luz, nao a tinta: `#FFC107` da 1.63:1 sobre branco e nao serve como
+   * texto.
    *
-   * Amarelo não serve como cor de texto: `#FFC107` dá 1.63:1 sobre branco. A saída é a do semáforo,
-   * amarelo como lâmpada e o que se lê contra ele escuro, e é o que `warningSurface` faz.
-   *
-   * Três tokens porque os papéis são diferentes: `warning` é âmbar escuro para aviso sobre fundo
-   * branco (4.92:1); `warningVivo` é o amarelo aceso, só em área pequena com texto escuro;
-   * `warningSurface` é pastel porque cobre blocos inteiros, e amarelo cheio num painel agride.
-   *
-   * Amarelo e não laranja: com o erro em 0°, o laranja em 17° viraria grau da mesma cor, e o que
-   * separa "acaba em cinco dias" de "acabou" é espécie, não intensidade.
+   * Tres tokens porque os papeis diferem: `warning` e ambar escuro para texto sobre branco
+   * (4.92:1), `warningVivo` e o amarelo aceso so em area pequena com texto escuro, e
+   * `warningSurface` e pastel porque cobre blocos inteiros.
    */
   warning: "#A16207",
   warningVivo: "#FFC107",
@@ -80,69 +75,48 @@ export const colors = {
   onSuccessContainer: "#04502A",
 
   /**
-   * As versões vivas, só para elemento gráfico: ícone, barra, borda lateral, ponto de marcação.
-   * A WCAG pede 3:1 para forma e 4.5:1 para texto, e é essa diferença que separa estes dois tokens
-   * de `success` e `error`. Usar um no lugar do outro é como o defeito volta.
+   * As versoes vivas, so para elemento grafico: icone, barra, borda, ponto de marcacao.
    *
-   * O teto foi medido: o verde para em `#12963F` (3.45:1 na pior superfície) porque o verde grama
-   * de catálogo (`#22C55E`) dá 2.28:1 e some até como ícone. O vermelho puro passa como forma
-   * (3.50:1 na pior), mas reprova em texto, e é por isso que `error` existe separado.
+   * A WCAG pede 3:1 para forma e 4.5:1 para texto, e e essa diferenca que as separa de `success` e
+   * `error`. Usar uma no lugar da outra e como o defeito volta. O teto foi medido: o verde para em
+   * 3.45:1 na pior superficie, e o vermelho puro passa como forma mas reprova como texto.
    */
   successVivo: "#12963F",
   errorVivo: "#FF0000",
 
   /**
-   * O vermelho de área preenchida, hoje o fundo do alerta de estoque.
+   * O vermelho de area preenchida, hoje o fundo do alerta de estoque.
    *
-   * Terceiro tom porque aqui a exigência se inverte: quem precisa de contraste é o texto branco por
-   * cima, e quanto mais vivo o fundo, pior. Este dá 8.55:1 com branco; o `errorVivo` daria 3.94:1 e
-   * reprovaria, num card que carrega quatro linhas.
+   * Aqui a exigencia se inverte: quem precisa de contraste e o texto branco por cima, e quanto mais
+   * vivo o fundo, pior. Este da 8.55:1 com branco; o `errorVivo` daria 3.94:1 e reprovaria.
    */
   errorPreenchido: "#9E0008",
   /**
-   * O que se lê **sobre** `errorPreenchido`.
+   * O que se le sobre `errorPreenchido`.
    *
-   * Nasceu tarde, e a falta dele era um defeito: o card de estoque baixo usava `onError`, que
-   * significa "o que se lê sobre `error`" - outro fundo. Nos temas claros os dois calham de ser
-   * branco e ninguém notava; no escuro, `error` é um vermelho **claro** (`#FF9A92`), então `onError`
-   * é quase preto - e o texto do card saía a **1.51:1** contra o fundo, ilegível.
-   *
-   * Um token de preenchimento precisa do seu par de tinta. Sem ele, quem escreve a tela escolhe o
-   * "on" mais parecido e o erro só aparece no tema onde as duas cores divergem.
+   * Todo token de preenchimento precisa do seu par de tinta. Sem ele quem escreve a tela pega o
+   * "on" mais parecido, e o erro so aparece no tema onde as duas cores divergem: usando `onError`,
+   * o texto saia a 1.51:1 no escuro.
    */
   onErrorPreenchido: "#FFFFFF",
 
   /**
-   * As versões **diluídas** de sucesso e erro, para fundo de cartão numa lista.
+   * As versoes diluidas, para fundo de cartao numa lista.
    *
-   * `successContainer` e `errorContainer` são os tons do Material para um chip ou um selo pequeno
-   * - numa área grande eles gritam, e dois cartões saturados em sequência (a dose atrasada logo
-   * acima da que é agora) anulam a hierarquia que a cor deveria criar. Estes são claros o
-   * bastante para tingir sem chamar mais atenção que o texto que carregam.
+   * Os `container` do Material sao tons de chip ou selo pequeno: numa area grande eles gritam, e
+   * dois cartoes saturados em sequencia anulam a hierarquia que a cor deveria criar.
    */
   successSurface: "#E8F6EC",
-  // Matiz 0°, como os três vermelhos: em 6° ele puxava para o salmão e destoava do vermelho puro
-  // que agora tinge o ícone e a faixa em cima dele.
+  // Matiz 0, como os tres vermelhos: em 6 ele puxava para o salmao.
   errorSurface: "#FDEAEA",
-  /**
-   * O que se lê **sobre** `errorSurface` - o par que faltava, como o `onErrorPreenchido`.
-   *
-   * Quem escrevia sobre essa superfície usava `error`, o vermelho de texto da tela. Os dois valem
-   * enquanto o fundo da tela e a superfície tingida forem ambos claros; no tema escuro `error` é
-   * um salmão (`#FF9A92`) e a superfície é clara, e o selo "OBRIGATÓRIO" saía a 1.76:1.
-   *
-   * Toda superfície precisa do seu "on". Sem ele, quem escreve a tela pega o token mais parecido,
-   * e o erro só aparece no tema onde os dois divergem.
-   */
+  /** O par de tinta da superficie: com `error` no escuro, o selo saia a 1.76:1. */
   onErrorSurface: "#8C0009",
 
   /**
-   * O fundo da tela, e a hierarquia de superfícies acima dele.
+   * O fundo da tela, e a hierarquia de superficies acima dele.
    *
-   * `background` escureceu de `#F7F9FB` para `#F1F4F8` e ganhou um toque de azul. Com o fundo
-   * quase branco, o cartão branco em cima dele dependia inteiramente da sombra para existir - e
-   * sombra sutil some na luz do sol, que é onde metade do uso de um app de remédio acontece.
-   * Agora o contraste entre fundo e cartão faz sozinho o trabalho que a sombra só reforça.
+   * Nao e quase branco de proposito: assim o cartao branco em cima nao depende so da sombra para
+   * existir, e sombra sutil some na luz do sol, que e onde metade do uso acontece.
    */
   background: "#F1F4F8",
   onBackground: "#141719",
@@ -160,27 +134,19 @@ export const colors = {
   /**
    * Texto de apoio e contorno.
    *
-   * Dá 4.83:1 **sobre branco**, que é onde ele aparece como texto: quatro telas o usam assim (o
-   * resumo da ficha, a finalidade no consentimento, o status dos termos), sempre dentro de cartão.
-   *
-   * ⚠️ Sobre o `background` da tela ele cai para 4.38:1 e **não** passa em AA para texto. Ali só
-   * serve como contorno - para texto recuado direto sobre o fundo existe o `onSurfaceMuted`.
+   * 4.83:1 sobre branco, que e onde ele aparece como texto, sempre dentro de cartao. Sobre o
+   * `background` da tela cai para 4.38:1 e nao passa em AA: ali so serve como contorno, e para
+   * texto direto sobre o fundo existe o `onSurfaceMuted`.
    */
   outline: "#6B7280",
   outlineVariant: "#CBD2DE",
 
   /**
-   * O véu que cobre a tela quando um popup ou uma folha se abre.
+   * O veu que cobre a tela quando um popup abre.
    *
-   * Existe como token porque a regra de "escurecer o que está atrás" **não sobrevive à troca de
-   * tema sozinha**. O véu era `onSurface` a 40% - o cinza-azulado do texto, escolhido para não ser
-   * um preto que a paleta não tem. Funciona em três temas e inverte no quarto: no escuro
-   * `onSurface` é quase branco (`#E6E9EE`), então o "escurecedor" **clareava** o fundo, de
-   * `#0F1319` para `#65696E`. Abrir um popup à noite acendia a tela atrás dele.
-   *
-   * Aqui a cor é dita para cada tema, e é o único jeito de a intenção ("o que está atrás recua")
-   * sobreviver a uma paleta invertida - derivar de qualquer token de conteúdo repete o erro na
-   * primeira inversão.
+   * Token proprio, e nao `onSurface` com opacidade, porque a intencao de "o que esta atras recua"
+   * nao sobrevive a uma paleta invertida: no escuro aquele token e quase branco, e o escurecedor
+   * clareava o fundo. Abrir um popup a noite acendia a tela atras dele.
    */
   scrim: "rgba(20, 23, 25, 0.45)",
 } as const;
@@ -188,24 +154,13 @@ export const colors = {
 export type ColorToken = keyof typeof colors;
 
 /**
- * ## Como um estado se mostra, agora que a faixa lateral acabou
+ * Como um estado se mostra.
  *
- * Até aqui, "atrasada", "é agora", "atenção" e "erro" eram ditos por uma **barra colorida de 4px
- * na borda esquerda**. Ela saiu do app inteiro (7 lugares). O motivo não é gosto: a faixa grossa
- * é um enfeite que carrega significado - quem não repara nela não recebe a informação, e ela
- * empurra todo o conteúdo do bloco 4px para a direita, o que desalinha um cartão com estado do
- * cartão sem estado logo abaixo. Numa lista de doses isso lê como defeito de renderização.
+ * Tres sinais que se somam e sobrevivem ao daltonismo, num app de publico idoso onde a
+ * deuteranopia atinge 1 em 12 homens: fundo tingido na superficie inteira, icone com a forma
+ * dizendo o que a cor diz, e rotulo em texto herdando a cor do estado.
  *
- * No lugar dela, três sinais que se somam e que **sobrevivem ao daltonismo** (o app tem público
- * idoso, e deuteranopia atinge 1 em 12 homens):
- *
- * 1. **Fundo tingido** - a superfície inteira recebe a cor diluída. Área grande, impossível de
- *    não ver, e não desloca nada.
- * 2. **Ícone** - desenhado, com a forma dizendo o que a cor diz.
- * 3. **Rótulo em texto** - "ATRASADA", "É AGORA". Já existia; agora ele herda a cor do estado em
- *    vez de ficar cinza.
- *
- * `estadoVisual` reúne o par fundo/tinta de cada estado, para que nenhuma tela precise escolher
+ * `estadoVisual` reune o par fundo/tinta de cada estado, para que nenhuma tela precise escolher
  * de novo qual verde vai com qual verde.
  */
 export function estadosVisuais(paleta: { readonly [K in ColorToken]: string }) {
