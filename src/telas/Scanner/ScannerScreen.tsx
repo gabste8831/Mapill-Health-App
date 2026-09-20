@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import type { CatalogEntry } from "@/domain/ports/medication-catalog";
 import { useBuscaPorEan } from "@/hooks/use-medication-catalog";
+import { capitalizarNome, resumirSubstancia } from "@/shared/rotulos-de-medicamento";
 import { Button, Header } from "@/ui";
 import { useEstilos } from "@/shared/theme";
 import { criarEstilos } from "./ScannerScreen.styles";
@@ -111,12 +112,23 @@ export function ScannerScreen({ onUsar, onBack }: ScannerScreenProps) {
       {estado.tipo === "encontrado" ? (
         <View style={styles.centro}>
           <Text style={styles.rotulo}>Encontrado</Text>
+          {/* Capitalizado, como na lista de sugestões: é o mesmo nome vindo da mesma base, e o
+              caixa alta da CMED ocupa mais largura, quebra em mais linhas e se lê mais devagar —
+              caixa alta apaga a silhueta da palavra, que é por onde se reconhece um nome
+              familiar de relance. Aqui isso pesa mais que em qualquer outra tela: esta é a
+              pergunta "é este o remédio da sua caixa?", e a resposta se dá comparando o que está
+              escrito na tela com o que está impresso na embalagem. */}
           <Text style={styles.nome}>
-            {estado.entrada.name}
-            {estado.entrada.strength.length > 0 ? ` ${estado.entrada.strength}` : ""}
+            {capitalizarNome(
+              estado.entrada.strength.length > 0
+                ? `${estado.entrada.name} ${estado.entrada.strength}`
+                : estado.entrada.name,
+            )}
           </Text>
           {estado.entrada.activeIngredient.length > 0 ? (
-            <Text style={styles.texto}>{estado.entrada.activeIngredient.toLowerCase()}</Text>
+            // `resumirSubstancia` e não o texto cru: a CMED separa as substâncias por `;`, e um
+            // produto de cinco componentes empurrava os botões de confirmar para fora da tela.
+            <Text style={styles.texto}>{resumirSubstancia(estado.entrada.activeIngredient)}</Text>
           ) : null}
 
           {/* "Continuar" e não "Salvar": o que vem a seguir é o formulário, onde a posologia ainda

@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 
+import { capitalizarNome } from "@/shared/rotulos-de-medicamento";
 import { ScannerScreen } from "@/telas/Scanner/ScannerScreen";
 
 /**
@@ -26,11 +27,21 @@ export default function ScannerRoute() {
             entrada === null
               ? {}
               : {
-                  nome:
+                  /**
+                   * Capitalizado aqui, e não só na exibição: **este** é o valor que o formulário
+                   * abre no campo e que vai para o banco. Era o único caminho da CMED que gravava
+                   * o uppercase cru — quem chegava pela busca passava por `aceitarSugestao`, que
+                   * já capitalizava, e os dois cadastros do mesmo remédio saíam com nomes
+                   * diferentes conforme a pessoa tivesse escaneado ou digitado.
+                   */
+                  nome: capitalizarNome(
                     entrada.strength.length > 0
                       ? `${entrada.name} ${entrada.strength}`
                       : entrada.name,
-                  principioAtivo: entrada.activeIngredient.toLowerCase(),
+                  ),
+                  // `capitalizarNome` e não `toLowerCase`: minúscula corrida é o outro extremo do
+                  // caixa alta, e deixava "dipirona monoidratada" parecendo texto não formatado.
+                  principioAtivo: capitalizarNome(entrada.activeIngredient),
                   requisito: entrada.prescriptionRequirement,
                 },
         })
