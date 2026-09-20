@@ -3,12 +3,8 @@ import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/share
 
 export const criarEstilos = estilosDoTema(({ cores }) => ({
   /**
-   * Fundo **azul cheio**, e não o cinza claro do resto do app.
-   *
-   * É a única tela do Mapill que não parece o Mapill, e isso é intencional: ela irrompe sobre a
-   * tela de bloqueio, muitas vezes no escuro, e precisa ser reconhecida em meio segundo como "o
-   * alarme do remédio" - não como mais uma tela do aplicativo. A cor cheia também separa o que
-   * exige resposta agora do que se consulta com calma.
+   * Azul cheio, e nao o cinza do resto do app: e a unica tela que nao parece o Mapill, de
+   * proposito. Ela irrompe sobre o bloqueio, no escuro, e precisa ser reconhecida em meio segundo.
    */
   safeArea: {
     flex: 1,
@@ -22,19 +18,14 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     paddingBottom: spacing.md,
   },
 
-  /**
-   * Fixo no topo, fora da rolagem - por isso traz o próprio recuo lateral.
-   *
-   * Dentro do `ScrollView` ele herdava o `paddingHorizontal` do `conteudo`; fora dele, sem isto, o
-   * título encostaria na borda enquanto a lista abaixo continuaria recuada.
-   */
+  // Fixo no topo, fora da rolagem, por isso traz o proprio recuo lateral: sem ele o titulo
+  // encostaria na borda enquanto a lista abaixo continua recuada.
   cabecalho: {
     alignItems: "center",
     gap: spacing.xs,
     paddingHorizontal: spacing.gutter,
     paddingTop: spacing.md,
-    // Folga maior embaixo: é ela que separa a hora do primeiro cartão, e o cabeçalho precisa se ler
-    // como bloco à parte da lista - não como o primeiro item dela.
+    // Separa a hora do primeiro cartao: o cabecalho precisa se ler como bloco a parte da lista.
     paddingBottom: spacing.md,
   },
   titulo: {
@@ -50,28 +41,16 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
   },
 
-  /**
-   * Ocupa tudo o que sobra abaixo do cabeçalho, com o remédio centrado nesse espaço.
-   *
-   * `flex: 1` é o que faz o nome e a foto ficarem no meio da tela em vez de logo abaixo da hora - e
-   * com vários remédios a lista simplesmente cresce e empurra o rodapé, que é quando o `ScrollView`
-   * passa a rolar.
-   */
+  // `flex: 1` e o que centra o remedio no espaco que sobra, em vez de deixa-lo logo abaixo da hora.
   lista: {
     flex: 1,
     justifyContent: "center",
-    // `md` e não `lg`: o vão de 32dp fazia sentido quando os itens eram blocos soltos no azul.
-    // Com o fundo claro delimitando cada cartão, a separação já está feita - e o espaço que sobra
-    // é o que falta para o terceiro remédio caber na tela.
+    // `md` e nao `lg`: com o fundo do cartao delimitando cada item, a separacao ja esta feita, e o
+    // espaco que sobra e o que falta para o terceiro remedio caber na tela.
     gap: spacing.md,
   },
-  /**
-   * A dose única, no mesmo cartão das outras formas.
-   *
-   * Era o único item que continuava solto no azul depois de 14/09 - e as três formas da tela são a
-   * mesma tela vista com mais ou menos remédios, não três telas diferentes. Aqui o conteúdo segue
-   * centrado, porque com uma dose só não há lista a alinhar: há um remédio, e ele é o assunto.
-   */
+  // A dose unica, no mesmo cartao das outras formas: sao a mesma tela com mais ou menos remedios,
+  // nao tres telas. Aqui o conteudo fica centrado, porque nao ha lista a alinhar.
   item: {
     alignItems: "center",
     gap: spacing.xs,
@@ -94,32 +73,15 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     textAlign: "center",
   },
-  /**
-   * O item da lista enxuta: alinhado à esquerda, separado por espaço.
-   *
-   * Centralizado como o de uma dose, três remédios viravam três blocos flutuando no meio da tela,
-   * sem eixo comum para o olho seguir. À esquerda eles se leem como lista - que é o que são.
-   *
-   * **Sem linha divisória, desde 14/09.** A miniatura já marca onde cada item começa, e o espaço
-   * entre eles basta para separá-los - a régua cinza só somava ruído numa tela que se lê de
-   * madrugada. É a mesma escolha do resto do app: separar por espaço e sombra, não por borda.
-   */
+  // Alinhado a esquerda: centralizados, tres remedios viram tres blocos flutuando sem eixo comum
+  // para o olho seguir. Sem linha divisoria, porque o fundo do cartao ja delimita cada um.
   itemEnxuto: {
     alignItems: "stretch",
-    // Simétrico de propósito: metade em cima e metade embaixo somava espaço desigual entre o
-    // primeiro item e o cabeçalho. Aqui o `gap` da lista é quem separa, e cada item respira igual.
+    // Simetrico: metade em cima e metade embaixo somava espaco desigual com o cabecalho.
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.sm,
-    /**
-     * Um azul mais claro que o fundo, para o item se ler como cartão.
-     *
-     * Branco a 12% sobre o azul da tela, e não uma cor fixa: assim o cartão acompanha o fundo em
-     * vez de brigar com ele, e continua valendo se o tom da tela mudar. É a mesma construção do
-     * círculo do ícone no cabeçalho.
-     *
-     * Substitui a régua que separava os itens até 14/09 - o fundo delimita cada um sem somar uma
-     * linha a mais numa tela que se lê de madrugada.
-     */
+    // Branco a 12% sobre o azul, e nao cor fixa: acompanha o fundo em vez de brigar com ele, e
+    // continua valendo se o tom da tela mudar.
     backgroundColor: withOpacity(cores.onPrimary, 0.12),
     borderRadius: radius.lg,
   },
@@ -143,26 +105,17 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flex: 1,
     gap: 2,
   },
-  /**
-   * A faixa de baixo: orientação, observação e local, na **largura inteira** do cartão.
-   *
-   * É o ganho da disposição em faixas - estas linhas são as que mais crescem, e presas à coluna ao
-   * lado da foto quebravam cedo demais.
-   */
+  // A faixa de baixo, na largura inteira: estas linhas sao as que mais crescem, e presas a coluna
+  // ao lado da foto quebravam cedo demais.
   detalhesDoItem: {
     gap: 2,
   },
   /**
-   * 64dp: grande o bastante para a caixa se reconhecer pela cor e pela forma, sem tomar a linha.
+   * 64dp: grande para a caixa se reconhecer pela cor e pela forma, sem tomar a linha. Os 132 da
+   * tela de uma dose nao cabem tres vezes, e a 44 a foto virava selo que nao se le de madrugada.
    *
-   * Os 132dp da tela de uma dose não cabem aqui - três deles empilhados não deixam espaço para mais
-   * nada. Mas os 44dp de antes erravam para o outro lado: a foto existe para distinguir uma caixa
-   * da outra, e nesse tamanho ela virava um selo que não se lia de madrugada (retorno do Gabriel em
-   * 14/09).
-   *
-   * **Centrada na altura do item**, e não alinhada ao nome. Com a orientação de tomada de volta, a
-   * coluna de texto tem três ou quatro linhas, e a foto presa ao topo deixava um vão embaixo dela -
-   * a linha ficava com dois eixos diferentes. Centrada, o item se lê como um bloco só.
+   * Centrada na altura, e nao alinhada ao nome: com tres ou quatro linhas de texto ao lado, presa
+   * ao topo ela deixava um vao embaixo e a linha ficava com dois eixos.
    */
   miniatura: {
     width: 64,
@@ -175,13 +128,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     flex: 1,
     gap: 2,
   },
-  /**
-   * O nome na lista enxuta.
-   *
-   * 18px e não os 30 da tela de uma dose: com três remédios, três títulos em corpo grande disputam
-   * a tela e nenhum se destaca - o tamanho deixa de significar importância quando tudo é grande.
-   * Aqui o nome precisa ser lido, não anunciado.
-   */
+  // Menor que na tela de uma dose: com tres remedios, tres titulos grandes disputam a tela e
+  // nenhum se destaca. Aqui o nome precisa ser lido, nao anunciado.
   nomeCompacto: {
     ...typography.headlineSm,
     color: cores.onPrimary,
@@ -195,14 +143,9 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     textAlign: "left",
   },
   /**
-   * A orientação de tomada na lista - "em jejum", "com água".
-   *
-   * **Fica, e isso é regra e não estética.** Cheguei a cortá-la para a lista caber; o Gabriel
-   * corrigiu em 12/09, e com razão: quem toma em jejum precisa saber no instante em que levanta, e
-   * não depois de já ter comido. Caber é problema de escala, e se resolve no corpo do texto.
-   *
-   * `bodySm` com entrelinha apertada: duas linhas dela ainda somam menos que uma linha em `bodyLg`,
-   * que é o corpo da versão de uma dose só.
+   * A orientacao de tomada e regra, nao estetica: quem toma em jejum precisa saber no instante em
+   * que levanta. Caber e problema de escala, e se resolve no corpo do texto - com entrelinha
+   * apertada, duas linhas aqui somam menos que uma na versao de uma dose so.
    */
   orientacaoCompacta: {
     ...typography.bodyMd,
@@ -218,13 +161,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     gap: spacing.xs,
     marginVertical: 2,
   },
-  /**
-   * Cada orientação vira uma etiqueta com fundo próprio.
-   *
-   * Mais clara que o cartão (18% contra os 12% dele), para se destacar **dentro** dele: é a regra
-   * da tomada, e quem lê de madrugada precisa distinguí-la da observação livre logo abaixo. Como
-   * texto corrido, as duas se liam como a mesma coisa.
-   */
+  // Mais clara que o cartao, para se destacar dentro dele: e a regra da tomada, e como texto
+  // corrido ela se lia igual a observacao livre logo abaixo.
   etiqueta: {
     backgroundColor: withOpacity(cores.onPrimary, 0.18),
     borderRadius: radius.sm,
@@ -239,13 +177,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   etiquetasCentradas: {
     justifyContent: "center",
   },
-  /**
-   * A observação do tratamento, um degrau abaixo da orientação de tomada.
-   *
-   * Mais apagada de propósito: ela é sobre o tratamento como um todo ("comprar mais na farmácia da
-   * esquina"), não sobre como engolir esta dose. Com o mesmo peso da orientação, competiria com a
-   * informação que decide a tomada - e é a orientação que precisa ser lida primeiro.
-   */
+  // Mais apagada que a orientacao: e sobre o tratamento como um todo, nao sobre como engolir esta
+  // dose, e com o mesmo peso competiria com a informacao que decide a tomada.
   observacaoCompacta: {
     ...typography.bodyMd,
     color: cores.onPrimary,
@@ -259,26 +192,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
   },
   /**
-   * A lista **mínima**, de quatro remédios em diante: só nome e quantidade.
+   * A lista minima, de quatro remedios em diante: so nome e quantidade.
    *
-   * Nasceu em 12/09, quando o Gabriel testou com quatro e encontrou a tela vazia entre o horário e
-   * os botões - a versão anterior não listava nada acima de três, só uma frase mandando abrir o
-   * app. "Você tem 4 remédios" sem os nomes não é informação: é o aviso de que a informação está
-   * em outro lugar, numa tela que existe justamente para dizer o que está acontecendo agora.
+   * O terceiro degrau de escala da tela corta o que nao decide se a pessoa levanta - foto,
+   * orientacao e local. O nome fica porque responde "e o da pressao ou o do sono?".
    *
-   * É o terceiro degrau de escala da tela, e o que ele corta é o que **não** decide se a pessoa
-   * levanta: foto, orientação de tomada e local. O nome fica porque responde "é o da pressão ou o
-   * do sono?", e a quantidade porque vem junto dele em uma linha só.
-   *
-   * `gap` menor que o da lista de três: aqui cada item é uma linha, e o respiro de um bloco entre
-   * linhas simples faria quatro nomes ocuparem o que seis ocupariam.
-   */
-  /**
-   * A lista de quatro ou mais, centrada na altura como a de dois ou três.
-   *
-   * `flex: 1` para ela tomar o espaço entre o cabeçalho e o rodapé, e `justifyContent: "center"`
-   * para os remédios ficarem no meio dele - presa ao topo, a lista deixava um vão embaixo que só
-   * aparecia nesta forma da tela, e as três formas passavam a se comportar de jeitos diferentes.
+   * Centrada na altura como as outras formas: presa ao topo, a lista deixava um vao embaixo que so
+   * aparecia aqui, e as tres formas passavam a se comportar diferente.
    */
   listaMinima: {
     width: "100%",
@@ -286,30 +206,22 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     justifyContent: "center",
     gap: spacing.sm,
   },
-  /**
-   * Nome e quantidade lado a lado, e não empilhados.
-   *
-   * Empilhado, cada remédio vira dois níveis e a lista dobra de altura - com seis remédios a tela
-   * volta a rolar, que é o que este degrau existe para evitar. Lado a lado, o nome fica com o
-   * espaço que sobrar e a quantidade ocupa o que precisa.
-   */
+  // Lado a lado, e nao empilhados: empilhado cada remedio vira dois niveis e a lista dobra de
+  // altura, voltando a rolar, que e o que este degrau existe para evitar.
   itemMinimo: {
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "space-between",
     gap: spacing.sm,
-    // O mesmo cartão da lista de dois ou três: as duas formas são a mesma tela vista com mais ou
-    // menos remédios, e um fundo em uma e não na outra as fazia parecer telas diferentes.
+    // O mesmo cartao das outras formas: um fundo numa e nao na outra as fazia parecer telas
+    // diferentes.
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     backgroundColor: withOpacity(cores.onPrimary, 0.12),
     borderRadius: radius.lg,
   },
-  /**
-   * `flexShrink` com `numberOfLines={1}` na tela: nome comprido corta com reticências em vez de
-   * empurrar a quantidade para fora. A quantidade é curta e não pode ser a que some - ela é metade
-   * da informação clínica desta linha.
-   */
+  // Nome comprido corta com reticencias em vez de empurrar a quantidade para fora: ela e curta e e
+  // metade da informacao clinica desta linha.
   nomeMinimo: {
     ...typography.bodyLg,
     fontFamily: "PlusJakartaSans_600SemiBold",
@@ -321,11 +233,6 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     opacity: 0.85,
   },
-  /**
-   * A frase que acompanha a lista mínima, acima de três remédios.
-   *
-   * Diz o que fazer, e não o que há: o "quantos" já está no título e os nomes estão logo acima.
-   */
   quantidade: {
     ...typography.headlineSm,
     color: cores.onPrimary,
@@ -355,13 +262,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     marginTop: spacing.xs,
     opacity: 0.7,
   },
-  /**
-   * O mesmo local, à esquerda e sem o respiro de cima.
-   *
-   * Mora **dentro** da coluna de texto (ver `textoDoItem`), e não como irmão do item: assim ele
-   * alinha com o nome quer haja miniatura ou não, sem depender de um recuo fixo que quebraria no
-   * remédio sem foto.
-   */
+  // Dentro da coluna de texto, e nao como irmao do item: assim alinha com o nome havendo miniatura
+  // ou nao, sem um recuo fixo que quebraria no remedio sem foto.
   localEnxuto: {
     flexDirection: "row",
     alignItems: "center",
@@ -389,13 +291,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
   botaoTomei: {
     flex: 1,
     flexDirection: "row",
-    /**
-     * 48dp: o mínimo que o Android pede para alvo de toque, e o piso desta tela.
-     *
-     * Eram 56. Numa tela que precisa caber três remédios, os 8dp valem mais na lista do que na
-     * altura de um botão que já é o maior elemento do rodapé - mas **não se desce daqui**: quem
-     * responde recém-acordado erra a mira, e um alvo pequeno num alarme é defeito, não economia.
-     */
+    // 48dp e o minimo que o Android pede para alvo de toque, e o piso desta tela: nao se desce
+    // daqui, porque quem responde recem-acordado erra a mira.
     minHeight: 48,
     alignItems: "center",
     justifyContent: "center",
@@ -453,13 +350,8 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onPrimary,
     opacity: 0.8,
   },
-  /**
-   * O botão que já cumpriu seu papel: fica no lugar, apagado e sem ação.
-   *
-   * Some seria pior - a linha se reorganizaria debaixo do dedo de quem acabou de tocar, e o botão
-   * vizinho mudaria de tamanho e de posição. Apagado, ele responde ao toque ("pronto, silenciei")
-   * sem mover nada.
-   */
+  // O botao que ja cumpriu seu papel fica no lugar, apagado: some faria a linha se reorganizar
+  // debaixo do dedo de quem acabou de tocar.
   botaoInativo: {
     opacity: 0.45,
   },
