@@ -43,19 +43,12 @@ export async function apagarNaNuvem(tabelasDesejadas: readonly string[]): Promis
     return true;
   } catch (cause) {
     /**
-     * Registrado, e o **fracasso é devolvido** - não engolido.
+     * O fracasso e devolvido, e nao engolido.
      *
-     * Seguir em frente continua certo: travar o apagamento local por causa da nuvem deixaria os
-     * dados nos dois lugares. O que mudou em 14/09 é quem sabe que a nuvem não foi limpa.
-     *
-     * O texto que estava aqui dizia que "as linhas locais são apagadas de vez, então a próxima
-     * sincronização não as ressuscita". **Isso estava errado:** a marca d'água é apagada junto
-     * (`SQL_LIMPAR_MARCA_DAGUA`), e sem ela o pull seguinte baixa o servidor inteiro de volta. Com a
-     * nuvem intacta, o botão de apagar virava um apagamento temporário - a pessoa via tudo sumir e
-     * voltar, que é o que o comentário de `eraseHealthData` chama de a pior coisa que um botão de
-     * exclusão pode fazer.
-     *
-     * Quem chama usa este retorno para decidir se preserva a marca d'água. Ver `eraseHealthData`.
+     * Seguir em frente continua certo, porque travar o apagamento local por causa da nuvem deixaria
+     * os dados nos dois lugares. Mas quem chama precisa saber: a marca d'agua e apagada junto, e
+     * sem ela o pull seguinte baixa o servidor inteiro de volta. Com a nuvem intacta, o botao de
+     * apagar viraria um apagamento temporario, com a pessoa vendo tudo sumir e voltar.
      */
     console.error("Falha ao apagar os dados na nuvem:", cause);
     return false;

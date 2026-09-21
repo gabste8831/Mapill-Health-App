@@ -24,26 +24,15 @@ type DoseScheduleRow = SyncableRow & {
 /**
  * O instante sempre na **mesma forma** - `2026-09-14T02:00:00.000Z`.
  *
- * ## O defeito que isto corrige
+ * `scheduled_for` e texto e chegava em duas formas: o cadastro grava terminando em `Z`, e o que
+ * volta da sincronizacao vem com `+00:00`. As duas descrevem o mesmo momento.
  *
- * `scheduled_for` é texto, e chegava em duas formas: o cadastro grava com `toISOString()`, que
- * termina em `Z`, e o que volta da sincronização vem com `+00:00`. As duas descrevem o mesmo
- * momento. O Diagnóstico do Gabriel em 13/09 mostrou as duas lado a lado na mesma lista.
+ * Isso quebra toda comparacao de texto sobre a coluna, e o SQLite so compara texto aqui: `+` vem
+ * antes de qualquer digito em ASCII, entao as doses gravadas com `+00:00` nao eram apagadas pelo
+ * `deleteUpcoming`. Foi o que fez a regeracao por fuso falhar sem erro nenhum.
  *
- * Isso quebra **toda comparação de texto** sobre a coluna, e o SQLite só compara texto aqui. Em
- * `deleteUpcoming`, `'...T02:00:00+00:00' >= '...T20:00:00.000Z'` é falso - `+` (0x2B) vem antes de
- * qualquer dígito na tabela ASCII. As doses gravadas com `+00:00` **não eram apagadas**.
- *
- * Foi o que fez a regeração por fuso falhar sem erro nenhum: ela apagava parte da grade, regravava
- * no fuso novo, e as linhas sobreviventes continuavam com o horário antigo. O Gabriel trocou para
- * Manaus e viu as 21:00 virarem 20:00 - que é a conversão de instante absoluto, a marca de uma dose
- * que ninguém regerou.
- *
- * ## Por que na escrita, e não na comparação
- *
- * Corrigir cada consulta seria remendar um sintoma de cada vez, e a próxima comparação escrita
- * esqueceria. Normalizando aqui - o único ponto por onde toda escrita passa - a coluna passa a ter
- * uma forma só, e as comparações de texto voltam a ser válidas por construção.
+ * Na escrita, e nao na comparacao: corrigir cada consulta remendaria um sintoma por vez, e a
+ * proxima esqueceria. Aqui e o unico ponto por onde toda escrita passa.
  *
  * Linhas gravadas antes disto continuam com a forma antiga até serem reescritas. A regeração por
  * fuso e o reabastecimento as reescrevem naturalmente; o `Set` em `reabastecerGradeDeDoses` compara

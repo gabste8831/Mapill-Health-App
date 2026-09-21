@@ -1,30 +1,16 @@
 /**
  * Põe `scheduled_for` numa forma só - `...T02:00:00.000Z` - nas linhas que já existem.
  *
- * ## O defeito que isto corrige
+ * A coluna e texto e vinha em duas formas: o cadastro grava terminando em `Z`, e o que volta da
+ * sincronizacao vem com `+00:00`. As duas descrevem o mesmo instante.
  *
- * A coluna é texto e vinha em duas formas: o cadastro grava com `toISOString()`, terminando em `Z`,
- * e o que volta da sincronização vem com `+00:00`. As duas descrevem o mesmo instante, e o
- * Diagnóstico do Gabriel em 13/09 mostrou as duas lado a lado na mesma lista de doses.
+ * O SQLite compara texto, e `+` vem antes de qualquer digito em ASCII: a comparacao por faixa dava
+ * falso mesmo com o momento posterior, e deixava de fora as linhas em `+00:00`. Foi o que fez a
+ * regeracao por fuso falhar em silencio, apagando so parte da grade.
  *
- * O SQLite compara texto, e `+` (0x2B) vem antes de qualquer dígito em ASCII. Então
- * `'...T02:00:00+00:00' >= '...T20:00:00.000Z'` é **falso** mesmo quando o momento é posterior - e
- * toda consulta por faixa deixava de fora as linhas em `+00:00`.
- *
- * Foi o que fez a regeração por fuso falhar em silêncio: `deleteUpcoming` apagava só parte da
- * grade, o app regravava no fuso novo, e as linhas que escaparam ficavam com o horário antigo. O
- * Gabriel trocou para Manaus e viu as 21:00 virarem 20:00 - a conversão de instante absoluto, que é
- * a assinatura de uma dose que ninguém regerou.
- *
- * ## As três correções, e por que as três são necessárias
- *
- * 1. `normalizarInstante` no `toRow` - impede que a coluna volte a ter duas formas.
- * 2. `julianday(...)` nas consultas - compara instante em vez de texto, alcançando o que já existe.
- * 3. **Esta migration** - conserta as linhas gravadas, para que a comparação de texto volte a ser
- *    correta e o índice da coluna volte a servir.
- *
- * Sem a (3), o banco carregaria as duas formas para sempre e qualquer consulta nova escrita sem
- * `julianday` traria o defeito de volta, calada.
+ * Sao tres correcoes, e as tres sao necessarias: `normalizarInstante` no `toRow` impede a coluna de
+ * voltar a ter duas formas, `julianday` nas consultas alcanca o que ja existe, e esta migration
+ * conserta as linhas gravadas, para a comparacao de texto voltar a ser correta e o indice servir.
  *
  * ## Por que `strftime` e não uma reescrita no app
  *

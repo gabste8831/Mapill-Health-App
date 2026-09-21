@@ -11,29 +11,17 @@ const CAMPOS_DE_ARQUIVO = [
 ] as const;
 
 /**
- * Zera os caminhos de foto e anexo cujo **arquivo não está mais no aparelho**.
+ * Zera os caminhos de foto e anexo cujo arquivo nao esta mais no aparelho.
  *
- * ## Por que existe
+ * Os anexos nao sobem para a nuvem, mas o caminho deles subia: num aparelho reinstalado o app
+ * recebia uma string apontando para nada, e a tela oferecia "Trocar" e "Remover" para uma imagem
+ * inexistente. A origem ja foi corrigida, mas quem sincronizou antes tem o caminho gravado, e o
+ * pull so revisita linhas cujo `updated_at` mudou.
  *
- * Os anexos não sobem para a nuvem (decisão E9). O **caminho** deles subia, e num aparelho
- * reinstalado o app recebia `file:///data/user/0/…/foto.jpg` - uma string que aponta para nada.
- * A tela então oferecia "Trocar foto da caixa" e "Remover" para uma imagem que não existe, e o
- * quadrado ficava vazio sem dizer por quê.
+ * Aqui, e nao numa migration, porque SQL nao pergunta ao sistema de arquivos se o caminho existe:
+ * la a opcao seria apagar todos, custando a foto de quem tem o arquivo intacto.
  *
- * A origem já foi corrigida: esses campos sobem como `null`, e o `receber` confere a existência do
- * arquivo antes de gravar. Mas quem sincronizou **antes** dessas correções tem o caminho gravado, e
- * o pull só revisita linhas cujo `updated_at` mudou - nelas o defeito ficaria para sempre.
- *
- * ## Por que aqui, e não numa migration
- *
- * Migration é SQL puro e não consegue perguntar ao sistema de arquivos se o caminho existe. A opção
- * lá seria apagar **todos** os caminhos, o que custaria a foto de quem nunca trocou de aparelho e
- * tem o arquivo intacto. Aqui a verificação é possível, e só o que de fato sumiu é limpado.
- *
- * ## Por que não incomoda
- *
- * Roda na abertura, depois das migrations, e o caso comum é não encontrar nada - três consultas que
- * não retornam linha nenhuma. Só faz trabalho quando há o que consertar.
+ * Roda na abertura, e o caso comum e nao encontrar nada.
  */
 export async function limparAnexosPerdidos(): Promise<void> {
   if (Platform.OS === "web") return;

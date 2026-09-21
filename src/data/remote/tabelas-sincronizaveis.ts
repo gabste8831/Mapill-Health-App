@@ -52,13 +52,9 @@ export const COLUNAS_ORFAS: Partial<Record<TabelaSincronizavel, string[]>> = {
     "emergency_contact_relationship",
   ],
   /**
-   * A receita nasceu como anexo do **compromisso** (migration 002) e mudou de dono em 20/08: ela
-   * pertence à prescrição, onde o paciente já está descrevendo o medicamento. As colunas viraram
-   * `attachment_uri` / `attachment_valid_until` / `attachment_sync_opt_out` em `prescriptions`, e
-   * estas três ficaram vazias no SQLite.
-   *
-   * Não deram erro na validação de 01/09 só porque `patient_profiles` sobe primeiro e o push parou
-   * ali. Seriam a falha seguinte.
+   * A receita nasceu como anexo do compromisso e mudou de dono: ela pertence a prescricao, onde o
+   * paciente ja esta descrevendo o medicamento. As colunas viraram `attachment_*` em
+   * `prescriptions`, e estas tres ficaram vazias no SQLite.
    */
   appointments: ["prescription_photo_uri", "prescription_valid_until", "photo_sync_opt_out"],
 };

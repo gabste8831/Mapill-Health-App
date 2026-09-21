@@ -132,11 +132,11 @@ export class LocalDataRepository {
       }
 
       /**
-       * Resto da tentativa de regerar a grade por fuso, abandonada em 13/09.
+       * Resto da tentativa de regerar a grade por fuso, abandonada.
        *
-       * Nada escreve nesta chave hoje, mas os aparelhos que rodaram aquela versão têm a linha
-       * gravada - e ela descrevia as doses, que este apagamento remove. Sai junto para não deixar
-       * lixo de uma feature que não existe mais. O `catch` cobre quem não tem a tabela.
+       * Nada escreve nesta chave hoje, mas os aparelhos que rodaram aquela versao tem a linha
+       * gravada, e ela descrevia as doses que este apagamento remove. O `catch` cobre quem nao tem
+       * a tabela.
        */
       await database
         .runAsync("DELETE FROM app_state WHERE key = ?", [CHAVE_DO_FUSO_DA_GRADE])
