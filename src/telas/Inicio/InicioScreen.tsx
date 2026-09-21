@@ -143,11 +143,11 @@ export function InicioScreen() {
   /**
    * `null` enquanto a agenda nao chegou, e e isso que separa "o dia fechou" de "a tela montou".
    *
-   * Com `useState(diaFechado)` o valor inicial so vale na primeira montagem: voltando a Home,
+   * Comecando em `diaFechado` o valor inicial so valeria na primeira montagem: voltando a Home,
    * `isLoading` ainda e verdadeiro, `diaFechado` nasce falso, e quando as doses chegam a comparacao
    * le isso como transicao. A comemoracao aparecia a cada redirecionamento com o dia completo.
    */
-  const [diaFechadoAntes, setDiaFechadoAntes] = useState<boolean | null>(null);
+  const diaFechadoAntes = useRef<boolean | null>(null);
   const [comemorar, setComemorar] = useState(false);
 
   /**
@@ -164,17 +164,31 @@ export function InicioScreen() {
     }, []),
   );
 
-  if (!isLoading && diaFechadoAntes !== diaFechado) {
-    const primeiraLeitura = diaFechadoAntes === null;
-    const noticiaDeFora = chegouAgoraNaTela.current;
-    setDiaFechadoAntes(diaFechado);
-    // Só a passagem para fechado comemora. O caminho de volta (uma correção retroativa reabre o
-    // dia) apenas atualiza a memória, sem festejar o desfazer.
-    if (diaFechado && !primeiraLeitura && !noticiaDeFora) setComemorar(true);
-  }
-  // Depois de a leitura do foco ser considerada, a tela volta a ser "ao vivo": daqui em diante as
-  // mudanças vêm de quem está olhando para ela.
-  if (!isLoading) chegouAgoraNaTela.current = false;
+  /**
+   * A comparação mora num efeito, e não no render, porque as duas marcas são refs: lê-las e
+   * escrevê-las enquanto a tela renderiza é o que a regra `react-hooks/refs` proíbe, e o motivo da
+   * regra vale aqui - o render pode rodar duas vezes, e a marca do foco seria gasta na primeira.
+   *
+   * Só `comemorar` é estado, porque só ele decide o que aparece. A memória do dia anterior é
+   * bookkeeping: ninguém a desenha, e como ref ela não provoca o render em cascata que sairia de
+   * um `setState` aqui dentro.
+   *
+   * A ordem é a mesma de antes: decidir com a marca do foco ainda de pé, e só então abaixá-la.
+   */
+  useEffect(() => {
+    if (isLoading) return;
+    if (diaFechadoAntes.current !== diaFechado) {
+      const primeiraLeitura = diaFechadoAntes.current === null;
+      const noticiaDeFora = chegouAgoraNaTela.current;
+      diaFechadoAntes.current = diaFechado;
+      // Só a passagem para fechado comemora. O caminho de volta (uma correção retroativa reabre o
+      // dia) apenas atualiza a memória, sem festejar o desfazer.
+      if (diaFechado && !primeiraLeitura && !noticiaDeFora) setComemorar(true);
+    }
+    // Depois de a leitura do foco ser considerada, a tela volta a ser "ao vivo": daqui em diante as
+    // mudanças vêm de quem está olhando para ela.
+    chegouAgoraNaTela.current = false;
+  }, [isLoading, diaFechado]);
   const proximaDose = agenda.doses.find((dose) => dose.status === "next");
   const atrasadas = agenda.doses.filter((dose) => dose.status === "late");
 
