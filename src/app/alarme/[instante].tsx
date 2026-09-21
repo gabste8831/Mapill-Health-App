@@ -6,52 +6,32 @@ import { quemEstaEmCena } from "@/notifications/alarme-em-cena";
 import { AlarmeScreen } from "@/telas/Alarme/AlarmeScreen";
 
 /**
- * A tela do alarme **dentro do app**, para quando ele dispara com o Mapill aberto.
+ * A tela do alarme dentro do app, para quando ele dispara com o Mapill aberto.
  *
- * ## Por que existe, se já há a tela cheia do Notifee
+ * Mesmo componente da tela cheia, por outro caminho: com a pessoa usando o celular, o Android
+ * rebaixa o `fullScreenAction` para um aviso no topo, e isso nao se contorna pela API. O app
+ * rodando tem um recurso que o sistema nao controla - navegar.
  *
- * São o mesmo componente por dois caminhos, porque o Android trata os dois casos de forma
- * diferente. Com o aparelho ocioso, o `fullScreenAction` abre a tela por cima do bloqueio, fora do
- * roteador. Com a pessoa **usando** o celular, o sistema rebaixa aquilo para um aviso no topo - e
- * essa decisão não se contorna pela API de notificação.
- *
- * Mas o app rodando tem um recurso que o sistema não controla: ele pode navegar. Então o handler de
- * `DELIVERED` empurra esta rota, e o alarme aparece igual - mesma tela, mesmo som em loop, mesmos
- * botões. É o que mantém a promessa de trazer a atenção de volta para a dose, em vez de um aviso
- * discreto que se ignora sem perceber.
- *
- * Declarada como modal com `gestureEnabled: false` no `_layout`: sair daqui exige responder, como
- * na versão de tela cheia.
+ * Modal com `gestureEnabled: false`: sair daqui exige responder, como na tela cheia.
  */
 export default function AlarmeRoute() {
   const { instante } = useLocalSearchParams<{ instante: string }>();
   const router = useRouter();
 
   /**
-   * **A rota cede lugar à Activity**, se as duas correrem para o mesmo horário.
+   * A rota cede lugar a Activity, se as duas correrem para o mesmo horario.
    *
-   * O listener já evita empurrar a rota quando a Activity está em cena (ver `alarme-em-cena`), mas
-   * existe uma corrida: o `DELIVERED` pode chegar **antes** de a Activity terminar de montar, e aí
-   * a guarda de lá não vê nada e a rota entra. Esta é a outra ponta - se a Activity apareceu no
-   * meio, a rota sai.
-   *
-   * A Activity tem precedência porque é ela que o Android colocou na frente, por cima da tela de
-   * bloqueio. A rota é o plano B para quando o sistema rebaixa o full-screen intent, e duas telas
-   * tocando o mesmo alarme é o que produzia o som duplicado.
+   * O listener ja evita empurrar a rota com a Activity em cena, mas o `DELIVERED` pode chegar antes
+   * de ela montar, e ai a guarda de la nao ve nada. Esta e a outra ponta. A Activity tem
+   * precedencia porque e ela que o Android colocou por cima do bloqueio.
    */
   useEffect(() => {
     if (quemEstaEmCena(instante) !== "activity") return;
 
     /**
-     * Navega **depois** do quadro, e não dentro do efeito de montagem.
-     *
-     * Chamar `router.back()` aqui direto produzia o aviso `Can't perform a React state update on a
-     * component that hasn't mounted yet` (visto em aparelho em 10/09): o roteador atualiza estado
-     * ao navegar, e neste ponto a árvore desta rota ainda está montando. `setTimeout(…, 0)` joga a
-     * navegação para o fim da fila, quando a montagem terminou.
-     *
-     * O `clearTimeout` cobre o caso de a tela sair antes do disparo - por resposta na Activity, por
-     * exemplo. Navegar a partir de um componente já desmontado é o mesmo aviso pelo outro lado.
+     * Navega depois do quadro, e nao dentro do efeito: `router.back()` direto avisa que nao da
+     * para atualizar estado de um componente que ainda nao montou, porque a arvore desta rota
+     * ainda esta subindo. O `clearTimeout` cobre a tela sair antes do disparo.
      */
     const sair = setTimeout(() => {
       if (router.canGoBack()) router.back();

@@ -41,28 +41,14 @@ function AvisosDeDose() {
 }
 
 /**
- * Mantém os dados espelhados na nuvem enquanto o app estiver de pé.
+ * Mantem os dados espelhados na nuvem enquanto o app estiver de pe.
  *
- * ## O defeito que isto corrige
+ * Montado so na tela de Conta, nada subia enquanto ela nao fosse aberta: uma edicao na ficha era
+ * desfeita pelo `pull` do login seguinte, que trazia a versao antiga do servidor. Sincronizacao que
+ * depende de visitar uma tela nao e backup.
  *
- * Até 14/09 o `useSync` era montado **só na tela de Conta**, e a sincronização acontecia apenas
- * enquanto ela estava aberta (e uma vez no login). Confirmar uma dose, editar a ficha, cadastrar um
- * remédio - nada disso subia. O dado ficava no aparelho até alguém abrir Conta e dados.
- *
- * O prejuízo apareceu em aparelho: o Gabriel editou o nome na ficha, e a alteração sumiu no login
- * seguinte. Não foi perda de escrita - o dado nunca saiu do celular, e o `pull` trouxe de volta a
- * versão antiga do servidor, que era a única que existia lá.
- *
- * Sincronização que depende de a pessoa visitar uma tela específica não é backup. E o próprio app já
- * tratava o caminho inverso com esse cuidado: `eraseHealthData` apaga na nuvem **primeiro**, porque
- * "apagar só o local faria o próximo pull trazer tudo de volta".
- *
- * ## Por que aqui, e não a cada gravação
- *
- * Montado no passo `app`, o `useSync` sincroniza ao abrir e a cada volta ao primeiro plano - que é
- * quando o aparelho tem rede e a pessoa acabou de mexer no app. Disparar a cada escrita traria mais
- * consistência e mais bateria; esta é a troca barata que resolve o caso real, e o push acontece
- * antes do pull, então nada local é sobrescrito no caminho.
+ * Aqui ele sincroniza ao abrir e a cada volta ao primeiro plano, que e quando ha rede e a pessoa
+ * acabou de mexer no app. O push acontece antes do pull, entao nada local e sobrescrito.
  */
 function SincronizacaoEmSegundoPlano() {
   useSync();
