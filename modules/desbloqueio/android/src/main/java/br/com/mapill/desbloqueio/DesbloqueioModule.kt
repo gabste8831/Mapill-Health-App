@@ -22,7 +22,7 @@ import expo.modules.kotlin.modules.ModuleDefinition
  *
  * ## O que ele não faz
  *
- * Não desbloqueia nada por conta própria — só **pede**, e quem decide é o sistema, com a senha ou a
+ * Não desbloqueia nada por conta própria - só **pede**, e quem decide é o sistema, com a senha ou a
  * biometria que a pessoa já configurou. Num aparelho sem bloqueio o Android dispensa na hora, que é
  * o certo: não há segredo a proteger onde a pessoa optou por não ter um.
  */
@@ -33,7 +33,7 @@ class DesbloqueioModule : Module() {
     /**
      * `true` quando a tela de bloqueio está na frente agora.
      *
-     * Serve para a tela do alarme não pedir autenticação a quem já está com o aparelho aberto —
+     * Serve para a tela do alarme não pedir autenticação a quem já está com o aparelho aberto -
      * pedir ali seria atrito sem ganho, já que a pessoa acabou de passar pelo bloqueio.
      */
     AsyncFunction("estaBloqueado") {
@@ -41,16 +41,16 @@ class DesbloqueioModule : Module() {
     }
 
     /**
-     * Encerra **esta** Activity e a tira dos recentes — sem matar o processo.
+     * Encerra **esta** Activity e a tira dos recentes - sem matar o processo.
      *
      * A tela do alarme vive numa Activity própria, em task própria (`AlarmeActivity`,
      * `launchMode=singleInstance`). `BackHandler.exitApp()` não serve aqui: ele encerra o processo
-     * inteiro, e com ele o app que pode estar aberto atrás — além de derrubar o serviço que toca o
+     * inteiro, e com ele o app que pode estar aberto atrás - além de derrubar o serviço que toca o
      * som antes de ele se despedir.
      *
      * `finishAndRemoveTask` fecha a task do alarme e devolve o aparelho ao que estava antes: o
      * bloqueio, se era dali que a tela veio. É o que torna "Tomei" com o celular bloqueado não
-     * revelar o app — junto com o `showWhenLocked` ter saído da `MainActivity`.
+     * revelar o app - junto com o `showWhenLocked` ter saído da `MainActivity`.
      */
     AsyncFunction("fecharTelaDoAlarme") {
       val activity = appContext.currentActivity ?: return@AsyncFunction false
@@ -67,7 +67,7 @@ class DesbloqueioModule : Module() {
      *
      * A causa do problema (responder a dose deixa o app acessível) é a do topo deste arquivo: o
      * `showWhenLocked` vale para a `MainActivity`, onde o app inteiro vive. A saída é uma Activity
-     * separada só para o alarme — ver `docs/O-QUE-FALTA-TESTAR.md`.
+     * separada só para o alarme - ver `docs/O-QUE-FALTA-TESTAR.md`.
      */
 
     /**
@@ -97,7 +97,7 @@ class DesbloqueioModule : Module() {
        * `requestDismissKeyguard` só existe da API 26 em diante, e o app atende a partir da 24.
        *
        * No 24 e no 25 a resposta é `false`, e não `true`: sem como pedir a autenticação, deixar
-       * passar seria entregar o dado — e é melhor a pessoa desbloquear por fora e abrir o app pela
+       * passar seria entregar o dado - e é melhor a pessoa desbloquear por fora e abrir o app pela
        * própria mão do que o alarme abrir sozinho por cima do bloqueio.
        */
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
