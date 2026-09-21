@@ -170,32 +170,19 @@ export class DoseScheduleRepository
   }
 
   /**
-   * Some com os horários futuros de uma prescrição - por **soft delete**, desde 14/09.
+   * Some com os horarios futuros de uma prescricao, por soft delete.
    *
-   * ## Por que deixou de ser hard delete
+   * Linha apagada some sem deixar recado: o push envia o que esta na tabela, e o que nao existe
+   * mais nunca e selecionado. A exclusao nao chega ao servidor, e qualquer aparelho com marca
+   * d'agua anterior baixa tudo de volta.
    *
-   * O argumento antigo era: "um horário futuro que deixou de existir porque a posologia mudou não é
-   * histórico, é ruído". Ele valia num app local-only e parou de valer quando a sincronização entrou.
+   * Essas linhas nao tocam alarme nem aparecem em tela, mas se acumulam a cada edicao de posologia,
+   * incham o primeiro pull de todo aparelho novo, e saem no CSV de exportacao, que nao filtra
+   * excluidos: horarios de um remedio que a pessoa mandou apagar, num arquivo que existe para
+   * cumprir a LGPD.
    *
-   * **Linha apagada some sem deixar recado.** O push envia o que está na tabela
-   * (`WHERE synced_at IS NULL OR updated_at > synced_at`), e o que não existe mais nunca é
-   * selecionado - a exclusão nunca chega ao servidor, e a linha continua viva lá com
-   * `deleted_at NULL`. Qualquer aparelho cuja marca d'água seja anterior a baixa de volta: um
-   * segundo celular, ou o mesmo depois de reinstalar.
-   *
-   * Nenhuma delas toca alarme nem aparece em tela - todo leitor filtra `deleted_at IS NULL` -, mas
-   * elas se acumulam a cada edição de posologia, incham o primeiro pull de todo aparelho novo e
-   * saem no **CSV de exportação**, que não filtra excluídos: horários de um remédio que a pessoa
-   * mandou apagar, num arquivo que existe para cumprir a LGPD.
-   *
-   * O próprio `excluirMedicamento` já enuncia a regra que esta função contrariava: "linha apagada
-   * some sem deixar recado, e voltaria do servidor na sincronização seguinte".
-   *
-   * ## O que se ganha junto
-   *
-   * A dose confirmada **antes da hora** (o app permite, com 15 min de tolerância) e apagada logo
-   * depois deixava o `intake_log` apontando para nada. Com a linha preservada, o histórico
-   * continua ligado ao que o referencia.
+   * Ganha-se junto o vinculo do historico: a dose confirmada antes da hora e apagada em seguida
+   * deixava o `intake_log` apontando para nada.
    */
   async deleteUpcoming(prescriptionId: string, fromTimestamp: string): Promise<void> {
     /**

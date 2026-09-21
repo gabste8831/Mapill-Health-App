@@ -57,7 +57,7 @@ export default function ContaRoute() {
   }
 
   /**
-   * Grava um novo registro de consentimento a cada vinculação de conta (decisão P2, de 26/08).
+   * Grava um novo registro de consentimento a cada vinculacao de conta.
    *
    * O login por si só não muda a base legal - o texto vigente diz que os dados não saem do
    * aparelho, e isso continua verdade. O registro existe pelo **rastro**: vincular conta é o

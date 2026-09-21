@@ -3,9 +3,9 @@ import { generateDoseSchedules, type SchedulablePrescription } from "./generate-
 /**
  * Os horários de **hoje** que o cadastro vai descartar por já terem passado.
  *
- * A regra do app é que dose vencida não vira compromisso: o controle de alerta e de estoque começa
- * no instante do cadastro, e o ciclo normal vale a partir de amanhã (decisão de 26/08). Isso está
- * certo - cobrar confirmação de algo que a pessoa não tinha como cumprir seria pior.
+ * A regra do app e que dose vencida nao vira compromisso: o controle de alerta e de estoque comeca
+ * no instante do cadastro, e o ciclo normal vale a partir de amanha. Cobrar confirmacao de algo que
+ * a pessoa nao tinha como cumprir seria pior.
  *
  * O que não pode é acontecer calado. Quem digita três horários e salva precisa saber que dois
  * deles não valem para hoje, senão sai da tela achando que agendou o dia inteiro. Esta função

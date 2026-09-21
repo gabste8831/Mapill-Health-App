@@ -12,11 +12,9 @@
  * voltar a ter duas formas, `julianday` nas consultas alcanca o que ja existe, e esta migration
  * conserta as linhas gravadas, para a comparacao de texto voltar a ser correta e o indice servir.
  *
- * ## Por que `strftime` e não uma reescrita no app
- *
- * Porque o SQLite sabe fazer isso sozinho, em uma passada, dentro da transação da migration. Fazer
- * em JavaScript exigiria ler todas as linhas, converter e regravar uma a uma - mais lento e com uma
- * janela em que o banco fica meio convertido.
+ * `strftime`, e nao uma reescrita no app: o SQLite faz isso em uma passada, dentro da transacao da
+ * migration. Em JavaScript seria ler, converter e regravar linha a linha, com uma janela em que o
+ * banco fica meio convertido.
  *
  * O `WHERE` restringe às linhas que precisam: as que já terminam em `Z` ficam intactas. E a terceira
  * condição é a rede de segurança - `strftime` devolve `NULL` para texto que não souber interpretar,

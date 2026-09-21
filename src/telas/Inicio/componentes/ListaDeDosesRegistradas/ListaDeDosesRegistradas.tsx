@@ -23,15 +23,12 @@ type ListaDeDosesRegistradasProps = {
 /**
  * As doses de hoje que já foram respondidas, em lista compacta.
  *
- * ## Por que não são cartões como as pendentes
+ * Nao sao cartoes como as pendentes porque as duas listas respondem perguntas diferentes: a de cima
+ * pergunta "o que falta?" e precisa de botoes e area de toque generosa; esta responde "o que eu ja
+ * fiz?", e quem confere varre a coluna de horarios em vez de ler cartao por cartao.
  *
- * As duas listas respondem perguntas diferentes. A de cima pergunta "o que falta?" e precisa de
- * botões, cor de urgência e área de toque generosa. Esta responde "o que eu já fiz?" - é conferência,
- * e quem confere varre a coluna de horários de cima a baixo em vez de ler cartão por cartão.
- *
- * Em cartões, o efeito era perverso: quanto mais em dia a pessoa estivesse, mais cheia ficava a
- * Home, e as doses pendentes iam sendo empurradas para longe pelas já resolvidas. A forma compacta
- * é a mesma da agenda do Calendário, onde esse enxugamento já tinha funcionado.
+ * Em cartoes o efeito era perverso: quanto mais em dia a pessoa estivesse, mais cheia ficava a
+ * Home, e as pendentes iam sendo empurradas para longe pelas resolvidas.
  *
  * O toque continua abrindo a correção retroativa em cada linha: encolher o registro não pode custar
  * a chance de corrigir um "pulei" que era "tomei".

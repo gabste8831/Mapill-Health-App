@@ -213,11 +213,9 @@ export type RespostaAoAviso =
 /**
  * Se **todas** as doses do aviso já foram respondidas - confirmadas ou puladas.
  *
- * Existe para o toque num aviso já resolvido não abrir tela nenhuma. O Android não remove a
- * notificação sozinho depois que ela é respondida por outro caminho (o botão dela mesma, a Home,
- * um segundo toque), e o aviso que fica na bandeja convida ao toque tardio - que abria a tela do
- * alarme só para ela se fechar sozinha no quadro seguinte, produzindo o lampejo azul visto em
- * aparelho em 09/09.
+ * Existe para o toque num aviso ja resolvido nao abrir tela nenhuma. O Android nao remove a
+ * notificacao depois de ela ser respondida por outro caminho, e o aviso que fica na bandeja convida
+ * ao toque tardio, que abria a tela do alarme so para ela se fechar no quadro seguinte.
  *
  * Lista vazia devolve `false`: um aviso sem dose vinculada não tem o que resolver, e tratá-lo como
  * resolvido faria o toque perder o efeito. É o caso dos avisos de estoque e receita, que aliás nem

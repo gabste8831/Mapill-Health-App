@@ -131,10 +131,9 @@ function dataPorExtenso(dia: Date): string {
 /**
  * Os avisos de compromisso e de renovação de receita.
  *
- * Reusa `AvisoDeDose` de propósito: a estrutura de um aviso agendado é a mesma - quando tocar, o
- * que dizer, e o que ele carrega. O que muda é o **modo**, sempre `notification` e nunca `alarm`
- * (decisão de 24/08): interromper como despertador se justifica na dose, que tem hora exata e
- * consequência clínica imediata; para uma consulta na semana que vem seria só barulho.
+ * Reusa `AvisoDeDose` de proposito: a estrutura de um aviso agendado e a mesma. O que muda e o
+ * modo, sempre `notification` e nunca `alarm` - interromper como despertador se justifica na dose,
+ * que tem hora exata e consequencia clinica; para uma consulta na semana que vem seria so barulho.
  *
  * `doseScheduleIds` fica vazio nestes avisos - eles não apontam para dose nenhuma. É o que faz o
  * toque abrir o app em vez da tela de horário, sem precisar de um segundo tipo de dado.

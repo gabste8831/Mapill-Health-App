@@ -60,9 +60,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * O rótulo tem um piso de largura, e é isso que o impede de virar uma coluna de letras.
    *
-   * Antes ele tinha só `flexShrink: 1` e o valor não tinha limite nenhum: um valor longo - como
-   * "Mídia (o esperado é despertador - ver E.1)" - tomava toda a largura e espremia o rótulo até
-   * "Volume do alarme" quebrar letra por letra, uma por linha. Apareceu em aparelho em 13/09.
+   * So com `flexShrink: 1` e sem limite no valor, um valor longo tomava toda a largura e espremia
+   * o rotulo ate ele quebrar letra por letra, uma por linha.
    *
    * `flexBasis` reserva o espaço, `flexShrink: 0` impede que ele seja tomado, e o valor encolhe no
    * lugar. Rótulo é texto curto e conhecido; valor é o que varia.

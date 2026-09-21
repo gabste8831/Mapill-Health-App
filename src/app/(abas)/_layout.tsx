@@ -28,11 +28,9 @@ function AbasNativas() {
        * que a borda faria. O azul fica reservado à aba ativa: é o único destaque, então ele
        * aponta.
        *
-       * `corDeDestaque`, e não `primary` puro: no tema escuro `primary` é o navy escurecido
-       * (pedido do Gabriel, pensado para fundo de bloco), e usado como tinta de ícone/texto sobre
-       * a barra - que já é escura - ele quase some. `corDeDestaque` existe exatamente para isto:
-       * é `primary` em todo tema onde ele já é claro o bastante para ler como tinta, e um azul
-       * mais claro só no escuro. Ver `shared/theme/colors.ts`.
+       * `corDeDestaque`, e nao `primary` puro: no tema escuro aquele e o navy pensado para fundo
+       * de bloco, e como tinta sobre a barra, que ja e escura, ele quase some. `corDeDestaque` e
+       * `primary` onde ele ja le como tinta, e um azul mais claro so no escuro.
        */
       backgroundColor={cores.surfaceContainerLow}
       tintColor={cores.corDeDestaque}

@@ -486,9 +486,9 @@ export async function gravarDesfecho(
 /**
  * Manda o desfecho para a nuvem sem segurar quem gravou.
  *
- * O histórico de ingestão é o que o médico lê, e é o dado que menos pode existir só num aparelho.
- * Até 14/09 ele esperava alguém abrir a tela de Conta para subir - e quem confirma doses todo dia
- * não tem motivo para abrir aquela tela nunca.
+ * O historico de ingestao e o que o medico le, e e o dado que menos pode existir so num aparelho.
+ * Esperando a tela de Conta ser aberta para subir, ele nunca subia: quem confirma doses todo dia
+ * nao tem motivo para abrir aquela tela.
  *
  * Sem `await` e com o erro engolido, de propósito: a gravação local já aconteceu e é ela que vale.
  * Falhar aqui deixa a linha pendente, e a próxima passada da sincronização a leva - que é como o

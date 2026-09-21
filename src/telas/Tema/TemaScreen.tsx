@@ -18,12 +18,9 @@ export type TemaScreenProps = {
  * maioria de quem abre Ajustes está atrás de outra coisa (conta, dados). Um botão em
  * Acessibilidade que leva pra cá deixa Ajustes como um menu curto de novo.
  *
- * ## Duas perguntas, e não uma
- *
- * **Aparência** é gosto e conforto: claro, escuro, alto contraste. **Preferências visuais** é
- * necessidade: quais cores o app usa para dizer "tudo certo", "fique atento" e "urgente". As duas
- * são independentes de propósito - quem não distingue verde de vermelho também usa o app à noite,
- * e antes precisava abrir mão do tema escuro para enxergar os estados.
+ * Duas perguntas, e nao uma: aparencia e gosto e conforto, preferencias visuais e necessidade. Sao
+ * independentes de proposito - quem nao distingue verde de vermelho tambem usa o app a noite, e
+ * antes precisava abrir mao do tema escuro para enxergar os estados.
  */
 export function TemaScreen({ onBack }: TemaScreenProps) {
   const styles = useEstilos(criarEstilos);

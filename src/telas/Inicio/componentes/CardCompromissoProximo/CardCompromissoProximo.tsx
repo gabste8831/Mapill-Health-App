@@ -40,21 +40,14 @@ type CardCompromissoProximoProps = {
 /**
  * O compromisso que está chegando, na Home.
  *
- * ## Por que ele não é o card azul
+ * Nao e o card azul: aquele e a unica quebra da paleta neutra da Home, e um segundo dividiria o
+ * destaque em vez de somar, fazendo a dose perder a vaga que a torna a proxima coisa a fazer. Aqui
+ * a presenca vem da barra lateral e do bloco de data, que e a assinatura do compromisso na lista.
  *
- * O azul cheio da próxima dose é a única quebra da paleta neutra da Home - é o que a faz saltar. Um
- * segundo card azul não somaria destaque, dividiria o que existe, e a dose perderia a vaga que a
- * torna a próxima coisa a fazer. Aqui a presença vem da barra lateral e do bloco de data, que é a
- * assinatura visual do compromisso na listagem: quem já viu a lista reconhece o card antes de ler.
+ * Mostra o preparo, que e a unica informacao do compromisso a exigir acao antecipada: um aviso de
+ * "jejum de 12h" cinco dias antes evita a consulta perdida por ter tomado cafe.
  *
- * ## O que ele mostra que a linha não mostrava
- *
- * O **preparo**. É a única informação do compromisso que exige ação antecipada - jejum, levar
- * exames, chegar mais cedo - e descobri-la só ao abrir o detalhe é descobrir tarde. Um aviso de
- * "jejum de 12h" que aparece cinco dias antes é o que evita a consulta perdida por ter tomado café.
- *
- * No dia, a barra e o bloco de data viram verdes, como o cartão de dose de agora: é o mesmo sinal
- * de "é hoje" que o resto da tela já usa.
+ * No dia, a barra e o bloco viram verdes, como o cartao de dose de agora.
  */
 export function CardCompromissoProximo({
   quando,
