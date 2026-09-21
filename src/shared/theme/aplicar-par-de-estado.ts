@@ -31,24 +31,13 @@ function escurecer(hex: string, peso: number): string {
 /**
  * Reescreve os tokens de estado da paleta com o par que a pessoa escolheu.
  *
- * ## Por que derivar, e não listar
+ * Deriva em vez de listar: o par tem duas cores, mas o app usa onze tokens de estado, e pedir onze
+ * cores por opcao seria pedir uma paleta inteira a cada par novo, com a chance de reprovar em
+ * contraste crescendo a cada valor escrito a mao.
  *
- * O par tem duas cores, mas o app usa **onze** tokens de estado: a cor de texto, a viva (para
- * ícone e barra de gráfico), a preenchida (fundo de card), a superfície tingida, e os "on" de cada
- * uma. Pedir onze cores por par seria pedir que alguém escolhesse uma paleta inteira a cada opção
- * nova - e a chance de uma delas reprovar em contraste cresce com cada valor escrito à mão.
- *
- * Aqui os vizinhos saem da cor escolhida por mistura com branco ou preto, nas mesmas proporções
- * que separam os tons do tema padrão. Assim um par novo entra em `pares-de-estado.ts` com duas
- * cores e o resto se resolve, mantendo as relações que já foram validadas.
- *
- * ## O que **não** é derivado
- *
- * Os pesos abaixo pressupõem uma superfície clara (fundo quase branco, texto escuro). No tema
- * escuro as superfícies de estado são escuras, e clarear a cor produziria o inverso do que se quer
- * - por isso a derivação só entra em tema de esquema claro, e no escuro o par escolhido muda
- * apenas o que é **tinta** (`success`, `error` e as versões vivas). Quem chama decide, passando
- * `esquema`.
+ * Os pesos pressupoem superficie clara, entao a derivacao so entra em tema de esquema claro: no
+ * escuro as superficies de estado ja sao escuras, e clarear produziria o inverso. La o par muda
+ * apenas o que e tinta.
  */
 export function aplicarParDeEstado(
   paleta: PaletaDeTema,

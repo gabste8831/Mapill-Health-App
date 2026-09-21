@@ -1,20 +1,14 @@
 import * as Sharing from "expo-sharing";
 
 /**
- * Abre um anexo que não é imagem - hoje, a receita em PDF.
+ * Abre um anexo que nao e imagem, hoje a receita em PDF.
  *
- * ## Por que a folha de compartilhamento, e não um visualizador próprio
+ * Pela folha de compartilhamento, e nao por um visualizador proprio: ler PDF dentro do app exigiria
+ * dependencia nativa e entregaria menos, porque o leitor que a pessoa ja tem traz zoom, busca,
+ * impressao e o envio para alguem, que e o que mais importa numa receita.
  *
- * Ler um PDF dentro do app exigiria uma dependência nativa (WebView ou leitor dedicado), isto é,
- * uma build nova. E entregaria menos: o leitor que a pessoa já tem no aparelho tem zoom, busca,
- * rolagem entre páginas e - o que mais importa numa receita - a opção de imprimir e de mandar para
- * alguém. Reimplementar isso mal seria pior que não reimplementar.
- *
- * É o mesmo caminho pelo qual o relatório em PDF já sai do app, então a folha que aparece é uma que
- * a pessoa já viu aqui dentro.
- *
- * Devolve `false` quando não há como abrir - quem chama decide o que dizer. O erro não é lançado:
- * falhar ao abrir um anexo não deve derrubar o formulário que o continha.
+ * Devolve `false` quando nao ha como abrir, e nao lanca: falhar ao abrir um anexo nao deve derrubar
+ * o formulario que o continha.
  */
 export async function abrirDocumento(uri: string): Promise<boolean> {
   if (!(await Sharing.isAvailableAsync())) return false;

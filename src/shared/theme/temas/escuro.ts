@@ -37,15 +37,11 @@ export const temaEscuro: Tema = {
      */
     corDeDestaque: "#7FB2FF",
     /**
-     * Cinza, e não azul, para o bloco que domina a tela sozinho - hoje só a faixa do calendário.
-     * Pedido do Gabriel depois de ver o tema escuro de verdade: um bloco tão grande no azul do
-     * tema competia com o resto da paleta escura em vez de se somar a ela.
+     * Cinza, e nao azul, para o bloco que domina a tela sozinho: um bloco tao grande no azul do
+     * tema competia com a paleta escura em vez de se somar a ela.
      *
-     * É o **mesmo `surfaceContainer`** das fichas de filtro não selecionadas, logo abaixo da
-     * grade. Já foi `surfaceContainerHigh`, um degrau acima, e a diferença de um degrau entre dois
-     * blocos vizinhos não lê como hierarquia - lê como desalinho, duas superfícies quase iguais
-     * sem motivo aparente para não serem iguais. Sendo a mesma cor, a faixa e as fichas passam a
-     * ser um bloco só de "controles do calendário".
+     * O mesmo `surfaceContainer` das fichas logo abaixo, e nao um degrau acima: a diferenca de um
+     * degrau entre blocos vizinhos nao le como hierarquia, le como desalinho.
      */
     superficieDeDestaque: "#2A323D",
     onSuperficieDeDestaque: "#E6E9EE",

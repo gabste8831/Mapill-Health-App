@@ -1,29 +1,17 @@
 import { Easing } from "react-native-reanimated";
 
 /**
- * # Como o app se move
+ * Como o app se move.
  *
- * ## A regra
+ * Movimento aqui tem uma funcao so: mostrar que algo mudou. Nada se move para enfeitar, porque o
+ * app abre na mao de quem tem catarata, tremor, ou pressa por ter esquecido o remedio. Por isso os
+ * tempos sao curtos e o gatilho e sempre mudanca de estado real.
  *
- * Movimento aqui tem uma função só: **mostrar que algo mudou**. A barra que cresce diz "seu dia
- * avançou"; o check que aparece diz "ficou registrado". Nada se move para enfeitar.
- *
- * Isto não é purismo - é o público. Este app abre na mão de quem tem catarata, tremor, ou está
- * com pressa porque esqueceu o remédio. Animação que atrasa uma confirmação de dose é atrito num
- * fluxo que precisa ser instantâneo, e animação que se repete a cada rolagem vira ruído que ensina
- * a ignorar a tela. Por isso os tempos são curtos e o gatilho é sempre uma mudança de estado real.
- *
- * ## Por que quase tudo é `out`
- *
- * Uma curva `out` começa rápida e desacelera no fim: o elemento parece chegar ao lugar por conta
- * própria, com peso. `in` (começa devagar) faz a interface parecer travada, e `inOut` só serve
- * para o que sai *e* volta.
+ * Quase tudo e `out`, que comeca rapido e desacelera: o elemento parece chegar ao lugar. `in` faz
+ * a interface parecer travada, e `inOut` so serve para o que sai e volta.
  */
 
-/**
- * Os três tempos. Não há um quarto - quando cada animação escolhe o próprio número, o app perde o
- * compasso e a interface parece feita por pessoas diferentes.
- */
+/** Os tres tempos. Cada animacao escolhendo o proprio numero faz o app perder o compasso. */
 export const duracao = {
   /** Resposta imediata: tinta que muda, item que aparece. */
   rapida: 140,
@@ -40,14 +28,9 @@ export const curva = Easing.out(Easing.cubic);
 export const curvaEnfatica = Easing.out(Easing.back(1.4));
 
 /**
- * **A preferência de "reduzir movimento" é lida com `useReducedMotion()`**, do Reanimated - não
- * por um helper daqui.
+ * A preferencia de "reduzir movimento" e lida com `useReducedMotion()` do Reanimated, e nao por um
+ * helper daqui: duas formas de responder a mesma pergunta divergem em silencio.
  *
- * Havia um `duracaoRespeitandoMovimento(ms, reduzir)` neste arquivo e um `use-reduzir-movimento`
- * nos hooks, escritos para ser o caminho padrão. Os componentes acabaram usando o hook da
- * biblioteca, que faz o mesmo e já roda na thread de UI - e as duas peças próprias ficaram sem
- * consumidor. Duas formas de responder à mesma pergunta divergem em silêncio; ficou a da lib.
- *
- * O padrão, em quem anima: `const semMovimento = useReducedMotion();` e a duração vira `0`.
- * Com duração zero o valor salta para o destino - o estado final continua correto e nada pisca.
+ * O padrao em quem anima: `const semMovimento = useReducedMotion()`, e a duracao vira `0`. Com zero
+ * o valor salta para o destino, o estado final continua correto e nada pisca.
  */

@@ -21,11 +21,10 @@ export type PaletaDeTema = { readonly [K in keyof typeof paletaPadrao]: string }
  */
 export type AjustesDeTema = {
   /**
-   * Desenhar contorno nas superfícies em vez de confiar na sombra.
+   * Desenhar contorno nas superficies em vez de confiar na sombra.
    *
-   * A regra de "sombra e nunca borda" (decisão de 21/08) pressupõe que se enxergue uma sombra de
-   * 8% de opacidade. Quem escolheu alto contraste em geral não enxerga - e aí a regra que existia
-   * para não parecer planilha passa a esconder onde um cartão termina.
+   * A regra de "sombra e nunca borda" pressupoe enxergar 8% de opacidade. Quem escolheu alto
+   * contraste em geral nao enxerga, e a regra passa a esconder onde um cartao termina.
    */
   contornarSuperficies: boolean;
   /**

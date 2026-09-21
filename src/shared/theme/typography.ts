@@ -1,20 +1,15 @@
 import type { TextStyle } from "react-native";
 
 /**
- * ## A altura de linha não pode ser menor que a caixa da fonte
+ * A altura de linha nao pode ser menor que a caixa da fonte.
  *
- * A Plus Jakarta Sans desce 260 unidades por em: uma linha precisa de **1,26 × o tamanho** para
+ * A Plus Jakarta Sans desce 260 unidades por em: uma linha precisa de 1,26 vezes o tamanho para
  * caber ascendente e descendente inteiras. Abaixo disso o sistema corta a perna das letras que
- * descem - g, p, q, j, y -, e o defeito só aparece com o texto certo: "Olá, Gabriel." estava
- * inteiro e "Olá, gabriel." saía com o g cortado.
+ * descem - g, p, q, j, y -, e o defeito so aparece com o texto certo. Quem muda um tamanho aqui
+ * confere a conta: `lineHeight >= fontSize * 1.26`.
  *
- * Os três títulos grandes estavam em 1,2× e cortavam. Quem muda um tamanho aqui confere a conta:
- * `lineHeight >= fontSize * 1.26`.
- *
- * Fonte: Plus Jakarta Sans (`@expo-google-fonts/plus-jakarta-sans`, carregada em
- * `src/app/_layout.tsx`). Pesos leves (300) só em telas de apresentação - texto que
- * carrega informação clínica (dose, horário, nome do medicamento) usa sempre 500+,
- * priorizando legibilidade pro público idoso/polimedicado sobre a estética editorial.
+ * Pesos leves (300) so em telas de apresentacao: texto que carrega informacao clinica usa sempre
+ * 500 ou mais, priorizando legibilidade sobre estetica editorial.
  */
 export const typography: Record<string, TextStyle> = {
   headlineXl: {

@@ -5,38 +5,14 @@ import { useTema } from "./tema-contexto";
 import type { Tema } from "./temas";
 
 /**
- * # Como migrar uma tela para temas
+ * Folhas de estilo que respondem ao tema.
  *
- * Esta é a peça que torna a migração mecânica. Um arquivo de estilos hoje é assim:
+ * `StyleSheet.create` roda uma vez, na importacao, e as cores lidas ali ficam congeladas: trocar de
+ * tema nao repintaria nada. Por isso a folha e uma funcao que recebe o tema.
  *
- * ```ts
- * export const styles = StyleSheet.create({
- *   card: { backgroundColor: colors.surfaceContainerLowest },
- * });
- * ```
- *
- * Vira assim - **três linhas mudam**, o corpo do objeto fica idêntico:
- *
- * ```ts
- * export const criarEstilos = estilosDoTema(({ cores }) => ({
- *   card: { backgroundColor: cores.surfaceContainerLowest },
- * }));
- * ```
- *
- * E no componente, a linha do import vira:
- *
- * ```tsx
- * const styles = useEstilos(criarEstilos);
- * ```
- *
- * ## Por que uma função, e não `StyleSheet.create` direto
- *
- * `StyleSheet.create` roda **uma vez**, quando o módulo é importado. As cores lidas ali ficam
- * congeladas para sempre - trocar de tema não repinta nada. É a razão de a migração ser
- * necessária, e não apenas conveniente.
- *
- * O `useMemo` por tema garante que a folha só é recriada quando o tema muda de fato: rolar uma
- * lista de 200 doses não reconstrói estilo nenhum.
+ * Uso: `estilosDoTema(({ cores }) => ({ ... }))` no arquivo de estilos, e
+ * `useEstilos(criarEstilos)` no componente. O `useMemo` por tema garante que rolar uma lista longa
+ * nao reconstroi estilo nenhum.
  */
 
 /** A "receita" de uma folha de estilos: recebe o tema, devolve o objeto de estilos. */

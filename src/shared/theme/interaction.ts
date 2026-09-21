@@ -5,26 +5,13 @@ import { colors } from "./colors";
 /**
  * Como o app responde ao dedo.
  *
- * ## Por que isto existe
+ * Nao e enfeite: um app que nao confirma o toque ensina a duvidar se ele funcionou, e num publico
+ * que ja duvida da propria memoria a resposta e tocar de novo - no botao de confirmar dose, isso
+ * registrava duas vezes. E a primeira camada da mesma protecao que a guarda de idempotencia faz no
+ * banco.
  *
- * Até 02/09 **nada no app respondia ao toque**: 75 `Pressable` e nenhum `pressed`, nenhum
- * `android_ripple`. O sintoma não era feio, era pior - um app que não confirma o toque ensina a
- * duvidar se o toque funcionou. E num público que já duvida da própria memória, a resposta a essa
- * dúvida é **tocar de novo**: no botão de confirmar dose, isso registrava duas vezes.
- *
- * Ou seja, feedback de toque aqui não é enfeite: é a primeira camada da mesma proteção que a guarda
- * de idempotência em `confirmarDosesDoAviso` faz no banco.
- *
- * ## Por que opacidade e escala, e não ripple
- *
- * O `ripple` do Android é de uma plataforma só (e o projeto mantém irmãos `.ios.tsx`), e exige
- * `overflow: hidden` para respeitar canto arredondado - o que apagaria as sombras dos cartões.
- * `Pressable` já entrega o estado `pressed` de graça, nas duas plataformas, sem worklet e sem
- * biblioteca.
- *
- * O `reanimated` está instalado, mas para um toggle de opacidade seria peso sem ganho: a diferença
- * entre uma transição de 100ms e uma troca imediata, no tempo de um toque, ninguém percebe. Ele
- * fica guardado para onde ganha de verdade - a barra de progresso que cresce.
+ * Opacidade e escala, e nao ripple: aquele e de uma plataforma so e exige `overflow: hidden` para
+ * respeitar canto arredondado, o que apagaria as sombras dos cartoes.
  */
 
 /** Superfície colorida cheia (botão primário, chip selecionado, cartão azul) escurece ao toque. */

@@ -1,32 +1,16 @@
 /**
- * # As cores de "deu certo" e "não deu"
+ * As cores de "deu certo" e "nao deu".
  *
- * O app diz duas coisas o tempo todo com cor: a dose foi tomada (verde) ou está atrasada (vermelho).
- * Esse par é o que quem não distingue cores não consegue ler - e verde com vermelho é justamente o
- * que a deuteranopia e a protanopia confundem, juntas presentes em cerca de **1 homem em 12**.
+ * Verde com vermelho e justamente o que a deuteranopia e a protanopia confundem, juntas presentes
+ * em cerca de 1 homem em 12.
  *
- * ## Por que a escolha é da pessoa, e não do app
+ * A escolha e da pessoa, e nao do app: daltonismo nao e uma condicao so, e nenhum par fixo e otimo
+ * para as tres formas. Um "modo daltonismo" com turquesa e magenta ja existiu aqui, e a medicao o
+ * desmontou - separava pior que o verde e vermelho que substituia.
  *
- * A saída óbvia seria o app trocar o par sozinho num "modo daltonismo". Foi o que existia aqui, com
- * turquesa e magenta fixos - e a medição desmontou a ideia: simulando as três formas de daltonismo,
- * aquele par separava **pior** que o verde e vermelho que ele substituía (117 contra 127 no pior
- * caso, numa distância RGB em que 60 é o mínimo utilizável).
- *
- * A razão é que daltonismo não é uma condição só. O par que resolve a protanopia não é o mesmo que
- * resolve a tritanopia, e nenhum par fixo é ótimo para as três. Quem sabe qual funciona é quem
- * enxerga - então a escolha é oferecida, com uma amostra de cada par para comparar na hora.
- *
- * ## Todos os pares aqui são validados
- *
- * Nenhuma opção pode ser pior que não escolher nada. Cada par abaixo foi medido em duas frentes:
- *
- * 1. **Contraste sobre branco** (WCAG AA, 4.5:1), porque as duas cores são usadas como texto -
- *    "TOMADA" no cartão, "Estoque zerado" na lista.
- * 2. **Separação sob as três formas de daltonismo**, simulando deuteranopia, protanopia e
- *    tritanopia. O número é a distância RGB entre as duas cores como aquela visão as vê; abaixo de
- *    60 elas colapsam num tom só.
- *
- * Os valores estão anotados em cada par, e foram medidos - não estimados.
+ * Todos os pares foram medidos em duas frentes, e os valores anotados em cada um sao medidos, nao
+ * estimados: contraste sobre branco (WCAG AA, 4.5:1), porque as cores sao usadas como texto, e
+ * separacao sob as tres formas de daltonismo, onde abaixo de 60 elas colapsam num tom so.
  */
 export type ParDeEstado = {
   id: string;
