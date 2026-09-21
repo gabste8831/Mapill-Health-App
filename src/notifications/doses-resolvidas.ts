@@ -1,25 +1,14 @@
 /**
- * Avisos internos sobre o que aconteceu com uma dose, para quem estiver mostrando ela agora.
+ * Avisos internos sobre o que aconteceu com uma dose, para quem a estiver mostrando agora.
  *
- * ## Por que existe
+ * A tela de alarme e a unica que nao pode esperar: enquanto toca, ela afirma que ha resposta
+ * pendente, e o som seguir depois de a dose ser resolvida em outro lugar e o app se contradizendo.
+ * Ela ja revalida por intervalo, e estes avisos so fecham os segundos entre uma revalidacao e outra.
  *
- * A tela de alarme é a única do app que **não** pode esperar. Ela toca em loop, e enquanto tocar
- * está afirmando que há uma resposta pendente - se a dose for resolvida em outro lugar, ou se a
- * pessoa escolher outro caminho para responder, o som continuar é o app contradizendo o que ele
- * mesmo acabou de fazer.
+ * Nada aqui e fonte de verdade: o banco e. Perdendo o aviso, a revalidacao periodica ainda resolve.
  *
- * Ela revalida sozinha a cada poucos segundos, e isso cobre o caso geral. Mas "poucos segundos" de
- * alarme tocando depois de respondido lê como defeito - foi exatamente o relato do teste de 05/09.
- * Estes avisos fecham essa janela: quem age avisa, e quem está tocando reage na hora.
- *
- * ## Por que não é um estado global de verdade
- *
- * Nada aqui é fonte de verdade - o banco é. Isto é só um empurrão para reagir antes do próximo
- * intervalo. Se o aviso se perder (a tela montou depois do fato, por exemplo), a revalidação
- * periódica ainda resolve; o custo é voltar aos poucos segundos de atraso, e não um estado errado.
- *
- * Vive no módulo, e não em contexto de React, porque quem age nem sempre é um componente: o handler
- * de segundo plano do Notifee roda fora da árvore.
+ * No modulo, e nao em contexto de React, porque quem age nem sempre e um componente: o handler de
+ * segundo plano roda fora da arvore.
  */
 
 type OuvinteDeResolucao = (doseScheduleIds: string[]) => void;

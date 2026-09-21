@@ -41,33 +41,16 @@ function diasDeDiferenca(de: Date, ate: Date): number {
 /**
  * Quais compromissos a Home mostra hoje.
  *
- * ## A janela é o lembrete que a pessoa pediu
+ * A antecedencia do aviso e a janela do card: `reminderLeadDays: 7` poe o compromisso na Home nos
+ * sete dias que antecedem a consulta. Assim a regra tem um lugar so, e a notificacao e a Home nunca
+ * discordam.
  *
- * Um compromisso marcado com três meses de antecedência não pode ocupar a Home por três meses - ela
- * é a tela do **dia**, e o que não é acionável hoje vira ruído que empurra as doses para baixo. Mas
- * também não basta mostrar só no próprio dia: quem pede aviso de sete dias está pedindo tempo para
- * se organizar (remarcar o trabalho, arrumar carona), e esse pedido vale tanto para a notificação
- * quanto para a tela.
+ * Quem nao pediu lembrete nao recebe card antes do dia, porque nao pedir aviso e uma resposta. O
+ * proprio dia e a excecao e entra sempre: quem nao marcou aviso dispensou a antecedencia, nao
+ * dispensou ver a agenda quando ela chega.
  *
- * Então a antecedência do aviso **é** a janela do card: `reminderLeadDays: 7` põe o compromisso na
- * Home nos sete dias que antecedem a consulta. A regra fica com um só lugar para ser ajustada, e a
- * notificação e a Home nunca discordam - que era o problema de tê-las com critérios separados.
- *
- * Quem não pediu lembrete nenhum não recebe card **antes** do dia. Não pedir aviso é uma resposta,
- * e ignorá-la seria decidir pela pessoa que ela quer ser avisada com antecedência.
- *
- * O próprio dia é a exceção, e entra sempre. A Home é a tela do que acontece hoje: um compromisso
- * marcado para hoje é do dia de hoje, tenha sido pedido lembrete ou não. Quem não marcou aviso
- * dispensou a *antecedência* - não dispensou ver a própria agenda quando ela chega.
- *
- * ## Por que sai depois da data
- *
- * Passou o compromisso, o card sai da Home mesmo sem resposta. A Home mostra o que **ainda dá para
- * fazer**; registrar que a consulta aconteceu é conversa da listagem de compromissos, onde o
- * histórico vive. Um card de ontem cobrando desfecho competiria com as doses de hoje pelo mesmo
- * espaço, e perderia - vira aquele aviso que se aprende a ignorar.
- *
- * Respondido não entra em nenhuma hipótese: não há o que lembrar.
+ * Passada a data, o card sai mesmo sem resposta: a Home mostra o que ainda da para fazer, e
+ * registrar o desfecho e conversa da listagem. Respondido nao entra em hipotese nenhuma.
  */
 export function compromissosAMostrarNaHome(input: CompromissosNaHomeInput): CompromissoNaHome[] {
   const { compromissos, agora } = input;

@@ -25,14 +25,13 @@ import { reabastecerGradeDeDoses } from "./reabastecer-grade-de-doses";
 const persistsLocally = Platform.OS !== "web";
 
 /**
- * O que a última manutenção da grade fez - lido pelo Diagnóstico.
+ * O que a ultima manutencao da grade fez, lido pelo Diagnostico.
  *
- * Existe porque em 13/09 o reabastecimento falhou e **nada** revelou isso: o `catch` abaixo escrevia
- * no `console`, que ninguém lê com o APK na mão. Sem este registro, "a correção não funcionou" e "a
- * correção nem rodou" são indistinguíveis - e foi exatamente aí que a rodada travou.
+ * Sem este registro, "a correcao nao funcionou" e "a correcao nem rodou" sao indistinguiveis com o
+ * APK na mao, porque o `catch` abaixo escreve no console, que ninguem le.
  *
- * Mora no módulo, e não em estado de React, porque quem chama o reagendamento não é uma tela: são os
- * gatilhos do ciclo de vida, o listener de avisos e a volta ao primeiro plano.
+ * No modulo, e nao em estado de React: quem chama o reagendamento nao e uma tela, sao os gatilhos
+ * do ciclo de vida.
  */
 export type ManutencaoDaGrade = {
   quando: string;
@@ -51,49 +50,39 @@ export function lerUltimaManutencaoDaGrade(): ManutencaoDaGrade | null {
 }
 
 /**
- * Quantos dias de avisos ficam pendentes no sistema operacional.
+ * Quantos dias de avisos ficam pendentes no sistema.
  *
- * Sete, e não o tratamento inteiro: "3x ao dia por 6 meses" são ~540 avisos para **uma**
- * prescrição, e um paciente polimedicado passaria de 2.500 - acima do que qualquer sistema aceita
- * manter agendado. A janela é reabastecida a cada abertura do app, que é frequente o bastante num
- * app que a pessoa abre para confirmar dose.
+ * Sete, e nao o tratamento inteiro: um paciente polimedicado passaria de 2.500 avisos, acima do que
+ * o sistema aceita manter agendado. A janela e reabastecida a cada abertura do app.
  *
- * Casado com `SCHEDULE_HORIZON_DAYS` do cadastro, que é quantos dias de `DoseSchedule` existem no
- * banco: agendar aviso para dose que ainda não foi gerada não faria sentido.
+ * Casado com o horizonte do cadastro: agendar aviso para dose que ainda nao foi gerada nao faria
+ * sentido.
  */
 const JANELA_DE_AVISOS_EM_DIAS = 7;
 
 const gateway = new NotifeeGateway();
 
 /**
- * A execução em curso, quando há uma.
+ * A execucao em curso, quando ha uma.
  *
- * Reagendar é "cancela tudo, depois agenda tudo", e duas execuções sobrepostas se atropelam: a
- * segunda cancelaria justo o que a primeira acabou de agendar, e o que sobra depende de qual
- * terminou por último. Não é hipotético - salvar um cadastro e voltar ao primeiro plano disparam
- * os dois gatilhos quase juntos.
- *
- * A fila resolve serializando: quem chega enquanto outra roda espera a vez. Como a operação é
- * idempotente, esperar nunca custa correção - só tempo.
+ * Reagendar e "cancela tudo, depois agenda tudo", e duas execucoes sobrepostas se atropelam: a
+ * segunda cancelaria o que a primeira acabou de agendar. Acontece de verdade, porque salvar um
+ * cadastro e voltar ao primeiro plano disparam os dois gatilhos quase juntos.
  */
 let emAndamento: Promise<void> = Promise.resolve();
 
 /**
- * Refaz **toda** a janela de avisos: cancela o que estiver agendado e reagenda a partir do banco.
+ * Refaz toda a janela de avisos: cancela o agendado e reagenda a partir do banco.
  *
- * A operação é grosseira de propósito, e essa é a decisão central do bloco. O pior defeito
- * possível aqui é o **alarme órfão** - a pessoa recebe lembrete de um remédio que já parou de
- * tomar -, e ele nasce de tentar editar cirurgicamente o que já está agendado: some uma dose aqui,
- * muda um horário ali, e cada caminho esquecido vira um aviso que ninguém mais cancela. Cancelar
- * tudo e reagendar é **idempotente**: chamar duas vezes dá o mesmo resultado que chamar uma, e
- * qualquer estado anterior converge para o correto.
+ * Grosseira de proposito, e essa e a decisao central do bloco. O pior defeito possivel e o alarme
+ * orfao, e ele nasce de tentar editar cirurgicamente o que ja esta agendado: cada caminho esquecido
+ * vira um aviso que ninguem mais cancela. Cancelar tudo e reagendar e idempotente, e qualquer
+ * estado anterior converge para o correto.
  *
- * Por isso ela é o único ponto de entrada. Todos os gatilhos do ciclo de vida - criar, editar ou
- * excluir tratamento, mudar o modo de lembrete, confirmar uma dose antes da hora, adiar, virar a
- * janela - chamam esta mesma função, e não variações espertas dela.
+ * Por isso e o unico ponto de entrada: todos os gatilhos do ciclo de vida chamam esta funcao, e nao
+ * variacoes espertas dela.
  *
- * Nunca lança: falhar em reagendar não pode derrubar o cadastro que acabou de ser salvo. O erro é
- * registrado e a próxima abertura do app corrige, porque a operação é idempotente.
+ * Nunca lanca: falhar em reagendar nao pode derrubar o cadastro que acabou de ser salvo.
  */
 export async function reagendarTodosOsAvisos(): Promise<void> {
   if (!persistsLocally) return;
@@ -112,28 +101,14 @@ async function executarReagendamento(): Promise<void> {
     const agora = new Date();
 
     /**
-     * A grade de doses é posta em dia **antes da guarda de permissão**, e a ordem é a correção.
+     * A grade e posta em dia antes da guarda de permissao, e a ordem e a correcao.
      *
-     * Reabastecer existe por causa do passo A.4: nada repunha a grade, que era gravada no cadastro
-     * 30 dias de cada vez e acabava. Um tratamento contínuo parava de avisar por volta do 30º dia,
-     * calado - agendar a partir de uma grade vazia agenda nada. Ver `reabastecerGradeDeDoses`.
+     * A guarda existe para avisos, nao para a grade: `DoseSchedule` e o que a Home lista, o que o
+     * calendario mostra e o que o historico referencia, e nada disso depende de o Android deixar
+     * notificar. Depois da guarda, quem negou a permissao perdia tambem a agenda.
      *
-     * ## Por que antes da permissão, e não depois
-     *
-     * Na primeira versão (13/09) isto ficava **depois** da guarda de `consultarPermissao`, e o passo
-     * D.3 falhou por causa disso: o Diagnóstico do Gabriel mostrou `Notificações: Não pedida`, e a
-     * guarda devolve cedo - então a manutenção nunca rodava. Salvar o cadastro continuava
-     * funcionando porque aquele caminho grava as doses direto, sem passar por aqui, e era esse
-     * contraste que fazia o defeito parecer coisa do reabastecimento.
-     *
-     * A guarda existe para **avisos**, não para a grade. `DoseSchedule` é dado do app - é o que a
-     * Home lista, o que o calendário mostra e o que o histórico referencia. Nada disso depende de o
-     * Android deixar notificar. Amarrar as duas coisas fazia a pessoa que negou a permissão perder
-     * também a agenda, que é o que o app faz de mais básico.
-     *
-     * O `catch` é deliberado: manter a grade é manutenção de fundo, e falhar nela não pode impedir o
-     * reagendamento dos avisos que já existem. A próxima abertura tenta de novo, porque a operação é
-     * idempotente.
+     * O `catch` e deliberado: manter a grade e manutencao de fundo, e falhar nela nao pode impedir
+     * o reagendamento dos avisos que ja existem.
      */
     try {
       const reposicao = await reabastecerGradeDeDoses(agora);
@@ -145,16 +120,8 @@ async function executarReagendamento(): Promise<void> {
         erro: null,
       };
     } catch (erro) {
-      /**
-       * O erro é **guardado**, e não só registrado no console.
-       *
-       * Em 13/09 este `catch` engoliu a falha do passo D.3 e o resultado foi o pior possível: a
-       * correção não funcionou, e não havia como saber por quê - nem dose na Home, nem aviso, nem
-       * linha em lugar nenhum. `console.warn` não existe para quem testa com o APK na mão.
-       *
-       * O `catch` continua aqui porque manter a grade não pode derrubar o agendamento dos avisos que
-       * já existem. O que muda é que agora ele deixa rastro, e o Diagnóstico o mostra.
-       */
+      // O erro e guardado, e nao so registrado no console: `console.warn` nao existe para quem
+      // testa com o APK na mao, e sem rastro a falha era indistinguivel de nao ter rodado.
       ultimaManutencao = {
         quando: agora.toISOString(),
         tratamentos: 0,
@@ -301,34 +268,15 @@ async function executarReagendamento(): Promise<void> {
       ...avisosDeEstoque,
     ];
 
-    /**
-     * **Cancelar tudo, depois agendar tudo** - a RN14, e agora ela é verdade por construção.
-     *
-     * Até 02/09 esta linha era duas: um `cancelarTudo` para cada biblioteca, porque cada uma só
-     * enxergava a própria lista de agendamentos. Funcionava, mas dependia de disciplina - um
-     * terceiro ponto de cancelamento que esquecesse uma das chamadas traria de volta o **alarme
-     * órfão**, o lembrete de um remédio que a pessoa já parou de tomar, e nada no compilador
-     * denunciaria.
-     *
-     * Com um agendador só, "cancelar tudo" é literalmente tudo. O defeito deixou de ser possível
-     * em vez de ser evitado por atenção.
-     */
+    // Com um agendador so, "cancelar tudo" e literalmente tudo, e o alarme orfao deixa de ser
+    // possivel em vez de ser evitado por disciplina.
     await gateway.cancelarTudo();
 
     /**
-     * Um aviso que falha **não leva os outros junto**.
+     * Um aviso que falha nao leva os outros junto.
      *
-     * Sem o `catch` por item, uma única rejeição do agendador aborta o laço e a grade do dia fica
-     * pela metade - sem nada indicar quais avisos entraram e quais não. Foi o que aconteceu em
-     * aparelho em 09/09: o Notifee recusou um gatilho no passado
-     * (`trigger timestamp date must be in the future`) e o reagendamento inteiro morreu ali.
-     *
-     * A causa daquele caso está corrigida em dois lugares (`planejarAvisosDeDose` e o piso do
-     * gateway), e este `catch` é a terceira camada: cobre o próximo motivo de falha, que ninguém
-     * previu ainda. Perder um aviso é ruim; perder os vinte seguintes por causa dele é pior.
-     *
-     * O erro aparece no console em desenvolvimento porque um aviso que sumiu em silêncio é
-     * exatamente o defeito que este bloco existe para não ter.
+     * Sem o `catch` por item, uma rejeicao aborta o laco e a grade do dia fica pela metade, sem
+     * nada indicar quais entraram. Perder um aviso e ruim; perder os vinte seguintes e pior.
      */
     for (const aviso of avisos) {
       // O modo decide o canal e se abre tela cheia; quem agenda é o mesmo gateway nos dois casos.
@@ -340,48 +288,22 @@ async function executarReagendamento(): Promise<void> {
     }
 
     /**
-     * A memória do aviso de estoque, gravada **depois** de ele existir de fato.
+     * A marca do aviso de estoque NAO e gravada aqui, e este comentario existe para a tentacao nao
+     * voltar.
      *
-     * Marcar antes de agendar deixaria o estoque calado por um aviso que talvez não tenha sido
-     * criado - e o próximo reagendamento o consideraria já avisado. Aqui a marca só é gravada
-     * quando o `agendar` acima passou.
+     * Reagendar roda a cada volta ao primeiro plano. Com a marca gravada no planejamento, o aviso
+     * era planejado, a quantidade de agora gravada, e o reagendamento seguinte comparava a
+     * quantidade consigo mesma e concluia que ja avisara: o aviso de estoque sumia em segundos.
      *
-     * Guarda a quantidade de agora: é ela que `planejarAvisosDeEstoque` compara para saber se
-     * houve reposição desde o último aviso. Reagendar de novo com a mesma caixa não avisa outra
-     * vez; repor e voltar a baixar avisa.
-     *
-     * Só os estoques que entraram nesta rodada - `avisosDeEstoque` já é o resultado da regra,
-     * então nada aqui reinterpreta quem devia ser avisado.
-     */
-    /**
-     * ⚠️ A marca do aviso de estoque **não é gravada aqui**, e este comentário existe para a
-     * tentação não voltar.
-     *
-     * Marcar no agendamento foi o defeito que sumia com o aviso de estoque, visto em aparelho em
-     * 11/09: o Diagnóstico listava compromisso e receita para as 00:01, e nenhum estoque.
-     *
-     * Reagendar é "cancela tudo e planeja de novo", e roda a cada volta do app ao primeiro plano.
-     * Com a marca gravada no planejamento, a sequência era: planeja o aviso para daqui a dois dias
-     * → grava a quantidade de agora → o app volta ao primeiro plano → `precisaAvisar` compara a
-     * quantidade consigo mesma, conclui que já avisou, e descarta o estoque. O aviso vivia até o
-     * reagendamento seguinte, que era questão de segundos.
-     *
-     * A trava existe para o aviso não se repetir a cada dose confirmada, e isso só faz sentido
-     * depois de ele **ter chegado** - quem grava é o listener, ao receber a entrega (ver
-     * `marcarEstoqueComoAvisado` em `escutar-avisos`). Aqui não há o que marcar: nada chegou a
-     * ninguém ainda.
+     * A trava so faz sentido depois de o aviso ter chegado, e quem grava e o listener, na entrega.
      */
 
     /**
-     * O estado real depois de reconstruir, e não só o que se tentou agendar.
+     * O estado real depois de reconstruir, e nao so o que se tentou agendar.
      *
-     * Este bloco já falhou em silêncio mais de uma vez: o agendamento é aceito, nenhum erro
-     * aparece, e o alarme não toca - por um canal que nasceu mudo, uma permissão que o Android não
-     * pede sozinho, ou uma dose que não entrou na janela. Cada uma dessas causas some no mesmo
-     * sintoma, e distingui-las sem este resumo exigia tentativa e erro no aparelho.
-     *
-     * `diagnosticarCanalDeAlarme` existia desde 02/09 e nunca foi chamada - o diagnóstico estava
-     * escrito e desligado.
+     * Este bloco ja falhou em silencio: o agendamento e aceito, nenhum erro aparece, e o alarme nao
+     * toca - por canal mudo, permissao que o Android nao pede sozinho, ou dose fora da janela. As
+     * tres causas dao o mesmo sintoma.
      */
     if (__DEV__) {
       const alarmes = avisos.filter((aviso) => aviso.modo === "alarm").length;

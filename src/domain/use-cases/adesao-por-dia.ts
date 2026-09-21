@@ -31,36 +31,18 @@ function diaLocal(data: Date): string {
 }
 
 /**
- * A adesão **dia a dia**, e não só a média do período.
+ * A adesao dia a dia, e nao so a media do periodo.
  *
- * ## Por que ela é uma pergunta diferente da taxa geral
+ * "86% em 7 dias" esconde a forma do conjunto: seis dias perfeitos e um zerado dao quase o mesmo
+ * numero que sete irregulares, e as duas situacoes pedem conversas clinicas diferentes.
  *
- * "86% nos últimos 7 dias" descreve o conjunto e esconde a forma dele: seis dias perfeitos e um
- * zerado dão quase o mesmo número que sete dias irregulares, e as duas situações pedem conversas
- * clínicas diferentes. Quem olha o próprio tratamento quer saber **qual dia** falhou - é isso que
- * liga o número a um acontecimento ("na quarta eu viajei") em vez de deixá-lo como um veredito.
+ * Conta todas as doses do dia, vencidas ou nao, e e aqui que difere da taxa geral, que olha so o
+ * que venceu. Um dia com duas doses e uma tomada esta pela metade, mesmo que a segunda venca as
+ * 22h. Contando so as vencidas, a barra do topo da Home marcava 50% e o grafico logo abaixo 100%,
+ * no mesmo dia.
  *
- * O mini-gráfico da Home já mostra isso em barras, mas barra não se lê como número: dá para ver que
- * um dia foi pior, não *quanto* pior.
- *
- * ## O que conta
- *
- * **Todas as doses do dia**, tenham vencido ou não - e é aqui que esta conta difere da taxa geral.
- *
- * A taxa geral olha só o que venceu, porque ela responde "como foi a adesão até agora" sobre um
- * período inteiro. Esta responde outra coisa: "como está **este dia**". E um dia com duas doses em
- * que uma foi tomada está pela metade, não completo - mesmo que a segunda só vença às 22h.
- *
- * A regra anterior contava só as vencidas, e o efeito em aparelho foi o app se contradizer na mesma
- * tela: a barra de progresso do topo da Home marcava 50% (uma de duas doses do dia) e o gráfico
- * logo abaixo marcava 100% (uma de uma dose vencida). Duas barras lado a lado, o mesmo dia, números
- * diferentes - e quem lê não tem como saber em qual acreditar.
- *
- * Dias **inteiramente** no futuro continuam sem taxa: ali não há nem o que ter começado. O que
- * mudou é só o dia em andamento, que agora se mede pelo que ele tem, e não pelo que já passou.
- *
- * Dias sem dose agendada vêm com `taxa: null`, e não com zero: quem não tinha o que tomar não
- * falhou em nada.
+ * Dias inteiramente no futuro seguem sem taxa. Dias sem dose vem com `null`, e nao zero: quem nao
+ * tinha o que tomar nao falhou em nada.
  */
 export function adesaoPorDia(input: AdesaoPorDiaInput): AdesaoDeUmDia[] {
   const { doses, agora, dias } = input;
