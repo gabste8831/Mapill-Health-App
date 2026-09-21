@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
-import Constants from "expo-constants";
 import * as Application from "expo-application";
 
 import {
