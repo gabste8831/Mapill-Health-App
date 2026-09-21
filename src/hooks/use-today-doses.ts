@@ -115,9 +115,9 @@ export type AgendaDoDia = {
    * isso, o aviso apareceria para quem nunca pediu lembrete nenhum - cobrando uma permissão que
    * não muda nada na vida dessa pessoa, que é o jeito mais rápido de ensinar a ignorar avisos.
    *
-   * Contava só o lembrete de dose até 12/09, e isso deixava sem painel quem usa o app de outro
-   * jeito - sem alarme de dose, mas com aviso de estoque ou de consulta. Os avisos dessa pessoa
-   * dependiam da mesma permissão e sumiam em silêncio, sem nada na tela explicando por quê.
+   * Conta as tres fontes, e nao so o lembrete de dose: quem usa o app sem alarme de dose, mas com
+   * aviso de estoque ou de consulta, ficava sem painel, e os avisos dessa pessoa sumiam em
+   * silencio por dependerem da mesma permissao.
    */
   tratamentosComLembrete: number;
 };
@@ -285,16 +285,13 @@ async function carregarAgenda(agora: Date): Promise<AgendaDoDia> {
     /**
      * **Qualquer aviso conta, e não só o de dose.**
      *
-     * Eram só as prescrições com `reminderMode`, e isso deixava sem painel de permissões quem usa o
-     * app de outro jeito: sem lembrete de dose, mas com aviso de estoque acabando ou de compromisso
-     * marcado. Esses avisos precisam da mesma permissão de notificação, e sem ela sumiam em
-     * silêncio - o app prometia avisar, não avisava, e não havia nada na tela explicando por quê.
+     * As tres fontes entram porque as tres dependem da mesma autorizacao: contando so as
+     * prescricoes com `reminderMode`, quem usa o app com aviso de estoque ou de compromisso ficava
+     * sem painel, e esses avisos sumiam em silencio. O que a segunda condicao evita e cobrar
+     * permissao de quem nao pediu aviso nenhum.
      *
-     * Relatado em 12/09. As três fontes entram porque as três dependem da mesma autorização; o que
-     * a segunda condição do painel evita é cobrar permissão de quem não pediu aviso **nenhum**.
-     *
-     * Só os de medicamento que ainda existe, pelo mesmo motivo do estoque: a prescrição de um
-     * remédio excluído continua no banco como histórico, mas não espera aviso nenhum.
+     * So os de medicamento que ainda existe: a prescricao de um remedio excluido continua no banco
+     * como historico, mas nao espera aviso.
      */
     tratamentosComLembrete:
       prescriptions.filter(
@@ -362,12 +359,10 @@ function estoquesQueVaoAcabar(
     // que ficar calado.
     if (depletion === null) continue;
     /**
-     * **Sem prazo escolhido, o cartão aparece na semana do fim.**
+     * Sem prazo escolhido, o cartao aparece na semana do fim.
      *
-     * A antecedência é opcional desde 08/09 - quem marca a caixa sem escolher prazo quer ser
-     * avisado no dia em que o estoque acabar. Aqui ela era exigida (`leadDays === null` pulava o
-     * item), e o efeito era a pessoa marcar o aviso e não ver cartão nenhum: nem o antecipado, nem
-     * o do fim.
+     * A antecedencia e opcional: quem marca a caixa sem escolher prazo quer ser avisado no dia em
+     * que o estoque acabar. Exigindo-a, a pessoa marcava o aviso e nao via cartao nenhum.
      *
      * Sete dias é a mesma janela que a tela de estoque usa para o selo de prazo, e é o intervalo em
      * que uma ida à farmácia ainda cabe sem pressa. O cartão é informação na tela, não notificação:

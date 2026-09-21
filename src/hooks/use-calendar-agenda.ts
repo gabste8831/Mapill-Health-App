@@ -59,10 +59,10 @@ export type DoseDaAgenda = {
  * causa dele. É uma data que vale a pena ver ao planejar o mês, e por isso entra no calendário;
  * mas listá-lo junto das doses o faria parecer algo a confirmar, que não é.
  *
- * `ehEstimativa` separa o que é fato do que é previsão. A validade da receita está escrita no
- * papel: 20/09 é 20/09. O fim do estoque é uma projeção que se move a cada dose confirmada e a
- * cada recontagem - desenhá-la com o mesmo peso de uma consulta marcada daria a ela uma certeza
- * que ela não tem. A tela usa isto para dizer "por volta de" em vez de afirmar o dia.
+ * `ehEstimativa` separa o que e fato do que e previsao. A validade da receita esta escrita no
+ * papel; o fim do estoque e uma projecao que se move a cada dose confirmada e a cada recontagem, e
+ * desenha-la com o mesmo peso daria a ela uma certeza que nao tem. A tela usa isto para dizer "por
+ * volta de" em vez de afirmar o dia.
  */
 export type MarcoDoDia = {
   id: string;

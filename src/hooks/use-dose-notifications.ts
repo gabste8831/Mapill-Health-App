@@ -90,13 +90,8 @@ export function useDoseNotifications(): void {
         .catch(() => router.push("/remedios"));
     }
 
-    /**
-     * `navigate`, e não `push`: **duas telas de alarme nunca se empilham.**
-     *
-     * `push` empilha sempre, mesmo com a rota já aberta - e foi o que fez cada toque na notificação
-     * abrir mais uma tela azul (visto em 10/09, passo 14.5.2). `navigate` reaproveita a rota quando
-     * os parâmetros são os mesmos, então o mesmo horário nunca vira duas telas.
-     */
+    // `navigate` e nao `push`: aquele empilha sempre, mesmo com a rota ja aberta, e cada toque na
+    // notificacao abria mais uma tela azul. Com os mesmos parametros, a rota e reaproveitada.
     function abrirTelaDeAlarme(scheduledFor: string) {
       router.navigate({ pathname: "/alarme/[instante]", params: { instante: scheduledFor } });
     }

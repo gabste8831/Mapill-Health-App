@@ -59,13 +59,12 @@ export async function savePatientProfileDraft(draft: PatientProfileDraft): Promi
   /**
    * Sobe agora, sem esperar o app sair e voltar.
    *
-   * A ficha é o caso em que a espera mais custa: quem a edita costuma ficar no app depois, então o
-   * gatilho de "voltou ao primeiro plano" pode demorar horas - e se a pessoa trocar de conta nesse
-   * meio-tempo, o `pull` traz a versão antiga e a edição some. Foi o que aconteceu com o Gabriel em
-   * 14/09, com o nome que ele tinha acabado de corrigir.
+   * A ficha e o caso em que a espera mais custa: quem a edita costuma ficar no app depois, entao o
+   * gatilho de "voltou ao primeiro plano" pode demorar horas, e trocar de conta nesse meio-tempo
+   * faz o `pull` trazer a versao antiga e a edicao sumir.
    *
-   * Sem `await`: a tela não deve esperar a rede para dizer que salvou - o dado já está no SQLite, e
-   * é ele que manda. Falhando aqui, a linha continua pendente e a próxima passada a leva.
+   * Sem `await`: a tela nao deve esperar a rede para dizer que salvou, porque o dado ja esta no
+   * SQLite. Falhando aqui, a linha continua pendente e a proxima passada a leva.
    */
   void sincronizar().catch(() => {});
 }

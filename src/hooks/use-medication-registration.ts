@@ -17,13 +17,11 @@ import type { MedicamentoDraft } from "@/telas/CadastroDeMedicamento/FormularioD
 const persistsLocally = Platform.OS !== "web";
 
 /**
- * Quantos dias de horários são gerados de uma vez. Agendar até o infinito não cabe em banco nem
- * no limite de alarmes do sistema operacional.
+ * Quantos dias de horarios sao gerados de uma vez: agendar ate o infinito nao cabe em banco nem no
+ * limite de alarmes do sistema.
  *
- * A janela é reabastecida a cada abertura do app por `reabastecerGradeDeDoses`, com este mesmo
- * horizonte. Até 13/09 este comentário prometia esse reabastecimento e ele **não existia**: a grade
- * acabava no 30º dia e o tratamento contínuo parava de avisar, calado (passo A.4). Se mexer neste
- * número, mexa no `HORIZONTE_EM_DIAS` de lá junto.
+ * A janela e reabastecida a cada abertura por `reabastecerGradeDeDoses`, com este mesmo horizonte.
+ * Mexendo neste numero, mexer no `HORIZONTE_EM_DIAS` de la junto.
  */
 const SCHEDULE_HORIZON_DAYS = 30;
 
@@ -202,9 +200,9 @@ export async function salvarMedicamento(
  * o E10 preenche é a lacuna de **adesão e histórico** do primeiro dia, não a de estoque, que já
  * nasce certa.
  *
- * O ganho maior nem é o registro: é a pergunta existir. Quem cadastra às 12h um remédio das 08h e
- * vê "você já tomou a dose das 08:00?" descobre ali que tinha uma dose hoje - inclusive quem ainda
- * não tomou (decisão de 27/08).
+ * O ganho maior nem e o registro: e a pergunta existir. Quem cadastra as 12h um remedio das 08h e
+ * ve "voce ja tomou a dose das 08:00?" descobre ali que tinha uma dose hoje, inclusive quem ainda
+ * nao tomou.
  */
 async function registrarDosesJaTomadas(
   draft: MedicamentoDraft,

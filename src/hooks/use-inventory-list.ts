@@ -186,9 +186,9 @@ export async function salvarAvisoDeEstoqueBaixo(
 
   await repository.save({
     ...atual,
-    // Só a caixa decide, sem depender do prazo: sem antecedência o aviso continua existindo e sai
-    // no dia em que o estoque acabar (ver `planejar-avisos-de-estoque`). O cadastro ainda exigia as
-    // duas coisas, e gravava `false` para quem marcava sem escolher prazo - corrigido em 11/09.
+    // So a caixa decide, sem depender do prazo: sem antecedencia o aviso continua existindo e sai
+    // no dia em que o estoque acabar. Exigindo as duas coisas, quem marcava sem escolher prazo
+    // acabava com o aviso desligado.
     lowStockAlertEnabled: aviso.habilitado,
     // Desligar o aviso limpa o prazo: guardá-lo deixaria um valor órfão que voltaria a valer sozinho
     // se alguém remarcasse a caixa, escolhendo por ela algo que ela não pediu desta vez.

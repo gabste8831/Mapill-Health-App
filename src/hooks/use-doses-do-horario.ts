@@ -41,11 +41,11 @@ export type DoseDoHorario = {
    */
   storageLocation: string | null;
   /**
-   * A observação livre do tratamento, quando houver.
+   * A observacao livre do tratamento, quando houver.
    *
-   * Diferente de `intakeNote`, que acompanha a dose ("em jejum"): esta é o que o paciente anotou
-   * sobre o tratamento como um todo. Pedido do Gabriel em 12/09 - na tela onde a dose se confirma,
-   * tudo o que ele cadastrou precisa estar visível, porque é ali que a informação vira orientação.
+   * Diferente de `intakeNote`, que acompanha a dose: esta e o que o paciente anotou sobre o
+   * tratamento como um todo. Na tela onde a dose se confirma, tudo o que foi cadastrado precisa
+   * estar visivel, porque e ali que a informacao vira orientacao.
    */
   notes: string | null;
   latestStatus: IntakeStatus | null;

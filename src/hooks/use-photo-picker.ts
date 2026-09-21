@@ -21,9 +21,9 @@ export function usePhotoPicker(prefix: string) {
   const [isPicking, setPicking] = useState(false);
 
   /**
-   * @param origin de onde tirar a imagem. A câmera entrou em 27/08 (E10 da revisão): é improvável
-   * que alguém já tenha a foto da caixa do remédio na galeria, e mandar sair do app para
-   * fotografar e voltar era o caminho longo para a origem mais provável.
+   * @param origin de onde tirar a imagem. A camera existe porque e improvavel que alguem ja tenha
+   * a foto da caixa na galeria, e sair do app para fotografar e voltar era o caminho longo para a
+   * origem mais provavel.
    *
    * A permissão é pedida **só quando a origem escolhida precisa dela** - abrir a galeria não
    * dispara pedido de câmera. É o que sobra do princípio de minimização depois de a câmera passar
