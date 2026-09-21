@@ -18,23 +18,12 @@ export type VisualizadorDeMidiaProps = {
 /**
  * A foto ampliada, sobre a tela que a chamou.
  *
- * ## Por que não ocupa a tela toda
+ * Camada por cima, e nao tela propria: quem toca na miniatura no meio de um cadastro quer conferir
+ * e voltar ao campo seguinte, e navegar perderia o lugar, alem de empilhar uma rota sobre o modal.
+ * Assim o formulario fica intacto atras e a camada sai com um toque fora.
  *
- * As miniaturas do app são pequenas - 56 a 72px - e servem para *reconhecer*, não para ler. A foto
- * da caixa responde "é este o remédio?"; a da receita responde "o que está escrito aqui?", e essa
- * segunda pergunta não se responde numa miniatura.
- *
- * Mas a resposta também não justifica trocar de tela. Quem toca na miniatura no meio de um cadastro
- * quer conferir e voltar ao campo seguinte - uma navegação de ida e volta perderia o lugar, e no
- * Android empilharia uma rota sobre o modal do cadastro. A camada por cima mantém o formulário
- * intacto atrás e sai com um toque fora.
- *
- * ## Só imagem
- *
- * PDF não se renderiza aqui: `expo-image` não o lê, e um leitor de PDF exigiria dependência nativa
- * (build nova). Quem chama trata o `document` abrindo o leitor do sistema - ver `abrirDocumento` em
- * `abrir-anexo.ts`. É melhor caminho de qualquer forma: o leitor do aparelho tem zoom, busca e
- * rolagem de páginas, que este visualizador nunca teria.
+ * So imagem: `expo-image` nao le PDF, e um leitor exigiria dependencia nativa. Quem chama abre o
+ * leitor do sistema, que e melhor caminho de qualquer forma - tem zoom, busca e rolagem.
  */
 export function VisualizadorDeMidia({ uri, titulo, legenda, onClose }: VisualizadorDeMidiaProps) {
   return (

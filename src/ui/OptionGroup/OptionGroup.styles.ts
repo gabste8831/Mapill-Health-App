@@ -126,22 +126,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     color: cores.onSurfaceVariant,
   },
   /**
-   * Não é o branco cheio do label: continua sendo texto de apoio depois de selecionado, e igualar
-   * os dois apagaria a hierarquia que o hint tem quando o cartão está apagado.
+   * Nao e o branco cheio do label: continua sendo texto de apoio depois de selecionado.
    *
-   * **`onPrimary` a 85%, e não `secondaryContainer`** (12/09). O token anterior é uma cor de
-   * *fundo*, e o valor dele muda de papel conforme o tema: no escuro ele é `#2C374A`, um navy
-   * escuro, e como o cartão selecionado é azul em todos os temas, o resultado era **2,08:1**
-   * (medido) - texto escuro sobre fundo escuro. Foi o que o Gabriel encontrou ao testar o cadastro
-   * de medicação no modo escuro.
+   * `onPrimary` a 85%, e nao um token de `container`: aquele e cor de fundo, e o valor dele muda de
+   * papel conforme o tema - no escuro dava 2,08:1, texto escuro sobre fundo escuro. Uma cor so esta
+   * segura quando e definida contra a superficie em que vai pousar.
    *
-   * O defeito também existia no tema claro, em 4,34:1, abaixo dos 4,5 que a WCAG pede para texto
-   * normal - só era menos visível. A lição é a mesma da tela de alertas: uma cor só está segura
-   * quando é definida **contra a superfície em que vai pousar**, e um `container` nunca foi isso.
-   *
-   * Com `onPrimary` a 85% o par é sempre o mesmo par, em qualquer tema: 4,59:1 nos três de fundo
-   * azul e 6,88:1 no alto contraste, com o título cheio em 5,75:1 e 8,91:1 - a hierarquia continua
-   * legível porque a diferença entre os dois textos é de peso, não de legibilidade.
+   * Assim o par e sempre o mesmo: 4,59:1 nos tres de fundo azul e 6,88:1 no alto contraste.
    */
   optionHintSelected: {
     color: withOpacity(cores.onPrimary, 0.85),

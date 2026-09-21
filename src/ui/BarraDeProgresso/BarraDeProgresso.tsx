@@ -30,17 +30,12 @@ type BarraDeProgressoProps = {
 /**
  * A barra que cresce, em vez de saltar.
  *
- * ## Por que animar isto e não a lista inteira
+ * O progresso do dia e a unica coisa na Home que representa uma grandeza que muda por causa de algo
+ * que a pessoa acabou de fazer: ver a barra crescer e o que liga o toque em "Confirmar" ao avanco
+ * do dia.
  *
- * O progresso do dia é a única coisa na Home que representa uma **grandeza que muda por causa de
- * algo que a pessoa acabou de fazer**. Ver a barra crescer é o que liga o toque em "Confirmar" ao
- * avanço do dia; sem isso o número novo simplesmente aparece, e a relação entre a ação e o efeito
- * fica por conta de quem estava olhando na hora certa.
- *
- * ## A largura vive na thread de UI
- *
- * `width` em porcentagem é animável pelo Reanimated e roda fora da thread de JS, então a barra não
- * engasga enquanto o registro da dose escreve no banco - que é exatamente quando ela anima.
+ * A largura anima na thread de UI, entao a barra nao engasga enquanto o registro da dose escreve no
+ * banco, que e exatamente quando ela anima.
  */
 export function BarraDeProgresso({
   valor,

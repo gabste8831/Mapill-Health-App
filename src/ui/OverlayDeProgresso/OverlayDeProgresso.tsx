@@ -14,20 +14,14 @@ export type OverlayDeProgressoProps = {
 /**
  * Tela cheia enquanto algo demorado acontece, sem prometer quando termina.
  *
- * ## Por que não o `SuccessOverlay`
+ * Nao e o `SuccessOverlay`, que some sozinho porque comemora algo ja acabado: aqui o tempo e da
+ * rede, e um overlay que sai por conta propria devolveria a pessoa a uma tela incompleta.
  *
- * Aquele some sozinho depois de alguns segundos, porque comemora algo que **já acabou**. Aqui o
- * tempo é da rede: pode ser meio segundo com 4G bom, pode ser dez com sinal ruim. Um overlay que
- * sai por conta própria devolveria a pessoa a uma tela ainda incompleta.
+ * Existe porque o login restaura os dados antes de decidir para onde ir, e sem cobrir esse
+ * intervalo a tela de login reaparece por alguns segundos, o que le como falha.
  *
- * ## Por que existe
- *
- * O login restaura os dados antes de decidir para onde ir. Sem cobrir esse intervalo, quem entra
- * com o Google vê a tela de login **voltar** por alguns segundos antes de a Home aparecer - e uma
- * tela de login que reaparece depois de você ter entrado lê como falha, não como espera.
- *
- * Sem barra de progresso e sem porcentagem: não há como saber quantos registros virão antes de
- * pedi-los, e uma barra que anda até 90% e para é pior que nenhuma.
+ * Sem barra nem porcentagem: nao ha como saber quantos registros virao antes de pedi-los, e uma
+ * barra que anda ate 90% e para e pior que nenhuma.
  */
 export function OverlayDeProgresso({ visivel, titulo, descricao }: OverlayDeProgressoProps) {
   const styles = useEstilos(criarEstilos);

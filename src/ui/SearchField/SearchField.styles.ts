@@ -8,9 +8,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * na tela inicial do celular. Buscar também é diferente de preencher: nada aqui vai ser salvo,
    * e o campo não deve parecer que cobra uma resposta.
    *
-   * Sombra, e não borda - mesma regra do resto do app (decisão de 21/08). A pílula já tem a forma
-   * de campo de busca sem precisar de contorno pra provar isso, e a borda de 2px carregada estava
-   * deixando o campo "pesado" perto do resto da tela, que não usa contorno em nenhum outro lugar.
+   * Sombra, e nao borda, como no resto do app: a pilula ja tem a forma de campo de busca sem
+   * precisar de contorno para prova-lo, e a borda deixava o campo pesado perto do resto da tela.
    *
    * **No alto contraste vale o contrário**, e por isso a fronteira vem do tema. Ali a sombra não
    * se vê: a pílula branca sobre o fundo branco perdia toda a fronteira, e o que sobrava era um

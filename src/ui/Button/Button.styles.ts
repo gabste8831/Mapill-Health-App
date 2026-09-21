@@ -45,8 +45,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * A folha já é uma superfície clara elevada, então uma sombra sutil sobre ela não se vê, e o
    * botão sumia junto: "Cancelar" virava um texto solto ao lado do "Confirmar", justamente onde
    * ninguém pode hesitar sobre o que é clicável. O contorno entra **só aqui**, e não no `outline`
-   * inteiro, porque sobre o fundo da tela a sombra funciona e a borda contraria a linguagem
-   * visual do app (sombra no lugar de borda, decisão de 21/08).
+   * inteiro, porque sobre o fundo da tela a sombra funciona e a borda contraria a linguagem visual
+   * do app, que e sombra no lugar de borda.
    */
   outlineEmFolha: ajustes.contornarSuperficies
     ? // No alto contraste o `outline` acima ja traz contorno proprio, e mais forte: sobrescrever

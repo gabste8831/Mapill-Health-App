@@ -7,8 +7,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * 1px fazia o card parecer uma caixa desenhada e não uma superfície acima. A sombra é
    * discreta de propósito - o objetivo é separar do fundo, não empilhar camadas.
    *
-   * Esta foi a decisão original (21/08); o valor virou `surfaceShadow` em 30/08, quando ficou
-   * claro que a cópia dele em cinco arquivos era o que deixava as telas divergirem.
+   * O valor vive em `surfaceShadow`: a copia dele em cinco arquivos era o que deixava as telas
+   * divergirem.
    */
   card: {
     backgroundColor: cores.surfaceContainerLowest,

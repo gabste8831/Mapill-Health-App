@@ -2,16 +2,12 @@ import { estilosDoTema, radius, spacing, typography, withOpacity } from "@/share
 
 export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
-   * **Azul informativo, e não o amarelo de atenção.**
+   * Azul informativo, e nao o amarelo de atencao.
    *
-   * Era `warningSurface`, o mesmo amarelo do alerta de recontagem de estoque e do painel de
-   * permissões. O Gabriel apontou o problema em 12/09: no vocabulário do app, amarelo significa
-   * "algo está pendente" - e aqui não há pendência conhecida. Este aviso aparece **sempre**, porque
-   * o app não consegue saber se as três autorizações foram atendidas.
-   *
-   * Amarelo permanente numa tela de cadastro lê como "você deixou algo em branco", inclusive para
-   * quem preencheu tudo. A cor estava afirmando um estado que o app não tem como verificar, que é o
-   * mesmo erro do placar e da lista da Home, em outra forma.
+   * No vocabulario do app, amarelo significa "algo esta pendente", e aqui nao ha pendencia
+   * conhecida: este aviso aparece sempre, porque o app nao sabe se as tres autorizacoes foram
+   * atendidas. Amarelo permanente numa tela de cadastro le como "voce deixou algo em branco",
+   * inclusive para quem preencheu tudo.
    *
    * `primarySurface` é a superfície de informação do app, e o par `onPrimarySurface` dá **8,73:1**
    * sobre ela (medido) - folgado para AA. Azul aqui também diz a coisa certa: é a cor dos caminhos,
@@ -32,29 +28,22 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     borderRadius: radius.lg,
     backgroundColor: cores.primarySurface,
     /**
-     * A borda do `CardDeAtalho`, e pelo mesmo motivo: **isto é um caminho, não um conteúdo.**
+     * A borda do `CardDeAtalho`, pelo mesmo motivo: isto e um caminho, nao um conteudo. Sem ela o
+     * bloco lia como aviso a ser lido, e nao como algo a ser tocado.
      *
-     * Pedida pelo Gabriel em 12/09, comparando com o atalho de estoque. Sem ela o bloco lia como
-     * um aviso a ser lido, e não como algo a ser tocado - o mesmo problema que as linhas da tela de
-     * permissões tinham, em outra escala.
-     *
-     * `corDeDestaque` e não `primary`: no tema escuro `primary` é o navy de fundo, e uma borda dele
-     * sobre superfície escura não se distingue de nada. No alto contraste ela vira azul cheio de
-     * 2px, junto com os demais contornos do tema (ver `contornarSuperficies`).
+     * `corDeDestaque` e nao `primary`: no escuro aquele e o navy de fundo, e uma borda dele sobre
+     * superficie escura nao se distingue de nada.
      */
     ...(ajustes.contornarSuperficies
       ? { borderWidth: 2, borderColor: cores.corDeDestaque }
       : { borderWidth: 1, borderColor: withOpacity(cores.corDeDestaque, 0.35) }),
   },
   /**
-   * O estado urgente: **vermelho enquanto o app comprova que falta autorização.**
+   * O estado urgente: vermelho enquanto o app comprova que falta autorizacao.
    *
-   * Decisão do Gabriel em 12/09, e ela é coerente com tudo o que a gente corrigiu hoje: a cor só
-   * afirma o que o app sabe. Enquanto o painel "Seus alarmes não vão funcionar" estiver na Home,
-   * existe pendência **provada** - e aí o vermelho é factual, não dramatização.
-   *
-   * Quando as verificáveis são atendidas, volta ao azul. As três restantes o app não consegue ler, e
-   * manter o vermelho por elas seria pintar de erro um estado desconhecido.
+   * A cor so afirma o que o app sabe. Havendo pendencia provada, o vermelho e factual; atendidas as
+   * verificaveis, volta ao azul, porque manter o vermelho pelas outras seria pintar de erro um
+   * estado desconhecido.
    *
    * A borda é `error` cheio (6,03:1 sobre branco, medido) porque aqui ela carrega significado, e não
    * só separação - é o mesmo critério que faz o painel crítico usar a cor cheia.

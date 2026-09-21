@@ -18,21 +18,14 @@ type LogoDoMapillProps = {
 };
 
 /**
- * A marca do Mapill: o quadrado azul com a cápsula, e a palavra "Mapill" ao lado.
+ * A marca do Mapill: o quadrado azul com a capsula, e a palavra ao lado.
  *
- * ## Dois arquivos, e não um com a cor trocada
+ * Dois arquivos, e nao um com a cor trocada: o que muda entre eles e so a palavra, escura ou
+ * branca conforme o fundo. O quadrado e a capsula sao identicos nos dois, porque marca que muda de
+ * cor conforme a tela deixa de ser reconhecida.
  *
- * O que muda entre eles é **só a palavra** - escura na versão para fundo claro, branca na versão
- * para fundo escuro. O quadrado azul e a cápsula são idênticos nos dois: eles são a marca, e marca
- * que muda de cor conforme a tela deixa de ser reconhecida. É a mesma lógica do ícone do app, que
- * não vira outro desenho quando o celular entra no modo escuro.
- *
- * ## Por que dois arquivos resolvem o defeito antigo
- *
- * A marca já foi um PNG só (`mark-transparent-a.png`), com a palavra em preto congelado - e por
- * isso ela **desaparecia** no tema escuro, onde o cabeçalho é quase preto. Foi esse defeito que
- * levou a desenhar a wordmark em texto e, agora, a ter uma versão por esquema: a escolha do
- * arquivo é feita aqui, uma vez, em vez de cada tela lembrar de qual usar.
+ * Com um PNG so, de palavra em preto congelado, a marca desaparecia no tema escuro. A escolha do
+ * arquivo e feita aqui, uma vez, em vez de cada tela lembrar de qual usar.
  */
 export function LogoDoMapill({ largura = 220, sobreFundoEscuro, style }: LogoDoMapillProps) {
   const { tema } = useTema();
