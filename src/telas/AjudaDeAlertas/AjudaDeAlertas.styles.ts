@@ -11,11 +11,10 @@ import {
 /**
  * Reativa ao tema desde 12/09 - antes era `StyleSheet.create` com a paleta lida na importação.
  *
- * Este arquivo era o maior devedor do app (15 ocorrências no `scripts/tema-pendente.mjs`), e a
- * consequência não era estética: `StyleSheet.create` roda uma vez, quando o módulo é importado, e
- * as cores lidas ali ficam congeladas. Quem trocasse para o tema escuro ou para o alto contraste
- * continuava vendo esta tela no tema claro - texto quase branco sobre fundo quase branco, na tela
- * que trata do assunto mais difícil do app. O Gabriel apontou em 12/09.
+ * A consequencia de nao responder ao tema nao era estetica: `StyleSheet.create` roda uma vez, na
+ * importacao, e as cores ficam congeladas. Quem trocasse para o escuro ou o alto contraste
+ * continuava vendo esta tela no claro - texto quase branco sobre fundo quase branco, na tela que
+ * trata do assunto mais dificil do app.
  */
 export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   safeArea: {
@@ -86,28 +85,14 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * A linha de uma permissão - desenhada como **superfície elevada**, igual às linhas de Ajustes.
    *
-   * ## Por que sombra, e não borda
+   * Sombra, e nao borda, que e a regra do app: tentativas com borda erraram porque `surface` e
+   * `background` sao a mesma cor no tema claro, e a linha ficava em 1,38:1 sem preenchimento que a
+   * separasse da pagina. `surfaceContainerLowest` da o branco, e a sombra faz a elevacao.
    *
-   * Esta linha passou por quatro tentativas em 12/09, e as três primeiras erraram por insistir em
-   * borda: `surface` a 60% sobre o bloco dava **1,11:1** (medido); depois azul cheio, que gritava
-   * em cinco linhas empilhadas; depois cinza `outlineVariant`, que dá **1,38:1** porque `surface` e
-   * `background` são a mesma cor no tema claro - a linha não tinha preenchimento que a separasse da
-   * página, e a borda sustentava o contorno sozinha.
+   * No alto contraste, `fronteiraDeSuperficie` troca a sombra por contorno: la a sombra nao e
+   * discricao, e a fronteira apagada. O helper e o mesmo do `Card`, entao as telas nao divergem.
    *
-   * A regra do app resolve isso e é anterior a tudo: **sombra e nunca borda** (21/08). Uma borda de
-   * 1px faz o bloco parecer caixa desenhada de formulário HTML; o que separa uma superfície do fundo
-   * é ela estar *acima* dele. `surfaceContainerLowest` dá o branco que `surface` não dava, e a
-   * sombra faz a elevação - é exatamente o `Card` de Ajustes, que foi o pedido do Gabriel.
-   *
-   * ## E no alto contraste
-   *
-   * `fronteiraDeSuperficie` troca a sombra por contorno quando o tema pede. Isso não é detalhe:
-   * a regra da sombra pressupõe enxergar 8% de opacidade, e quem escolheu alto contraste não
-   * enxerga - ali a sombra não é discrição, é a fronteira apagada. O helper é o mesmo que o `Card`
-   * usa, então as duas telas continuam iguais nos três temas em vez de divergirem na próxima
-   * mudança.
-   *
-   * ## As medidas
+   * As medidas
    *
    * 56dp de altura mínima, acima dos 44 do projeto: esta é a tela mais difícil do app para o
    * público mais velho, e o alvo maior é a acomodação mais barata que existe. `gap` maior pelo

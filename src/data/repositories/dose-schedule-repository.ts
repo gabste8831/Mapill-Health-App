@@ -191,7 +191,7 @@ export class DoseScheduleRepository
      * A comparação de texto deixava escapar toda linha gravada com `+00:00` em vez de `Z`: o `+`
      * (0x2B) vem antes de qualquer dígito em ASCII, então `'...+00:00' >= '...Z'` é falso mesmo
      * quando o momento é posterior. A regeração por fuso apagava parte da grade, regravava, e as
-     * sobreviventes ficavam com o horário antigo - o defeito que o Gabriel viu em 13/09, com as
+     * sobreviventes ficavam com o horario antigo - o defeito visto em aparelho, com as
      * 21:00 virando 20:00 ao trocar para Manaus.
      *
      * `normalizarInstante` no `toRow` impede que a coluna volte a ter duas formas, mas as linhas
