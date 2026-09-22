@@ -66,7 +66,7 @@ function ItemDeDose({ dose, onConfirmar, onPular, onAdiar }: ItemProps) {
         ) : null}
 
         {/**
-         * **Tudo o que foi cadastrado aparece aqui** - pedido do Gabriel em 12/09.
+         * Tudo o que foi cadastrado aparece aqui.
          *
          * Esta é a tela onde a dose se confirma, e é para onde o toque na notificação leva. Quem
          * chega aqui está com o remédio na mão, ou indo buscá-lo: cada campo que o app guarda e não

@@ -104,7 +104,7 @@ function ItemDeRemedio({ item, onAbrirDetalhe, onEdit, onDelete, onVerFoto }: It
 
           <View style={styles.itemHeaderText}>
             {/**
-             * O nome e, ao lado, o sino de que **este remédio avisa** - proposta do Gabriel em 12/09.
+             * O nome e, ao lado, o sino de que este remedio avisa.
              *
              * Antes, saber se um tratamento tinha lembrete exigia abrir a edição dele, um por um. É
              * exatamente o que a heurística de *reconhecimento em vez de recordação* (Nielsen) pede

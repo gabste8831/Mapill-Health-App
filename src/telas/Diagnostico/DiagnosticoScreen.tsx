@@ -98,12 +98,10 @@ function ItemAgendado({
 /**
  * O estado real do subsistema de avisos, e os disparos de teste.
  *
- * ## Por que uma tela, e não logs
- *
- * O alarme é a função central do app e a mais cara de testar: exige esperar o horário, bloquear o
- * aparelho, às vezes reiniciar. Quando não tocava, sobravam meia dúzia de explicações possíveis
- * (não foi agendado, foi para o horário errado, o canal está mudo, falta permissão, o Android matou
- * o processo) e nenhuma forma de distinguir entre elas sem cabo e Metro ligados.
+ * Uma tela, e nao logs: o alarme e a funcao central do app e a mais cara de testar, e quando nao
+ * tocava sobravam meia duzia de explicacoes possiveis - nao foi agendado, foi para o horario
+ * errado, o canal esta mudo, falta permissao, o Android matou o processo - sem forma de distinguir
+ * entre elas sem cabo e Metro ligados.
  *
  * Aqui a resposta vem antes da espera: o que está agendado **neste instante**, para quando, em que
  * canal, com quais permissões - e quantos avisos *deveriam* existir. Um alarme que não aparece na
@@ -128,9 +126,9 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
     /**
      * As doses direto do banco, sem passar pelo planejador de avisos.
      *
-     * É de propósito que não venham de `diagnosticarAvisos`: aquilo lista o que o **sistema** tem
-     * agendado, e com a permissão negada é sempre vazio - como no teste de 13/09, que mostrou
-     * "Agendados: 0" e não distinguia "a grade está vazia" de "não há permissão para agendar".
+     * De proposito nao vem de `diagnosticarAvisos`: aquilo lista o que o sistema tem agendado, e
+     * com a permissao negada e sempre vazio - "Agendados: 0" nao distingue "a grade esta vazia" de
+     * "nao ha permissao para agendar".
      */
     const agora = new Date();
     const daquiADias = new Date(agora.getTime() + 3 * 24 * 60 * 60 * 1000);
@@ -300,10 +298,9 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
         {/**
          * Qual build está rodando - a primeira pergunta de toda sessão de teste.
          *
-         * Em 13/09 o Gabriel instalou uma build nova e não tinha como confirmar, de dentro do app,
-         * que era ela: a saída era conferir o versionCode nas configurações do Android. Um teste
-         * feito sobre a build errada não é um teste, e o custo de descobrir isso depois é a rodada
-         * inteira.
+         * Sem isto, confirmar qual build esta rodando exigia sair do app e ler o versionCode nas
+         * configuracoes do Android. Um teste feito sobre a build errada nao e um teste, e o custo
+         * de descobrir isso depois e a rodada inteira.
          *
          * O `versionCode` é o que decide, porque sobe a cada build; o `1.0.0` fica igual por meses.
          */}
@@ -323,13 +320,12 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
             {/**
              * O alarme **sai no volume de mídia**, e esta linha diz isso em vez de esconder.
              *
-             * O patch de `USAGE_ALARM` no canal está aplicado - verificado rodando `expo prebuild`
-             * em 13/09 -, e mesmo assim não funciona: quem toca o som da notificação é o
-             * NotificationManager, e ele usa o stream dele independente do que o canal peça. A
-             * correção é o app tocar o próprio som (ver E.1 em `docs/O-QUE-FALTA-TESTAR.md`).
+             * O patch de `USAGE_ALARM` no canal esta aplicado e mesmo assim nao funciona: quem toca
+             * o som da notificacao e o NotificationManager, que usa o stream dele independente do
+             * que o canal peca. A correcao e o app tocar o proprio som.
              *
-             * Marcada como "ruim" de propósito: é uma limitação conhecida e ainda aberta, e um "OK"
-             * aqui foi exatamente o que deixou o defeito passar na build de 12/09.
+             * Marcada como "ruim" de proposito: e limitacao conhecida e ainda aberta, e um "OK"
+             * aqui foi o que deixou o defeito passar despercebido.
              */}
             <Linha rotulo="Volume do alarme" valor="Mídia (ver E.1)" estado="ruim" />
           </View>
@@ -338,9 +334,8 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
         {/**
          * O que a manutenção da grade fez na última execução.
          *
-         * Existe por causa do 13/09: o reabastecimento falhou, o `catch` engoliu o erro, e o teste
-         * não tinha como distinguir "a correção não funcionou" de "a correção nem rodou". Sem esta
-         * seção, a única saída era ler o código e adivinhar.
+         * Sem esta secao, com o `catch` engolindo o erro do reabastecimento, nao ha como distinguir
+         * "a correcao nao funcionou" de "a correcao nem rodou".
          *
          * "Ainda não rodou" é resposta legítima: a manutenção acontece dentro de
          * `reagendarTodosOsAvisos`, então basta tocar em "Refazer a janela de avisos" abaixo.
@@ -370,10 +365,9 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                 {/**
                  * **Esta é a linha que responde o D.3**, e não a de cima.
                  *
-                 * "Doses gravadas: 0" é ambíguo: pode ser grade já completa (certo) ou
-                 * reabastecimento que não fez nada (errado) - o mesmo número para os dois casos, que
-                 * foi o que travou o teste de 13/09. A data do fim distingue: perto de 30 dias, a
-                 * grade alcança o horizonte; a poucos dias, o tratamento vai emudecer.
+                 * "Doses gravadas: 0" e ambiguo: pode ser grade ja completa ou reabastecimento que
+                 * nao fez nada, o mesmo numero para os dois casos. A data do fim distingue: perto
+                 * de 30 dias, a grade alcanca o horizonte; a poucos dias, o tratamento vai emudecer.
                  */}
                 <Linha
                   rotulo="Grade vai até"
@@ -395,10 +389,9 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
             {/**
              * O fuso do aparelho e o deslocamento - sempre visíveis, mesmo sem manutenção.
              *
-             * No teste de 13/09 a dose das 18:00 apareceu às 15:00, e isso **não** é a conversão de
-             * Rio do Sul para Manaus, que daria 17:00. Três horas é o próprio deslocamento de Rio do
-             * Sul, o que aponta para um instante UTC sendo lido como hora de parede em algum ponto -
-             * e não para a troca de fuso em si.
+             * Uma dose das 18:00 aparecendo as 15:00 nao e conversao entre fusos, que daria outro
+             * valor: tres horas e o proprio deslocamento local, o que aponta para um instante UTC
+             * sendo lido como hora de parede em algum ponto, e nao para a troca de fuso em si.
              *
              * Sem ver o fuso que o app enxerga, distinguir essas duas explicações é chute. Estas
              * linhas existem para o próximo teste começar com o dado na mão.
@@ -475,8 +468,8 @@ export function DiagnosticoScreen({ onBack }: DiagnosticoScreenProps) {
                       Importa porque canal no Android é imutável: uma correção de som, importância ou
                       `AudioAttributes` só alcança quem já instalou se a versão subir, e um canal
                       antigo sobrevivendo parece saudável em toda verificação que o app sabe fazer.
-                      Em 13/09 o Gabriel precisou conferir se o `v7` tinha nascido, e a tela não
-                      dizia. */}
+                      Sem esta linha, conferir se a versao nova do canal nasceu era impossivel de
+                      dentro do app. */}
                   <Text style={styles.agendadoId} numberOfLines={1}>
                     {canal.id}
                   </Text>

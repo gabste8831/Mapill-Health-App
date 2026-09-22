@@ -208,8 +208,8 @@ const WEEKDAYS: { value: Weekday; label: string; nome: string }[] = [
   { value: 6, label: "Sáb", nome: "sábado" },
 ];
 
-// Os rótulos moram em `shared/orientacoes-de-tomada` desde 14/09: a tela do alarme passou a
-// mostrá-los, e duas cópias divergiriam no dia em que alguém corrigisse um texto num lugar só.
+// Os rotulos moram em `shared/orientacoes-de-tomada` porque a tela do alarme tambem os mostra, e
+// duas copias divergiriam no dia em que alguem corrigisse um texto num lugar so.
 const INTAKE_INSTRUCTION_LABELS = ORIENTACOES_DE_TOMADA;
 
 /** Ficha que só abre o campo livre; não é valor do domínio. */
@@ -1266,18 +1266,10 @@ export function FormularioDeMedicamentoScreen({
           : null,
       stockUnit: stockUnitForMedicationForm(form, doseUnit),
       /**
-       * **Marcar a caixa basta** - a antecedência é separada, e opcional.
+       * Marcar a caixa basta: a antecedencia e separada, e opcional.
        *
-       * Havia um `&& leadDays !== null` aqui, com a justificativa de que "alerta sem antecedência
-       * não dispara nunca, então não fica ligado mentindo". Era verdade antes de 08/09, quando o
-       * planejador descartava o estoque sem prazo; deixou de ser quando "quero ser avisado" foi
-       * separado de "quero ser avisado com N dias" - hoje `planejar-avisos-de-estoque` agenda o
-       * aviso do **fim** só com `querAviso`, sem olhar o prazo.
-       *
-       * A condição sobreviveu à correção e virou o defeito oposto: marcar sem escolher prazo
-       * gravava `false`, e a interface confirmava uma intenção que o banco negava. Visto em
-       * aparelho em 11/09, e é o mesmo caso que a receita (`renewalReminderEnabled`) já tratava
-       * certo - o que mostra que a correção passou por lá e não por aqui.
+       * Exigindo tambem o prazo, marcar sem escolher um gravava `false`, e a interface confirmava
+       * uma intencao que o banco negava. O planejador agenda o aviso do fim so com `querAviso`.
        */
       lowStockAlertEnabled: tracksStock && wantsLowStockAlert,
       lowStockAlertLeadDays:

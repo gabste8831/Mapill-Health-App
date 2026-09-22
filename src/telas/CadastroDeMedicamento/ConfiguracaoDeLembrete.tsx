@@ -114,21 +114,17 @@ export function ConfiguracaoDeLembrete({
         />
 
         {/**
-         * **Um bloco de permissões por vez** - nunca os dois.
+         * Um bloco de permissoes por vez, nunca os dois: convivendo, o painel e o aviso apareciam
+         * um debaixo do outro dizendo a mesma coisa. Dois blocos iguais nao somam urgencia, eles
+         * dividem a atencao e ensinam que a segunda metade e decorativa.
          *
-         * Os dois conviviam aqui, e o Gabriel encontrou o resultado em 12/09: quem abria o app pela
-         * primeira vez e ia cadastrar um remédio via a mesma cobrança duplicada nesta folha, o
-         * painel e o aviso, um debaixo do outro. Dois blocos dizendo a mesma coisa não somam
-         * urgência: eles dividem a atenção e ensinam que a segunda metade é decorativa.
+         * A escolha e por quem tem mais a dizer naquele momento:
          *
-         * A escolha é por **quem tem mais a dizer** naquele momento, e por isso é exclusiva:
-         *
-         * - Com pendência **comprovada**, o painel: ele nomeia a consequência ("seus alarmes não vão
-         *   funcionar") e leva à tela onde as cinco autorizações se resolvem. É o bloco mais
-         *   completo, e foi o que o Gabriel pediu para manter.
-         * - Sem pendência comprovada, o aviso: as três não-verificáveis continuam podendo estar
-         *   desligadas, e esta folha é onde a pessoa acredita que vai ser avisada. Calar aqui seria
-         *   prometer o lembrete sem dizer do que ele depende.
+         * - Com pendencia comprovada, o painel, que nomeia a consequencia e leva a tela onde as
+         *   cinco autorizacoes se resolvem.
+         * - Sem ela, o aviso: as nao-verificaveis continuam podendo estar desligadas, e esta folha
+         *   e onde a pessoa acredita que vai ser avisada. Calar aqui seria prometer o lembrete sem
+         *   dizer do que ele depende.
          *
          * Só quando o modo escolhido depende do aparelho: para quem escolheu "nenhum aviso" as
          * autorizações não mudam nada, e cobrar ali é o alerta que ensina a ignorar alertas.

@@ -9,7 +9,7 @@ import {
 } from "@/shared/theme";
 
 /**
- * Reativa ao tema desde 12/09 - antes era `StyleSheet.create` com a paleta lida na importação.
+ * Reativa ao tema.
  *
  * A consequencia de nao responder ao tema nao era estetica: `StyleSheet.create` roda uma vez, na
  * importacao, e as cores ficam congeladas. Quem trocasse para o escuro ou o alto contraste
@@ -65,9 +65,9 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * A seção de autorizações: **sem fundo próprio**, como as outras seções desta tela.
    *
-   * Tinha `secondaryContainer` a 45%, e com as linhas ganhando superfície branca por dentro o
-   * resultado era caixa dentro de caixa - três níveis de fundo em quatro pixels. É o que fazia a
-   * tela parecer pesada apesar de cada peça estar correta (apontado em 12/09).
+   * Com fundo proprio e as linhas ganhando superficie branca por dentro, o resultado era caixa
+   * dentro de caixa: tres niveis de fundo em quatro pixels, e a tela parecia pesada apesar de cada
+   * peca estar correta.
    *
    * Sem o bloco, o que separa a seção é o mesmo que separa as de texto: o rótulo e o espaço. As
    * linhas passam a ser as únicas superfícies elevadas, que é o que as faz ler como botões.
@@ -129,9 +129,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
    * Cheguei a subir para 18px, e com a superfície discreta ficou desproporcional - texto grande em
    * caixa leve lê como título de seção, não como botão.
    *
-   * `500Medium` e não `600SemiBold`: com a linha agora sobre superfície branca e elevada, é a
-   * própria superfície que diz "isto é um botão", e o semibold em cima virava ênfase repetida. Um
-   * degrau abaixo mantém a hierarquia dentro da linha sem o peso que o Gabriel apontou em 12/09.
+   * `500Medium` e nao `600SemiBold`: com a linha sobre superficie branca e elevada, e a propria
+   * superficie que diz "isto e um botao", e o semibold em cima vira enfase repetida.
    */
   linhaTitulo: {
     ...typography.bodyMd,
@@ -141,9 +140,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
   /**
    * O passo dentro da tela do sistema - onde procurar depois que ela abrir.
    *
-   * Sem itálico (pedido do Gabriel em 12/09): em bloco pequeno ele custa legibilidade justamente
-   * para quem mais precisa desta instrução, e o que separa esta linha do título já é o tamanho e a
-   * cor. Itálico aqui era decoração sobre distinção que já existia.
+   * Sem italico: em bloco pequeno ele custa legibilidade justamente para quem mais precisa desta
+   * instrucao, e o que separa esta linha do titulo ja e o tamanho e a cor.
    */
   linhaComoFazer: {
     ...typography.bodySm,
@@ -166,15 +164,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     fontFamily: "PlusJakartaSans_600SemiBold",
     color: cores.error,
   },
-  /**
-   * O placar de progresso saiu em 12/09, junto dos seus estilos.
-   *
-   * Ele dizia "2 de 3 ainda faltam", e o denominador era o número de autorizações **verificáveis** -
-   * as únicas que o app sabe contar. Quem lia concluía que três era o total, e que zerar aquele
-   * número deixava o app pronto; o total honesto é cinco. É o mesmo engano que tirou a lista de
-   * permissões da Home no mesmo dia, e qualquer progresso aqui o repetiria.
-   */
-
+  // Nao ha placar de progresso: o denominador so poderia contar as verificaveis, e quem lesse
+  // concluiria que zerar aquele numero deixava o app pronto, quando o total honesto e cinco.
   alvoDeLink: {
     minHeight: 44,
     justifyContent: "center",

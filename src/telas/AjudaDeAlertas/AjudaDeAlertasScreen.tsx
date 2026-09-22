@@ -119,10 +119,9 @@ export function AjudaDeAlertasScreen({
         {/**
          * **As permissões primeiro, a explicação depois** - e essa ordem é a decisão desta tela.
          *
-         * Ela nasceu como texto explicativo, e as autorizações entraram no fim. O Gabriel corrigiu
-         * em 12/09, e o argumento é de acessibilidade: quem chega aqui está tentando fazer o alarme
-         * funcionar, e atravessar quatro seções de texto antes de achar o que resolve é desistir no
-         * meio. O público inclui idosos, e permissão de Android é o assunto mais difícil do app.
+         * O argumento e de acessibilidade: quem chega aqui esta tentando fazer o alarme funcionar,
+         * e atravessar quatro secoes de texto antes de achar o que resolve e desistir no meio. O
+         * publico inclui idosos, e permissao de Android e o assunto mais dificil do app.
          *
          * ⚠️ **Não há placar de progresso aqui, e isso é deliberado.**
          *
@@ -198,9 +197,9 @@ export function AjudaDeAlertasScreen({
          * cinco autorizações não expõem estado a nenhuma API (sobrepor apps, início automático,
          * bateria), e para essas o painel marca a **ida** à tela do sistema, não a permissão.
          *
-         * O furo que isso abria, apontado pelo Gabriel em 12/09: quem abre a tela do Autostart e sai
-         * sem ligar a chave vê a linha desaparecer do painel - e fica sem aviso nenhum, com o app
-         * silencioso e nada explicando por quê. O lugar onde ele orientava deixou de existir.
+         * O furo que isso abre: quem abre a tela do Autostart e sai sem ligar a chave ve a linha
+         * desaparecer do painel, e fica sem aviso nenhum, com o app silencioso e nada explicando
+         * por que.
          *
          * Aqui as cinco estão sempre listadas, com o botão que leva à tela de cada uma. Não é um
          * alerta: é a página de consulta de "por que o aviso não chegou?", e ela não pode sumir
@@ -213,11 +212,9 @@ export function AjudaDeAlertasScreen({
          * verde ou vermelho. A segunda lista o que nenhuma API expõe, e onde só a pessoa pode
          * verificar abrindo a tela.
          *
-         * Separar foi decisão do Gabriel em 12/09, e resolve o furo que a versão anterior tinha:
-         * lá as três não-verificáveis eram marcadas como concedidas ao serem **visitadas**, então
-         * quem abria o Autostart e saía sem ligar a chave via a linha desaparecer - e ficava com o
-         * app silencioso e nada explicando por quê. Aqui elas nunca desaparecem, porque o app nunca
-         * soube se foram atendidas.
+         * Separar resolve o furo de marcar as nao-verificaveis como concedidas ao serem visitadas:
+         * quem abria o Autostart e saia sem ligar a chave via a linha desaparecer, e ficava com o
+         * app silencioso. Aqui elas nunca desaparecem, porque o app nunca soube se foram atendidas.
          */}
         <Pressable
           style={estadoDePressao(styles.alvoDeLink, { superficie: true })}
