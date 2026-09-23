@@ -1,102 +1,59 @@
 # Pendências do Capítulo 4
 
-> **Levantado em 22/09/2026**, contra `TCC Gabriel Steffens Atualizado 22_09.docx.md`.
+> **Atualizado em 23/09/2026**, contra `TCC Gabriel Steffens Atualizado 23_09.docx.md`.
 >
-> Organizado por natureza. As pendências de conteúdo exigem decisão ou escrita. As de
-> acabamento ficam para o fechamento do trabalho, quando a estrutura não mudar mais.
->
-> **Como usar.** Marcar cada item conforme resolver. Os números de linha referem-se ao
-> arquivo Markdown exportado e mudam a cada nova exportação, servindo apenas como pista.
+> **O texto do capítulo 4 está fechado.** Enviado ao orientador para validação em 23/09. As
+> próximas mudanças no capítulo dependem do retorno dele.
 
 ---
 
-## 1. Conteúdo
+## 1. Pendente
 
-### 1.1 Remissão a seção inexistente, na 4.2
+### 1.1 Figuras 6 a 12
 
-**Status.** Pendente de decisão.
+O texto e as legendas estão no documento. Faltam as capturas, feitas em aparelho.
 
-**Onde.** Seção 4.2, parágrafo de abertura, por volta da linha 494.
+| Figura | Seção | O que capturar |
+|---|---|---|
+| 6 | 4.6.2 | Configurações adicionais do cadastro (receita, lembrete, estoque) |
+| 7 | 4.6.3 | Home com as doses do dia agrupadas por estado |
+| 8 | 4.6.3 | Notificação do alarme sobre a tela de bloqueio |
+| 9 | 4.6.4 | Tela de adesão e calendário |
+| 10 | 4.6.4 | Relatório clínico em PDF |
+| 11 | 4.6.5 | Ajustes, Configurações de tema, com os conjuntos de cores de estado |
+| 12 | 4.6.5 | Home nos temas claro, escuro e alto contraste, lado a lado |
 
-**O que diz hoje.**
+Para a 7 e a 12, capturar um dia com doses em estados diferentes (tomada, atrasada, próxima),
+de modo que os selos descritos no texto apareçam.
 
-> *"Os requisitos foram organizados em categorias e entregues de forma incremental ao longo
-> das fases de desenvolvimento detalhadas na seção 4.5."*
+### 1.2 Sumário
 
-**O problema.** A seção 4.5 é Modelo de Dados. Não existe, em nenhum ponto do capítulo, seção
-que detalhe fases de desenvolvimento.
-
-**Caminhos possíveis.** Escrever uma seção sobre as fases e ajustar o número, apontar a
-remissão para outra seção existente, ou remover a remissão e encerrar a frase em
-"de forma incremental".
-
----
-
-### 1.2 Subseções 4.6.3 e 4.6.4
-
-**Status.** Texto pronto, aguardando inserção.
-
-**Arquivo.** `docs/tcc/4.6.3-e-4.6.4-jornada.md`
-
-**O que falta.** Colar as duas subseções no Word e produzir quatro capturas de tela, marcadas
-no texto como FIGURA 7 a FIGURA 10. O arquivo traz as legendas e as fontes prontas, além de
-dois blocos de código já conferidos contra o repositório.
-
-**Atenção ao colar.** Verificar se a primeira linha de cada bloco de código entra na lista
-numerada, problema que ocorreu na 4.4.6 e na 4.4.8.
+As linhas vazias com estilo de título entre as seções são espaçamento intencional. Ao gerar o
+sumário automático, conferir se elas entram como entradas vazias e, se entrarem, removê-las do
+sumário.
 
 ---
 
-### 1.3 Proporção entre arquitetura e usabilidade
+## 2. Resolvido
 
-**Status.** Observação, não é lacuna.
+### Rodada de 23/09
 
-A seção 4.4 reúne oito subseções sobre arquitetura, e a 4.6 terá quatro sobre a jornada do
-usuário. O referencial teórico dedica a seção 2.4 inteira às heurísticas de usabilidade, com
-cinco subseções, entre elas acessibilidade e psicologia das cores.
+| Item | Situação |
+|---|---|
+| 4.6.3 e 4.6.4 inseridas no meio da 4.6.2 | Reposicionadas, e a 4.6.2 voltou a fechar com as Figuras 4, 5 e 6 |
+| Frase de apresentação do código da 4.6.3 ausente | Incluída |
+| Título "4.6..4" e título vazio abaixo dele | Corrigidos |
+| Proporção entre arquitetura e usabilidade | Escrita a 4.6.5 Acessibilidade e Linguagem Visual, que dá contrapartida às seções 2.4.3, 2.4.4 e 2.4.5 |
+| Remissão da 4.2 às "fases de desenvolvimento detalhadas na seção 4.5" | Remissão removida, a frase encerra em "de forma incremental" |
+| Remissão da 4.5 à figura errada | Corrigida para Figura 2 |
+| 4.4.9 Limitações Técnicas | Descartada por decisão do Gabriel |
 
-Vale conferir se esse referencial aparece no desenvolvimento na mesma medida que o de
-arquitetura, ou se parte dele foi apresentada na fundamentação sem contrapartida prática.
+A 4.6.5 foi conferida contra o código. O conjunto padrão de cores de estado reprova em
+`scripts/conferir-cores-de-estado.mjs`, e o texto diz isso em vez de afirmar que todos passam.
+A mensagem de dia completo conta doses tomadas e puladas, e o texto a apresenta como reforço do
+registro, não do resultado.
 
----
-
-## 2. Acabamento
-
-> Itens para o fechamento, quando a estrutura estiver estável.
-
-### 2.1 Remissão a figura com número errado, na 4.5
-
-**Onde.** Seção 4.5, primeiro parágrafo, por volta da linha 773.
-
-**O que diz hoje.** *"A figura 1 apresenta de forma simplificada a estrutura relacional do
-projeto."*
-
-**O correto.** A figura logo abaixo é a Figura 2, que traz o diagrama entidade-relacionamento.
-A Figura 1 é o diagrama de sequência do Last-Write-Wins, na seção 4.4.6.
-
----
-
-### 2.2 Figura 6 sem imagem
-
-**Onde.** Final da seção 4.6.2, por volta da linha 485.
-
-A Figura 6, sobre configurações adicionais do cadastro, tem legenda e fonte, mas nenhuma
-imagem associada. As Figuras 1 a 5 possuem imagem. Verificar se a captura foi perdida na
-exportação ou se ainda não foi inserida.
-
----
-
-### 2.3 Numeração de figuras e sumário
-
-Com a inclusão das Figuras 7 a 10 nas subseções novas, conferir a sequência completa e
-atualizar o sumário. Nenhuma figura anterior precisa ser renumerada, uma vez que as novas
-entram ao final.
-
----
-
-## 3. Resolvido nesta rodada
-
-Registro do que foi tratado em 22/09, para referência.
+### Rodada de 22/09
 
 | Item | Situação |
 |---|---|
@@ -110,15 +67,12 @@ Registro do que foi tratado em 22/09, para referência.
 
 ---
 
-## 4. Fora do Capítulo 4
+## 3. Fora do Capítulo 4
 
-Anotado para não se perder, ainda que não pertença a este capítulo.
+**Capítulo 5 Resultados.** Existe como título, sem conteúdo. É o próximo bloco de escrita.
 
-**Capítulo 5 Resultados.** Existe como título, sem conteúdo.
-
-**Remissões ao Capítulo 2.** O texto inserido na 4.4.3 remete à atomicidade da seção 2.9.1, e
-o texto da 4.6.4 remete à minimização da seção 2.10.2. O capítulo 2 não foi consultado, e
-convém verificar se ambas sustentam a remissão.
+**Remissões ao Capítulo 2.** A 4.4.3 remete à atomicidade da seção 2.9.1, e a 4.6.4 à
+minimização da seção 2.10.2. Conferir se ambas sustentam a remissão.
 
 **Acentuação no código-fonte.** A refatoração de comentários removeu acentos em parte do
 projeto, e 77 arquivos misturam as duas grafias. Não afeta o artigo, exceto se novos trechos
