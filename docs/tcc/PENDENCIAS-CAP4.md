@@ -1,6 +1,6 @@
 # Pendências do Capítulo 4
 
-> **Atualizado em 24/09/2026.** A edição agora é feita no Google Docs.
+> **Atualizado em 24/09/2026, 16h30.** A edição agora é feita no Google Docs.
 >
 > **Retorno do orientador (24/09).** A estrutura do capítulo foi aprovada. Os ajustes pedidos
 > são de formatação: código passa a ser quadro com borda, e todo quadro ou figura fica na mesma
@@ -11,74 +11,48 @@
 
 ## 1. Pendente
 
-### 1.1 Código em quadro
+### 1.1 Figuras 8, 10, 11 e 12
 
-**Conferido em 24/09, 15h.** Os blocos de código até a 4.6.4 já estão em tabela, mas a partir do
-segundo código da 4.4.7 os títulos ficaram deslocados uma posição, e os quadros do modelo de dados
-ainda não foram renumerados.
-
-**Formato.** Tabela 1×1 com borda de ½ pt. Código em Courier New 10, todo em preto, palavras
-reservadas em negrito, comentários em itálico, numeração de linhas e recuo preservados. Título
-acima ("Quadro N - ..."), "Fonte: elaborado pelo autor." abaixo. A frase anterior cita o número
-("conforme o Quadro N."), com Q maiúsculo.
-
-**A regra da numeração.** Quadros são numerados pela ordem em que aparecem no documento, contando
-todos. Os nove do modelo de dados ficam entre a 4.4.8 e a 4.6.3, e por isso os códigos da 4.6
-são 25, 26 e 27.
-
-| Quadro | Seção | Código | Título correto | Estado |
-|---|---|---|---|---|
-| 11 | 4.4.6 | LWW | Resolução de conflito de sincronização pelo critério *Last-Write-Wins* | ✅ |
-| 12 | 4.4.7 | `IntakeLog` | Estrutura do registro de ingestão de dose | ✅ |
-| 13 | 4.4.7 | `execute(...)` | Correção retroativa de um registro de dose | 🔧 está como "Quadro 12 - Estrutura..." |
-| 14 | 4.4.8 | `jaEstaEmCena` | Verificação de alarme já exibido | 🔧 está como "Quadro 13 - Correção..." |
-| 15 | 4.4.8 | `fecharTelaDoAlarme` | Encerramento da tela do alarme no módulo nativo | 🔧 está como "Quadro 14 - Verificação..." |
-| 16 a 24 | 4.5 | tabelas do banco | Os mesmos títulos de hoje | 🔧 ainda numerados 11 a 19 |
-| 25 | 4.6.3 | `ACAO_TOMEI` | Ações do alarme de dose disponíveis na notificação | 🔧 está como "Quadro 15 - Encerramento..." |
-| 26 | 4.6.4 | `naoVenceuNemFoiRespondida` | Critério de exclusão de doses no cálculo de adesão | 🔧 está como "Quadro 16 - Verificação..." |
-| 27 | 4.6.5 | `azulLaranja` | Definição de um conjunto de cores de estado | ⬜ ainda fora de tabela |
-
-**As frases que apresentam cada quadro.** Troca só no final da frase.
-
-| Antes do | Hoje termina em | Passa a terminar em |
-|---|---|---|
-| 12 | "...na estrutura da entidade:" | "...na estrutura da entidade, conforme o Quadro 12." |
-| 13 | "...no momento da gravação:" | "...no momento da gravação, conforme o Quadro 13." |
-| 14 | "...o custo de cada erro possível" (sem ponto) | "...o custo de cada erro possível, conforme o Quadro 14." |
-| 15 | "...pela reprodução do som." | "...pela reprodução do som, e o Quadro 15 apresenta a solução adotada." |
-| 16 a 24 | "A figura 2 apresenta... o quadro 11 contempla..." | "A Figura 2 apresenta... os Quadros 16 a 24 contemplam o esquema completo do modelo de dados." |
-| 25 | "...conforme o trecho a seguir." | "...conforme o Quadro 25." |
-| 26 | "...apresentada na seção 4.3.6." | "...apresentada na seção 4.3.6 e detalhada no Quadro 26." |
-| 27 | "O trecho a seguir apresenta um dos conjuntos..." | "O Quadro 27 apresenta um dos conjuntos..." |
-
-**Conferir no Google Docs.** No `.md` exportado os quadros 12 em diante aparecem sem numeração
-de linhas. Pode ser só a exportação, que não leva lista numerada para dentro de tabela, mas vale
-confirmar que os números aparecem como no Quadro 11.
-
-**Depois de tudo.** Atualizar a lista de quadros no pré-textual.
-
-### 1.2 Quadro, título e fonte na mesma página
-
-Vale para todos os quadros e figuras. No título, marcar "Manter com o próximo" (Formatar,
-Espaçamento entre linhas e parágrafos, Espaçamento personalizado). Na tabela, desmarcar
-"Permitir que a linha ultrapasse as páginas". Quadro grande demais tem a fonte reduzida para
-10 pt e, se ainda não couber, vira dois. Quebras de página manuais só no final, depois de toda a
-renumeração.
-
-### 1.3 Figuras 8, 10, 11 e 12
-
-As Figuras 6, 7 e 9 já estão no documento. O que cada captura pendente mostra fica em
+As Figuras 1 a 7 e 9 já têm imagem. O que cada captura pendente mostra fica em
 [`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURAS.md).
 
-### 1.4 Sumário
+### 1.2 Paginação
+
+Fica para o fim, quando nenhuma figura ou quadro mudar mais de tamanho.
+
+- Quadro e figura na mesma página que o título e a fonte. No título, marcar "Manter com o
+  próximo" (Formatar, Espaçamento entre linhas e parágrafos, Espaçamento personalizado). Na
+  tabela, desmarcar "Permitir que a linha ultrapasse as páginas". Quadro grande demais tem a
+  fonte reduzida para 10 pt e, se ainda não couber, vira dois.
+- Quebras de página manuais só depois disso.
+- Por último, os números de página das listas de quadros e de figuras, que estão em branco.
+
+### 1.3 Sumário
 
 As linhas vazias com estilo de título entre as seções são espaçamento intencional. Ao gerar o
 sumário automático, conferir se elas entram como entradas vazias e, se entrarem, removê-las do
 sumário.
 
+### 1.4 Detalhe
+
+A legenda da Figura 1, no corpo, termina com ponto final e as demais não.
+
 ---
 
 ## 2. Resolvido
+
+### Rodada de 24/09, retorno do orientador
+
+| Item | Situação |
+|---|---|
+| Código como quadro com borda | Os oito blocos viraram os Quadros 11 a 15 e 25 a 27, no formato do Quadro 11 |
+| Numeração dos quadros | Pela ordem de aparecimento, contando todos. O modelo de dados passou de 11 a 19 para 16 a 24 |
+| Remissões aos quadros | Todo quadro é citado antes de aparecer, com o número. A 4.5 remete aos Quadros 16 a 24 |
+| Listas de quadros e de figuras | Refeitas com os 27 quadros e as 12 figuras, faltando só as páginas |
+| Remissões ao capítulo 2 | A 4.4.3 e a 4.6.4 sustentam o que citam da 2.9.1 e da 2.10.2 |
+
+O formato dos quadros de código: tabela 1×1 com borda de ½ pt, Courier New 10, texto em preto,
+palavras reservadas em negrito, comentários em itálico, numeração de linhas e recuo preservados.
 
 ### Rodada de 23/09
 

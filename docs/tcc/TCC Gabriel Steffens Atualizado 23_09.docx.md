@@ -85,29 +85,48 @@ WHO: *World Health Organization* (Organização Mundial da Saúde)
 WCAG: *Web Content Accessibility Guidelines* (Diretrizes de Acessibilidade para Conteúdo Web)  
 **LISTA DE QUADROS**
 
-Quadro 1 \- Comparativo dos métodos de medição de adesão medicamentosa	22  
-Quadro 2 \- Comparação entre o Mapill e soluções de mercado	37  
-Quadro 3 \- Requisitos funcionais: identidade e consentimento	40  
-Quadro 4 \- Requisitos funcionais: cadastro clínico	41  
-Quadro 5 \- Requisitos funcionais: operação diária	41  
-Quadro 6 \- Requisitos funcionais: lembretes	42  
-Quadro 7 \- Requisitos funcionais: agenda clínica	42  
-Quadro 8 \- Requisitos funcionais: dados e direitos	43  
-Quadro 9 \- Requisitos não funcionais	43  
-Quadro 10 \- Regras de negócio	44  
-Quadro 11 \- medications \- Modelo de dados referente às medicações	45  
-Quadro 12 \- prescriptions \- Modelo de dados referente às prescrições	45  
-Quadro 13 \- dose\_schedules \- Modelo de dados referente aos horários de dose	46  
-Quadro 14 \- intake\_logs \- Modelo de dados referente aos registros de ingestão	46  
-Quadro 15 \- inventory\_items \- Modelo de dados referente aos itens de estoque	46  
-Quadro 16 \- inventory\_adjustments \- Modelo de dados referente aos ajustes de estoque	47  
-Quadro 17 \- appointments \- Modelo de dados referente aos compromissos	47  
-Quadro 18 \- patient\_profiles \- Modelo de dados referente aos perfis de paciente	47  
-Quadro 19 \- consent\_records \- Modelo de dados referente aos registros de consentimento	48
+Quadro 1 \- Comparativo dos métodos de medição de adesão medicamentosa	  
+Quadro 2 \- Comparação entre o Mapill e soluções de mercado	  
+Quadro 3 \- Requisitos funcionais: identidade e consentimento	  
+Quadro 4 \- Requisitos funcionais: cadastro clínico	  
+Quadro 5 \- Requisitos funcionais: operação diária	  
+Quadro 6 \- Requisitos funcionais: lembretes	  
+Quadro 7 \- Requisitos funcionais: agenda clínica	  
+Quadro 8 \- Requisitos funcionais: dados e direitos	  
+Quadro 9 \- Requisitos não funcionais	  
+Quadro 10 \- Regras de negócio	  
+Quadro 11 \- Resolução de conflito de sincronização pelo critério *Last-Write-Wins*	  
+Quadro 12 \- Estrutura do registro de ingestão de dose	  
+Quadro 13 \- Correção retroativa de um registro de dose	  
+Quadro 14 \- Verificação de alarme já exibido	  
+Quadro 15 \- Encerramento da tela do alarme no módulo nativo	  
+Quadro 16 \- medications \- Modelo de dados referente às medicações	  
+Quadro 17 \- prescriptions \- Modelo de dados referente às prescrições	  
+Quadro 18 \- dose\_schedules \- Modelo de dados referente aos horários de dose	  
+Quadro 19 \- intake\_logs \- Modelo de dados referente aos registros de ingestão	  
+Quadro 20 \- inventory\_items \- Modelo de dados referente aos itens de estoque	  
+Quadro 21 \- inventory\_adjustments \- Modelo de dados referente aos ajustes de estoque	  
+Quadro 22 \- appointments \- Modelo de dados referente aos compromissos	  
+Quadro 23 \- patient\_profiles \- Modelo de dados referente aos perfis de paciente	  
+Quadro 24 \- consent\_records \- Modelo de dados referente aos registros de consentimento	  
+Quadro 25 \- Ações do alarme de dose disponíveis na notificação	  
+Quadro 26 \- Critério de exclusão de doses no cálculo de adesão	  
+Quadro 27 \- Definição de um conjunto de cores de estado	
 
 **LISTA DE FIGURAS**
 
-Figura 1 \- Diagrama entidade-relacionamento do modelo de dados do Mapill	45
+Figura 1 \- Diagrama de sequência da resolução de conflito de sincronização entre dispositivo local e servidor em nuvem pelo critério *Last-Write-Wins*	32  
+Figura 2 \- Diagrama entidade-relacionamento do modelo de dados do Mapill	33  
+Figura 3 \- Telas de Login, consentimento e ficha de saúde	38  
+Figura 4 \- Identificação do medicamento por código de barras	39  
+Figura 5 \- Formulário de cadastro de medicação	39  
+Figura 6 \- Configurações adicionais do cadastro de medicação	40  
+Figura 7 \- Tela inicial com as doses do dia agrupadas por estado	40  
+Figura 8 \- Notificação do alarme de dose sobre a tela de bloqueio	41  
+Figura 9 \- Tela de adesão e calendário de acompanhamento	42  
+Figura 10 \- Relatório clínico gerado em formato PDF	42  
+Figura 11 \- Escolha do conjunto de cores de estado nas configurações de tema	43  
+Figura 12 \- Tela inicial nos temas claro, escuro e de alto contraste	44
 
 **SUMÁRIO**
 
@@ -577,7 +596,7 @@ Quadro 8 \- Requisitos funcionais: dados e direitos
 | Código | Requisito |
 | :---- | :---- |
 | 39 | O sistema deve sincronizar com a nuvem quando houver conta vinculada |
-| 40 | Conflito de edição deve resolver por Last-Write-Wins, de forma determinística |
+| 40 | Conflito de edição deve resolver por *Last-Write-Wins*, de forma determinística |
 | 41 | O sistema deve calcular taxa de adesão por período e por medicamento |
 | 42 | O sistema deve exportar todos os dados do titular em formato legível e portável |
 | 43 | O sistema deve apagar os dados do titular no aparelho e na nuvem |
@@ -633,7 +652,7 @@ Fonte: elaborado pelo autor.
 
 ### **4.3.5 Sincronização de Dados**
 
-	Conflitos de edição entre aparelhos diferentes são resolvidos pelo critério de Last-Write-Wins já apresentado na seção 2.9.3, sempre considerando o registro em sua totalidade, nunca mesclando campos isolados de versões diferentes.  
+	Conflitos de edição entre aparelhos diferentes são resolvidos pelo critério de *Last-Write-Wins* já apresentado na seção 2.9.3, sempre considerando o registro em sua totalidade, nunca mesclando campos isolados de versões diferentes.  
 A exclusão ocorre em duas modalidades. A de um registro individual, como um tratamento encerrado, é lógica: a linha recebe um carimbo de exclusão e permanece na base, o que preserva o histórico de doses já registradas e permite propagar a remoção aos demais aparelhos, já que uma linha apagada desapareceria sem deixar registro e retornaria na sincronização seguinte. Os registros são removidos da nuvem antes do aparelho, ordem que impede que a sincronização seguinte os traga de volta.  
 	Não há expurgo automático por decurso de prazo, e isso é deliberado. O histórico de adesão é o insumo do relatório levado à consulta, cujo intervalo costuma ser semestral, de modo que uma retenção curta inutilizaria a funcionalidade que justifica a aplicação. A eliminação permanece, assim, prerrogativa exclusiva do titular.
 
@@ -696,57 +715,43 @@ Fonte: elaborado pelo autor.
 
 ### **4.4.6 Sincronização e Consistência Eventual** 
 
-	A sincronização entre a base local e a base remota segue o modelo de Last-Write-Wins apresentado na seção 2.9.3, no qual o registro com o carimbo de tempo mais recente prevalece integralmente sobre a versão anterior, sem mesclagem de campos individuais. Se o sistema tentasse combinar campos de duas versões diferentes de um mesmo registro, poderia produzir um estado que nenhum dos dois dispositivos realmente gerou, misturando, por exemplo, a dose de uma edição com o horário de outra.
+	A sincronização entre a base local e a base remota segue o modelo de LWW apresentado na seção 2.9.3, no qual o registro com o carimbo de tempo mais recente prevalece integralmente sobre a versão anterior, sem mesclagem de campos individuais. Se o sistema tentasse combinar campos de duas versões diferentes de um mesmo registro, poderia produzir um estado que nenhum dos dois dispositivos realmente gerou, misturando, por exemplo, a dose de uma edição com o horário de outra.
 
 Figura 1 \- Diagrama de sequência da resolução de conflito de sincronização entre dispositivo local e servidor em nuvem pelo critério *Last-Write-Wins*.  
 ![][image1]  
 Fonte: elaborado pelo autor.
 
-	A aplicação do critério ocorre no momento da recepção, comparando o carimbo de tempo da versão remota com o da versão local antes de qualquer escrita, conforme o trecho a seguir.
+	A aplicação do critério ocorre no momento da recepção, comparando o carimbo de tempo da versão remota com o da versão local antes de qualquer escrita, conforme o Quadro 11\.
 
-1. **const** local \= **await** database.getFirstAsync\<{ updated\_at: string }\>(  
-2.  \`SELECT updated\_at FROM \${tabela} WHERE id \= ?\`,  
-3.  \[id\],  
-4. );  
-5.   
-6. // LWW por \`updated\_at\`, tudo-ou-nada por registro: local igual ou mais novo vence. Sem merge  
-7. // de campos, que poderia produzir uma posologia que ninguém escreveu. O empate fica com o local  
-8. // porque empate só acontece quando os dois lados já têm a mesma coisa.  
-9. **if** (local \!== null && local.updated\_at \>= remotaUpdatedAt) {  
-10.  // ...  
-11.  **continue**;  
-12. }
+Quadro 11 \- Resolução de conflito de sincronização pelo critério *Last-Write-Wins*
+
+| const local \= await database.getFirstAsync\<{ updated\_at: string }\>(  \`SELECT updated\_at FROM \${tabela} WHERE id \= ?\`,  \[id\], ); *// LWW por \`updated\_at\`, tudo-ou-nada por registro: local igual ou mais novo vence. Sem merge // de campos, que poderia produzir uma posologia que ninguém escreveu. O empate fica com o local // porque empate só acontece quando os dois lados já têm a mesma coisa.* if (local \!== null && local.updated\_at \>= remotaUpdatedAt) {   // ...   continue; } |
+| :---- |
+
+Fonte: elaborado pelo autor.
 
 	O empate favorece a versão local. O envio seleciona as linhas cujo carimbo de modificação é posterior ao de sincronização, e grava esse último somente após a confirmação do servidor, o que mantém pendente para o ciclo seguinte qualquer edição feita durante o envio. As linhas marcadas para exclusão lógica também sobem, de modo que a remoção alcance os demais aparelhos.  
 No nível de segurança, a comunicação entre a aplicação e a base remota é protegida por políticas de segurança em nível de linha, aplicadas às nove tabelas sincronizáveis, restringindo toda operação de leitura, inserção e atualização ao proprietário do registro, identificado pelo token de autenticação do usuário. Essa redundância é deliberada. Ainda que a política de segurança em nível de linha já seja suficiente para garantir o isolamento dos dados, a aplicação repete o filtro por identificador de usuário como uma segunda camada independente de verificação, de modo que as duas camadas precisam concordar entre si para que uma operação seja concluída.
 
 ### **4.4.7 Trilha de Auditoria e os Três Estados da Dose** 
 
-	O registro de ingestão do Mapill opera sob o princípio de imutabilidade, no qual nenhum registro de dose é sobrescrito ou apagado, reforçando a integridade do histórico clínico já discutida na seção 4.3.1. O tipo de dado correspondente formaliza essa restrição diretamente na estrutura da entidade:
+	O registro de ingestão do Mapill opera sob o princípio de imutabilidade, no qual nenhum registro de dose é sobrescrito ou apagado, reforçando a integridade do histórico clínico já discutida na seção 4.3.1. O tipo de dado correspondente formaliza essa restrição diretamente na estrutura da entidade, conforme o Quadro 12\.
 
-1. **export** type **IntakeLog** \= **SyncableEntity** & {  
-2.  doseScheduleId: string;  
-3.  status: **IntakeStatus**;  
-4.  occurredAt: string;  
-5.  correctsLogId: string | null;  
-6. };
+Quadro 12 \- Estrutura do registro de ingestão de dose
 
-O campo correctsLogId é o que torna a correção retroativa rastreável. Quando presente, aponta para o registro que esta entrada substitui, em vez de sobrescrevê-lo. A regra que efetivamente impõe essa restrição, está no caso de uso responsável pela correção, e não na entidade, ela apenas declara o formato do dado, enquanto o comportamento de nunca sobrescrever é aplicado no momento da gravação:
+| export type IntakeLog \= SyncableEntity & {  doseScheduleId: string;  status: IntakeStatus;  occurredAt: string;  correctsLogId: string | null; }; |
+| :---- |
 
-1. **async** **execute**(input: **CorrectIntakeInput**): **Promise**\<**void**\> {  
-2.  **const** correctedLog: **IntakeLog** \= {  
-3.    id: input.id,  
-4.    doseScheduleId: input.previousLog.doseScheduleId,  
-5.    status: input.newStatus,  
-6.    occurredAt: input.occurredAt,  
-7.    correctsLogId: input.previousLog.id,  
-8.    updatedAt: input.occurredAt,  
-9.    syncedAt: null,  
-10.    deletedAt: null,  
-11.  };  
-12.  **await** this.intakeLogRepository.**save**(correctedLog);  
-13.  // ...  
-14. }
+Fonte: elaborado pelo autor.
+
+O campo correctsLogId é o que torna a correção retroativa rastreável. Quando presente, aponta para o registro que esta entrada substitui, em vez de sobrescrevê-lo. A regra que efetivamente impõe essa restrição, está no caso de uso responsável pela correção, e não na entidade, ela apenas declara o formato do dado, enquanto o comportamento de nunca sobrescrever é aplicado no momento da gravação, conforme o Quadro 13\.
+
+Quadro 13 \- Correção retroativa de um registro de dose
+
+| async execute(input: CorrectIntakeInput): Promise\<void\> {  const correctedLog: IntakeLog \= {    id: input.id,    doseScheduleId: input.previousLog.doseScheduleId,    status: input.newStatus,    occurredAt: input.occurredAt,    correctsLogId: input.previousLog.id,    updatedAt: input.occurredAt,    syncedAt: null,    deletedAt: null,  };  await this.intakeLogRepository.save(correctedLog);  // ... } |
+| :---- |
+
+Fonte: elaborado pelo autor.
 
 A constante correctedLog recebe um identificador próprio (input.id), distinto do registro original, cujo identificador é preservado apenas na referência correctsLogId. O registro anterior nunca é alterado nem removido. Esse princípio aproxima-se da lógica de imutabilidade que rege o prontuário eletrônico, no qual uma correção retroativa não elimina o registro original, mas cria um novo apontando para o que substitui, preservando o histórico.
 
@@ -754,38 +759,39 @@ A constante correctedLog recebe um identificador próprio (input.id), distinto d
 
 	A biblioteca inicialmente adotada para o agendamento de alarmes, Notifee, teve sua manutenção descontinuada, e seu mecanismo de reinicialização automática após a reinicialização do aparelho (*boot receiver*) deixou de ser corretamente invocado a partir do Android 12\. Como o disparo confiável do alarme mesmo após o desligamento do aparelho é um requisito central deste projeto, a aplicação migrou para o *fork* mantido da biblioteca, react-native-notify-kit, que preserva a interface de programação original.  
 	Essa biblioteca é a base do mecanismo de disparo do alarme de dose. Ela delega o agendamento ao gerenciador nativo de alarmes do sistema operacional. Essa escolha é central para o requisito de confiabilidade discutido na seção 4.2.2. Ao transferir a responsabilidade de guardar o horário para o próprio sistema operacional, e não para um processo da aplicação, o alarme dispara mesmo com o aplicativo encerrado e sem nenhum processo em execução na memória do aparelho, condição indispensável diante do contexto apresentado. Os botões de ação da notificação são construídos diretamente no momento do agendamento, o que mantém a aplicação livre de qualquer indireção entre o que é oferecido ao paciente e o que a notificação de fato executa.  
-	A entrega do alarme contempla dois pontos de acionamento distintos, sendo o primeiro uma tela nativa, exibida em primeiro plano sobre a tela de bloqueio quando a aplicação está em segundo plano, e o segundo uma rota interna da aplicação, utilizada quando o alarme dispara com a aplicação já em uso. Como os dois pontos de acionamento compartilham o mesmo processo de execução, a aplicação mantém um controle de estado em escopo de módulo, e não vinculado à árvore de componentes da interface, garantindo que apenas um dos dois caminhos efetivamente conduza à resposta do paciente. A consulta que decide qual caminho prevalece considera o custo de cada erro possível
+	A entrega do alarme contempla dois pontos de acionamento distintos, sendo o primeiro uma tela nativa, exibida em primeiro plano sobre a tela de bloqueio quando a aplicação está em segundo plano, e o segundo uma rota interna da aplicação, utilizada quando o alarme dispara com a aplicação já em uso. Como os dois pontos de acionamento compartilham o mesmo processo de execução, a aplicação mantém um controle de estado em escopo de módulo, e não vinculado à árvore de componentes da interface, garantindo que apenas um dos dois caminhos efetivamente conduza à resposta do paciente. A consulta que decide qual caminho prevalece considera o custo de cada erro possível, conforme o Quadro 14\.
 
-1. ### **export** **function** **jaEstaEmCena**(scheduledFor: string): boolean {
+Quadro 14 \- Verificação de alarme já exibido
 
-2. ###  **if** (activityNascendo && \!activityConhecida) **return** true;
+| export function jaEstaEmCena(scheduledFor: string): boolean {  if (activityNascendo && \!activityConhecida) return true;  return emCena.has(scheduledFor); } |
+| :---- |
 
-3. ###  **return** emCena.**has**(scheduledFor);
-
-4. ### }
+Fonte: elaborado pelo autor.
 
 	Enquanto a tela nativa é construída, a aplicação ainda não sabe a qual horário ela corresponde, e nessa janela a consulta responde afirmativamente por precaução. O critério considera a assimetria entre os dois erros possíveis. Responder afirmativamente sem tela alguma custa um toque ignorado, ao passo que responder negativamente com a tela a caminho produz duas telas para a mesma dose, em que a resposta dada numa delas não encerra a outra, comprometendo a integridade do registro clínico discutida na seção 4.3.1.  
-O encerramento da tela também exigiu tratamento específico no nível nativo, por meio de um módulo próprio escrito em Kotlin. A tela do alarme ocupa uma atividade própria do Android, executada em tarefa separada, de modo que o encerramento convencional oferecido pela biblioteca de interface finalizaria o processo inteiro da aplicação, derrubando junto o serviço responsável pela reprodução do som.
+O encerramento da tela também exigiu tratamento específico no nível nativo, por meio de um módulo próprio escrito em Kotlin. A tela do alarme ocupa uma atividade própria do Android, executada em tarefa separada, de modo que o encerramento convencional oferecido pela biblioteca de interface finalizaria o processo inteiro da aplicação, derrubando junto o serviço responsável pela reprodução do som, e o Quadro 15 apresenta a solução adotada.
 
-1. **AsyncFunction**("fecharTelaDoAlarme") {  
-2.  **val** activity \= appContext.currentActivity ?: **return**@**AsyncFunction** false  
-3.  activity.runOnUiThread { activity.**finishAndRemoveTask**() }  
-4.  **return**@**AsyncFunction** true  
-5. }
+Quadro 15 \- Encerramento da tela do alarme no módulo nativo
 
+| AsyncFunction("fecharTelaDoAlarme") {  val activity \= appContext.currentActivity ?: return@AsyncFunction false  activity.runOnUiThread { activity.finishAndRemoveTask() }  return@AsyncFunction true } |
+| :---- |
+
+Fonte: elaborado pelo autor.
+
+	  
 	O módulo encerra apenas a tarefa do alarme e devolve o aparelho ao estado anterior ao disparo, que é a tela de bloqueio quando o alarme foi acionado com o aparelho bloqueado, de modo que a confirmação de uma dose não expõe os dados clínicos. A reprodução do som é conduzida pela própria aplicação em serviço de primeiro plano, e não pelo canal de notificação.
 
 ##  
 
 ## 4.5 MODELO DE DADOS 
 
-O modelo de dados do Mapill materializa as entidades de domínio apresentadas na seção 4.4.2 em nove tabelas relacionais, definidas tanto na base local SQLite quanto na base remota PostgreSQL. A figura 2 apresenta de forma simplificada a estrutura relacional do projeto, enquanto o quadro 11 contempla o esquema completo do modelo de dados. 
+O modelo de dados do Mapill materializa as entidades de domínio apresentadas na seção 4.4.2 em nove tabelas relacionais, definidas tanto na base local SQLite quanto na base remota PostgreSQL. A Figura 2 apresenta de forma simplificada a estrutura relacional do projeto, enquanto os Quadros 16 a 24 contemplam o esquema completo do modelo de dados. 
 
 Figura 2 \- Diagrama entidade-relacionamento do modelo de dados do Mapill  
 ![][image2]  
 Fonte: elaborado pelo autor.
 
-Quadro 11 \- medications \- Modelo de dados referente às medicações
+Quadro 16 \- medications \- Modelo de dados referente às medicações
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -804,7 +810,7 @@ Quadro 11 \- medications \- Modelo de dados referente às medicações
 
 Fonte: elaborado pelo autor.
 
-Quadro 12 \- prescriptions \- Modelo de dados referente às prescrições
+Quadro 17 \- prescriptions \- Modelo de dados referente às prescrições
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -831,7 +837,7 @@ Quadro 12 \- prescriptions \- Modelo de dados referente às prescrições
 
 Fonte: elaborado pelo autor.
 
-Quadro 13 \- dose\_schedules \- Modelo de dados referente aos horários de dose
+Quadro 18 \- dose\_schedules \- Modelo de dados referente aos horários de dose
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -847,7 +853,7 @@ Quadro 13 \- dose\_schedules \- Modelo de dados referente aos horários de dose
 
 Fonte: elaborado pelo autor.
 
-Quadro 14 \- intake\_logs \- Modelo de dados referente aos registros de ingestão
+Quadro 19 \- intake\_logs \- Modelo de dados referente aos registros de ingestão
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -862,7 +868,7 @@ Quadro 14 \- intake\_logs \- Modelo de dados referente aos registros de ingestã
 
 Fonte: elaborado pelo autor.
 
-Quadro 15 \- inventory\_items \- Modelo de dados referente aos itens de estoque
+Quadro 20 \- inventory\_items \- Modelo de dados referente aos itens de estoque
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -880,7 +886,7 @@ Quadro 15 \- inventory\_items \- Modelo de dados referente aos itens de estoque
 
 Fonte: elaborado pelo autor.
 
-Quadro 16 \- inventory\_adjustments \- Modelo de dados referente aos ajustes de estoque
+Quadro 21 \- inventory\_adjustments \- Modelo de dados referente aos ajustes de estoque
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -894,7 +900,7 @@ Quadro 16 \- inventory\_adjustments \- Modelo de dados referente aos ajustes de 
 
 Fonte: elaborado pelo autor.
 
-Quadro 17 \- appointments \- Modelo de dados referente aos compromissos
+Quadro 22 \- appointments \- Modelo de dados referente aos compromissos
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -914,7 +920,7 @@ Quadro 17 \- appointments \- Modelo de dados referente aos compromissos
 
 Fonte: elaborado pelo autor.
 
-Quadro 18 \- patient\_profiles \- Modelo de dados referente aos perfis de paciente
+Quadro 23 \- patient\_profiles \- Modelo de dados referente aos perfis de paciente
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -934,7 +940,7 @@ Quadro 18 \- patient\_profiles \- Modelo de dados referente aos perfis de pacien
 
 Fonte: elaborado pelo autor.
 
-Quadro 19 \- consent\_records \- Modelo de dados referente aos registros de consentimento
+Quadro 24 \- consent\_records \- Modelo de dados referente aos registros de consentimento
 
 | Campo | Tipo | Descrição |
 | :---- | :---- | :---- |
@@ -962,10 +968,11 @@ Figura 3 \- Telas de Login, consentimento e ficha de saúde
 
 ### **4.6.2 Cadastro de Medicamentos**
 
-O cadastro de um medicamento pode começar de duas formas: cadastro manual ou escaneando o código de barras presente na embalagem do produto. Ao ler o código, o aplicativo consulta um catálogo local derivado da base pública da Anvisa (CMED) e, quando encontra o produto, preenche automaticamente o nome comercial, o princípio ativo e a dosagem. O ponto central dessa funcionalidade é que nada é salvo sem revisão, o scanner sugere e a pessoa confirma, nunca o contrário, o que evita transferir ao reconhecimento automático a responsabilidade por um dado clínico.  
-O catálogo deriva da base pública da CMED e reúne cerca de sete mil apresentações comerciais, com nome, princípio ativo, dosagem, exigência de receita e códigos de barras. O arquivo é embarcado na aplicação e importado para a base local uma única vez por instalação, o que mantém a consulta disponível no uso offline.  
-	No formulário propriamente dito, a heurística de prevenção de erros, apresentada na seção 2.4.1, orienta uma decisão central, onde todo campo relativo à posologia nasce vazio, sem valor pré-selecionado. Essa exigência corresponde à regra de negócio de código 08, discutida na seção 4.3, e está registrada no próprio código do formulário.  
-	A fim de transformar um ambiente complicado e denso de preenchimento em algo intuitivo e simples de operar, o cadastro adota uma revelação progressiva de campos. Enquanto o essencial não está completo (medicamento, a dose e a posologia), os campos opcionais permanecem ocultos. Assim que o essencial fecha, uma mensagem avisa que o cadastro já pode ser concluído ali mesmo, e o restante, como estoque, foto, anexo de receita e local de guarda, se revela de uma vez, disponível de forma não obrigatória ao preenchimento. Essa abordagem reduz a carga cognitiva de um formulário longo, ao mostrar a cada momento só o que o paciente precisa decidir naquele passo, e adia o que pode ser adiado.  
+O cadastro de um medicamento pode começar de duas formas: cadastro manual ou escaneando o código de barras presente na embalagem do produto. Ao ler o código, o aplicativo consulta um catálogo local derivado da base pública da Anvisa (CMED) e, quando encontra o produto, preenche automaticamente o nome comercial, o princípio ativo e a dosagem.  
+	O catálogo deriva da base pública da CMED e reúne cerca de sete mil apresentações comerciais, com nome, princípio ativo, dosagem, exigência de receita e códigos de barras. O arquivo é embarcado na aplicação e importado para a base local uma única vez por instalação.  
+	No formulário propriamente dito, a heurística de prevenção de erros, apresentada na seção 2.4.1, orienta uma decisão central, onde todo campo relativo à posologia nasce vazio, sem valor pré-selecionado. Essa exigência corresponde à regra de negócio de código 08\.  
+	A fim de transformar um ambiente complicado e denso de preenchimento em algo intuitivo e simples de operar, o cadastro adota uma revelação progressiva de campos. Enquanto o essencial não está completo (medicamento, a dose e a posologia), os campos opcionais permanecem ocultos. Assim que o essencial fecha, uma mensagem avisa que o cadastro já pode ser concluído ali mesmo, e o restante, como estoque, foto, anexo de receita e local de guarda, se revela de uma vez, disponível de forma não obrigatória ao preenchimento. 
+
 Figura 4 \- Identificação do medicamento por código de barras  
 ![][image4]  
 Fonte: elaborado pelo autor.  
@@ -987,15 +994,16 @@ Figura 7 \- Tela inicial com as doses do dia agrupadas por estado
 ![][image7]  
 Fonte: elaborado pelo autor.
 
-O alarme de dose apresenta três ações diretamente na notificação, definidas no momento do agendamento, conforme o trecho a seguir.
+O alarme de dose apresenta três ações diretamente na notificação, definidas no momento do agendamento, conforme o Quadro 25\.
 
-1. **export** **const** ACAO\_TOMEI \= "tomei";  
-2. **export** **const** ACAO\_PULEI \= "pulei";  
-3. **export** **const** ACAO\_ADIAR \= "adiar";  
-4. // Um adiamento só por horário.  
-5. **export** **const** MINUTOS\_DE\_ADIAMENTO \= 5;
+Quadro 25 \- Ações do alarme de dose disponíveis na notificação
 
-	A confirmação e o registro de dose pulada dispensam a abertura do aplicativo, decisão que reduz o esforço exigido do paciente no momento em que ele precisa apenas responder. O adiamento não grava desfecho algum, limitando-se a reagendar o aviso por cinco minutos, e é oferecido uma única vez por horário, uma vez que o adiamento repetido esvaziaria a função do alarme. A distinção entre dose pulada e dose sem registro é preservada em toda a rotina, e é o que permite ao relatório clínico afirmar o que de fato ocorreu.  
+| export const ACAO\_TOMEI \= "tomei"; export const ACAO\_PULEI \= "pulei"; export const ACAO\_ADIAR \= "adiar"; // Um adiamento só por horário. export const MINUTOS\_DE\_ADIAMENTO \= 5; |
+| :---- |
+
+Fonte: elaborado pelo autor.
+
+A confirmação e o registro de dose pulada dispensam a abertura do aplicativo, decisão que reduz o esforço exigido do paciente no momento em que ele precisa apenas responder. O adiamento não grava desfecho algum, limitando-se a reagendar o aviso por cinco minutos, e é oferecido uma única vez por horário, uma vez que o adiamento repetido esvaziaria a função do alarme. A distinção entre dose pulada e dose sem registro é preservada em toda a rotina, e é o que permite ao relatório clínico afirmar o que de fato ocorreu.  
 	O registro de uma dose repercute em outras áreas da aplicação sem exigir qualquer ação adicional. A quantidade administrada é descontada do estoque correspondente, a previsão de esgotamento é recalculada e a taxa de adesão do dia é atualizada. Quando o estoque atinge o limiar configurado, um aviso de reposição é agendado, o que antecipa a falta em vez de comunicá-la depois de consumada.
 
 Figura 8 \- Notificação do alarme de dose sobre a tela de bloqueio   
@@ -1003,16 +1011,17 @@ Fonte: elaborado pelo autor.
 
 ### **4.6.4 Acompanhamento e Relatório Clínico**
 
-	O acompanhamento de longo prazo reúne o histórico que a rotina diária produz. A tela de adesão apresenta a taxa consolidada do período e a distribuição dia a dia, e o cálculo exclui as doses que ainda não venceram e que ninguém respondeu, conforme a regra apresentada na seção 4.3.6.
+	O acompanhamento de longo prazo reúne o histórico que a rotina diária produz. A tela de adesão apresenta a taxa consolidada do período e a distribuição dia a dia, e o cálculo exclui as doses que ainda não venceram e que ninguém respondeu, conforme a regra apresentada na seção 4.3.6 e detalhada no Quadro 26\.
 
-1. // O que fica de fora das contas, a dose que ainda não venceu e que ninguém respondeu.  
-2. **function** **naoVenceuNemFoiRespondida**(dose: DoseDoPeriodo, agoraIso: string): boolean {  
-3.  **return** dose.scheduledFor \> agoraIso && dose.latestStatus \=== null;  
-4. }
+Quadro 26 \- Critério de exclusão de doses no cálculo de adesão
 
-As duas condições são exigidas em conjunto. Uma dose futura sem resposta é uma previsão, e nada afirma sobre o comportamento do paciente, ao passo que uma dose futura já confirmada ou pulada é um fato registrado, que sair da conta esconderia. A ausência completa de doses vencidas resulta na indicação de que ainda não há dados suficientes, em vez de uma taxa de zero por cento, que afirmaria sobre o paciente algo que não ocorreu.
+| // O que fica de fora das contas, a dose que ainda não venceu e que ninguém respondeu. function naoVenceuNemFoiRespondida(dose: DoseDoPeriodo, agoraIso: string): boolean {  return dose.scheduledFor \> agoraIso && dose.latestStatus \=== null; } |
+| :---- |
 
-Figura 9 \- Tela de adesão e calendário de acompanhamento   
+Fonte: elaborado pelo autor.
+
+As duas condições são exigidas em conjunto. Uma dose futura sem resposta é uma previsão, e nada afirma sobre o comportamento do paciente, ao passo que uma dose futura já confirmada ou pulada é um fato registrado, que sair da conta esconderia. A ausência completa de doses vencidas resulta na indicação de que ainda não há dados suficientes, em vez de uma taxa de zero por cento, que afirmaria sobre o paciente algo que não ocorreu.  
+Figura 9 \- Tela de adesão e calendário de acompanhamento  
 ![][image8]  
 Fonte: elaborado pelo autor.
 
@@ -1027,16 +1036,14 @@ Fonte: elaborado pelo autor.
 
 As decisões visuais da aplicação partem do público que a utiliza, majoritariamente idoso, para o qual a perda de contraste e da precisão motora são condições comuns, conforme discutido na seção 2.4.5. Todas as cores da paleta foram medidas contra o nível AA das WCAG (W3C, 2018), e cada valor registra no próprio código a razão de contraste que o impede de ser alterado. O verde que indica dose tomada, por exemplo, é o tom mais vivo que ainda atinge 4,5:1 sobre as superfícies onde aparece, uma vez que o passo seguinte já reprovaria.  
 A cor segue o princípio de sinalização de Norman (2013), apresentado na seção 2.4.3, e é reservada a quatro significados. O vermelho indica o urgente, o verde o que deu certo, o amarelo o que exige atenção e o azul a ação. Por essa razão o azul não pinta fundos, cabeçalhos nem a barra de navegação, já que uma cor presente em toda parte deixa de sinalizar algo. O estado da dose, contudo, nunca depende apenas da cor. Cada item da tela inicial traz o rótulo por extenso, como tomada, atrasada ou é agora, e o leitor de tela recebe o mesmo estado em forma de frase.  
-Verde e vermelho são justamente as cores confundidas nas formas mais comuns de daltonismo. Para esse público, a aplicação oferece quatro conjuntos alternativos de cores de estado, válidos em qualquer tema. Cada conjunto foi aprovado em duas exigências distintas, o contraste AA contra as superfícies onde aparece e a distinção entre suas três cores sob simulação de deuteranopia, protanopia e tritanopia, pelo método de Brettel, Viénot e Mollon (1997). Uma rotina de conferência do projeto executa essa verificação e reprova o conjunto em que duas cores fiquem perceptualmente próximas demais. Foi essa rotina que revelou, no próprio conjunto padrão, a colisão entre o amarelo de atenção e o vermelho de urgência, o que motivou a criação dos conjuntos alternativos. O padrão foi mantido por corresponder à convenção que o paciente já reconhece, e a troca fica a critério de quem precisa dela. O trecho a seguir apresenta um dos conjuntos, com a descrição exibida ao paciente.
+Verde e vermelho são justamente as cores confundidas nas formas mais comuns de daltonismo. Para esse público, a aplicação oferece quatro conjuntos alternativos de cores de estado, válidos em qualquer tema. Cada conjunto foi aprovado em duas exigências distintas, o contraste AA contra as superfícies onde aparece e a distinção entre suas três cores sob simulação de deuteranopia, protanopia e tritanopia, pelo método de Brettel, Viénot e Mollon (1997). Uma rotina de conferência do projeto executa essa verificação e reprova o conjunto em que duas cores fiquem perceptualmente próximas demais. Foi essa rotina que revelou, no próprio conjunto padrão, a colisão entre o amarelo de atenção e o vermelho de urgência, o que motivou a criação dos conjuntos alternativos. O padrão foi mantido por corresponder à convenção que o paciente já reconhece, e a troca fica a critério de quem precisa dela. O Quadro 27 apresenta um dos conjuntos, com a descrição exibida ao paciente.
 
-1. {  
-2. id: "azulLaranja",  
-3. nome: "Azul, marrom e laranja",  
-4. afirmativo: "\#0B5FD9",  
-5. negativo: "\#C2410C",  
-6. atencao: "\#6D4C00",  
-7. descricao: "O conjunto que mais se separa.",  
-8. },
+Quadro 27 \- Definição de um conjunto de cores de estado
+
+| {  id: "azulLaranja",  nome: "Azul, marrom e laranja",  afirmativo: "\#0B5FD9",  negativo: "\#C2410C",  atencao: "\#6D4C00",  descricao: "O conjunto que mais se separa.", }, |
+| :---- |
+
+Fonte: elaborado pelo autor.
 
 Figura 11 \- Escolha do conjunto de cores de estado nas configurações de tema  
 Fonte: elaborado pelo autor.
@@ -1047,6 +1054,8 @@ Figura 12 \- Tela inicial nos temas claro, escuro e de alto contraste
 Fonte: elaborado pelo autor.
 
 Da gamificação discutida na seção 2.4.4, a aplicação adota o indicador de progresso diário. A tela inicial mostra a proporção de doses concluídas no dia, e o indicador é omitido quando não há doses, pois um progresso de zero por cento sobre nada seria lido como fracasso. Quando a última dose do dia é respondida, uma mensagem de dia completo é exibida ao paciente. A mensagem considera tanto as doses tomadas quanto as puladas, de modo que o reforço recai sobre o registro e não sobre o resultado, preservando a integridade do registro clínico estabelecida na seção 4.3.1.
+
+# 
 
 # **5 RESULTADOS**
 
