@@ -11,20 +11,8 @@
 
 ### 1.1 Figuras 6 a 12
 
-O texto e as legendas estão no documento. Faltam as capturas, feitas em aparelho.
-
-| Figura | Seção | O que capturar |
-|---|---|---|
-| 6 | 4.6.2 | Configurações adicionais do cadastro (receita, lembrete, estoque) |
-| 7 | 4.6.3 | Home com as doses do dia agrupadas por estado |
-| 8 | 4.6.3 | Notificação do alarme sobre a tela de bloqueio |
-| 9 | 4.6.4 | Tela de adesão e calendário |
-| 10 | 4.6.4 | Relatório clínico em PDF |
-| 11 | 4.6.5 | Ajustes, Configurações de tema, com os conjuntos de cores de estado |
-| 12 | 4.6.5 | Home nos temas claro, escuro e alto contraste, lado a lado |
-
-Para a 7 e a 12, capturar um dia com doses em estados diferentes (tomada, atrasada, próxima),
-de modo que os selos descritos no texto apareçam.
+O texto e as legendas estão no documento. O que cada captura mostra, e o estado de cada uma,
+fica em [`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURAS.md).
 
 ### 1.2 Sumário
 
