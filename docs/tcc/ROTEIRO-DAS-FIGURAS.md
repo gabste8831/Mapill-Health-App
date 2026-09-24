@@ -12,10 +12,8 @@
 
 ## Estado atual
 
-Cinco figuras preenchidas, sete vazias. Conferido pelos marcadores de imagem do arquivo
-exportado: há cinco referências `![][imageN]` e cinco definições correspondentes no rodapé,
-em sequência sem lacuna, o que indica que as figuras 6 a 12 nunca foram inseridas, e não que
-a exportação as tenha perdido.
+Oito figuras preenchidas, quatro vazias, conferido em 24/09 pelos marcadores de imagem do
+arquivo exportado. A imagem que segue a Figura 7 é a da Figura 9, e a 8 continua sem captura.
 
 | Figura | Conteúdo | Estado |
 |---|---|---|
@@ -24,10 +22,10 @@ a exportação as tenha perdido.
 | 3 | Login, consentimento e ficha de saúde | ✅ preenchida |
 | 4 | Identificação por código de barras | ✅ preenchida |
 | 5 | Formulário de cadastro de medicação | ✅ preenchida |
-| 6 | Configurações adicionais do cadastro | ⬜ vazia |
-| 7 | Tela inicial com doses agrupadas por estado | ⬜ vazia |
+| 6 | Configurações adicionais do cadastro | ✅ preenchida |
+| 7 | Tela inicial com doses agrupadas por estado | ✅ preenchida |
 | 8 | Alarme sobre a tela de bloqueio | ⬜ vazia |
-| 9 | Adesão e calendário | ⬜ vazia |
+| 9 | Adesão e calendário | ✅ preenchida |
 | 10 | Relatório clínico em PDF | ⬜ vazia |
 | 11 | Conjuntos de cores de estado | ⬜ vazia |
 | 12 | Tela inicial nos três temas | ⬜ vazia |
