@@ -13,32 +13,49 @@
 
 ### 1.1 Código em quadro
 
-**Quadro 11 concluído** (4.4.6, *Last-Write-Wins*). É o modelo para os demais.
+**Conferido em 24/09, 15h.** Os blocos de código até a 4.6.4 já estão em tabela, mas a partir do
+segundo código da 4.4.7 os títulos ficaram deslocados uma posição, e os quadros do modelo de dados
+ainda não foram renumerados.
 
 **Formato.** Tabela 1×1 com borda de ½ pt. Código em Courier New 10, todo em preto, palavras
 reservadas em negrito, comentários em itálico, numeração de linhas e recuo preservados. Título
 acima ("Quadro N - ..."), "Fonte: elaborado pelo autor." abaixo. A frase anterior cita o número
 ("conforme o Quadro N."), com Q maiúsculo.
 
-| Quadro | Seção | Título | Estado |
-|---|---|---|---|
-| 11 | 4.4.6 | Resolução de conflito de sincronização pelo critério *Last-Write-Wins* | ✅ |
-| 12 | 4.4.7 | Estrutura do registro de ingestão de dose | ⬜ |
-| 13 | 4.4.7 | Correção retroativa de um registro de dose | ⬜ |
-| 14 | 4.4.8 | Verificação de alarme já exibido | ⬜ |
-| 15 | 4.4.8 | Encerramento da tela do alarme no módulo nativo | ⬜ |
-| 16 a 24 | 4.5 | Os antigos Quadros 11 a 19 do modelo de dados, só renumerados | ⬜ |
-| 25 | 4.6.3 | Ações do alarme de dose disponíveis na notificação | ⬜ |
-| 26 | 4.6.4 | Critério de exclusão de doses no cálculo de adesão | ⬜ |
-| 27 | 4.6.5 | Definição de um conjunto de cores de estado | ⬜ |
+**A regra da numeração.** Quadros são numerados pela ordem em que aparecem no documento, contando
+todos. Os nove do modelo de dados ficam entre a 4.4.8 e a 4.6.3, e por isso os códigos da 4.6
+são 25, 26 e 27.
 
-**Junto com a renumeração.**
+| Quadro | Seção | Código | Título correto | Estado |
+|---|---|---|---|---|
+| 11 | 4.4.6 | LWW | Resolução de conflito de sincronização pelo critério *Last-Write-Wins* | ✅ |
+| 12 | 4.4.7 | `IntakeLog` | Estrutura do registro de ingestão de dose | ✅ |
+| 13 | 4.4.7 | `execute(...)` | Correção retroativa de um registro de dose | 🔧 está como "Quadro 12 - Estrutura..." |
+| 14 | 4.4.8 | `jaEstaEmCena` | Verificação de alarme já exibido | 🔧 está como "Quadro 13 - Correção..." |
+| 15 | 4.4.8 | `fecharTelaDoAlarme` | Encerramento da tela do alarme no módulo nativo | 🔧 está como "Quadro 14 - Verificação..." |
+| 16 a 24 | 4.5 | tabelas do banco | Os mesmos títulos de hoje | 🔧 ainda numerados 11 a 19 |
+| 25 | 4.6.3 | `ACAO_TOMEI` | Ações do alarme de dose disponíveis na notificação | 🔧 está como "Quadro 15 - Encerramento..." |
+| 26 | 4.6.4 | `naoVenceuNemFoiRespondida` | Critério de exclusão de doses no cálculo de adesão | 🔧 está como "Quadro 16 - Verificação..." |
+| 27 | 4.6.5 | `azulLaranja` | Definição de um conjunto de cores de estado | ⬜ ainda fora de tabela |
 
-- Na 4.5, "o quadro 11 contempla o esquema completo" passa a "os Quadros 16 a 24 contemplam o
-  esquema completo".
-- A primeira linha do código `jaEstaEmCena`, na 4.4.8, está com estilo de título. Ao montar o
-  Quadro 14, trocar para texto normal, senão ela entra no sumário.
-- Atualizar a lista de quadros no pré-textual.
+**As frases que apresentam cada quadro.** Troca só no final da frase.
+
+| Antes do | Hoje termina em | Passa a terminar em |
+|---|---|---|
+| 12 | "...na estrutura da entidade:" | "...na estrutura da entidade, conforme o Quadro 12." |
+| 13 | "...no momento da gravação:" | "...no momento da gravação, conforme o Quadro 13." |
+| 14 | "...o custo de cada erro possível" (sem ponto) | "...o custo de cada erro possível, conforme o Quadro 14." |
+| 15 | "...pela reprodução do som." | "...pela reprodução do som, e o Quadro 15 apresenta a solução adotada." |
+| 16 a 24 | "A figura 2 apresenta... o quadro 11 contempla..." | "A Figura 2 apresenta... os Quadros 16 a 24 contemplam o esquema completo do modelo de dados." |
+| 25 | "...conforme o trecho a seguir." | "...conforme o Quadro 25." |
+| 26 | "...apresentada na seção 4.3.6." | "...apresentada na seção 4.3.6 e detalhada no Quadro 26." |
+| 27 | "O trecho a seguir apresenta um dos conjuntos..." | "O Quadro 27 apresenta um dos conjuntos..." |
+
+**Conferir no Google Docs.** No `.md` exportado os quadros 12 em diante aparecem sem numeração
+de linhas. Pode ser só a exportação, que não leva lista numerada para dentro de tabela, mas vale
+confirmar que os números aparecem como no Quadro 11.
+
+**Depois de tudo.** Atualizar a lista de quadros no pré-textual.
 
 ### 1.2 Quadro, título e fonte na mesma página
 
