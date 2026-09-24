@@ -1,4 +1,3 @@
-  
 **CENTRO UNIVERSITÁRIO PARA O DESENVOLVIMENTO DO ALTO VALE DO ITAJAÍ \- UNIDAVI**
 
 **GABRIEL STEFFENS**
@@ -170,7 +169,7 @@ Figura 1 \- Diagrama entidade-relacionamento do modelo de dados do Mapill	45
 
 [**2.6.2 Práticas de Clean Code e Legibilidade	29**](#2.6.2-práticas-de-clean-code-e-legibilidade)
 
-[2.7 PARADIGMAS CONTEMPORÂNEOS DE ARQUITETURA DE SOFTWARE MÓVEL	30](#2.7-paradigmas-contemporâneos-de-arquitetura-de-software-móvel)
+[2.7 PARADIGMAS DE ARQUITETURA DE SOFTWARE MÓVEL	30](#2.7-paradigmas-de-arquitetura-de-software-móvel)
 
 [**2.7.1 Tipagem Estática e Confiabilidade Algorítmica: O Papel do TypeScript	30**](#2.7.1-tipagem-estática-e-confiabilidade-algorítmica:-o-papel-do-typescript)
 
@@ -377,7 +376,7 @@ Além da organização estrutural orientada pelos princípios SOLID, a qualidade
 No desenvolvimento de soluções de suporte à saúde, ambiguidades na declaração de variáveis ou lógicas confusas podem gerar falhas sistêmicas graves. Para mitigar esse risco, o projeto fundamenta-se na regra de *meaningful names* (nomenclaturas significativas). Essa prática determina que nomes de variáveis, classes e métodos devem revelar sua exata intenção de forma clara e inequívoca, dispensando a necessidade de comentários excessivos.  
 Na prática, isso significa abolir o uso de variáveis genéricas, abreviações não padronizadas ou "números mágicos" soltos pelo código. Em vez de declarações ambíguas, o código prioriza termos descritivos que separam claramente, por exemplo, o que representa um intervalo de tempo, um alerta agendado ou a dosagem de um medicamento. Essa objetividade na escrita reduz o tempo de manutenção, facilita a identificação de anomalias e garante que a lógica de negócio se mantenha transparente e segura ao longo de todo o processo de desenvolvimento e utilização.
 
-## 2.7 PARADIGMAS CONTEMPORÂNEOS DE ARQUITETURA DE SOFTWARE MÓVEL {#2.7-paradigmas-contemporâneos-de-arquitetura-de-software-móvel}
+## 2.7 PARADIGMAS DE ARQUITETURA DE SOFTWARE MÓVEL {#2.7-paradigmas-de-arquitetura-de-software-móvel}
 
 No desenvolvimento de soluções em *mHealth*, a escolha do ecossistema tecnológico é um fator determinante para a eficiência no fluxo de desenvolvimento e a estabilidade operacional. O estado da arte da engenharia de *software* móvel prioriza a flexibilidade e a manutenibilidade. Nesse cenário, a construção de sistemas modernos apoia-se em paradigmas multiplataforma e em linguagens que oferecem tipagem rigorosa, frequentemente integradas aos ambientes de execução baseados em JavaScript.
 
@@ -491,7 +490,7 @@ A delimitação do escopo foi tratada como uma decisão de projeto desde o iníc
 
 ## 4.2 LEVANTAMENTO DE REQUISITOS 
 
-O levantamento de requisitos do aplicativo seguiu a classificação clássica descrita por Sommerville (2018), distinguindo requisitos funcionais, que descrevem o comportamento esperado da aplicação, de requisitos não funcionais, que estabelecem restrições de qualidade e desempenho. Os requisitos foram organizados em categorias e entregues de forma incremental ao longo das fases de desenvolvimento detalhadas na seção 4.5. Os Quadros 3 a 9 apresentam o levantamento completo, organizado por categoria. 
+O levantamento de requisitos do aplicativo seguiu a classificação clássica descrita por Sommerville (2018), distinguindo requisitos funcionais, que descrevem o comportamento esperado da aplicação, de requisitos não funcionais, que estabelecem restrições de qualidade e desempenho. Os requisitos foram organizados em categorias e entregues de forma incremental. Os Quadros 3 a 9 apresentam o levantamento completo, organizado por categoria.
 
 ### **4.2.1 Requisitos Funcionais**
 
@@ -608,21 +607,29 @@ Quadro 9 \- Requisitos não funcionais
 
 Fonte: elaborado pelo autor.
 
-4.3 REGRAS DE NEGÓCIO 
+## 4.3 REGRAS DE NEGÓCIO
 
-	As regras de negócio do Mapill operacionalizam, no comportamento do sistema, os princípios discutidos no referencial teórico deste trabalho, sobretudo aqueles relativos à integridade do registro clínico, à auditoria eletrônica da adesão e à consistência de dados em ambientes distribuídos. Ao todo, foram definidas vinte regras, organizadas em seis grupos temáticos, apresentadas nas subseções a seguir, com o detalhamento técnico completo de cada uma disponível no Quadro 10\. 
+	As regras de negócio do Mapill operacionalizam, no comportamento do sistema, os princípios discutidos no referencial teórico deste trabalho, sobretudo aqueles relativos à integridade do registro clínico, à auditoria eletrônica da adesão e à consistência de dados em ambientes distribuídos. Ao todo, foram definidas vinte regras, organizadas em seis grupos temáticos, apresentadas nas subseções a seguir, com o detalhamento técnico completo de cada uma disponível no Quadro 10\.
 
-### **4.3.1 Integridade do Registro Clínico**  	A regra mais importante do sistema estabelece que uma dose não respondida nunca é automaticamente marcada como pulada pela simples passagem do tempo, permanecendo em um estado que aguarda resposta do paciente. Essa decisão evita que o sistema registre como fato algo que não foi confirmado pelo usuário, preservando a natureza do registro de ingestão como um documento fiel ao comportamento real do paciente, conforme discutido na seção 2.3.3. Pela mesma razão, a correção de um registro nunca sobrescreve o anterior, mas gera um novo lançamento vinculado ao original, e a exclusão de um tratamento é lógica, preservando o histórico de doses já registradas mesmo quando os horários futuros deixam de existir.
+### **4.3.1 Integridade do Registro Clínico**
 
-### 
-
-### **4.3.2 Controle de Estoque**  	Cada confirmação de dose desconta do estoque a quantidade efetivamente administrada, e não uma unidade genérica do medicamento, o que evita que a previsão de esgotamento seja otimista demais em posologias com múltiplas unidades por dose. Quando a unidade de medida do estoque não é compatível com a unidade da dose, o sistema recusa apresentar uma previsão de término em vez de calcular um valor impreciso. Além disso, toda alteração de estoque é registrada como um evento de ajuste, nunca como a substituição de um valor absoluto, o que permite compor com segurança doses confirmadas, recontagens manuais e reposições sem que uma ação apague o efeito da outra. 
+	A regra mais importante do sistema estabelece que uma dose não respondida nunca é automaticamente marcada como pulada pela simples passagem do tempo, permanecendo em um estado que aguarda resposta do paciente. Essa decisão evita que o sistema registre como fato algo que não foi confirmado pelo usuário, preservando a natureza do registro de ingestão como um documento fiel ao comportamento real do paciente, conforme discutido na seção 2.3.3. Pela mesma razão, a correção de um registro nunca sobrescreve o anterior, mas gera um novo lançamento vinculado ao original, e a exclusão de um tratamento é lógica, preservando o histórico de doses já registradas mesmo quando os horários futuros deixam de existir.
 
 ### 
 
-### **4.3.3 Modelagem da Posologia**  	A frequência escolhida pelo paciente determina a quantidade de campos de horário a preencher, que são sempre apresentados vazios, nunca com um valor sugerido, de modo a evitar que o paciente aceite um horário incorreto apenas por pressa. Da mesma forma, a unidade de dose é solicitada apenas quando existe ambiguidade real, como em medicamentos líquidos ou injetáveis, e um campo que perde o sentido após a alteração de outro, como a dose em mililitros ao trocar a forma farmacêutica para comprimido, é limpo automaticamente pelo sistema.
+### **4.3.2 Controle de Estoque**
 
-### **4.3.4 Notificações e Lembretes**  	Doses de medicamentos diferentes marcadas para o mesmo horário geram um único aviso agrupado, e o adiamento de um lembrete é permitido apenas uma vez por horário, deixando de ser oferecido na segunda tentativa. Qualquer alteração em uma prescrição cancela a totalidade dos avisos agendados e reconstrói o agendamento por completo, evitando que um lembrete de um tratamento já encerrado continue sendo emitido. Além disso, o texto apresentado ao paciente descreve exatamente o comportamento entregue pela plataforma móvel, e compromissos clínicos utilizam apenas notificações comuns, reservando o alarme sonoro de alta prioridade exclusivamente para doses de medicamento.
+	Cada confirmação de dose desconta do estoque a quantidade efetivamente administrada, e não uma unidade genérica do medicamento, o que evita que a previsão de esgotamento seja otimista demais em posologias com múltiplas unidades por dose. Quando a unidade de medida do estoque não é compatível com a unidade da dose, o sistema recusa apresentar uma previsão de término em vez de calcular um valor impreciso. Além disso, toda alteração de estoque é registrada como um evento de ajuste, nunca como a substituição de um valor absoluto, o que permite compor com segurança doses confirmadas, recontagens manuais e reposições sem que uma ação apague o efeito da outra.
+
+### 
+
+### **4.3.3 Modelagem da Posologia**
+
+	A frequência escolhida pelo paciente determina a quantidade de campos de horário a preencher, que são sempre apresentados vazios, nunca com um valor sugerido, de modo a evitar que o paciente aceite um horário incorreto apenas por pressa. Da mesma forma, a unidade de dose é solicitada apenas quando existe ambiguidade real, como em medicamentos líquidos ou injetáveis, e um campo que perde o sentido após a alteração de outro, como a dose em mililitros ao trocar a forma farmacêutica para comprimido, é limpo automaticamente pelo sistema.
+
+### **4.3.4 Notificações e Lembretes**
+
+	Doses de medicamentos diferentes marcadas para o mesmo horário geram um único aviso agrupado, e o adiamento de um lembrete é permitido apenas uma vez por horário, deixando de ser oferecido na segunda tentativa. Qualquer alteração em uma prescrição cancela a totalidade dos avisos agendados e reconstrói o agendamento por completo, evitando que um lembrete de um tratamento já encerrado continue sendo emitido. Além disso, o texto apresentado ao paciente descreve exatamente o comportamento entregue pela plataforma móvel, e compromissos clínicos utilizam apenas notificações comuns, reservando o alarme sonoro de alta prioridade exclusivamente para doses de medicamento.
 
 ### **4.3.5 Sincronização de Dados**
 
@@ -630,7 +637,9 @@ Fonte: elaborado pelo autor.
 A exclusão ocorre em duas modalidades. A de um registro individual, como um tratamento encerrado, é lógica: a linha recebe um carimbo de exclusão e permanece na base, o que preserva o histórico de doses já registradas e permite propagar a remoção aos demais aparelhos, já que uma linha apagada desapareceria sem deixar registro e retornaria na sincronização seguinte. Os registros são removidos da nuvem antes do aparelho, ordem que impede que a sincronização seguinte os traga de volta.  
 	Não há expurgo automático por decurso de prazo, e isso é deliberado. O histórico de adesão é o insumo do relatório levado à consulta, cujo intervalo costuma ser semestral, de modo que uma retenção curta inutilizaria a funcionalidade que justifica a aplicação. A eliminação permanece, assim, prerrogativa exclusiva do titular.
 
-###  **4.3.6 Cálculo de Adesão**  	Doses cujo horário ainda não chegou não entram no cálculo da taxa de adesão, evitando que o percentual seja penalizado por compromissos futuros, e a ausência completa de doses vencidas resulta na indicação de que ainda não há dados suficientes para medição, em vez da apresentação de uma taxa de zero por cento, que representaria uma afirmação incorreta sobre o comportamento do paciente.
+###  **4.3.6 Cálculo de Adesão**
+
+	Doses cujo horário ainda não chegou não entram no cálculo da taxa de adesão, evitando que o percentual seja penalizado por compromissos futuros, e a ausência completa de doses vencidas resulta na indicação de que ainda não há dados suficientes para medição, em vez da apresentação de uma taxa de zero por cento, que representaria uma afirmação incorreta sobre o comportamento do paciente.
 
 Quadro 10 \- Regras de negócio
 
@@ -711,8 +720,6 @@ Fonte: elaborado pelo autor.
 	O empate favorece a versão local. O envio seleciona as linhas cujo carimbo de modificação é posterior ao de sincronização, e grava esse último somente após a confirmação do servidor, o que mantém pendente para o ciclo seguinte qualquer edição feita durante o envio. As linhas marcadas para exclusão lógica também sobem, de modo que a remoção alcance os demais aparelhos.  
 No nível de segurança, a comunicação entre a aplicação e a base remota é protegida por políticas de segurança em nível de linha, aplicadas às nove tabelas sincronizáveis, restringindo toda operação de leitura, inserção e atualização ao proprietário do registro, identificado pelo token de autenticação do usuário. Essa redundância é deliberada. Ainda que a política de segurança em nível de linha já seja suficiente para garantir o isolamento dos dados, a aplicação repete o filtro por identificador de usuário como uma segunda camada independente de verificação, de modo que as duas camadas precisam concordar entre si para que uma operação seja concluída.
 
-### 
-
 ### **4.4.7 Trilha de Auditoria e os Três Estados da Dose** 
 
 	O registro de ingestão do Mapill opera sob o princípio de imutabilidade, no qual nenhum registro de dose é sobrescrito ou apagado, reforçando a integridade do histórico clínico já discutida na seção 4.3.1. O tipo de dado correspondente formaliza essa restrição diretamente na estrutura da entidade:
@@ -768,9 +775,11 @@ O encerramento da tela também exigiu tratamento específico no nível nativo, p
 
 	O módulo encerra apenas a tarefa do alarme e devolve o aparelho ao estado anterior ao disparo, que é a tela de bloqueio quando o alarme foi acionado com o aparelho bloqueado, de modo que a confirmação de uma dose não expõe os dados clínicos. A reprodução do som é conduzida pela própria aplicação em serviço de primeiro plano, e não pelo canal de notificação.
 
-##  4.5 MODELO DE DADOS 
+##  
 
-O modelo de dados do Mapill materializa as entidades de domínio apresentadas na seção 4.4.2 em nove tabelas relacionais, definidas tanto na base local SQLite quanto na base remota PostgreSQL. A figura 1 apresenta de forma simplificada a estrutura relacional do projeto, enquanto o quadro 11 contempla o esquema completo do modelo de dados. 
+## 4.5 MODELO DE DADOS 
+
+O modelo de dados do Mapill materializa as entidades de domínio apresentadas na seção 4.4.2 em nove tabelas relacionais, definidas tanto na base local SQLite quanto na base remota PostgreSQL. A figura 2 apresenta de forma simplificada a estrutura relacional do projeto, enquanto o quadro 11 contempla o esquema completo do modelo de dados. 
 
 Figura 2 \- Diagrama entidade-relacionamento do modelo de dados do Mapill  
 ![][image2]  
@@ -956,8 +965,7 @@ Figura 3 \- Telas de Login, consentimento e ficha de saúde
 O cadastro de um medicamento pode começar de duas formas: cadastro manual ou escaneando o código de barras presente na embalagem do produto. Ao ler o código, o aplicativo consulta um catálogo local derivado da base pública da Anvisa (CMED) e, quando encontra o produto, preenche automaticamente o nome comercial, o princípio ativo e a dosagem. O ponto central dessa funcionalidade é que nada é salvo sem revisão, o scanner sugere e a pessoa confirma, nunca o contrário, o que evita transferir ao reconhecimento automático a responsabilidade por um dado clínico.  
 O catálogo deriva da base pública da CMED e reúne cerca de sete mil apresentações comerciais, com nome, princípio ativo, dosagem, exigência de receita e códigos de barras. O arquivo é embarcado na aplicação e importado para a base local uma única vez por instalação, o que mantém a consulta disponível no uso offline.  
 	No formulário propriamente dito, a heurística de prevenção de erros, apresentada na seção 2.4.1, orienta uma decisão central, onde todo campo relativo à posologia nasce vazio, sem valor pré-selecionado. Essa exigência corresponde à regra de negócio de código 08, discutida na seção 4.3, e está registrada no próprio código do formulário.  
-A fim de transformar um ambiente complicado e denso de preenchimento em algo intuitivo e simples de operar, o cadastro adota uma revelação progressiva de campos. Enquanto o essencial não está completo (medicamento, a dose e a posologia), os campos opcionais permanecem ocultos. Assim que o essencial fecha, uma mensagem avisa que o cadastro já pode ser concluído ali mesmo, e o restante, como estoque, foto, anexo de receita e local de guarda, se revela de uma vez, disponível de forma não obrigatória ao preenchimento. Essa abordagem reduz a carga cognitiva de um formulário longo, ao mostrar a cada momento só o que o paciente precisa decidir naquele passo, e adia o que pode ser adiado.
-
+	A fim de transformar um ambiente complicado e denso de preenchimento em algo intuitivo e simples de operar, o cadastro adota uma revelação progressiva de campos. Enquanto o essencial não está completo (medicamento, a dose e a posologia), os campos opcionais permanecem ocultos. Assim que o essencial fecha, uma mensagem avisa que o cadastro já pode ser concluído ali mesmo, e o restante, como estoque, foto, anexo de receita e local de guarda, se revela de uma vez, disponível de forma não obrigatória ao preenchimento. Essa abordagem reduz a carga cognitiva de um formulário longo, ao mostrar a cada momento só o que o paciente precisa decidir naquele passo, e adia o que pode ser adiado.  
 Figura 4 \- Identificação do medicamento por código de barras  
 ![][image4]  
 Fonte: elaborado pelo autor.  
@@ -969,6 +977,72 @@ Fonte: elaborado pelo autor.
 
 Figura 6 \- Configurações adicionais do cadastro de medicação  
 Fonte: elaborado pelo autor.
+
+### **4.6.3 Rotina Diária e Resposta ao Alarme** 
+
+Concluído o cadastro, a tela inicial passa a concentrar o uso cotidiano da aplicação. Ela apresenta as doses do dia em dois grupos, sendo o primeiro o das doses que ainda aguardam resposta e o segundo o das já registradas, ordenação que coloca à frente aquilo que exige ação do paciente. Cada dose exibe um estado visual próprio, entre confirmada, pulada, atrasada, na hora, próxima e futura, e a distinção entre atrasada e na hora considera uma janela de tolerância em torno do horário marcado, de modo que uma dose rigorosamente em dia não seja apresentada como pendência.
+
+Figura 7 \- Tela inicial com as doses do dia agrupadas por estado   
+Fonte: elaborado pelo autor.
+
+O alarme de dose apresenta três ações diretamente na notificação, definidas no momento do agendamento, conforme o trecho a seguir.
+
+1. **export** **const** ACAO\_TOMEI \= "tomei";  
+2. **export** **const** ACAO\_PULEI \= "pulei";  
+3. **export** **const** ACAO\_ADIAR \= "adiar";  
+4. // Um adiamento só por horário.  
+5. **export** **const** MINUTOS\_DE\_ADIAMENTO \= 5;
+
+	A confirmação e o registro de dose pulada dispensam a abertura do aplicativo, decisão que reduz o esforço exigido do paciente no momento em que ele precisa apenas responder. O adiamento não grava desfecho algum, limitando-se a reagendar o aviso por cinco minutos, e é oferecido uma única vez por horário, uma vez que o adiamento repetido esvaziaria a função do alarme. A distinção entre dose pulada e dose sem registro é preservada em toda a rotina, e é o que permite ao relatório clínico afirmar o que de fato ocorreu.  
+	O registro de uma dose repercute em outras áreas da aplicação sem exigir qualquer ação adicional. A quantidade administrada é descontada do estoque correspondente, a previsão de esgotamento é recalculada e a taxa de adesão do dia é atualizada. Quando o estoque atinge o limiar configurado, um aviso de reposição é agendado, o que antecipa a falta em vez de comunicá-la depois de consumada.
+
+Figura 8 \- Notificação do alarme de dose sobre a tela de bloqueio   
+Fonte: elaborado pelo autor.
+
+### **4.6.4 Acompanhamento e Relatório Clínico**
+
+	O acompanhamento de longo prazo reúne o histórico que a rotina diária produz. A tela de adesão apresenta a taxa consolidada do período e a distribuição dia a dia, e o cálculo exclui as doses que ainda não venceram e que ninguém respondeu, conforme a regra apresentada na seção 4.3.6.
+
+1. // O que fica de fora das contas, a dose que ainda não venceu e que ninguém respondeu.  
+2. **function** **naoVenceuNemFoiRespondida**(dose: DoseDoPeriodo, agoraIso: string): boolean {  
+3.  **return** dose.scheduledFor \> agoraIso && dose.latestStatus \=== null;  
+4. }
+
+As duas condições são exigidas em conjunto. Uma dose futura sem resposta é uma previsão, e nada afirma sobre o comportamento do paciente, ao passo que uma dose futura já confirmada ou pulada é um fato registrado, que sair da conta esconderia. A ausência completa de doses vencidas resulta na indicação de que ainda não há dados suficientes, em vez de uma taxa de zero por cento, que afirmaria sobre o paciente algo que não ocorreu.
+
+Figura 9 \- Tela de adesão e calendário de acompanhamento   
+Fonte: elaborado pelo autor.
+
+O calendário oferece a mesma informação em outra perspectiva, permitindo consultar qualquer data anterior com as doses e os compromissos daquele dia. A correção retroativa é possível a partir dessa tela, e segue o princípio de imutabilidade apresentado na seção 4.4.7, no qual o registro anterior é preservado e a correção origina um novo lançamento vinculado a ele.  
+	O relatório clínico em formato PDF encerra a jornada e é o único artefato da aplicação que existe fora do aparelho. Ele reúne a identificação do paciente, os tratamentos do período, a taxa de adesão e o histórico de doses, e destina-se à consulta com o profissional de saúde. A geração ocorre integralmente no aparelho, sem envio dos dados clínicos a qualquer serviço externo, e o arquivo resultante fica disponível para compartilhamento por iniciativa do paciente, atendendo ao princípio de minimização apresentado na seção 2.10.2.
+
+Figura 10 \- Relatório clínico gerado em formato PDF   
+Fonte: elaborado pelo autor.
+
+### **4.6.5 Acessibilidade e Linguagem Visual**
+
+As decisões visuais da aplicação partem do público que a utiliza, majoritariamente idoso, para o qual a perda de contraste e da precisão motora são condições comuns, conforme discutido na seção 2.4.5. Todas as cores da paleta foram medidas contra o nível AA das WCAG (W3C, 2018), e cada valor registra no próprio código a razão de contraste que o impede de ser alterado. O verde que indica dose tomada, por exemplo, é o tom mais vivo que ainda atinge 4,5:1 sobre as superfícies onde aparece, uma vez que o passo seguinte já reprovaria.  
+A cor segue o princípio de sinalização de Norman (2013), apresentado na seção 2.4.3, e é reservada a quatro significados. O vermelho indica o urgente, o verde o que deu certo, o amarelo o que exige atenção e o azul a ação. Por essa razão o azul não pinta fundos, cabeçalhos nem a barra de navegação, já que uma cor presente em toda parte deixa de sinalizar algo. O estado da dose, contudo, nunca depende apenas da cor. Cada item da tela inicial traz o rótulo por extenso, como tomada, atrasada ou é agora, e o leitor de tela recebe o mesmo estado em forma de frase.  
+Verde e vermelho são justamente as cores confundidas nas formas mais comuns de daltonismo. Para esse público, a aplicação oferece quatro conjuntos alternativos de cores de estado, válidos em qualquer tema. Cada conjunto foi aprovado em duas exigências distintas, o contraste AA contra as superfícies onde aparece e a distinção entre suas três cores sob simulação de deuteranopia, protanopia e tritanopia, pelo método de Brettel, Viénot e Mollon (1997). Uma rotina de conferência do projeto executa essa verificação e reprova o conjunto em que duas cores fiquem perceptualmente próximas demais. Foi essa rotina que revelou, no próprio conjunto padrão, a colisão entre o amarelo de atenção e o vermelho de urgência, o que motivou a criação dos conjuntos alternativos. O padrão foi mantido por corresponder à convenção que o paciente já reconhece, e a troca fica a critério de quem precisa dela. O trecho a seguir apresenta um dos conjuntos, com a descrição exibida ao paciente.
+
+1. {  
+2. id: "azulLaranja",  
+3. nome: "Azul, marrom e laranja",  
+4. afirmativo: "\#0B5FD9",  
+5. negativo: "\#C2410C",  
+6. atencao: "\#6D4C00",  
+7. descricao: "O conjunto que mais se separa.",  
+8. },
+
+Figura 11 \- Escolha do conjunto de cores de estado nas configurações de tema  
+Fonte: elaborado pelo autor.
+
+Além do tema claro, a aplicação oferece os temas escuro e de alto contraste, este voltado à baixa visão e ao uso sob luz solar. No alto contraste, a separação entre superfícies por sombra, adotada no restante da interface, dá lugar a contornos visíveis, uma vez que uma sombra de baixa opacidade deixa de ser percebida justamente por quem escolhe esse tema. As animações da interface, por sua vez, respeitam a preferência de redução de movimento do sistema operacional.
+
+Figura 12 \- Tela inicial nos temas claro, escuro e de alto contraste  
+Fonte: elaborado pelo autor.
+
+Da gamificação discutida na seção 2.4.4, a aplicação adota o indicador de progresso diário. A tela inicial mostra a proporção de doses concluídas no dia, e o indicador é omitido quando não há doses, pois um progresso de zero por cento sobre nada seria lido como fracasso. Quando a última dose do dia é respondida, uma mensagem de dia completo é exibida ao paciente. A mensagem considera tanto as doses tomadas quanto as puladas, de modo que o reforço recai sobre o registro e não sobre o resultado, preservando a integridade do registro clínico estabelecida na seção 4.3.1.
 
 # **5 RESULTADOS**
 
