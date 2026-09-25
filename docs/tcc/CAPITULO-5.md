@@ -26,13 +26,11 @@
 
 **5.2 Ajustes Decorrentes da Validação**
 
-	Os cenários de teste foram definidos a partir das situações de uso previstas para a aplicação, como a troca de aparelho e o acesso à mesma conta em mais de um dispositivo. Sua execução integrou a rotina de desenvolvimento, e o comportamento observado em cada cenário foi refinado e verificado novamente em aparelho, preservando a convergência entre as bases que a consistência eventual pressupõe, conforme a seção 2.9.3.
+	Os cenários de teste foram definidos a partir das situações de uso previstas para a aplicação, como a troca de aparelho e o acesso à mesma conta em mais de um dispositivo, e sua execução integrou a rotina de desenvolvimento.
 
-	Na restauração dos dados, três ajustes foram incorporados. A consulta à base local passou a aguardar o recebimento dos dados remotos, evitando que os termos e a ficha de saúde fossem solicitados novamente. As listas, como alergias e posologia, passaram a ser convertidas entre o texto da base local e o *jsonb* da base remota. E a exclusão das doses futuras passou de física para lógica, de modo que a remoção alcance também a base remota.
+	Na restauração dos dados, a consulta à base local passou a aguardar o recebimento dos dados remotos, as listas passaram a ser convertidas entre os formatos das duas bases e a exclusão das doses futuras passou a ser lógica. Nos cenários com mais de um aparelho, o critério *Last-Write-Wins* passou a ser aplicado também pelo servidor no envio, e o recebimento passou a considerar o instante de chegada à base remota, para que registros feitos sem conexão alcancem os demais aparelhos.
 
-	Nos cenários com mais de um aparelho, a revisão do código feita na preparação do teste de conflito resultou em dois refinamentos. O critério *Last-Write-Wins*, até então aplicado no recebimento, passou a ser aplicado também no envio, pelo servidor, garantindo que prevaleça a edição mais recente, e não o aparelho que sincroniza por último. E o recebimento passou a considerar o instante de chegada à base remota, e não a data de edição, para que registros feitos sem conexão alcancem os demais aparelhos da mesma conta.
-
-	Com os ajustes incorporados, os cenários foram executados novamente, e o Quadro 28 sintetiza os procedimentos e os resultados obtidos.
+	Com os ajustes incorporados e verificados em aparelho, os cenários foram executados novamente, e o Quadro 28 sintetiza os resultados obtidos.
 
 Quadro 28 - Cenários de validação da arquitetura *offline-first*
 
@@ -74,7 +72,11 @@ começa com "O empate favorece a versão local".
 - **Sem datas nem commits no texto.** Estão acima, como fonte, para a defesa.
 - **A 5.2 fala em ajustes, e não em defeitos**, por decisão de 25/09 sobre o tom: a validação é
   apresentada como ciclo de teste e refinamento. O conteúdo técnico é o mesmo.
-- **A 5.2 foi enxugada em 25/09.** Saíram o reagendamento dos alarmes depois da restauração, a
-  rotina de conferência das listas (`scripts/conferir-json-da-sync.mjs`) e a menção a qual defeito
-  foi reproduzido antes da correção (só o do recebimento, no bloco 23; o do envio não). Ficam aqui
-  para a defesa.
+- **A 5.2 foi enxugada duas vezes em 25/09**, para o Quadro 28 caber. Ficam aqui, para a defesa,
+  o que saiu dela. O porquê de cada ajuste: a restauração pedia termos e ficha de novo porque
+  consultava a base local antes do pull; as alergias sumiam por falta de conversão entre `TEXT` e
+  `jsonb`; as doses excluídas voltavam porque a exclusão física não sobe. No envio, vencia quem
+  sincronizava por último; no recebimento, o que foi feito offline nunca descia. Também saíram o
+  reagendamento dos alarmes depois da restauração, a rotina de conferência das listas
+  (`scripts/conferir-json-da-sync.mjs`), a remissão à 2.9.3 e a menção a qual defeito foi
+  reproduzido antes da correção (só o do recebimento, no bloco 23).
