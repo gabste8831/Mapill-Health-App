@@ -14,9 +14,9 @@ const path = require("node:path");
  * não ordem. Não é limitação do Notifee: a issue #297, pedindo exatamente isto, foi fechada como
  * *not planned*.
  *
- * **Antes de mexer aqui, leia a E.1 em `docs/O-QUE-FALTA-TESTAR.md`.** A correção é o app tocar o
- * próprio som com `expo-audio` e o canal do alarme ficar mudo; o alvo do patch (em `AudioPlayer.kt`)
- * já está localizado lá. Ajustar este plugin não vai resolver.
+ * **Antes de mexer aqui, leia "Como o som funciona" em `.claude/skills/mapill-dev/references/alarm.md`.**
+ * A correção foi o app tocar o próprio som com `expo-audio`, num serviço, com o canal do alarme mudo.
+ * Ajustar este plugin não vai resolver.
  *
  * O plugin continua no lugar porque não custa nada e passa a valer no dia em que o Android tratar o
  * atributo como ordem. O texto abaixo é o raciocínio original, mantido porque explica o problema -

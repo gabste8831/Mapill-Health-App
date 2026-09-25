@@ -52,9 +52,8 @@ export async function pedirDesbloqueio(): Promise<boolean> {
  * quando a Activity do alarme sobe com `showWhenLocked` e `turnScreenOn`, e remover a task depois
  * não desfaz isso. Não existe API de re-bloqueio para app nenhum.
  *
- * O defeito que isso deixa em aberto - responder a dose deixa o app acessível sem autenticação -
- * está em `docs/O-QUE-FALTA-TESTAR.md`, com a saída proposta: uma Activity separada só para o
- * alarme, com o `showWhenLocked` nela e não na `MainActivity`.
+ * A saída foi arquitetural: a `AlarmeActivity`, com o `showWhenLocked` nela e não na
+ * `MainActivity`. Ver `.claude/skills/mapill-dev/references/alarm.md`.
  */
 
 /**

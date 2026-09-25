@@ -66,8 +66,8 @@ class DesbloqueioModule : Module() {
      * task depois não desfaz isso. O Android não expõe API de re-bloqueio para app nenhum.
      *
      * A causa do problema (responder a dose deixa o app acessível) é a do topo deste arquivo: o
-     * `showWhenLocked` vale para a `MainActivity`, onde o app inteiro vive. A saída é uma Activity
-     * separada só para o alarme - ver `docs/O-QUE-FALTA-TESTAR.md`.
+     * `showWhenLocked` vale para a `MainActivity`, onde o app inteiro vive. A saída foi a
+     * `AlarmeActivity`, separada só para o alarme - ver `.claude/skills/mapill-dev/references/alarm.md`.
      */
 
     /**

@@ -166,3 +166,7 @@ projeto):
 - `references/sync-and-offline.md` - detalhes de sincronização SQLite ↔ Supabase, LWW, RLS
 - `references/screens-and-flows.md` - mapeamento de telas definidas vs. em aberto, fluxos de
   navegação, e perguntas pendentes de UX
+- `references/alarm.md` - como o alarme funciona hoje: agendamento, as duas Activities, o som no
+  serviço, os patches e plugins, e a decisão do fuso. Ler antes de mexer em qualquer coisa do alarme
+- `references/build-and-install.md` - como compilar o APK de release e instalar pelo cabo, e por
+  que o `expo run:android` não serve
