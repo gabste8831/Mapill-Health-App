@@ -24,20 +24,15 @@ listas caírem 3, e aí é preciso refazer os números e conferir de novo contra
 Também pendente de confirmar com o modelo da UNIDAVI: o número aparece impresso nas páginas 1 a 14,
 inclusive na capa, e pela NBR 14724 ele só aparece a partir da Introdução.
 
-## 3. Linhas vazias no sumário
-
-As linhas vazias com estilo de título entre as seções são espaçamento intencional. Se o sumário for
-gerado automaticamente, conferir se elas entram como entradas vazias e, se entrarem, removê-las.
-
 ---
 
 ## Capítulo 5 Resultados
 
-**No documento e conferido em 25/09**, no `.docx` das 15:19. Os ajustes de tom e o Quadro 28 na lista
-de quadros já entraram, assim como a frase nova da 4.4.6. O `CAPITULO-5.md` pode sair.
+**Concluído em 25/09.** No documento e conferido contra o PDF das 16:14, com a frase nova da 4.4.6,
+o Quadro 28 na lista e LWW na lista de siglas. O texto de trabalho (`CAPITULO-5.md`) saiu do
+repositório e fica no histórico do git, com as fontes de cada afirmação para a defesa.
 
-Detalhes que restam: "Autostart" na 5.3 está entre aspas e vai em itálico; conferir se LWW está na
-lista de siglas.
+Detalhe opcional: *Autostart* na 5.3 está em itálico e também entre aspas; as aspas sobram.
 
 **Padrão de fonte.** Todas as fontes do documento estão como "Fonte: elaborado pelo autor (2026).".
 
