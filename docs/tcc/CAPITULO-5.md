@@ -26,17 +26,13 @@
 
 **5.2 Defeitos Identificados Durante a Validação**
 
-	A validação revelou cinco defeitos na sincronização, todos corrigidos e verificados novamente em aparelho. Nenhum deles provocava perda definitiva de dados, uma vez que a base remota preservava os registros, mas todos comprometiam a convergência entre as bases que a consistência eventual pressupõe, conforme discutido na seção 2.9.3.
+	A validação revelou cinco defeitos na sincronização, todos corrigidos e verificados novamente em aparelho. Nenhum causava perda definitiva de dados, pois a base remota preservava os registros, mas todos impediam a convergência entre as bases que a consistência eventual pressupõe, conforme a seção 2.9.3.
 
-	Na primeira execução do cenário de restauração, a aplicação reinstalada solicitava novamente o aceite dos termos e o preenchimento da ficha de saúde, e nenhum medicamento retornava. A causa era de ordem, e não de ausência de sincronização. A aplicação consultava a base local, ainda vazia, antes de concluir o recebimento dos dados remotos. A correção inverteu essa ordem e passou a reagendar os alarmes ao final do recebimento, uma vez que o agendamento reside no sistema operacional e não acompanha os dados restaurados.
+	Os três primeiros surgiram em torno da restauração dos dados. A aplicação consultava a base local, ainda vazia, antes de concluir o recebimento dos dados remotos, e voltava a solicitar os termos e a ficha de saúde. As listas, como alergias e posologia, atravessavam sem conversão entre o texto da base local e o *jsonb* da base remota. E a exclusão das doses futuras era física, de modo que nunca alcançava a base remota, de onde as doses retornavam. As correções inverteram a ordem da restauração, passaram a converter as listas nos dois sentidos e substituíram a exclusão física pela lógica.
 
-	Corrigida a ordem, as alergias ainda não retornavam. As colunas que armazenam listas, como alergias, contatos de emergência e posologia, são texto na base local e *jsonb* na base remota, e atravessavam a fronteira entre as duas sem conversão. A correção passou a converter esses valores nos dois sentidos, e uma rotina de conferência automatizada passou a verificar essa travessia.
+	Os dois últimos foram identificados na análise do código que antecedeu o cenário de conflito. O envio gravava a versão local sem comparar carimbos, e prevalecia o aparelho que sincronizasse por último, e não a edição mais recente. O recebimento buscava os registros pela data de edição, e um registro editado sem conexão, que chegava depois com data antiga, nunca alcançava os demais aparelhos da mesma conta. A correção aplicou o critério *Last-Write-Wins* também no servidor e fez o recebimento considerar o instante de chegada à base remota, mantendo a data de edição apenas para decidir o conflito.
 
-	O terceiro defeito envolvia a exclusão das doses futuras de um tratamento, que apagava fisicamente as linhas da base local. Uma linha inexistente não é enviada, de modo que a exclusão nunca alcançava a base remota, e um segundo aparelho ou uma reinstalação trazia as doses de volta. A correção substituiu a exclusão física pela lógica, que se propaga pela sincronização conforme a modalidade descrita na seção 4.3.5.
-
-	Os dois últimos defeitos foram identificados na análise do código que antecedeu o cenário de conflito. No primeiro, o envio gravava a versão local na base remota sem comparar carimbos de tempo, de modo que prevalecia o aparelho que sincronizasse por último, e não a edição mais recente. A correção levou o critério *Last-Write-Wins* também ao servidor, que passou a recusar a atualização mais antiga que a armazenada. No segundo, o recebimento selecionava os registros cuja data de edição fosse posterior à última sincronização. Um registro editado sem conexão chegava à base remota depois, com data antiga, e nunca era buscado pelos demais aparelhos da mesma conta. A correção separou as duas funções da data, de modo que o carimbo de edição continua decidindo o conflito, enquanto o recebimento passou a considerar o instante de chegada à base remota, registrado pelo próprio servidor. O segundo defeito foi reproduzido em aparelho antes da correção, e ambos foram validados depois dela.
-
-	Com as correções descritas, os cenários previstos na metodologia foram executados novamente, e o Quadro 28 sintetiza os procedimentos e os resultados obtidos.
+	Com as correções descritas, os cenários foram executados novamente, e o Quadro 28 sintetiza os procedimentos e os resultados obtidos.
 
 Quadro 28 - Cenários de validação da arquitetura *offline-first*
 
@@ -76,6 +72,7 @@ começa com "O empate favorece a versão local".
 - **Sem menção a cuidador.** O Quadro 2 põe o "login de cuidador" fora do escopo, e citar cuidador
   aqui pareceria contradição. O texto fala em "demais aparelhos da mesma conta".
 - **Sem datas nem commits no texto.** Estão acima, como fonte, para a defesa.
-- **O defeito do envio não foi reproduzido em aparelho antes da correção**, por decisão de 25/09 de
-  registrar só o processo validado. O texto diz isso com precisão, e só afirma a reprodução prévia
-  para o defeito do recebimento.
+- **A 5.2 foi enxugada em 25/09.** Saíram o reagendamento dos alarmes depois da restauração, a
+  rotina de conferência das listas (`scripts/conferir-json-da-sync.mjs`) e a menção a qual defeito
+  foi reproduzido antes da correção (só o do recebimento, no bloco 23; o do envio não). Ficam aqui
+  para a defesa.
