@@ -31,17 +31,20 @@ sumário.
 
 ## Capítulo 5 Resultados
 
-**Texto escrito em 25/09**, em [`CAPITULO-5.md`](CAPITULO-5.md), com a evidência completa. Os
-quatro cenários da seção 3.2 foram validados em aparelho, e os cinco defeitos da sincronização
-encontrados na validação estão corrigidos. Falta levar para o documento.
+**No documento desde 25/09**, conferido no `docs/TCC Gabriel Steffens Atualizado 24_09.docx` das
+15:09. A frase nova da 4.4.6 também entrou. Faltam três ajustes do tom combinado depois:
 
-1. **Confirmar o aparelho.** O texto diz que os testes foram num Xiaomi Redmi Note 14 Pro 5G com
-   Android 16. Se os de 08/09 ou de 12/09 foram em outro celular, a introdução muda.
-2. **Colar o capítulo** no lugar do título solto "5 RESULTADOS".
-3. **Quadro 28**, o primeiro do capítulo. Entra na lista de quadros.
-4. **Frase nova na 4.4.6**, que está no fim do `CAPITULO-5.md`. Sem ela, a 4.4.6 descreve a
-   sincronização de antes das correções de 25/09.
-5. Depois de conferido no documento, o `CAPITULO-5.md` sai.
+1. A última frase da introdução ainda diz "Os defeitos encontrados (...) foram corrigidos". Passa a
+   "Os ajustes identificados ao longo dos testes foram incorporados e verificados novamente antes
+   do registro de cada resultado."
+2. Quadro 28, três últimas linhas: "após as correções descritas" passa a "com os ajustes descritos".
+3. Quadro 28 na lista de quadros.
+
+Detalhes: "Autostart" na 5.3 está entre aspas e vai em itálico; conferir se LWW está na lista de
+siglas. Depois disso o `CAPITULO-5.md` sai.
+
+**Padrão de fonte.** Desde 25/09 todas as 38 fontes do documento estão como "Fonte: elaborado pelo
+autor (2026).". É esse o padrão agora.
 
 ## Capítulo 6 Conclusão
 
