@@ -20,7 +20,11 @@
 
 **5.1 Validação da Arquitetura *Offline-First***
 
-	Os cenários previstos na metodologia foram executados sobre a sincronização entre a base local e a base remota apresentada na seção 4.4.6. Nos cenários que envolvem um segundo dispositivo, as edições desse dispositivo foram simuladas por operações diretas na base remota, com carimbo de tempo controlado, o que permite reproduzir com precisão a ordem dos acontecimentos. O Quadro 28 sintetiza os procedimentos e os resultados obtidos.
+	Os cenários previstos na metodologia foram executados sobre a sincronização entre a base local e a base remota apresentada na seção 4.4.6. Nos cenários que envolvem um segundo dispositivo, as edições desse dispositivo foram simuladas por operações diretas na base remota, com carimbo de tempo controlado, o que permite reproduzir com precisão a ordem dos acontecimentos.
+
+	No cenário de conflito, a edição feita sem conexão alterou o nome e o horário de um medicamento, e a base remota recebeu um novo nome um minuto depois. Após a reconexão, prevaleceram o nome da base remota e o horário do aparelho. O resultado decorre de nome e horário pertencerem a registros distintos, das tabelas de medicamentos e de prescrições, dos quais apenas o primeiro esteve em conflito. O comportamento corresponde ao critério da seção 4.3.5, aplicado ao registro inteiro e sem mescla de campos. Dois casos de controle completaram o cenário. Quando a edição do aparelho era a mais recente, ela prevaleceu nas duas bases, e sem edição pendente o aparelho recebeu a versão remota ao retornar ao primeiro plano.
+
+	O Quadro 28 sintetiza os procedimentos e os resultados obtidos em todos os cenários.
 
 Quadro 28 - Cenários de validação da arquitetura *offline-first*
 
@@ -33,8 +37,6 @@ Quadro 28 - Cenários de validação da arquitetura *offline-first*
 | Conflito entre registros | Edição sem conexão no aparelho, seguida de edição posterior do mesmo registro na base remota e da reconexão | Prevalência da edição mais recente nas duas bases | Aprovado, após as correções descritas na seção 5.2 |
 
 Fonte: elaborado pelo autor.
-
-	No cenário de conflito, a edição feita sem conexão alterou o nome e o horário de um medicamento, e a base remota recebeu um novo nome um minuto depois. Após a reconexão, prevaleceram o nome da base remota e o horário do aparelho. O resultado decorre de nome e horário pertencerem a registros distintos, das tabelas de medicamentos e de prescrições, dos quais apenas o primeiro esteve em conflito. O comportamento corresponde ao critério da seção 4.3.5, aplicado ao registro inteiro e sem mescla de campos. Dois casos de controle completaram o cenário. Quando a edição do aparelho era a mais recente, ela prevaleceu nas duas bases, e sem edição pendente o aparelho recebeu a versão remota ao retornar ao primeiro plano.
 
 **5.2 Defeitos Identificados Durante a Validação**
 
