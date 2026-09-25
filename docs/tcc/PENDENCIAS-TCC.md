@@ -36,8 +36,8 @@ Detalhe opcional: *Autostart* na 5.3 está em itálico e também entre aspas; as
 ## Capítulo 6 Conclusão
 
 **Texto escrito em 25/09**, em [`CAPITULO-6.md`](CAPITULO-6.md): problema de pesquisa respondido,
-objetivos, contribuições, limitações da validação e trabalhos futuros, com o parágrafo do cuidador
-mantido inteiro. Falta levar para o documento e conferir. A conclusão pode passar de uma página
+objetivos, contribuições, limitações da validação e trabalhos futuros (iOS, organização por
+tratamento, acesso de acompanhamento e avaliação de usabilidade). Falta levar para o documento e conferir. A conclusão pode passar de uma página
 para duas, e aí as Referências e os Anexos descem, o que pede nova conferência do sumário.
 
 ## Resumo e Abstract

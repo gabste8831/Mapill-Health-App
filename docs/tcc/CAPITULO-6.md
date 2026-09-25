@@ -1,11 +1,13 @@
 # Capítulo 6 - texto para inclusão
 
 > **Escrito em 25/09/2026.** Substitui o capítulo "6. CONCLUSÃO", que tinha só o parágrafo de
-> trabalhos futuros. Esse parágrafo foi mantido inteiro, como começo do último.
+> trabalhos futuros, usado como base do acesso de acompanhamento.
 >
-> **Fontes dos trabalhos futuros**, todos já registrados no projeto: cuidador (Quadro 2 e seção 4.1),
-> iOS (`PLANO-DE-DESENVOLVIMENTO.md`, fora de escopo por exigir conta Apple Developer), anexos na
-> nuvem (item E9 do plano) e pausar ou arquivar tratamento (commit `0cddbef`, achado no uso).
+> **Trabalhos futuros definidos pelo Gabriel em 25/09:** versão para iOS, organização do cuidado por
+> tratamento (contexto clínico que reúne medicamentos, sessões em lote e compromissos, com adesão ao
+> tratamento inteiro) e acesso de acompanhamento só de consulta para médicos e responsáveis. A
+> avaliação de usabilidade fecha o parágrafo, por responder à limitação declarada. Saíram os anexos
+> na nuvem (item E9 do plano) e o pausar ou arquivar tratamento (commit `0cddbef`).
 >
 > **Este arquivo sai** depois que o texto estiver no documento e conferido.
 
@@ -21,4 +23,4 @@
 
 	O trabalho apresenta limitações que delimitam o alcance desses resultados. A validação consistiu em testes funcionais conduzidos pelo autor em um único modelo de aparelho, com o segundo dispositivo simulado pela base remota, e não incluiu avaliação com usuários do público-alvo. A aplicação foi desenvolvida e validada apenas para Android, e a entrega do alarme permanece sujeita às restrições de inicialização automática impostas por alguns fabricantes, que a aplicação pode orientar, mas não contornar.
 
-	Como sugestão para trabalhos futuros, aponta-se a possibilidade de estender o Mapill com um mecanismo de vínculo entre a conta do paciente e um perfil de cuidador ou profissional de saúde, funcionalidade já consolidada em soluções de mercado como o Medisafe, e que exigiria, no entanto, a revisão do modelo de permissões da aplicação, deliberadamente simplificado na delimitação de escopo apresentada na seção 4.1. Também se sugerem a avaliação de usabilidade com pacientes idosos e polimedicados, a versão para iOS, a sincronização dos anexos, hoje mantidos apenas no aparelho, e a possibilidade de pausar ou arquivar um tratamento sem excluí-lo, de modo que uma interrupção orientada pelo médico não seja computada como falta de adesão.
+	Como trabalhos futuros, sugere-se inicialmente o desenvolvimento da versão para iOS, que ampliaria o alcance da aplicação aos usuários de aparelhos da Apple. Outra frente é a organização do cuidado por tratamento, na qual o paciente reúne sob um mesmo contexto clínico, como o de uma terapia oncológica, os medicamentos, as sessões de radioterapia agendadas em lote e os demais compromissos, permitindo acompanhar a adesão ao tratamento como um todo, e não apenas a cada medicamento. Sugere-se também um acesso de acompanhamento destinado a médicos e responsáveis pelo paciente, com permissão apenas de consulta, funcionalidade já consolidada em soluções de mercado como o Medisafe, e que exigiria a revisão do modelo de permissões da aplicação, deliberadamente simplificado na delimitação de escopo apresentada na seção 4.1. Por fim, a avaliação de usabilidade com pacientes idosos e polimedicados complementaria a validação técnica realizada neste trabalho.
