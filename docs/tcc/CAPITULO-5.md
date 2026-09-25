@@ -26,9 +26,9 @@
 
 **5.2 Ajustes Decorrentes da Validação**
 
-	Os cenários de teste foram definidos a partir das situações de uso previstas para a aplicação, como a troca de aparelho e o acesso à mesma conta em mais de um dispositivo, e sua execução integrou a rotina de desenvolvimento.
+	Os cenários de teste foram definidos a partir das situações de uso previstas para a aplicação, como a troca de aparelho e o acesso à mesma conta em mais de um dispositivo, e sua execução integrou a rotina de desenvolvimento. O comportamento observado em cada cenário foi refinado de modo a preservar a convergência entre as bases que a consistência eventual pressupõe, conforme a seção 2.9.3.
 
-	Na restauração dos dados, a consulta à base local passou a aguardar o recebimento dos dados remotos, as listas passaram a ser convertidas entre os formatos das duas bases e a exclusão das doses futuras passou a ser lógica. Nos cenários com mais de um aparelho, o critério *Last-Write-Wins* passou a ser aplicado também pelo servidor no envio, e o recebimento passou a considerar o instante de chegada à base remota, para que registros feitos sem conexão alcancem os demais aparelhos.
+	Na restauração dos dados, a consulta à base local passou a aguardar o recebimento dos dados remotos, evitando que os termos e a ficha de saúde fossem solicitados novamente. As listas passaram a ser convertidas entre os formatos das duas bases, e a exclusão das doses futuras passou a ser lógica, de modo que a remoção alcance também a base remota. Nos cenários com mais de um aparelho, o critério *Last-Write-Wins* passou a ser aplicado também pelo servidor no envio, garantindo que prevaleça a edição mais recente, e o recebimento passou a considerar o instante de chegada à base remota, para que registros feitos sem conexão alcancem os demais aparelhos.
 
 	Com os ajustes incorporados e verificados em aparelho, os cenários foram executados novamente, e o Quadro 28 sintetiza os resultados obtidos.
 
@@ -78,5 +78,5 @@ começa com "O empate favorece a versão local".
   `jsonb`; as doses excluídas voltavam porque a exclusão física não sobe. No envio, vencia quem
   sincronizava por último; no recebimento, o que foi feito offline nunca descia. Também saíram o
   reagendamento dos alarmes depois da restauração, a rotina de conferência das listas
-  (`scripts/conferir-json-da-sync.mjs`), a remissão à 2.9.3 e a menção a qual defeito foi
+  (`scripts/conferir-json-da-sync.mjs`) e a menção a qual defeito foi
   reproduzido antes da correção (só o do recebimento, no bloco 23).
