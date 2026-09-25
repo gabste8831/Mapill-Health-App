@@ -154,7 +154,22 @@ avisos`. Se a seção "DESENVOLVIMENTO" não existir, a build é antiga.
 
 # PARTE 1 - O que falta
 
-## 22 - Conflito entre aparelho e nuvem 🆕🔬 (25/09, capítulo 5 do TCC)
+## 22 - Conflito entre aparelho e nuvem ✅ _(passou totalmente em 25/09)_
+
+> **Resultado de 25/09, com a build instalada às 09:55 e o trigger aplicado no Supabase.**
+>
+> - **22.1** A conferência devolveu as 9 tabelas.
+> - **22.2** O remédio foi renomeado no aparelho offline para "Conflito C", com o horário mudado para
+>   12:30. Às 10:06 a nuvem recebeu "Conflito D". Ao reconectar, aparelho e nuvem ficaram com
+>   **Conflito D**, a edição mais recente, mesmo o aparelho tendo sincronizado por último. O
+>   horário **12:30** também subiu, porque fica em `prescriptions`, onde não houve conflito: o LWW
+>   decide registro por registro, sem mesclar campos.
+> - **22.3** Nuvem com "Conflito E" e aparelho offline renomeando depois para "Conflito F": venceu
+>   **Conflito F** nos dois lados.
+> - **22.4** Sem edição pendente, a nuvem com "Conflito G" chegou ao aparelho ao voltar ao primeiro
+>   plano.
+>
+> Os quatro cenários da seção 3.2 do artigo estão validados em aparelho.
 
 **O que se prova.** O quarto cenário da seção 3.2: conflito entre registro local e remoto. O
 aparelho sobe antes de descer, e o `upsert` não comparava carimbo, então vencia quem sincronizava

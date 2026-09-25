@@ -31,11 +31,11 @@ sumário.
 
 ## Fora do Capítulo 4
 
-**Capítulo 5 Resultados.** Só o título. A seção 3.2 promete a validação da arquitetura
-*offline-first* em quatro cenários, e o capítulo precisa relatá-los. Ausência de conexão,
-restabelecimento e sincronização foram testados em aparelho em 08/09. O conflito entre registros
-não teve teste dedicado, e falta decidir se o texto o apresenta como validado pela regra da 4.4.6
-ou se ele é testado antes.
+**Capítulo 5 Resultados.** Só o título, mas a evidência está completa. Os quatro cenários da
+seção 3.2 foram validados em aparelho. Ausência de conexão, restabelecimento e sincronização em
+08/09. O conflito entre registros em 25/09, depois da correção do envio (`ed7b9bf`), com o
+resultado registrado no bloco 22 do `docs/ROTEIRO-DE-TESTE.md`. A falha do envio foi identificada
+na análise do código, e entra no capítulo como defeito encontrado e corrigido antes da validação.
 
 **Capítulo 6 Conclusão.** Tem só o parágrafo de trabalhos futuros. Depende do capítulo 5.
 
