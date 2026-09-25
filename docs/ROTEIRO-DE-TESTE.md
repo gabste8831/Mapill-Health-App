@@ -154,6 +154,72 @@ avisos`. Se a seção "DESENVOLVIMENTO" não existir, a build é antiga.
 
 # PARTE 1 - O que falta
 
+## 22 - Conflito entre aparelho e nuvem 🆕🔬 (25/09, capítulo 5 do TCC)
+
+**O que se prova.** O quarto cenário da seção 3.2: conflito entre registro local e remoto. O
+aparelho sobe antes de descer, e o `upsert` não comparava carimbo, então vencia quem sincronizava
+por último, e não a edição mais recente. A correção é o trigger `recusar_versao_antiga` no
+Postgres, na seção "LWW TAMBÉM NO ENVIO" do `docs/supabase-schema.sql`.
+
+**Antes de começar.**
+
+- Conta Google vinculada, e data e hora do celular em **automático**. O teste compara o relógio do
+  aparelho com o do servidor.
+- O segundo aparelho é simulado pelo **SQL Editor** do Supabase: um `update` com `updated_at = now()`
+  é exatamente o que um outro celular faria ao subir uma edição.
+- O app sincroniza ao **voltar ao primeiro plano**. "Sair e voltar" nos passos abaixo é isso.
+
+**22.0** Com internet, cadastre manualmente um remédio chamado **Conflito**. Em `Ajustes → Conta
+e dados`, espere **"Tudo salvo na nuvem"**. No SQL Editor, pegue o id:
+
+```sql
+select id, name, updated_at from public.medications where name ilike 'conflito%';
+```
+
+### Aplicar o SQL
+
+**22.1** No SQL Editor, rode a seção **"LWW TAMBÉM NO ENVIO"** do `docs/supabase-schema.sql` (ou o
+arquivo inteiro, que é idempotente). Depois, a conferência do fim do arquivo:
+
+```sql
+select event_object_table from information_schema.triggers
+where trigger_name = 'recusar_versao_antiga' order by event_object_table;
+```
+
+> ✅ **9 linhas**, uma por tabela.
+
+### O teste
+
+**22.2** **Modo avião ligado.** No app, renomeie o remédio para **Conflito C** e anote a hora.
+Espere um minuto e, no SQL Editor, simule o outro aparelho editando depois:
+
+```sql
+update public.medications set name = 'Conflito D', updated_at = now() where id = '<id>';
+```
+
+Desligue o modo avião, saia do app e volte. Em `Conta e dados`, espere "Tudo salvo na nuvem".
+
+> ✅ A nuvem continua com **Conflito D**, e o app passa a mostrar **Conflito D**. A edição mais
+> recente venceu, mesmo o aparelho tendo sincronizado por último.
+> 🔬 **Capture** a lista de remédios e o resultado da consulta do 22.0. É a evidência do
+> capítulo 5.
+
+**22.3** O caso inverso, para mostrar que o aparelho ainda vence quando é o mais novo. **Modo avião
+ligado.** Rode o `update` com **Conflito E**. Espere um minuto e renomeie no app para **Conflito F**.
+Desligue o modo avião, saia e volte.
+
+> ✅ App e nuvem com **Conflito F**.
+
+**22.4** O caso sem edição pendente. Com internet e sem mexer no app, rode o `update` com
+**Conflito G**. Saia do app e volte.
+
+> ✅ O app passa a mostrar **Conflito G**. É o recebimento, que já comparava carimbos antes da
+> correção.
+
+**Ao terminar**, exclua o remédio **Conflito**.
+
+---
+
 ## 11 - A ferramenta de diagnóstico
 
 **Faça este bloco antes de qualquer teste de alarme.** Ela é o que torna os demais suportáveis: em
@@ -959,107 +1025,3 @@ contínuo, estoque 28, local `Gaveta da cozinha`, avisar com 7 dias.
 
 
 ---
-
-# ANEXO - As decisoes de 13/09 sobre alarme e fuso
-
-> Movido do `O-QUE-FALTA-TESTAR.md` em 14/09, que passou a ser so a lista de acao.
-> Fica aqui como registro: as duas analises sustentam seccoes do artigo.
-
-# PARTE E - Decisões tomadas, e o que fica fora de escopo
-
-## E.1 - 🔊 O alarme no volume de despertador
-
-**Decisão do Gabriel em 13/09:** fica para depois de todo o resto estar validado. Duas builds foram
-gastas nisso sem resultado, e o motivo é que o caminho tentado não leva lá - não é questão de
-insistir mais.
-
-**Até lá, o alarme toca no volume de mídia.** É a única característica do app que fica sabidamente
-incompleta.
-
-### Por que as duas tentativas falharam
-
-O `AudioAttributes` do canal **foi** aplicado. Verificado em 13/09 rodando `expo prebuild`
-localmente: o [`plugins/volume-de-despertador.js`](../plugins/volume-de-despertador.js) transforma o
-`ChannelManager.java` corretamente, `USAGE_NOTIFICATION` vira `USAGE_ALARM`. O plugin funciona.
-
-O problema é que **quem toca o som da notificação é o NotificationManager, não o app** - e ele usa o
-stream dele independentemente do que o canal peça. O `AudioAttributes` ali é uma dica, não uma
-ordem.
-
-Não é defeito do Notifee: a [issue #297](https://github.com/invertase/notifee/issues/297), pedindo
-exatamente isto, foi fechada como *not planned*. E os [requisitos do Google Play para apps de
-alarme](https://support.google.com/googleplay/android-developer/answer/13392821) descrevem a
-arquitetura esperada - o app toca som próprio, e a notificação serve ao full-screen intent, não ao
-áudio.
-
-### O caminho que funciona
-
-Separar quem mostra de quem toca:
-
-1. **O canal do alarme fica mudo** (`sound: null`). A notificação continua fazendo a tela azul
-   irromper e continua na bandeja - só não emite som.
-2. **A tela do alarme toca o som**, com `expo-audio` (já instalado e registrado no `app.json`), em
-   loop, parando quando a dose é respondida.
-3. **Um segundo config plugin** põe `USAGE_ALARM` no player. É necessário porque o `expo-audio`
-   [não expõe a escolha de stream](https://docs.expo.dev/versions/v57.0.0/sdk/audio/) - tem
-   `interruptionMode` e `playsInSilentMode`, e nada de `androidAudioUsage`.
-
-**O alvo do patch já está localizado:** `node_modules/expo-audio/android/src/main/java/expo/modules/
-audio/AudioPlayer.kt`, linha 39 - `.setAudioAttributes(AudioAttributes.DEFAULT, false)`, onde
-`DEFAULT` é `USAGE_MEDIA`. Uma linha, no mesmo formato do patch que já existe e comprovadamente
-aplica.
-
-### O que ganha junto
-
-O loop do som passa a ser do app, e não do canal; e parar o som vira uma chamada direta em vez de
-cancelar notificação. Os dois são contornos que existem hoje só porque o som é do sistema.
-
-### O risco a tratar
-
-Se o Android matar o processo antes de a tela montar, o som não toca - hoje quem toca é o sistema, e
-isso não acontece. A defesa é um **foreground service**, que é o que os requisitos do Play descrevem
-para apps de alarme e que este app ainda não usa. Entra no mesmo trabalho.
-
-### Tamanho
-
-Mudança de arquitetura do alarme, não ajuste. Merece build dedicada e uma rodada de teste própria -
-foi por isso que ficou para depois, e não por ser difícil.
-
-## E.2 - ✅ A dose segue o instante, não a hora de parede
-
-**Decisão do Gabriel em 13/09, e o comportamento atual está correto.** Um remédio cadastrado para as
-21:00 em São Paulo toca às **20:00** em Manaus - é o mesmo momento, visto de outro fuso.
-
-### O que foi tentado, e por que saiu
-
-A suposição de 13/09 era a oposta: que "tomo às 8 da manhã" fosse uma promessa sobre o **relógio de
-parede**, e que o horário devesse se manter ao trocar de fuso. Foi implementado - o app guardava o
-fuso da última geração e regerava as doses futuras quando ele mudava.
-
-Não funcionou, e a caçada consumiu a tarde. Três causas reais foram encontradas no caminho (todas
-corrigidas e mantidas, porque valem por si):
-
-- A manutenção da grade rodava **depois** da guarda de permissão, então nunca rodava com a permissão
-  negada.
-- O offset que o `Date` aplica **demora a acompanhar** o nome do fuso, então a regeração usava o
-  deslocamento antigo.
-- `scheduled_for` tinha **duas formas de ISO** no banco, e a comparação de texto do SQLite deixava
-  escapar metade das linhas.
-
-### Por que o comportamento atual é defensável
-
-Não é só desistência - o instante absoluto tem um argumento próprio, e num app de medicação ele é
-forte: **quem toma de 12 em 12 horas não deve encurtar o intervalo porque atravessou um fuso.**
-Manter a hora de parede numa viagem de três fusos comprimiria ou esticaria o intervalo entre doses,
-que é justamente o que a posologia estabelece.
-
-Para viagem curta - o caso real de quem usa este app - seguir o instante é o mais seguro.
-
-### O que fica registrado
-
-O código da tentativa foi removido (`fuso-da-grade.ts`). A tabela `app_state` (migration 019) fica:
-migration publicada não se remove, e um lugar para estado interno é útil.
-
-**Se um dia isto for revisitado**, o caminho rigoroso é gravar a hora local pretendida (`"21:00"`)
-ao lado do instante e derivar um do outro - não detectar troca de fuso e regerar. Custa uma coluna,
-backfill e a revisão dos ~35 arquivos que leem `scheduledFor`, e foi o que se evitou em 13/09.

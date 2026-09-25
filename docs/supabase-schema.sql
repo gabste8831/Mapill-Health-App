@@ -297,6 +297,54 @@ alter table public.inventory_items
   add column if not exists low_stock_alerted_at_quantity real;
 
 -- =============================================================================
+-- LWW TAMBÉM NO ENVIO
+--
+-- O cliente sobe antes de descer, e o `upsert` do push não compara carimbo: sem
+-- isto, o aparelho que sincroniza por último vence, e não a edição mais recente.
+-- Um celular que ficou offline com uma edição das 10:00 sobrescrevia a das 10:05
+-- que outro aparelho já tinha subido.
+--
+-- O trigger recusa em silêncio a versão mais velha que a guardada, e o pull que
+-- vem em seguida entrega a mais nova ao aparelho, pela comparação que o cliente
+-- já faz ao receber. Empate passa, igual ao cliente, onde o empate fica com o
+-- local.
+--
+-- Só `update`: `insert` não tem versão anterior a perder, e o `delete` é o
+-- apagamento da LGPD, que não pode ser barrado por carimbo.
+-- =============================================================================
+create or replace function public.recusar_versao_antiga()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.updated_at < old.updated_at then
+    return null;
+  end if;
+  return new;
+end;
+$$;
+
+do $$
+declare
+  tabela text;
+begin
+  foreach tabela in array array[
+    'medications', 'prescriptions', 'dose_schedules', 'intake_logs',
+    'inventory_items', 'inventory_adjustments', 'appointments',
+    'patient_profiles', 'consent_records'
+  ]
+  loop
+    execute format('drop trigger if exists recusar_versao_antiga on public.%I', tabela);
+    execute format(
+      'create trigger recusar_versao_antiga before update on public.%I '
+      'for each row execute function public.recusar_versao_antiga()',
+      tabela
+    );
+  end loop;
+end $$;
+
+-- =============================================================================
 -- CONFERÊNCIA
 --
 -- Depois de rodar, esta consulta tem que devolver **9 linhas, todas com
@@ -312,3 +360,10 @@ alter table public.inventory_items
 --     'patient_profiles', 'consent_records'
 --   )
 -- order by tablename;
+--
+-- E esta, 9 linhas, uma por tabela, confirma o trigger do LWW no envio:
+--
+-- select event_object_table
+-- from information_schema.triggers
+-- where trigger_name = 'recusar_versao_antiga'
+-- order by event_object_table;

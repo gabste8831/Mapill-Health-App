@@ -179,6 +179,10 @@ const COLUNAS_BOOLEANAS: Record<TabelaSincronizavel, string[]> = {
 /**
  * Sobe o que mudou: `synced_at IS NULL OR updated_at > synced_at`. Inclui linha com `deleted_at`,
  * porque a exclusão precisa viajar, senão ela volta do servidor no pull seguinte.
+ *
+ * O `upsert` não compara carimbo. Quem recusa uma versão mais velha que a da nuvem é o trigger
+ * `recusar_versao_antiga` do Postgres (`docs/supabase-schema.sql`), e o pull seguinte entrega a
+ * mais nova a este aparelho.
  */
 async function enviar(tabela: TabelaSincronizavel, userId: string): Promise<number> {
   const database = getDatabase();
