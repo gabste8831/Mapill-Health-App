@@ -22,7 +22,11 @@
 
 	Os cenários previstos na metodologia foram executados sobre a sincronização entre a base local e a base remota apresentada na seção 4.4.6. Nos cenários que envolvem um segundo dispositivo, as edições desse dispositivo foram simuladas por operações diretas na base remota, com carimbo de tempo controlado, o que permite reproduzir com precisão a ordem dos acontecimentos. O resultado consolidado de todos os cenários é apresentado ao fim da seção 5.2.
 
-	No cenário de conflito, a edição feita sem conexão alterou o nome e o horário de um medicamento, e a base remota recebeu um novo nome um minuto depois. Após a reconexão, prevaleceram o nome da base remota e o horário do aparelho. O resultado decorre de nome e horário pertencerem a registros distintos, das tabelas de medicamentos e de prescrições, dos quais apenas o primeiro esteve em conflito. O comportamento corresponde ao critério da seção 4.3.5, aplicado ao registro inteiro e sem mescla de campos. Dois casos de controle completaram o cenário. Quando a edição do aparelho era a mais recente, ela prevaleceu nas duas bases, e sem edição pendente o aparelho recebeu a versão remota ao retornar ao primeiro plano.
+	No cenário de conflito, o nome e o horário de um medicamento foram alterados no aparelho sem conexão. Um minuto depois, o mesmo medicamento recebeu outro nome na base remota. Após a reconexão, as duas bases passaram a exibir o nome definido na base remota, por ser a edição mais recente, e o horário definido no aparelho, que não havia sido alterado em outro lugar.
+
+	O nome e o horário ficam em registros diferentes, o primeiro na tabela de medicamentos e o segundo na de prescrições. Por isso cada um foi decidido separadamente, e apenas o nome esteve em conflito. O resultado confirma o critério da seção 4.3.5, no qual cada registro prevalece por inteiro, sem mescla de campos.
+
+	Dois casos de controle completaram o cenário. No primeiro, a edição feita no aparelho era a mais recente e prevaleceu nas duas bases. No segundo, sem nenhuma edição pendente, o aparelho recebeu a versão remota ao ser reaberto.
 
 **5.2 Defeitos Identificados Durante a Validação**
 
