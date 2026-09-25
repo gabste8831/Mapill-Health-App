@@ -26,11 +26,11 @@
 
 **5.2 Ajustes Decorrentes da Validação**
 
-	A execução dos cenários orientou ajustes pontuais na sincronização, concentrados em situações que só se manifestam com a base remota já preenchida ou com mais de um aparelho na mesma conta. Cada ajuste foi verificado novamente em aparelho, preservando a convergência entre as bases que a consistência eventual pressupõe, conforme a seção 2.9.3.
+	Os cenários de teste foram definidos a partir das situações de uso previstas para a aplicação, como a troca de aparelho e o acesso à mesma conta em mais de um dispositivo. Sua execução integrou a rotina de desenvolvimento, e o comportamento observado em cada cenário foi refinado e verificado novamente em aparelho, preservando a convergência entre as bases que a consistência eventual pressupõe, conforme a seção 2.9.3.
 
 	Na restauração dos dados, três ajustes foram incorporados. A consulta à base local passou a aguardar o recebimento dos dados remotos, evitando que os termos e a ficha de saúde fossem solicitados novamente. As listas, como alergias e posologia, passaram a ser convertidas entre o texto da base local e o *jsonb* da base remota. E a exclusão das doses futuras passou de física para lógica, de modo que a remoção alcance também a base remota.
 
-	Nos cenários com mais de um aparelho, a análise do código que antecedeu o teste de conflito levou a dois refinamentos. O critério *Last-Write-Wins*, até então aplicado no recebimento, passou a ser aplicado também no envio, pelo servidor, garantindo que prevaleça a edição mais recente, e não o aparelho que sincroniza por último. E o recebimento passou a considerar o instante de chegada à base remota, e não a data de edição, para que registros feitos sem conexão alcancem os demais aparelhos da mesma conta.
+	Nos cenários com mais de um aparelho, a revisão do código feita na preparação do teste de conflito resultou em dois refinamentos. O critério *Last-Write-Wins*, até então aplicado no recebimento, passou a ser aplicado também no envio, pelo servidor, garantindo que prevaleça a edição mais recente, e não o aparelho que sincroniza por último. E o recebimento passou a considerar o instante de chegada à base remota, e não a data de edição, para que registros feitos sem conexão alcancem os demais aparelhos da mesma conta.
 
 	Com os ajustes incorporados, os cenários foram executados novamente, e o Quadro 28 sintetiza os procedimentos e os resultados obtidos.
 
@@ -50,7 +50,7 @@ Fonte: elaborado pelo autor.
 
 	A seção 3.2 estabelece que os alertas devem ser disparados independentemente de conexão e do estado da aplicação. O alarme foi verificado em aparelho nas quatro combinações entre aparelho bloqueado ou em uso e aplicação presente ou ausente da lista de recentes. Com o aparelho bloqueado, a tela do alarme foi exibida sobre a tela de bloqueio, e a confirmação registrou o desfecho da dose. Com o aparelho em uso, o sistema exibiu a notificação com as ações de confirmar e pular, e o toque levou à tela do horário correspondente.
 
-	Os testes também orientaram um ajuste de privacidade. A permissão de exibição sobre a tela de bloqueio pertencia à atividade principal, compartilhada por toda a aplicação, e por isso a tela do alarme foi isolada em uma atividade própria. Com isso, o encerramento do alarme devolve o aparelho ao bloqueio, sem expor os demais dados da aplicação.
+	Na mesma rotina, a exibição do alarme sobre a tela de bloqueio recebeu um ajuste de privacidade. A permissão de exibição sobre a tela de bloqueio pertencia à atividade principal, compartilhada por toda a aplicação, e por isso a tela do alarme foi isolada em uma atividade própria. Com isso, o encerramento do alarme devolve o aparelho ao bloqueio, sem expor os demais dados da aplicação.
 
 	O teste de reinicialização revelou uma limitação de plataforma. Após reiniciar o aparelho, sem abrir a aplicação, o alarme agendado não soou no horário previsto, e soou no instante em que o aparelho foi desbloqueado. O agendamento sobreviveu à reinicialização, mas a entrega ficou retida pela restrição de inicialização automática que a fabricante aplica a aplicativos de terceiros, conhecida como *Autostart*. Não há interface de programação que permita consultar ou conceder essa permissão, e a mitigação adotada foi orientar o paciente na tela de ajuda de alertas da própria aplicação.
 
