@@ -1,4 +1,4 @@
-# Pendências do Capítulo 4
+# Pendências do TCC
 
 > **Atualizado em 25/09/2026.** Só o que falta fazer. A edição é feita no Google Docs.
 >
@@ -29,20 +29,24 @@ sumário.
 
 ---
 
-## Fora do Capítulo 4
+## Capítulo 5 Resultados
 
-**Capítulo 5 Resultados.** Só o título, mas a evidência está completa. Os quatro cenários da
-seção 3.2 foram validados em aparelho. Ausência de conexão, restabelecimento e sincronização em
-08/09. O conflito entre registros em 25/09, depois da correção do envio (`ed7b9bf`), com o
-resultado registrado no bloco 22 do `docs/ROTEIRO-DE-TESTE.md`. Dois defeitos foram encontrados
-em 25/09 e corrigidos antes de validar, e entram na seção de defeitos. O envio sobrescrevia a
-nuvem sem comparar data (`ed7b9bf`, bloco 22). O recebimento buscava pela data da edição, e o que
-um aparelho fez offline nunca chegava ao outro na mesma conta (bloco 23).
+**Texto escrito em 25/09**, em [`CAPITULO-5.md`](CAPITULO-5.md), com a evidência completa. Os
+quatro cenários da seção 3.2 foram validados em aparelho, e os cinco defeitos da sincronização
+encontrados na validação estão corrigidos. Falta levar para o documento.
 
-**Ajuste no Capítulo 4 depois disso.** A 4.4.6 pode ganhar uma frase dizendo que o critério também
-é aplicado pelo servidor no envio, e que o recebimento busca pela hora de chegada à nuvem, e não
-pela hora da edição.
+1. **Confirmar o aparelho.** O texto diz que os testes foram num Xiaomi Redmi Note 14 Pro 5G com
+   Android 16. Se os de 08/09 ou de 12/09 foram em outro celular, a introdução muda.
+2. **Colar o capítulo** no lugar do título solto "5 RESULTADOS".
+3. **Quadro 28**, o primeiro do capítulo. Entra na lista de quadros.
+4. **Frase nova na 4.4.6**, que está no fim do `CAPITULO-5.md`. Sem ela, a 4.4.6 descreve a
+   sincronização de antes das correções de 25/09.
+5. Depois de conferido no documento, o `CAPITULO-5.md` sai.
 
-**Capítulo 6 Conclusão.** Tem só o parágrafo de trabalhos futuros. Depende do capítulo 5.
+## Capítulo 6 Conclusão
 
-**Resumo e Abstract.** Revisar depois dos capítulos 5 e 6, para que citem os resultados.
+Tem só o parágrafo de trabalhos futuros. É o próximo bloco de escrita, e depende do capítulo 5.
+
+## Resumo e Abstract
+
+Revisar depois dos capítulos 5 e 6, para que citem os resultados.
