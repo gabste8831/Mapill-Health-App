@@ -2,8 +2,9 @@
 
 > **Atualizado em 25/09/2026.** Só o que falta fazer. A edição é feita no Google Docs.
 >
-> **Sumário e listas preenchidos e conferidos em 25/09** contra o PDF das 16:14. As 121 entradas
-> (82 do sumário, 28 quadros e 12 figuras) batem com o corpo. Sumário nas páginas 12 a 14, Introdução
+> **Sumário e listas conferidos em 25/09** contra o PDF das 17:27. Das 121 entradas (82 do sumário,
+> 28 quadros e 12 figuras), só REFERÊNCIAS (passa a 82) e ANEXOS (passa a 86) precisam de ajuste,
+> porque a conclusão agora ocupa as páginas 80 e 81. Sumário nas páginas 12 a 14, Introdução
 > na 15. Os quadros e as figuras estão em sequência, com título e fonte na mesma página. Qualquer
 > mudança que desloque páginas pede nova conferência.
 
@@ -35,11 +36,12 @@ Detalhe opcional: *Autostart* na 5.3 está em itálico e também entre aspas; as
 
 ## Capítulo 6 Conclusão
 
-**Texto escrito em 25/09**, em [`CAPITULO-6.md`](CAPITULO-6.md): problema de pesquisa respondido,
-objetivos, contribuições, limitações da validação e trabalhos futuros (iOS, organização por
-tratamento, acesso de acompanhamento e avaliação de usabilidade). Falta levar para o documento e conferir. A conclusão pode passar de uma página
-para duas, e aí as Referências e os Anexos descem, o que pede nova conferência do sumário.
+**Concluído em 25/09.** No documento e conferido contra o PDF das 17:27, nas páginas 80 e 81. Seis
+parágrafos: problema de pesquisa, objetivos, contribuições, limitações, trabalhos futuros (iOS,
+organização por tratamento, acesso de acompanhamento e avaliação de usabilidade) e fechamento. O
+texto de trabalho (`CAPITULO-6.md`) saiu e fica no histórico do git.
 
 ## Resumo e Abstract
 
-Revisar depois dos capítulos 5 e 6, para que citem os resultados.
+**É o próximo passo.** Os capítulos 5 e 6 estão fechados, e o resumo foi escrito antes deles.
+Revisar para que cite a validação e os resultados.
