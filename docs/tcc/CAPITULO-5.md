@@ -20,13 +20,9 @@
 
 **5.1 Validação da Arquitetura *Offline-First***
 
-	Os cenários previstos na metodologia foram executados sobre a sincronização entre a base local e a base remota apresentada na seção 4.4.6. Nos cenários que envolvem um segundo dispositivo, as edições desse dispositivo foram simuladas por operações diretas na base remota, com carimbo de tempo controlado, o que permite reproduzir com precisão a ordem dos acontecimentos. O resultado consolidado de todos os cenários é apresentado ao fim da seção 5.2.
+	Os cenários previstos na metodologia foram executados sobre a sincronização apresentada na seção 4.4.6. As edições de um segundo dispositivo foram simuladas por operações diretas na base remota, com carimbo de tempo controlado, o que permite reproduzir com precisão a ordem dos acontecimentos.
 
-	No cenário de conflito, o nome e o horário de um medicamento foram alterados no aparelho sem conexão. Um minuto depois, o mesmo medicamento recebeu outro nome na base remota. Após a reconexão, as duas bases passaram a exibir o nome definido na base remota, por ser a edição mais recente, e o horário definido no aparelho, que não havia sido alterado em outro lugar.
-
-	O nome e o horário ficam em registros diferentes, o primeiro na tabela de medicamentos e o segundo na de prescrições. Por isso cada um foi decidido separadamente, e apenas o nome esteve em conflito. O resultado confirma o critério da seção 4.3.5, no qual cada registro prevalece por inteiro, sem mescla de campos.
-
-	Dois casos de controle completaram o cenário. No primeiro, a edição feita no aparelho era a mais recente e prevaleceu nas duas bases. No segundo, sem nenhuma edição pendente, o aparelho recebeu a versão remota ao ser reaberto.
+	No cenário de conflito, o nome e o horário de um medicamento foram alterados no aparelho sem conexão, e um minuto depois o mesmo medicamento recebeu outro nome na base remota. Após a reconexão, prevaleceu o nome da base remota, por ser a edição mais recente, juntamente ao horário definido no aparelho. Como nome e horário ficam em tabelas diferentes, apenas o nome esteve em conflito, o que confirma o critério da seção 4.3.5, no qual cada registro prevalece por inteiro. Nos casos de controle, a edição do aparelho prevaleceu quando era a mais recente, e, sem edição pendente, o aparelho recebeu a versão remota.
 
 **5.2 Defeitos Identificados Durante a Validação**
 
