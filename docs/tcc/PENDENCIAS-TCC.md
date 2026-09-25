@@ -15,13 +15,28 @@ Hoje estão com imagem duplicada, só para reservar espaço. O que cada captura 
 [`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURAS.md). Ao trocar, conferir se a captura tem o mesmo
 tamanho da duplicada, senão a fonte pode descer para a página seguinte.
 
-## 2. Números de página das listas
+## 2. Sumário, listas e paginação
 
-Por último, depois das figuras reais. A lista de figuras tem números antigos (Figura 2 na 33,
-Figura 12 na 44) e a de quadros está sem número. Usar o número impresso no alto da página, não o
-índice do PDF.
+Revisados em 25/09 contra o PDF das 15:22 (Introdução na página 14, número impresso igual à página
+do PDF). Os 28 quadros e as 12 figuras estão em sequência, com título igual ao das listas e com
+título e fonte na mesma página. O que falta:
 
-## 3. Sumário
+- **Sumário incompleto.** Para na 4.1, faltam 2.4.5, 2.9.3, 2.10.1, 2.10.2, 4.2 a 4.6 com as
+  subseções e 5.1 a 5.4, e várias páginas estão antigas. A versão completa foi entregue no chat em
+  25/09. Considerar gerar pelo Google Docs (Inserir, Índice).
+- **Páginas das listas.** Quadros sem número; figuras com a numeração antiga (1 na 32 a 12 na 44,
+  quando o certo é 52 a 74).
+- **Capítulos com e sem ponto.** "1.", "2.", "3." e "6." com ponto, "4" e "5" sem. A NBR 6024 pede
+  sem ponto.
+- **5.1 a 5.4 em caixa baixa**, enquanto as seções de mesmo nível estão em caixa alta.
+- **Epígrafe, dedicatória e agradecimentos** ainda com texto de modelo (páginas 4 a 6). São
+  opcionais; escrever ou remover. Remover muda todas as páginas em 3.
+- **Número impresso nas páginas 1 a 13**, inclusive na capa. Pela NBR 14724 só aparece a partir da
+  Introdução, e a capa não conta. Confirmar com o modelo da UNIDAVI se a Introdução é mesmo a 14.
+
+Decidir os dois últimos antes de preencher os números, porque eles deslocam tudo.
+
+## 3. Linhas vazias no sumário
 
 As linhas vazias com estilo de título entre as seções são espaçamento intencional. Ao gerar o
 sumário automático, conferir se elas entram como entradas vazias e, se entrarem, removê-las do
