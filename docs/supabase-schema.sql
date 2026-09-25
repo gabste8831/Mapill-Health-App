@@ -59,6 +59,7 @@ create table if not exists public.medications (
   ean text,
   from_cmed boolean not null default false,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -93,6 +94,7 @@ create table if not exists public.prescriptions (
   -- (E9 ainda não implementado), e a coluna existe para quando subirem.
   attachment_sync_opt_out boolean not null default false,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -111,6 +113,7 @@ create table if not exists public.dose_schedules (
   notification_id text,
   snooze_count integer not null default 0,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -127,6 +130,7 @@ create table if not exists public.intake_logs (
   -- existindo. É o que torna o histórico auditável em vez de reescrito.
   corrects_log_id uuid,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -146,6 +150,7 @@ create table if not exists public.inventory_items (
   low_stock_alerted_at_quantity real,
   storage_location text,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -158,6 +163,7 @@ create table if not exists public.inventory_adjustments (
   delta real not null,
   reason text not null,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -177,6 +183,7 @@ create table if not exists public.appointments (
   outcome text,
   outcome_notes text,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -196,6 +203,7 @@ create table if not exists public.patient_profiles (
   notes text,
   photo_sync_opt_out boolean not null default false,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -208,6 +216,7 @@ create table if not exists public.consent_records (
   terms_version text not null,
   accepted_at timestamptz not null,
   updated_at timestamptz not null,
+  server_updated_at timestamptz,
   deleted_at timestamptz
 );
 
@@ -345,6 +354,76 @@ begin
 end $$;
 
 -- =============================================================================
+-- O PULL PELA CHEGADA, NÃO PELA EDIÇÃO
+--
+-- `updated_at` é o relógio de quem editou, e responde "qual versão é a mais
+-- nova" (o LWW). Não serve para "o que eu ainda não baixei": uma edição feita
+-- offline durante uma semana chega à nuvem no domingo com data de segunda, abaixo
+-- da marca d'água de quem ficou online, e esse aparelho nunca a busca.
+--
+-- `server_updated_at` é carimbado pelo servidor quando a linha chega ou muda, e
+-- é por ele que o pull pergunta. `clock_timestamp()` e não `now()`: o `now()` é o
+-- mesmo para o lote inteiro de um upsert, e um empate na virada de página do pull
+-- pularia linhas.
+--
+-- As linhas que já existiam recebem o próprio `updated_at`, que é a melhor
+-- aproximação de quando chegaram. O backfill vem antes do trigger, senão o
+-- trigger o sobrescreveria com a hora da migração.
+-- =============================================================================
+do $$
+declare
+  tabela text;
+begin
+  foreach tabela in array array[
+    'medications', 'prescriptions', 'dose_schedules', 'intake_logs',
+    'inventory_items', 'inventory_adjustments', 'appointments',
+    'patient_profiles', 'consent_records'
+  ]
+  loop
+    execute format('alter table public.%I add column if not exists server_updated_at timestamptz', tabela);
+    execute format(
+      'update public.%I set server_updated_at = updated_at where server_updated_at is null',
+      tabela
+    );
+    execute format('alter table public.%I alter column server_updated_at set not null', tabela);
+    execute format(
+      'create index if not exists %I on public.%I (user_id, server_updated_at)',
+      'idx_' || tabela || '_chegada', tabela
+    );
+  end loop;
+end $$;
+
+create or replace function public.carimbar_chegada()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.server_updated_at := clock_timestamp();
+  return new;
+end;
+$$;
+
+do $$
+declare
+  tabela text;
+begin
+  foreach tabela in array array[
+    'medications', 'prescriptions', 'dose_schedules', 'intake_logs',
+    'inventory_items', 'inventory_adjustments', 'appointments',
+    'patient_profiles', 'consent_records'
+  ]
+  loop
+    execute format('drop trigger if exists carimbar_chegada on public.%I', tabela);
+    execute format(
+      'create trigger carimbar_chegada before insert or update on public.%I '
+      'for each row execute function public.carimbar_chegada()',
+      tabela
+    );
+  end loop;
+end $$;
+
+-- =============================================================================
 -- CONFERÊNCIA
 --
 -- Depois de rodar, esta consulta tem que devolver **9 linhas, todas com
@@ -361,9 +440,11 @@ end $$;
 --   )
 -- order by tablename;
 --
--- E esta, 9 linhas, uma por tabela, confirma o trigger do LWW no envio:
+-- E esta, 18 linhas, duas por tabela, confirma os triggers do LWW no envio e do
+-- carimbo de chegada:
 --
--- select event_object_table
+-- select event_object_table, trigger_name
 -- from information_schema.triggers
--- where trigger_name = 'recusar_versao_antiga'
--- order by event_object_table;
+-- where trigger_name in ('recusar_versao_antiga', 'carimbar_chegada')
+--   and event_manipulation = 'UPDATE'
+-- order by event_object_table, trigger_name;

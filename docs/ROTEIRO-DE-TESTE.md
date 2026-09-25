@@ -154,6 +154,27 @@ avisos`. Se a seção "DESENVOLVIMENTO" não existir, a build é antiga.
 
 # PARTE 1 - O que falta
 
+## 23 - O que um aparelho fez offline chega ao outro ✅ _(passou totalmente em 25/09)_
+
+> **O defeito.** O pull perguntava à nuvem pelo que tinha sido **editado** depois da marca d'água.
+> O que um aparelho fez offline chega à nuvem depois, com data antiga, e ficava abaixo da marca
+> d'água de quem estava online: nunca descia. A correção é o pull perguntar pela **chegada**
+> (`server_updated_at`, carimbado pelo servidor), com a migration 021 zerando a marca antiga.
+>
+> **Resultado de 25/09.** O aparelho faz o papel de quem ficou online, e o SQL Editor o de quem
+> ficou offline.
+>
+> - **Antes da correção**, com a build das 09:55: dois remédios inseridos na nuvem, um com
+>   `updated_at = now()` e outro com `now() - 3 dias`. Só o de hoje apareceu no aparelho.
+> - **SQL aplicado** (seção "O PULL PELA CHEGADA" do `docs/supabase-schema.sql`): a conferência
+>   devolveu os 18 triggers, dois por tabela.
+> - **Build das 10:34 instalada.** Na primeira abertura apareceu o de 3 dias, e nada sumiu nem
+>   duplicou.
+> - **Daqui para frente:** um remédio inserido com `now() - 5 dias` depois da correção apareceu no
+>   aparelho ao voltar ao primeiro plano.
+
+---
+
 ## 22 - Conflito entre aparelho e nuvem ✅ _(passou totalmente em 25/09)_
 
 > **Resultado de 25/09, com a build instalada às 09:55 e o trigger aplicado no Supabase.**

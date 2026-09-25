@@ -34,8 +34,14 @@ sumário.
 **Capítulo 5 Resultados.** Só o título, mas a evidência está completa. Os quatro cenários da
 seção 3.2 foram validados em aparelho. Ausência de conexão, restabelecimento e sincronização em
 08/09. O conflito entre registros em 25/09, depois da correção do envio (`ed7b9bf`), com o
-resultado registrado no bloco 22 do `docs/ROTEIRO-DE-TESTE.md`. A falha do envio foi identificada
-na análise do código, e entra no capítulo como defeito encontrado e corrigido antes da validação.
+resultado registrado no bloco 22 do `docs/ROTEIRO-DE-TESTE.md`. Dois defeitos foram encontrados
+em 25/09 e corrigidos antes de validar, e entram na seção de defeitos. O envio sobrescrevia a
+nuvem sem comparar data (`ed7b9bf`, bloco 22). O recebimento buscava pela data da edição, e o que
+um aparelho fez offline nunca chegava ao outro na mesma conta (bloco 23).
+
+**Ajuste no Capítulo 4 depois disso.** A 4.4.6 pode ganhar uma frase dizendo que o critério também
+é aplicado pelo servidor no envio, e que o recebimento busca pela hora de chegada à nuvem, e não
+pela hora da edição.
 
 **Capítulo 6 Conclusão.** Tem só o parágrafo de trabalhos futuros. Depende do capítulo 5.
 

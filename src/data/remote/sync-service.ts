@@ -139,8 +139,9 @@ function paraLocal(
   const saida: Record<string, unknown> = {};
   for (const [coluna, valor] of Object.entries(linha)) {
     // `user_id` só existe no servidor: no aparelho o banco é de uma pessoa só, e guardar a coluna
-    // localmente criaria um campo que nenhuma entidade conhece.
-    if (coluna === "user_id") continue;
+    // localmente criaria um campo que nenhuma entidade conhece. `server_updated_at` também: ele só
+    // serve para o pull perguntar o que chegou, e quem guarda a resposta é a marca d'água.
+    if (coluna === "user_id" || coluna === "server_updated_at") continue;
     if (colunasBooleanas.includes(coluna)) {
       saida[coluna] = valor === true ? 1 : 0;
       continue;
@@ -248,12 +249,23 @@ function limparArquivosInexistentes(
   }
 }
 
+/**
+ * Desce o que chegou à nuvem desde a última vez.
+ *
+ * A pergunta é pela **chegada** (`server_updated_at`, carimbado pelo servidor), e não pela edição
+ * (`updated_at`, o relógio de quem editou). O que outro aparelho fez offline chega depois com data
+ * antiga: perguntado pela edição, ficaria abaixo da marca d'água e nunca desceria. A edição continua
+ * sendo o que decide o conflito, logo abaixo.
+ */
 async function receber(tabela: TabelaSincronizavel): Promise<number> {
   const database = getDatabase();
   const desde = await lerMarcaDagua(tabela);
 
-  let consulta = supabase!.from(tabela).select("*").order("updated_at", { ascending: true });
-  if (desde !== null) consulta = consulta.gt("updated_at", desde);
+  let consulta = supabase!
+    .from(tabela)
+    .select("*")
+    .order("server_updated_at", { ascending: true });
+  if (desde !== null) consulta = consulta.gt("server_updated_at", desde);
 
   const { data, error } = await consulta;
   if (error !== null) throw new Error(`${tabela}: ${error.message}`);
@@ -261,11 +273,13 @@ async function receber(tabela: TabelaSincronizavel): Promise<number> {
 
   const booleanas = COLUNAS_BOOLEANAS[tabela];
   let recebidos = 0;
-  let maiorUpdatedAt = desde;
+  let ultimaChegada = desde;
 
   for (const remota of data as Record<string, unknown>[]) {
     const id = remota.id as string;
     const remotaUpdatedAt = new Date(remota.updated_at as string).toISOString();
+    const chegada = new Date(remota.server_updated_at as string).toISOString();
+    if (ultimaChegada === null || chegada > ultimaChegada) ultimaChegada = chegada;
 
     const local = await database.getFirstAsync<{ updated_at: string }>(
       `SELECT updated_at FROM ${tabela} WHERE id = ?`,
@@ -275,12 +289,7 @@ async function receber(tabela: TabelaSincronizavel): Promise<number> {
     // LWW por `updated_at`, tudo-ou-nada por registro: local igual ou mais novo vence. Sem merge
     // de campos, que poderia produzir uma posologia que ninguém escreveu. O empate fica com o local
     // porque empate só acontece quando os dois lados já têm a mesma coisa.
-    if (local !== null && local.updated_at >= remotaUpdatedAt) {
-      if (maiorUpdatedAt === null || remotaUpdatedAt > maiorUpdatedAt) {
-        maiorUpdatedAt = remotaUpdatedAt;
-      }
-      continue;
-    }
+    if (local !== null && local.updated_at >= remotaUpdatedAt) continue;
 
     const linha = paraLocal(remota, booleanas);
     linha.updated_at = remotaUpdatedAt;
@@ -303,12 +312,9 @@ async function receber(tabela: TabelaSincronizavel): Promise<number> {
     );
 
     recebidos += 1;
-    if (maiorUpdatedAt === null || remotaUpdatedAt > maiorUpdatedAt) {
-      maiorUpdatedAt = remotaUpdatedAt;
-    }
   }
 
-  if (maiorUpdatedAt !== null) await gravarMarcaDagua(tabela, maiorUpdatedAt);
+  if (ultimaChegada !== null) await gravarMarcaDagua(tabela, ultimaChegada);
   return recebidos;
 }
 

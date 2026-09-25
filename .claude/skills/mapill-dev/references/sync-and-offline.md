@@ -19,10 +19,30 @@ eventual consistency; Kleppmann, 2017 - LWW).
    disponível) e:
    - Envia para o Supabase todos os registros locais com `synced_at IS NULL` ou
      `updated_at > synced_at`.
-   - Busca do Supabase registros mais novos que a última sincronização conhecida.
+   - Busca do Supabase o que **chegou** desde a última vez, por `server_updated_at`, e não o que
+     foi **editado** desde então. Ver "Duas datas, duas perguntas" abaixo.
 3. **Resolução de conflito: Last-Write-Wins (LWW)** por `updated_at`. Se o mesmo registro foi
    alterado local e remotamente, vence o timestamp mais recente. Não implementar merge de
    campos parcial - é tudo-ou-nada por registro, conforme descrito no artigo.
+
+## Duas datas, duas perguntas
+
+Corrigido em 25/09, depois de dois defeitos que só aparecem com dois aparelhos na mesma conta
+(paciente e cuidador, por exemplo).
+
+| Pergunta | Data | Quem carimba |
+|---|---|---|
+| Qual versão é a mais nova? (LWW) | `updated_at` | O relógio de quem editou |
+| O que eu ainda não baixei? (pull) | `server_updated_at` | O servidor, quando a linha chega ou muda |
+
+- **O push não compara nada**, é um `upsert`. Quem recusa uma versão mais velha que a da nuvem é o
+  trigger `recusar_versao_antiga`. Sem ele, vencia o aparelho que sincronizava por último.
+- **O pull pergunta pela chegada.** Perguntando pela edição, o que um aparelho fez offline por uma
+  semana chegava com data antiga, abaixo da marca d'água do outro, e nunca descia.
+  `server_updated_at` só existe no servidor (trigger `carimbar_chegada`, com `clock_timestamp()`
+  para não empatar dentro de um lote), e `paraLocal` a descarta.
+- Os dois triggers estão em `docs/supabase-schema.sql`, e a validação em aparelho nos blocos 22 e
+  23 do `docs/ROTEIRO-DE-TESTE.md`.
 
 ## Segurança (RLS no Supabase)
 
