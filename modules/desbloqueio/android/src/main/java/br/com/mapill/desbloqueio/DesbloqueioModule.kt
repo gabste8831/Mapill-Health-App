@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.KeyguardManager
 import android.content.Context
 import android.os.Build
+import android.os.PowerManager
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -40,8 +41,19 @@ class DesbloqueioModule : Module() {
       return@AsyncFunction keyguardManager()?.isKeyguardLocked ?: false
     }
 
+    // Tela apagada sem bloqueio (Smart Lock, aparelho sem senha) também não é alguém saindo do alarme.
+    AsyncFunction("telaLigada") {
+      val energia =
+        appContext.reactContext?.getSystemService(Context.POWER_SERVICE) as? PowerManager
+      return@AsyncFunction energia?.isInteractive
+    }
+
+    AsyncFunction("telaDoAlarmeNaFrente") {
+      return@AsyncFunction TelaDoAlarme.estaNaFrente()
+    }
+
     /**
-     * Encerra **esta** Activity e a tira dos recentes - sem matar o processo.
+     * Encerra a Activity do alarme e a tira dos recentes - sem matar o processo.
      *
      * A tela do alarme vive numa Activity própria, em task própria (`AlarmeActivity`,
      * `launchMode=singleInstance`). `BackHandler.exitApp()` não serve aqui: ele encerra o processo
@@ -51,9 +63,16 @@ class DesbloqueioModule : Module() {
      * `finishAndRemoveTask` fecha a task do alarme e devolve o aparelho ao que estava antes: o
      * bloqueio, se era dali que a tela veio. É o que torna "Tomei" com o celular bloqueado não
      * revelar o app - junto com o `showWhenLocked` ter saído da `MainActivity`.
+     *
+     * Mira a Activity registrada em `TelaDoAlarme`, e não o `currentActivity`, que pode ser a
+     * `MainActivity`. Sem Activity do alarme viva não há o que fechar, e isso não é falha.
      */
     AsyncFunction("fecharTelaDoAlarme") {
-      val activity = appContext.currentActivity ?: return@AsyncFunction false
+      val atual = appContext.currentActivity
+      val activity =
+        TelaDoAlarme.activity()
+          ?: atual?.takeIf { it.javaClass.simpleName == "AlarmeActivity" }
+          ?: return@AsyncFunction true
       activity.runOnUiThread { activity.finishAndRemoveTask() }
       return@AsyncFunction true
     }

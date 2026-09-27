@@ -177,6 +177,26 @@ também é o que mantém o processo vivo enquanto o som toca.
 a tela, ao montar. E um `setInterval` de 6 s vigia o player: se ele tiver sido pausado por disputa
 de foco de áudio, toca de novo. Um alarme de medicação não pode depender de uma garantia só.
 
+### O que pode calar o alarme
+
+Só resposta de alguém: Tomei, Pulei, Adiar, Silenciar, Responder depois, o toque no corpo da
+notificação, o deslize dela, a dose resolvida em outro lugar, ou os 5 minutos do silêncio automático.
+
+O que **não** cala, e já calou (27/09, "tocou dois bips e parou"):
+
+- **O `PRESS` com o aparelho bloqueado.** Na tela de bloqueio o Android só entrega o toque depois do
+  desbloqueio, então o `PRESS` que chega com o aparelho travado é o que a MIUI gera sozinha.
+  `escutar-avisos` o ignora (pergunta de novo após 800 ms, para não perder o toque real que chega com
+  o bloqueio saindo). O `DISMISSED` segue a mesma regra, porque o `ongoing` barra o deslize ali.
+- **A Activity perder a frente.** O `PRESS` fantasma abre a `MainActivity` por baixo do bloqueio, a
+  tela apaga, o bloqueio volta, e nada disso é alguém saindo. A tela espera 1,5 s e só encerra com o
+  aparelho destravado, a tela acesa e outra coisa na frente.
+
+"Na frente" não se pergunta ao `AppState`: as duas Activities dividem o mesmo React, e `active` pode
+ser qualquer uma. Quem responde é `TelaDoAlarme`, no módulo `desbloqueio`, que a `AlarmeActivity`
+alimenta a cada passo do ciclo de vida. É também por ela que `fecharTelaDoAlarme` acha a Activity
+certa - o `currentActivity` do React pode ser a `MainActivity`, e fechar "a atual" encerrava o app.
+
 ---
 
 ## O estado que vive fora do React
@@ -278,11 +298,13 @@ remédios mostrados são sempre os de verdade.
 
 ## O módulo nativo `desbloqueio`
 
-Três funções, e o que elas respondem:
+Cinco funções, e o que elas respondem:
 
 | Função | Para quê |
 |---|---|
 | `estaBloqueado()` | Se a tela de bloqueio está na frente. **Três estados**, e isso importa: `null` é "não consegui perguntar" (build sem o módulo), e tratá-lo como `false` faria a tela cheia parar de subir. |
+| `telaLigada()` | Se a tela do aparelho está acesa. Tela apagada sem bloqueio também não é alguém saindo do alarme. |
+| `telaDoAlarmeNaFrente()` | Se a `AlarmeActivity` é a que está na frente, lido de `TelaDoAlarme`. `null` sem Activity do alarme viva. |
 | `pedirDesbloqueio()` | Pede a autenticação antes de entrar no app a partir do alarme. `false` quando a pessoa desiste - desistir não é erro. |
 | `fecharTelaDoAlarme()` | Fecha a Activity do alarme sem matar o processo. `BackHandler.exitApp()` levaria junto o app aberto atrás e o serviço que toca o som. |
 

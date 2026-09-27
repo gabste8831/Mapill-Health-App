@@ -1,6 +1,7 @@
 import notifee, { EventType, type Event } from "react-native-notify-kit";
 
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
+import { estaBloqueado } from "@/modules/desbloqueio";
 import { ACAO_ADIAR, ACAO_PULEI, ACAO_TOMEI } from "./acoes";
 import { pedirParaEncerrarAlarme } from "./doses-resolvidas";
 import {
@@ -48,6 +49,8 @@ const jaAbertos = new Set<string>();
  * ainda deve ser agendado, este o que ainda deve acordar alguem.
  */
 const ATRASO_MAXIMO_PARA_TELA_CHEIA_EM_MS = 4 * 60 * 60 * 1000;
+
+const ESPERA_DO_DESBLOQUEIO_EM_MS = 800;
 
 /**
  * Esquece o que ja foi aberto, a cada reconstrucao da janela de avisos.
@@ -99,6 +102,13 @@ async function marcarEstoqueComoAvisado(chave: string): Promise<void> {
   } catch (cause) {
     if (__DEV__) console.error("[Mapill] falha ao marcar o estoque como avisado:", cause);
   }
+}
+
+/** O toque real na tela de bloqueio chega com o bloqueio ainda saindo: dai a segunda pergunta. */
+async function ehToqueFantasma(): Promise<boolean> {
+  if ((await estaBloqueado()) !== true) return false;
+  await new Promise((pronto) => setTimeout(pronto, ESPERA_DO_DESBLOQUEIO_EM_MS));
+  return (await estaBloqueado()) === true;
 }
 
 async function tratar(evento: Event): Promise<void> {
@@ -192,15 +202,31 @@ async function tratar(evento: Event): Promise<void> {
    * Quem arrasta o aviso para fora esta dizendo "ja vi, pode parar", e insistir depois disso deixa
    * som tocando sem nada na tela para desliga-lo. A dose nao e respondida aqui: dispensar nao e
    * "tomei" nem "pulei", e ela segue pendente.
+   *
+   * O som para aqui, e nao so na tela: com o celular em uso nao ha tela montada para ouvir o pedido.
    */
   if (evento.type === EventType.DISMISSED) {
     if (!ehAlarmeDeTelaCheia(id)) return;
+    // Na tela de bloqueio o `ongoing` barra o deslize: dispensa com o aparelho travado nao foi gesto.
+    if ((await estaBloqueado()) === true) return;
+    await dispensarAlarmeAtivo().catch(() => {});
     // Sem argumento: existe no maximo uma tela de alarme por vez, entao nao ha outra a acertar.
     pedirParaEncerrarAlarme();
     return;
   }
 
   if (evento.type !== EventType.ACTION_PRESS && evento.type !== EventType.PRESS) return;
+
+  /**
+   * Com o aparelho bloqueado, o `PRESS` do alarme nao foi toque de ninguem.
+   *
+   * Na tela de bloqueio o Android so entrega o toque numa notificacao depois do desbloqueio. O que
+   * chega com o aparelho travado e o `PRESS` que a MIUI gera sozinha, e trata-lo como toque calava
+   * o alarme e o trocava pela tela do horario, que o bloqueio esconde.
+   */
+  if (evento.type === EventType.PRESS && ehAlarmeDeTelaCheia(id) && (await ehToqueFantasma())) {
+    return;
+  }
 
   // Aviso que nao e de dose: o toque navega e nao responde nada. Sai antes de
   // `tratarRespostaAoAviso` porque a lista de doses e vazia.

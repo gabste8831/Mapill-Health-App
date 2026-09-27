@@ -3,6 +3,8 @@ import { Platform } from "react-native";
 
 type ModuloDeDesbloqueio = NativeModule & {
   estaBloqueado(): Promise<boolean>;
+  telaLigada(): Promise<boolean | null>;
+  telaDoAlarmeNaFrente(): Promise<boolean | null>;
   pedirDesbloqueio(): Promise<boolean>;
   fecharTelaDoAlarme(): Promise<boolean>;
 };
@@ -27,6 +29,24 @@ const modulo = requireOptionalNativeModule<ModuloDeDesbloqueio>("Desbloqueio");
 export async function estaBloqueado(): Promise<boolean | null> {
   if (Platform.OS !== "android" || modulo === null) return null;
   return modulo.estaBloqueado().catch(() => null);
+}
+
+/** Se a tela do aparelho está acesa - `null` quando não há como perguntar. */
+export async function telaLigada(): Promise<boolean | null> {
+  if (Platform.OS !== "android" || modulo === null) return null;
+  return modulo.telaLigada().catch(() => null);
+}
+
+/**
+ * Se a Activity do alarme é a que está na frente - `null` quando não há Activity do alarme viva ou
+ * não há como perguntar.
+ *
+ * Existe porque o `AppState` não responde isto: a `MainActivity` e a do alarme dividem o mesmo
+ * React, e `active` pode ser qualquer uma das duas.
+ */
+export async function telaDoAlarmeNaFrente(): Promise<boolean | null> {
+  if (Platform.OS !== "android" || modulo === null) return null;
+  return modulo.telaDoAlarmeNaFrente().catch(() => null);
 }
 
 /**

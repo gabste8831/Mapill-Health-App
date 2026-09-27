@@ -52,7 +52,7 @@ const CAMINHO_NO_ANDROID = ["app", "src", "main", "java"];
 /**
  * A Activity, em Kotlin.
  *
- * Herda de `ReactActivity` como a principal, e difere em três pontos, todos deliberados:
+ * Herda de `ReactActivity` como a principal, e difere em quatro pontos, todos deliberados:
  *
  * 1. `getMainComponentName` devolve o componente do alarme, **fixo**. Sem Notifee, sem sticky, sem
  *    intent - nada a decidir.
@@ -60,6 +60,8 @@ const CAMINHO_NO_ANDROID = ["app", "src", "main", "java"];
  *    chega à tela sem depender de evento nenhum.
  * 3. `onNewIntent` troca o intent antes do `super`, para um segundo alarme chegando a esta Activity
  *    ser lido corretamente.
+ * 4. Cada passo do ciclo de vida é anotado em `TelaDoAlarme`, do módulo `desbloqueio`: é por ali que
+ *    o JS sabe se é esta Activity que está na frente, e qual fechar.
  *
  * O `ReactActivityDelegateWrapper` do Expo é preservado - é ele que liga os módulos do Expo ao
  * ciclo de vida da Activity, e sem ele nada do `expo-*` funciona aqui dentro.
@@ -75,6 +77,7 @@ import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 
+import br.com.mapill.desbloqueio.TelaDoAlarme
 import expo.modules.ReactActivityDelegateWrapper
 
 /**
@@ -87,9 +90,26 @@ import expo.modules.ReactActivityDelegateWrapper
  */
 class AlarmeActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
+    // Antes do super: a partir daqui o JS pode pedir para fechá-la.
+    TelaDoAlarme.nasceu(this)
     // Sem a splash do Expo: ela é registrada na MainActivity e cobria esta tela com o mesmo azul
     // do tema, o que por dias pareceu "tela azul vazia" (15/09).
     super.onCreate(null)
+  }
+
+  override fun onResume() {
+    super.onResume()
+    TelaDoAlarme.voltouAFrente(this)
+  }
+
+  override fun onPause() {
+    TelaDoAlarme.saiuDaFrente(this)
+    super.onPause()
+  }
+
+  override fun onDestroy() {
+    TelaDoAlarme.morreu(this)
+    super.onDestroy()
   }
 
   // O componente é fixo porque esta Activity só existe para o alarme. Era a decisão que o sticky

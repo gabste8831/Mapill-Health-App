@@ -3,7 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { AppState, Linking, Pressable, ScrollView, Text, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { estaBloqueado, pedirDesbloqueio } from "@/modules/desbloqueio";
+import {
+  estaBloqueado,
+  pedirDesbloqueio,
+  telaDoAlarmeNaFrente,
+  telaLigada,
+} from "@/modules/desbloqueio";
 import { chaveDoHorario } from "@/domain/use-cases/planejar-avisos-de-dose";
 import { useDosesDoAlarme } from "@/hooks/use-doses-do-alarme";
 import { MINUTOS_DE_ADIAMENTO } from "@/notifications/acoes";
@@ -44,6 +49,9 @@ const MAXIMO_PARA_RESPONDER_NO_ALARME = 1;
  * precisa dele ja nao esta ali para ouvir.
  */
 const SILENCIA_SOZINHO_EM_MS = 5 * 60_000;
+
+/** O bastante para a Activity que passa por cima e sai (a do `PRESS`, o bloqueio) ja ter saido. */
+const ESPERA_PARA_CONFIRMAR_SAIDA_EM_MS = 1_500;
 
 type AlarmeScreenProps = {
   /** ISO do horário que disparou. Vem no `data` da notificação do Notifee. */
@@ -220,12 +228,13 @@ export function AlarmeScreen({
   useEffect(() => ouvirPedidoDeEncerrarAlarme(onFechar), [onFechar]);
 
   /**
-   * Perder o primeiro plano encerra o alarme, e e esta a garantia que funciona.
+   * Perder o primeiro plano encerra o alarme, mas so quando foi a pessoa que saiu dele.
    *
-   * O aviso interno acima nao alcanca esta tela quando o toque e processado pelo
-   * `onBackgroundEvent`: aquele handler roda num contexto JS separado, e o `Set` de ouvintes vive
-   * na memoria de cada contexto. O `AppState` nao depende de contexto compartilhado, e vale para
-   * qualquer saida. A dose segue pendente: sair nao e responder.
+   * Na MIUI a Activity perde a frente sem ninguem sair dela: o `PRESS` que o sistema gera sozinho
+   * abre o app por baixo do bloqueio, a tela apaga, o bloqueio volta. Encerrar ali calava o alarme
+   * sem tela nem aviso. Por isso a decisao espera o ciclo de vida assentar e pergunta ao Android:
+   * com o aparelho bloqueado ou a tela apagada ninguem saiu, e o alarme segue tocando. A dose segue
+   * pendente nos dois casos: sair nao e responder.
    */
   useEffect(() => {
     /**
@@ -239,16 +248,35 @@ export function AlarmeScreen({
     // So encerra depois de ter estado ativo uma vez: a Activity nasce enquanto o aparelho ainda
     // desbloqueia, e fechar nesse intervalo mataria o alarme antes de alguem ve-lo.
     let esteveAtivo = AppState.currentState === "active";
+    let montada = true;
+    let conferencia: ReturnType<typeof setTimeout> | null = null;
+
+    async function pessoaSaiu(): Promise<boolean> {
+      // O `AppState` e dividido com a `MainActivity`, entao so serve quando o nativo nao responde.
+      const naFrente = (await telaDoAlarmeNaFrente()) ?? AppState.currentState === "active";
+      if (naFrente) return false;
+      if ((await estaBloqueado()) !== false) return false;
+      return (await telaLigada()) !== false;
+    }
 
     const assinatura = AppState.addEventListener("change", (estado) => {
-      if (estado === "active") {
-        esteveAtivo = true;
-        return;
-      }
+      if (estado === "active") esteveAtivo = true;
       if (!esteveAtivo) return;
-      void dispensarAlarmeAtivo().then(onFechar);
+
+      // Qualquer mudanca reinicia a espera: e o estado depois dela que decide, e nao o evento.
+      if (conferencia !== null) clearTimeout(conferencia);
+      conferencia = setTimeout(() => {
+        conferencia = null;
+        void pessoaSaiu().then((saiu) => {
+          if (saiu && montada) void dispensarAlarmeAtivo().then(onFechar);
+        });
+      }, ESPERA_PARA_CONFIRMAR_SAIDA_EM_MS);
     });
-    return () => assinatura.remove();
+    return () => {
+      montada = false;
+      if (conferencia !== null) clearTimeout(conferencia);
+      assinatura.remove();
+    };
   }, [ehActivityDeAlarme, onFechar]);
 
   /**
