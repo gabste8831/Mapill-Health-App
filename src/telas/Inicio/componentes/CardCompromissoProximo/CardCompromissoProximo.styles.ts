@@ -15,7 +15,8 @@ export const criarEstilos = estilosDoTema(({ cores, ajustes }) => ({
     gap: spacing.md,
     borderLeftWidth: 4,
     borderLeftColor: cores.corDeDestaque,
-    overflow: "hidden",
+    // Sem `overflow: "hidden"`: com a borda do alto contraste virando sombra, o Android recortava os
+    // filhos e o card ficava vazio. Nada aqui passa da borda arredondada.
   },
   containerHoje: {
     borderLeftColor: cores.success,

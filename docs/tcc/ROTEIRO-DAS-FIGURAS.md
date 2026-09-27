@@ -161,3 +161,29 @@ parágrafo próprio.
 
 As três já têm imagem, mas não foram conferidas contra o que o texto promete. Vale a mesma
 checagem feita para as demais antes do fechamento.
+
+---
+
+## Pendências de desenvolvimento que travam capturas
+
+Defeitos do aplicativo, não do documento. Precisam ser resolvidos antes de capturar as figuras
+que dependem deles.
+
+### Card de compromisso da Home perde o conteúdo ao trocar de tema
+
+**Relatado em 26/09/2026.** Na Home, o card do compromisso que está chegando (consulta, exame)
+não mantém os textos depois de uma troca de tema: o conteúdo do card fica estranho, como se não
+persistisse. Reproduz ao mudar o tema com o card visível na tela.
+
+Bloqueia a **Figura 12** (tela inicial nos três temas), que exige exatamente a troca de tema com
+a Home montada, e a base de demonstração tem compromisso cadastrado. Também atinge a **Figura
+11**, que pede a tela inicial com outro conjunto de cores aplicado.
+
+**Corrigido em 27/09, falta confirmar no aparelho.** Era o único cartão do app que somava a
+superfície que troca borda por sombra conforme o tema (`superficieDeCartao`) com
+`overflow: "hidden"`. Ao sair do alto contraste o Android recortava os filhos e sobrava só o fundo. O
+`overflow` saiu de [`CardCompromissoProximo.styles.ts`](../../src/telas/Inicio/componentes/CardCompromissoProximo/CardCompromissoProximo.styles.ts),
+e nada do card passa da borda arredondada.
+
+Para confirmar: com um compromisso para amanhã na Home, alternar alto contraste, escuro e claro
+algumas vezes e voltar à Home a cada troca.
