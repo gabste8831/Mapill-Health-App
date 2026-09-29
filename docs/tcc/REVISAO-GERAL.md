@@ -1,55 +1,54 @@
 # Revisão geral do TCC: o que falta
 
-> **Conferido em 29/09, 16:44**, contra `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` (88 páginas).
-> Aqui fica **só o que ainda falta**. O que já foi resolvido saiu deste arquivo (fica no histórico do
-> git). O negrito será avaliado à parte.
+> **Conferido em 29/09, 17:02**, contra `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` (88 páginas).
+> Este é o guia completo: tudo o que ainda falta no documento, por menor que seja. O que já foi
+> resolvido saiu daqui (fica no histórico do git).
+>
+> **Já conferido e certo:** as 121 entradas do sumário e das listas, as remissões a seções, as
+> chamadas de todos os quadros e figuras, as citações contra as referências, a lista de siglas, o
+> itálico dos termos estrangeiros, o tempo verbal, o resumo, o abstract e as referências.
+
+Ordem sugerida: 1 → 2 → 3 → exportar PDF → 4.
 
 ---
 
-## 1. Referências (p.87)
+## 1. Figuras 8, 10, 11 e 12
 
-- RISKO: `GILBERT, Sam J..` → `GILBERT, Sam J.` (ponto duplo; a abreviatura do prenome já fecha o
-  elemento).
+As quatro ainda usam a **mesma imagem de reserva** (a tela inicial repetida, conferido pelo arquivo
+da imagem dentro do PDF). O que cada captura mostra está em
+[`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURAS.md).
 
-O resto da lista está conforme: prenomes, títulos, locais, datas de acesso, ISO e DETERDING (com
-**Proceedings** em negrito).
+| Figura | Página | Conteúdo |
+|---|---|---|
+| 8 | 72 | Notificação do alarme de dose sobre a tela de bloqueio |
+| 10 | 75 | Relatório clínico gerado em formato PDF |
+| 11 | 77 | Escolha do conjunto de cores de estado nas configurações de tema |
+| 12 | 78 | Tela inicial nos temas claro, escuro e de alto contraste |
 
-## 2. Números de página (sumário e listas)
+Ao trocar, manter o mesmo tamanho da imagem de reserva, para o título, a imagem e a fonte seguirem
+na mesma página e nada deslocar.
 
-O sumário voltou a 3 páginas e a Introdução está na 16. Até a 4.6.2, a Figura 3 e o Quadro 24 está
-tudo certo. A partir daí, trocar:
+## 2. Pré-textuais
 
-| Onde | Entrada | Está | Fica |
-|---|---|---|---|
-| Sumário | 4.6.3 Rotina Diária e Resposta ao Alarme | 69 | 70 |
-| Sumário | 4.6.4 Acompanhamento e Relatório Clínico | 71 | 73 |
-| Sumário | 4.6.5 Acessibilidade e Linguagem Visual | 74 | 75 |
-| Sumário | 5. RESULTADOS | 77 | 79 |
-| Sumário | 5.1 VALIDAÇÃO DA ARQUITETURA OFFLINE-FIRST | 77 | 79 |
-| Sumário | 5.2 AJUSTES DECORRENTES DA VALIDAÇÃO | 77 | 79 |
-| Sumário | 5.3 CONFIABILIDADE DO ALARME | 79 | 81 |
-| Sumário | 5.4 ATENDIMENTO AOS OBJETIVOS | 79 | 82 |
-| Sumário | 6. CONCLUSÃO | 81 | 83 |
-| Sumário | REFERÊNCIAS | 83 | 85 |
-| Sumário | ANEXOS | 86 | 88 |
-| Quadros | Quadro 25 | 70 | 71 |
-| Quadros | Quadro 26 | 72 | 73 |
-| Quadros | Quadro 27 | 75 | 76 |
-| Quadros | Quadro 28 | 78 | 80 |
-| Figuras | Figura 4 | 67 | 68 |
-| Figuras | Figura 5 | 68 | 69 |
-| Figuras | Figura 6 | 69 | 70 |
-| Figuras | Figura 7 | 70 | 71 |
-| Figuras | Figura 8 | 71 | 72 |
-| Figuras | Figura 9 | 72 | 74 |
-| Figuras | Figura 10 | 73 | 75 |
-| Figuras | Figura 11 | 75 | 77 |
-| Figuras | Figura 12 | 76 | 78 |
+**Folha de aprovação (p.3)**
+- Nomes dos dois professores da banca, depois de "Prof.".
+- Data: está "Rio do Sul, 25 de junho de 2026." Trocar pela data da defesa.
+- "Itajaí- UNIDAVI" → "Itajaí - UNIDAVI" (com espaço antes do hífen, como na capa). Isso também
+  corrige o espaçamento esticado da linha "UNIDAVI, a ser apreciado pela Banca".
 
-Trocar números não desloca páginas. Qualquer outra mudança no corpo pede nova conferência.
+**Título sem ponto final (p.1, 2 e 3).** "...TRATAMENTO MEDICAMENTOSO." → "...TRATAMENTO
+MEDICAMENTOSO". Título não leva ponto final, nas três páginas.
 
-## 3. Pré-textuais (para o fim)
+**Epígrafe (p.4), dedicatória (p.5) e agradecimentos (p.6).** Ainda com texto de modelo. São
+opcionais na ABNT: escrever ou remover. Escrever, cada um na sua página, não muda a numeração.
+Remover desloca todas as páginas e pede nova conferência do sumário e das listas.
 
-- Folha de aprovação (p.3): banca e data.
-- Epígrafe (p.4), dedicatória (p.5) e agradecimentos (p.6): ainda com texto de modelo. Escrever ou
-  remover; remover desloca todas as páginas e pede nova conferência dos números.
+## 3. Negrito
+
+Revisão à parte, combinada para depois. Ainda não feita.
+
+## 4. Conferência final
+
+Depois dos itens 1 a 3, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+e salvar no editor, que corrompe o arquivo). Eu confiro de novo o sumário, as listas e se alguma
+figura empurrou página.
