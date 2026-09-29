@@ -43,19 +43,11 @@ texto de trabalho (`CAPITULO-6.md`) saiu e fica no histórico do git.
 
 ## Resumo e Abstract
 
-**É o próximo passo.** Os capítulos 5 e 6 estão fechados, e o resumo foi escrito antes deles.
-Revisar para que cite a validação e os resultados.
+**Reescritos em 29/09**, com resultados e conclusão. Faltam só as palavras-chave em minúscula
+(item 1.3 da revisão geral).
 
 ## Revisão geral do documento
 
-Pedida em 25/09, para depois do resumo. Feita sobre o PDF exportado, documento inteiro.
-
-1. **Remissões.** Números de figuras, quadros e seções citados no texto batem com o que existe.
-2. **Ortografia**, pontos finais, concordância e campos ainda por preencher.
-3. **Consistência de termos.** Padronizar grafias como "m-health", "mhealth", "mHealth" e
-   "M-Health", e as de outros termos recorrentes.
-4. **Itálico** em palavras estrangeiras, no texto corrido e nos títulos.
-5. **Siglas.** Toda sigla usada está na lista, e toda sigla da lista é usada.
-6. **Listas e corpo.** Nome e presença real de cada quadro, tabela e figura.
-7. **Referências.** Toda obra citada está na lista, e toda obra da lista é citada.
-8. **Coerência.** O que foi escrito é consistente entre os capítulos, e o argumento se sustenta.
+**Feita em 29/09** contra o PDF do mesmo dia. Os achados, com página, trecho e correção, estão em
+[`REVISAO-GERAL.md`](REVISAO-GERAL.md), por ordem de prioridade. O negrito ficou de fora e será
+avaliado à parte.
