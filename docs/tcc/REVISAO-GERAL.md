@@ -1,12 +1,262 @@
 # Revisão geral do TCC
 
-> **Feita em 29/09/2026** contra `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` (86 páginas). As
+> **Feita em 29/09/2026**, e reconferida às 11:16 (seção 0), contra `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` (86 páginas). As
 > páginas citadas são as do PDF, que coincidem com o número impresso.
 >
 > **Como usar.** Ordenado por prioridade. Marcar cada item conforme corrigir. O negrito ficou de fora,
 > por decisão do Gabriel, e será avaliado à parte.
 >
 > **Este arquivo sai** quando tudo estiver aplicado e conferido num PDF novo.
+
+---
+
+## 0. Situação em 29/09, 11:16 (o que falta)
+
+Conferido contra `TCC Gabriel Steffens Atualizado 29_09.docx (1).pdf` (88 páginas). Quase tudo das
+seções 1 a 4 abaixo já foi aplicado. Esta seção lista **só o que falta**, com o texto pronto. As
+seções 1 a 6 ficam como registro.
+
+1. **Frase duplicada, p.74.** "A Figura 10 apresenta um relatório gerado." aparece duas vezes
+   seguidas no fim do parágrafo do relatório. Apagar uma.
+2. **Palavras-chave, p.7.** "Palavras-Chave" → "Palavras-chave". O resto da linha já está certo.
+3. **"Diferente de" → "Diferentemente de"**, só trocar a palavra no começo destas frases. "Ao contrário
+   de" também serve.
+   - p.18 "Diferente de métodos convencionais ou lembretes genéricos..."
+   - p.19 "Diferente dos modelos tradicionais de eHealth..."
+   - p.22 "Diferente de aplicações passivas..."
+   - p.35 "Diferente dos SGBDs convencionais..."
+   - p.66 "Diferente do cadastro de medicamento..."
+4. **p.26, as duas frases com "-se"**, reescritas sem o pronome para evitar a dúvida de colocação.
+   - "...terminologias prévias, como "interface humana" e "usabilidade", **eram** demasiadamente limitadas frente à complexidade da interação humano-computador."
+   - "Sinteticamente, enquanto a UI **cuida da** apresentação visual do artefato, a UX concentra-se na fluidez operacional..."
+5. **Itálico.** "*design*" (p.41, "sistema de design próprio"), "*offline*" (p.42, "de forma totalmente
+   offline"), "*frameworks*" (p.46, "em relação a frameworks externos") e "*mHealth*" na lista de
+   siglas. E "clean code" (p.31) → "*Clean Code*", como no resto do texto.
+6. **Quadro 16, p.59.** "injeção etc)" → "injeção etc.)".
+7. **Lista de siglas, p.9.** Faltam Anvisa, OAuth (usada no Quadro 3), PDF, PK, SQL e W3C. As entradas
+   iOS, CMED, FK, IBM e ORM foram acrescentadas no fim, fora da ordem. A CMED está com o significado
+   entre parênteses. Lista completa, em ordem, para substituir a atual:
+
+```
+ACID: Atomicity, Consistency, Isolation, Durability (Atomicidade, Consistência, Isolamento e Durabilidade)
+Anvisa: Agência Nacional de Vigilância Sanitária
+API: Application Programming Interface (Interface de Programação de Aplicações)
+BaaS: Backend as a Service (Backend como Serviço)
+CDSS: Clinical Decision Support Systems (Sistemas de Suporte à Decisão Clínica)
+CMED: Câmara de Regulação do Mercado de Medicamentos
+CSS: Cascading Style Sheets (Folhas de Estilo em Cascata)
+CTO: Chief Technology Officer (Diretor de Tecnologia)
+eHealth: Electronic Health (Saúde Eletrônica)
+eMEM: Electronic Medication Monitoring (Monitoramento Eletrônico de Medicamentos)
+FK: Foreign Key (Chave Estrangeira)
+IBM: International Business Machines
+iOS: iPhone Operating System (Sistema Operacional do iPhone)
+ISO/IEC: International Organization for Standardization / International Electrotechnical Commission
+JWT: JSON Web Token
+LGPD: Lei Geral de Proteção de Dados
+LWW: Last-Write-Wins (Última Gravação Prevalece)
+mHealth: Mobile Health (Saúde Móvel)
+OAuth: Open Authorization (Autorização Aberta)
+ORM: Object-Relational Mapping (Mapeamento Objeto-Relacional)
+PDF: Portable Document Format (Formato de Documento Portátil)
+PK: Primary Key (Chave Primária)
+RLS: Row Level Security (Segurança em Nível de Linha)
+SGBD: Sistema Gerenciador de Banco de Dados
+SOLID: Single responsibility, Open-closed, Liskov substitution, Interface segregation, Dependency inversion
+SQL: Structured Query Language (Linguagem de Consulta Estruturada)
+SRP: Single Responsibility Principle (Princípio de Responsabilidade Única)
+SSoT: Single Source of Truth (Fonte Única de Verdade)
+UI: User Interface (Interface do Usuário)
+UNIDAVI: Centro Universitário para o Desenvolvimento do Alto Vale do Itajaí
+UX: User Experience (Experiência do Usuário)
+W3C: World Wide Web Consortium
+WCAG: Web Content Accessibility Guidelines (Diretrizes de Acessibilidade para Conteúdo Web)
+WHO: World Health Organization (Organização Mundial da Saúde)
+```
+
+8. **Referências.** Estas 18 entradas ainda diferem da versão pronta. Substituir cada uma pela linha
+   abaixo (as outras 15 já estão certas). O que muda: prenomes por extenso, título em inglês com
+   minúscula, local no original (New York, Geneva, Toronto), data de acesso abreviada ("29 abr.",
+   "10 set."), "(ISO)" no cabeçalho da norma e DETERDING como trabalho em evento.
+
+```
+BATES, David W. et al. Ten commandments for effective clinical decision support: making the practice of evidence-based medicine a reality. Journal of the American Medical Informatics Association, v. 10, n. 6, p. 523-530, 2003.
+
+BRETTEL, Hans; VIÉNOT, Françoise; MOLLON, John D. Computerized simulation of color appearance for dichromats. Journal of the Optical Society of America A, v. 14, n. 10, p. 2647-2655, 1997.
+
+BRUNTON, Laurence L.; KNOLLMANN, Björn C. (ed.). As bases farmacológicas da terapêutica de Goodman & Gilman. 14. ed. Porto Alegre: Artmed, 2024.
+
+CAVOUKIAN, Ann. Privacy by design: the 7 foundational principles. Toronto: Information and Privacy Commissioner of Ontario, 2009.
+
+DETERDING, Sebastian et al. From game design elements to gamefulness: defining gamification. In: INTERNATIONAL ACADEMIC MINDTREK CONFERENCE, 15., 2011, Tampere. Proceedings [...]. New York: ACM, 2011. p. 9-15.
+
+EXPO. Expo documentation. 2024. Disponível em: https://docs.expo.dev/. Acesso em: 7 maio 2026.
+
+INTERNATIONAL ORGANIZATION FOR STANDARDIZATION (ISO). ISO/IEC 25010: systems and software engineering - systems and software quality requirements and evaluation (SQuaRE) - product quality model. Geneva: ISO/IEC, 2023.
+
+KLEPPMANN, Martin. Designing data-intensive applications: the big ideas behind reliable, scalable, and maintainable systems. Sebastopol: O'Reilly Media, 2017.
+
+LOSHIN, David. Master data management. Burlington: Morgan Kaufmann, 2010.
+
+MICROSOFT. TypeScript: typed JavaScript at any scale. 2024. Disponível em: https://www.typescriptlang.org/. Acesso em: 10 maio 2026.
+
+NORMAN, Donald A. The design of everyday things. Revised and expanded edition. New York: Basic Books, 2013.
+
+OSTERBERG, Lars; BLASCHKE, Terrence. Adherence to medication. New England Journal of Medicine, v. 353, n. 5, p. 487-497, 2005.
+
+RISKO, Evan F.; GILBERT, Sam J. Cognitive offloading. Trends in Cognitive Sciences, v. 20, n. 9, p. 676-688, 2016.
+
+SQLITE. SQLite documentation. 2026. Disponível em: https://www.sqlite.org/docs.html. Acesso em: 8 maio 2026.
+
+SUPABASE. Supabase documentation: Row Level Security. 2026. Disponível em: https://supabase.com/docs/guides/auth/row-level-security. Acesso em: 8 maio 2026.
+
+VOGELS, Werner. Eventually consistent - revisited. All Things Distributed, 2008. Disponível em: https://www.allthingsdistributed.com/2008/12/eventually_consistent.html. Acesso em: 29 maio 2026.
+
+WORLD HEALTH ORGANIZATION (WHO). Adherence to long-term therapies: evidence for action. Geneva: World Health Organization, 2003. Disponível em: https://iris.who.int/server/api/core/bitstreams/121c6b73-8651-442f-9560-e3b1d9c8a75c/content. Acesso em: 29 abr. 2026.
+
+WORLD HEALTH ORGANIZATION (WHO). mHealth: new horizons for health through mobile technologies. Geneva: World Health Organization, 2011. Disponível em: https://iris.who.int/server/api/core/bitstreams/ad1b13c0-7c82-47b4-8dd5-f0a26c3a3cc3/content. Acesso em: 13 maio 2026.
+
+WORLD WIDE WEB CONSORTIUM (W3C). Web Content Accessibility Guidelines (WCAG) 2.1. Cambridge, MA: W3C, 2018. Disponível em: https://www.w3.org/TR/WCAG21/. Acesso em: 10 set. 2026.
+```
+
+9. **Sumário e listas.** O documento passou a 88 páginas e a Introdução foi para a p.16. As páginas
+   abaixo são deste PDF. Refazer depois de aplicar o resto, se algo deslocar.
+
+```
+SUMÁRIO
+1. INTRODUÇÃO	16
+1.1 PROBLEMA DE PESQUISA	16
+1.2 OBJETIVOS	17
+1.2.1 Geral	17
+1.2.2 Específicos	17
+1.3 JUSTIFICATIVA	18
+2. REFERENCIAL TEÓRICO	19
+2.1 O ECOSSISTEMA MHEALTH E A ADESÃO TERAPÊUTICA	19
+2.1.1 O Desafio da Descontinuidade do Tratamento	19
+2.1.2 Intervenção Digital como Suporte Cognitivo e Logístico	20
+2.2 GESTÃO ESPECIALIZADA VERSUS FERRAMENTAS GENÉRICAS	21
+2.2.1 A Restrição Espacial dos Artefatos Físicos e a Descentralização	21
+2.2.2 A Centralização Operacional como SSoT	21
+2.3 GESTÃO TEMPORAL E INTERVENÇÕES ATIVAS EM MHEALTH	22
+2.3.1 Memória Prospectiva e Gatilhos de Interrupção	22
+2.3.2 Desoneração Cognitiva e Planejamento Antecipatório	23
+2.3.3 Auditoria Clínica e Monitoramento Eletrônico	24
+2.4 HEURÍSTICAS DE USABILIDADE APLICADAS AO COMPORTAMENTO DO USUÁRIO	25
+2.4.1 Heurísticas de Nielsen e a Redução da Carga Mental	25
+2.4.2 Conceitos Fundamentais: Interface do Usuário e Experiência do Usuário	26
+2.4.3 Psicologia do Design e Indução ao Uso	26
+2.4.4 Gamificação e Reforço Positivo	27
+2.4.5 Acessibilidade como Atributo de Qualidade	27
+2.5 ENGENHARIA DE SOFTWARE APLICADA A SISTEMAS DE SAÚDE	28
+2.5.1 O Papel Sistêmico da Engenharia de Software	28
+2.5.2 Engenharia de Requisitos e Estruturação de Regras de Negócio	29
+2.5.3 Garantia de Qualidade e Sistemas Orientados à Criticidade	30
+2.6 PADRÕES ARQUITETURAIS E CLEAN ARCHITECTURE	30
+2.6.1 Princípios SOLID e o Desacoplamento Estrutural	31
+2.6.2 Práticas de Clean Code e Legibilidade	31
+2.7 PARADIGMAS DE ARQUITETURA DE SOFTWARE MÓVEL	32
+2.7.1 Tipagem Estática e Confiabilidade Algorítmica: O Papel do TypeScript	32
+2.7.2 Computação Móvel e Ubiquidade no Cuidado	32
+2.7.3 Arquiteturas Multiplataforma Baseadas em Pontes Nativas: React Native e Expo	32
+2.8 PARADIGMA OFFLINE-FIRST EM SISTEMAS CRÍTICOS	33
+2.8.1 Processamento em Segundo Plano e Despertadores Nativos	34
+2.9 PERSISTÊNCIA EMBARCADA E MODELOS DE CONSISTÊNCIA EVENTUAL	34
+2.9.1 O Padrão Relacional em Borda (Edge): O Motor SQLite	35
+2.9.2 BaaS e Integridade na Nuvem: Supabase e PostgreSQL	35
+2.9.3 Arquitetura Híbrida e Sincronização Assíncrona	36
+2.10 PRIVACIDADE E SEGURANÇA DE DADOS EM MHEALTH	36
+2.10.1 A LGPD e o Tratamento de Dados Sensíveis	37
+2.10.2 Minimização e o Controle do Ciclo de Vida do Dado	37
+3. METODOLOGIA DA PESQUISA	39
+3.1 ESTADO DA ARTE E TRABALHOS RELACIONADOS	39
+3.2 PROCEDIMENTOS METODOLÓGICOS	41
+4. DESENVOLVIMENTO	42
+4.1 VISÃO GERAL DA APLICAÇÃO E DELIMITAÇÃO DO ESCOPO	42
+4.2 LEVANTAMENTO DE REQUISITOS	43
+4.2.1 Requisitos Funcionais	43
+4.2.2 Requisitos Não Funcionais	46
+4.3 REGRAS DE NEGÓCIO	47
+4.3.1 Integridade do Registro Clínico	47
+4.3.2 Controle de Estoque	48
+4.3.3 Modelagem da Posologia	48
+4.3.4 Notificações e Lembretes	48
+4.3.5 Sincronização de Dados	49
+4.3.6 Cálculo de Adesão	49
+4.4 ARQUITETURA DE SOFTWARE	51
+4.4.1 Decisão Estrutural	51
+4.4.2 Camada de Domínio	51
+4.4.3 Camada de Dados	52
+4.4.4 Camada de Apresentação	52
+4.4.5 Stack Tecnológica	52
+4.4.6 Sincronização e Consistência Eventual	53
+4.4.7 Trilha de Auditoria e os Três Estados da Dose	55
+4.4.8 Garantia de Entrega do Alarme	56
+4.5 MODELO DE DADOS	58
+4.6 JORNADA E EXPERIÊNCIA DO USUÁRIO	65
+4.6.1 Primeiro Acesso	65
+4.6.2 Cadastro de Medicamentos	66
+4.6.3 Rotina Diária e Resposta ao Alarme	70
+4.6.4 Acompanhamento e Relatório Clínico	73
+4.6.5 Acessibilidade e Linguagem Visual	75
+5. RESULTADOS	79
+5.1 VALIDAÇÃO DA ARQUITETURA OFFLINE-FIRST	79
+5.2 AJUSTES DECORRENTES DA VALIDAÇÃO	79
+5.3 CONFIABILIDADE DO ALARME	81
+5.4 ATENDIMENTO AOS OBJETIVOS	82
+6. CONCLUSÃO	83
+REFERÊNCIAS	85
+ANEXOS	88
+
+LISTA DE QUADROS
+Quadro 1	24
+Quadro 2	40
+Quadro 3	44
+Quadro 4	44
+Quadro 5	45
+Quadro 6	45
+Quadro 7	46
+Quadro 8	46
+Quadro 9	47
+Quadro 10	50
+Quadro 11	54
+Quadro 12	55
+Quadro 13	56
+Quadro 14	57
+Quadro 15	58
+Quadro 16	59
+Quadro 17	60
+Quadro 18	61
+Quadro 19	61
+Quadro 20	62
+Quadro 21	62
+Quadro 22	63
+Quadro 23	64
+Quadro 24	65
+Quadro 25	71
+Quadro 26	73
+Quadro 27	76
+Quadro 28	80
+
+LISTA DE FIGURAS
+Figura 1	54
+Figura 2	59
+Figura 3	66
+Figura 4	68
+Figura 5	69
+Figura 6	70
+Figura 7	71
+Figura 8	72
+Figura 9	74
+Figura 10	75
+Figura 11	77
+Figura 12	78
+```
+
+10. **Pré-textuais**, para depois. Banca, epígrafe, dedicatória e agradecimentos.
+
+**Diagramação da 4.6.4.** A Figura 9 não coube na p.73 e foi para a p.74, deixando cerca de um terço
+da p.73 em branco. A 4.6.5 começa na p.75, logo após a Figura 10. A ABNT aceita o espaço. Para
+eliminá-lo, reduzir um pouco a altura da Figura 9.
 
 ---
 
