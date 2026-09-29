@@ -26,8 +26,8 @@ A ABNT pede que toda ilustração seja citada no texto antes de aparecer. Das 12
 | Figura 6 | 68 | "...com a antecedência escolhida pelo paciente, conforme a Figura 6." |
 | Figura 7 | 69 | "...não seja apresentada como pendência, como mostra a Figura 7." |
 | Figura 8 | 70 | "...em vez de comunicá-la depois de consumada. A Figura 8 apresenta a notificação do alarme sobre a tela de bloqueio." |
-| Figura 9 | 71 | "...que afirmaria algo que não ocorreu. A Figura 9 apresenta a tela de adesão e o calendário." |
-| Figura 10 | 72 | "...apresentado na seção 2.10.2. A Figura 10 apresenta um relatório gerado." |
+| Figura 9 | 71 | Já incluída na 4.6.4 reescrita, seção 6.7. |
+| Figura 10 | 72 | Já incluída na 4.6.4 reescrita, seção 6.7. |
 | Figura 11 | 74 | "O Quadro 27 apresenta um dos conjuntos, com a descrição exibida ao paciente, e a Figura 11, a escolha do conjunto nas configurações de tema." (reescreve a frase que já existe antes do Quadro 27) |
 | Figura 12 | 75 | "...a preferência de redução de movimento do sistema operacional. A Figura 12 mostra a tela inicial nos três temas." |
 
@@ -348,7 +348,6 @@ BRUNTON, Laurence L.; KNOLLMANN, Björn C. (ed.). As bases farmacológicas da te
 
 CAVOUKIAN, Ann. Privacy by design: the 7 foundational principles. Toronto: Information and Privacy Commissioner of Ontario, 2009.
 
-
 DETERDING, Sebastian et al. From game design elements to gamefulness: defining gamification. In: INTERNATIONAL ACADEMIC MINDTREK CONFERENCE, 15., 2011, Tampere. Proceedings [...]. New York: ACM, 2011. p. 9-15.
 
 EXPO. Expo documentation. 2024. Disponível em: https://docs.expo.dev/. Acesso em: 7 maio 2026.
@@ -391,7 +390,6 @@ SUPABASE. Supabase documentation: Row Level Security. 2026. Disponível em: http
 
 SWELLER, John. Cognitive load during problem solving: effects on learning. Cognitive Science, v. 12, n. 2, p. 257-285, 1988.
 
-
 VOGELS, Werner. Eventually consistent - revisited. All Things Distributed, 2008. Disponível em: https://www.allthingsdistributed.com/2008/12/eventually_consistent.html. Acesso em: 29 maio 2026.
 
 WORLD HEALTH ORGANIZATION (WHO). Adherence to long-term therapies: evidence for action. Geneva: World Health Organization, 2003. Disponível em: https://iris.who.int/server/api/core/bitstreams/121c6b73-8651-442f-9560-e3b1d9c8a75c/content. Acesso em: 29 abr. 2026.
@@ -400,3 +398,30 @@ WORLD HEALTH ORGANIZATION (WHO). mHealth: new horizons for health through mobile
 
 WORLD WIDE WEB CONSORTIUM (W3C). Web Content Accessibility Guidelines (WCAG) 2.1. Cambridge, MA: W3C, 2018. Disponível em: https://www.w3.org/TR/WCAG21/. Acesso em: 10 set. 2026.
 ```
+
+### 6.7 Seção 4.6.4 reescrita (29/09)
+
+Reescrita para preencher o terço em branco da p.72 e contar melhor o que as telas fazem. As páginas
+70 e 71 estão cheias, então os dois primeiros parágrafos mantêm o tamanho, para a Figura 9 não descer.
+O conteúdo novo entra depois dela. Já traz as remissões às Figuras 9 e 10 (item 1.1). Conferido
+contra o código: períodos de 7, 30 e 90 dias, seleção de medicamentos e compromissos no relatório,
+seções do PDF e rodapé.
+
+> O acompanhamento de longo prazo reúne o histórico que a rotina diária produz. A tela de adesão apresenta a taxa consolidada do período e a distribuição dia a dia, e o cálculo exclui as doses não vencidas e não respondidas, conforme a regra detalhada no Quadro 26.
+
+(Quadro 26, sem mudança)
+
+> As duas condições são exigidas em conjunto. Uma dose futura sem resposta é apenas uma previsão, e uma já respondida é um fato registrado, que não pode ficar de fora da conta. Sem nenhuma dose vencida, a tela indica que ainda não há dados suficientes, em vez de uma taxa de zero por cento, que afirmaria algo que não ocorreu. A Figura 9 apresenta a tela de adesão e o calendário.
+
+(Figura 9, sem mudança)
+
+> O calendário oferece a mesma informação em outra perspectiva, permitindo consultar qualquer data anterior com as doses e os compromissos daquele dia. Enquanto a tela de adesão resume o período em números, o calendário responde a perguntas pontuais, como se a dose de uma data específica foi tomada, pulada ou ficou sem resposta. A correção retroativa é possível a partir dessa tela, e segue o princípio de imutabilidade apresentado na seção 4.4.7, no qual o registro anterior é preservado e a correção origina um novo lançamento vinculado a ele.
+>
+> O relatório clínico em formato PDF encerra a jornada e é o único artefato da aplicação que existe fora do aparelho. Ele reúne a identificação do paciente e o período coberto, os tratamentos em curso, a taxa de adesão, as doses não tomadas e os compromissos do período, e destina-se à consulta com o profissional de saúde. Antes de gerá-lo, o paciente escolhe quais medicamentos e compromissos serão incluídos, de modo que o documento levado a um especialista contenha apenas o que diz respeito àquela consulta. A geração ocorre integralmente no aparelho, sem envio dos dados clínicos a qualquer serviço externo, e o arquivo resultante fica disponível para compartilhamento por iniciativa do paciente, atendendo ao princípio de minimização apresentado na seção 2.10.2. A Figura 10 apresenta um relatório gerado.
+
+(Figura 10, sem mudança)
+
+> O próprio documento declara, em seu rodapé, que foi gerado a partir dos registros feitos pelo paciente e que não substitui avaliação clínica nem constitui prescrição. A ressalva delimita o papel da aplicação, que organiza e apresenta o que foi registrado sem interpretá-lo clinicamente, tarefa que cabe ao profissional de saúde.
+
+Depois de aplicar, conferir no PDF se a 4.6.5 continua começando na p.73. Se descer, o sumário muda
+da 4.6.5 em diante.
