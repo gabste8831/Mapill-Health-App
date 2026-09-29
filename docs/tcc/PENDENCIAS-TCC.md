@@ -43,11 +43,10 @@ texto de trabalho (`CAPITULO-6.md`) saiu e fica no histórico do git.
 
 ## Resumo e Abstract
 
-**Reescritos em 29/09**, com resultados e conclusão. Faltam só as palavras-chave em minúscula
-(item 1.3 da revisão geral).
+**Concluídos em 29/09**, com as palavras-chave em minúscula.
 
 ## Revisão geral do documento
 
-**Feita em 29/09** contra o PDF do mesmo dia. Os achados, com página, trecho e correção, estão em
-[`REVISAO-GERAL.md`](REVISAO-GERAL.md), por ordem de prioridade. O negrito ficou de fora e será
+**Reconferida em 29/09, 16:00.** O que falta (referências, sumário duplicado, números de página e
+pré-textuais) está em [`REVISAO-GERAL.md`](REVISAO-GERAL.md), só com os pendentes. O negrito será
 avaliado à parte.
