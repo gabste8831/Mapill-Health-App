@@ -57,7 +57,8 @@ A ABNT pede que toda ilustração seja citada no texto antes de aparecer. Das 12
 
 ### 1.6 Tempo verbal de proposta em trabalho concluído
 
-O trabalho está pronto e validado, mas dois trechos ainda falam no futuro, como no projeto.
+O trabalho está pronto e validado, mas dois trechos ainda falam no futuro, como no projeto. Texto
+pronto nas seções 6.1 e 6.3.
 
 - [ ] **p.15, introdução** "buscar-se-á desvincular" → "busca-se desvincular"; "a solução integrará" → "a solução integra".
 - [ ] **p.40, seção 3.2** Todo o parágrafo está no futuro. "será operacionalizada" → "foi operacionalizada"; "será desenvolvida" → "foi desenvolvida"; "será construído" → "foi construído"; "adotará" → "adota"; "será guiada" → "foi guiada"; "será projetado" → "foi projetado"; "consistirá" → "consistiu".
@@ -68,24 +69,27 @@ O trabalho está pronto e validado, mas dois trechos ainda falam no futuro, como
 
 ### 2.1 Lista de siglas (p.9)
 
+Lista completa pronta na seção 6.5. Os itens abaixo são o que ela corrige.
+
 - [ ] **Acrescentar** as usadas no texto e ausentes da lista: CMED (Câmara de Regulação do Mercado de Medicamentos), FK (*Foreign Key*, chave estrangeira), IBM (*International Business Machines*), ORM (*Object-Relational Mapping*), PDF (*Portable Document Format*), PK (*Primary Key*, chave primária), SQL (*Structured Query Language*) e W3C (*World Wide Web Consortium*).
 - [ ] **Grafia igual à do texto.** A lista traz "MHEALTH", "EHEALTH", "SSOT" e "EMEM", e o texto usa *mHealth*, *eHealth*, SSoT e eMEM.
 - [ ] **Remover o "iOS" solto** no fim da lista, ou completar ("iOS: sistema operacional móvel da Apple"). Não é sigla.
-- [ ] "Single Source of Truth" na lista e "*single source of truth*" no texto. Padronizar a caixa.
 
 ### 2.2 Referências nunca citadas
 
 - [ ] **CONSELHO BRASILEIRO DE OFTALMOLOGIA (CBO)**, 2003. Não é citada no texto. Citar onde se fala da perda de contraste com a idade (seção 2.4.5 ou 4.6.5) ou remover da lista.
 - [ ] **TABI et al.**, 2019. Não é citada no texto. Citar (provavelmente na seção 3.1, estado da arte) ou remover da lista.
-- [ ] **ISO/IEC 25010:2023** é citada pelo nome da norma, mas sem a chamada autor-data. Acrescentar "(ISO, 2023)" nas duas menções (p.27 e p.28/29) e começar a entrada da lista por "INTERNATIONAL ORGANIZATION FOR STANDARDIZATION (ISO)".
+- [ ] **ISO/IEC 25010:2023** é citada pelo nome da norma, mas sem a chamada autor-data. Frases prontas na seção 6.4, e entrada da lista na 6.6.
 
 Conferido sem problema: todo autor citado no texto está na lista.
 
 ### 2.3 Formato da lista de referências (NBR 6023)
 
+Lista completa pronta na seção 6.6, já com tudo abaixo aplicado.
+
 - [ ] **Data de acesso em todas as entradas online.** "Acesso em: 08 de maio de 2026." → "Acesso em: 8 maio 2026." Dia sem zero, sem "de", mês abreviado (maio fica por extenso). Vale para ALLSOPP, as duas BRASIL, CONSELHO, EXPO, IBM, META, MICROSOFT, SQLITE, SUPABASE, TABI, VOGELS, W3C e as duas WHO.
 - [ ] **p.84, ordem alfabética.** "WORLD WIDE WEB CONSORTIUM (W3C)" vem antes das duas "WORLD HEALTH ORGANIZATION". As WHO vêm primeiro.
-- [ ] **Prenomes.** Umas entradas por extenso ("ALLSOPP, John", "MARTIN, Robert C.") e outras abreviadas ("BATES, D. W.", "LOSHIN, D."). Escolher uma forma para toda a lista.
+- [ ] **Prenomes.** Umas entradas por extenso ("ALLSOPP, John", "MARTIN, Robert C.") e outras abreviadas ("BATES, D. W.", "LOSHIN, D."). Padronizado por extenso, que predomina.
 - [ ] **Títulos em inglês com maiúsculas em cada palavra.** KLEPPMANN, TABI, MICROSOFT, VOGELS e CAVOUKIAN. Pela ABNT, só a primeira palavra e nomes próprios ("Designing data-intensive applications: the big ideas...").
 - [ ] **MARTIN** "Arquitetura Limpa" → "Arquitetura limpa", como já está em "Código limpo".
 - [ ] **(eds.)** em ISTEPANIAN → "(ed.)", como em BRUNTON.
@@ -157,7 +161,7 @@ Achados dos revisores. As sugestões seguem o estilo do trabalho.
 
 ### 4.2 Capítulos 3 e 4, até o modelo de dados
 
-- [ ] **p.38** "questionamento principal: De que maneira" → "questionamento principal, de que maneira", sem dois-pontos.
+- [ ] **p.38** "questionamento principal: De que maneira". Pergunta de pesquisa em forma indireta, frase pronta na seção 6.2.
 - [ ] **p.39, Quadro 2** "Não, somente alerta um responsável em casos de doses não tomadas." Única célula com ponto final. Tirar o ponto.
 - [ ] **p.40** "da seguinte maneira: A partir da estruturação" → "da seguinte maneira. A partir da estruturação".
 - [ ] **p.43, Quadro 4, item 09** "ciclo com pausa, e sob demanda" → "ciclo com pausa e sob demanda".
@@ -197,3 +201,203 @@ Opcional:
 - Resumo com 297 palavras e abstract com 295, dentro do limite da NBR 6028.
 - Todo autor citado no texto está na lista de referências.
 - Todas as entradas de referência terminam com ponto, têm ano e trazem "Acesso em" quando têm "Disponível em".
+
+---
+
+## 6. Textos prontos para colar
+
+Os itens 1.6, 2.1, 2.2 e 2.3 e o item de p.38 da seção 4.2 apontam para cá. Nos trechos já
+consolidados, só mudou o que a revisão pediu (tempo verbal, itálico, dois-pontos); o resto está
+idêntico ao documento. Itálico marcado com asteriscos.
+
+### 6.1 Introdução, p.15 (item 1.6)
+
+Duas frases, trocando só o tempo verbal.
+
+> Ao transformar o dispositivo móvel em um suporte utilitário, busca-se desvincular o auxílio terapêutico de espaços físicos fixos, combatendo a dependência de lembretes analógicos e promovendo a autonomia do indivíduo por meio de um monitoramento ininterrupto e preditivo.
+
+> Atuando como uma SSoT, a solução integra o registro de ingestão, o controle de inventário e a gestão de rotinas clínicas, visando converter o ambiente digital em um ecossistema coeso de auxílio ao paciente.
+
+### 6.2 Seção 3, abertura, p.38 (item de p.38 da seção 4.2)
+
+A pergunta de pesquisa passa a indireta, sem dois-pontos e sem ponto de interrogação. O conteúdo é o
+mesmo da seção 1.1.
+
+> O trabalho busca responder de que maneira uma aplicação móvel, baseada em arquitetura *offline-first*, pode centralizar o gerenciamento de medicamentos, o controle de estoques e a organização de compromissos terapêuticos, atendendo a requisitos funcionais e não funcionais de usabilidade, segurança e confiabilidade voltados ao contexto do cuidado com a saúde.
+
+### 6.3 Seção 3.2 inteira, p.40 (item 1.6)
+
+Tempo verbal, itálico e os dois-pontos do segundo parágrafo. Nenhuma outra palavra mudou.
+
+> Quanto aos procedimentos metodológicos, recorre-se ao levantamento bibliográfico e documental com foco em áreas como engenharia de *software*, *mHealth* e *design* de interfaces, subsidiando o levantamento de requisitos e as decisões de projeto da aplicação.
+>
+> A pesquisa foi operacionalizada da seguinte maneira. A partir da estruturação teórica e do levantamento de requisitos arquiteturais, a aplicação, denominada Mapill, foi desenvolvida adotando um ecossistema multiplataforma. O *frontend* móvel foi construído utilizando o *framework* React Native orquestrado pelo Expo, com a linguagem TypeScript para garantir segurança de tipagem e um sistema de *design* próprio para a estilização das interfaces.
+>
+> A infraestrutura de persistência adota o paradigma *offline-first*, utilizando o banco de dados SQLite localmente para garantir o funcionamento de forma autônoma e independente de conectividade. Para a sincronização e a recuperação de falhas, a aplicação comunica-se diretamente com a plataforma Supabase, que expõe uma interface de programação de aplicações sobre o banco de dados PostgreSQL e atua como repositório secundário em nuvem.
+>
+> A concepção de UX foi estritamente guiada pelas heurísticas de Nielsen, priorizando fluxos simplificados e alta legibilidade para atender ao público-alvo, composto majoritariamente por idosos e pacientes polimedicados. O sistema foi projetado para operacionalizar o motor de disparos via notificações locais e alarmes, assegurando o determinismo dos alertas independentemente de conexão com a rede, além de aplicar mecânicas de gamificação para estímulo à adesão.
+>
+> Por fim, a etapa de validação técnica do trabalho consistiu na análise do comportamento da arquitetura *offline-first* em cenários controlados, simulando situações de ausência de conexão, restabelecimento de conectividade, sincronização de dados e conflito entre registros locais e remotos, de modo a verificar a confiabilidade e a consistência da solução proposta diante das condições de uso previstas.
+
+Opcional: "aplicar mecânicas de gamificação" promete um pouco mais do que a 4.6.5 entrega, que é só o
+indicador de progresso e a mensagem de dia completo. "aplicar elementos de gamificação" fica mais fiel.
+
+### 6.4 Frases com a ISO/IEC 25010 (item 2.2)
+
+**Seção 2.4.5, p.27.** Já inclui a correção da remissão à 2.5.3 (item 1.5) e o itálico.
+
+> Essa exigência dialoga diretamente com a norma ISO/IEC 25010:2023 (ISO, 2023), apresentada na seção 2.5.3 deste trabalho, que reconhece a acessibilidade como uma característica formal de qualidade de *software*, e não como um complemento estético ao produto.
+
+**Seção 2.5.3, p.28 e 29.** Só o começo muda, o resto da frase segue igual.
+
+> Segundo a norma internacional ISO/IEC 25010:2023 (ISO, 2023), que estabelece o modelo de qualidade de produto de *software*, destacam-se para este contexto os atributos de confiabilidade (...)
+
+### 6.5 Lista de abreviaturas e siglas completa (item 2.1)
+
+Substitui a lista inteira da p.9. Em ordem alfabética, com a grafia usada no texto e a expansão em
+inglês em itálico.
+
+O que mudou em relação à lista atual:
+
+- **Entraram** Anvisa, CMED, FK, IBM, ORM, PDF, PK, SQL e W3C, todas usadas no texto.
+- **Grafia corrigida** para a do texto: EHEALTH → *eHealth*, EMEM → eMEM, MHEALTH → *mHealth*, SSOT → SSoT.
+- **eMEM** passa a "Monitoramento Eletrônico de Medicamentos", como no Quadro 1 ("Monitoramento eletrônico de medicamentos (eMEM)").
+- **Saiu** o "iOS" solto no fim, que não é sigla.
+- As demais entradas conferidas e mantidas, todas usadas no texto ou na capa (UNIDAVI).
+
+```
+ACID: Atomicity, Consistency, Isolation, Durability (Atomicidade, Consistência, Isolamento e Durabilidade)
+Anvisa: Agência Nacional de Vigilância Sanitária
+API: Application Programming Interface (Interface de Programação de Aplicações)
+BaaS: Backend as a Service (Backend como Serviço)
+CDSS: Clinical Decision Support Systems (Sistemas de Suporte à Decisão Clínica)
+CMED: Câmara de Regulação do Mercado de Medicamentos
+CSS: Cascading Style Sheets (Folhas de Estilo em Cascata)
+CTO: Chief Technology Officer (Diretor de Tecnologia)
+eHealth: Electronic Health (Saúde Eletrônica)
+eMEM: Electronic Medication Monitoring (Monitoramento Eletrônico de Medicamentos)
+FK: Foreign Key (Chave Estrangeira)
+IBM: International Business Machines
+ISO/IEC: International Organization for Standardization / International Electrotechnical Commission
+JWT: JSON Web Token
+LGPD: Lei Geral de Proteção de Dados
+LWW: Last-Write-Wins (Última Gravação Prevalece)
+mHealth: Mobile Health (Saúde Móvel)
+ORM: Object-Relational Mapping (Mapeamento Objeto-Relacional)
+PDF: Portable Document Format (Formato de Documento Portátil)
+PK: Primary Key (Chave Primária)
+RLS: Row Level Security (Segurança em Nível de Linha)
+SGBD: Sistema Gerenciador de Banco de Dados
+SOLID: Single responsibility, Open-closed, Liskov substitution, Interface segregation, Dependency inversion
+SQL: Structured Query Language (Linguagem de Consulta Estruturada)
+SRP: Single Responsibility Principle (Princípio de Responsabilidade Única)
+SSoT: Single Source of Truth (Fonte Única de Verdade)
+UI: User Interface (Interface do Usuário)
+UNIDAVI: Centro Universitário para o Desenvolvimento do Alto Vale do Itajaí
+UX: User Experience (Experiência do Usuário)
+W3C: World Wide Web Consortium
+WCAG: Web Content Accessibility Guidelines (Diretrizes de Acessibilidade para Conteúdo Web)
+WHO: World Health Organization (Organização Mundial da Saúde)
+```
+
+Itálico: a expansão em inglês de cada sigla (ex.: *Application Programming Interface*), e *Backend*
+na tradução de BaaS. A sigla em si fica sem itálico, exceto *eHealth* e *mHealth*, que o texto já usa
+em itálico. SGBD passou ao singular, que é a forma de verbete.
+
+### 6.6 Lista de referências completa (item 2.3)
+
+Substitui a lista inteira das p.82 a 85. Segue a NBR 6023 e o padrão que já predomina no documento.
+
+O que mudou em relação à lista atual:
+
+- **Prenomes por extenso** em todas, que é o padrão de 14 das 21 entradas com autor pessoal. Os 7
+  completados foram BATES (David W.), BRETTEL, VIÉNOT e MOLLON (Hans, Françoise, John D.), BRUNTON e
+  KNOLLMANN (Laurence L., Björn C.), DETERDING (Sebastian), LOSHIN (David), OSTERBERG e BLASCHKE
+  (Lars, Terrence) e RISKO e GILBERT (Evan F., Sam J.). Vale conferir os nomes contra a fonte.
+- **Data de acesso** no formato da norma ("8 maio 2026").
+- **Títulos em inglês** só com a primeira letra maiúscula e nomes próprios.
+- **Local** como aparece no documento: New York, Geneva, Toronto.
+- **ISO** com a sigla no cabeçalho, como já é feito com W3C e WHO, para casar com "(ISO, 2023)".
+- **DETERDING** no modelo de trabalho em evento. **ISTEPANIAN** com "(ed.)". **BADDELEY** com
+  "Artmed". **MARTIN** com "Arquitetura limpa". **WHO 2011** com a editora por extenso.
+- **Ordem alfabética**: as duas WORLD HEALTH ORGANIZATION antes da WORLD WIDE WEB CONSORTIUM.
+- **URLs da WHO** sem as quebras que a extração do PDF criou ("9560-e3b1d9c8a75c" e "content").
+  Conferir no documento se as quebras existem mesmo.
+
+O negrito fica como está hoje (título principal em negrito), a ser conferido na revisão do negrito.
+Em DETERDING, o negrito passa para "*Proceedings*".
+
+**CONSELHO BRASILEIRO DE OFTALMOLOGIA** e **TABI** continuam na lista, mas nenhuma das duas é citada no
+texto. Decidir entre citar ou remover (item 2.2).
+
+```
+ALLSOPP, John. The web's future is offline. beyond tellerrand, 2014. Disponível em: https://www.youtube.com/watch?v=VvwhcoZhoI4. Acesso em: 8 maio 2026.
+
+BADDELEY, Alan; ANDERSON, Michael C.; EYSENCK, Michael W. Memória. Porto Alegre: Artmed, 2010.
+
+BATES, David W. et al. Ten commandments for effective clinical decision support: making the practice of evidence-based medicine a reality. Journal of the American Medical Informatics Association, v. 10, n. 6, p. 523-530, 2003.
+
+BRASIL. [Lei Geral de Proteção de Dados Pessoais (LGPD)]. Lei nº 13.709, de 14 de agosto de 2018. Brasília, DF: Presidência da República, 2018. Disponível em: http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.html. Acesso em: 10 maio 2026.
+
+BRASIL. Ministério da Saúde. Estratégia de Saúde Digital para o Brasil 2020-2028. Brasília, DF: Ministério da Saúde, 2020. Disponível em: https://bvsms.saude.gov.br/bvs/publicacoes/estrategia_saude_digital_Brasil.pdf. Acesso em: 10 maio 2026.
+
+BRETTEL, Hans; VIÉNOT, Françoise; MOLLON, John D. Computerized simulation of color appearance for dichromats. Journal of the Optical Society of America A, v. 14, n. 10, p. 2647-2655, 1997.
+
+BRUNTON, Laurence L.; KNOLLMANN, Björn C. (ed.). As bases farmacológicas da terapêutica de Goodman & Gilman. 14. ed. Porto Alegre: Artmed, 2024.
+
+CAVOUKIAN, Ann. Privacy by design: the 7 foundational principles. Toronto: Information and Privacy Commissioner of Ontario, 2009.
+
+CONSELHO BRASILEIRO DE OFTALMOLOGIA (CBO). Catarata: diagnóstico e tratamento. Projeto Diretrizes. São Paulo: Associação Médica Brasileira; Brasília: Conselho Federal de Medicina, 2003. Disponível em: https://www.cbo.net.br/novo/publico-geral/catarata.php. Acesso em: 10 set. 2026.
+
+DETERDING, Sebastian et al. From game design elements to gamefulness: defining gamification. In: INTERNATIONAL ACADEMIC MINDTREK CONFERENCE, 15., 2011, Tampere. Proceedings [...]. New York: ACM, 2011. p. 9-15.
+
+EXPO. Expo documentation. 2024. Disponível em: https://docs.expo.dev/. Acesso em: 7 maio 2026.
+
+IBM. ACID properties of transactions. 2024. Disponível em: https://www.ibm.com/docs/pt-br/cics-tx/11.1.0?topic=processing-acid-properties-transactions. Acesso em: 14 maio 2026.
+
+INTERNATIONAL ORGANIZATION FOR STANDARDIZATION (ISO). ISO/IEC 25010: systems and software engineering - systems and software quality requirements and evaluation (SQuaRE) - product quality model. Geneva: ISO/IEC, 2023.
+
+ISTEPANIAN, Robert S. H.; LAXMINARAYAN, Swamy; PATTICHIS, Constantinos S. (ed.). M-health: emerging mobile health systems. New York: Springer, 2006.
+
+KLEPPMANN, Martin. Designing data-intensive applications: the big ideas behind reliable, scalable, and maintainable systems. Sebastopol: O'Reilly Media, 2017.
+
+LOSHIN, David. Master data management. Burlington: Morgan Kaufmann, 2010.
+
+MARTIN, Robert C. Arquitetura limpa: o guia do artesão para estrutura e design de software. Rio de Janeiro: Alta Books, 2019.
+
+MARTIN, Robert C. Código limpo: habilidades práticas do Agile Software. Rio de Janeiro: Alta Books, 2009.
+
+META. React Native: a framework for building native apps using React. 2024. Disponível em: https://reactnative.dev/docs/getting-started. Acesso em: 7 maio 2026.
+
+MICROSOFT. TypeScript: typed JavaScript at any scale. 2024. Disponível em: https://www.typescriptlang.org/. Acesso em: 10 maio 2026.
+
+NIELSEN, Jakob. Usability engineering. San Diego: Academic Press, 1994.
+
+NORMAN, Donald A. The design of everyday things. Revised and expanded edition. New York: Basic Books, 2013.
+
+OSTERBERG, Lars; BLASCHKE, Terrence. Adherence to medication. New England Journal of Medicine, v. 353, n. 5, p. 487-497, 2005.
+
+PINHEIRO, Patrícia Peck. Proteção de dados pessoais: comentários à Lei n. 13.709/2018 (LGPD). 2. ed. São Paulo: Saraiva, 2020.
+
+PRESSMAN, Roger S.; MAXIM, Bruce R. Engenharia de software: uma abordagem profissional. 9. ed. Porto Alegre: AMGH, 2021.
+
+RISKO, Evan F.; GILBERT, Sam J. Cognitive offloading. Trends in Cognitive Sciences, v. 20, n. 9, p. 676-688, 2016.
+
+SOMMERVILLE, Ian. Engenharia de software. 10. ed. São Paulo: Pearson Education do Brasil, 2018.
+
+SQLITE. SQLite documentation. 2026. Disponível em: https://www.sqlite.org/docs.html. Acesso em: 8 maio 2026.
+
+SUPABASE. Supabase documentation: Row Level Security. 2026. Disponível em: https://supabase.com/docs/guides/auth/row-level-security. Acesso em: 8 maio 2026.
+
+SWELLER, John. Cognitive load during problem solving: effects on learning. Cognitive Science, v. 12, n. 2, p. 257-285, 1988.
+
+TABI, Katarina et al. Mobile apps for medication management: review and analysis. JMIR mHealth and uHealth, v. 7, n. 9, e13608, set. 2019. DOI: 10.2196/13608. Disponível em: https://mhealth.jmir.org/2019/9/e13608. Acesso em: 4 set. 2026.
+
+VOGELS, Werner. Eventually consistent - revisited. All Things Distributed, 2008. Disponível em: https://www.allthingsdistributed.com/2008/12/eventually_consistent.html. Acesso em: 29 maio 2026.
+
+WORLD HEALTH ORGANIZATION (WHO). Adherence to long-term therapies: evidence for action. Geneva: World Health Organization, 2003. Disponível em: https://iris.who.int/server/api/core/bitstreams/121c6b73-8651-442f-9560-e3b1d9c8a75c/content. Acesso em: 29 abr. 2026.
+
+WORLD HEALTH ORGANIZATION (WHO). mHealth: new horizons for health through mobile technologies. Geneva: World Health Organization, 2011. Disponível em: https://iris.who.int/server/api/core/bitstreams/ad1b13c0-7c82-47b4-8dd5-f0a26c3a3cc3/content. Acesso em: 13 maio 2026.
+
+WORLD WIDE WEB CONSORTIUM (W3C). Web Content Accessibility Guidelines (WCAG) 2.1. Cambridge, MA: W3C, 2018. Disponível em: https://www.w3.org/TR/WCAG21/. Acesso em: 10 set. 2026.
+```
