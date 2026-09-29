@@ -47,6 +47,6 @@ texto de trabalho (`CAPITULO-6.md`) saiu e fica no histórico do git.
 
 ## Revisão geral do documento
 
-**Reconferida em 29/09, 16:00.** O que falta (referências, sumário duplicado, números de página e
+**Reconferida em 29/09, 16:44.** O que falta (um ponto na RISKO, números de página e
 pré-textuais) está em [`REVISAO-GERAL.md`](REVISAO-GERAL.md), só com os pendentes. O negrito será
 avaliado à parte.
