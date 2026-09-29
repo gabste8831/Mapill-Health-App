@@ -33,6 +33,8 @@ A ABNT pede que toda ilustração seja citada no texto antes de aparecer. Das 12
 
 ### 1.2 Pré-textuais incompletos
 
+Ficam para depois, por decisão de 29/09.
+
 - [ ] **p.2 e p.3** "curso de Sistemas **da** Informação" → "Sistemas **de** Informação". O próprio grau diz "Bacharel em Sistemas de Informação".
 - [ ] **p.3** Banca examinadora com "Prof." em branco, duas vezes. Preencher os nomes.
 - [ ] **p.3** "Rio do Sul, 25 de junho de 2026". Conferir a data, provavelmente é a da apresentação.
@@ -77,8 +79,8 @@ Lista completa pronta na seção 6.5. Os itens abaixo são o que ela corrige.
 
 ### 2.2 Referências nunca citadas
 
-- [ ] **CONSELHO BRASILEIRO DE OFTALMOLOGIA (CBO)**, 2003. Não é citada no texto. Citar onde se fala da perda de contraste com a idade (seção 2.4.5 ou 4.6.5) ou remover da lista.
-- [ ] **TABI et al.**, 2019. Não é citada no texto. Citar (provavelmente na seção 3.1, estado da arte) ou remover da lista.
+- [ ] **CONSELHO BRASILEIRO DE OFTALMOLOGIA (CBO)**, 2003. Não é citada no texto. **Remover da lista** (decidido em 29/09; a lista pronta da seção 6.6 já está sem ela).
+- [ ] **TABI et al.**, 2019. Não é citada no texto. **Remover da lista** (decidido em 29/09; a lista pronta da seção 6.6 já está sem ela).
 - [ ] **ISO/IEC 25010:2023** é citada pelo nome da norma, mas sem a chamada autor-data. Frases prontas na seção 6.4, e entrada da lista na 6.6.
 
 Conferido sem problema: todo autor citado no texto está na lista.
@@ -87,17 +89,16 @@ Conferido sem problema: todo autor citado no texto está na lista.
 
 Lista completa pronta na seção 6.6, já com tudo abaixo aplicado.
 
-- [ ] **Data de acesso em todas as entradas online.** "Acesso em: 08 de maio de 2026." → "Acesso em: 8 maio 2026." Dia sem zero, sem "de", mês abreviado (maio fica por extenso). Vale para ALLSOPP, as duas BRASIL, CONSELHO, EXPO, IBM, META, MICROSOFT, SQLITE, SUPABASE, TABI, VOGELS, W3C e as duas WHO.
+- [ ] **Data de acesso em todas as entradas online.** "Acesso em: 08 de maio de 2026." → "Acesso em: 8 maio 2026." Dia sem zero, sem "de", mês abreviado (maio fica por extenso). Vale para ALLSOPP, as duas BRASIL, EXPO, IBM, META, MICROSOFT, SQLITE, SUPABASE, VOGELS, W3C e as duas WHO.
 - [ ] **p.84, ordem alfabética.** "WORLD WIDE WEB CONSORTIUM (W3C)" vem antes das duas "WORLD HEALTH ORGANIZATION". As WHO vêm primeiro.
 - [ ] **Prenomes.** Umas entradas por extenso ("ALLSOPP, John", "MARTIN, Robert C.") e outras abreviadas ("BATES, D. W.", "LOSHIN, D."). Padronizado por extenso, que predomina.
-- [ ] **Títulos em inglês com maiúsculas em cada palavra.** KLEPPMANN, TABI, MICROSOFT, VOGELS e CAVOUKIAN. Pela ABNT, só a primeira palavra e nomes próprios ("Designing data-intensive applications: the big ideas...").
+- [ ] **Títulos em inglês com maiúsculas em cada palavra.** KLEPPMANN, MICROSOFT, VOGELS e CAVOUKIAN. Pela ABNT, só a primeira palavra e nomes próprios ("Designing data-intensive applications: the big ideas...").
 - [ ] **MARTIN** "Arquitetura Limpa" → "Arquitetura limpa", como já está em "Código limpo".
 - [ ] **(eds.)** em ISTEPANIAN → "(ed.)", como em BRUNTON.
 - [ ] **Editora.** "ArtMed" em BADDELEY e "Artmed" em BRUNTON. Usar "Artmed".
 - [ ] **WHO.** "Genebra: World Health Organization" (2003) e "Genebra: WHO" (2011). Padronizar.
 - [ ] **Local.** "Nova York", "Genebra" e "Ontário" traduzidos, e "Sebastopol", "Burlington" e "Cambridge, MA" no original. A NBR pede o local como aparece no documento ("New York", "Geneva"). Em CAVOUKIAN, Ontário é a província, e a cidade é Toronto.
 - [ ] **DETERDING, trabalho em evento.** Seguir o modelo "In: INTERNATIONAL ACADEMIC MINDTREK CONFERENCE, 15., 2011, Tampere. *Proceedings* [...]. New York: ACM, 2011. p. 9-15."
-- [ ] **TABI.** "set. 2019" e "Acesso em: 04 de setembro de 2026" na mesma entrada. Resolve junto com a data de acesso.
 - [ ] **WHO 2003, URL.** Conferir o hífen em "...9560 e3b1d9c8a75c". Pode ser só a quebra de linha.
 
 ---
@@ -227,7 +228,7 @@ mesmo da seção 1.1.
 
 ### 6.3 Seção 3.2 inteira, p.40 (item 1.6)
 
-Tempo verbal, itálico e os dois-pontos do segundo parágrafo. Nenhuma outra palavra mudou.
+Tempo verbal, itálico, os dois-pontos do segundo parágrafo e "elementos de gamificação".
 
 > Quanto aos procedimentos metodológicos, recorre-se ao levantamento bibliográfico e documental com foco em áreas como engenharia de *software*, *mHealth* e *design* de interfaces, subsidiando o levantamento de requisitos e as decisões de projeto da aplicação.
 >
@@ -235,12 +236,12 @@ Tempo verbal, itálico e os dois-pontos do segundo parágrafo. Nenhuma outra pal
 >
 > A infraestrutura de persistência adota o paradigma *offline-first*, utilizando o banco de dados SQLite localmente para garantir o funcionamento de forma autônoma e independente de conectividade. Para a sincronização e a recuperação de falhas, a aplicação comunica-se diretamente com a plataforma Supabase, que expõe uma interface de programação de aplicações sobre o banco de dados PostgreSQL e atua como repositório secundário em nuvem.
 >
-> A concepção de UX foi estritamente guiada pelas heurísticas de Nielsen, priorizando fluxos simplificados e alta legibilidade para atender ao público-alvo, composto majoritariamente por idosos e pacientes polimedicados. O sistema foi projetado para operacionalizar o motor de disparos via notificações locais e alarmes, assegurando o determinismo dos alertas independentemente de conexão com a rede, além de aplicar mecânicas de gamificação para estímulo à adesão.
+> A concepção de UX foi estritamente guiada pelas heurísticas de Nielsen, priorizando fluxos simplificados e alta legibilidade para atender ao público-alvo, composto majoritariamente por idosos e pacientes polimedicados. O sistema foi projetado para operacionalizar o motor de disparos via notificações locais e alarmes, assegurando o determinismo dos alertas independentemente de conexão com a rede, além de aplicar elementos de gamificação para estímulo à adesão.
 >
 > Por fim, a etapa de validação técnica do trabalho consistiu na análise do comportamento da arquitetura *offline-first* em cenários controlados, simulando situações de ausência de conexão, restabelecimento de conectividade, sincronização de dados e conflito entre registros locais e remotos, de modo a verificar a confiabilidade e a consistência da solução proposta diante das condições de uso previstas.
 
-Opcional: "aplicar mecânicas de gamificação" promete um pouco mais do que a 4.6.5 entrega, que é só o
-indicador de progresso e a mensagem de dia completo. "aplicar elementos de gamificação" fica mais fiel.
+Além do tempo verbal, "mecânicas de gamificação" passou a "elementos de gamificação" (decidido em
+29/09), porque a 4.6.5 descreve só o indicador de progresso e a mensagem de dia completo.
 
 ### 6.4 Frases com a ISO/IEC 25010 (item 2.2)
 
@@ -327,8 +328,8 @@ O que mudou em relação à lista atual:
 O negrito fica como está hoje (título principal em negrito), a ser conferido na revisão do negrito.
 Em DETERDING, o negrito passa para "*Proceedings*".
 
-**CONSELHO BRASILEIRO DE OFTALMOLOGIA** e **TABI** continuam na lista, mas nenhuma das duas é citada no
-texto. Decidir entre citar ou remover (item 2.2).
+**CONSELHO BRASILEIRO DE OFTALMOLOGIA** e **TABI** saíram da lista, por decisão de 29/09, já que nenhuma
+das duas é citada no texto. A lista ficou com 33 entradas.
 
 ```
 ALLSOPP, John. The web's future is offline. beyond tellerrand, 2014. Disponível em: https://www.youtube.com/watch?v=VvwhcoZhoI4. Acesso em: 8 maio 2026.
@@ -347,7 +348,6 @@ BRUNTON, Laurence L.; KNOLLMANN, Björn C. (ed.). As bases farmacológicas da te
 
 CAVOUKIAN, Ann. Privacy by design: the 7 foundational principles. Toronto: Information and Privacy Commissioner of Ontario, 2009.
 
-CONSELHO BRASILEIRO DE OFTALMOLOGIA (CBO). Catarata: diagnóstico e tratamento. Projeto Diretrizes. São Paulo: Associação Médica Brasileira; Brasília: Conselho Federal de Medicina, 2003. Disponível em: https://www.cbo.net.br/novo/publico-geral/catarata.php. Acesso em: 10 set. 2026.
 
 DETERDING, Sebastian et al. From game design elements to gamefulness: defining gamification. In: INTERNATIONAL ACADEMIC MINDTREK CONFERENCE, 15., 2011, Tampere. Proceedings [...]. New York: ACM, 2011. p. 9-15.
 
@@ -391,7 +391,6 @@ SUPABASE. Supabase documentation: Row Level Security. 2026. Disponível em: http
 
 SWELLER, John. Cognitive load during problem solving: effects on learning. Cognitive Science, v. 12, n. 2, p. 257-285, 1988.
 
-TABI, Katarina et al. Mobile apps for medication management: review and analysis. JMIR mHealth and uHealth, v. 7, n. 9, e13608, set. 2019. DOI: 10.2196/13608. Disponível em: https://mhealth.jmir.org/2019/9/e13608. Acesso em: 4 set. 2026.
 
 VOGELS, Werner. Eventually consistent - revisited. All Things Distributed, 2008. Disponível em: https://www.allthingsdistributed.com/2008/12/eventually_consistent.html. Acesso em: 29 maio 2026.
 
