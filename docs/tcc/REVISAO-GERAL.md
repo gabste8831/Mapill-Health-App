@@ -401,26 +401,21 @@ WORLD WIDE WEB CONSORTIUM (W3C). Web Content Accessibility Guidelines (WCAG) 2.1
 
 ### 6.7 Seção 4.6.4, os dois primeiros parágrafos (29/09)
 
-Por decisão de 29/09, só os dois primeiros parágrafos mudam. A p.70 tem espaço para umas duas linhas a
-mais, e a p.71 está cheia até a Figura 9, então o segundo parágrafo precisa manter o tamanho, mesmo
-com a remissão à Figura 9. Crescer ali empurra a figura para a p.72 e desloca o resto do capítulo.
+Por decisão de 29/09, só os dois primeiros parágrafos mudam, e podem crescer para ocupar o espaço livre
+da seção (umas duas linhas na p.70 e o terço em branco da p.72). Cerca de 140 palavras a mais.
+Conferido no código: períodos de 7, 30 e 90 dias, taxa por medicamento quando há mais de um, últimos
+sete dias fixos e lista de doses perdidas (vencidas e não tomadas, das mais recentes para as mais
+antigas).
 
-**Primeiro parágrafo** (cresce cerca de uma linha, com o que a tela mostra: períodos de 7, 30 e 90
-dias, puladas separadas de sem resposta, conferido no código):
+> O acompanhamento de longo prazo reúne o histórico que a rotina diária produz. A tela de adesão apresenta a taxa consolidada em períodos de sete, trinta ou noventa dias e, quando há mais de um tratamento, a taxa de cada medicamento. As doses puladas e as que ficaram sem resposta são contadas separadamente, uma vez que a primeira é uma decisão registrada pelo paciente e a segunda é a ausência de registro, distinção estabelecida na seção 4.3.1. Independentemente do período escolhido, a tela mantém visíveis os últimos sete dias, já que identificar em que dia a dose falhou só é útil enquanto o paciente ainda se lembra daquele dia. O cálculo exclui as doses não vencidas e não respondidas, conforme a regra detalhada no Quadro 26.
 
-> O acompanhamento de longo prazo reúne o histórico que a rotina diária produz. A tela de adesão apresenta a taxa consolidada em períodos de sete, trinta ou noventa dias, com a distribuição dia a dia e as doses puladas contadas separadamente das que ficaram sem resposta. O cálculo exclui as doses não vencidas e não respondidas, conforme a regra detalhada no Quadro 26.
+(Quadro 26, sem mudança)
 
-**Segundo parágrafo** (mesmo tamanho do original, já com a remissão à Figura 9 do item 1.1):
-
-> As duas condições são exigidas em conjunto, pois uma dose futura sem resposta é apenas uma previsão, e uma já respondida é um fato registrado. Sem nenhuma dose vencida, a tela indica que ainda não há dados suficientes, em vez de uma taxa de zero por cento que afirmaria algo que não ocorreu. A Figura 9 apresenta a tela de adesão e o calendário.
+> As duas condições são exigidas em conjunto. Uma dose futura sem resposta é apenas uma previsão, e nada afirma sobre o comportamento do paciente, enquanto uma dose futura já confirmada ou pulada é um fato registrado, que não pode ficar de fora da conta. Sem nenhuma dose vencida, a tela indica que ainda não há dados suficientes, em vez de uma taxa de zero por cento, que afirmaria algo que não ocorreu. A tela também lista as doses perdidas do período, das mais recentes para as mais antigas, permitindo localizar cada falta sem percorrer o histórico dia a dia. A Figura 9 apresenta a tela de adesão e o calendário.
 
 Os parágrafos do calendário e do relatório ficam como estão. A remissão à Figura 10 (item 1.1) ainda
 precisa entrar no fim do parágrafo do relatório: "...apresentado na seção 2.10.2. A Figura 10
 apresenta um relatório gerado."
 
-**Opcional, não aplicado.** O terço em branco da p.72 só se preenche com texto depois da Figura 9. Se
-um dia quiser, estes dois acréscimos cabem ali:
-
-> (no parágrafo do calendário, depois da primeira frase) Enquanto a tela de adesão resume o período em números, o calendário responde a perguntas pontuais, como se a dose de uma data específica foi tomada, pulada ou ficou sem resposta.
-
-> (parágrafo novo, depois da Figura 10) O próprio documento declara, em seu rodapé, que foi gerado a partir dos registros feitos pelo paciente e que não substitui avaliação clínica nem constitui prescrição. A ressalva delimita o papel da aplicação, que organiza e apresenta o que foi registrado sem interpretá-lo clinicamente, tarefa que cabe ao profissional de saúde.
+Depois de aplicar, conferir no PDF onde a Figura 9 caiu (se ela pular para a p.72, a p.71 pode ficar
+com espaço) e se a 4.6.5 continua começando na p.73.
