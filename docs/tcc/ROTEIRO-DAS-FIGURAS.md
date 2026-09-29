@@ -179,7 +179,7 @@ Bloqueia a **Figura 12** (tela inicial nos três temas), que exige exatamente a 
 a Home montada, e a base de demonstração tem compromisso cadastrado. Também atinge a **Figura
 11**, que pede a tela inicial com outro conjunto de cores aplicado.
 
-**Corrigido em 27/09, falta confirmar no aparelho.** Era o único cartão do app que somava a
+**Corrigido em 27/09 e confirmado no aparelho em 29/09.** As Figuras 11 e 12 estão liberadas. Era o único cartão do app que somava a
 superfície que troca borda por sombra conforme o tema (`superficieDeCartao`) com
 `overflow: "hidden"`. Ao sair do alto contraste o Android recortava os filhos e sobrava só o fundo. O
 `overflow` saiu de [`CardCompromissoProximo.styles.ts`](../../src/telas/Inicio/componentes/CardCompromissoProximo/CardCompromissoProximo.styles.ts),
