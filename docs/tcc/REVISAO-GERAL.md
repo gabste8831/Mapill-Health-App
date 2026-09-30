@@ -213,19 +213,25 @@ Agradecimentos com o título AGRADECIMENTOS e texto justificado, como o corpo.
 *Agradecimentos (p.6)*
 
 > Aos meus pais, Celio Steffens e Solange Aparecida Maciel Steffens, agradeço pelo apoio ao longo
-> de toda a graduação e por me ensinarem o valor do esforço e da dedicação. Foi na rotina da nossa
-> família, marcada pela presença constante de medicamentos, que nasceu a ideia do Mapill, e este
-> trabalho carrega um pouco do cuidado que sempre vi dentro de casa.
+> de toda a vida e por me ensinarem o valor do esforço e da dedicação. Serei sempre grato por me
+> darem a oportunidade do estudo, a liberdade para tomar minhas próprias decisões e uma base
+> sólida para construir meu futuro da melhor forma possível.
 >
 > À minha avó, Norma Alda Steffens, pelo carinho de sempre e por ser parte importante de quem eu
-> sou. À minha namorada, Elisa Patzlaff, pela paciência nos dias dedicados a este trabalho, pelo
-> incentivo nos momentos de cansaço e por acreditar neste projeto junto comigo.
+> sou. Suas palavras e seus momentos de incentivo moldaram meu caráter e seguem fortalecendo minhas
+> ambições.
 >
-> Ao meu orientador, Prof. Me. Marciel de Liz Santos, pelas orientações e correções que deram forma
+> À minha namorada, Elisa Patzlaff, pelo amparo e pelo companheirismo ao longo desses seis anos,
+> pela paciência nos dias dedicados a este trabalho e por acreditar neste projeto junto comigo,
+> tendo sido também uma grande influência em sua construção e validação. Sua companhia foi
+> fundamental para a conclusão deste ciclo.
+>
+> Ao meu orientador, Prof. Me. Marciel de Liz Santos, pelas instruções e correções que deram forma
 > a este trabalho.
 >
-> Por fim, agradeço a mim mesmo, pela disciplina de levar adiante um projeto que começou como uma
-> ideia e se tornou uma aplicação real.
+> Por fim, agradeço a mim mesmo, pela disciplina de levar adiante este projeto, um desafio muito
+> além da minha zona de conforto e do meu domínio, que termina com a certeza de ter crescido a cada
+> etapa.
 
 **Folha de aprovação (p.3).** A data está "Rio do Sul, 25 de junho de 2026.". Trocar pela data da
 defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
