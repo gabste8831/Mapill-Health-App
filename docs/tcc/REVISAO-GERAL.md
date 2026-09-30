@@ -25,6 +25,9 @@ As mudanças do orientador entraram todas (título 3.2, remissões, "Em síntese
 
 As outras 119 entradas do sumário e das listas estão certas.
 
+**ANEXOS (p.88).** A página tem só o título, sem nada anexado. Anexo é opcional: apagar a página e
+a linha "ANEXOS" do sumário. Por ser a última página, nada mais se desloca.
+
 ## 2. Figuras 8, 10, 11 e 12
 
 As quatro ainda usam a **mesma imagem de reserva** (a tela inicial repetida). Cada figura leva
@@ -90,6 +93,10 @@ Epígrafe, dedicatória e agradecimentos já estão no documento (conferidos em 
 defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
 
 ## 4. Negrito (reconferido em 30/09 contra o PDF das 15:07)
+
+Os títulos estão certos e consistentes no corpo e no sumário: título 1 em caixa alta com negrito,
+título 2 em caixa alta sem negrito, título 3 em minúsculas com negrito (não há título 4). Os pontos
+abaixo não são de título.
 
 Já corrigidos: 5.1 a 5.4 sem negrito no sumário, e ISO, ISTEPANIAN e WHO 2011 com o subtítulo
 normal. Falta:
