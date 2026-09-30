@@ -10,7 +10,7 @@
 > referências, e na folha de aprovação o hífen de "Itajaí - UNIDAVI" e o título sem ponto final.
 > No capítulo 4, todos os quadros e figuras já têm título, corpo e fonte na mesma página.
 
-Ordem sugerida: 1 → 2 → 3 → 4 → exportar PDF → 5.
+Ordem sugerida: 1 → 2 → 4 → exportar PDF → 5. O item 3 fica para depois da apresentação.
 
 ---
 
@@ -110,12 +110,65 @@ Epígrafe, dedicatória e agradecimentos já estão no documento (conferidos em 
 **Folha de aprovação (p.3).** A data está "Rio do Sul, 25 de junho de 2026.". Trocar pela data da
 defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
 
-## 4. Negrito
+## 4. Negrito (conferido em 30/09 contra o PDF das 14:49)
 
-Revisão à parte, combinada para depois. Ainda não feita.
+O padrão do corpo está consistente e serve de régua: **título 1** (1. INTRODUÇÃO) em negrito e
+caixa alta, **título 2** (1.1 PROBLEMA DE PESQUISA) em caixa alta sem negrito, **título 3** (1.2.1
+Geral) em negrito. Cabeçalhos de quadro em negrito, palavras reservadas dos quadros de código em
+negrito, "Palavras-chave:" e "Keywords:" em negrito. Tudo isso está certo.
+
+1. **Sumário, 5.1 a 5.4 em negrito.** No sumário os títulos 2 estão sem negrito, como no corpo,
+   menos 5.1, 5.2, 5.3 e 5.4. Tirar o negrito dessas quatro linhas (a NBR 6027 pede que o sumário
+   repita a tipografia do texto). A linha nova "6.1 TRABALHOS FUTUROS" também vai sem negrito.
+2. **Vírgula em negrito (p.19).** Em "Laxminarayan e Pattichis (2006), que destacam...", só a
+   vírgula depois de "(2006)" está em negrito. Tirar.
+3. **Referências: o subtítulo não leva negrito.** Pela NBR 6023, o negrito vai só no título; o que
+   vem depois dos dois-pontos é subtítulo e fica normal. Hoje o subtítulo está em negrito nestas
+   entradas (deixar em negrito só a parte indicada):
+   - CAVOUKIAN: **Privacy by design**: the 7 foundational principles.
+   - ISO: **ISO/IEC 25010**: systems and software engineering - ... - product quality model.
+   - ISTEPANIAN: **M-health**: emerging mobile health systems.
+   - KLEPPMANN: **Designing data-intensive applications**: the big ideas behind reliable,
+     scalable, and maintainable systems. (Hoje até o ponto final está em negrito.)
+   - MARTIN 2019: **Arquitetura limpa**: o guia do artesão para estrutura e design de software.
+   - MARTIN 2009: **Código limpo**: habilidades práticas do Agile Software.
+   - META: **React Native**: a framework for building native apps using React.
+   - MICROSOFT: **TypeScript**: typed JavaScript at any scale.
+   - PINHEIRO: **Proteção de dados pessoais**: comentários à Lei n. 13.709/2018 (LGPD).
+   - PRESSMAN: **Engenharia de software**: uma abordagem profissional.
+   - SUPABASE: **Supabase documentation**: Row Level Security.
+   - WHO 2003: **Adherence to long-term therapies**: evidence for action.
+   - WHO 2011: **mHealth**: new horizons for health through mobile technologies.
+
+   Os dois-pontos também saem do negrito. As demais entradas (artigos com o periódico em negrito,
+   DETERDING com Proceedings, livros sem subtítulo) já estão certas.
+4. **Opcional, itálico em título.** "2.5.1 O Papel Sistêmico da Engenharia de *Software*" tem
+   "Software" em itálico, mas "software" é palavra dicionarizada e não está em itálico no título
+   2.5 nem no resto do texto. Tirar o itálico, no corpo e no sumário. ("*Design*" na 2.4.3 fica,
+   porque o texto usa *design* em itálico.)
+
+## 4.1 Número de página nos pré-textuais
+
+Pela NBR 14724, as páginas pré-textuais são contadas, mas o número só aparece a partir da
+Introdução. O sumário ocupa três páginas (13 a 15), e a opção "primeira página diferente" esconde
+só a primeira delas. O caminho no Google Docs:
+
+1. Clicar no começo de "1. INTRODUÇÃO" e usar **Inserir › Quebra › Quebra de seção (próxima
+   página)**. Se já houver uma quebra de página comum ali, apagar a comum.
+2. Dar dois cliques no cabeçalho da página da Introdução e **desmarcar "Vincular ao anterior"**.
+   O número fica.
+3. Dar dois cliques no cabeçalho de uma página do sumário e **apagar o número**. Como o vínculo foi
+   desfeito, isso não afeta o corpo. Se o sumário estiver em uma seção própria com "Layout
+   diferente na primeira página" marcado, desmarcar, para as três páginas ficarem iguais (sem
+   número).
+4. Em **Inserir › Números de página › Mais opções**, na seção da Introdução, escolher **"Continuar
+   da seção anterior"**, para a Introdução seguir mostrando 16.
+
+Se as páginas pré-textuais estiverem em várias seções, repetir o passo 3 em cada uma que ainda
+mostrar número.
 
 ## 5. Conferência final
 
-Depois dos itens 1 a 4, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+Depois dos itens 1, 2 e 4, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
 e salvar no editor, que corrompe o arquivo). Eu confiro de novo o sumário (com 3.1, 3.2 e 6.1
 novos), as listas, as remissões 3.1 e 6.1 e se algum quadro ou figura passou a quebrar página.
