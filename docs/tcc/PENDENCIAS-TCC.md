@@ -47,5 +47,5 @@ texto de trabalho (`CAPITULO-6.md`) saiu e fica no histórico do git.
 
 ## Revisão geral do documento
 
-**Fechada em 30/09, 16:02.** O texto está pronto. Faltam só as Figuras 8, 10, 11 e 12 e, no dia da
-defesa, a data e a banca na folha de aprovação. Detalhes em [`REVISAO-GERAL.md`](REVISAO-GERAL.md).
+Tudo o que falta (trocas de texto, figuras, números de página, folha de aprovação e aprofundamento
+opcional) está em um arquivo só, [`REVISAO-GERAL.md`](REVISAO-GERAL.md).
