@@ -21,51 +21,40 @@ fonte continuarem na mesma página.
 
 ### Figura 8 - Notificação do alarme de dose sobre a tela de bloqueio (p.72)
 
-O texto em volta fala do alarme sobre o bloqueio, das ações sem abrir o app e do adiamento de
-cinco minutos oferecido uma vez só.
-
-1. **Tela cheia do alarme sobre a tela de bloqueio**, com o nome do medicamento, a dose e o local
-   de guarda legíveis e os botões Tomei, Pulei e Adiar visíveis.
-2. **Notificação com as ações rápidas**, com o aparelho desbloqueado e em uso (outra tela aberta
-   ao fundo), mostrando as ações direto na notificação.
-3. **O alarme depois de um adiamento**, cinco minutos depois, já **sem o botão Adiar**. Comprova a
-   regra de que o adiamento é oferecido uma única vez por horário.
+1. **Tela do alarme sobre a tela de bloqueio.**
+2. **Notificação com os botões de ação** (Tomei, Pulei, Adiar) visíveis.
+3. **Tela do alarme depois do adiamento, com dois medicamentos.** Mostra o agrupamento das doses do
+   mesmo horário em um único aviso (4.2.1) e, sem o botão Adiar, que o adiamento é oferecido uma
+   vez só. Conferir que o Adiar de fato não aparece.
 
 ### Figura 10 - Relatório clínico gerado em formato PDF (p.75)
 
-Não é tela do app, é o PDF gerado, aberto no visualizador do celular. O texto diz que ele reúne
-a identificação do paciente, os tratamentos, a taxa de adesão e o histórico de doses.
-
-1. **Topo da primeira página**: o cabeçalho com o nome do paciente e o período, e logo abaixo a
-   seção "Média de adesão aos medicamentos" com a taxa em destaque.
-2. **Seção "Tratamentos em curso"**, com a lista dos medicamentos do período.
-3. **Seções "Doses não tomadas" e "Compromissos do período"**, que formam o histórico levado à
-   consulta.
-
-Gerar o relatório de um período com algumas faltas (a base de demonstração tem adesão entre 80 e
-90%), para a seção de doses não tomadas não aparecer vazia.
+1. **Print do PDF gerado a partir da tela de adesão.** Um print só serve, desde que o texto fique
+   legível no tamanho da figura. Se o relatório tiver mais de uma página, duas páginas lado a lado
+   leem melhor do que uma imagem reduzida. Usar um período com algumas faltas, para a seção de
+   doses não tomadas não aparecer vazia.
 
 ### Figura 11 - Escolha do conjunto de cores de estado nas configurações de tema (p.77)
 
-O Quadro 27, logo acima, mostra o conjunto "Azul, marrom e laranja" (`azulLaranja`) em código.
-Usar esse mesmo conjunto amarra o texto à imagem.
+O conjunto troca três cores no app inteiro: afirmativo (azul: dose tomada, estoque em dia),
+negativo (laranja: dose atrasada, estoque zerado) e atenção (marrom: estoque acabando, receita
+vencendo).
 
-1. **Configurações de tema com a lista dos conjuntos de cores**, com as descrições visíveis (Verde,
-   amarelo e vermelho; Azul, marrom e laranja; Azul, petróleo e vermelho; Roxo, petróleo e âmbar;
-   Turquesa, marrom e magenta).
-2. **"Azul, marrom e laranja" selecionado**, com a marcação de escolhido visível.
-3. **Tela inicial com esse conjunto aplicado**, com doses em estados diferentes (atrasada, na
-   hora, confirmada) para mostrar as cores novas.
+1. **Configurações de tema** com "Azul, marrom e laranja" marcado.
+2. **Home** com esse conjunto aplicado (dose confirmada e dose atrasada à vista).
+3. **Tela de estoque ou lista de medicamentos com um item acabando**, mostrando o aviso de
+   reposição em marrom, a terceira cor, que a Home quase não mostra. Deixar um medicamento da base
+   de demonstração abaixo do limite de aviso. Alternativa mais simples: tela de adesão ou
+   calendário nas cores novas.
 
 ### Figura 12 - Tela inicial nos temas claro, escuro e de alto contraste (p.78)
 
-1. **Tema claro.**
-2. **Tema escuro.**
-3. **Tema de alto contraste.**
+1. **Home no tema padrão.**
+2. **Home no tema escuro.**
+3. **Home no tema de alto contraste.**
 
-A mesma tela inicial, com os mesmos dados, no mesmo dia e na mesma posição de rolagem. Só o tema
-muda. No alto contraste, deixar à vista um cartão, porque o texto diz que ali a sombra dá lugar ao
-contorno. Voltar o conjunto de cores para o padrão antes, para não misturar com a Figura 11.
+Mesmos dados, mesmo dia e mesma rolagem nos três. Só o tema muda. Voltar o conjunto de cores para
+o padrão antes, para não misturar com a Figura 11.
 
 ## 2. Folha de aprovação (p.3), no dia da defesa
 
