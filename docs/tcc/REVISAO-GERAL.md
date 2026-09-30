@@ -1,7 +1,7 @@
 # Revisão geral do TCC: o que falta
 
 > **Atualizado em 30/09**, com o retorno do orientador (29/09 à noite), conferido contra
-> `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` das 13:37 (88 páginas).
+> `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` das 14:38 (89 páginas).
 > Este é o guia completo: tudo o que ainda falta no documento, por menor que seja. O que já foi
 > resolvido saiu daqui (fica no histórico do git).
 >
@@ -10,133 +10,43 @@
 > referências, e na folha de aprovação o hífen de "Itajaí - UNIDAVI" e o título sem ponto final.
 > No capítulo 4, todos os quadros e figuras já têm título, corpo e fonte na mesma página.
 
-Ordem sugerida: 1 → 2 → 3 → 4 → 5 → 6 → exportar PDF → 8.
+Ordem sugerida: 1 → 2 → 3 → 4 → exportar PDF → 5.
 
 ---
 
-## 1. Metodologia: trocar a ordem de 3.1 e 3.2 (pedido do orientador)
+## 1. Ajustes pendentes das mudanças do orientador
 
-**PROCEDIMENTOS METODOLÓGICOS passa a ser a 3.1** e **ESTADO DA ARTE E TRABALHOS RELACIONADOS
-passa a ser a 3.2**.
+A troca de 3.1 e 3.2, o Quadro 2 com Sim e Não e seu texto, a 6.1 em alíneas e o Quadro 28 em uma
+página já entraram. Ficaram estes pontos:
 
-1. Recortar o título "3.2 PROCEDIMENTOS METODOLÓGICOS" com os quatro parágrafos dele (de "Quanto aos
-   procedimentos metodológicos..." até "...diante das condições de uso previstas.").
-2. Colar logo depois da introdução do capítulo 3, isto é, depois do parágrafo que termina em
-   "...voltados ao contexto do cuidado com a saúde." e antes de "3.1 ESTADO DA ARTE".
-3. Renumerar os dois títulos: "3.1 PROCEDIMENTOS METODOLÓGICOS" e "3.2 ESTADO DA ARTE E TRABALHOS
-   RELACIONADOS".
-4. **Duas remissões mudam**, porque apontam para os procedimentos:
-   - 5 (abertura de Resultados): "validação técnica descrita na seção 3.2" → "**seção 3.1**".
-   - 5.3: "A seção 3.2 estabelece que os alertas..." → "A **seção 3.1** estabelece...".
-5. No sumário, trocar a ordem e os números das duas linhas (páginas no item 8).
+1. **Título duplicado (p.40).** O segundo título do capítulo 3, logo antes de "O mercado de
+   aplicativos de gestão medicamentosa...", está "3.1 PROCEDIMENTOS METODOLÓGICOS". Trocar por
+   **"3.2 ESTADO DA ARTE E TRABALHOS RELACIONADOS"**.
+2. **Duas remissões ainda apontam para a 3.2.** Trocar por 3.1, porque falam dos procedimentos:
+   - p.79, abertura de Resultados: "validação técnica descrita na seção 3.2" → "**seção 3.1**".
+   - p.81, 5.3: "A seção 3.2 estabelece que os alertas..." → "A **seção 3.1** estabelece...".
+3. **O fechamento da conclusão sumiu.** O parágrafo "Em síntese" saiu junto com o de trabalhos
+   futuros. Colar de volta no fim do capítulo 6, depois do parágrafo das limitações (o que termina
+   em "...são apresentadas na seção 6.1.") e antes de "6.1 TRABALHOS FUTUROS":
 
-O Quadro 2 continua sendo o Quadro 2, porque nenhum quadro vem antes dele na 3.1 nova.
+   > Em síntese, o Mapill demonstra que é possível conciliar, em uma mesma aplicação, o
+   > funcionamento independente de conexão, a fidelidade do registro clínico e a simplicidade de
+   > uso. Ao assumir as tarefas de lembrar, registrar e antecipar a reposição dos medicamentos, a
+   > aplicação transfere ao aparelho parte da carga cognitiva que a rotina terapêutica impõe ao
+   > paciente, oferecendo uma resposta concreta à descontinuidade do tratamento que motivou o
+   > desenvolvimento do trabalho.
 
-## 2. Quadro 2: só Sim ou Não, e o texto que explica (pedido do orientador)
+4. **Página em branco (p.85).** Entre o fim da 6.1 e as REFERÊNCIAS sobrou uma página vazia. Apagar
+   as linhas vazias ou a quebra de página extra depois da alínea e).
+5. **Sumário e lista de quadros.**
+   - Acrescentar a linha "6.1 TRABALHOS FUTUROS" logo abaixo de "6. CONCLUSÃO".
+   - 3.2 ESTADO DA ARTE: 41 → **40**.
+   - 5.4 ATENDIMENTO AOS OBJETIVOS: 82 → **81**.
+   - Quadro 2 (lista de quadros): 40 → **41**.
+   - 6.1, REFERÊNCIAS e ANEXOS: esperar os itens 3 e 4, que mudam essas páginas. Eu passo os
+     números na próxima conferência.
 
-### 2.1 O quadro novo
-
-Substituir o conteúdo das linhas. Título e fonte ficam como estão.
-
-| Aspecto | Mapill | Medisafe | MyTherapy |
-|---|---|---|---|
-| Funcionalidades essenciais gratuitas | Sim | Não | Sim |
-| Gratuidade sem repasse de dados a terceiros | Sim | Não | Não |
-| Funcionamento sem conta | Sim | Não | Sim |
-| Cadastro por código de barras | Sim | Não | Sim |
-| Cadastro de compromissos clínicos | Sim | Sim | Sim |
-| Controle de estoque com aviso, sem custo | Sim | Não | Sim |
-| Dose variável por horário | Sim | Não | Não |
-| Verificação de interação medicamentosa | Não | Sim | Não |
-| Registro de medidas gerais de saúde | Não | Sim | Sim |
-| Acesso de cuidador ou médico à conta do paciente | Não | Sim | Não |
-
-O que mudou em relação ao atual: a linha "Como sustenta a gratuidade" virou "Gratuidade sem
-repasse de dados a terceiros", que dá para responder com Sim ou Não; "Não confirmado
-publicamente" e "Não mencionado publicamente" viraram Não; "Fora do escopo (seção 4.1)" virou Não
-(explicado no segundo parágrafo abaixo).
-
-### 2.2 Os parágrafos novos
-
-Inserir **logo depois da fonte do Quadro 2** e antes de "4. DESENVOLVIMENTO". Com a troca do item
-1, o Quadro 2 fica no fim da 3.2, e estes parágrafos fecham a seção.
-
-> O Quadro 2 evidencia que o Mapill se destaca nos aspectos ligados ao acesso e ao tratamento. É
-> a única das três soluções que oferece todas as funcionalidades sem custo e sem repasse de dados a
-> terceiros, uma vez que o Medisafe cobra assinatura e o MyTherapy sustenta sua gratuidade com dados
-> de uso. Também funciona sem conta, o que o Medisafe não permite, e é a única a oferecer dose
-> variável por horário, necessária quando a quantidade muda ao longo do dia.
->
-> Os aspectos marcados como Não para o Mapill correspondem a exclusões deliberadas de escopo,
-> descritas na seção 4.1. A verificação de interação medicamentosa aproximaria a aplicação de um
-> sistema de apoio à prescrição, o registro de medidas gerais de saúde desviaria o foco da adesão
-> medicamentosa e o acesso de cuidador ou médico exigiria rever o modelo de uma conta por paciente,
-> frente prevista nos trabalhos futuros. Assim, o Medisafe é a solução mais ampla, mas condiciona
-> funcionalidades básicas ao pagamento, e o MyTherapy é gratuito, mas depende do repasse de dados,
-> enquanto o Mapill troca amplitude por profundidade no tratamento medicamentoso.
-
-(O "Não" vai sem aspas e sem itálico, como valor do quadro.)
-
-## 3. Conclusão: subcapítulo de trabalhos futuros em tópicos (pedido do orientador)
-
-**3.1 No capítulo 6, apagar o parágrafo inteiro** que começa em "Como trabalhos futuros, sugere-se
-inicialmente..." e termina em "...complementaria a validação técnica realizada neste trabalho."
-
-**3.2 No fim do parágrafo das limitações** (o que termina em "...que a aplicação pode orientar, mas
-não contornar."), acrescentar a frase:
-
-> As frentes de continuidade que decorrem dessas limitações são apresentadas na seção 6.1.
-
-O parágrafo "Em síntese, o Mapill demonstra..." continua como fechamento do capítulo 6.
-
-**3.3 Depois do "Em síntese"**, inserir o subcapítulo, no mesmo estilo de título de 5.1 (caixa
-alta), e acrescentá-lo ao sumário:
-
-> **6.1 TRABALHOS FUTUROS**
->
-> A partir das limitações apresentadas e das funcionalidades deixadas fora do escopo, identificam-se
-> as seguintes frentes para a continuidade do trabalho:
->
-> a) desenvolvimento da versão para iOS, ampliando o alcance da aplicação aos usuários de aparelhos
-> da Apple;
->
-> b) organização do cuidado por tratamento, reunindo sob um mesmo contexto clínico, como o de uma
-> terapia oncológica, os medicamentos, as sessões de radioterapia agendadas em lote e os demais
-> compromissos, de modo a acompanhar a adesão ao tratamento como um todo, e não apenas a cada
-> medicamento;
->
-> c) acesso de acompanhamento destinado a médicos e responsáveis pelo paciente, com permissão
-> apenas de consulta, o que exige rever o modelo de uma conta por paciente definido na seção 4.1;
->
-> d) avaliação de usabilidade com pacientes idosos e polimedicados, complementando a validação
-> técnica realizada neste trabalho;
->
-> e) validação da entrega do alarme em aparelhos de outros fabricantes e versões do Android, dada a
-> variação das restrições de inicialização automática entre eles.
-
-Formato das alíneas (NBR 6024): letra minúscula seguida de parêntese, recuo em relação à margem,
-cada uma termina em ponto e vírgula e a última em ponto. O texto que as introduz termina em
-dois-pontos, e aqui eles são exigência da norma.
-
-## 4. Quadro 28 (p.80 e 81): passa de uma página
-
-O orientador pediu título, corpo e fonte sempre na mesma página. No capítulo 4 isso já está
-certo. O único que ainda quebra é o **Quadro 28**, no capítulo 5: a última linha (conflito entre
-registros) e a fonte caem na p.81. Encurtar as células resolve sem mexer na fonte do quadro:
-
-| Cenário | Procedimento | Resultado esperado | Resultado obtido |
-|---|---|---|---|
-| Ausência de conexão | Cadastro de medicamento com o modo avião ativado | Cadastro concluído e alteração pendente de envio | Aprovado |
-| Restabelecimento da conectividade | Desativação do modo avião | Envio automático da alteração pendente | Aprovado |
-| Sincronização por restauração | Reinstalação e acesso com a mesma conta | Retorno de todos os dados, inclusive dos alarmes | Aprovado, com os ajustes da seção 5.2 |
-| Sincronização entre dispositivos | Registro remoto com data de edição anterior à última sincronização | Recebimento do registro pelo aparelho | Aprovado, com os ajustes da seção 5.2 |
-| Conflito entre registros | Edição sem conexão, edição posterior na base remota e reconexão | Prevalência da edição mais recente | Aprovado, com os ajustes da seção 5.2 |
-
-Se ainda assim não couber, reduzir a fonte do quadro para 10 (a ABNT permite fonte menor em
-ilustrações). Como os itens 1 a 3 acrescentam texto antes do capítulo 5, conferir de novo no PDF
-final se nenhum outro quadro ou figura passou a quebrar.
-
-## 5. Figuras 8, 10, 11 e 12
+## 2. Figuras 8, 10, 11 e 12
 
 As quatro ainda usam a **mesma imagem de reserva** (a tela inicial repetida). Cada figura leva
 **três capturas lado a lado**, na mesma altura e com espaçamento igual, do mesmo aparelho, com a
@@ -193,55 +103,19 @@ A mesma tela inicial, com os mesmos dados, no mesmo dia e na mesma posição de 
 muda. No alto contraste, deixar à vista um cartão, porque o texto diz que ali a sombra dá lugar ao
 contorno. Voltar o conjunto de cores para o padrão antes, para não misturar com a Figura 11.
 
-## 6. Pré-textuais
+## 3. Pré-textuais
 
-**Epígrafe, dedicatória e agradecimentos (p.4 a 6).** Textos definidos em 30/09. Cada um na sua
-página. Epígrafe e dedicatória sem título, alinhadas à direita, no terço inferior da página.
-Agradecimentos com o título AGRADECIMENTOS e texto justificado, como o corpo.
-
-*Epígrafe (p.4)*, citada por Osterberg e Blaschke (2005), que já estão nas referências:
-
-> Os medicamentos não funcionam em pacientes que não os tomam.
-> (C. Everett Koop)
-
-*Dedicatória (p.5)*
-
-> Aos meus pais, Celio e Solange, à minha avó Norma e à minha namorada Elisa, pela presença
-> constante ao longo desta caminhada.
-> E a mim mesmo, pela persistência de chegar até aqui.
-
-*Agradecimentos (p.6)*
-
-> Aos meus pais, Celio Steffens e Solange Aparecida Maciel Steffens, agradeço pelo apoio ao longo
-> de toda a vida e por me ensinarem o valor do esforço e da dedicação. Serei sempre grato por me
-> darem a oportunidade do estudo, a liberdade para tomar minhas próprias decisões e uma base
-> sólida para construir meu futuro da melhor forma possível.
->
-> À minha avó, Norma Alda Steffens, pelo carinho de sempre e por ser parte importante de quem eu
-> sou. Suas palavras e seus momentos de incentivo moldaram meu caráter e seguem fortalecendo minhas
-> ambições.
->
-> À minha namorada, Elisa Patzlaff, pelo amparo e pelo companheirismo ao longo desses seis anos,
-> pela paciência nos dias dedicados a este trabalho e por acreditar neste projeto junto comigo,
-> tendo sido também uma grande influência em sua construção e validação. Sua companhia foi
-> fundamental para a conclusão deste ciclo.
->
-> Ao meu orientador, Prof. Me. Marciel de Liz Santos, pelas instruções e correções que deram forma
-> a este trabalho.
->
-> Por fim, agradeço a mim mesmo, pela disciplina de levar adiante este projeto, um desafio muito
-> além da minha zona de conforto e do meu domínio, que termina com a certeza de ter crescido a cada
-> etapa.
+Epígrafe, dedicatória e agradecimentos já estão no documento (conferidos em 30/09, 14:38).
 
 **Folha de aprovação (p.3).** A data está "Rio do Sul, 25 de junho de 2026.". Trocar pela data da
 defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
 
-## 7. Negrito
+## 4. Negrito
 
 Revisão à parte, combinada para depois. Ainda não feita.
 
-## 8. Conferência final
+## 5. Conferência final
 
-Depois dos itens 1 a 7, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+Depois dos itens 1 a 4, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
 e salvar no editor, que corrompe o arquivo). Eu confiro de novo o sumário (com 3.1, 3.2 e 6.1
 novos), as listas, as remissões 3.1 e 6.1 e se algum quadro ou figura passou a quebrar página.
