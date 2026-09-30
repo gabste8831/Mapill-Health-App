@@ -84,15 +84,14 @@ Incluir o indicador de progresso diário em ao menos um dos prints, já que a 4.
 
 ## Figura 8 - Notificação do alarme sobre a tela de bloqueio
 
-**Duas capturas bastam.** Uma tela de bloqueio não rende três ângulos sem repetição.
+Três capturas, como as demais (decidido em 30/09).
 
 1. **Tela cheia do alarme sobre o bloqueio**, com medicamento, dose e local de guarda legíveis
    e as três ações visíveis: Tomei, Pulei e Adiar.
 2. **Notificação com ações rápidas**, com o aparelho em uso. É o outro caminho que o texto
    descreve.
-
-Terceiro print opcional: o **estado após o adiamento**, com o botão Adiar já ausente. Comprova
-visualmente a regra de negócio de código 12, que o texto afirma logo abaixo da figura.
+3. **Estado após o adiamento**, com o botão Adiar já ausente. Comprova visualmente a regra de
+   negócio de código 12, que o texto afirma logo abaixo da figura.
 
 ---
 

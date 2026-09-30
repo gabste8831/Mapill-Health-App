@@ -1,54 +1,241 @@
 # Revisão geral do TCC: o que falta
 
-> **Conferido em 29/09, 17:02**, contra `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` (88 páginas).
+> **Atualizado em 30/09**, com o retorno do orientador (29/09 à noite), conferido contra
+> `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` das 13:37 (88 páginas).
 > Este é o guia completo: tudo o que ainda falta no documento, por menor que seja. O que já foi
 > resolvido saiu daqui (fica no histórico do git).
 >
-> **Já conferido e certo:** as 121 entradas do sumário e das listas, as remissões a seções, as
-> chamadas de todos os quadros e figuras, as citações contra as referências, a lista de siglas, o
-> itálico dos termos estrangeiros, o tempo verbal, o resumo, o abstract e as referências.
+> **Já conferido e certo:** sumário e listas (121 entradas), remissões, chamadas de quadros e
+> figuras, citações contra referências, siglas, itálico, tempo verbal, resumo, abstract,
+> referências, e na folha de aprovação o hífen de "Itajaí - UNIDAVI" e o título sem ponto final.
+> No capítulo 4, todos os quadros e figuras já têm título, corpo e fonte na mesma página.
 
-Ordem sugerida: 1 → 2 → 3 → exportar PDF → 4.
+Ordem sugerida: 1 → 2 → 3 → 4 → 5 → 6 → exportar PDF → 8.
 
 ---
 
-## 1. Figuras 8, 10, 11 e 12
+## 1. Metodologia: trocar a ordem de 3.1 e 3.2 (pedido do orientador)
 
-As quatro ainda usam a **mesma imagem de reserva** (a tela inicial repetida, conferido pelo arquivo
-da imagem dentro do PDF). O que cada captura mostra está em
-[`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURAS.md).
+**PROCEDIMENTOS METODOLÓGICOS passa a ser a 3.1** e **ESTADO DA ARTE E TRABALHOS RELACIONADOS
+passa a ser a 3.2**.
 
-| Figura | Página | Conteúdo |
-|---|---|---|
-| 8 | 72 | Notificação do alarme de dose sobre a tela de bloqueio |
-| 10 | 75 | Relatório clínico gerado em formato PDF |
-| 11 | 77 | Escolha do conjunto de cores de estado nas configurações de tema |
-| 12 | 78 | Tela inicial nos temas claro, escuro e de alto contraste |
+1. Recortar o título "3.2 PROCEDIMENTOS METODOLÓGICOS" com os quatro parágrafos dele (de "Quanto aos
+   procedimentos metodológicos..." até "...diante das condições de uso previstas.").
+2. Colar logo depois da introdução do capítulo 3, isto é, depois do parágrafo que termina em
+   "...voltados ao contexto do cuidado com a saúde." e antes de "3.1 ESTADO DA ARTE".
+3. Renumerar os dois títulos: "3.1 PROCEDIMENTOS METODOLÓGICOS" e "3.2 ESTADO DA ARTE E TRABALHOS
+   RELACIONADOS".
+4. **Duas remissões mudam**, porque apontam para os procedimentos:
+   - 5 (abertura de Resultados): "validação técnica descrita na seção 3.2" → "**seção 3.1**".
+   - 5.3: "A seção 3.2 estabelece que os alertas..." → "A **seção 3.1** estabelece...".
+5. No sumário, trocar a ordem e os números das duas linhas (páginas no item 8).
 
-Ao trocar, manter o mesmo tamanho da imagem de reserva, para o título, a imagem e a fonte seguirem
-na mesma página e nada deslocar.
+O Quadro 2 continua sendo o Quadro 2, porque nenhum quadro vem antes dele na 3.1 nova.
 
-## 2. Pré-textuais
+## 2. Quadro 2: só Sim ou Não, e o texto que explica (pedido do orientador)
 
-**Folha de aprovação (p.3)**
-- Nomes dos dois professores da banca, depois de "Prof.".
-- Data: está "Rio do Sul, 25 de junho de 2026." Trocar pela data da defesa.
-- "Itajaí- UNIDAVI" → "Itajaí - UNIDAVI" (com espaço antes do hífen, como na capa). Isso também
-  corrige o espaçamento esticado da linha "UNIDAVI, a ser apreciado pela Banca".
+### 2.1 O quadro novo
 
-**Título sem ponto final (p.1, 2 e 3).** "...TRATAMENTO MEDICAMENTOSO." → "...TRATAMENTO
-MEDICAMENTOSO". Título não leva ponto final, nas três páginas.
+Substituir o conteúdo das linhas. Título e fonte ficam como estão.
 
-**Epígrafe (p.4), dedicatória (p.5) e agradecimentos (p.6).** Ainda com texto de modelo. São
-opcionais na ABNT: escrever ou remover. Escrever, cada um na sua página, não muda a numeração.
-Remover desloca todas as páginas e pede nova conferência do sumário e das listas.
+| Aspecto | Mapill | Medisafe | MyTherapy |
+|---|---|---|---|
+| Funcionalidades essenciais gratuitas | Sim | Não | Sim |
+| Gratuidade sem repasse de dados a terceiros | Sim | Não | Não |
+| Funcionamento sem conta | Sim | Não | Sim |
+| Cadastro por código de barras | Sim | Não | Sim |
+| Cadastro de compromissos clínicos | Sim | Sim | Sim |
+| Controle de estoque com aviso, sem custo | Sim | Não | Sim |
+| Dose variável por horário | Sim | Não | Não |
+| Verificação de interação medicamentosa | Não | Sim | Não |
+| Registro de medidas gerais de saúde | Não | Sim | Sim |
+| Acesso de cuidador ou médico à conta do paciente | Não | Sim | Não |
 
-## 3. Negrito
+O que mudou em relação ao atual: a linha "Como sustenta a gratuidade" virou "Gratuidade sem
+repasse de dados a terceiros", que dá para responder com Sim ou Não; "Não confirmado
+publicamente" e "Não mencionado publicamente" viraram Não (o critério é explicado no primeiro
+parágrafo abaixo); "Fora do escopo (seção 4.1)" virou Não (explicado no terceiro parágrafo).
+
+### 2.2 Os parágrafos novos
+
+Inserir **logo depois da fonte do Quadro 2** e antes de "4. DESENVOLVIMENTO". Com a troca do item
+1, o Quadro 2 fica no fim da 3.2, e estes parágrafos fecham a seção.
+
+> O preenchimento do Quadro 2 adota como critério a informação declarada publicamente por cada
+> solução, em suas páginas oficiais e nas lojas de aplicativos. Uma funcionalidade foi marcada
+> como presente apenas quando descrita de forma explícita, e a ausência de menção foi registrada
+> como Não. É o caso do cadastro por código de barras no Medisafe e da dose variável por horário
+> nas duas soluções concorrentes, recursos que podem existir sem estar documentados, mas que não
+> puderam ser confirmados.
+>
+> Nos aspectos em que o Mapill se destaca, a diferença decorre de decisões de projeto. O acesso
+> gratuito a todas as funcionalidades, sem repasse de dados de uso a terceiros, distingue a
+> proposta tanto do Medisafe, que passou a cobrar assinatura e por isso recebe Não nos dois
+> primeiros aspectos, quanto do MyTherapy, que é gratuito, mas sustenta essa gratuidade com o
+> repasse de dados agregados a parceiros. O funcionamento sem conta decorre do paradigma
+> offline-first, no qual a conta serve apenas à sincronização, enquanto o Medisafe a exige desde
+> o primeiro uso. O controle de estoque com aviso de reposição está presente nas três soluções,
+> mas no Medisafe integra o plano pago, e a dose variável por horário, necessária às posologias
+> em que a quantidade muda ao longo do dia, não é mencionada por nenhuma das concorrentes.
+>
+> Nos aspectos marcados como Não para o Mapill, a aplicação oferece menos do que as concorrentes,
+> e a ausência é deliberada. A verificação de interação medicamentosa, oferecida pelo Medisafe,
+> exigiria uma base farmacológica mantida e validada clinicamente, o que aproximaria a aplicação
+> de um sistema de apoio à prescrição, papel excluído do escopo na seção 4.1. O registro de
+> medidas gerais de saúde, presente nas duas concorrentes, ampliaria o escopo para o bem-estar
+> geral, direção contrária à de aprofundar a adesão medicamentosa. O acesso de cuidador ou
+> médico, oferecido pelo Medisafe, exigiria rever o modelo de uma conta por paciente e figura
+> entre os trabalhos futuros apresentados na seção 6.1.
+>
+> Em síntese, o Medisafe é a solução mais ampla, mas condiciona funcionalidades básicas ao
+> pagamento, e o MyTherapy é gratuito e igualmente amplo, mas depende do repasse de dados. O
+> Mapill abre mão dessa amplitude em favor da profundidade no tratamento medicamentoso e da
+> autonomia do paciente sobre os próprios dados, o que corresponde ao posicionamento descrito no
+> início desta seção.
+
+(O "Não" vai sem aspas e sem itálico, como valor do quadro.)
+
+## 3. Conclusão: subcapítulo de trabalhos futuros em tópicos (pedido do orientador)
+
+**3.1 No capítulo 6, apagar o parágrafo inteiro** que começa em "Como trabalhos futuros, sugere-se
+inicialmente..." e termina em "...complementaria a validação técnica realizada neste trabalho."
+
+**3.2 No fim do parágrafo das limitações** (o que termina em "...que a aplicação pode orientar, mas
+não contornar."), acrescentar a frase:
+
+> As frentes de continuidade que decorrem dessas limitações são apresentadas na seção 6.1.
+
+O parágrafo "Em síntese, o Mapill demonstra..." continua como fechamento do capítulo 6.
+
+**3.3 Depois do "Em síntese"**, inserir o subcapítulo, no mesmo estilo de título de 5.1 (caixa
+alta), e acrescentá-lo ao sumário:
+
+> **6.1 TRABALHOS FUTUROS**
+>
+> A partir das limitações apresentadas e das funcionalidades deixadas fora do escopo, identificam-se
+> as seguintes frentes para a continuidade do trabalho:
+>
+> a) desenvolvimento da versão para iOS, ampliando o alcance da aplicação aos usuários de aparelhos
+> da Apple;
+>
+> b) organização do cuidado por tratamento, reunindo sob um mesmo contexto clínico, como o de uma
+> terapia oncológica, os medicamentos, as sessões de radioterapia agendadas em lote e os demais
+> compromissos, de modo a acompanhar a adesão ao tratamento como um todo, e não apenas a cada
+> medicamento;
+>
+> c) acesso de acompanhamento destinado a médicos e responsáveis pelo paciente, com permissão
+> apenas de consulta, o que exige rever o modelo de uma conta por paciente definido na seção 4.1;
+>
+> d) avaliação de usabilidade com pacientes idosos e polimedicados, complementando a validação
+> técnica realizada neste trabalho;
+>
+> e) validação da entrega do alarme em aparelhos de outros fabricantes e versões do Android, dada a
+> variação das restrições de inicialização automática entre eles.
+
+Formato das alíneas (NBR 6024): letra minúscula seguida de parêntese, recuo em relação à margem,
+cada uma termina em ponto e vírgula e a última em ponto. O texto que as introduz termina em
+dois-pontos, e aqui eles são exigência da norma.
+
+## 4. Quadro 28 (p.80 e 81): passa de uma página
+
+O orientador pediu título, corpo e fonte sempre na mesma página. No capítulo 4 isso já está
+certo. O único que ainda quebra é o **Quadro 28**, no capítulo 5: a última linha (conflito entre
+registros) e a fonte caem na p.81. Encurtar as células resolve sem mexer na fonte do quadro:
+
+| Cenário | Procedimento | Resultado esperado | Resultado obtido |
+|---|---|---|---|
+| Ausência de conexão | Cadastro de medicamento com o modo avião ativado | Cadastro concluído e alteração pendente de envio | Aprovado |
+| Restabelecimento da conectividade | Desativação do modo avião | Envio automático da alteração pendente | Aprovado |
+| Sincronização por restauração | Reinstalação e acesso com a mesma conta | Retorno de todos os dados, inclusive dos alarmes | Aprovado, com os ajustes da seção 5.2 |
+| Sincronização entre dispositivos | Registro remoto com data de edição anterior à última sincronização | Recebimento do registro pelo aparelho | Aprovado, com os ajustes da seção 5.2 |
+| Conflito entre registros | Edição sem conexão, edição posterior na base remota e reconexão | Prevalência da edição mais recente | Aprovado, com os ajustes da seção 5.2 |
+
+Se ainda assim não couber, reduzir a fonte do quadro para 10 (a ABNT permite fonte menor em
+ilustrações). Como os itens 1 a 3 acrescentam texto antes do capítulo 5, conferir de novo no PDF
+final se nenhum outro quadro ou figura passou a quebrar.
+
+## 5. Figuras 8, 10, 11 e 12
+
+As quatro ainda usam a **mesma imagem de reserva** (a tela inicial repetida). Cada figura leva
+**três capturas lado a lado**, na mesma altura e com espaçamento igual, do mesmo aparelho, com a
+barra de status limpa e sem moldura de celular. Os dados são os da base de demonstração do
+[`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURAS.md): o mesmo paciente fictício e os mesmos
+medicamentos em todas as figuras. Manter o tamanho da imagem de reserva, para título, imagem e
+fonte continuarem na mesma página.
+
+### Figura 8 - Notificação do alarme de dose sobre a tela de bloqueio (p.72)
+
+O texto em volta fala do alarme sobre o bloqueio, das ações sem abrir o app e do adiamento de
+cinco minutos oferecido uma vez só.
+
+1. **Tela cheia do alarme sobre a tela de bloqueio**, com o nome do medicamento, a dose e o local
+   de guarda legíveis e os botões Tomei, Pulei e Adiar visíveis.
+2. **Notificação com as ações rápidas**, com o aparelho desbloqueado e em uso (outra tela aberta
+   ao fundo), mostrando as ações direto na notificação.
+3. **O alarme depois de um adiamento**, cinco minutos depois, já **sem o botão Adiar**. Comprova a
+   regra de que o adiamento é oferecido uma única vez por horário.
+
+### Figura 10 - Relatório clínico gerado em formato PDF (p.75)
+
+Não é tela do app, é o PDF gerado, aberto no visualizador do celular. O texto diz que ele reúne
+a identificação do paciente, os tratamentos, a taxa de adesão e o histórico de doses.
+
+1. **Topo da primeira página**: o cabeçalho com o nome do paciente e o período, e logo abaixo a
+   seção "Média de adesão aos medicamentos" com a taxa em destaque.
+2. **Seção "Tratamentos em curso"**, com a lista dos medicamentos do período.
+3. **Seções "Doses não tomadas" e "Compromissos do período"**, que formam o histórico levado à
+   consulta.
+
+Gerar o relatório de um período com algumas faltas (a base de demonstração tem adesão entre 80 e
+90%), para a seção de doses não tomadas não aparecer vazia.
+
+### Figura 11 - Escolha do conjunto de cores de estado nas configurações de tema (p.77)
+
+O Quadro 27, logo acima, mostra o conjunto "Azul, marrom e laranja" (`azulLaranja`) em código.
+Usar esse mesmo conjunto amarra o texto à imagem.
+
+1. **Configurações de tema com a lista dos conjuntos de cores**, com as descrições visíveis (Verde,
+   amarelo e vermelho; Azul, marrom e laranja; Azul, petróleo e vermelho; Roxo, petróleo e âmbar;
+   Turquesa, marrom e magenta).
+2. **"Azul, marrom e laranja" selecionado**, com a marcação de escolhido visível.
+3. **Tela inicial com esse conjunto aplicado**, com doses em estados diferentes (atrasada, na
+   hora, confirmada) para mostrar as cores novas.
+
+### Figura 12 - Tela inicial nos temas claro, escuro e de alto contraste (p.78)
+
+1. **Tema claro.**
+2. **Tema escuro.**
+3. **Tema de alto contraste.**
+
+A mesma tela inicial, com os mesmos dados, no mesmo dia e na mesma posição de rolagem. Só o tema
+muda. No alto contraste, deixar à vista um cartão, porque o texto diz que ali a sombra dá lugar ao
+contorno. Voltar o conjunto de cores para o padrão antes, para não misturar com a Figura 11.
+
+## 6. Pré-textuais
+
+**Epígrafe (p.4), dedicatória (p.5) e agradecimentos (p.6).** O orientador pediu os três. Cada um
+na sua página, sem título na epígrafe e na dedicatória (só os agradecimentos levam título). Duas
+sugestões de epígrafe ligadas ao tema, ambas de obras que já estão nas referências:
+
+> "Os medicamentos não funcionam em pacientes que não os tomam." (C. Everett Koop)
+
+citada por Osterberg e Blaschke (2005), ou
+
+> "Aumentar a efetividade das intervenções de adesão pode ter um impacto muito maior na saúde da
+> população do que qualquer melhoria em tratamentos médicos específicos." (World Health
+> Organization, 2003)
+
+A epígrafe fica no fim da página, alinhada à direita, com recuo.
+
+**Folha de aprovação (p.3).** A data está "Rio do Sul, 25 de junho de 2026.". Trocar pela data da
+defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
+
+## 7. Negrito
 
 Revisão à parte, combinada para depois. Ainda não feita.
 
-## 4. Conferência final
+## 8. Conferência final
 
-Depois dos itens 1 a 3, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
-e salvar no editor, que corrompe o arquivo). Eu confiro de novo o sumário, as listas e se alguma
-figura empurrou página.
+Depois dos itens 1 a 7, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+e salvar no editor, que corrompe o arquivo). Eu confiro de novo o sumário (com 3.1, 3.2 e 6.1
+novos), as listas, as remissões 3.1 e 6.1 e se algum quadro ou figura passou a quebrar página.
