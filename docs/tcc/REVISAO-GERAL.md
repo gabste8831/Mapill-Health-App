@@ -56,6 +56,29 @@ vencendo).
 Mesmos dados, mesmo dia e mesma rolagem nos três. Só o tema muda. Voltar o conjunto de cores para
 o padrão antes, para não misturar com a Figura 11.
 
+## 1.1 Formatação (conferida em 30/09 contra o PDF das 16:02)
+
+Margens (3 cm à esquerda e no topo, 2 cm à direita e embaixo), Times New Roman 12 no texto e 10 nos
+quadros, espaçamento e recuo de parágrafo estão certos. Não há citação longa (mais de três linhas)
+no texto, então não há recuo de 4 cm a conferir. Três ajustes:
+
+1. **Alíneas da 6.1 (p.84).** Pela NBR 6024, a segunda linha de uma alínea começa **sob a primeira
+   letra do texto**, e não sob o "a)". Hoje as linhas seguintes voltam para baixo da letra. Também
+   sobram linhas em branco entre as alíneas, que devem sair (o espaçamento é o mesmo do texto).
+   No Google Docs: apagar as linhas em branco entre a) e e), selecionar as cinco alíneas e, em
+   **Formatar › Alinhamento e recuo › Opções de recuo**, usar **Recuo à esquerda 1,87 cm** e
+   **Recuo especial: Deslocamento 0,6 cm**. O "a)" continua a 1,27 cm, como o recuo de parágrafo,
+   e as linhas seguintes alinham com o texto.
+2. **Objetivos (p.17), linha esticada.** No item "Implementar a aplicação móvel, contemplando o
+   cadastro de medicamentos...", a primeira linha sai com as palavras espalhadas, sinal de uma
+   quebra de linha manual (Shift+Enter) no meio do item. Apagar a quebra e deixar a linha correr.
+3. **Opcional, marcadores.** Os objetivos usam marcadores (●), e a 6.1 usa alíneas (a, b, c). As duas
+   formas são aceitas, mas a NBR 6024 prefere alíneas. Se quiser uniformizar, os objetivos
+   específicos viram a) a f), com inicial minúscula, ponto e vírgula e ponto no último. Se o modelo
+   da UNIDAVI traz os objetivos com marcador, pode manter.
+4. **Opcional, Quadro 26 (p.73).** A primeira linha do código (o comentário) está em Courier 9, e
+   as demais em 10. Igualar em 10.
+
 ## 2. Folha de aprovação (p.3), no dia da defesa
 
 - Data: hoje está "Rio do Sul, 30 de setembro de 2026.". Trocar pela data da defesa.
