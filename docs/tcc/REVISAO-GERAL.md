@@ -53,45 +53,27 @@ Substituir o conteúdo das linhas. Título e fonte ficam como estão.
 
 O que mudou em relação ao atual: a linha "Como sustenta a gratuidade" virou "Gratuidade sem
 repasse de dados a terceiros", que dá para responder com Sim ou Não; "Não confirmado
-publicamente" e "Não mencionado publicamente" viraram Não (o critério é explicado no primeiro
-parágrafo abaixo); "Fora do escopo (seção 4.1)" virou Não (explicado no terceiro parágrafo).
+publicamente" e "Não mencionado publicamente" viraram Não; "Fora do escopo (seção 4.1)" virou Não
+(explicado no segundo parágrafo abaixo).
 
 ### 2.2 Os parágrafos novos
 
 Inserir **logo depois da fonte do Quadro 2** e antes de "4. DESENVOLVIMENTO". Com a troca do item
 1, o Quadro 2 fica no fim da 3.2, e estes parágrafos fecham a seção.
 
-> O preenchimento do Quadro 2 adota como critério a informação declarada publicamente por cada
-> solução, em suas páginas oficiais e nas lojas de aplicativos. Uma funcionalidade foi marcada
-> como presente apenas quando descrita de forma explícita, e a ausência de menção foi registrada
-> como Não. É o caso do cadastro por código de barras no Medisafe e da dose variável por horário
-> nas duas soluções concorrentes, recursos que podem existir sem estar documentados, mas que não
-> puderam ser confirmados.
+> O Quadro 2 evidencia que o Mapill se destaca nos aspectos ligados ao acesso e ao tratamento. É
+> a única das três soluções que oferece todas as funcionalidades sem custo e sem repasse de dados a
+> terceiros, uma vez que o Medisafe cobra assinatura e o MyTherapy sustenta sua gratuidade com dados
+> de uso. Também funciona sem conta, o que o Medisafe não permite, e é a única a oferecer dose
+> variável por horário, necessária quando a quantidade muda ao longo do dia.
 >
-> Nos aspectos em que o Mapill se destaca, a diferença decorre de decisões de projeto. O acesso
-> gratuito a todas as funcionalidades, sem repasse de dados de uso a terceiros, distingue a
-> proposta tanto do Medisafe, que passou a cobrar assinatura e por isso recebe Não nos dois
-> primeiros aspectos, quanto do MyTherapy, que é gratuito, mas sustenta essa gratuidade com o
-> repasse de dados agregados a parceiros. O funcionamento sem conta decorre do paradigma
-> offline-first, no qual a conta serve apenas à sincronização, enquanto o Medisafe a exige desde
-> o primeiro uso. O controle de estoque com aviso de reposição está presente nas três soluções,
-> mas no Medisafe integra o plano pago, e a dose variável por horário, necessária às posologias
-> em que a quantidade muda ao longo do dia, não é mencionada por nenhuma das concorrentes.
->
-> Nos aspectos marcados como Não para o Mapill, a aplicação oferece menos do que as concorrentes,
-> e a ausência é deliberada. A verificação de interação medicamentosa, oferecida pelo Medisafe,
-> exigiria uma base farmacológica mantida e validada clinicamente, o que aproximaria a aplicação
-> de um sistema de apoio à prescrição, papel excluído do escopo na seção 4.1. O registro de
-> medidas gerais de saúde, presente nas duas concorrentes, ampliaria o escopo para o bem-estar
-> geral, direção contrária à de aprofundar a adesão medicamentosa. O acesso de cuidador ou
-> médico, oferecido pelo Medisafe, exigiria rever o modelo de uma conta por paciente e figura
-> entre os trabalhos futuros apresentados na seção 6.1.
->
-> Em síntese, o Medisafe é a solução mais ampla, mas condiciona funcionalidades básicas ao
-> pagamento, e o MyTherapy é gratuito e igualmente amplo, mas depende do repasse de dados. O
-> Mapill abre mão dessa amplitude em favor da profundidade no tratamento medicamentoso e da
-> autonomia do paciente sobre os próprios dados, o que corresponde ao posicionamento descrito no
-> início desta seção.
+> Os aspectos marcados como Não para o Mapill correspondem a exclusões deliberadas de escopo,
+> descritas na seção 4.1. A verificação de interação medicamentosa aproximaria a aplicação de um
+> sistema de apoio à prescrição, o registro de medidas gerais de saúde desviaria o foco da adesão
+> medicamentosa e o acesso de cuidador ou médico exigiria rever o modelo de uma conta por paciente,
+> frente prevista nos trabalhos futuros. Assim, o Medisafe é a solução mais ampla, mas condiciona
+> funcionalidades básicas ao pagamento, e o MyTherapy é gratuito, mas depende do repasse de dados,
+> enquanto o Mapill troca amplitude por profundidade no tratamento medicamentoso.
 
 (O "Não" vai sem aspas e sem itálico, como valor do quadro.)
 
