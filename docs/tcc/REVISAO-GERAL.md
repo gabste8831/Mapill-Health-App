@@ -1,145 +1,13 @@
 # TCC: o que falta (guia único)
 
-> **Conferido em 30/09, 17:25**, contra `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` (89
-> páginas). Formatação, referências, siglas, pré-textuais, numeração a partir da Introdução e
-> alíneas da 6.1 estão certos. Tudo o que falta está neste arquivo; o histórico das revisões
-> anteriores fica no git.
+> **Conferido em 30/09, 17:45**, contra `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` (89
+> páginas). **O texto está fechado:** todas as trocas de conteúdo entraram, inclusive as do resumo,
+> do abstract e os cinco pontos rápidos do corpo. Formatação, referências, siglas, pré-textuais,
+> numeração a partir da Introdução e alíneas da 6.1 estão certos. O histórico das revisões fica no
+> git.
 >
-> **Ordem:** 1 (trocas de texto) → 2 (figuras) → 3 (página em branco) → 4 (números de página, por
-> último) → exportar PDF → 8 (conferência). O 6 fica para o dia da defesa, e o 7 é aprofundamento
-> opcional.
-
----
-
-## 1. Trocas de texto
-
-Cada item traz a página, o **texto atual** (para achar com Ctrl+F no Google Docs) e o **texto
-novo**, pronto para colar.
-
-### 1.A Resumo e abstract
-
-#### 1.A.1 Resumo, última frase (p.7). Recomendado
-
-A conclusão (capítulo 6) agora diz que o efeito sobre a carga cognitiva ainda precisa ser
-verificado com usuários. O resumo continua afirmando esse efeito e a "simplicidade de uso" como
-resultado. Quem ler o resumo e depois a conclusão encontra as duas versões. A troca abaixo mantém a
-frase quase igual.
-
-Atual:
-> Conclui-se que é possível conciliar, em uma mesma aplicação, o funcionamento independente de
-> conexão, a fidelidade do registro clínico e a simplicidade de uso, transferindo ao aparelho parte
-> da carga cognitiva que a rotina terapêutica impõe ao paciente.
-
-Novo:
-> Conclui-se que é possível conciliar, em uma mesma aplicação, o funcionamento independente de
-> conexão e a fidelidade do registro clínico, com o propósito de transferir ao aparelho parte da
-> carga cognitiva que a rotina terapêutica impõe ao paciente.
-
-#### 1.A.2 Abstract (p.8). O abstract é a tradução do resumo e precisa acompanhá-lo
-
-**a) A frase da validação.** O resumo já diz "conduzida pelo autor em aparelho físico, com um
-segundo dispositivo simulado pela base remota", e o abstract ainda não.
-
-Atual:
-> The technical validation, conducted on a physical device, confirmed
-
-Novo:
-> The technical validation, conducted by the author on a physical device, with a second device
-> simulated through the remote database, confirmed
-
-**b) A última frase** (acompanha o item 1.A.1).
-
-Atual:
-> It is concluded that it is possible to reconcile, in a single application, operation independent
-> of connection, fidelity of the clinical record and simplicity of use, transferring to the device
-> part of the cognitive load that the therapeutic routine imposes on the patient.
-
-Novo:
-> It is concluded that it is possible to reconcile, in a single application, operation independent
-> of connection and fidelity of the clinical record, with the purpose of transferring to the device
-> part of the cognitive load that the therapeutic routine imposes on the patient.
-
-#### 1.A.3 Opcional: o alarme após reiniciar, no resumo
-
-Não é incorreto deixar de fora: o resumo não afirma nada falso sobre o alarme. Se quiser incluir,
-acrescentar ao fim da frase "O alarme de dose foi verificado com o aparelho bloqueado e em uso, com
-a aplicação presente ou ausente da lista de recentes", antes do ponto:
-
-> , e a entrega após a reinicialização mostrou-se dependente da restrição de inicialização
-> automática imposta pelo fabricante
-
-E no abstract, no mesmo lugar: ", and delivery after a restart proved dependent on the autostart
-restriction imposed by the manufacturer".
-
-### 1.B Pontos rápidos no corpo do texto
-
-#### 1.B.1 Segurança: o "filtro duplo" (p.56, seção 4.4.6, fim)
-
-No código, o identificador do usuário é enviado em cada gravação e em cada exclusão, e a política
-do servidor confere. No **recebimento**, porém, a aplicação não repete o filtro: quem isola os dados
-é só a política de segurança em nível de linha. O texto diz que o filtro é repetido em toda operação.
-
-Atual:
-> restringindo toda operação de leitura, inserção e atualização ao proprietário do registro,
-> identificado pelo token de autenticação do usuário. Essa redundância é deliberada. Ainda que a
-> política de segurança em nível de linha já seja suficiente para garantir o isolamento dos dados, a
-> aplicação repete o filtro por identificador de usuário como uma segunda camada independente de
-> verificação, de modo que as duas camadas precisam concordar entre si para que uma operação seja
-> concluída.
-
-Novo:
-> restringindo toda operação de leitura, inserção, atualização e exclusão ao proprietário do
-> registro, identificado pelo token de autenticação do usuário. Nas gravações e nas exclusões, a
-> aplicação também informa o identificador do usuário, e a operação só é aceita quando ele coincide
-> com o do token, o que acrescenta uma segunda verificação. No recebimento, o isolamento fica a cargo
-> exclusivamente da política de segurança em nível de linha.
-
-#### 1.B.2 Imutabilidade absoluta (p.57, seção 4.4.7)
-
-O registro corrigido não é alterado, mas é apagado quando o titular pede a exclusão de todos os
-seus dados (seção 4.3.5). O "nunca" contradiz a própria 4.3.5.
-
-Atual:
-> O registro anterior nunca é alterado nem removido.
-
-Novo:
-> O registro anterior não é alterado nem removido pela correção, e só deixa de existir quando o
-> titular solicita a exclusão de todos os seus dados, conforme a seção 4.3.5.
-
-#### 1.B.3 RLS não é anonimização (p.36, seção 2.9.2, fim)
-
-RLS é controle de acesso. Não anonimiza nada, e a LGPD não exige RLS especificamente. O que ela
-exige são medidas de segurança contra acesso não autorizado.
-
-Atual:
-> Essa arquitetura é um requisito indispensável para atender às diretrizes de privacidade e
-> anonimização exigidas pela Lei Geral de Proteção de Dados (Brasil, 2018).
-
-Novo:
-> Esse isolamento atende à exigência da Lei Geral de Proteção de Dados (Brasil, 2018) de que o
-> controlador adote medidas técnicas capazes de proteger os dados pessoais de acessos não
-> autorizados.
-
-#### 1.B.4 Autostart, afirmação categórica sem fonte (p.82, seção 5.3)
-
-Atual:
-> Não há interface de programação que permita consultar ou conceder essa permissão.
-
-Novo:
-> O Android não oferece uma interface de programação padronizada para consultar ou conceder essa
-> permissão, que cada fabricante implementa de forma própria.
-
-#### 1.B.5 Alarme: quatro combinações anunciadas, duas relatadas (p.82, seção 5.3)
-
-O texto diz que o alarme foi verificado em quatro combinações (bloqueado ou em uso, com o app
-presente ou ausente dos recentes), mas só descreve o bloqueado e o em uso. Acrescentar depois de
-"...e o toque levou à tela correspondente.":
-
-> Nas duas situações, o comportamento foi o mesmo com a aplicação presente ou ausente da lista de
-> recentes.
-
-**Confira antes de colar** que foi isso que você observou nos testes. Se em alguma combinação o
-resultado foi diferente, me diga qual, que eu reescrevo a frase.
+> **Falta:** 2 (figuras) → 3 (página em branco) → 4 (números de página, por último) → exportar PDF
+> → 8 (conferência). O 6 fica para o dia da defesa, e o 7 é aprofundamento opcional.
 
 ---
 
@@ -191,22 +59,26 @@ vencendo).
 Mesmos dados, mesmo dia e mesma rolagem nos três. Só o tema muda. Voltar o conjunto de cores para
 o padrão antes, para não misturar com a Figura 11.
 
-## 3. Página em branco (p.86)
+## 3. Página em branco (p.60)
 
-Voltou a sobrar uma página vazia entre o fim da 6.1 e as REFERÊNCIAS. Apagar as linhas vazias depois
-da alínea e).
+A página em branco do fim saiu, mas apareceu outra na **p.60**, logo depois do primeiro parágrafo da
+4.5 ("...os Quadros 16 a 24 contemplam o esquema completo do modelo de dados."). A Figura 2 não coube
+no resto da p.59, desceu e deixou a p.60 vazia. Apagar a linha vazia entre esse parágrafo e o título
+"Figura 2 - Diagrama entidade-relacionamento...". Se ainda assim sobrar uma página vazia, reduzir um
+pouco a altura da Figura 2.
 
 ## 4. Números de página
 
-As trocas de conteúdo empurraram tudo **uma página** a partir do capítulo 4. A regra é simples:
+As trocas de conteúdo empurraram tudo **uma página** a partir do capítulo 4. Depois de apagar a
+página em branco do item 3, a regra é simples:
 
 - **Sumário:** de "4. DESENVOLVIMENTO" até "6.1 TRABALHOS FUTUROS", somar 1 a cada número.
-  REFERÊNCIAS passa de 85 para **86**, depois de apagar a página em branco.
+  REFERÊNCIAS já está com **86**, que fica certo depois do item 3.
 - **Lista de quadros:** do Quadro 2 ao Quadro 28, somar 1.
 - **Lista de figuras:** da Figura 1 à Figura 12, somar 1.
 
-Até a 3.2 e o Quadro 1, nada muda. Fazer isto por último e exportar o PDF, porque as trocas que ainda
-faltam no item 1 podem deslocar de novo.
+Até a 3.2 e o Quadro 1, nada muda. Fazer isto por último, depois das figuras, e exportar o PDF para
+eu conferir.
 
 ## 5. Opcional
 
