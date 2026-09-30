@@ -7,7 +7,8 @@
 > página, e as mudanças pedidas pelo orientador.
 >
 > Falta só o que depende de captura ou da defesa. A revisão de conteúdo, feita com o prompt de
-> revisão crítica do orientador, está à parte em [`REVISAO-CRITICA.md`](REVISAO-CRITICA.md).
+> revisão crítica do orientador, está à parte em [`REVISAO-CRITICA.md`](REVISAO-CRITICA.md), e as
+> trocas prontas para colar, em [`AJUSTES-DE-CONTEUDO.md`](AJUSTES-DE-CONTEUDO.md).
 
 ---
 
@@ -23,7 +24,9 @@ fonte continuarem na mesma página.
 ### Figura 8 - Notificação do alarme de dose sobre a tela de bloqueio (p.72)
 
 1. **Tela do alarme sobre a tela de bloqueio.**
-2. **Notificação com os botões de ação** (Tomei, Pulei, Adiar) visíveis.
+2. **Notificação com os botões de ação**, Tomei e Pulei. No código, só a notificação comum tem
+   botões, e o Adiar existe apenas na tela cheia do alarme. Para este print, usar um medicamento com
+   o lembrete no modo **notificação**, e não alarme.
 3. **Tela do alarme depois do adiamento, com dois medicamentos.** Mostra o agrupamento das doses do
    mesmo horário em um único aviso (4.2.1) e, sem o botão Adiar, que o adiamento é oferecido uma
    vez só. Conferir que o Adiar de fato não aparece.
