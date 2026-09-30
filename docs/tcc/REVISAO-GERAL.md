@@ -1,7 +1,7 @@
 # Revisão geral do TCC: o que falta
 
 > **Atualizado em 30/09**, com o retorno do orientador (29/09 à noite), conferido contra
-> `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` das 15:07 (88 páginas).
+> `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` das 15:57 (`... (1).pdf`, 88 páginas).
 > Este é o guia completo: tudo o que ainda falta no documento, por menor que seja. O que já foi
 > resolvido saiu daqui (fica no histórico do git).
 >
@@ -10,20 +10,14 @@
 > referências, e na folha de aprovação o hífen de "Itajaí - UNIDAVI" e o título sem ponto final.
 > No capítulo 4, todos os quadros e figuras já têm título, corpo e fonte na mesma página.
 
-Ordem sugerida: 1 → 2 → 4 → exportar PDF → 5. O item 3 fica para depois da apresentação.
+Ordem sugerida: 1 → 4 → 2 → exportar PDF → 5. O item 3 fica para depois da apresentação.
 
 ---
 
-## 1. Números de página no sumário
+## 1. Anexos
 
-As mudanças do orientador entraram todas (título 3.2, remissões, "Em síntese", página em branco,
-6.1 no sumário). Faltam três números:
-
-- 6. CONCLUSÃO: 84 → **83**
-- 6.1 TRABALHOS FUTUROS: 85 → **84**
-- REFERÊNCIAS: 86 → **85**
-
-As outras 119 entradas do sumário e das listas estão certas.
+O sumário e as listas estão certos (122 entradas), e o número de página já aparece só a partir da
+Introdução. Falta só:
 
 **ANEXOS (p.88).** A página tem só o título, sem nada anexado. Anexo é opcional: apagar a página e
 a linha "ANEXOS" do sumário. Por ser a última página, nada mais se desloca.
@@ -92,55 +86,20 @@ Epígrafe, dedicatória e agradecimentos já estão no documento (conferidos em 
 **Folha de aprovação (p.3).** A data está "Rio do Sul, 25 de junho de 2026.". Trocar pela data da
 defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
 
-## 4. Negrito (reconferido em 30/09 contra o PDF das 15:07)
+## 4. Negrito nas referências
 
-Os títulos estão certos e consistentes no corpo e no sumário: título 1 em caixa alta com negrito,
-título 2 em caixa alta sem negrito, título 3 em minúsculas com negrito (não há título 4). Os pontos
-abaixo não são de título.
+Os títulos, o sumário e o corpo estão certos. Nas referências, três entradas ainda têm o subtítulo
+em negrito (em 15:07 elas pareciam corrigidas, mas o negrito continuava depois dos dois-pontos).
+Deixar em negrito só a parte marcada; os dois-pontos e o subtítulo ficam normais:
 
-Já corrigidos: 5.1 a 5.4 sem negrito no sumário, e ISO, ISTEPANIAN e WHO 2011 com o subtítulo
-normal. Falta:
+- ISO: **ISO/IEC 25010**: systems and software engineering - systems and software quality
+  requirements and evaluation (SQuaRE) - product quality model. (Os dois-pontos já estão certos;
+  falta tirar o negrito da segunda linha em diante.)
+- ISTEPANIAN: ***M-health***: emerging mobile health systems.
+- WHO 2011: ***mHealth***: new horizons for health through mobile technologies.
 
-1. **Sumário, linha 5.4.** O texto saiu do negrito, mas os pontinhos e o "81" continuam em negrito.
-2. **Vírgula em negrito (p.19)**, logo depois de "Laxminarayan e Pattichis (2006)".
-3. **Referências, subtítulo ainda em negrito.** Deixar em negrito só a parte marcada:
-   - CAVOUKIAN: **Privacy by design**: the 7 foundational principles.
-   - KLEPPMANN: **Designing data-intensive applications**: the big ideas behind reliable,
-     scalable, and maintainable systems.
-   - MARTIN 2019: **Arquitetura limpa**: o guia do artesão para estrutura e design de software.
-   - MARTIN 2009: **Código limpo**: habilidades práticas do Agile Software.
-   - META: **React Native**: a framework for building native apps using React.
-   - MICROSOFT: **TypeScript**: typed JavaScript at any scale.
-   - PINHEIRO: **Proteção de dados pessoais**: comentários à Lei n. 13.709/2018 (LGPD).
-   - PRESSMAN: **Engenharia de software**: uma abordagem profissional.
-   - SUPABASE: **Supabase documentation**: Row Level Security.
-   - WHO 2003: **Adherence to long-term therapies**: evidence for action.
-
-   Os dois-pontos também saem do negrito.
-4. **Opcional.** "*Software*" em itálico na 2.5.1 (corpo e sumário), que não aparece em itálico no
-   resto do texto.
-
-## 4.1 Número de página nos pré-textuais
-
-No PDF das 15:07, as páginas 1 a 15 ainda mostram número.
-
-Pela NBR 14724, as páginas pré-textuais são contadas, mas o número só aparece a partir da
-Introdução. O sumário ocupa três páginas (13 a 15), e a opção "primeira página diferente" esconde
-só a primeira delas. O caminho no Google Docs:
-
-1. Clicar no começo de "1. INTRODUÇÃO" e usar **Inserir › Quebra › Quebra de seção (próxima
-   página)**. Se já houver uma quebra de página comum ali, apagar a comum.
-2. Dar dois cliques no cabeçalho da página da Introdução e **desmarcar "Vincular ao anterior"**.
-   O número fica.
-3. Dar dois cliques no cabeçalho de uma página do sumário e **apagar o número**. Como o vínculo foi
-   desfeito, isso não afeta o corpo. Se o sumário estiver em uma seção própria com "Layout
-   diferente na primeira página" marcado, desmarcar, para as três páginas ficarem iguais (sem
-   número).
-4. Em **Inserir › Números de página › Mais opções**, na seção da Introdução, escolher **"Continuar
-   da seção anterior"**, para a Introdução seguir mostrando 16.
-
-Se as páginas pré-textuais estiverem em várias seções, repetir o passo 3 em cada uma que ainda
-mostrar número.
+Opcional: "*Software*" em itálico na 2.5.1 (corpo e sumário), que não aparece em itálico no resto
+do texto.
 
 ## 5. Conferência final
 
