@@ -6,7 +6,8 @@
 > numeração de página a partir da Introdução, quadros e figuras com título e fonte na mesma
 > página, e as mudanças pedidas pelo orientador.
 >
-> Falta só o que depende de captura ou da defesa.
+> Falta só o que depende de captura ou da defesa. A revisão de conteúdo, feita com o prompt de
+> revisão crítica do orientador, está à parte em [`REVISAO-CRITICA.md`](REVISAO-CRITICA.md).
 
 ---
 
