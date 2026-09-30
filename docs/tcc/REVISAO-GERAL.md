@@ -1,28 +1,16 @@
 # Revisão geral do TCC: o que falta
 
-> **Atualizado em 30/09**, com o retorno do orientador (29/09 à noite), conferido contra
-> `TCC Gabriel Steffens Atualizado 29_09.docx.pdf` das 15:57 (`... (1).pdf`, 88 páginas).
-> Este é o guia completo: tudo o que ainda falta no documento, por menor que seja. O que já foi
-> resolvido saiu daqui (fica no histórico do git).
+> **Conferido em 30/09, 16:02**, contra `TCC Gabriel Steffens Atualizado 29_09.docx (2).pdf`
+> (87 páginas). O texto está fechado: sumário e listas (121 entradas), remissões, chamadas de
+> quadros e figuras, citações, referências e seu negrito, siglas, itálico, títulos, pré-textuais,
+> numeração de página a partir da Introdução, quadros e figuras com título e fonte na mesma
+> página, e as mudanças pedidas pelo orientador.
 >
-> **Já conferido e certo:** sumário e listas (121 entradas), remissões, chamadas de quadros e
-> figuras, citações contra referências, siglas, itálico, tempo verbal, resumo, abstract,
-> referências, e na folha de aprovação o hífen de "Itajaí - UNIDAVI" e o título sem ponto final.
-> No capítulo 4, todos os quadros e figuras já têm título, corpo e fonte na mesma página.
-
-Ordem sugerida: 1 → 4 → 2 → exportar PDF → 5. O item 3 fica para depois da apresentação.
+> Falta só o que depende de captura ou da defesa.
 
 ---
 
-## 1. Anexos
-
-O sumário e as listas estão certos (122 entradas), e o número de página já aparece só a partir da
-Introdução. Falta só:
-
-**ANEXOS (p.88).** A página tem só o título, sem nada anexado. Anexo é opcional: apagar a página e
-a linha "ANEXOS" do sumário. Por ser a última página, nada mais se desloca.
-
-## 2. Figuras 8, 10, 11 e 12
+## 1. Figuras 8, 10, 11 e 12
 
 As quatro ainda usam a **mesma imagem de reserva** (a tela inicial repetida). Cada figura leva
 **três capturas lado a lado**, na mesma altura e com espaçamento igual, do mesmo aparelho, com a
@@ -79,30 +67,13 @@ A mesma tela inicial, com os mesmos dados, no mesmo dia e na mesma posição de 
 muda. No alto contraste, deixar à vista um cartão, porque o texto diz que ali a sombra dá lugar ao
 contorno. Voltar o conjunto de cores para o padrão antes, para não misturar com a Figura 11.
 
-## 3. Pré-textuais
+## 2. Folha de aprovação (p.3), no dia da defesa
 
-Epígrafe, dedicatória e agradecimentos já estão no documento (conferidos em 30/09, 14:38).
+- Data: hoje está "Rio do Sul, 30 de setembro de 2026.". Trocar pela data da defesa.
+- Nomes dos dois professores da banca, depois de "Prof.".
 
-**Folha de aprovação (p.3).** A data está "Rio do Sul, 25 de junho de 2026.". Trocar pela data da
-defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
+## 3. Conferência final
 
-## 4. Negrito nas referências
-
-Os títulos, o sumário e o corpo estão certos. Nas referências, três entradas ainda têm o subtítulo
-em negrito (em 15:07 elas pareciam corrigidas, mas o negrito continuava depois dos dois-pontos).
-Deixar em negrito só a parte marcada; os dois-pontos e o subtítulo ficam normais:
-
-- ISO: **ISO/IEC 25010**: systems and software engineering - systems and software quality
-  requirements and evaluation (SQuaRE) - product quality model. (Os dois-pontos já estão certos;
-  falta tirar o negrito da segunda linha em diante.)
-- ISTEPANIAN: ***M-health***: emerging mobile health systems.
-- WHO 2011: ***mHealth***: new horizons for health through mobile technologies.
-
-Opcional: "*Software*" em itálico na 2.5.1 (corpo e sumário), que não aparece em itálico no resto
-do texto.
-
-## 5. Conferência final
-
-Depois dos itens 1, 2 e 4, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
-e salvar no editor, que corrompe o arquivo). Eu confiro de novo o sumário (com 3.1, 3.2 e 6.1
-novos), as listas, as remissões 3.1 e 6.1 e se algum quadro ou figura passou a quebrar página.
+Depois de inserir as figuras, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos
+(sem abrir e salvar no editor, que corrompe o arquivo). Eu confiro se alguma figura empurrou
+página e, se for o caso, refaço os números do sumário e das listas.
