@@ -213,19 +213,37 @@ contorno. Voltar o conjunto de cores para o padrão antes, para não misturar co
 
 ## 6. Pré-textuais
 
-**Epígrafe (p.4), dedicatória (p.5) e agradecimentos (p.6).** O orientador pediu os três. Cada um
-na sua página, sem título na epígrafe e na dedicatória (só os agradecimentos levam título). Duas
-sugestões de epígrafe ligadas ao tema, ambas de obras que já estão nas referências:
+**Epígrafe, dedicatória e agradecimentos (p.4 a 6).** Textos definidos em 30/09. Cada um na sua
+página. Epígrafe e dedicatória sem título, alinhadas à direita, no terço inferior da página.
+Agradecimentos com o título AGRADECIMENTOS e texto justificado, como o corpo.
 
-> "Os medicamentos não funcionam em pacientes que não os tomam." (C. Everett Koop)
+*Epígrafe (p.4)*, citada por Osterberg e Blaschke (2005), que já estão nas referências:
 
-citada por Osterberg e Blaschke (2005), ou
+> Os medicamentos não funcionam em pacientes que não os tomam.
+> (C. Everett Koop)
 
-> "Aumentar a efetividade das intervenções de adesão pode ter um impacto muito maior na saúde da
-> população do que qualquer melhoria em tratamentos médicos específicos." (World Health
-> Organization, 2003)
+*Dedicatória (p.5)*
 
-A epígrafe fica no fim da página, alinhada à direita, com recuo.
+> Aos meus pais, Celio e Solange, à minha avó Norma e à minha namorada Elisa, pela presença
+> constante ao longo desta caminhada.
+> E a mim mesmo, pela persistência de chegar até aqui.
+
+*Agradecimentos (p.6)*
+
+> Aos meus pais, Celio Steffens e Solange Aparecida Maciel Steffens, agradeço pelo apoio ao longo
+> de toda a graduação e por me ensinarem o valor do esforço e da dedicação. Foi na rotina da nossa
+> família, marcada pela presença constante de medicamentos, que nasceu a ideia do Mapill, e este
+> trabalho carrega um pouco do cuidado que sempre vi dentro de casa.
+>
+> À minha avó, Norma Alda Steffens, pelo carinho de sempre e por ser parte importante de quem eu
+> sou. À minha namorada, Elisa Patzlaff, pela paciência nos dias dedicados a este trabalho, pelo
+> incentivo nos momentos de cansaço e por acreditar neste projeto junto comigo.
+>
+> Ao meu orientador, Prof. Me. Marciel de Liz Santos, pelas orientações e correções que deram forma
+> a este trabalho.
+>
+> Por fim, agradeço a mim mesmo, pela disciplina de levar adiante um projeto que começou como uma
+> ideia e se tornou uma aplicação real.
 
 **Folha de aprovação (p.3).** A data está "Rio do Sul, 25 de junho de 2026.". Trocar pela data da
 defesa. Os nomes da banca ficam para depois da apresentação, como o orientador indicou.
