@@ -6,12 +6,12 @@
 > numeração a partir da Introdução e alíneas da 6.1 estão certos. O histórico das revisões fica no
 > git.
 >
-> **Falta:** 2 (figuras) → 3 (página em branco) → 4 (números de página, por último) → exportar PDF
-> → 8 (conferência). O 6 fica para o dia da defesa, e o 7 é aprofundamento opcional.
+> **Falta:** 1 (figuras) → 2 (página em branco) → 3 (números de página, por último) → exportar PDF
+> → 7 (conferência). O 5 fica para o dia da defesa, e o 6 é aprofundamento opcional.
 
 ---
 
-## 2. Figuras 8, 10, 11 e 12
+## 1. Figuras 8, 10, 11 e 12
 
 As quatro ainda usam a **mesma imagem de reserva** (a tela inicial repetida). Cada figura leva
 **três capturas lado a lado**, na mesma altura e com espaçamento igual, do mesmo aparelho, com a
@@ -59,7 +59,7 @@ vencendo).
 Mesmos dados, mesmo dia e mesma rolagem nos três. Só o tema muda. Voltar o conjunto de cores para
 o padrão antes, para não misturar com a Figura 11.
 
-## 3. Página em branco (p.60)
+## 2. Página em branco (p.60)
 
 A página em branco do fim saiu, mas apareceu outra na **p.60**, logo depois do primeiro parágrafo da
 4.5 ("...os Quadros 16 a 24 contemplam o esquema completo do modelo de dados."). A Figura 2 não coube
@@ -67,39 +67,39 @@ no resto da p.59, desceu e deixou a p.60 vazia. Apagar a linha vazia entre esse 
 "Figura 2 - Diagrama entidade-relacionamento...". Se ainda assim sobrar uma página vazia, reduzir um
 pouco a altura da Figura 2.
 
-## 4. Números de página
+## 3. Números de página
 
 As trocas de conteúdo empurraram tudo **uma página** a partir do capítulo 4. Depois de apagar a
-página em branco do item 3, a regra é simples:
+página em branco do item 2, a regra é simples:
 
 - **Sumário:** de "4. DESENVOLVIMENTO" até "6.1 TRABALHOS FUTUROS", somar 1 a cada número.
-  REFERÊNCIAS já está com **86**, que fica certo depois do item 3.
+  REFERÊNCIAS já está com **86**, que fica certo depois do item 2.
 - **Lista de quadros:** do Quadro 2 ao Quadro 28, somar 1.
 - **Lista de figuras:** da Figura 1 à Figura 12, somar 1.
 
 Até a 3.2 e o Quadro 1, nada muda. Fazer isto por último, depois das figuras, e exportar o PDF para
 eu conferir.
 
-## 5. Opcional
+## 4. Opcional
 
 - **Quadro 26 (p.74).** A primeira linha do código (o comentário) está em Courier 9, e as demais em 10.
 - **Objetivos com marcador (p.17).** A 6.1 usa alíneas, e os objetivos, marcadores. As duas formas
   são aceitas. A linha "Implementar a aplicação móvel..." parece esticada, mas é só a justificação de
   uma linha com palavras longas, e não há o que corrigir.
 
-## 6. Folha de aprovação (p.3), no dia da defesa
+## 5. Folha de aprovação (p.3), no dia da defesa
 
 - Data: hoje está "Rio do Sul, 30 de setembro de 2026.". Trocar pela data da defesa.
 - Nomes dos dois professores da banca, depois de "Prof.".
 
 ---
 
-## 7. Aprofundamento (opcional)
+## 6. Aprofundamento (opcional)
 
 Pontos que a revisão crítica, feita com o prompt do orientador, apontou como frágeis. Não
 contradizem o app e não impedem a entrega. Eu escrevo o texto novo de cada um quando quiser atacar.
 
-### 7.1 Referencial teórico (capítulo 2)
+### 6.1 Referencial teórico (capítulo 2)
 
 - **Adesão multidimensional (p.19 e 20).** A WHO (2003) descreve cinco dimensões da não adesão (socioeconômica,
   sistema de saúde, condição, terapia e paciente), e o trabalho ataca o esquecimento e a logística
@@ -131,7 +131,7 @@ contradizem o app e não impedem a entrega. Eu escrevo o texto novo de cada um q
   as da versão de 2023.
 - **Gamificação (p.27).** Efeitos e "motivação intrínseca" sem fonte.
 
-### 7.2 Metodologia e desenvolvimento (capítulos 3 e 4)
+### 6.2 Metodologia e desenvolvimento (capítulos 3 e 4)
 
 - **Quadro 2 sem fonte nas referências (p.40 a 42).** As páginas oficiais do Medisafe e do MyTherapy
   não estão na lista, e "não menciona" virou "Não".
@@ -149,7 +149,7 @@ contradizem o app e não impedem a entrega. Eu escrevo o texto novo de cada um q
 - **Estilo.** A mesma regra reaparece como requisito, regra de negócio e jornada, e os absolutos
   ("nunca", "garante") ainda aparecem com frequência.
 
-### 7.3 Resultados e conclusão (capítulos 5 e 6)
+### 6.3 Resultados e conclusão (capítulos 5 e 6)
 
 - **"Aprovado, com os ajustes" (Quadro 28).** Só o resultado final foi registrado, e a 5.2 lista as
   correções sem o sintoma de cada uma.
@@ -169,7 +169,7 @@ contradizem o app e não impedem a entrega. Eu escrevo o texto novo de cada um q
 
 ---
 
-## 8. Conferência final
+## 7. Conferência final
 
-Depois dos itens 1 a 4, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+Depois dos itens 1 a 3, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
 e salvar no editor, que corrompe o arquivo). Eu confiro as trocas, as figuras e os números de página.
