@@ -280,19 +280,16 @@ Novo:
 **c) p.47, seção 4.3.1:** "como um documento fiel ao comportamento real do paciente" → "como um
 documento fiel ao que o paciente de fato respondeu".
 
-### 3.2 A validação ganha método (p.40, seção 3.1)
+### 3.2 A validação ganha método (p.40, fim da seção 3.1)
 
-A 3.1 não diz como a validação foi feita, e o capítulo 5 remete a ela. Trocar o último parágrafo da
-3.1.
+O parágrafo que descrevia a validação ("Por fim, a etapa de validação técnica do trabalho
+consistiu...") **sumiu na troca de ordem da 3.1 com a 3.2**: no PDF das 16:02, a 3.1 termina em
+"...elementos de gamificação para estímulo à adesão." e já começa a 3.2. Sem ele, o capítulo 5
+remete a uma metodologia que não descreve a validação. Não há o que substituir: é só **acrescentar**
+o parágrafo abaixo como último da 3.1, logo depois de "...estímulo à adesão." (a frase ajustada no
+item 1.1 c) e antes do título "3.2 ESTADO DA ARTE E TRABALHOS RELACIONADOS".
 
-Atual:
-> Por fim, a etapa de validação técnica do trabalho consistiu na análise do comportamento da
-> arquitetura offline-first em cenários controlados, simulando situações de ausência de conexão,
-> restabelecimento de conectividade, sincronização de dados e conflito entre registros locais e
-> remotos, de modo a verificar a confiabilidade e a consistência da solução proposta diante das
-> condições de uso previstas.
-
-Novo:
+Parágrafo a acrescentar:
 > Por fim, a etapa de validação técnica consistiu em testes funcionais conduzidos pelo autor em
 > aparelho físico, seguindo um roteiro escrito no qual cada passo registra o procedimento executado e
 > o resultado esperado. Foram analisados o comportamento da arquitetura offline-first em situações de
