@@ -22,38 +22,32 @@ numeração dos dois segue igual.
 
 > **4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO**
 >
-> O desenvolvimento do Mapill contou com ferramentas de inteligência artificial (IA) em três
-> frentes, a concepção inicial das telas, a escrita e a verificação do código e a condução dos
-> testes em aparelho. Em todas elas, as decisões de projeto, a revisão do que foi produzido e a
-> validação final permaneceram a cargo do autor.
+> O desenvolvimento do Mapill contou com ferramentas de inteligência artificial (IA), e as decisões
+> de projeto, a revisão do que foi produzido e a validação final permaneceram a cargo do autor. Na
+> concepção das telas, o Google Stitch (Google, 2026) gerou propostas iniciais a partir de descrições
+> textuais, ajustadas no Figma (Figma, 2026) antes da implementação sobre o sistema de *design*
+> próprio apresentado na seção 4.4.4.
 >
-> Na concepção, o Google Stitch (Google, 2026) gerou propostas iniciais de tela a partir de
-> descrições textuais, e o Figma (Figma, 2026) foi utilizado para comparar e ajustar essas propostas
-> antes da implementação. Elas serviram como ponto de partida, e a interface final foi construída
-> sobre o sistema de *design* próprio apresentado na seção 4.4.4.
+> Na implementação, utilizou-se o Claude Code (Anthropic, 2026), assistente de programação baseado
+> nos modelos Claude, da Anthropic, que opera sobre o repositório e executa comandos no ambiente de
+> desenvolvimento, empregado na escrita de código e no diagnóstico de defeitos. Para que o assistente
+> seguisse as decisões do projeto, foram escritas, no início do desenvolvimento, quatro *skills*,
+> arquivos de instrução que ele consulta antes de agir. Elas registram a arquitetura e a
+> sincronização *offline-first*, as heurísticas de usabilidade, a validação de dados clínicos e as
+> práticas de React Native, de modo que o código gerado partisse das mesmas regras descritas neste
+> capítulo.
 >
-> Na implementação, utilizou-se o assistente de programação Claude Code (Anthropic, 2026), que opera
-> sobre o repositório do projeto e executa comandos no ambiente de desenvolvimento. O assistente foi
-> empregado na escrita de código, na elaboração de rotinas de conferência e no diagnóstico de
-> defeitos a partir dos registros de execução do aparelho.
+> O maior desafio foi a rotina de teste. Cada versão instalável é compilada em nuvem, em um processo
+> de minutos e com limite mensal no plano gratuito, de modo que um erro descoberto só no aparelho
+> custava uma compilação inteira e uma nova rodada de testes. Por isso, nenhuma versão era gerada sem
+> passar antes pela checagem de tipos, pela análise estática do código e por dezessete rotinas de
+> conferência, que exercitam as regras de domínio sem aparelho graças ao instante presente recebido
+> como parâmetro, conforme a seção 4.4.2. Defeitos encontrados no aparelho passaram a originar novas
+> rotinas, para que não retornassem em versões seguintes.
 >
-> O maior desafio dessa etapa foi a rotina de teste. Cada versão instalável é compilada em nuvem,
-> leva minutos para ficar pronta, e o plano gratuito do serviço limita a quantidade mensal de
-> compilações. Um erro descoberto só no aparelho custava, assim, uma compilação inteira e uma nova
-> rodada de testes. Para evitar esse retrabalho, nenhuma versão era gerada sem passar antes pela
-> checagem de tipos do TypeScript, pela análise estática do código e por dezessete rotinas de
-> conferência escritas ao longo do projeto. Essas rotinas exercitam as regras de domínio sem
-> aparelho e sem banco de dados, o que só é possível porque os casos de uso recebem o instante
-> presente como parâmetro, conforme a seção 4.4.2. Defeitos encontrados no aparelho, como o alarme
-> que deixava de tocar após edições sucessivas de um tratamento, deram origem a novas rotinas, de
-> modo que a mesma falha não retornasse em versões seguintes.
->
-> Na validação descrita no capítulo 5, a IA apoiou também a montagem do roteiro de testes, no qual
-> cada passo registra o procedimento e o resultado esperado. Para os cenários com mais de um
-> aparelho, o roteiro simulou o segundo dispositivo por comandos executados diretamente na base
-> remota, com carimbo de tempo controlado, o que permitiu reproduzir com precisão a ordem dos
-> acontecimentos na sincronização e no conflito. A execução de cada cenário e a decisão sobre sua
-> aprovação couberam ao autor, no aparelho físico.
+> Na validação descrita no capítulo 5, o assistente apoiou a montagem do roteiro de testes e a
+> simulação do segundo dispositivo por comandos na base remota, com carimbo de tempo controlado. A
+> execução e a aprovação de cada cenário couberam ao autor, no aparelho físico.
 
 **Junto com a seção**
 
