@@ -22,38 +22,45 @@ numeração dos dois segue igual.
 
 > **4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO**
 >
-> O desenvolvimento do Mapill contou com ferramentas de inteligência artificial (IA), e as decisões
-> de projeto, a revisão do que foi produzido e a validação final permaneceram a cargo do autor. Na
-> concepção das telas, o Google Stitch (Google, 2026) gerou propostas iniciais a partir de descrições
-> textuais, ajustadas no Figma (Figma, 2026) antes da implementação sobre o sistema de *design*
-> próprio apresentado na seção 4.4.4.
+> O desenvolvimento do projeto contou com o auxílio de ferramentas de inteligência artificial (IA).
+> Na concepção das telas, etapa das primeiras ideias de *design*, o Google Stitch (Google, 2026)
+> gerou propostas iniciais a partir de descrições textuais centradas no foco da aplicação, ajustadas
+> no Figma (Figma, 2026) antes da implementação sobre o sistema de *design* próprio apresentado na
+> seção 4.4.4.
 >
-> Na implementação, utilizou-se o Claude Code (Anthropic, 2026), assistente de programação baseado
-> nos modelos Claude, da Anthropic, que opera sobre o repositório e executa comandos no ambiente de
-> desenvolvimento, empregado na escrita de código e no diagnóstico de defeitos. Para que o assistente
-> seguisse as decisões do projeto, foram escritas, no início do desenvolvimento, quatro *skills*,
-> arquivos de instrução que ele consulta antes de agir. Elas registram a arquitetura e a
-> sincronização *offline-first*, as heurísticas de usabilidade, a validação de dados clínicos e as
-> práticas de React Native, de modo que o código gerado partisse das mesmas regras descritas neste
-> capítulo.
+> Na implementação, utilizou-se o Claude Code (Anthropic, 2026), um agente de IA que opera sobre o
+> repositório e executa comandos no ambiente de desenvolvimento, empregado na escrita de código e no
+> diagnóstico de defeitos. Para que o agente seguisse as decisões do projeto, foram escritos, no
+> início do desenvolvimento, arquivos de instrução que ele consulta antes de cada operação para obter
+> contexto. Esses arquivos registram a arquitetura adotada, a sincronização *offline-first*, as
+> heurísticas de usabilidade, a validação de dados clínicos e as práticas de React Native, de modo
+> que os planos de implementação, as rotinas e as revisões partissem das mesmas regras descritas
+> neste capítulo.
 >
-> O maior desafio foi a rotina de teste. Cada versão instalável é compilada em nuvem, em um processo
-> de minutos e com limite mensal no plano gratuito, de modo que um erro descoberto só no aparelho
-> custava uma compilação inteira e uma nova rodada de testes. Por isso, nenhuma versão era gerada sem
-> passar antes pela checagem de tipos, pela análise estática do código e por dezessete rotinas de
-> conferência, que exercitam as regras de domínio sem aparelho graças ao instante presente recebido
-> como parâmetro, conforme a seção 4.4.2. Defeitos encontrados no aparelho passaram a originar novas
-> rotinas, para que não retornassem em versões seguintes.
+> O ponto mais marcante foi a rotina de teste, na qual o agente atuou também na revisão de código
+> (*code review*). Durante grande parte do desenvolvimento, as versões instaláveis foram compiladas em
+> nuvem pelo EAS (*Expo Application Services*), cujo plano gratuito limita o número mensal de
+> compilações, de modo que um erro descoberto só no aparelho custava uma compilação inteira e uma
+> nova rodada de testes. Por isso, nenhuma versão era gerada sem passar antes pela checagem de tipos,
+> pela análise estática do código e por rotinas de conferência, que exercitam as regras de domínio
+> sem aparelho graças ao instante presente recebido como parâmetro, conforme a seção 4.4.2. A mesma
+> verificação prévia foi mantida depois que a compilação passou a ser feita localmente, com
+> instalação direta no aparelho por depuração USB. Defeitos encontrados no aparelho passaram a
+> originar novas rotinas, tanto de regras da arquitetura quanto de alinhamento ao *design* do
+> produto, para que não retornassem em versões seguintes.
 >
-> Na validação descrita no capítulo 5, o assistente apoiou a montagem do roteiro de testes e a
-> simulação do segundo dispositivo por comandos na base remota, com carimbo de tempo controlado. A
-> execução e a aprovação de cada cenário couberam ao autor, no aparelho físico.
+> Na validação descrita no capítulo 5, o agente apoiou a montagem do roteiro de testes e a simulação
+> do segundo dispositivo pela base remota, o que permitiu cenários mais completos, com mais recursos
+> da aplicação acionados em menos tempo. A execução e a aprovação de cada cenário couberam ao autor,
+> no aparelho físico.
 
 **Junto com a seção**
 
 - **Sumário:** nova linha "4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO", depois da 4.6.5.
   O número sai depois de inserir a figura 8, no item 3.
-- **Lista de siglas:** "IA: Inteligência Artificial", entre FK e IBM.
+- **Lista de siglas:** "EAS: *Expo Application Services*", entre CTO e eHealth, "IA: Inteligência
+  Artificial", entre FK e IBM, e "USB: *Universal Serial Bus* (Barramento Serial Universal)", entre
+  UNIDAVI e UX.
 - **Referências**, em ordem alfabética:
   - depois de ALLSOPP: ANTHROPIC. **Claude Code**. 2026. Disponível em:
     https://www.anthropic.com/claude-code. Acesso em: 1 out. 2026.
