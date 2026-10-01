@@ -15,10 +15,10 @@ Continua **"6. CONFCLUSÃO"**, com um F a mais. No Sumário está certo.
 
 ## 2. Texto coberto na p.16
 
-Na última linha do 1.1 PROBLEMA DE PESQUISA, um retângulo branco cobre o começo da palavra
-"segurança", e no PDF sai só **"nça e confiabilidade..."**. É o mesmo tipo de caixa branca que esconde
-o número nas p.3 a 5, e nesta página ficou por cima do texto. Apagar a caixa ou movê-la para o
-rodapé, se ela estiver ali para esconder alguma coisa.
+Na última linha do 1.1 PROBLEMA DE PESQUISA, um retângulo branco cobria o começo da palavra
+"segurança", e no PDF saía só **"nça e confiabilidade..."**. **Removido em 01/10**, falta só ver no
+próximo PDF. As caixas brancas que sobraram nas p.3, 4 e 5 vieram do modelo antigo e ficam sobre
+área vazia, sem cobrir texto, então podem ficar.
 
 ## 3. Comentários de código sem itálico
 
