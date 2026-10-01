@@ -40,8 +40,8 @@ numeração dos dois segue igual.
 > O ponto mais marcante foi a rotina de teste, na qual o agente atuou também na revisão de código
 > (*code review*). Durante grande parte do desenvolvimento, as versões instaláveis foram compiladas em
 > nuvem pelo EAS (*Expo Application Services*), cujo plano gratuito limita o número mensal de
-> compilações, de modo que um erro descoberto só no aparelho custava uma compilação inteira e uma
-> nova rodada de testes. Por isso, nenhuma versão era gerada sem passar antes pela checagem de tipos,
+> compilações, de modo que um erro descoberto só no aparelho podia custar uma compilação inteira e
+> uma nova rodada de testes. Por isso, nenhuma versão era gerada sem passar antes pela checagem de tipos,
 > pela análise estática do código e por rotinas de conferência, que exercitam as regras de domínio
 > sem aparelho graças ao instante presente recebido como parâmetro, conforme a seção 4.4.2. A mesma
 > verificação prévia foi mantida depois que a compilação passou a ser feita localmente, com
