@@ -1,53 +1,34 @@
 # TCC: o que falta (guia único)
 
-> **Conferido em 01/10, 11:58**, contra `TCC Gabriel Steffens Atualizado 01_10.docx.pdf` (91
-> páginas). Figura 8 inserida e no tamanho certo, seção 4.7 no lugar, e os acertos da manhã
-> (capítulo 6, p.16, comentários dos Quadros 25 e 26, Figura 12, Abstract, 2.7.3) estão certos. O
-> histórico das revisões fica no git.
+> **Conferido em 01/10, 13:43**, contra `TCC Gabriel Steffens Atualizado 01_10.docx (1).pdf` (91
+> páginas). Texto, siglas, quadros, figuras e a seção 4.7 estão certos. O histórico das revisões fica
+> no git.
 >
-> **Falta:** 1 a 5 (acertos pontuais) → 6 (números de página) → exportar PDF → 8 (conferência). O
-> 7 fica para o dia da defesa.
+> **Falta:** 1 (página em branco) → 2 (acabamentos) → 6 (números de página) → exportar PDF → 8
+> (conferência). O 7 fica para o dia da defesa.
 
 ---
 
-## 1. Sumário sem a 4.7 (p.15)
+## 1. Página em branco depois do Sumário (p.16 do PDF)
 
-Falta a linha **"4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO.....79"**, entre a 4.6.5 e o
-5. RESULTADOS, no mesmo estilo da 4.6 (sem negrito, por ser seção de nível 2).
+A linha nova da 4.7 empurrou as linhas vazias do fim do Sumário para uma página nova, que saiu
+inteira em branco, entre o Sumário e a Introdução. Apagar as linhas vazias depois de
+"REFERÊNCIAS.....86". Depois de exportar, conferir que a Introdução continua com o número **16** no
+topo, porque a tabela do item 6 parte disso.
 
-## 2. Lista de siglas sem EAS e USB (p.9 e 10)
+## 2. Acabamentos
 
-A IA entrou. Faltam as duas que a 4.7 também usa.
-
-- **EAS:** *Expo Application Services*, entre CTO e eHealth.
-- **USB:** *Universal Serial Bus* (Barramento Serial Universal), entre UNIDAVI e UX.
-
-## 3. Ajustes no texto da 4.7 (p.79)
-
-- "seguisse as decisões e escopo do projeto" → "seguisse as decisões e **o** escopo do projeto".
-- "pela checagem de tipos, análise estática do código e por rotinas" → "pela checagem de tipos,
-  **pela** análise estática do código e por rotinas".
-- "alinhamento ao design do produto" → *design* em **itálico**, como nas outras duas ocorrências da
-  seção.
-
-## 4. Referências (p.87 a 90)
-
-- **FIGMA** ficou sem o ano no fim. Está "Acesso em: 1 out." e fica "Acesso em: 1 out. **2026.**".
-- **Página quase vazia na p.89.** Depois de NIELSEN há uma quebra de página, e NORMAN começa no
-  topo da p.90. Apagar a quebra que ficou depois de NIELSEN.
-- **Espaço entre referências desigual.** O padrão é uma linha em branco entre cada uma. Ficaram
-  com espaço menor EXPO, FIGMA, GOOGLE e IBM entre si, MEDISAFE, META e MICROSOFT entre si, e NORMAN e
-  OSTERBERG. Vale selecionar a lista inteira e aplicar o mesmo espaçamento de uma vez.
-
-## 5. Reticências dos Quadros 11 e 13 (p.55 e 57)
-
-Nas linhas `// ...` (linha 10 do Quadro 11 e linha 13 do Quadro 13) o `//` ficou em itálico e as
-reticências não. Pôr o `...` em itálico também.
+- **FIGMA (Referências):** termina em "Acesso em: 1 out. 2026" sem o ponto final.
+- **Espaço entre referências:** ainda desigual em três trechos. EXPO e FIGMA estão coladas, sem
+  linha em branco, e FIGMA, GOOGLE, MEDISAFE, META, NIELSEN e NORMAN têm um espaço menor que o das
+  demais. Selecionar a lista inteira e aplicar o mesmo espaçamento resolve de uma vez.
+- **Sumário, linha da 4.7:** o pontilhado saiu em negrito, e nas outras seções de nível 2 ele é
+  normal.
 
 ## 6. Números de página
 
-Conferidos entrada por entrada contra o PDF das 11:58, já com a Figura 8 e a 4.7. Trocar só estes; o
-resto já está certo.
+Conferidos de novo contra o PDF das 13:43, pelo número impresso no topo de cada página. A tabela
+não mudou. Ainda não foi aplicada, e é o que falta. Trocar só estes; o resto já está certo.
 
 **Sumário**
 
@@ -78,7 +59,7 @@ resto já está certo.
 | 4.6.1 Primeiro Acesso | 65 | 66 |
 | 4.6.2 Cadastro de Medicamentos | 66 | 67 |
 | 4.6.5 Acessibilidade e Linguagem Visual | 75 | 76 |
-| 4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO | (nova) | 79 |
+| 4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO | 79 | 79 |
 | 5. RESULTADOS | 79 | 80 |
 | 5.1 VALIDAÇÃO DA ARQUITETURA OFFLINE-FIRST | 79 | 80 |
 | 5.2 AJUSTES DECORRENTES DA VALIDAÇÃO | 79 | 80 |
@@ -97,8 +78,6 @@ continuam em 70 e 73.
 **Lista de figuras:** **Figura 1: 54 → 55**, **Figura 2: 59 → 60** e **Figura 3: 66 → 67**. Da
 Figura 4 à 12 já está certo.
 
-Os itens 1 a 5 não mudam a paginação. A quebra da p.89 fica dentro das Referências e não mexe no
-Sumário.
 
 ## 7. Folha de aprovação (p.3), no dia da defesa
 
@@ -107,5 +86,5 @@ Sumário.
 
 ## 8. Conferência final
 
-Depois dos itens 1 a 6, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+Depois dos itens 1, 2 e 6, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
 e salvar no editor, que corrompe o arquivo). Eu confiro tudo de novo.
