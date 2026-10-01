@@ -103,6 +103,27 @@ caminho de execução antes da build que a contém.)*
 
 ### Pendência anotada para o refinamento
 
+🔴 **Relógio quebrado quando abre com o teclado de pé** (anotado em 30/09, ainda sem correção).
+
+- **Como reproduzir:** tocar no campo de horário (o teclado numérico sobe) e, com ele aberto, tocar
+  no ícone do relógio ao lado. Tocar direto no ícone, com o teclado fechado, abre perfeito.
+- **O que aparece:** o mostrador desenhado mais para baixo, e os botões Cancelar e Confirmar por
+  cima dele.
+- **Causa provável:** o `BottomSheet` se mede com o teclado aberto (`maxHeight` e `paddingBottom`
+  vêm de `useKeyboardHeight`). O `Modal` tira o foco do campo, o teclado fecha logo depois e o popup
+  cresce, mas o `Host` do Compose não acompanha o novo layout. É o mesmo tipo de problema já
+  registrado no `minHeight: 320` de `TimePicker.styles.ts`.
+- **Correção sugerida:** abrir o popup só depois do `keyboardDidHide`. Se o teclado estiver visível
+  (`Keyboard.isVisible()`), chamar `Keyboard.dismiss()` e abrir no evento, com um tempo-limite de
+  reserva para o caso de o evento não vir. Um helper em `src/shared/` resolve todos os pontos de uma
+  vez.
+- **Onde aplicar:** `TimeField.abrir()` (todo campo de horário do app, inclusive os da lista de
+  horários do cadastro), `DateField.abrir()` (o calendário usa o mesmo `Host` e deve quebrar igual) e
+  `SeletorDeHorarios`, no botão que troca o popup para `relogioDaSerie` depois de digitar o
+  intervalo.
+- **Como validar:** os três caminhos com o teclado aberto antes de tocar no ícone, nos quatro temas.
+  É só JavaScript, então dá para testar pela recarga do Metro, sem gastar build.
+
 **Os quatro temas.** ✅ **Resolvido em 11/09** - os quatro temas (padrão, escuro, alto contraste e
 daltonismo) foram revisados em aparelho e aprovados.
 
