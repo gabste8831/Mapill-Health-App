@@ -1,96 +1,53 @@
 # TCC: o que falta (guia único)
 
-> **Conferido em 01/10, 10:30**, contra `TCC Gabriel Steffens Atualizado 01_10.docx.pdf` (89
-> páginas). O histórico das revisões fica no git.
+> **Conferido em 01/10, 11:58**, contra `TCC Gabriel Steffens Atualizado 01_10.docx.pdf` (91
+> páginas). Figura 8 inserida e no tamanho certo, seção 4.7 no lugar, e os acertos da manhã
+> (capítulo 6, p.16, comentários dos Quadros 25 e 26, Figura 12, Abstract, 2.7.3) estão certos. O
+> histórico das revisões fica no git.
 >
-> **Falta:** 1 (seção 4.7) → 2 (Figura 8) → 3 (números de página) → exportar PDF → 5 (conferência).
-> O 4 fica para o dia da defesa.
+> **Falta:** 1 a 5 (acertos pontuais) → 6 (números de página) → exportar PDF → 8 (conferência). O
+> 7 fica para o dia da defesa.
 
 ---
 
-## Feitos em 01/10, a conferir no próximo PDF
+## 1. Sumário sem a 4.7 (p.15)
 
-Título "6. CONFCLUSÃO" (p.83), caixa branca sobre "segurança" (p.16), itálico nos comentários dos
-Quadros 11, 13, 25 e 26, título da Figura 12 na lista, frase da reinicialização no Abstract, espaço
-entre as referências META, MICROSOFT, NIELSEN e NORMAN, e o pontilhado da 2.7.3 no Sumário.
+Falta a linha **"4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO.....79"**, entre a 4.6.5 e o
+5. RESULTADOS, no mesmo estilo da 4.6 (sem negrito, por ser seção de nível 2).
 
-## 1. Seção 4.7, uso de inteligência artificial (depois da 4.6.5, antes do capítulo 5)
+## 2. Lista de siglas sem EAS e USB (p.9 e 10)
 
-Entra no fim do capítulo 4, logo depois do parágrafo da gamificação (p.78). No fim do capítulo,
-nenhuma remissão a seção existente muda de número. O texto não usa quadro nem figura, então a
-numeração dos dois segue igual.
+A IA entrou. Faltam as duas que a 4.7 também usa.
 
-> **4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO**
->
-> O desenvolvimento do projeto contou com o auxílio de ferramentas de inteligência artificial (IA).
-> Na concepção das telas, etapa das primeiras ideias de *design*, o Google Stitch (Google, 2026)
-> gerou propostas iniciais a partir de descrições textuais centradas no foco da aplicação, ajustadas
-> no Figma (Figma, 2026) antes da implementação sobre o sistema de *design* próprio apresentado na
-> seção 4.4.4.
->
-> Na implementação, utilizou-se o Claude Code (Anthropic, 2026), um agente de IA que opera sobre o
-> repositório e executa comandos no ambiente de desenvolvimento, empregado na escrita de código e no
-> diagnóstico de defeitos. Para que o agente seguisse as decisões do projeto, foram escritos, no
-> início do desenvolvimento, arquivos de instrução que ele consulta antes de cada operação para obter
-> contexto. Esses arquivos registram a arquitetura adotada, a sincronização *offline-first*, as
-> heurísticas de usabilidade, a validação de dados clínicos e as práticas de React Native, de modo
-> que os planos de implementação, as rotinas e as revisões partissem das mesmas regras descritas
-> neste capítulo.
->
-> O ponto mais marcante foi a rotina de teste, na qual o agente atuou também na revisão de código
-> (*code review*). Durante grande parte do desenvolvimento, as versões instaláveis foram compiladas em
-> nuvem pelo EAS (*Expo Application Services*), cujo plano gratuito limita o número mensal de
-> compilações, de modo que um erro descoberto só no aparelho podia custar uma compilação inteira e
-> uma nova rodada de testes. Por isso, nenhuma versão era gerada sem passar antes pela checagem de tipos,
-> pela análise estática do código e por rotinas de conferência, que exercitam as regras de domínio
-> sem aparelho graças ao instante presente recebido como parâmetro, conforme a seção 4.4.2. A mesma
-> verificação prévia foi mantida depois que a compilação passou a ser feita localmente, com
-> instalação direta no aparelho por depuração USB. Defeitos encontrados no aparelho passaram a
-> originar novas rotinas, tanto de regras da arquitetura quanto de alinhamento ao *design* do
-> produto, para que não retornassem em versões seguintes.
->
-> Na validação descrita no capítulo 5, o agente apoiou a montagem do roteiro de testes e a simulação
-> do segundo dispositivo pela base remota, o que permitiu cenários mais completos, com mais recursos
-> da aplicação acionados em menos tempo. A execução e a aprovação de cada cenário couberam ao autor,
-> no aparelho físico.
+- **EAS:** *Expo Application Services*, entre CTO e eHealth.
+- **USB:** *Universal Serial Bus* (Barramento Serial Universal), entre UNIDAVI e UX.
 
-**Junto com a seção**
+## 3. Ajustes no texto da 4.7 (p.79)
 
-- **Sumário:** nova linha "4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO", depois da 4.6.5.
-  O número sai depois de inserir a figura 8, no item 3.
-- **Lista de siglas:** "EAS: *Expo Application Services*", entre CTO e eHealth, "IA: Inteligência
-  Artificial", entre FK e IBM, e "USB: *Universal Serial Bus* (Barramento Serial Universal)", entre
-  UNIDAVI e UX.
-- **Referências**, em ordem alfabética:
-  - depois de ALLSOPP: ANTHROPIC. **Claude Code**. 2026. Disponível em:
-    https://www.anthropic.com/claude-code. Acesso em: 1 out. 2026.
-  - depois de EXPO: FIGMA. **Figma**. 2026. Disponível em: https://www.figma.com. Acesso em: 1 out.
-    2026.
-  - depois de FIGMA: GOOGLE. **Stitch**. 2026. Disponível em: https://stitch.withgoogle.com. Acesso
-    em: 1 out. 2026.
+- "seguisse as decisões e escopo do projeto" → "seguisse as decisões e **o** escopo do projeto".
+- "pela checagem de tipos, análise estática do código e por rotinas" → "pela checagem de tipos,
+  **pela** análise estática do código e por rotinas".
+- "alinhamento ao design do produto" → *design* em **itálico**, como nas outras duas ocorrências da
+  seção.
 
-## 2. Figura 8 - Notificação do alarme de dose sobre a tela de bloqueio (p.72)
+## 4. Referências (p.87 a 90)
 
-É a única que ainda usa a imagem de reserva. Três capturas lado a lado, na mesma altura e com
-espaçamento igual, do mesmo aparelho, com a barra de status limpa, sem moldura de celular e com os
-dados da base de demonstração do [`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURAS.md).
+- **FIGMA** ficou sem o ano no fim. Está "Acesso em: 1 out." e fica "Acesso em: 1 out. **2026.**".
+- **Página quase vazia na p.89.** Depois de NIELSEN há uma quebra de página, e NORMAN começa no
+  topo da p.90. Apagar a quebra que ficou depois de NIELSEN.
+- **Espaço entre referências desigual.** O padrão é uma linha em branco entre cada uma. Ficaram
+  com espaço menor EXPO, FIGMA, GOOGLE e IBM entre si, MEDISAFE, META e MICROSOFT entre si, e NORMAN e
+  OSTERBERG. Vale selecionar a lista inteira e aplicar o mesmo espaçamento de uma vez.
 
-1. **Tela do alarme sobre a tela de bloqueio.**
-2. **Notificação com os botões de ação**, Tomei e Pulei. Só a notificação comum tem botões, e o
-   Adiar existe apenas na tela cheia do alarme. Para este print, usar um medicamento com o lembrete
-   no modo **notificação**, e não alarme.
-3. **Tela do alarme depois do adiamento, com dois medicamentos.** Mostra o agrupamento das doses do
-   mesmo horário em um único aviso e, sem o botão Adiar, que o adiamento é oferecido uma vez só.
+## 5. Reticências dos Quadros 11 e 13 (p.55 e 57)
 
-**Manter o tamanho da imagem de reserva**, que é o mesmo das Figuras 3 a 7. Se a figura nova ficar
-mais alta, a fonte desce para a p.73 e todos os números a partir daí andam; aí é só me mandar o
-PDF de novo.
+Nas linhas `// ...` (linha 10 do Quadro 11 e linha 13 do Quadro 13) o `//` ficou em itálico e as
+reticências não. Pôr o `...` em itálico também.
 
-## 3. Números de página
+## 6. Números de página
 
-Conferidos entrada por entrada contra o PDF de 01/10. **A seção 4.7 vai empurrar o capítulo 5 em
-diante**, então esta tabela vale só até a 4.6.5, e o resto eu recalculo no próximo PDF. Supondo
-que a Figura 8 não mude de tamanho, trocar estes.
+Conferidos entrada por entrada contra o PDF das 11:58, já com a Figura 8 e a 4.7. Trocar só estes; o
+resto já está certo.
 
 **Sumário**
 
@@ -121,21 +78,34 @@ que a Figura 8 não mude de tamanho, trocar estes.
 | 4.6.1 Primeiro Acesso | 65 | 66 |
 | 4.6.2 Cadastro de Medicamentos | 66 | 67 |
 | 4.6.5 Acessibilidade e Linguagem Visual | 75 | 76 |
+| 4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO | (nova) | 79 |
+| 5. RESULTADOS | 79 | 80 |
+| 5.1 VALIDAÇÃO DA ARQUITETURA OFFLINE-FIRST | 79 | 80 |
+| 5.2 AJUSTES DECORRENTES DA VALIDAÇÃO | 79 | 80 |
+| 5.3 CONFIABILIDADE DO ALARME | 81 | 82 |
+| 5.4 ATENDIMENTO AOS OBJETIVOS | 81 | 82 |
+| 6. CONCLUSÃO | 83 | 84 |
+| 6.1 TRABALHOS FUTUROS | 84 | 85 |
+| REFERÊNCIAS | 86 | 87 |
 
-A 4.2 LEVANTAMENTO DE REQUISITOS fica em 43 (o título está no pé da p.43).
+A 4.2 LEVANTAMENTO DE REQUISITOS fica em 43 (o título está no pé da p.43), e a 4.6.3 e a 4.6.4
+continuam em 70 e 73.
 
 **Lista de quadros:** do **Quadro 3 ao Quadro 24, somar 1** (Quadro 3: 44 → 45 ... Quadro 24: 65 →
-66), e **Quadro 27: 76 → 77**. Os Quadros 1, 2, 25, 26 e 28 já estão certos.
+66), **Quadro 27: 76 → 77** e **Quadro 28: 80 → 81**. Os Quadros 1, 2, 25 e 26 já estão certos.
 
 **Lista de figuras:** **Figura 1: 54 → 55**, **Figura 2: 59 → 60** e **Figura 3: 66 → 67**. Da
 Figura 4 à 12 já está certo.
 
-## 4. Folha de aprovação (p.3), no dia da defesa
+Os itens 1 a 5 não mudam a paginação. A quebra da p.89 fica dentro das Referências e não mexe no
+Sumário.
+
+## 7. Folha de aprovação (p.3), no dia da defesa
 
 - Data: hoje está "Rio do Sul, 30 de setembro de 2026.". Trocar pela data da defesa.
 - Nomes dos dois professores da banca, depois de "Prof.".
 
-## 5. Conferência final
+## 8. Conferência final
 
-Depois dos itens 1 a 3, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
-e salvar no editor, que corrompe o arquivo). Eu confiro a Figura 8, a seção 4.7, os acertos de 01/10 e os números de página.
+Depois dos itens 1 a 6, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+e salvar no editor, que corrompe o arquivo). Eu confiro tudo de novo.
