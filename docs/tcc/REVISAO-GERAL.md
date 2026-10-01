@@ -1,35 +1,15 @@
 # TCC: o que falta (guia único)
 
-> **Conferido em 01/10, 14:38**, contra `TCC Gabriel Steffens Atualizado 01_10.docx.pdf` (90
-> páginas). Sumário e listas com os 123 números certos e títulos idênticos aos do corpo, remissões
-> a quadros, figuras e seções todas válidas, quadros de código iguais ao código-fonte, contagens do
-> texto conferidas e figuras de acordo com as legendas. O histórico das revisões fica no git.
+> **Conferido em 01/10, 14:57**, contra `TCC Gabriel Steffens Atualizado 01_10.docx.pdf` (90
+> páginas). Documento fechado. Sumário e listas com os 123 números certos e títulos idênticos aos do
+> corpo, remissões válidas, quadros de código iguais ao código-fonte, figuras de acordo com as
+> legendas, itálicos completos, server_updated_at citada na 4.5 sem mexer na paginação, e numeração
+> visível só a partir da Introdução (16). O histórico das revisões fica no git.
 >
-> **Falta:** A (itálicos) e B (frase na 4.5) → exportar PDF → 2 (conferência). O 1 fica para o dia da defesa. O espaço
-> entre algumas referências (EXPO, FIGMA, GOOGLE, MEDISAFE, META, NIELSEN e NORMAN) segue um pouco
-> menor que o das demais, acabamento opcional.
+> **Falta:** só o item 1, no dia da defesa. O espaço entre algumas referências (EXPO, FIGMA, GOOGLE,
+> MEDISAFE, META, NIELSEN e NORMAN) segue um pouco menor que o das demais, acabamento opcional.
 
 ---
-
-## A. Itálicos que faltam (não mexem na paginação)
-
-- **Sumário (p.13 e 14):** MHEALTH em itálico nas entradas 2.1, 2.3 e 2.10, como já está nos
-  títulos do corpo.
-- **Título da 2.6 (p.30) e a entrada dela no Sumário (p.14):** CLEAN ARCHITECTURE em itálico, como
-  já está na 4.4.1 e como o Sumário faz com *Clean Code* na 2.6.2.
-- **Lista de siglas (p.9):** a sigla "eHealth" em itálico, como já está "mHealth" logo abaixo.
-
-## B. Coluna server_updated_at, em uma frase na 4.5 (p.59)
-
-Linha nova nos nove quadros desarruma as tabelas, então a coluna entra no texto. No fim do
-parágrafo de abertura da 4.5, depois de "...os Quadros 16 a 24 contemplam o esquema completo do
-modelo de dados.", acrescentar:
-
-> Na base remota, as tabelas têm ainda a coluna server_updated_at, descrita na seção 4.4.6.
-
-A frase cabe em uma linha, e a p.59 tem espaço para ela antes da margem, então a Figura 2 continua
-na p.60 e a paginação não muda. Conferir isso no PDF exportado. O nome da coluna vai sem itálico,
-como "correctsLogId" na 4.4.7.
 
 ## 1. Folha de aprovação (p.3), no dia da defesa
 
@@ -38,5 +18,5 @@ como "correctsLogId" na 4.4.7.
 
 ## 2. Conferência final
 
-Depois dos itens A e B, e de novo depois do item 1, no dia da defesa, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+Depois do item 1, no dia da defesa, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
 e salvar no editor, que corrompe o arquivo). Eu confiro tudo de novo.
