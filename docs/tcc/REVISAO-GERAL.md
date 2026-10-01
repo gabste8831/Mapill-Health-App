@@ -4,8 +4,8 @@
 > páginas). Texto, siglas, quadros, figuras e a seção 4.7 estão certos. O histórico das revisões fica
 > no git.
 >
-> **Falta:** 1 (página em branco) → 2 (acabamentos) → 6 (números de página) → exportar PDF → 8
-> (conferência). O 7 fica para o dia da defesa.
+> **Falta:** 1 (página em branco) → 2 (acabamentos) → 3 (números de página) → exportar PDF → 5
+> (conferência). O 4 fica para o dia da defesa.
 
 ---
 
@@ -14,7 +14,7 @@
 A linha nova da 4.7 empurrou as linhas vazias do fim do Sumário para uma página nova, que saiu
 inteira em branco, entre o Sumário e a Introdução. Apagar as linhas vazias depois de
 "REFERÊNCIAS.....86". Depois de exportar, conferir que a Introdução continua com o número **16** no
-topo, porque a tabela do item 6 parte disso.
+topo, porque a tabela do item 3 parte disso.
 
 ## 2. Acabamentos
 
@@ -25,7 +25,7 @@ topo, porque a tabela do item 6 parte disso.
 - **Sumário, linha da 4.7:** o pontilhado saiu em negrito, e nas outras seções de nível 2 ele é
   normal.
 
-## 6. Números de página
+## 3. Números de página
 
 Conferidos de novo contra o PDF das 13:43, pelo número impresso no topo de cada página. A tabela
 não mudou. Ainda não foi aplicada, e é o que falta. Trocar só estes; o resto já está certo.
@@ -79,12 +79,12 @@ continuam em 70 e 73.
 Figura 4 à 12 já está certo.
 
 
-## 7. Folha de aprovação (p.3), no dia da defesa
+## 4. Folha de aprovação (p.3), no dia da defesa
 
 - Data: hoje está "Rio do Sul, 30 de setembro de 2026.". Trocar pela data da defesa.
 - Nomes dos dois professores da banca, depois de "Prof.".
 
-## 8. Conferência final
+## 5. Conferência final
 
-Depois dos itens 1, 2 e 6, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+Depois dos itens 1 a 3, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
 e salvar no editor, que corrompe o arquivo). Eu confiro tudo de novo.
