@@ -1,34 +1,18 @@
 # TCC: o que falta (guia único)
 
-> **Conferido em 01/10, 13:43**, contra `TCC Gabriel Steffens Atualizado 01_10.docx (1).pdf` (91
-> páginas). Texto, siglas, quadros, figuras e a seção 4.7 estão certos. O histórico das revisões fica
-> no git.
+> **Conferido em 01/10, 13:55**, contra `TCC Gabriel Steffens Atualizado 01_10.docx (2).pdf` (90
+> páginas). Texto, siglas, quadros, figuras, Sumário (títulos), seção 4.7 e a página em branco estão
+> resolvidos. O histórico das revisões fica no git.
 >
-> **Falta:** 1 (página em branco) → 2 (acabamentos) → 3 (números de página) → exportar PDF → 5
-> (conferência). O 4 fica para o dia da defesa.
+> **Falta:** 1 (números de página) → exportar PDF → 3 (conferência). O 2 fica para o dia da defesa.
+> O espaço entre algumas referências ainda é um pouco menor que o das demais (EXPO, FIGMA, GOOGLE,
+> MEDISAFE, META, NIELSEN e NORMAN), acabamento opcional.
 
 ---
 
-## 1. Página em branco depois do Sumário (p.16 do PDF)
+## 1. Números de página
 
-A linha nova da 4.7 empurrou as linhas vazias do fim do Sumário para uma página nova, que saiu
-inteira em branco, entre o Sumário e a Introdução. Apagar as linhas vazias depois de
-"REFERÊNCIAS.....86". Depois de exportar, conferir que a Introdução continua com o número **16** no
-topo, porque a tabela do item 3 parte disso.
-
-## 2. Acabamentos
-
-- **FIGMA (Referências):** termina em "Acesso em: 1 out. 2026" sem o ponto final.
-- **Espaço entre referências:** ainda desigual em três trechos. EXPO e FIGMA estão coladas, sem
-  linha em branco, e FIGMA, GOOGLE, MEDISAFE, META, NIELSEN e NORMAN têm um espaço menor que o das
-  demais. Selecionar a lista inteira e aplicar o mesmo espaçamento resolve de uma vez.
-- **Sumário, linha da 4.7:** o pontilhado saiu em negrito, e nas outras seções de nível 2 ele é
-  normal.
-
-## 3. Números de página
-
-Conferidos de novo contra o PDF das 13:43, pelo número impresso no topo de cada página. A tabela
-não mudou. Ainda não foi aplicada, e é o que falta. Trocar só estes; o resto já está certo.
+Conferidos de novo contra o PDF das 13:55. A tabela não mudou e ainda não foi aplicada. Trocar só estes; o resto já está certo.
 
 **Sumário**
 
@@ -79,12 +63,12 @@ continuam em 70 e 73.
 Figura 4 à 12 já está certo.
 
 
-## 4. Folha de aprovação (p.3), no dia da defesa
+## 2. Folha de aprovação (p.3), no dia da defesa
 
 - Data: hoje está "Rio do Sul, 30 de setembro de 2026.". Trocar pela data da defesa.
 - Nomes dos dois professores da banca, depois de "Prof.".
 
-## 5. Conferência final
+## 3. Conferência final
 
-Depois dos itens 1 a 3, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+Depois do item 1, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
 e salvar no editor, que corrompe o arquivo). Eu confiro tudo de novo.
