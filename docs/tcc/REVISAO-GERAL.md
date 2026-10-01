@@ -1,67 +1,74 @@
 # TCC: o que falta (guia único)
 
 > **Conferido em 01/10, 10:30**, contra `TCC Gabriel Steffens Atualizado 01_10.docx.pdf` (89
-> páginas). Figuras 1 a 7 e 9 a 12 inseridas e no tamanho certo, pré-textuais, siglas e o restante
-> do texto estão certos. O histórico das revisões fica no git.
+> páginas). O histórico das revisões fica no git.
 >
-> **Falta:** 1 a 7 (correções pontuais) → 8 (Figura 8) → 9 (números de página) → exportar PDF →
-> 11 (conferência). O 10 fica para o dia da defesa.
+> **Falta:** 1 (seção 4.7) → 2 (Figura 8) → 3 (números de página) → exportar PDF → 5 (conferência).
+> O 4 fica para o dia da defesa.
 
 ---
 
-## 1. Título do capítulo 6 (p.83)
+## Feitos em 01/10, a conferir no próximo PDF
 
-Continua **"6. CONFCLUSÃO"**, com um F a mais. No Sumário está certo.
+Título "6. CONFCLUSÃO" (p.83), caixa branca sobre "segurança" (p.16), itálico nos comentários dos
+Quadros 11, 13, 25 e 26, título da Figura 12 na lista, frase da reinicialização no Abstract, espaço
+entre as referências META, MICROSOFT, NIELSEN e NORMAN, e o pontilhado da 2.7.3 no Sumário.
 
-## 2. Texto coberto na p.16
+## 1. Seção 4.7, uso de inteligência artificial (depois da 4.6.5, antes do capítulo 5)
 
-Na última linha do 1.1 PROBLEMA DE PESQUISA, um retângulo branco cobria o começo da palavra
-"segurança", e no PDF saía só **"nça e confiabilidade..."**. **Removido em 01/10**, falta só ver no
-próximo PDF. As caixas brancas que sobraram nas p.3, 4 e 5 vieram do modelo antigo e ficam sobre
-área vazia, sem cobrir texto, então podem ficar.
+Entra no fim do capítulo 4, logo depois do parágrafo da gamificação (p.78). No fim do capítulo,
+nenhuma remissão a seção existente muda de número. O texto não usa quadro nem figura, então a
+numeração dos dois segue igual.
 
-## 3. Comentários de código sem itálico
+> **4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO**
+>
+> O desenvolvimento do Mapill contou com ferramentas de inteligência artificial (IA) em três
+> frentes, a concepção inicial das telas, a escrita e a verificação do código e a condução dos
+> testes em aparelho. Em todas elas, as decisões de projeto, a revisão do que foi produzido e a
+> validação final permaneceram a cargo do autor.
+>
+> Na concepção, o Google Stitch (Google, 2026) gerou propostas iniciais de tela a partir de
+> descrições textuais, e o Figma (Figma, 2026) foi utilizado para comparar e ajustar essas propostas
+> antes da implementação. Elas serviram como ponto de partida, e a interface final foi construída
+> sobre o sistema de *design* próprio apresentado na seção 4.4.4.
+>
+> Na implementação, utilizou-se o assistente de programação Claude Code (Anthropic, 2026), que opera
+> sobre o repositório do projeto e executa comandos no ambiente de desenvolvimento. O assistente foi
+> empregado na escrita de código, na elaboração de rotinas de conferência e no diagnóstico de
+> defeitos a partir dos registros de execução do aparelho.
+>
+> O maior desafio dessa etapa foi a rotina de teste. Cada versão instalável é compilada em nuvem,
+> leva minutos para ficar pronta, e o plano gratuito do serviço limita a quantidade mensal de
+> compilações. Um erro descoberto só no aparelho custava, assim, uma compilação inteira e uma nova
+> rodada de testes. Para evitar esse retrabalho, nenhuma versão era gerada sem passar antes pela
+> checagem de tipos do TypeScript, pela análise estática do código e por dezessete rotinas de
+> conferência escritas ao longo do projeto. Essas rotinas exercitam as regras de domínio sem
+> aparelho e sem banco de dados, o que só é possível porque os casos de uso recebem o instante
+> presente como parâmetro, conforme a seção 4.4.2. Defeitos encontrados no aparelho, como o alarme
+> que deixava de tocar após edições sucessivas de um tratamento, deram origem a novas rotinas, de
+> modo que a mesma falha não retornasse em versões seguintes.
+>
+> Na validação descrita no capítulo 5, a IA apoiou também a montagem do roteiro de testes, no qual
+> cada passo registra o procedimento e o resultado esperado. Para os cenários com mais de um
+> aparelho, o roteiro simulou o segundo dispositivo por comandos executados diretamente na base
+> remota, com carimbo de tempo controlado, o que permitiu reproduzir com precisão a ordem dos
+> acontecimentos na sincronização e no conflito. A execução de cada cenário e a decisão sobre sua
+> aprovação couberam ao autor, no aparelho físico.
 
-O padrão dos quadros pede comentário em itálico, e quatro linhas ficaram em fonte normal:
+**Junto com a seção**
 
-- **Quadro 25 (p.71)**, linha 4: `// Um adiamento só por horário.`
-- **Quadro 26 (p.73)**, linha 1: `// O que fica de fora das contas, ...` (as duas linhas da quebra)
-- **Quadro 11 (p.55)**, linha 10: `// ...`
-- **Quadro 13 (p.57)**, linha 13: `// ...`
+- **Sumário:** nova linha "4.7 USO DE INTELIGÊNCIA ARTIFICIAL NO DESENVOLVIMENTO", depois da 4.6.5.
+  O número sai depois de inserir a figura 8, no item 3.
+- **Lista de siglas:** "IA: Inteligência Artificial", entre FK e IBM.
+- **Referências**, em ordem alfabética:
+  - depois de ALLSOPP: ANTHROPIC. **Claude Code**. 2026. Disponível em:
+    https://www.anthropic.com/claude-code. Acesso em: 1 out. 2026.
+  - depois de EXPO: FIGMA. **Figma**. 2026. Disponível em: https://www.figma.com. Acesso em: 1 out.
+    2026.
+  - depois de FIGMA: GOOGLE. **Stitch**. 2026. Disponível em: https://stitch.withgoogle.com. Acesso
+    em: 1 out. 2026.
 
-## 4. Título da Figura 12 diferente na lista (p.12)
-
-A imagem mostra claro, alto contraste e escuro, nessa ordem, e a legenda no corpo (p.78) diz
-**"Tela inicial nos temas claro, alto contraste e escuro"**. A Lista de Figuras ainda diz
-"claro, escuro e de alto contraste". Trocar a entrada da lista pelo texto da legenda.
-
-## 5. Abstract sem a frase da reinicialização (p.8)
-
-O Resumo termina a parte do alarme com "e a entrega após a reinicialização mostrou-se dependente
-da restrição de inicialização automática imposta pelo fabricante", e o Abstract não tem esse
-trecho. Trocar:
-
-> The dose alarm was verified with the device locked and in use, with the application present in or
-> absent from the recent apps list.
-
-por:
-
-> The dose alarm was verified with the device locked and in use, with the application present in or
-> absent from the recent apps list, and its delivery after a reboot proved dependent on the
-> autostart restriction imposed by the manufacturer.
-
-## 6. Espaço entre referências (p.87)
-
-Todas as referências têm uma linha em branco entre si, menos **META e MICROSOFT** e **NIELSEN e
-NORMAN**, que estão coladas. Entre MEDISAFE e META o espaço também sai menor que os demais.
-
-## 7. Sumário: 2.7.3 sem pontilhado (p.14)
-
-A entrada "2.7.3 Arquiteturas Multiplataforma Baseadas em Pontes Nativas: React Native e Expo"
-encosta no número e sai **"Expo33"**, sem pontilhado. Quebrar o título em duas linhas, como já
-está a 2.4, para o pontilhado e o 33 caberem na segunda.
-
-## 8. Figura 8 - Notificação do alarme de dose sobre a tela de bloqueio (p.72)
+## 2. Figura 8 - Notificação do alarme de dose sobre a tela de bloqueio (p.72)
 
 É a única que ainda usa a imagem de reserva. Três capturas lado a lado, na mesma altura e com
 espaçamento igual, do mesmo aparelho, com a barra de status limpa, sem moldura de celular e com os
@@ -78,10 +85,11 @@ dados da base de demonstração do [`ROTEIRO-DAS-FIGURAS.md`](ROTEIRO-DAS-FIGURA
 mais alta, a fonte desce para a p.73 e todos os números a partir daí andam; aí é só me mandar o
 PDF de novo.
 
-## 9. Números de página
+## 3. Números de página
 
-Conferidos entrada por entrada contra o PDF de 01/10. Nada mudou desde o de 30/09. Supondo que a
-Figura 8 não mude de tamanho, trocar só estes; o resto já está certo.
+Conferidos entrada por entrada contra o PDF de 01/10. **A seção 4.7 vai empurrar o capítulo 5 em
+diante**, então esta tabela vale só até a 4.6.5, e o resto eu recalculo no próximo PDF. Supondo
+que a Figura 8 não mude de tamanho, trocar estes.
 
 **Sumário**
 
@@ -121,12 +129,12 @@ A 4.2 LEVANTAMENTO DE REQUISITOS fica em 43 (o título está no pé da p.43).
 **Lista de figuras:** **Figura 1: 54 → 55**, **Figura 2: 59 → 60** e **Figura 3: 66 → 67**. Da
 Figura 4 à 12 já está certo.
 
-## 10. Folha de aprovação (p.3), no dia da defesa
+## 4. Folha de aprovação (p.3), no dia da defesa
 
 - Data: hoje está "Rio do Sul, 30 de setembro de 2026.". Trocar pela data da defesa.
 - Nomes dos dois professores da banca, depois de "Prof.".
 
-## 11. Conferência final
+## 5. Conferência final
 
-Depois dos itens 1 a 9, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
-e salvar no editor, que corrompe o arquivo). Eu confiro a Figura 8, a p.16 e os números de página.
+Depois dos itens 1 a 3, exportar o PDF e trazer para `docs/` pelo Explorador de Arquivos (sem abrir
+e salvar no editor, que corrompe o arquivo). Eu confiro a Figura 8, a seção 4.7, os acertos de 01/10 e os números de página.
