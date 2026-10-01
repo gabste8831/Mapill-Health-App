@@ -5,8 +5,7 @@
 > a quadros, figuras e seções todas válidas, quadros de código iguais ao código-fonte, contagens do
 > texto conferidas e figuras de acordo com as legendas. O histórico das revisões fica no git.
 >
-> **Falta:** A (itálicos) e B (coluna nos Quadros 16 a 24) → exportar PDF → números de página,
-> que eu recalculo → 2 (conferência). O 1 fica para o dia da defesa. O espaço
+> **Falta:** A (itálicos) e B (frase na 4.5) → exportar PDF → 2 (conferência). O 1 fica para o dia da defesa. O espaço
 > entre algumas referências (EXPO, FIGMA, GOOGLE, MEDISAFE, META, NIELSEN e NORMAN) segue um pouco
 > menor que o das demais, acabamento opcional.
 
@@ -20,23 +19,17 @@
   já está na 4.4.1 e como o Sumário faz com *Clean Code* na 2.6.2.
 - **Lista de siglas (p.9):** a sigla "eHealth" em itálico, como já está "mHealth" logo abaixo.
 
-## B. Coluna server_updated_at nos Quadros 16 a 24
+## B. Coluna server_updated_at, em uma frase na 4.5 (p.59)
 
-A coluna existe nas nove tabelas da base remota desde a correção de 25/09 descrita na 5.2, e os
-quadros ainda não a listam. Em cada um dos nove quadros, inserir uma linha **entre updated_at e
-deleted_at**, com a mesma formatação das outras (nome normal, tipo em itálico):
+Linha nova nos nove quadros desarruma as tabelas, então a coluna entra no texto. No fim do
+parágrafo de abertura da 4.5, depois de "...os Quadros 16 a 24 contemplam o esquema completo do
+modelo de dados.", acrescentar:
 
-| Campo | Tipo | Descrição |
-|---|---|---|
-| server_updated_at | *timestamptz* | Data e hora de chegada do registro à base remota, usada no recebimento da sincronização |
+> Na base remota, as tabelas têm ainda a coluna server_updated_at, descrita na seção 4.4.6.
 
-A descrição é a mesma nos nove. Os quadros afetados são 16 (medications), 17 (prescriptions), 18
-(dose_schedules), 19 (intake_logs), 20 (inventory_items), 21 (inventory_adjustments), 22
-(appointments), 23 (patient_profiles) e 24 (consent_records).
-
-**Isso muda a paginação.** Depois de inserir, exportar o PDF antes de mexer nos números, que eu
-recalculo o Sumário e as listas a partir dele. Vale conferir também que nenhum quadro se partiu
-entre duas páginas e que a fonte continua colada a cada um.
+A frase cabe em uma linha, e a p.59 tem espaço para ela antes da margem, então a Figura 2 continua
+na p.60 e a paginação não muda. Conferir isso no PDF exportado. O nome da coluna vai sem itálico,
+como "correctsLogId" na 4.4.7.
 
 ## 1. Folha de aprovação (p.3), no dia da defesa
 
