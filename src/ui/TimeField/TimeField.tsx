@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 
+import { depoisDoTeclado } from "@/shared/depois-do-teclado";
 import { formatTimeInput, parseTimeInput } from "@/shared/time-input";
 import { useCores, useEstilos } from "@/shared/theme";
 import { BottomSheet } from "../BottomSheet/BottomSheet";
@@ -54,7 +55,7 @@ export function TimeField({
 
   function abrir() {
     setRascunho(null);
-    setSheetOpen(true);
+    depoisDoTeclado(() => setSheetOpen(true));
   }
 
   function confirmar() {

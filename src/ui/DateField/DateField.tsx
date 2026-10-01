@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import type { NativeSyntheticEvent, TargetedEvent } from "react-native";
 
 import { formatDateInput, parseDateInput, toDateInput } from "@/shared/date-input";
+import { depoisDoTeclado } from "@/shared/depois-do-teclado";
 import { useCores, useEstilos } from "@/shared/theme";
 import { BottomSheet } from "../BottomSheet/BottomSheet";
 import { Button } from "../Button/Button";
@@ -58,7 +59,7 @@ export function DateField({
 
   function abrir() {
     setRascunho(null);
-    setSheetOpen(true);
+    depoisDoTeclado(() => setSheetOpen(true));
   }
 
   function confirmar() {

@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Keyboard, Pressable, Text, View } from "react-native";
 
+import { depoisDoTeclado } from "@/shared/depois-do-teclado";
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
 import { formatDecimalInput, formatIntegerInput } from "@/shared/number-input";
 import {
@@ -243,7 +244,7 @@ export function SeletorDeHorarios({
                 style={estadoDePressao(styles.botaoDeHorario)}
                 onPress={() => {
                   setRascunho(null);
-                  setModo({ tipo: "relogioDaSerie" });
+                  depoisDoTeclado(() => setModo({ tipo: "relogioDaSerie" }));
                 }}
                 accessibilityRole="button"
                 accessibilityLabel="Escolher o primeiro horário da série">
