@@ -105,7 +105,11 @@ caminho de execução antes da build que a contém.)*
 
 **Relógio quebrado quando abre com o teclado de pé.** ✅ **Resolvido em 01/10** - o popup só abre
 depois que o teclado fecha (`src/shared/depois-do-teclado.ts`), nos três pontos abaixo. Validado em
-aparelho, na build local de 01/10. O registro original fica para a história:
+aparelho, na build local de 01/10. Em 03/10 o relógio da série ainda quebrava, mesmo com o teclado
+fechado: o mostrador nativo montado num popup já aberto não acompanha o layout. O popup passou a ser
+recriado quando o relógio entra (`key` no `BottomSheet` do `SeletorDeHorarios`), e os dois caminhos,
+com teclado aberto e fechado, foram conferidos por captura de tela no aparelho. O registro original
+fica para a história:
 
 - **Como reproduzir:** tocar no campo de horário (o teclado numérico sobe) e, com ele aberto, tocar
   no ícone do relógio ao lado. Tocar direto no ícone, com o teclado fechado, abre perfeito.

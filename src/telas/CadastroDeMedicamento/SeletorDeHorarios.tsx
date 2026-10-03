@@ -198,7 +198,13 @@ export function SeletorDeHorarios({
         </Text>
       ) : null}
 
-      <BottomSheet visible={isSheetOpen} onClose={handleRequestClose} title={tituloDoPopup()}>
+      {/* A `key` recria o popup quando o relógio entra: o mostrador nativo montado num popup já
+          aberto não acompanha o layout e sai desenhado por baixo dos botões. */}
+      <BottomSheet
+        key={modo.tipo === "relogioDaSerie" ? "relogio" : "formulario"}
+        visible={isSheetOpen}
+        onClose={handleRequestClose}
+        title={tituloDoPopup()}>
         {modo.tipo === "relogioDaSerie" ? (
           <View style={styles.sheetBody}>
             <TimePicker initialValue={primeiroDaSerie} onChange={setRascunho} />
