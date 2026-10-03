@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
+import { usePreventRemove } from "expo-router/react-navigation";
 import { useMemo, useState } from "react";
 import {
   Alert,
@@ -963,6 +964,19 @@ export function FormularioDeMedicamentoScreen({
   );
 
   /**
+   * As doses que a pessoa pediu ao tocar em "Estender". Sem isto o total era recalculado sobre o
+   * prazo novo e o aviso voltava, pedindo mais um dia a cada toque. Vale para os horários e o início
+   * em que foi pedido: mudou um deles, a conta é outra.
+   */
+  const [alvoDoPrazo, setAlvoDoPrazo] = useState<{ doses: number; chave: string } | null>(null);
+  const chaveDoAlvo = JSON.stringify([schedule, startDate]);
+  const prazoJaCompleta =
+    alvoDoPrazo !== null &&
+    alvoDoPrazo.chave === chaveDoAlvo &&
+    resumoDoTratamento !== null &&
+    resumoDoTratamento.totalDoses >= alvoDoPrazo.doses;
+
+  /**
    * Quais dos horários já vencidos de hoje o paciente diz ter tomado. Só no cadastro novo: editar
    * um tratamento antigo não é o momento de registrar ingestão.
    */
@@ -986,6 +1000,40 @@ export function FormularioDeMedicamentoScreen({
     uri: string;
     titulo: string;
   } | null>(null);
+
+  /**
+   * As respostas do formulário, para saber se a pessoa mexeu em algo. Fora ficam os estados que só
+   * abrem e fecham popups: abrir um e sair não é ter preenchido nada.
+   */
+  const respostas = JSON.stringify([
+    name, activeIngredient, form, doseAmount, doseUnit, frequency, doseInputs, dosesVariam,
+    weekdays, cycleLengthInput, activeDaysInput, cycleStart, cycleStartInput, customDosesInput,
+    startDateInput, duration, durationAmount, durationUnit, reminderMode, photoUri, attachmentUri,
+    attachmentName, wantsRenewalReminder, renewalLeadDays, validUntilInput, tracksStock,
+    stockQuantity, wantsLowStockAlert, leadDays, storageLocation, intakeInstructions, intakeNote,
+    notes, horariosJaTomados,
+  ]);
+  const [respostasIniciais] = useState(respostas);
+  const navigation = useNavigation();
+
+  // Voltar (seta ou botão do Android) com algo preenchido perguntava nada e perdia tudo.
+  usePreventRemove(respostas !== respostasIniciais, ({ data }) => {
+    Keyboard.dismiss();
+    Alert.alert(
+      initialValue === undefined ? "Descartar o cadastro?" : "Descartar as alterações?",
+      initialValue === undefined
+        ? "O que você preencheu até aqui não será salvo."
+        : "As mudanças que você fez não serão salvas.",
+      [
+        { text: "Continuar editando", style: "cancel" },
+        {
+          text: "Descartar",
+          style: "destructive",
+          onPress: () => navigation.dispatch(data.action),
+        },
+      ],
+    );
+  });
 
   /**
    * Sem anexo pergunta a origem, com imagem amplia aqui, com PDF entrega ao leitor do aparelho:
@@ -1658,7 +1706,7 @@ export function FormularioDeMedicamentoScreen({
             </Text>
           ) : null}
 
-          {faltaDeDose !== null ? (
+          {faltaDeDose !== null && !prazoJaCompleta ? (
             <View style={styles.avisoDePrazo}>
               <Text style={styles.sectionHintDestaque}>
                 Esse prazo entrega {faltaDeDose.planejadas} das{" "}
@@ -1675,6 +1723,7 @@ export function FormularioDeMedicamentoScreen({
                   );
                   // `null` só sairia com data inválida, e esta veio do próprio domínio.
                   if (nova === null) return;
+                  setAlvoDoPrazo({ doses: faltaDeDose.nominais, chave: chaveDoAlvo });
                   setDurationUnit(nova.unit);
                   setDurationAmount(String(nova.amount));
                 }}

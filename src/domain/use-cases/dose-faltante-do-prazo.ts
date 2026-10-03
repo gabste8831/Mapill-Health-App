@@ -71,7 +71,9 @@ export function doseFaltanteDoPrazo(
   // divisão - pode haver pausa no meio, e só o gerador sabe onde.
   for (let dias = 1; dias <= MAX_DIAS_DE_EXTENSAO; dias += 1) {
     const candidato = new Date(fim.getFullYear(), fim.getMonth(), fim.getDate() + dias);
-    if (contar(prescription, now, candidato) >= nominais) {
+    // Com o `endDate` do candidato: o original recorta a janela e a contagem nunca sairia do lugar.
+    const estendida = { ...prescription, endDate: toIsoDay(candidato) };
+    if (contar(estendida, now, candidato) >= nominais) {
       return { planejadas, nominais, fimQueCompleta: toIsoDay(candidato) };
     }
   }
