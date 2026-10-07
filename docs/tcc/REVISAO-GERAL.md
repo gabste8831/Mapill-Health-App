@@ -7,6 +7,11 @@
 > esquerda, itálicos e fontes uniformes.
 >
 > **Falta:** só o item 1, no dia da defesa, e a conferência final (item 2).
+>
+> **Apêndice A conferido em 07/10, 20:42**, contra `TCC Gabriel Steffens Atualizado 06_10.docx.pdf`
+> (93 páginas). Manual do usuário nas p.90 a 93, chamada no fim do primeiro parágrafo do 4.6, 4.6.2
+> encurtado para a Figura 4 voltar à p.68. Sumário e listas com as 124 entradas certas (Referências na
+> p.86, Apêndice na p.90), A.1 a A.12 fora do sumário, *login* e *Home* em itálico.
 
 ---
 
