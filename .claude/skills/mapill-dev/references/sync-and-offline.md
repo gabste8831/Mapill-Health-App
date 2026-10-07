@@ -41,8 +41,8 @@ Corrigido em 25/09, depois de dois defeitos que só aparecem com dois aparelhos 
   semana chegava com data antiga, abaixo da marca d'água do outro, e nunca descia.
   `server_updated_at` só existe no servidor (trigger `carimbar_chegada`, com `clock_timestamp()`
   para não empatar dentro de um lote), e `paraLocal` a descarta.
-- Os dois triggers estão em `docs/supabase-schema.sql`, e a validação em aparelho nos blocos 22 e
-  23 do `docs/ROTEIRO-DE-TESTE.md`.
+- Os dois triggers estão em `docs/supabase-schema.sql`. Ambos foram validados em aparelho em
+  setembro de 2026, nos cenários de conflito e de registro offline (Quadro 28 do TCC).
 
 ## Segurança (RLS no Supabase)
 

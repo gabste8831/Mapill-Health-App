@@ -57,7 +57,7 @@ skills-lock.json
 .claude/skills/verify-and-stop/
 
 # Capturas de logcat (scripts/logcat-alarme.ps1) � brutas e volumosas.
-# O que importa de cada captura vai para o ROTEIRO-DE-TESTE.md.
+# O que importa de cada captura vai para o historico do docs/.
 docs/logcat-*.txt
 
 # Artefatos de build local e logs de investigacao.
