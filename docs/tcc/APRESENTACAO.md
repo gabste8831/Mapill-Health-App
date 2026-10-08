@@ -15,10 +15,10 @@
 | Contexto | 1 a 6 | 4 min 30 s |
 | Mapill, parte teórica | 7 a 10 | 3 min 10 s |
 | Demonstração | 11 | 8 min |
-| Fechamento | 12 a 16 | 3 min |
-| **Total** | | **18 min 40 s** |
+| Fechamento | 12 a 16 | 3 min 5 s |
+| **Total** | | **18 min 45 s** |
 
-Sobra 1 min 20 s, que cobre a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
+Sobra 1 min 15 s, que cobre a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
 cortes estão no slide 11.
 
 ---
@@ -246,8 +246,13 @@ você continua narrando ao vivo, com a mesma fala acima.
 ### 15. Referências (5 s)
 Só passar. Fica na tela se a banca pedir.
 
-### 16. Obrigado (15 s)
-> Encerro por aqui. Obrigado pela atenção, e fico à disposição para as perguntas.
+### 16. Obrigado (20 s)
+> Encerro por aqui. Quem quiser conhecer o Mapill pode usar o QR code, que leva à página do
+> aplicativo, onde também está o APK para instalar no Android. Obrigado pela atenção, e fico à
+> disposição para as perguntas.
+
+O QR code aponta para `https://mapill-website.vercel.app/`. Antes da defesa, confira se o APK já
+está publicado na página, porque alguém da banca pode escanear na hora.
 
 ---
 
