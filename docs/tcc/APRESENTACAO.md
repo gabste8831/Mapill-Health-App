@@ -1,7 +1,6 @@
 # Apresentação da defesa: roteiro de estudo
 
-> **Versão 2, 08/10.** Os slides agora são editados pelo Gabriel no Google Slides, e o .pptx do
-> repositório é só o ponto de partida. Slides em `apresentacao-mapill.pptx` (editável) e `apresentacao-mapill.pdf`
+> **Versão 3, 08/10.** Slides em `apresentacao-mapill.pptx` (editável) e `apresentacao-mapill.pdf`
 > (para o computador da defesa, com a fonte embutida). Fonte de todo o conteúdo é o TCC entregue,
 > `docs/TCC Gabriel Steffens Atualizado 06_10.docx.pdf`. A fala de cada slide também está nas notas
 > do .pptx, para o modo apresentador.
@@ -13,14 +12,14 @@
 
 | Bloco | Slides | Tempo |
 |---|---|---|
-| Contexto | 1 a 6 | 4 min 30 s |
-| Mapill, parte teórica | 7 a 10 | 3 min 10 s |
-| Demonstração | 11 | 8 min |
-| Fechamento | 12 a 16 | 3 min 5 s |
-| **Total** | | **18 min 45 s** |
+| Contexto | 1 a 7 | 5 min |
+| Mapill, parte teórica | 8 a 11 | 3 min 10 s |
+| Demonstração | 12 | 8 min |
+| Fechamento | 13 a 17 | 3 min 5 s |
+| **Total** | | **19 min 15 s** |
 
-Sobra 1 min 15 s, que cobre a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
-cortes estão no slide 11.
+Sobra 45 s, que cobre a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
+cortes estão no slide 12.
 
 ---
 
@@ -44,17 +43,23 @@ cortes estão no slide 11.
 > sem internet, pode concentrar os medicamentos, o estoque e os compromissos de saúde num lugar só,
 > sendo fácil de usar, segura e confiável.
 
-### 4. Justificativa (1 min)
-> O trabalho se justifica por três motivos. O primeiro é o próprio paciente, porque esquecer a dose
-> ou deixar o remédio acabar compromete o tratamento, e o celular pode concentrar tudo isso num
-> lugar só. O segundo é o mercado. O Medisafe passou, em janeiro deste ano, a aceitar só dois
-> medicamentos no plano gratuito, e o MyTherapy é gratuito, mas se sustenta repassando dados de uso
-> para empresas farmacêuticas. Além disso, nenhum dos dois descreve suporte a uma dose que muda
-> conforme o horário, comum em tratamentos como o de insulina. O terceiro é técnico. Funcionar sem
-> internet exige guardar os dados no aparelho, sincronizar com a nuvem e resolver conflitos entre
-> registros, e é aí que está a contribuição técnica deste trabalho.
+### 4. Justificativa, o problema (45 s)
+> Essa frase abre o meu trabalho, e resume por que ele existe. Quando o paciente não segue o
+> tratamento, o quadro piora de um jeito que poderia ser evitado, e isso acaba em atendimentos de
+> emergência e internações. Além disso, o remédio depende do horário certo, porque fora do
+> intervalo ele oscila entre não fazer efeito e se tornar tóxico. Por isso o Mapill não tenta ser
+> um aplicativo de saúde completo. Ele atua no ponto exato da falha, que é lembrar da dose,
+> registrar o que aconteceu e avisar antes de o remédio acabar.
 
-### 5. Objetivos (50 s)
+### 5. Justificativa, o mercado (45 s)
+> E o que já existe no mercado não resolve isso por completo. Os dois aplicativos mais conhecidos
+> são o Medisafe e o MyTherapy. O Medisafe passou, em janeiro deste ano, a aceitar só dois
+> medicamentos no plano gratuito, e o aviso de estoque ficou pago. O MyTherapy é gratuito, mas se
+> sustenta repassando dados de uso, anonimizados, para empresas farmacêuticas. E nenhum dos dois
+> descreve suporte a uma dose que muda conforme o horário, comum em tratamentos como o de insulina.
+> O Mapill troca amplitude por profundidade, sem cobrar e sem repassar dados.
+
+### 6. Objetivos (50 s)
 > O objetivo geral foi desenvolver uma aplicação móvel que apoiasse a gestão da rotina
 > medicamentosa, juntando o agendamento e o registro das doses, o controle de estoque e os
 > compromissos de saúde, numa arquitetura que funciona primeiro no aparelho. Para chegar lá, os
@@ -63,7 +68,7 @@ cortes estão no slide 11.
 > e, por fim, analisar como a arquitetura se comporta sem conexão, na volta da conexão e em
 > conflitos entre registros.
 
-### 6. Fundamentação (1 min)
+### 7. Fundamentação (1 min)
 > Vou passar rápido pela fundamentação, só pelo que justifica as principais decisões do projeto.
 > Esquecer a dose é uma falha da memória prospectiva, que é lembrar de fazer algo no futuro, e por
 > isso o centro do app é um alarme. A desoneração cognitiva explica por que o app deve calcular
@@ -78,7 +83,7 @@ cortes estão no slide 11.
 
 ## Mapill, parte teórica
 
-### 7. O que é o Mapill (45 s)
+### 8. O que é o Mapill (45 s)
 > Agora o Mapill em si. O desenvolvimento partiu de três exigências. O app tinha de funcionar sem
 > internet, representar o tratamento com fidelidade, inclusive quando a dose muda ao longo do dia,
 > e lembrar o paciente mesmo com o aplicativo fechado, que é justamente quando ele mais precisa.
@@ -87,7 +92,7 @@ cortes estão no slide 11.
 > tratamento está certo, porque esse papel é do profissional de saúde. Cada conta é de um paciente,
 > e dá para usar tudo sem criar conta.
 
-### 8. Arquitetura (50 s)
+### 9. Arquitetura (50 s)
 > A aplicação segue a Clean Architecture, em três camadas, e a dependência sempre aponta para
 > dentro. No centro fica o domínio, com as regras de negócio escritas em TypeScript puro, sem
 > depender de nenhuma biblioteca. Isso permite verificar cálculos como a geração de horários e a
@@ -96,7 +101,7 @@ cortes estão no slide 11.
 > próprio. O app foi feito em React Native com Expo, e o alarme é entregue pelo agendador do próprio
 > Android, e não por um processo do app. É isso que faz ele tocar mesmo com o aplicativo fechado.
 
-### 9. Regras de negócio (50 s)
+### 10. Regras de negócio (50 s)
 > Das vinte regras de negócio, estas quatro mostram o cuidado com o registro clínico. Uma dose que
 > o paciente não respondeu nunca é marcada como pulada só porque o tempo passou, porque o app não
 > pode afirmar algo que ninguém disse. O estoque desconta exatamente a quantidade da dose, então
@@ -104,7 +109,7 @@ cortes estão no slide 11.
 > antigo, ela cria um novo apontando para ele, como num prontuário. E remédios no mesmo horário
 > geram um aviso só, que pode ser adiado uma única vez, por cinco minutos.
 
-### 10. Sincronização e segurança (45 s)
+### 11. Sincronização e segurança (45 s)
 > Toda operação é gravada primeiro no próprio aparelho, e a nuvem funciona como cópia de segurança
 > e ponte entre dispositivos. Quando o mesmo registro é editado em dois lugares, vence a edição mais
 > recente, e vence inteira, sem misturar campos. No diagrama, o dispositivo B editou por último,
@@ -117,7 +122,7 @@ cortes estão no slide 11.
 
 ## Demonstração
 
-### 11. Demonstração (8 min)
+### 12. Demonstração (8 min)
 > Agora vou mostrar o aplicativo funcionando no meu celular.
 
 O slide mostra as seis telas do caminho. Ele serve de roteiro visual e é o plano C, caso o celular
@@ -179,7 +184,7 @@ e o vídeo falhem ao mesmo tempo.
 > mínimo da WCAG e numa simulação dos três tipos de daltonismo.
 
 **Fora da demo ao vivo.** Primeiro acesso (exige apagar os dados), compromissos (aparecem no
-calendário do passo d) e modo avião (explicado no slide 10).
+calendário do passo d) e modo avião (explicado no slide 11).
 
 ### Antes da defesa
 - Base de demonstração com alguns dias de histórico, para a adesão, o calendário e o relatório não
@@ -218,7 +223,7 @@ você continua narrando ao vivo, com a mesma fala acima.
 
 ## Fechamento
 
-### 12. Resultados (1 min)
+### 13. Resultados (1 min)
 > A validação foi feita por mim, num aparelho físico, seguindo um roteiro escrito em que cada passo
 > tinha o resultado esperado. O segundo aparelho foi simulado direto na base remota. Os cinco
 > cenários da arquitetura offline-first foram aprovados, três deles depois de ajustes que os
@@ -228,7 +233,7 @@ você continua narrando ao vivo, com a mesma fala acima.
 > aparelho foi desbloqueado, por uma restrição de inicialização automática que o fabricante aplica,
 > e que o Android não deixa contornar. O app passou a orientar o paciente a liberar essa permissão.
 
-### 13. Conclusão (1 min)
+### 14. Conclusão (1 min)
 > Os objetivos foram atendidos, com a ressalva do alarme depois de reiniciar o celular. O trabalho
 > mostra que é possível ter, no mesmo aplicativo, o funcionamento sem internet e a fidelidade do
 > registro clínico. Os diferenciais em relação ao que as soluções analisadas descrevem são
@@ -237,17 +242,17 @@ você continua narrando ao vivo, com a mesma fala acima.
 > limitações são claras. Testei em um só modelo de aparelho, sem usuários do público-alvo, e apenas
 > no Android, e as fotos e receitas anexadas ainda ficam só no aparelho.
 
-### 14. Trabalhos futuros (40 s)
+### 15. Trabalhos futuros (40 s)
 > Como próximos passos, o principal é avaliar o app com os pacientes para quem ele foi pensado,
 > idosos e polimedicados, porque só assim dá para medir o efeito real na adesão. Também quero
 > validar o alarme em aparelhos de outros fabricantes, fazer a versão para iOS e publicar nas lojas,
 > permitir que médicos e cuidadores consultem a conta do paciente e organizar o cuidado por
 > tratamento, como numa terapia oncológica com várias sessões e remédios ao mesmo tempo.
 
-### 15. Referências (5 s)
+### 16. Referências (5 s)
 Só passar. Fica na tela se a banca pedir.
 
-### 16. Obrigado (20 s)
+### 17. Obrigado (20 s)
 > Encerro por aqui. Quem quiser conhecer o Mapill pode usar o QR code, que leva à página do
 > aplicativo, onde também está o APK para instalar no Android. Obrigado pela atenção, e fico à
 > disposição para as perguntas.
