@@ -1,6 +1,7 @@
 # Apresentação da defesa: roteiro de estudo
 
-> **Versão 2, 08/10.** Slides em `apresentacao-mapill.pptx` (editável) e `apresentacao-mapill.pdf`
+> **Versão 2, 08/10.** Os slides agora são editados pelo Gabriel no Google Slides, e o .pptx do
+> repositório é só o ponto de partida. Slides em `apresentacao-mapill.pptx` (editável) e `apresentacao-mapill.pdf`
 > (para o computador da defesa, com a fonte embutida). Fonte de todo o conteúdo é o TCC entregue,
 > `docs/TCC Gabriel Steffens Atualizado 06_10.docx.pdf`. A fala de cada slide também está nas notas
 > do .pptx, para o modo apresentador.
@@ -44,14 +45,14 @@ cortes estão no slide 11.
 > sendo fácil de usar, segura e confiável.
 
 ### 4. Justificativa (1 min)
-> Já existem aplicativos para isso, e os dois mais conhecidos são o Medisafe e o MyTherapy. O
-> Medisafe passou, em janeiro deste ano, para um modelo em que o plano gratuito aceita só dois
-> medicamentos, e coisas básicas como o aviso de estoque ficaram pagas. O MyTherapy é gratuito, mas
-> se sustenta repassando dados de uso, anonimizados, para empresas farmacêuticas e institutos de
-> pesquisa. Além disso, nenhum dos dois descreve suporte a uma dose que muda conforme o horário,
-> que é comum em tratamentos como o de insulina. O Mapill não cobra por nenhuma função, não repassa
-> dados e trata a posologia com essa fidelidade. Em vez de ampliar o escopo para o bem-estar geral,
-> ele se aprofunda no tratamento medicamentoso.
+> O trabalho se justifica por três motivos. O primeiro é o próprio paciente, porque esquecer a dose
+> ou deixar o remédio acabar compromete o tratamento, e o celular pode concentrar tudo isso num
+> lugar só. O segundo é o mercado. O Medisafe passou, em janeiro deste ano, a aceitar só dois
+> medicamentos no plano gratuito, e o MyTherapy é gratuito, mas se sustenta repassando dados de uso
+> para empresas farmacêuticas. Além disso, nenhum dos dois descreve suporte a uma dose que muda
+> conforme o horário, comum em tratamentos como o de insulina. O terceiro é técnico. Funcionar sem
+> internet exige guardar os dados no aparelho, sincronizar com a nuvem e resolver conflitos entre
+> registros, e é aí que está a contribuição técnica deste trabalho.
 
 ### 5. Objetivos (50 s)
 > O objetivo geral foi desenvolver uma aplicação móvel que apoiasse a gestão da rotina
