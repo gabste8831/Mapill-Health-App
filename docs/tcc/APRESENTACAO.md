@@ -44,13 +44,12 @@ cortes estão no slide 12.
 > sendo fácil de usar, segura e confiável.
 
 ### 4. Justificativa, o problema (45 s)
-> Essa frase abre o meu trabalho, e resume por que ele existe. Quase nunca o paciente deixa de tomar
-> o remédio por descuido. Muitas vezes o lembrete é um bilhete na geladeira, que só funciona se ele
-> passar por ali na hora certa, e controlar de cabeça o estoque e os horários de vários remédios
-> sobrecarrega a memória. E o horário importa, porque fora do intervalo o remédio oscila entre não fazer efeito e se
-> tornar tóxico. Por isso o Mapill não tenta ser um aplicativo de saúde completo. Ele atua no ponto
-> exato da falha, que é lembrar da dose, registrar o que aconteceu e avisar antes de o remédio
-> acabar.
+> Essa frase abre o meu trabalho, e resume por que ele existe. As duas falhas que eu comentei
+> aparecem no dia a dia de formas bem concretas. Na cognitiva, o paciente esquece a dose, ou não
+> lembra se já tomou. O Mapill avisa no horário, mesmo com o aplicativo fechado, e guarda cada
+> resposta com data e hora. Na logística, o remédio acaba sem aviso, ou a consulta e a receita
+> passam do prazo. O app desconta o estoque a cada dose e avisa antes de acabar, e lembra dos
+> compromissos e da validade da receita.
 
 ### 5. Justificativa, o mercado (45 s)
 > E o que já existe no mercado não resolve isso por completo. Os dois aplicativos mais conhecidos
