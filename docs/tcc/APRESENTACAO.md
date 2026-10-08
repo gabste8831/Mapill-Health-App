@@ -45,9 +45,9 @@ cortes estão no slide 12.
 
 ### 4. Justificativa, o problema (45 s)
 > Essa frase abre o meu trabalho, e resume por que ele existe. Quase nunca o paciente deixa de tomar
-> o remédio por descuido. O lembrete que ele usa, como um bilhete na geladeira, só funciona se ele
+> o remédio por descuido. Muitas vezes o lembrete é um bilhete na geladeira, que só funciona se ele
 > passar por ali na hora certa, e controlar de cabeça o estoque e os horários de vários remédios
-> cansa. E o horário importa, porque fora do intervalo o remédio oscila entre não fazer efeito e se
+> sobrecarrega a memória. E o horário importa, porque fora do intervalo o remédio oscila entre não fazer efeito e se
 > tornar tóxico. Por isso o Mapill não tenta ser um aplicativo de saúde completo. Ele atua no ponto
 > exato da falha, que é lembrar da dose, registrar o que aconteceu e avisar antes de o remédio
 > acabar.
