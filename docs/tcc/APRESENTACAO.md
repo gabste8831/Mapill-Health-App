@@ -1,6 +1,7 @@
 # Apresentação da defesa: roteiro de estudo
 
-> **Versão 3, 08/10.** Slides em `apresentacao-mapill.pptx` (editável) e `apresentacao-mapill.pdf`
+> **Versão 4, 08/10.** O .pptx é o arquivo editado pelo Gabriel, e as mudanças são feitas direto
+> nele. Slides em `apresentacao-mapill.pptx` (editável) e `apresentacao-mapill.pdf`
 > (para o computador da defesa, com a fonte embutida). Fonte de todo o conteúdo é o TCC entregue,
 > `docs/TCC Gabriel Steffens Atualizado 06_10.docx.pdf`. A fala de cada slide também está nas notas
 > do .pptx, para o modo apresentador.
@@ -12,13 +13,13 @@
 
 | Bloco | Slides | Tempo |
 |---|---|---|
-| Contexto | 1 a 7 | 5 min |
+| Contexto | 1 a 7 | 5 min 10 s |
 | Mapill, parte teórica | 8 a 11 | 3 min 10 s |
 | Demonstração | 12 | 8 min |
 | Fechamento | 13 a 17 | 3 min 5 s |
-| **Total** | | **19 min 15 s** |
+| **Total** | | **19 min 25 s** |
 
-Sobra 45 s, que cobre a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
+Sobra 35 s, que cobre a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
 cortes estão no slide 12.
 
 ---
@@ -68,14 +69,16 @@ cortes estão no slide 12.
 > e, por fim, analisar como a arquitetura se comporta sem conexão, na volta da conexão e em
 > conflitos entre registros.
 
-### 7. Fundamentação (1 min)
-> Vou passar rápido pela fundamentação, só pelo que justifica as principais decisões do projeto.
-> Esquecer a dose é uma falha da memória prospectiva, que é lembrar de fazer algo no futuro, e por
-> isso o centro do app é um alarme. A desoneração cognitiva explica por que o app deve calcular
-> estoque e horários pelo paciente. O conceito de fonte única de verdade justifica juntar tudo num
-> só lugar. O paradigma offline-first e o critério Last-Write-Wins sustentam o funcionamento sem
-> internet e a sincronização. E as heurísticas de Nielsen, as diretrizes de acessibilidade da WCAG
-> e a LGPD orientam a interface e o tratamento dos dados de saúde.
+### 7. Fundamentação (1 min 10 s)
+> Vou passar rápido pela fundamentação, só pelo que sustenta as decisões do projeto. A memória
+> prospectiva é a que usamos para lembrar de fazer algo no futuro, como tomar o remédio às oito
+> horas, e é justamente ela que falha quando a dose é esquecida. Por isso o centro do app é um
+> alarme, que lembra pelo paciente. A desoneração cognitiva é passar para uma ferramenta aquilo que
+> a cabeça teria de guardar ou calcular, e é o que o app faz com o estoque e os horários. A fonte
+> única de verdade é ter um só lugar com a informação certa, por isso remédios, estoque e consultas
+> ficam no mesmo aplicativo. O offline-first é o app funcionar sem internet, e o Last-Write-Wins
+> define que, num conflito entre duas edições, vence a mais recente. E as heurísticas de Nielsen, a
+> WCAG e a LGPD orientam a interface, a acessibilidade e a proteção dos dados.
 
 **Corte possível.** Se o tempo apertar, fale só da memória prospectiva e do offline-first (30 s).
 
