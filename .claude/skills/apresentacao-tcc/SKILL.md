@@ -31,8 +31,9 @@ faz, e não relaxar as que ela faz.
 
 - **Pouco texto nos slides.** Usar tópicos.
 - **Falar mais do que ler.** O slide apoia a fala, e não a substitui.
-- Usar o **modelo de apresentação da UNIDAVI**. Pode ajustar o arquivo, incluir slides e alterar os
-  existentes, **mas as seções principais acima devem ser mantidas**.
+- O modelo da UNIDAVI é **só sugestão** (confirmado pelo orientador em 08/10). A apresentação usa
+  modelo próprio, com a identidade visual do Mapill, **mas as seções principais acima devem ser
+  mantidas, nessa ordem**.
 
 ## O que a orientação não define
 
