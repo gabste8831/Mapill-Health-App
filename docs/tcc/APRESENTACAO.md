@@ -1,8 +1,8 @@
 # Apresentação da defesa: roteiro de estudo
 
-> **Versão 4, 08/10.** O .pptx é o arquivo editado pelo Gabriel, e as mudanças são feitas direto
-> nele. Slides em `apresentacao-mapill.pptx` (editável) e `apresentacao-mapill.pdf`
-> (para o computador da defesa, com a fonte embutida). Fonte de todo o conteúdo é o TCC entregue,
+> **Versão 5, 09/10.** O .pptx é o arquivo editado pelo Gabriel, e as mudanças são feitas direto
+> nele. Slides em `apresentacao-mapill.pptx` (editável), com um PDF exportado para o computador da
+> defesa, com a fonte embutida. Fonte de todo o conteúdo é o TCC entregue,
 > `docs/TCC Gabriel Steffens Atualizado 06_10.docx.pdf`. A fala de cada slide também está nas notas
 > do .pptx, para o modo apresentador.
 >
@@ -14,13 +14,14 @@
 | Bloco | Slides | Tempo |
 |---|---|---|
 | Contexto | 1 a 7 | 5 min 10 s |
-| Mapill, parte teórica | 8 a 11 | 3 min 10 s |
-| Demonstração | 12 | 8 min |
-| Fechamento | 13 a 17 | 3 min 5 s |
-| **Total** | | **19 min 25 s** |
+| Mapill, parte teórica | 8 a 10 | 2 min 25 s |
+| Demonstração | 11 (e 12, se precisar do vídeo) | 7 min 30 s |
+| Resultados | 13 e 14 | 2 min |
+| Fechamento | 15 a 18 | 2 min 5 s |
+| **Total** | | **19 min 10 s** |
 
-Sobra 35 s, que cobre a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
-cortes estão no slide 12.
+Sobram 50 s, que cobrem a troca para o espelhamento e a volta aos slides. Se a demo atrasar, os
+cortes estão no slide 11.
 
 ---
 
@@ -39,18 +40,22 @@ cortes estão no slide 12.
 > dois tipos de falha. A cognitiva, que é simplesmente esquecer a dose, e a logística, que é o
 > remédio acabar ou a consulta passar sem que a pessoa perceba.
 
+A OMS aparece aqui e no slide 4. Aqui o peso é nos muitos fatores, e no 4 é no tamanho do
+problema. Evite dizer "a OMS" com a mesma ênfase nos dois.
+
 ### 3. Problema de pesquisa (30 s)
 > Daí vem a pergunta que o trabalho tenta responder. Como uma aplicação móvel, que funcione mesmo
 > sem internet, pode concentrar os medicamentos, o estoque e os compromissos de saúde num lugar só,
 > sendo fácil de usar, segura e confiável.
 
 ### 4. Justificativa, o problema (45 s)
-> Essa frase abre o meu trabalho, e resume por que ele existe. As duas falhas que eu comentei
-> aparecem no dia a dia de formas bem concretas. Na cognitiva, o paciente esquece a dose, ou não
-> lembra se já tomou. O Mapill avisa no horário, mesmo com o aplicativo fechado, e guarda cada
-> resposta com data e hora. Na logística, o remédio acaba sem aviso, ou a consulta e a receita
-> passam do prazo. O app desconta o estoque a cada dose e avisa antes de acabar, e lembra dos
-> compromissos e da validade da receita.
+> Essa frase abre o meu trabalho, e resume por que ele existe. E não é um problema pequeno, a
+> Organização Mundial da Saúde reconhece a baixa adesão ao tratamento como um dos maiores desafios
+> da saúde pública. As duas falhas que eu comentei aparecem no dia a dia de formas bem concretas.
+> Na cognitiva, o paciente esquece a dose, ou não lembra se já tomou. O Mapill avisa no horário,
+> mesmo com o aplicativo fechado, e guarda cada resposta com data e hora. Na logística, o remédio
+> acaba sem aviso, ou a consulta e a receita passam do prazo. O app desconta o estoque a cada dose
+> e avisa antes de acabar, e lembra dos compromissos e da validade da receita.
 
 ### 5. Justificativa, o mercado (45 s)
 > E o que já existe no mercado não resolve isso por completo. Os dois aplicativos mais conhecidos
@@ -86,16 +91,7 @@ cortes estão no slide 12.
 
 ## Mapill, parte teórica
 
-### 8. O que é o Mapill (45 s)
-> Agora o Mapill em si. O desenvolvimento partiu de três exigências. O app tinha de funcionar sem
-> internet, representar o tratamento com fidelidade, inclusive quando a dose muda ao longo do dia,
-> e lembrar o paciente mesmo com o aplicativo fechado, que é justamente quando ele mais precisa.
-> Desde o início, defini também o que o Mapill não é. Ele é um registro clínico pessoal, que lembra
-> da dose e guarda o que de fato aconteceu. Ele não prescreve, não sugere dose e não avalia se o
-> tratamento está certo, porque esse papel é do profissional de saúde. Cada conta é de um paciente,
-> e dá para usar tudo sem criar conta.
-
-### 9. Arquitetura (50 s)
+### 8. Arquitetura (50 s)
 > A aplicação segue a Clean Architecture, em três camadas, e a dependência sempre aponta para
 > dentro. No centro fica o domínio, com as regras de negócio escritas em TypeScript puro, sem
 > depender de nenhuma biblioteca. Isso permite verificar cálculos como a geração de horários e a
@@ -104,15 +100,20 @@ cortes estão no slide 12.
 > próprio. O app foi feito em React Native com Expo, e o alarme é entregue pelo agendador do próprio
 > Android, e não por um processo do app. É isso que faz ele tocar mesmo com o aplicativo fechado.
 
-### 10. Regras de negócio (50 s)
-> Das vinte regras de negócio, estas quatro mostram o cuidado com o registro clínico. Uma dose que
-> o paciente não respondeu nunca é marcada como pulada só porque o tempo passou, porque o app não
-> pode afirmar algo que ninguém disse. O estoque desconta exatamente a quantidade da dose, então
-> quem toma dois comprimidos de uma vez tem dois descontados. Uma correção nunca apaga o registro
-> antigo, ela cria um novo apontando para ele, como num prontuário. E remédios no mesmo horário
-> geram um aviso só, que pode ser adiado uma única vez, por cinco minutos.
+### 9. Requisitos (50 s)
+> Os requisitos partiram dos problemas que o paciente enfrenta. São quarenta e quatro requisitos
+> funcionais, nove não funcionais e vinte regras de negócio, e aqui eles estão organizados pelo
+> problema que resolvem. Para o esquecimento, o alarme toca mesmo com o app fechado, remédios no
+> mesmo horário geram um aviso só, e quem tomou atrasado confirma as doses de uma vez. Para a
+> posologia, o cadastro aceita dez formas farmacêuticas, quatro frequências e uma dose diferente em
+> cada horário. Para o estoque, o app desconta a dose de verdade, e não uma unidade, então quem toma
+> dois comprimidos tem dois descontados, e com isso prevê quando o remédio vai acabar. Como
+> complemento, consultas e exames ficam no mesmo calendário das doses, e o app avisa quando a
+> receita está para vencer, mas só a dose tem alarme, porque é ela que tem consequência imediata.
+> E tudo funciona sem internet e sem conta, com o paciente podendo exportar ou apagar os próprios
+> dados a qualquer momento.
 
-### 11. Sincronização e segurança (45 s)
+### 10. Sincronização e segurança (45 s)
 > Toda operação é gravada primeiro no próprio aparelho, e a nuvem funciona como cópia de segurança
 > e ponte entre dispositivos. Quando o mesmo registro é editado em dois lugares, vence a edição mais
 > recente, e vence inteira, sem misturar campos. No diagrama, o dispositivo B editou por último,
@@ -125,23 +126,24 @@ cortes estão no slide 12.
 
 ## Demonstração
 
-### 12. Demonstração (8 min)
+### 11. Demonstração (7 min 30 s)
 > Agora vou mostrar o aplicativo funcionando no meu celular.
 
-O slide mostra as seis telas do caminho. Ele serve de roteiro visual e é o plano C, caso o celular
-e o vídeo falhem ao mesmo tempo.
+O slide 11 fica na tela enquanto você espelha o celular. Ele mostra as seis telas do caminho,
+serve de roteiro visual e é o plano C, caso o celular e o vídeo falhem ao mesmo tempo. O slide 12
+guarda o vídeo reserva.
 
 | # | Tela | Tempo | Recado |
 |---|---|---|---|
 | a | Cadastro por código de barras | 1 min 30 s | catálogo da CMED no aparelho, campos que nascem vazios, dose variável |
-| b | Tela inicial | 45 s | pendentes primeiro, estado por escrito, progresso do dia |
+| b | Tela inicial | 45 s | pendentes primeiro, estado por escrito, alerta de estoque |
 | c | Alarme com o celular bloqueado | 2 min | o Android dispara, "Tomei" desconta o estoque |
-| d | Adesão, calendário e correção | 1 min 30 s | pulada e sem resposta separadas, correção sem apagar |
+| d | Adesão e calendário | 1 min | taxa por período e por remédio, consultas no mesmo calendário |
 | e | Relatório em PDF | 1 min | gerado no aparelho, compartilhado pelo paciente |
 | f | Temas e cores | 45 s | acessibilidade |
 | | Folga | 30 s | |
 
-**Se atrasar**, corte nesta ordem: f, depois e, depois a parte da correção em d.
+**Se atrasar**, corte nesta ordem: f, depois e.
 
 **a. Cadastro por código de barras**
 > Vou cadastrar um remédio lendo o código de barras da caixa. O app consulta um catálogo que vem
@@ -155,9 +157,8 @@ e o vídeo falhem ao mesmo tempo.
 
 **b. Tela inicial**
 > Esta é a tela do dia a dia. As doses que ainda esperam resposta vêm primeiro, e as já registradas
-> depois. Cada dose mostra o estado por escrito, e não só pela cor. Lá em cima, o progresso do dia.
-> Uma dose que passou do horário aparece como atrasada, mas continua esperando a resposta do
-> paciente. Ela nunca vira pulada sozinha.
+> depois. Cada dose mostra o estado por escrito, e não só pela cor. Lá em cima fica o progresso do
+> dia, e embaixo o aviso de estoque, quando algum remédio está perto de acabar.
 
 **c. Alarme**
 > Agora vou bloquear o celular e esperar a dose que deixei marcada. *(espera o alarme)* O alarme
@@ -167,13 +168,14 @@ e o vídeo falhem ao mesmo tempo.
 > novo, a dose aparece confirmada, o estoque já foi descontado e o progresso do dia subiu, sem que
 > eu fizesse mais nada.
 
-**d. Adesão, calendário e correção**
-> Na tela de adesão vejo a taxa em sete, trinta ou noventa dias, e por medicamento. Doses puladas e
-> doses sem resposta aparecem separadas, porque pular é uma decisão do paciente e não responder é a
-> falta de registro, e o médico precisa saber a diferença. Se não houver nenhuma dose vencida, o
-> app diz que ainda não há dados, em vez de mostrar zero por cento. No calendário consulto qualquer
-> dia anterior, com as doses e as consultas. E se eu marquei algo errado, posso corrigir. A correção
-> cria um novo registro e mantém o antigo, como num prontuário.
+**d. Adesão e calendário**
+> Na tela de adesão vejo a taxa em sete, trinta ou noventa dias, e também por medicamento. Se ainda
+> não houver nenhuma dose vencida, o app diz que ainda não há dados, em vez de mostrar zero por
+> cento. No calendário consulto qualquer dia, com as doses e também as consultas, que ficam no
+> mesmo lugar.
+
+A tela de adesão mostra os contadores de puladas e de sem resposta. Você não comenta, mas se a
+banca perguntar, a resposta está em "Perguntas prováveis".
 
 **e. Relatório**
 > Este é o relatório que o paciente leva à consulta. Ele traz a identificação, os tratamentos, a
@@ -186,26 +188,35 @@ e o vídeo falhem ao mesmo tempo.
 > daltonismo, a pessoa pode escolher outro conjunto de cores de estado. Todos passaram no contraste
 > mínimo da WCAG e numa simulação dos três tipos de daltonismo.
 
-**Fora da demo ao vivo.** Primeiro acesso (exige apagar os dados), compromissos (aparecem no
-calendário do passo d) e modo avião (explicado no slide 11).
+**Fora da demo ao vivo.** Primeiro acesso (exige apagar os dados), cadastro de compromisso (as
+consultas já aparecem no calendário do passo d) e modo avião (explicado no slide 10).
+
+### 12. Vídeo reserva (só se precisar)
+Se o espelhamento falhar, avance para o slide 12 e rode o vídeo no trecho em que parou. Você
+continua narrando ao vivo, com a mesma fala acima. Se o celular voltar, volte para ele.
 
 ### Antes da defesa
 - Base de demonstração com alguns dias de histórico, para a adesão, o calendário e o relatório não
-  aparecerem vazios.
+  aparecerem vazios, e com ao menos uma consulta cadastrada.
+- Um remédio com estoque baixo, para o aviso aparecer no passo b.
 - Uma dose marcada para tocar no meio do passo c. Conte uns 4 minutos depois do início da demo.
 - Permissões de notificação e alarme, Autostart e Não Perturbe conferidos.
 - Espelhamento testado no computador do local, com o cabo que vai ser usado.
 - Uma embalagem de remédio real à mão, para o código de barras.
-- Vídeo reserva e PDF dos slides no computador e num pendrive.
+- O vídeo do slide 12 abrindo no computador da defesa. Se ele estiver só vinculado, e não
+  incorporado ao pptx, o arquivo precisa estar na mesma pasta.
+- Vídeo reserva e PDF dos slides também num pendrive.
 
 ---
 
 ## Vídeo reserva
 
 O vídeo cobre a demo se o celular, o cabo ou o espelhamento falharem. Ele substitui só a tela, e
-você continua narrando ao vivo, com a mesma fala acima.
+você continua narrando ao vivo.
 
 **Como gravar**
+- **Siga o caminho a a f desta página**, na mesma ordem e com os mesmos recados, para conseguir
+  pular para o trecho certo no meio da fala.
 - **Sem áudio.** Assim o ritmo é seu, e dá para pausar ou avançar enquanto fala.
 - **Um arquivo por trecho**, de `a-cadastro.mp4` a `f-temas.mp4`, mais um arquivo com tudo junto.
   Se só o alarme falhar ao vivo, você abre direto o trecho c e volta ao celular depois.
@@ -224,38 +235,55 @@ você continua narrando ao vivo, com a mesma fala acima.
 
 ---
 
-## Fechamento
+## Resultados
 
-### 13. Resultados (1 min)
+### 13. Offline-first (1 min)
 > A validação foi feita por mim, num aparelho físico, seguindo um roteiro escrito em que cada passo
 > tinha o resultado esperado. O segundo aparelho foi simulado direto na base remota. Os cinco
-> cenários da arquitetura offline-first foram aprovados, três deles depois de ajustes que os
-> próprios testes revelaram, como fazer a edição mais recente prevalecer também no servidor. O
-> alarme funcionou nas quatro combinações de celular bloqueado ou em uso, com o app nos recentes ou
-> fora deles. A limitação apareceu depois de reiniciar o celular. O alarme só tocou quando o
-> aparelho foi desbloqueado, por uma restrição de inicialização automática que o fabricante aplica,
-> e que o Android não deixa contornar. O app passou a orientar o paciente a liberar essa permissão.
+> cenários da arquitetura offline-first foram aprovados, e três deles só depois de ajustes que os
+> próprios testes revelaram. Na restauração, o app pedia de novo os termos e a ficha de saúde,
+> porque olhava o banco local antes de receber os dados da nuvem. Doses futuras excluídas voltavam
+> a aparecer, e a exclusão passou a ser lógica. Entre dois aparelhos, vencia a versão sincronizada
+> por último, e não a mais recente, então o servidor passou a aplicar o mesmo critério. E as edições
+> feitas sem conexão não chegavam ao outro aparelho, o que foi resolvido olhando o momento em que o
+> dado chega à nuvem.
 
-### 14. Conclusão (1 min)
-> Os objetivos foram atendidos, com a ressalva do alarme depois de reiniciar o celular. O trabalho
-> mostra que é possível ter, no mesmo aplicativo, o funcionamento sem internet e a fidelidade do
-> registro clínico. Os diferenciais em relação ao que as soluções analisadas descrevem são
-> descontar o estoque pela dose de verdade, corrigir sem apagar o que foi registrado e separar a
-> dose pulada da dose sem resposta, o que deixa confiável o histórico levado ao médico. As
-> limitações são claras. Testei em um só modelo de aparelho, sem usuários do público-alvo, e apenas
-> no Android, e as fotos e receitas anexadas ainda ficam só no aparelho.
+### 14. Alarme (1 min)
+> O alarme, que é o centro do app, foi testado nas quatro combinações de celular bloqueado ou em
+> uso, com o app nos recentes ou fora deles. Com o celular bloqueado, a tela do alarme apareceu por
+> cima da tela de bloqueio, e com o celular em uso, apareceu a notificação com os botões de tomar e
+> pular. Em todas elas, quem dispara o alarme é o agendador do próprio Android, e não o app, por
+> isso ele toca mesmo com o aplicativo fechado. A ressalva veio depois de reiniciar o celular. O
+> alarme só tocou quando o aparelho foi desbloqueado, por uma restrição de inicialização automática
+> que o fabricante aplica e que o Android não deixa contornar. O app passou a orientar o paciente a
+> liberar essa permissão.
 
-### 15. Trabalhos futuros (40 s)
-> Como próximos passos, o principal é avaliar o app com os pacientes para quem ele foi pensado,
-> idosos e polimedicados, porque só assim dá para medir o efeito real na adesão. Também quero
-> validar o alarme em aparelhos de outros fabricantes, fazer a versão para iOS e publicar nas lojas,
-> permitir que médicos e cuidadores consultem a conta do paciente e organizar o cuidado por
-> tratamento, como numa terapia oncológica com várias sessões e remédios ao mesmo tempo.
+---
 
-### 16. Referências (5 s)
-Só passar. Fica na tela se a banca pedir.
+## Fechamento
 
-### 17. Obrigado (20 s)
+### 15. Conclusão (1 min)
+> Para fechar, volto à pergunta do começo. O Mapill centraliza num só aplicativo os remédios, o
+> estoque, as consultas e as receitas. É confiável porque o alarme toca mesmo com o aplicativo
+> fechado, e nenhuma operação depende de internet. É seguro porque cada usuário só acessa os
+> próprios dados, e quem não quiser criar conta pode usar tudo assim mesmo. O design foi guiado
+> pelas heurísticas de Nielsen e por critérios de acessibilidade, mas ainda não foi testado com
+> pacientes, e esse é justamente o primeiro passo que vem a seguir. Com isso, os objetivos do
+> trabalho foram atendidos.
+
+### 16. Trabalhos futuros (45 s)
+> As limitações apontam os próximos passos. Como não testei com usuários, o principal é avaliar o
+> app com os pacientes para quem ele foi pensado, idosos e polimedicados, porque só assim dá para
+> medir o efeito real na adesão. Como testei num só modelo de aparelho, quero validar o alarme em
+> outros fabricantes. Como o app é só para Android, vem a versão para iOS e a publicação nas lojas.
+> Além disso, quero permitir que médicos e cuidadores consultem a conta do paciente, sincronizar as
+> fotos e receitas anexadas, que hoje ficam só no aparelho, e organizar o cuidado por tratamento,
+> como numa terapia oncológica com várias sessões e remédios ao mesmo tempo.
+
+### 17. Referências (5 s)
+Só passar. Fica na tela se a banca pedir. A lista tem exatamente as obras citadas nos slides.
+
+### 18. Obrigado (15 s)
 > Encerro por aqui. Quem quiser conhecer o Mapill pode usar o QR code, que leva à página do
 > aplicativo, onde também está o APK para instalar no Android. Obrigado pela atenção, e fico à
 > disposição para as perguntas.
@@ -268,6 +296,18 @@ está publicado na página, porque alguém da banca pode escanear na hora.
 ## Perguntas prováveis da banca
 
 Respostas curtas, cada uma com a seção do TCC que a sustenta.
+
+**Na tela de adesão aparece "sem resposta". Qual a diferença para pulada?** (4.3.1, RN 01)
+Pular é uma decisão do paciente, que tocou em "pulei". Sem resposta é a dose que passou do horário
+sem nenhum registro. O app nunca transforma uma na outra só porque o tempo passou, porque não pode
+afirmar algo que o paciente não disse. Para o médico, a diferença importa, já que esquecer e decidir
+não tomar pedem conversas diferentes.
+
+**Qual é o modelo de dados?** (4.5, Figura 2, Quadros 16 a 24)
+São nove tabelas, iguais no SQLite e no PostgreSQL. Medicamentos, prescrições, horários de dose,
+registros de ingestão, itens de estoque, ajustes de estoque, compromissos, perfil do paciente e
+registros de consentimento. Na nuvem, cada uma tem ainda a coluna de chegada ao servidor, usada na
+sincronização.
 
 **Por que Last-Write-Wins, e não mesclar os campos?** (2.9.3, 4.4.6)
 Mesclar campos poderia produzir um registro que nenhum aparelho gerou, como a dose de uma edição
