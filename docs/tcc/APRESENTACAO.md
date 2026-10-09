@@ -30,97 +30,101 @@ cortes estão no slide 11.
 ### 1. Capa (20 s)
 > Boa noite a todos. Meu nome é Gabriel Steffens e vou apresentar o meu trabalho de conclusão de
 > curso, o Mapill, uma aplicação móvel para mitigação de falhas logísticas e cognitivas na adesão
-> ao tratamento medicamentoso, orientado pelo professor Marciel de Liz Santos.
+> ao tratamento medicamentoso, orientado pelo professor e mestre, Marciel de Liz Santos.
 
 ### 2. Introdução (50 s)
-> A descontinuidade do tratamento medicamentoso é um dos grandes desafios da saúde pública. A
-> Organização Mundial da Saúde mostra que a adesão depende de muitos fatores, e que a
-> responsabilidade não é só do paciente. Quem toma vários remédios por muito tempo precisa lembrar
-> de vários horários, controlar quanto ainda tem de cada um e não perder as consultas. Isso gera
-> dois tipos de falha. A cognitiva, que é simplesmente esquecer a dose, e a logística, que é o
+> A descontinuidade do tratamento medicamentoso é um dos grandes desafios da saúde pública, reconhecido inclusive pela Organização Mundial da Saúde. São multiplos fatores que podem fazer uma pessoa falhar, dentre elas falhas cognitivas, que é simplesmente esquecer a dose, e a logística, que é o
 > remédio acabar ou a consulta passar sem que a pessoa perceba.
 
-A OMS aparece aqui e no slide 4. Aqui o peso é nos muitos fatores, e no 4 é no tamanho do
-problema. Evite dizer "a OMS" com a mesma ênfase nos dois.
-
 ### 3. Problema de pesquisa (30 s)
-> Daí vem a pergunta que o trabalho tenta responder. Como uma aplicação móvel, que funcione mesmo
+> Daí vem a pergunta que o trabalho responde. 
+
+> "Como uma aplicação móvel, que funcione mesmo
 > sem internet, pode concentrar os medicamentos, o estoque e os compromissos de saúde num lugar só,
-> sendo fácil de usar, segura e confiável.
+> sendo fácil de usar, segura e confiável."
 
 ### 4. Justificativa, o problema (45 s)
-> Essa frase abre o meu trabalho, e resume por que ele existe. E não é um problema pequeno, a
-> Organização Mundial da Saúde reconhece a baixa adesão ao tratamento como um dos maiores desafios
-> da saúde pública. As duas falhas que eu comentei aparecem no dia a dia de formas bem concretas.
-> Na cognitiva, o paciente esquece a dose, ou não lembra se já tomou. O Mapill avisa no horário,
-> mesmo com o aplicativo fechado, e guarda cada resposta com data e hora. Na logística, o remédio
-> acaba sem aviso, ou a consulta e a receita passam do prazo. O app desconta o estoque a cada dose
+> Os medicamento não funcionam em pacientes que não os tomam. 
+
+> Essa frase abre o meu trabalho, e por mais que pareça óbvia, trata-se de uma grande problemática
+> Os dois tipos de falhas que eu comentei,aparecem no dia a dia de formas bem concretas.
+> Na cognitiva, o paciente esquece a dose, ou não lembra se já tomou. O Mapill avisa no horário, mesmo com o aplicativo fechado, e guarda cada resposta com data e hora. 
+
+> Na logística, o remédio
+acaba sem aviso, ou a consulta e a receita passam do prazo. O app desconta o estoque a cada dose
 > e avisa antes de acabar, e lembra dos compromissos e da validade da receita.
 
 ### 5. Justificativa, o mercado (45 s)
-> E o que já existe no mercado não resolve isso por completo. Os dois aplicativos mais conhecidos
-> são o Medisafe e o MyTherapy. O Medisafe passou, em janeiro deste ano, a aceitar só dois
-> medicamentos no plano gratuito, e o aviso de estoque ficou pago. O MyTherapy é gratuito, mas se
-> sustenta repassando dados de uso, anonimizados, para empresas farmacêuticas. E nenhum dos dois
-> descreve suporte a uma dose que muda conforme o horário, comum em tratamentos como o de insulina.
-> O Mapill troca amplitude por profundidade, sem cobrar e sem repassar dados.
+> Aqui eu menciono os dois aplicativos mais conhecidos no mercado relacionado, o Medisafe e o MyTherapy. 
+
+>O Medisafe passou, em janeiro deste ano, a aceitar só dois medicamentos no plano gratuito, e o aviso de estoque ficou pago. O MyTherapy é gratuito, mas se
+sustenta repassando dados de uso, anonimizados, para empresas farmacêuticas. 
+
+> Nenhum dos dois descreve suporte a uma dose que muda conforme o horário, comum em tratamentos como o de insulina por exemplo.
+
+> Diante disso, o Mapill troca amplitude por profundidade, sem cobrar por nada e sem repassar dados.
 
 ### 6. Objetivos (50 s)
-> O objetivo geral foi desenvolver uma aplicação móvel que apoiasse a gestão da rotina
-> medicamentosa, juntando o agendamento e o registro das doses, o controle de estoque e os
-> compromissos de saúde, numa arquitetura que funciona primeiro no aparelho. Para chegar lá, os
-> objetivos específicos seguiram o caminho natural de um projeto de software. Primeiro levantar os
-> requisitos na literatura, depois especificá-los, projetar a arquitetura e as telas, implementar
-> e, por fim, analisar como a arquitetura se comporta sem conexão, na volta da conexão e em
-> conflitos entre registros.
+> O objetivo geral foi desenvolver uma aplicação móvel que apoiasse a gestão da rotina medicamentosa do usuário, juntando o agendamento e o registro das doses, o controle de estoque e os compromissos de saúde, numa arquitetura que funciona sem internet. 
+
+>Para chegar lá, os objetivos específicos seguiram o caminho natural de um projeto de software, como listado nos 5 passos descritos. 
+
+> Primeiro levantar os requisitos na literatura, depois especificá-los, projetar a arquitetura e as telas, implementar, e, por fim, analisar a união de tudo, com a aplicação funcionando
+
 
 ### 7. Fundamentação (1 min 10 s)
-> Vou passar rápido pela fundamentação, só pelo que sustenta as decisões do projeto. A memória
-> prospectiva é a que usamos para lembrar de fazer algo no futuro, como tomar o remédio às oito
-> horas, e é justamente ela que falha quando a dose é esquecida. Por isso o centro do app é um
-> alarme, que lembra pelo paciente. A desoneração cognitiva é passar para uma ferramenta aquilo que
-> a cabeça teria de guardar ou calcular, e é o que o app faz com o estoque e os horários. A fonte
-> única de verdade é ter um só lugar com a informação certa, por isso remédios, estoque e consultas
-> ficam no mesmo aplicativo. O offline-first é o app funcionar sem internet, e o Last-Write-Wins
-> define que, num conflito entre duas edições, vence a mais recente. E as heurísticas de Nielsen, a
-> WCAG e a LGPD orientam a interface, a acessibilidade e a proteção dos dados.
+> A fundamentação do projeto foi baseada principalmente nessas obras. 
 
-**Corte possível.** Se o tempo apertar, fale só da memória prospectiva e do offline-first (30 s).
+> A memória prospectiva é a que usamos para lembrar de fazer algo no futuro, como tomar o remédio às oito horas. 
+Por isso o centro do app é um sistema de alarme, que lembra pelo paciente. 
+
+> A desoneração cognitiva é passar para uma ferramenta aquilo que a cabeça teria de guardar ou calcular, e é o que o app faz com o estoque e os horários. 
+
+> A fonte única de verdade é ter um só lugar com a informação certa, por isso remédios, estoque e consultas
+ficam no mesmo aplicativo. 
+
+> O offline-first é o app funcionar sem internet, e o Last-Write-Wins
+> define que, num conflito entre duas edições, vence a mais recente. 
+
+> As heurísticas de Nielsen, a WCAG e a LGPD orientam a interface, a acessibilidade e a proteção dos dados de utiliza.
 
 ---
 
-## Mapill, parte teórica
-
 ### 8. Arquitetura (50 s)
 > A aplicação segue a Clean Architecture, em três camadas, e a dependência sempre aponta para
-> dentro. No centro fica o domínio, com as regras de negócio escritas em TypeScript puro, sem
-> depender de nenhuma biblioteca. Isso permite verificar cálculos como a geração de horários e a
-> taxa de adesão sem precisar de um celular. Em volta fica a camada de dados, com o SQLite no
-> aparelho e o Supabase na nuvem, e por fora a apresentação, com as telas sobre um sistema de design
-> próprio. O app foi feito em React Native com Expo, e o alarme é entregue pelo agendador do próprio
-> Android, e não por um processo do app. É isso que faz ele tocar mesmo com o aplicativo fechado.
+> dentro. 
+
+> No centro fica o domínio, com as regras de negócio escritas em TypeScript puro, sem depender de nenhuma biblioteca. Isso permite verificar cálculos como a geração de horários e a taxa de adesão sem precisar de um celular. 
+
+> Em volta fica a camada de dados, com o SQLite no
+aparelho e o Supabase na nuvem
+
+> Por fora a apresentação, com as telas sobre um sistema de design próprio. O app foi feito em React Native com Expo, e o alarme é entregue pelo agendador do próprio
+Android, e não por um processo do app. É isso que faz ele tocar mesmo com o aplicativo fechado.
 
 ### 9. Requisitos (50 s)
 > Os requisitos partiram dos problemas que o paciente enfrenta. São quarenta e quatro requisitos
 > funcionais, nove não funcionais e vinte regras de negócio, e aqui eles estão organizados pelo
-> problema que resolvem. Para o esquecimento, o alarme toca mesmo com o app fechado, remédios no
-> mesmo horário geram um aviso só, e quem tomou atrasado confirma as doses de uma vez. Para a
-> posologia, o cadastro aceita dez formas farmacêuticas, quatro frequências e uma dose diferente em
-> cada horário. Para o estoque, o app desconta a dose de verdade, e não uma unidade, então quem toma
-> dois comprimidos tem dois descontados, e com isso prevê quando o remédio vai acabar. Como
-> complemento, consultas e exames ficam no mesmo calendário das doses, e o app avisa quando a
-> receita está para vencer, mas só a dose tem alarme, porque é ela que tem consequência imediata.
-> E tudo funciona sem internet e sem conta, com o paciente podendo exportar ou apagar os próprios
-> dados a qualquer momento.
+> problema que resolvem. 
+
+> Para o esquecimento, o alarme toca mesmo com o app fechado, remédios no mesmo horário geram um aviso só, e quem tomou atrasado confirma as doses de uma vez. 
+
+> Para a posologia, o cadastro aceita dez formas farmacêuticas, quatro frequências e uma dose diferente em cada horário. 
+
+> Para o estoque, o app desconta a dose de verdade, e não uma unidade, então quem toma dois comprimidos de uma vez,  tem dois descontados, e com isso prevê quando o remédio vai acabar. 
+
+> Como complemento, consultas e exames ficam no mesmo calendário das doses, e o app avisa quando a receita está para vencer, mas só a dose tem alarme estilo despertador, porque é ela que tem consequência imediata.
+
+> E tudo funciona sem internet e sem necessariamente uma conta, com o paciente podendo exportar ou apagar os próprios dados a qualquer momento.
 
 ### 10. Sincronização e segurança (45 s)
-> Toda operação é gravada primeiro no próprio aparelho, e a nuvem funciona como cópia de segurança
-> e ponte entre dispositivos. Quando o mesmo registro é editado em dois lugares, vence a edição mais
-> recente, e vence inteira, sem misturar campos. No diagrama, o dispositivo B editou por último,
-> então a versão dele prevalece nos dois lados. Se o app juntasse campos de versões diferentes,
-> poderia criar uma posologia que ninguém escreveu. O servidor aplica o mesmo critério, e cada
-> tabela tem políticas de segurança em nível de linha, então cada usuário só acessa os próprios
-> dados, identificado pelo token JWT.
+> Toda operação é gravada primeiro no próprio aparelho, e a nuvem funciona como cópia de segurança e ponte entre dispositivos. 
+
+> Quando o mesmo registro é editado em dois lugares, vence a edição mais recente, e vence inteira, sem misturar campos. 
+
+> No diagrama, o dispositivo B editou por último, então a versão dele prevalece nos dois lados. Se o app juntasse campos de versões diferentes, poderia criar uma posologia que ninguém escreveu de fato. 
+
+> O servidor aplica o mesmo critério, e cada tabela tem políticas de segurança em nível de linha, então cada usuário só acessa os próprios dados, identificado pelo token JWT. O login é opcional, mas se caso o usuário opte por fazer, é possível somente pela sua conta google
 
 ---
 
@@ -238,55 +242,61 @@ você continua narrando ao vivo.
 ## Resultados
 
 ### 13. Offline-first (1 min)
-> A validação foi feita por mim, num aparelho físico, seguindo um roteiro escrito em que cada passo
-> tinha o resultado esperado. O segundo aparelho foi simulado direto na base remota. Os cinco
-> cenários da arquitetura offline-first foram aprovados, e três deles só depois de ajustes que os
-> próprios testes revelaram. Na restauração, o app pedia de novo os termos e a ficha de saúde,
-> porque olhava o banco local antes de receber os dados da nuvem. Doses futuras excluídas voltavam
-> a aparecer, e a exclusão passou a ser lógica. Entre dois aparelhos, vencia a versão sincronizada
-> por último, e não a mais recente, então o servidor passou a aplicar o mesmo critério. E as edições
-> feitas sem conexão não chegavam ao outro aparelho, o que foi resolvido olhando o momento em que o
-> dado chega à nuvem.
+> A validação foi feita por mim, no meu aparelho físico, e também na base remota via comanddos SQL basicamente.
+
+> Os cinco cenários da arquitetura offline-first foram aprovados, e três deles só depois de ajustes que os próprios testes revelaram. 
+
+> Na restauração, o app pedia de novo os termos e a ficha de saúde, porque olhava o banco local antes de receber os dados da nuvem. 
+
+> Doses futuras excluídas voltavam a aparecer, e a exclusão passou a ser lógica. Entre dois aparelhos, vencia a versão sincronizada por último, e não a mais recente, então o servidor passou a aplicar o mesmo critério. 
+
+> E as edições feitas sem conexão não chegavam ao outro aparelho, o que foi resolvido olhando o momento em que o dado chega à nuvem, e não necessariamente a data em que foi cadastrado de fato
 
 ### 14. Alarme (1 min)
-> O alarme, que é o centro do app, foi testado nas quatro combinações de celular bloqueado ou em
-> uso, com o app nos recentes ou fora deles. Com o celular bloqueado, a tela do alarme apareceu por
-> cima da tela de bloqueio, e com o celular em uso, apareceu a notificação com os botões de tomar e
-> pular. Em todas elas, quem dispara o alarme é o agendador do próprio Android, e não o app, por
-> isso ele toca mesmo com o aplicativo fechado. A ressalva veio depois de reiniciar o celular. O
-> alarme só tocou quando o aparelho foi desbloqueado, por uma restrição de inicialização automática
-> que o fabricante aplica e que o Android não deixa contornar. O app passou a orientar o paciente a
-> liberar essa permissão.
+> O alarme, que é o centro do app, foi testado nas quatro combinações de celular bloqueado ou em uso, com o app nos recentes ou fora deles. 
+
+> Com o celular bloqueado, a tela do alarme apareceu por cima da tela de bloqueio, e com o celular em uso, apareceu a notificação com os botões de tomar e pular. 
+
+> Em todas elas, quem dispara o alarme é o agendador do próprio Android, e não o app
+
+> A ressalva veio depois de reiniciar o celular. O alarme só tocou quando o aparelho foi desbloqueado, por uma restrição de inicialização automática que o fabricante aplica e que o Android não deixa contornar. 
+
+> Diante disso, o app passou a orientar o paciente a iberar essa permissão. (verificar certinho onde ele faz isso)
 
 ---
 
 ## Fechamento
 
 ### 15. Conclusão (1 min)
-> Para fechar, volto à pergunta do começo. O Mapill centraliza num só aplicativo os remédios, o
-> estoque, as consultas e as receitas. É confiável porque o alarme toca mesmo com o aplicativo
-> fechado, e nenhuma operação depende de internet. É seguro porque cada usuário só acessa os
-> próprios dados, e quem não quiser criar conta pode usar tudo assim mesmo. O design foi guiado
-> pelas heurísticas de Nielsen e por critérios de acessibilidade, mas ainda não foi testado com
-> pacientes, e esse é justamente o primeiro passo que vem a seguir. Com isso, os objetivos do
-> trabalho foram atendidos.
+> Para fechar, volto à pergunta do começo. O Mapill centraliza num só aplicativo os remédios, o estoque, as consultas e as receitas. 
+
+> É confiável porque o alarme toca mesmo com o aplicativo fechado, e nenhuma operação depende de internet. 
+
+> É seguro porque cada usuário só acessa os próprios dados, e quem não quiser vincular sua conta google, pode usar todos os recursos 100% pelo aparelho. 
+
+> O design foi guiado pelas heurísticas de Nielsen e por critérios de acessibilidade, mas ainda não foi testado com
+pacientes, e esse é justamente o primeiro passo que vem a seguir. 
+
+> Com isso, os objetivos do trabalho foram atendidos.
 
 ### 16. Trabalhos futuros (45 s)
-> As limitações apontam os próximos passos. Como não testei com usuários, o principal é avaliar o
-> app com os pacientes para quem ele foi pensado, idosos e polimedicados, porque só assim dá para
-> medir o efeito real na adesão. Como testei num só modelo de aparelho, quero validar o alarme em
-> outros fabricantes. Como o app é só para Android, vem a versão para iOS e a publicação nas lojas.
-> Além disso, quero permitir que médicos e cuidadores consultem a conta do paciente, sincronizar as
-> fotos e receitas anexadas, que hoje ficam só no aparelho, e organizar o cuidado por tratamento,
-> como numa terapia oncológica com várias sessões e remédios ao mesmo tempo.
+> As limitações apontam os próximos passos a serem seguidos com o mapill. 
+
+> Como não testei com usuários de forma oficial, o principal fazer essa validação com usuários reais, validando assim a real eficácia do app no processo 
+
+> Como testei num só modelo de aparelho, quero validar o alarme em outros fabricantes. 
+
+> Como o app é só para Android, vem a versão para iOS e a publicação nas lojas.
+
+> Além disso, quero permitir que médicos e cuidadores consultem a conta do paciente, 
+
+> organizar o cuidado por tratamento, como numa terapia oncológica com várias sessões e remédios ao mesmo tempo.
 
 ### 17. Referências (5 s)
 Só passar. Fica na tela se a banca pedir. A lista tem exatamente as obras citadas nos slides.
 
 ### 18. Obrigado (15 s)
-> Encerro por aqui. Quem quiser conhecer o Mapill pode usar o QR code, que leva à página do
-> aplicativo, onde também está o APK para instalar no Android. Obrigado pela atenção, e fico à
-> disposição para as perguntas.
+> Encerro por aqui. Quem quiser conhecer o Mapill pode usar o QR code, que leva à página do aplicativo, onde também está o APK para instalar no Android. Obrigado pela atenção.
 
 O QR code aponta para `https://mapill-website.vercel.app/`. Antes da defesa, confira se o APK já
 está publicado na página, porque alguém da banca pode escanear na hora.
