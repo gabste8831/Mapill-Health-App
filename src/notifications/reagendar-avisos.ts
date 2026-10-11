@@ -63,6 +63,16 @@ const JANELA_DE_AVISOS_EM_DIAS = 7;
 const gateway = new NotifeeGateway();
 
 /**
+ * Modo pedido pela dose de demonstração (`dose-de-demonstracao.ts`), no lugar do da prescrição.
+ * Em memória: basta durar até o aviso ser agendado. Vazio fora da build de apresentação.
+ */
+const modosForcados = new Map<string, "alarm" | "notification">();
+
+export function forcarModoDaDose(doseScheduleId: string, modo: "alarm" | "notification"): void {
+  modosForcados.set(doseScheduleId, modo);
+}
+
+/**
  * A execucao em curso, quando ha uma.
  *
  * Reagendar e "cancela tudo, depois agenda tudo", e duas execucoes sobrepostas se atropelam: a
@@ -169,7 +179,7 @@ async function executarReagendamento(): Promise<void> {
         scheduledFor: doseSchedule.scheduledFor,
         medicationName: medication.name,
         quantidadeFormatada: formatarQuantidade(doseSchedule.amount, prescription.doseUnit),
-        reminderMode: prescription.reminderMode,
+        reminderMode: modosForcados.get(doseSchedule.id) ?? prescription.reminderMode,
         jaResolvida: resolvesDose(latestStatus),
         jaAdiada: doseSchedule.snoozeCount > 0,
       });

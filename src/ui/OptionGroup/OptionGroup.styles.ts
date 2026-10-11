@@ -41,13 +41,13 @@ export const criarEstilos = estilosDoTema(({ cores }) => ({
     justifyContent: "center",
   },
   /**
-   * Cresce pra dividir a linha igualmente. A base é estreita de propósito: é ela que decide
-   * quantas opções cabem antes de quebrar, e cinco botões curtos ("1×", "Mais") têm que caber
-   * numa linha só de celular.
+   * Parte da largura do próprio rótulo e cresce para fechar a linha. Base fixa estreita quebrava
+   * palavra no meio ("compri-mido") quando eram muitas opções, como as 11 unidades da forma "Outra".
    */
   optionInline: {
     flexGrow: 1,
-    flexBasis: 48,
+    flexBasis: "auto",
+    minWidth: 48,
     minHeight: 48,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,

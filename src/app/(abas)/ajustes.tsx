@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { SupabaseAuthGateway } from "@/data/remote/supabase-auth-gateway";
 import { isSupabaseConfigured } from "@/data/remote/supabase-client";
 import { usePatientProfile } from "@/hooks/use-patient-profile";
+import { agendarDoseDeDemonstracao } from "@/notifications/dose-de-demonstracao";
 import { AjustesScreen } from "@/telas/Ajustes/AjustesScreen";
 
 /**
@@ -40,6 +41,15 @@ export default function AjustesRoute() {
       onOpenDiagnostico={
         __DEV__ || process.env.EXPO_PUBLIC_DIAGNOSTICO === "1"
           ? () => router.push("/diagnostico")
+          : undefined
+      }
+      onAgendarDemonstracao={
+        __DEV__ || process.env.EXPO_PUBLIC_MODO_DEMO === "1"
+          ? async (modo, segundos) => {
+              const { medicamento, quando } = await agendarDoseDeDemonstracao(modo, segundos);
+              const tipo = modo === "alarm" ? "Alarme" : "Notificação";
+              return `${tipo} de ${medicamento} às ${quando.toLocaleTimeString("pt-BR")}. Bloqueie o celular.`;
+            }
           : undefined
       }
     />

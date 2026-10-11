@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { estadoDePressao, useCores, useEstilos } from "@/shared/theme";
-import { Card, FotoLocal } from "@/ui";
+import { Button, Card, FotoLocal } from "@/ui";
 import { criarEstilos } from "./AjustesScreen.styles";
 
 export type AjustesScreenProps = {
@@ -28,7 +28,15 @@ export type AjustesScreenProps = {
    * quem monta a rota, e uma prop opcional deixa isso explícito na assinatura.
    */
   onOpenDiagnostico?: () => void;
+  /** Cria uma dose real para daqui a `segundos` e devolve a frase de status. Só na build de apresentação. */
+  onAgendarDemonstracao?: (modo: "alarm" | "notification", segundos: number) => Promise<string>;
 };
+
+/** O alarme precisa do celular já bloqueado para abrir em tela cheia; a notificação, não. */
+const DISPAROS_DE_DEMONSTRACAO = [
+  { modo: "alarm", segundos: 15, label: "Alarme em 15 s" },
+  { modo: "notification", segundos: 10, label: "Notificação em 10 s" },
+] as const;
 
 type LinhaProps = {
   label: string;
@@ -87,9 +95,24 @@ export function AjustesScreen({
   onOpenTheme,
   onOpenAjudaDeAlertas,
   onOpenDiagnostico,
+  onAgendarDemonstracao,
 }: AjustesScreenProps) {
   const styles = useEstilos(criarEstilos);
   const cores = useCores();
+  const [statusDaDemo, setStatusDaDemo] = useState<string | null>(null);
+  const [agendandoDemo, setAgendandoDemo] = useState(false);
+
+  async function dispararDemonstracao(modo: "alarm" | "notification", segundos: number) {
+    if (!onAgendarDemonstracao || agendandoDemo) return;
+    setAgendandoDemo(true);
+    try {
+      setStatusDaDemo(await onAgendarDemonstracao(modo, segundos));
+    } catch (erro) {
+      setStatusDaDemo(erro instanceof Error ? erro.message : "Não foi possível agendar.");
+    } finally {
+      setAgendandoDemo(false);
+    }
+  }
 
   const hasProfile = patientName.trim().length > 0;
 
@@ -264,6 +287,27 @@ export function AjustesScreen({
                 hint="O que está agendado agora, e disparo de teste"
                 onPress={onOpenDiagnostico}
               />
+            </Card>
+          </View>
+        ) : null}
+
+        {/* Resolvido em compilação como o Diagnóstico: some do binário publicado na landing page. */}
+        {(__DEV__ || process.env.EXPO_PUBLIC_MODO_DEMO === "1") && onAgendarDemonstracao ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Demonstração</Text>
+            <Card style={styles.cartaoDeLinhas}>
+              {DISPAROS_DE_DEMONSTRACAO.map((disparo) => (
+                <Button
+                  key={disparo.label}
+                  label={disparo.label}
+                  variant={disparo.modo === "alarm" ? "primary" : "outline"}
+                  disabled={agendandoDemo}
+                  onPress={() => void dispararDemonstracao(disparo.modo, disparo.segundos)}
+                />
+              ))}
+              {statusDaDemo !== null ? (
+                <Text style={styles.rowHint}>{statusDaDemo}</Text>
+              ) : null}
             </Card>
           </View>
         ) : null}
