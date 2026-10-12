@@ -269,6 +269,25 @@ técnica:
 > parte **nunca rodou em aparelho**. O risco do projeto deixou de ser falta de código: é a validação
 > concentrada em poucas sessões.
 
+### Pendência anotada em 12/10: seletor de compromissos do relatório
+
+**Corrigir assim que possível, depois da defesa** (o APK da apresentação fica como está).
+
+- **O defeito:** o seletor de compromissos do relatório em PDF lista **todos** os compromissos
+  cadastrados, de qualquer data, mas o PDF só imprime os que caem no período escolhido. Dá para
+  marcar uma consulta de janeiro num relatório de 7 dias, e ela some do papel sem aviso.
+- **A regra que vale:** o seletor só oferece compromissos do período escolhido. Foi o contrário do
+  que se decidiu antes, e o comentário em `useRelatorioPdf` que justifica a lista completa ("a lista
+  não muda sob o dedo") sai junto com a correção.
+- **Onde:** `src/hooks/use-relatorio-pdf.ts`. A lista do seletor passa a depender do período, e uma
+  seleção que caia fora dele ao trocar o período é descartada.
+- **Junto, decidir:** o período vai de X dias atrás **até agora**, então consulta futura nunca entra
+  no PDF, nem marcada. Avaliar se o relatório deve listar as próximas consultas, que é o que o
+  médico costuma querer saber.
+- **De passagem:** o recorte compara `scheduledFor` como texto (`a.scheduledFor >= inicioIso`), e o
+  banco guarda os dois formatos de ISO (`Z` e `+00:00`). Comparar pelo instante, como o
+  `findBetween` já faz.
+
 ### 📱 Validação em aparelho - o risco número um
 
 ✅ **O alarme já foi validado em 01/09** (tela cheia sobre o bloqueio, som em loop, app fechado). O

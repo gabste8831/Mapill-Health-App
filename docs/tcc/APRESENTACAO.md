@@ -53,12 +53,12 @@
 
 - O objetivo geral foi desenvolver uma aplicação móvel que apoiasse a gestão da rotina medicamentosa do usuário, desde o cadastro de medicamentos, consultas, estoque, lembretes... de uso simples e completo, que não precisasse de internet.
 
-> Para chegar lá, os objetivos específicos seguiram o caminho natural de um projeto de software,
-> nos cinco passos do slide.
+- Para chegar lá, os objetivos específicos seguiram o caminho natural de um projeto de software,
 
-> Primeiro levantar os requisitos na literatura, depois especificá-los, projetar a arquitetura e
-> as telas, implementar e, por fim, analisar como a arquitetura offline-first se comporta em
-> cenários controlados, com a aplicação funcionando.
+- Primeiro levantar os requisitos na literatura
+- depois especificá-los
+- projetar a arquitetura e as telas, implementar e, por fim, analisar como a arquitetura offline-first se comporta em
+  > cenários controlados, com a aplicação funcionando.
 
 ### 7. Fundamentação (1 min)
 
