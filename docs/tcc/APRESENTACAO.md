@@ -38,16 +38,16 @@
 
 ### 5. Justificativa, o mercado (45 s)
 
-> Aqui eu menciono os dois aplicativos mais conhecidos no mercado, o Medisafe e o MyTherapy.
+- Aqui eu menciono os dois aplicativos mais conhecidos no mercado, o Medisafe e o MyTherapy.
 
-> O Medisafe passou, em janeiro deste ano, a aceitar só dois medicamentos no plano gratuito, e o
-> aviso de estoque ficou pago. O MyTherapy é gratuito, mas se sustenta repassando dados de uso,
-> anonimizados, para empresas farmacêuticas.
+- O Medisafe passou, em janeiro deste ano, a aceitar só dois medicamentos no plano gratuito, e o
+- aviso de estoque ficou pago. O MyTherapy é gratuito, mas se sustenta repassando dados de uso,
+- anonimizados, para empresas farmacêuticas.
 
-> Nenhum dos dois descreve suporte a uma dose que muda conforme o horário, comum em tratamentos
-> como o de insulina, por exemplo.
+- Nenhum dos dois descreve suporte a uma dose que muda conforme o horário, comum em tratamentos
+- como o de insulina, por exemplo.
 
-> Diante disso, o Mapill troca amplitude por profundidade, sem cobrar por nada, sem repassar dados, e sem limitar o controle do usuário
+- Diante disso, o Mapill troca amplitude por profundidade, sem cobrar por nada, sem repassar dados, e sem limitar o controle do usuário
 
 ### 6. Objetivos (45 s)
 
@@ -82,17 +82,13 @@
 
 ### 8. Arquitetura (55 s)
 
-> A aplicação segue a Clean Architecture, em três camadas, e a dependência sempre aponta para
-> dentro.
+A aplicação segue a Clean Architecture, do Robert Martin. A ideia é simples. O que é mais importante fica no centro e não depende de nada, e o que é detalhe fica por fora.
 
-> No centro fica o domínio, com as regras de negócio escritas em TypeScript puro, sem depender de
-> nenhuma biblioteca.
+No centro está o domínio, com as regras de cuidado com o remédio, como gerar os horários, descontar o estoque e calcular a adesão. Ele é escrito em TypeScript puro, sem nenhuma biblioteca, e por isso dá para testar essas regras sem precisar de um celular.
 
-> Em volta fica a camada de dados, com o SQLite no aparelho e o Supabase na nuvem.
+Em volta fica a camada de dados, com o SQLite no aparelho e o Supabase na nuvem, e por fora as telas. A dependência sempre aponta para dentro, então dá para trocar uma peça de fora sem mexer nas regras. Foi o que aconteceu com a biblioteca de alarme, que precisou ser trocada no meio do projeto sem alterar nenhuma regra de negócio.
 
-> Por fora fica a apresentação, com as telas sobre um sistema de design próprio. O app foi feito em
-> React Native com Expo, e o alarme é entregue pelo agendador do próprio Android, e não por um
-> processo do app. É isso que faz ele tocar mesmo com o aplicativo fechado.
+O app foi feito em React Native com Expo, e o alarme é entregue pelo agendador do próprio Android, e não por um processo do app. É isso que faz ele tocar mesmo com o aplicativo fechado.
 
 ### 9. Requisitos (1 min)
 
@@ -107,15 +103,6 @@
 > arquitetura que acabei de mostrar. Um dos não funcionais exige que o domínio não dependa de
 > nenhuma biblioteca, e é nesse domínio que ficam as regras de negócio, como descontar a dose de
 > verdade, e não uma unidade, ou deixar adiar o alarme uma vez só.
-
-Não precisa ler os seis quadros. Aponte para eles enquanto fala do caminho do paciente, na ordem
-do slide, da esquerda para a direita e de cima para baixo. As regras citadas no fim são a RN 02
-(estoque desconta a dose) e a RN 12 (adiar uma vez), e o não funcional é o RNF 09.
-
-As seis áreas são as dos Quadros 3 a 8 do TCC, e cada cartão do slide mostra a faixa de códigos.
-Se a banca perguntar por um requisito específico, os mais prováveis são estes. Dose variável por
-horário (RF 10), confirmação das atrasadas de uma vez (RF 21), um aviso por horário (RF 29) e
-estoque que desconta a dose, não a unidade (RF 18, RN 02).
 
 ### 10. Sincronização e segurança (55 s)
 
@@ -132,115 +119,6 @@ estoque que desconta a dose, não a unidade (RF 18, RN 02).
 > O servidor aplica o mesmo critério, e cada tabela tem políticas de segurança em nível de linha,
 > então cada usuário só acessa os próprios dados, identificado pelo token JWT. O login é opcional,
 > e quem quiser fazer entra com a própria conta Google.
-
----
-
-## Demonstração
-
-### 11. Demonstração (6 min 30 s)
-
-> Agora vou mostrar o aplicativo funcionando no meu celular.
-
-O slide 11 fica na tela enquanto você espelha o celular. Ele mostra as seis telas do caminho e
-serve de roteiro visual. O vídeo de demonstração está linkado no mesmo slide e é o plano B. Se o
-celular e o vídeo falharem ao mesmo tempo, narre a partir das telas do slide, que são o plano C.
-
-| #   | Tela                           | Tempo      | Recado                                                                |
-| --- | ------------------------------ | ---------- | --------------------------------------------------------------------- |
-| a   | Cadastro por código de barras  | 1 min 20 s | catálogo da CMED no aparelho, campos que nascem vazios, dose variável |
-| b   | Tela inicial                   | 40 s       | pendentes primeiro, estado por escrito, alerta de estoque             |
-| c   | Alarme com o celular bloqueado | 1 min 50 s | o Android dispara, "Tomei" desconta o estoque                         |
-| d   | Adesão e calendário            | 50 s       | taxa por período e por remédio, consultas no mesmo calendário         |
-| e   | Relatório em PDF               | 40 s       | gerado no aparelho, compartilhado pelo paciente                       |
-| f   | Temas e cores                  | 30 s       | acessibilidade                                                        |
-|     | Folga                          | 40 s       |                                                                       |
-
-✂ **Se atrasar**, corte nesta ordem. Primeiro o f vira uma frase só, mostrando o alto contraste.
-Depois o e sai inteiro.
-
-**a. Cadastro por código de barras**
-
-> Vou cadastrar um remédio lendo o código de barras da caixa. O app consulta um catálogo que vem
-> dentro dele, montado a partir da base pública da Anvisa, a CMED, com cerca de sete mil
-> apresentações, e por isso funciona até sem internet. Ele já preenche o nome, o princípio ativo e
-> a dosagem. Repare que os horários aparecem vazios. Isso é proposital, para que ninguém aceite um
-> horário errado por pressa. E aqui dá para colocar uma dose diferente em cada horário. Enquanto o
-> essencial não está preenchido, os campos opcionais ficam escondidos, e quando fecha, o app avisa
-> que já dá para cadastrar. O resto, como receita, tipo de lembrete e estoque, fica disponível sem
-> ser obrigatório.
-
-**b. Tela inicial**
-
-> Esta é a tela do dia a dia. As doses que ainda esperam resposta vêm primeiro, e as já registradas
-> depois. Cada dose mostra o estado por escrito, e não só pela cor. Lá em cima fica o progresso do
-> dia, e embaixo o aviso de estoque, quando algum remédio está perto de acabar.
-
-**c. Alarme**
-
-> Agora vou bloquear o celular e esperar a dose que deixei marcada. _(espera o alarme)_ O alarme
-> abre em tela cheia por cima da tela de bloqueio, mesmo com o app fechado, porque quem guarda o
-> horário é o Android. Tenho tomei, pulei e adiar por cinco minutos, uma vez só. Vou tocar em
-> tomei. _(toca)_ O celular volta para a tela de bloqueio, sem mostrar mais nada do app. Abrindo de
-> novo, a dose aparece confirmada, o estoque já foi descontado e o progresso do dia subiu, sem que
-> eu fizesse mais nada.
-
-**d. Adesão e calendário**
-
-> Na tela de adesão vejo a taxa em sete, trinta ou noventa dias, e também por medicamento. Se ainda
-> não houver nenhuma dose vencida, o app diz que ainda não há dados, em vez de mostrar zero por
-> cento. No calendário consulto qualquer dia, com as doses e também as consultas, que ficam no
-> mesmo lugar.
-
-A tela de adesão mostra os contadores de puladas e de sem resposta. Você não comenta, mas se a
-banca perguntar, a resposta está em "Perguntas prováveis".
-
-**e. Relatório**
-
-> Este é o relatório que o paciente leva à consulta. Ele traz a identificação, os tratamentos, a
-> taxa de adesão e o histórico de doses. É gerado inteiro no aparelho, sem mandar os dados para
-> nenhum serviço, e só sai do celular se o paciente decidir compartilhar.
-
-**f. Temas e cores**
-
-> Por fim, a acessibilidade. Além do tema claro, há o escuro e o de alto contraste, pensado para
-> baixa visão e uso sob o sol. E como verde e vermelho são as cores que mais se confundem no
-> daltonismo, a pessoa pode escolher outro conjunto de cores de estado. Todos passaram no contraste
-> mínimo da WCAG e numa simulação dos três tipos de daltonismo.
-
-**Fora da demo ao vivo.** Primeiro acesso (exige apagar os dados), cadastro de compromisso (as
-consultas já aparecem no calendário do passo d) e modo avião (explicado no slide 10).
-
-### Antes da defesa
-
-- Base de demonstração com alguns dias de histórico, para a adesão, o calendário e o relatório não
-  aparecerem vazios, e com ao menos uma consulta cadastrada.
-- Um remédio com estoque baixo, para o aviso aparecer no passo b.
-- Uma dose marcada para tocar no meio do passo c. Ele começa uns 2 minutos depois do início da
-  demo, então marque a dose para uns 2 min 30 s depois que você começar a falar do slide 11.
-- Permissões de notificação e alarme, início automático e Não Perturbe conferidos.
-- Espelhamento testado no seu computador, com o cabo que vai ser usado.
-- Uma embalagem de remédio real à mão, para o código de barras.
-- Internet do computador conectada e o link do vídeo no slide 11 testado antes de começar.
-
-### Vídeo de demonstração
-
-`apresentação mapill.mp4`, no Google Drive, aberto pelo link do slide 11. Ele substitui só a tela,
-e você continua narrando ao vivo, com a mesma fala acima. Se o celular voltar a funcionar, volte
-para ele.
-
-Para conseguir pular direto para o trecho certo no meio da fala, anote aqui em que minuto do vídeo
-começa cada passo.
-
-| Passo                  | Começa em |
-| ---------------------- | --------- |
-| a. Cadastro            |           |
-| b. Tela inicial        |           |
-| c. Alarme              |           |
-| d. Adesão e calendário |           |
-| e. Relatório           |           |
-| f. Temas e cores       |           |
-
----
 
 ## Resultados
 
