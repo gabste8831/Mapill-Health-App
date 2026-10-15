@@ -737,3 +737,66 @@ Jest por exemplo, e depois colocar esse conjunto num CI para rodar a cada altera
 **Resumo para falar.** Teste é o código que confere o código. CI é rodar esses testes sozinho a
 cada alteração, e CD é publicar sozinho quando passam. O Mapill tem os testes das regras de
 domínio, rodados à mão antes de cada versão, e ainda não tem CI nem CD.
+
+### De onde vêm as regras de posologia, formas farmacêuticas e frequências?
+
+Conferido contra `TCC Gabriel Steffens Finalizado - 08_10.docx.pdf`.
+
+O TCC declara o método na seção 3.1. Os requisitos vieram de levantamento bibliográfico e
+documental, e foram classificados segundo Sommerville (2018), na seção 4.2. A seção 4.1 diz de onde
+saíram as três exigências centrais, que são o referencial teórico e a análise dos concorrentes da
+seção 3.2. A fundamentação se divide em quatro camadas.
+
+**1. Por que a complexidade da posologia é o problema**
+
+| Autor | Seção | O que sustenta |
+| --- | --- | --- |
+| WHO (2003) | 2.1.1 | A adesão é multidimensional, e conciliar várias posologias sobrecarrega o paciente. A falha raramente é negligência |
+| Sweller (1988) | 2.1.2 | Memorizar várias posologias é carga cognitiva extrínseca, que deve ser eliminada |
+| Risko e Gilbert (2016) | 2.3.2 | Desoneração cognitiva, passar para a ferramenta o cálculo dos intervalos e do estoque |
+| Bates et al. (2003) | 2.3.2 | Delegar a complexidade logística e matemática a algoritmos reduz o desgaste |
+
+**2. Por que o horário tem que ser exato**
+
+Brunton e Knollmann (2024), o Goodman & Gilman, na seção 2.3. Manter o nível terapêutico depende
+de respeitar o intervalo entre as doses, e fora dele a concentração no sangue oscila entre a
+toxicidade e a ineficácia. É isso que justifica a frequência gerar os horários (RF 11), o alarme
+tocar com o app fechado e a dose poder mudar de um horário para outro (RF 10).
+
+**3. O que o mercado não cobre**
+
+Medisafe (2026) e MyTherapy (2026), na seção 3.2 e no Quadro 2. Nenhum dos dois descreve suporte a
+dose variável por horário, e nenhum detalha se o estoque desconta a dose real ou uma unidade fixa.
+Daí os RF 10 e 18.
+
+**4. De onde vêm as formas e as apresentações**
+
+Da base pública da CMED, da Anvisa, com cerca de sete mil apresentações comerciais, na seção 4.6.2.
+É dela que saem o nome, o princípio ativo e a dosagem preenchidos pelo código de barras.
+
+**5. As regras da tela**
+
+As regras de que os horários nascem vazios, de que a unidade só é perguntada quando é ambígua e de
+que um campo que perdeu o sentido é limpo vêm da heurística de prevenção de erros de Nielsen
+(1994), nas seções 2.4.1, 4.3.3 e 4.6.2, e na RN 08.
+
+**O que dizer se a banca apertar.** A lista exata, com dez formas farmacêuticas (RF 07) e quatro
+frequências (RF 09), não vem de um autor. Ela é modelagem própria, a partir da base da Anvisa e da
+análise de tratamentos reais, como o de insulina. O referencial justifica **por que** a posologia
+precisa ser representada com fidelidade, e não qual lista usar. Essa resposta é honesta e se
+sustenta, porque o app não prescreve nada. Ele registra o que o médico prescreveu, então precisa
+cobrir as formas que existem no mercado, e a CMED é o retrato oficial delas.
+
+**Reforço que já está nas referências.** Osterberg e Blaschke (2005), citados no TCC só pelos
+métodos de medir adesão, também mostram no mesmo artigo que a adesão cai conforme aumenta o número
+de doses por dia. Antes de usar isso na fala, confira a página no artigo original.
+
+**Atenção.** A CMED e a Anvisa aparecem no texto e na lista de siglas, mas não têm entrada própria
+nas Referências. Se a banca notar, a resposta é que a base é usada como fonte de dados do app, e
+não como referência teórica.
+
+**Resumo para falar.** A necessidade de representar posologias complexas vem da WHO, que liga a
+falha de adesão à complexidade do tratamento, e do Goodman & Gilman, que mostra que o intervalo
+entre doses define o efeito do remédio. As formas e apresentações vêm da base oficial da Anvisa. A
+lista de frequências é modelagem própria, feita para cobrir os tratamentos reais que os
+concorrentes não cobrem, como a dose de insulina que muda ao longo do dia.
