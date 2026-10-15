@@ -442,6 +442,35 @@ ler e gravar as próprias linhas. Todo registro tem um `updated_at`, que marca a
 decide qual versão vence. No aparelho, o `synced_at` marca o que já foi enviado. Na nuvem, o
 `server_updated_at` marca quando a linha chegou, e guia o que cada aparelho ainda precisa baixar.
 
+**As duas filas, passo a passo**
+
+*Fila de envio, no aparelho.* O app compara o `synced_at` com o `updated_at` da mesma linha.
+
+| Momento | `updated_at` | `synced_at` | Situação |
+| --- | --- | --- | --- |
+| Cadastra o remédio às 10h | 10h | vazio | pendente, nunca subiu |
+| Sincroniza às 10h05 | 10h | 10h | enviado, as duas datas iguais |
+| Edita a dose às 14h | 14h | 10h | pendente, a edição é mais nova que o envio |
+| Sincroniza às 14h10 | 14h | 14h | enviado de novo |
+
+A regra é `synced_at` vazio ou `updated_at` maior que `synced_at`. O `synced_at` recebe o próprio
+`updated_at` da linha, e não a hora do envio, para que as duas datas fiquem iguais quando está tudo
+em dia.
+
+*Fila de recebimento, na nuvem.* Aqui a comparação é com a **marca d'água**, a data guardada no
+aparelho, na tabela `sync_state`, que diz até quando aquele aparelho já baixou.
+
+| Momento | O que acontece |
+| --- | --- |
+| O celular A baixa às 10h | A marca d'água do A passa a ser 10h |
+| O celular B envia uma edição às 11h | O servidor carimba a linha com `server_updated_at` 11h |
+| O celular A sincroniza às 12h | Pede as linhas com `server_updated_at` depois das 10h, recebe a do B e passa a marca d'água para 11h |
+| O celular A sincroniza às 13h | Pede o que chegou depois das 11h. Não há nada novo, nada desce |
+
+Ou seja, o `synced_at` responde o que este aparelho ainda não enviou, e o `server_updated_at`,
+comparado com a marca d'água, responde o que este aparelho ainda não recebeu. Nenhum dos dois
+decide qual versão vence. Quem decide é o `updated_at`, depois que a linha chega.
+
 **Casos em que algo não sincroniza ou é recusado**
 
 1. **Sem conta vinculada.** A sincronização nem começa e não conta como erro, porque é o modo padrão
