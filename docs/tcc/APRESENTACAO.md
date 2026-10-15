@@ -449,3 +449,66 @@ ficou de fora do escopo.
 se perde é o saldo, que é uma linha só e é substituído inteiro pelo LWW. Se dois aparelhos
 descontam sem conexão, vence o saldo de quem editou por último, e o desconto do outro some da
 conta.
+
+### Como funcionam o RLS e o JWT, e o que existe de criptografia?
+
+**O caminho do login** (`src/data/remote/supabase-auth-gateway.ts`)
+
+1. O paciente toca em entrar com Google, e o app abre o navegador na tela do Google.
+2. O Google confirma quem é a pessoa e devolve ao Supabase, que cria ou encontra o usuário e gera
+   dois tokens.
+3. O app recebe um **access token**, que é o JWT, e um **refresh token**, e guarda os dois no
+   `AsyncStorage` (`src/data/remote/supabase-client.ts`).
+
+O app nunca vê nem guarda a senha do Google.
+
+**O que é o JWT.** É um texto em três partes, cabeçalho, conteúdo e assinatura. O conteúdo diz
+quem é o usuário (o campo `sub`, que é o id dele) e até quando o token vale, cerca de uma hora. A
+assinatura é feita pelo Supabase com uma chave secreta que só o servidor tem. O conteúdo não é
+secreto, qualquer um consegue ler, mas ninguém consegue alterar. Se alguém trocar o id dentro do
+token para o de outra pessoa, a assinatura deixa de bater e o servidor recusa. Quando o token
+vence, o `supabase-js` usa o refresh token para pegar outro sozinho (`autoRefreshToken`).
+
+**O que é o RLS.** Row Level Security é um recurso do próprio PostgreSQL que filtra linha por linha
+quem pode ver ou mexer em cada registro. Toda requisição do app vai com o JWT, o Supabase confere a
+assinatura e expõe o id do usuário dentro do banco pela função `auth.uid()`. As nove tabelas têm
+uma coluna `user_id` e as mesmas quatro políticas (`docs/supabase-schema.sql`).
+
+| Operação | Regra |
+| --- | --- |
+| Ler | só as linhas com `user_id = auth.uid()` |
+| Inserir | só se a linha nova tiver `user_id = auth.uid()` |
+| Alterar | só linhas suas, e sem trocar o dono |
+| Apagar | só linhas suas |
+
+A regra de inserir e alterar (`with check`) é o que impede alguém de gravar uma linha em nome de
+outro. Sem ela, a leitura estaria protegida e a escrita não. E sem token, `auth.uid()` é nulo,
+nenhuma linha casa, e o banco não devolve nada.
+
+**Por que a chave do Supabase pode ficar dentro do app.** A `anon key` que vai no `.env` é pública
+por projeto, qualquer um que abrir o APK consegue ver. Ela só identifica o projeto, não dá acesso a
+dado nenhum. Quem libera ou bloqueia é o RLS junto com o JWT. Por isso o RLS ligado nas nove
+tabelas não é um detalhe, é a proteção inteira.
+
+**Criptografia, o que existe**
+
+| Onde | Situação |
+| --- | --- |
+| No caminho entre app e nuvem | Criptografado, toda comunicação com o Supabase é HTTPS (TLS) |
+| Na nuvem, em disco | Criptografado pelo próprio Supabase, que cifra os discos do banco |
+| No aparelho, o SQLite | **Não** é cifrado pelo app. Fica na área privada do Mapill, que o Android isola dos outros apps, e o Android cifra o armazenamento do aparelho inteiro enquanto ele está bloqueado |
+| No aparelho, os tokens | Ficam no `AsyncStorage`, também na área privada, e não no `expo-secure-store`, que usaria o cofre de chaves do Android |
+| Fotos e anexos | Só no aparelho, na mesma área privada, e não sobem |
+
+**O que dá para dizer com honestidade.** A proteção entre usuários está no servidor e é sólida,
+porque não depende do app se comportar bem. A proteção dentro do aparelho depende do Android, do
+bloqueio de tela e do isolamento entre apps. Um celular com root ou desbloqueado na mão de outra
+pessoa expõe os dados, porque o app não tem banco cifrado nem bloqueio próprio por senha ou
+digital. A troca do `AsyncStorage` pelo `expo-secure-store`, o banco cifrado com SQLCipher, um
+bloqueio por biometria e o teste ativo do RLS com outra conta são as melhorias naturais.
+
+**Resumo para falar.** O login é feito pelo Google e o Supabase entrega um token assinado que diz
+quem é o usuário. Esse token vai em toda requisição, e o banco aplica em cada linha a regra de que
+o dono tem que ser quem está no token. Sem token ou com token de outra pessoa, nada volta. A
+comunicação vai por HTTPS e a nuvem cifra o disco. No aparelho, quem protege é o isolamento e a
+criptografia do próprio Android.
