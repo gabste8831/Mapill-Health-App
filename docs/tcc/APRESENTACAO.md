@@ -1080,6 +1080,139 @@ dias de antecedência, então uma notificação antes resolve. E se tudo tocasse
 aprenderia a ignorar o alarme, inclusive o da dose (RN 16). A palavra melhor é menos urgente, e não
 menos específico.
 
+**Por que os horários começam vazios.**
+Minha resposta. Evita o preenchimento de uma posologia incorreta ou acidental.
+Ajuste. Certo. Para completar, diga o mecanismo e a fonte. Um horário já sugerido é o que quem tem
+pressa aceita sem ler, e o app passaria a lembrar na hora errada sem ninguém perceber. Com o campo
+vazio, a pessoa é obrigada a pensar no horário. É a heurística de prevenção de erros de Nielsen
+(RN 08).
+
+**Por que o app recusa a previsão de estoque.**
+Minha resposta. A previsão é relativa, o app mostra uma data aproximada, porque não controla o
+estoque de fato, só ajuda a gerenciar.
+Ajuste. Você juntou duas coisas que são verdade, mas são diferentes.
+1. A RN 03 trata de quando a previsão **não aparece**. Isso acontece quando a unidade do estoque é
+   diferente da unidade da dose. Exemplo, a gota se toma em gotas e se compra em ml. Converter
+   exigiria saber quantas gotas tem um ml daquele frasco, e o app não sabe. Então, em vez de
+   chutar, não mostra nada (`estimate-stock-depletion.ts`, que devolve nulo quando as unidades não
+   batem).
+2. Quando as unidades batem, a previsão aparece, e aí sim ela é aproximada. A tela diz "cerca de" e
+   "por volta desta data", porque é uma projeção, que muda a cada dose confirmada ou pulada.
+Resposta curta. Com unidades diferentes, o app não arrisca um número errado num dado de saúde. Com
+unidades iguais, mostra a data como aproximação.
+
+**A tela acessa o banco direto?**
+Minha resposta. Não.
+Ajuste. Certo, mas diga o caminho. A tela usa um hook, o hook chama o repositório, e só o
+repositório fala com o banco (seção 4.4.4).
+
+### Nenhuma operação pode falhar em silêncio (RNF 07)
+
+**O que quer dizer.** Quando algo dá errado, alguém precisa ficar sabendo, seja o código que pediu a
+operação, seja o paciente na tela. O pior defeito num app de saúde não é o que trava, é o que parece
+ter funcionado e não funcionou. O paciente confia que o lembrete está agendado, e ele não está.
+
+**Exemplos reais do projeto**
+
+1. **Os cinco toques em adiar.** O banco só deixava adiar uma vez, e recusava a segunda tentativa.
+   Mas recusava calado, e o código que chamava seguia em frente e agendava o lembrete de novo.
+   Cinco toques em "Adiar" viravam cinco lembretes. A correção foi fazer o
+   `incrementSnoozeCount` devolver se o adiamento foi gasto agora ou já tinha sido gasto, e quem
+   chama passou a respeitar essa resposta (`src/domain/ports/dose-schedule-repository.ts`).
+2. **O aviso de receita que não saía.** O paciente marcava "me avisar antes de a receita vencer"
+   sem mexer na antecedência. O app gravava nulo e o planejador descartava a receita inteira. A
+   tela confirmava uma intenção que o app não cumpria. A migration 018 separou as duas informações
+   em colunas diferentes.
+3. **A sincronização.** Ela nunca lança erro escondido. Sempre devolve quantas linhas enviou, quantas
+   recebeu e a mensagem de erro, e a tela mostra isso. E o que não subiu continua contado como
+   pendente.
+
+**Resumo para falar.** Toda falha precisa aparecer para quem pode fazer algo com ela. O caso mais
+claro foi o adiamento, que era recusado em silêncio no banco e virava lembretes repetidos.
+
+### Por que as migrações só adicionam e nunca apagam? (RNF 04)
+
+**O que é migração.** O banco SQLite fica no celular de quem usa o app. Quando sai uma versão nova
+que precisa de uma coluna ou tabela nova, não dá para apagar o banco e criar de novo, porque o
+histórico clínico do paciente está ali dentro. A migração é um script que leva o banco da versão
+antiga para a nova, sem perder o que existe. O Mapill tem 21, em `src/data/local/migrations`.
+
+**Como rodam** (`src/data/local/migrations/index.ts`)
+
+1. O banco guarda o número da versão em que está, no `PRAGMA user_version`.
+2. Ao abrir o app, ele roda em ordem só as migrações com número maior que esse.
+3. Cada uma roda numa transação própria. Se falhar no meio, nada dela fica aplicado, e a versão
+   não avança. Na próxima abertura ela tenta de novo. É a atomicidade do ACID.
+
+**As três regras**
+
+- **Só adiciona.** Nunca remove nem renomeia coluna. Apagar uma coluna apagaria o dado que está
+  nela no celular de todo mundo, e não tem como desfazer.
+- **Migração publicada não se edita.** Se uma estava errada, a correção vem numa migração nova.
+  Editar uma antiga não teria efeito em quem já rodou, e os aparelhos ficariam com bancos
+  diferentes.
+- **Ao converter dado, preserva o conteúdo.** A migração 020 reescreveu as datas dos horários num
+  formato só, e só nas linhas que precisavam, sem perder nenhuma.
+
+**Exemplo de coluna substituída, e não apagada.** O contato de emergência começou como três
+colunas soltas (nome, telefone e parentesco). Depois virou uma lista, na migração 005. As colunas
+antigas não foram apagadas, ficaram sem uso. A sincronização sabe que elas existem e não as envia
+(`COLUNAS_ORFAS`, em `src/data/remote/tabelas-sincronizaveis.ts`).
+
+**O custo.** O banco carrega algumas colunas mortas. É o preço aceito para nunca arriscar o
+histórico do paciente.
+
+**Resumo para falar.** O banco mora no celular do paciente, com o histórico dentro. Por isso cada
+migração só acrescenta, roda numa transação e nunca é editada depois de publicada. Uma coluna que
+deixou de ser usada fica para trás, em vez de ser apagada.
+
+### Exclusão lógica e exclusão física (RN 07 e 18)
+
+| | Lógica | Física |
+| --- | --- | --- |
+| O que acontece | A linha ganha uma data em `deleted_at` e continua no banco | A linha é apagada de verdade, com `DELETE` |
+| Quando | No dia a dia, ao excluir um remédio, um tratamento ou um compromisso | Só quando o titular pede para apagar todos os dados, pela LGPD |
+| Some da tela? | Sim, todas as consultas filtram `deleted_at IS NULL` | Sim |
+| Volta pela sincronização? | Não, porque a exclusão também sincroniza | Não, porque a nuvem é apagada primeiro |
+
+**Por que a exclusão do dia a dia é lógica.** Por dois motivos.
+
+1. **Preservar o histórico.** Se o paciente encerra um tratamento, as doses que ele já tomou
+   continuam no relatório. Só os horários futuros são marcados como excluídos
+   (`deleteUpcoming`, em `src/data/repositories/dose-schedule-repository.ts`).
+2. **Avisar os outros aparelhos.** Uma linha apagada de verdade some sem deixar rastro, e na próxima
+   sincronização o outro aparelho, que ainda tem a linha, a enviaria de volta. A linha marcada com
+   `deleted_at` viaja como qualquer edição, e o outro aparelho também a esconde. Esse foi um dos
+   ajustes dos testes, quando doses futuras excluídas voltavam a aparecer.
+
+**Por que o pedido do titular é físico.** O direito de exclusão da LGPD exige que o dado saia. Uma
+linha marcada como excluída ainda é dado pessoal guardado num servidor (`apagar-na-nuvem.ts`). A
+ordem também importa. A nuvem é apagada antes do aparelho, senão a sincronização traria tudo de
+volta. E as tabelas são apagadas de filho para pai, para nada ficar apontando para um registro que
+já não existe.
+
+**Resumo para falar.** No dia a dia a exclusão é lógica, para preservar o histórico e para a
+exclusão chegar aos outros aparelhos. Quando o titular pede, ela é física, primeiro na nuvem e
+depois no aparelho, porque a LGPD exige que o dado deixe de existir.
+
+### Onde entra o SOLID?
+
+SOLID são cinco princípios de projeto de código, reunidos pelo Martin (seção 2.6.1). O TCC destaca
+dois, o S e o D, e são esses que o Mapill aplica com mais clareza.
+
+| Letra | Princípio | Em uma frase | No Mapill |
+| --- | --- | --- | --- |
+| **S** | Responsabilidade única | Cada módulo tem um só motivo para mudar | Cada caso de uso faz uma coisa. `generate-dose-schedules.ts` só gera horários, `estimate-stock-depletion.ts` só prevê o fim do estoque. A regra de para qual tela um aviso leva ficou num arquivo próprio, separada de quem escuta o toque na notificação |
+| **O** | Aberto e fechado | Dá para estender sem modificar o que já funciona | Trocar a biblioteca de alarme foi escrever outro adaptador, sem modificar as regras. As migrações seguem a mesma ideia, uma nova é acrescentada e as antigas não são editadas |
+| **L** | Substituição de Liskov | Qualquer implementação de um contrato pode tomar o lugar de outra | Qualquer classe que cumpra a porta `NotificationGateway` pode substituir a atual, inclusive uma falsa para teste. Todos os repositórios herdam de `SqliteRepository` e cumprem o mesmo `Repository` |
+| **I** | Segregação de interfaces | Contratos pequenos e específicos, em vez de um gigante | Há uma porta por assunto, `DoseScheduleRepository`, `InventoryRepository`, `AuthGateway`, e não uma interface única de banco com tudo |
+| **D** | Inversão de dependência | A regra depende de abstrações, não de detalhes | As portas em `src/domain/ports`. O domínio declara o que precisa e a camada de dados cumpre |
+
+**Resumo para falar.** O SOLID são cinco princípios para o código ser fácil de mudar. No Mapill, os
+mais fortes são o S, porque cada regra clínica é uma função com uma só responsabilidade, o que
+permite testar cada uma separada, e o D, porque o domínio só conhece interfaces, e é isso que
+sustenta a Clean Architecture.
+
 ### De onde vêm as regras de posologia, formas farmacêuticas e frequências?
 
 Conferido contra `TCC Gabriel Steffens Finalizado - 08_10.docx.pdf`.
