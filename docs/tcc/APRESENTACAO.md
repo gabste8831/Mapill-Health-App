@@ -299,6 +299,16 @@ Uma base de código única com acesso aos recursos nativos, e o Expo cuidando da
 precisou, houve código nativo, como o módulo em Kotlin que fecha a tela do alarme. A validação foi
 só no Android, e o iOS está nos trabalhos futuros.
 
+**Onde o SOLID aparece no código?** (2.6.1, 4.4.2, RNF 09)
+Os dois mais fortes são o S e o D, que são os que o TCC destaca. Responsabilidade única, porque cada
+regra clínica é uma função que faz uma coisa só, como gerar os horários ou prever o fim do estoque,
+e por isso cada uma é conferida separada. Inversão de dependência, porque o domínio declara portas,
+como `NotificationGateway`, e a camada de dados as cumpre. Os outros três aparecem como
+consequência. Aberto e fechado na troca da biblioteca de alarme, que foi um adaptador novo sem
+modificar regra. Liskov porque qualquer implementação de uma porta substitui outra. E segregação de
+interfaces porque há uma porta por assunto, e não uma interface única de banco. A tabela completa
+está em "Onde entra o SOLID?", nas dúvidas de estudo.
+
 **Por que sem ORM, sem Tailwind e sem gerenciador de estado global?** (4.4.5)
 O critério foi não adotar dependência sem necessidade concreta. As consultas são poucas e
 específicas, então SQL direto é mais legível. Os hooks com os repositórios bastaram para o estado,
