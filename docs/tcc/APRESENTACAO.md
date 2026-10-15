@@ -410,3 +410,42 @@ os outros aparelhos. Ela chega, e só depois o `updated_at` decide se vence.
 errada vencer. É um custo aceito, porque o Android sincroniza a hora pela rede e o uso é de um
 aparelho por paciente. O que o servidor garante é que nenhuma edição deixe de chegar, porque o
 recebimento usa a hora de chegada à nuvem.
+
+### Por que o estoque pode perder um desconto?
+
+Porque o estoque guarda o **saldo pronto**, e não só os movimentos. Cada baixa faz duas coisas
+dentro da mesma transação (`applyAdjustment` em `src/data/repositories/inventory-repository.ts`).
+
+1. Cria uma linha nova em `inventory_adjustments`, com o `delta` (por exemplo, menos 1) e o motivo.
+2. Atualiza o `quantity` de `inventory_items` para o novo saldo, e o `updated_at` da linha junto.
+
+Os ajustes nunca entram em conflito, porque cada um é uma linha nova com UUID próprio, e os dois
+aparelhos simplesmente somam as linhas. O problema está no item de estoque, que é uma linha só,
+editada pelos dois lados. E o LWW troca a linha inteira, sem fazer conta.
+
+**Exemplo.** A caixa tem 30 comprimidos, e os dois aparelhos estão sem internet.
+
+| Momento | Aparelho A | Aparelho B |
+| --- | --- | --- |
+| Início | 30 | 30 |
+| 8h, A registra uma dose de 1 | 29, `updated_at` 8h | 30 |
+| 9h, B registra uma dose de 2 | 29 | 28, `updated_at` 9h |
+| Os dois sincronizam | 28 | 28 |
+
+O certo seria 27. O LWW comparou 8h com 9h, a linha do B venceu inteira e o desconto do A sumiu do
+saldo. Os dois ajustes continuam registrados no histórico, mas o `quantity` não é recalculado a
+partir deles, ele só é substituído.
+
+**Por que isso foi aceito.** Só acontece com o mesmo estoque baixado em dois aparelhos da mesma
+conta, os dois sem conexão ao mesmo tempo. Com um aparelho principal por paciente, esse cenário
+quase não existe, e se acontecer o erro é de algumas unidades, que a recontagem manual corrige.
+
+**Como se resolveria.** Calcular o saldo a partir da soma dos ajustes, em vez de guardar o total
+pronto. Como os ajustes nunca se sobrescrevem, o saldo sairia certo em qualquer ordem de
+sincronização. Isso exigiria tratar a recontagem manual como um ajuste que fixa o saldo, e por isso
+ficou de fora do escopo.
+
+**Resumo para falar.** O ajuste de estoque nunca se perde, porque cada um é uma linha nova. O que
+se perde é o saldo, que é uma linha só e é substituído inteiro pelo LWW. Se dois aparelhos
+descontam sem conexão, vence o saldo de quem editou por último, e o desconto do outro some da
+conta.
