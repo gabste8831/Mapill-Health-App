@@ -326,6 +326,41 @@ está nas limitações e nos trabalhos futuros.
 
 Perguntas que fiz para entender melhor o projeto, com a resposta tirada do código.
 
+### Obras de apoio para revisar
+
+**Osterberg e Blaschke (2005)**
+OSTERBERG, Lars; BLASCHKE, Terrence. Adherence to medication. *New England Journal of Medicine*,
+v. 353, n. 5, p. 487-497, 2005.
+
+O que o TCC usa dela, na seção 2.3.3 e no Quadro 1. O monitoramento eletrônico, feito por
+dispositivos que registram a abertura da embalagem, é o método mais preciso para medir a adesão. O
+registro no app continua sendo um autorrelato, porque depende da confirmação do paciente, mas
+acrescenta o horário exato de cada resposta e separa dose tomada, pulada e sem resposta.
+
+O que mais ela oferece, sem estar no texto do TCC. O mesmo artigo mostra que a adesão cai à medida
+que aumenta o número de doses por dia. É um bom reforço para a pergunta de por que o app trata a
+complexidade da posologia como problema central. Conferir a página antes de citar.
+
+**WHO (2003)**
+WORLD HEALTH ORGANIZATION (WHO). *Adherence to long-term therapies: evidence for action*.
+Geneva: World Health Organization, 2003.
+
+O que o TCC usa dela, na Introdução e na seção 2.1.1. A definição de adesão, como o grau em que o
+comportamento do paciente corresponde ao plano combinado com o profissional de saúde, e a adesão
+como fenômeno multidimensional, que não deve ser atribuído só ao paciente.
+
+### A fala de que a descontinuidade é um desafio de saúde pública reconhecido pela OMS se sustenta?
+
+Sim, e a fonte é a WHO (2003), que já está nas referências. A Introdução do TCC abre com essa ideia
+e cita a WHO logo em seguida. O relatório inteiro trata a baixa adesão a tratamentos longos como um
+problema mundial de saúde pública, e é dele a estimativa conhecida de que, nos países
+desenvolvidos, só cerca de metade dos pacientes crônicos segue o tratamento. Conferir a página
+antes de usar o número.
+
+A fala não se justifica sozinha. O que a sustenta é a obra citada. No slide 2, vale colocar
+"(WHO, 2003)" junto da frase. Se a banca perguntar de onde veio, a resposta é o relatório
+*Adherence to long-term therapies*, da OMS, de 2003.
+
 ### Existe um campo em cada registro só para o Last-Write-Wins?
 
 Sim, é o `updated_at`. Mas ele não trabalha sozinho. Toda tabela sincronizável herda o mesmo
