@@ -858,6 +858,126 @@ Jest por exemplo, e depois colocar esse conjunto num CI para rodar a cada altera
 cada alteração, e CD é publicar sozinho quando passam. O Mapill tem os testes das regras de
 domínio, rodados à mão antes de cada versão, e ainda não tem CI nem CD.
 
+### Como falar da Clean Architecture com naturalidade
+
+**A ideia numa frase.** O que é mais importante e muda menos fica no centro, o que é detalhe e muda
+mais fica por fora, e quem está por fora depende de quem está dentro, nunca o contrário.
+
+**Uma comparação que ajuda.** Pense numa receita médica. A receita diz o que tomar, quanto e de
+quanto em quanto tempo. Ela não muda se o paciente compra na farmácia A ou B, nem se guarda o
+remédio na gaveta ou no armário. No Mapill, as regras de cuidado são a receita, e o banco, a
+biblioteca de alarme e as telas são a farmácia e o armário. Dá para trocar a farmácia sem
+reescrever a receita.
+
+**As três camadas no código**
+
+| Camada | Pasta | O que tem | Depende de |
+| --- | --- | --- | --- |
+| Domínio, o centro | `src/domain` | entidades (`entities`), portas (`ports`) e casos de uso (`use-cases`) | ninguém |
+| Dados, por fora | `src/data`, `src/notifications` | SQLite, Supabase e a biblioteca de alarme, cumprindo as portas | domínio |
+| Apresentação, mais por fora | `src/app`, `src/telas`, `src/ui`, `src/hooks` | telas, componentes e os hooks que ligam a tela aos repositórios | domínio e dados |
+
+O domínio não importa nenhuma biblioteca. Conferido no código, todos os `import` de `src/domain`
+apontam só para outros arquivos do próprio domínio. Isso é o RNF 09.
+
+**Os três termos que a banca pode puxar**
+
+- **Entidade.** O conceito do mundo real, como medicamento, prescrição, horário de dose e registro
+  de ingestão. É só o formato do dado, sem saber onde ele é guardado.
+- **Caso de uso.** A regra de negócio como uma função. Recebe dados, devolve resultado, e não
+  grava nada nem toca alarme. Exemplos são `generate-dose-schedules.ts`, que gera os horários a
+  partir da posologia, e `resumir-adesao.ts`, que calcula a taxa de adesão.
+- **Porta.** Um contrato que o domínio escreve dizendo do que precisa, sem dizer como. Por exemplo,
+  `NotificationGateway`, em `src/domain/ports`, diz que precisa de agendar, cancelar e contar
+  avisos. Quem cumpre o contrato é a camada de fora. Isso é a inversão de dependência, o D do
+  SOLID.
+
+**Três histórias do projeto para contar**
+
+1. **A troca da biblioteca de alarme.** O Notifee foi arquivado em abril de 2026. O domínio só
+   conhece a porta `NotificationGateway`, e quem a cumpre é `src/notifications/notifee-gateway.ts`.
+   A troca para o `react-native-notify-kit` mudou o `import` desse arquivo, e nenhuma regra de
+   horário, adiamento ou agrupamento foi tocada. É o exemplo mais forte, porque aconteceu de
+   verdade.
+2. **Testar sem celular.** Como os casos de uso são funções puras e recebem o instante presente como
+   parâmetro, as rotinas de `scripts/conferir-*.mjs` simulam a virada da meia-noite ou uma dose
+   atrasada no computador, em segundos, sem emulador e sem mexer no relógio.
+3. **Medicamento separado de prescrição.** O medicamento é o que está na caixa, e a prescrição é
+   como se toma. Se o médico muda a dose, muda a prescrição, e o medicamento e o histórico
+   continuam os mesmos (seção 4.4.2).
+
+**Versão de 30 segundos para falar.** "O Mapill segue a Clean Architecture. No centro ficam as
+regras de cuidado com o remédio, como gerar os horários, descontar o estoque e calcular a adesão,
+escritas em TypeScript puro, sem nenhuma biblioteca. Por fora ficam o banco, a nuvem e o alarme, e
+por último as telas. A dependência sempre aponta para dentro, então o centro não sabe que existe
+SQLite ou Android. Na prática, isso me deixou trocar a biblioteca de alarme no meio do projeto sem
+mexer em nenhuma regra, e testar as regras no computador, sem celular."
+
+**Armadilhas.** Não diga que são quatro camadas, o TCC fala em três. Os hooks fazem parte da
+apresentação (seção 4.4.4). E a pasta `src/notifications` é camada de fora, porque é ela que
+conhece a biblioteca de alarme.
+
+### Mais perguntas prováveis, sobre requisitos, regras e arquitetura
+
+**Qual a diferença entre requisito funcional, não funcional e regra de negócio?** (4.2, 4.3)
+Pela classificação de Sommerville, o funcional diz o que o sistema faz, como confirmar ou pular uma
+dose. O não funcional diz com que qualidade ou sob que restrição, como funcionar sem internet. A
+regra de negócio diz como o domínio se comporta, independente da tela, como o estoque descontar a
+dose e não uma unidade. São 44 funcionais, 9 não funcionais e 20 regras.
+
+**Por que o adiamento só é permitido uma vez?** (RN 12 e 13)
+Adiar sem limite vira uma forma de ignorar o alarme sem decidir nada. Uma vez dá cinco minutos de
+folga, e depois o botão some. Adiar também não registra desfecho, a dose continua pendente.
+
+**Por que um aviso por horário, e não um por remédio?** (RN 11)
+Quem toma três remédios às 8h receberia três alarmes tocando juntos. Um aviso só, com as três doses,
+é menos ruído e combina com o que a pessoa faz na prática, que é tomar tudo de uma vez.
+
+**Por que qualquer edição apaga e refaz todos os avisos?** (RN 14)
+Para não sobrar alarme órfão, de um horário que mudou ou de um tratamento encerrado. Reconstruir
+tudo é mais simples e mais seguro do que descobrir quais avisos mudaram.
+
+**Por que compromisso não toca alarme?** (RN 16)
+O alarme de alta prioridade fica reservado para a dose, que tem consequência clínica imediata. Se
+tudo tocasse como alarme, a pessoa aprenderia a ignorar o alarme.
+
+**Por que os horários nascem vazios no cadastro?** (RN 08, Nielsen)
+Horário sugerido é o que quem tem pressa aceita sem ler, e o app passaria a lembrar na hora errada
+sem ninguém perceber. É a heurística de prevenção de erros.
+
+**Por que o app recusa a previsão de estoque em vez de estimar?** (RN 03)
+Quando a unidade da embalagem não combina com a da dose, qualquer número seria um palpite. Para um
+dado de saúde, não mostrar é mais honesto do que mostrar errado.
+
+**O que quer dizer que nenhuma operação pode falhar em silêncio?** (RNF 07)
+Toda falha precisa voltar para quem chamou ou para a tela. Exemplo real, o adiamento devolve se
+deu certo, porque antes a recusa acontecia calada no banco e cinco toques em adiar viravam cinco
+lembretes. A sincronização também nunca lança erro escondido, ela devolve a mensagem para a tela.
+
+**Por que as migrações só adicionam e nunca apagam?** (RNF 04, 4.4.3)
+Porque o banco está no celular de quem já usa o app, com histórico clínico dentro. Uma migração que
+apaga ou renomeia uma coluna poderia perder dados de tratamento. São 21 migrações, cada uma numa
+transação própria, e a versão só é marcada depois de confirmada. Se falhar no meio, nada fica pela
+metade.
+
+**Exclusão lógica e física, qual a diferença e quando cada uma?** (RN 07 e 18, 4.3.5)
+A lógica marca a linha como excluída e mantém o histórico, e é usada quando o paciente apaga um
+tratamento. A física remove de verdade, e só acontece quando o titular pede para apagar tudo, pela
+LGPD. Nesse caso a nuvem é apagada primeiro, para a sincronização não trazer os dados de volta.
+
+**Se trocasse o SQLite por outro banco, o que mudaria?** (4.4.2)
+Só os repositórios em `src/data/repositories`, que cumprem as portas do domínio. As regras e as
+telas continuariam iguais. É a mesma lógica da troca da biblioteca de alarme.
+
+**A tela acessa o banco direto?** (4.4.4)
+Não. A tela usa um hook, o hook chama o repositório, e o repositório fala com o banco. Isso deixa
+a tela sem saber se o dado vem do SQLite ou de outro lugar.
+
+**Onde entra o SOLID?** (2.6.1, RNF 09)
+Principalmente no D, a inversão de dependência, pelas portas. Também aparece o S, a
+responsabilidade única, já que cada caso de uso faz uma coisa só, como gerar horários ou calcular
+adesão, e por isso cada um pode ser conferido separado.
+
 ### De onde vêm as regras de posologia, formas farmacêuticas e frequências?
 
 Conferido contra `TCC Gabriel Steffens Finalizado - 08_10.docx.pdf`.
