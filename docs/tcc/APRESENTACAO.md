@@ -512,3 +512,43 @@ quem é o usuário. Esse token vai em toda requisição, e o banco aplica em cad
 o dono tem que ser quem está no token. Sem token ou com token de outra pessoa, nada volta. A
 comunicação vai por HTTPS e a nuvem cifra o disco. No aparelho, quem protege é o isolamento e a
 criptografia do próprio Android.
+
+### Como o Google valida o usuário? Ele compara o e-mail?
+
+Não. O login segue o OAuth 2.0 com OpenID Connect, e quem identifica a pessoa é um id fixo da conta
+Google, e não o e-mail.
+
+**O caminho completo**
+
+1. O app pede ao Supabase o endereço de login do Google e abre esse endereço no navegador
+   (`signInWithOAuth` em `src/data/remote/supabase-auth-gateway.ts`).
+2. A pessoa entra **no site do Google**, com senha, verificação em duas etapas ou o que a conta
+   exigir. O app e o Supabase nunca veem a senha.
+3. O Google devolve ao Supabase um código de uso único. O Supabase troca esse código direto com o
+   Google, usando uma credencial secreta que só o servidor tem.
+4. Nessa troca o Google entrega o **id token**, que também é um JWT, assinado pelo Google. Dentro
+   dele vão o `sub`, que é o id permanente da conta Google, o e-mail, se o e-mail foi verificado, e
+   o nome.
+5. O Supabase confere a assinatura com as chaves públicas do Google e procura na tabela
+   `auth.identities` uma identidade do provedor Google com aquele `sub`. Se acha, é o mesmo usuário.
+   Se não acha, cria um usuário novo com um UUID próprio, e é esse UUID que vira o `user_id` das
+   tabelas do Mapill.
+6. O Supabase gera o **seu próprio** JWT, assinado por ele, e manda de volta ao app pelo endereço
+   `mapillapp://`. O app lê os tokens e abre a sessão (`setSession`).
+
+**Por que o `sub` e não o e-mail.** O e-mail pode mudar e pode ser reaproveitado. O `sub` nunca
+muda para aquela conta Google. Se a pessoa trocar o e-mail da conta, continua sendo o mesmo usuário
+no Mapill. O e-mail só aparece na tela de conta.
+
+**São dois JWT diferentes.** O do Google prova ao Supabase quem é a pessoa, e fica só entre os dois.
+O do Supabase é o que o app guarda e manda em toda requisição, e é dele que o RLS tira o
+`auth.uid()`.
+
+**Um ponto a melhorar.** Os tokens voltam ao app no próprio endereço de retorno (o fluxo
+implícito). O Supabase também oferece o fluxo com PKCE, em que volta só um código e o app o troca
+pelos tokens com uma prova que só ele tem. É mais seguro contra outro app que tente se registrar no
+mesmo endereço `mapillapp://`.
+
+**Resumo para falar.** A senha é digitada no Google, nunca no app. O Google entrega ao Supabase um
+token assinado com o id permanente da conta, o Supabase associa esse id a um usuário seu e emite o
+token que o app usa dali em diante.
