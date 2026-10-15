@@ -559,3 +559,46 @@ mesmo endereço `mapillapp://`.
 **Resumo para falar.** A senha é digitada no Google, nunca no app. O Google entrega ao Supabase um
 token assinado com o id permanente da conta, o Supabase associa esse id a um usuário seu e emite o
 token que o app usa dali em diante.
+
+### O React Native se justifica pensando numa versão para iPhone?
+
+Sim, e esse é o argumento mais forte da escolha. Mas o reaproveitamento não é total, e vale saber
+onde ele para.
+
+**O que serve para o iOS sem mudança**
+
+- O domínio inteiro, em TypeScript puro, com as regras de horário, estoque e adesão.
+- Os repositórios e o SQLite, porque o `expo-sqlite` funciona igual nos dois sistemas.
+- A sincronização, o Supabase, o RLS e o login com Google.
+- As telas, a navegação e o sistema de design.
+- O catálogo da CMED e a leitura do código de barras.
+
+Isso é a maior parte do código. E é a Clean Architecture que torna isso possível, porque as regras
+não sabem em que sistema estão rodando.
+
+**O que é só do Android e teria de ser refeito ou repensado**
+
+- O módulo nativo `modules/desbloqueio`, escrito em Kotlin, que abre e fecha a tela do alarme por
+  cima da tela de bloqueio. Não existe versão em Swift.
+- A tela de alarme em tela cheia. O iOS historicamente não deixa um app comum tomar a tela
+  bloqueada como um despertador. Hoje há caminhos, o AlarmKit nas versões novas do iOS e os
+  alertas críticos, que exigem autorização da Apple, mas seria outra implementação.
+- Os canais de notificação, a permissão de alarme exato e a ajuda de início automático do
+  fabricante (`src/notifications`). São conceitos do Android que não existem no iOS. A ajuda de
+  início automático simplesmente não seria necessária lá.
+- O limite de agendamento. O iOS guarda no máximo 64 notificações locais pendentes por app. Os
+  avisos de sete dias de quem toma vários remédios passariam disso, então a janela de agendamento
+  teria de ser menor ou renovada com mais frequência.
+
+**O que muda fora do código.** Para gerar e publicar no iOS é preciso uma conta de desenvolvedor da
+Apple, que é paga, e compilar com o EAS do Expo ou num Mac.
+
+**Comparando com a alternativa.** Com Kotlin nativo, o iPhone exigiria reescrever tudo em Swift,
+domínio, banco, sincronização e telas, e manter duas bases com as mesmas regras. Com React Native, o
+trabalho do iOS fica concentrado na parte de alarme e notificação, que é justamente a parte que
+depende do sistema em qualquer tecnologia.
+
+**Resumo para falar.** A escolha se justifica porque uma base só atende os dois sistemas, e a
+arquitetura deixa as regras independentes da plataforma. O que precisaria de trabalho próprio no
+iOS é o alarme, porque é a parte que conversa direto com o sistema operacional, e isso aconteceria
+com qualquer tecnologia.
