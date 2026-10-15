@@ -643,6 +643,18 @@ banco e outra na memória, que poderiam ficar diferentes. Isso combina com a fon
 do offline-first. A única coisa compartilhada entre as telas é o tema de cores, e para isso basta o
 Context, que já vem no React (`src/shared/theme/tema-contexto.tsx`).
 
+**O estado global com um exemplo.** Cada tela do React guarda os próprios dados numa variável
+interna (`useState`), e essa variável some quando a tela fecha. Imagine a tela inicial mostrando
+"3 doses pendentes" e a tela de doses mostrando a lista. Se cada uma guardasse a sua cópia,
+confirmar uma dose na lista deixaria a tela inicial com o número velho até alguém recarregar. O
+gerenciador de estado global resolve isso com um quadro de avisos único na memória do app. As duas
+telas leem do mesmo quadro, e quando uma escreve nele a outra é avisada e se redesenha. Redux e
+Zustand são bibliotecas que fazem esse quadro.
+
+No Mapill, o quadro de avisos é o banco. A tela de doses grava a confirmação no SQLite, e quando a
+tela inicial volta a aparecer ela relê o banco e já mostra 2. Ninguém precisa avisar ninguém,
+porque o dado só existe em um lugar.
+
 **Resumo para falar.** O Supabase é o back-end, não um ORM, e no aparelho o SQL é escrito direto
 porque as consultas são poucas e a sincronização precisa de controle fino. O estilo vem de um
 sistema de design próprio. E não há memória central de estado porque o banco local já é a fonte
