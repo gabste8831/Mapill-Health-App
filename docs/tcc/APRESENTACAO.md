@@ -602,3 +602,48 @@ depende do sistema em qualquer tecnologia.
 arquitetura deixa as regras independentes da plataforma. O que precisaria de trabalho próprio no
 iOS é o alarme, porque é a parte que conversa direto com o sistema operacional, e isso aconteceria
 com qualquer tecnologia.
+
+### O que são ORM, Tailwind e gerenciador de estado global, e por que o Mapill não usa?
+
+**O Supabase não é um ORM.** O Supabase é uma plataforma de back-end. Ele entrega um PostgreSQL
+hospedado, o login, as regras de RLS e uma API pronta que o app chama pela internet. A biblioteca
+`supabase-js` tem uma escrita parecida com a de um ORM, como `.from("medications").upsert(...)`,
+mas por baixo ela só monta uma requisição HTTP para essa API. Ela não cria classes a partir das
+tabelas, não gera migrações e não cuida do banco local.
+
+**O que é um ORM.** ORM quer dizer mapeamento objeto-relacional. É uma biblioteca, como Prisma,
+TypeORM ou Drizzle, em que a pessoa descreve as tabelas como classes ou objetos no código e a
+biblioteca escreve o SQL sozinha. Em vez de escrever `SELECT * FROM medications WHERE id = ?`,
+escreve algo como `db.medications.find(id)`.
+
+**O que o Mapill faz no lugar.** No SQLite do aparelho, o SQL é escrito à mão, e cada repositório
+tem duas funções pequenas que convertem a linha do banco na entidade do domínio e vice-versa
+(`toEntity` e `toRow`, em `src/data/repositories`). É o trabalho que o ORM faria, feito à mão. Isso
+se justifica porque as consultas são poucas e específicas, e porque partes como a sincronização
+precisam de SQL que um ORM esconderia, como o `ON CONFLICT` e a comparação de `updated_at` com
+`synced_at`.
+
+**O que é o Tailwind.** É uma forma de estilizar telas com classes curtas prontas, como
+`p-4 bg-white rounded-lg`. No React Native ele chega pela biblioteca NativeWind. O Mapill usa no
+lugar um sistema de design próprio em `src/shared/theme`, com cores, espaçamentos, tipografia e
+sombras definidos uma vez e usados pelos componentes de `src/ui`. Isso evita uma camada a mais
+entre o componente e o estilo, e deixa a troca de tema no mesmo lugar.
+
+**O que é gerenciador de estado global.** Estado é o dado que a tela está mostrando naquele
+momento, como a lista de remédios ou as doses de hoje. Quando várias telas precisam do mesmo dado,
+muitos apps criam uma "memória central" compartilhada, e as telas leem dela. As bibliotecas mais
+conhecidas para isso são Redux e Zustand. Quando uma tela muda algo nessa memória, as outras se
+atualizam sozinhas.
+
+**O que o Mapill faz no lugar.** A memória central do Mapill é o próprio SQLite. Cada tela tem um
+hook (`src/hooks`, como `use-inventory-list.ts`) que lê o que precisa dos repositórios toda vez
+que a tela ganha foco (`useFocusEffect`). Se o paciente registra uma dose e volta para o estoque, o
+estoque relê o banco e já mostra o número novo. Assim não existem duas cópias do mesmo dado, uma no
+banco e outra na memória, que poderiam ficar diferentes. Isso combina com a fonte única de verdade
+do offline-first. A única coisa compartilhada entre as telas é o tema de cores, e para isso basta o
+Context, que já vem no React (`src/shared/theme/tema-contexto.tsx`).
+
+**Resumo para falar.** O Supabase é o back-end, não um ORM, e no aparelho o SQL é escrito direto
+porque as consultas são poucas e a sincronização precisa de controle fino. O estilo vem de um
+sistema de design próprio. E não há memória central de estado porque o banco local já é a fonte
+única de verdade, e cada tela lê dele quando aparece.
