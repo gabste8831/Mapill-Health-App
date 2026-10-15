@@ -417,6 +417,62 @@ errada.
 vence, no aparelho e no servidor. O que muda de mão é o registro inteiro. A hora de chegada à nuvem
 serve só para saber o que ainda falta baixar.
 
+### Quais colunas aprovam ou recusam algo, e quando a sincronização não acontece?
+
+Nem toda coluna de controle aprova ou recusa. Duas decidem, e duas só organizam a fila.
+
+| Coluna | Onde existe | Decide ou organiza | O quê |
+| --- | --- | --- | --- |
+| `user_id` | só na nuvem | decide | **Quem** pode ler e gravar a linha, pelo RLS comparado ao JWT |
+| `updated_at` | aparelho e nuvem | decide | **Qual versão** vence, pelo LWW |
+| `synced_at` | só no aparelho | organiza | O que ainda falta **enviar** |
+| `server_updated_at` | só na nuvem | organiza | O que ainda falta **baixar** |
+
+Três cuidados com a forma de dizer.
+
+- O `user_id` não existe no aparelho. O banco local é de uma pessoa só, então o app tira a coluna ao
+  receber e a coloca de volta ao enviar.
+- O `synced_at` não diz quando o registro entrou na nuvem. Ele diz até qual versão aquele aparelho
+  já enviou. Quem diz quando entrou na nuvem é o `server_updated_at`, carimbado pelo servidor.
+- O `updated_at` é por registro, e não por campo. Mudou qualquer campo, a linha inteira ganha a
+  nova data.
+
+Forma correta de falar. As nove tabelas têm, na nuvem, um `user_id`, e o RLS só deixa cada usuário
+ler e gravar as próprias linhas. Todo registro tem um `updated_at`, que marca a última edição e
+decide qual versão vence. No aparelho, o `synced_at` marca o que já foi enviado. Na nuvem, o
+`server_updated_at` marca quando a linha chegou, e guia o que cada aparelho ainda precisa baixar.
+
+**Casos em que algo não sincroniza ou é recusado**
+
+1. **Sem conta vinculada.** A sincronização nem começa e não conta como erro, porque é o modo padrão
+   do app (`sync-service.ts`, em `executarSync`). Tudo fica só no aparelho.
+2. **Sem internet.** O envio falha, o erro aparece no resultado e nenhum `synced_at` é gravado.
+   As linhas continuam pendentes e sobem na próxima tentativa.
+3. **Sem token válido.** Se a sessão expirou e não foi renovada, o `auth.uid()` fica nulo no
+   servidor. A leitura volta vazia e a gravação é recusada pela política do RLS. As linhas continuam
+   pendentes até a pessoa entrar de novo.
+4. **Linha de outra pessoa.** Uma gravação com `user_id` diferente do id do token é recusada pelo
+   `with check` do RLS. O app sempre envia o id do próprio usuário, então esse caso só aparece se
+   alguém tentar forjar a requisição fora do app.
+5. **Versão mais velha chegando ao servidor.** O aparelho A editou às 8h, sem internet. O aparelho B
+   editou o mesmo registro às 9h e já enviou. Quando o A volta a ter conexão, o trigger
+   `recusar_versao_antiga` compara 8h com 9h e ignora o envio sem dar erro. Em seguida, o A baixa a
+   versão das 9h. Os dois aparelhos terminam iguais, com a versão do B.
+6. **Versão mais velha chegando ao aparelho.** No recebimento, se a linha local tem `updated_at`
+   igual ou mais novo que a remota, a remota é descartada.
+7. **Uma linha com dado inválido.** O envio vai em lotes de 200. Se o servidor recusa uma linha,
+   aquele lote inteiro volta com erro, a sincronização para ali e tenta de novo na próxima vez. Os
+   lotes anteriores já ficaram gravados.
+8. **Duas sincronizações ao mesmo tempo.** A segunda não começa. Ela recebe o resultado da primeira,
+   para as duas não disputarem as mesmas linhas.
+9. **Fotos e anexos.** Nunca sobem. O caminho do arquivo vai como nulo, e no outro aparelho o
+   registro chega sem a foto.
+
+**Resumo para falar.** O `user_id` decide quem pode mexer na linha, e o `updated_at` decide qual
+versão vale. O `synced_at` e o `server_updated_at` só controlam a fila do que falta enviar e
+receber. Quando algo não sincroniza, a linha continua pendente no aparelho, e nada se perde por
+falta de conexão.
+
 ### O que a pergunta "E se o relógio do celular estiver errado?" quer dizer?
 
 O `updated_at` é gravado com a hora do próprio celular (`new Date()`), e não com a hora de um
