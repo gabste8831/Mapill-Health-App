@@ -647,3 +647,43 @@ Context, que já vem no React (`src/shared/theme/tema-contexto.tsx`).
 porque as consultas são poucas e a sincronização precisa de controle fino. O estilo vem de um
 sistema de design próprio. E não há memória central de estado porque o banco local já é a fonte
 única de verdade, e cada tela lê dele quando aparece.
+
+### Por que Supabase e não um ORM?
+
+**Eles não concorrem entre si.** Supabase e ORM resolvem problemas de camadas diferentes, e um
+projeto pode usar os dois juntos. A pergunta da banca é sobre ORM contra SQL escrito à mão. A
+escolha do Supabase é outra decisão, contra alternativas como o Firebase ou um servidor próprio.
+
+**Por que o ORM não substituiria o Supabase.** Um ORM precisa de uma conexão direta com o banco,
+com usuário e senha do banco. Um app de celular não pode ter isso, porque qualquer um que abrisse o
+APK teria a senha do banco inteiro. Então, para usar um ORM no PostgreSQL da nuvem, seria preciso
+construir e hospedar um servidor próprio, com Node e Prisma por exemplo, escrever as rotas da API,
+o login e o controle de quem acessa o quê. É exatamente esse trabalho que o Supabase já entrega
+pronto.
+
+**O que justifica o Supabase**
+
+- É PostgreSQL, relacional e com transações ACID, o mesmo modelo do SQLite do aparelho. As nove
+  tabelas são iguais nos dois lados, e a sincronização só copia linhas.
+- O RLS fica dentro do banco, então a separação entre usuários não depende de um servidor escrito
+  por mim.
+- O login com Google vem pronto.
+- O plano gratuito cobre o uso de um TCC.
+- É código aberto e pode ser hospedado em servidor próprio, então o projeto não fica preso a um
+  fornecedor. Esse é um ponto a favor dele contra o Firebase, que também não é relacional.
+
+**Onde um ORM faria sentido.** No SQLite do aparelho. Existe ORM que funciona com o `expo-sqlite`,
+como o Drizzle, e seria uma escolha defensável. Ele foi deixado de lado por três motivos.
+
+1. São poucas tabelas e poucas consultas, e as funções `toEntity` e `toRow` são curtas. O ganho de
+   automatizar seria pequeno.
+2. A parte mais delicada do app, a sincronização, trabalha com qualquer tabela pelo nome e precisa
+   de SQL que um ORM esconde, como o `ON CONFLICT` e a comparação entre `updated_at` e `synced_at`.
+   Ela continuaria em SQL de qualquer jeito.
+3. Uma dependência a menos, com as próprias migrações, as próprias atualizações e o próprio jeito de
+   gerar SQL. Com o SQL à vista, fica claro o que cada operação faz no banco.
+
+**Resumo para falar.** O Supabase não compete com um ORM. Ele substitui o servidor inteiro que
+seria preciso construir, com banco, login e controle de acesso. O ORM caberia no banco local, mas
+com poucas consultas e uma sincronização que precisa de SQL direto, o ganho não pagava a dependência
+a mais.
