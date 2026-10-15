@@ -699,3 +699,41 @@ como o Drizzle, e seria uma escolha defensável. Ele foi deixado de lado por tr�
 seria preciso construir, com banco, login e controle de acesso. O ORM caberia no banco local, mas
 com poucas consultas e uma sincronização que precisa de SQL direto, o ganho não pagava a dependência
 a mais.
+
+### Teste automatizado é a mesma coisa que CI/CD?
+
+Não, são coisas diferentes que costumam andar juntas.
+
+| Termo | O que é | Exemplo |
+| --- | --- | --- |
+| Teste automatizado | Código que confere se outro código faz o que deveria | Uma rotina que chama a previsão de estoque com 30 comprimidos e confere a data em que acaba |
+| CI, integração contínua | Um serviço que roda os testes e as checagens sozinho a cada envio de código ao repositório, e avisa se algo quebrou | GitHub Actions rodando os testes a cada `git push` |
+| CD, entrega contínua | O passo seguinte, que gera e publica o app sozinho quando tudo passa | Um build do EAS disparado e enviado à loja a cada versão aprovada |
+
+O teste é o que confere. O CI é quem roda o teste sem ninguém lembrar. O CD é quem publica depois.
+Dá para ter teste sem CI, rodando à mão, mas não faz sentido ter CI sem nada para rodar.
+
+**O que o Mapill tem hoje**
+
+- **Testes, em forma de rotinas de conferência.** São os arquivos `scripts/conferir-*.mjs`, como
+  `conferir-previsao-de-estoque.mjs`. Cada um chama uma regra do domínio com casos montados à mão e
+  imprime `ok` ou `FALHOU`. Funcionam sem aparelho porque a hora atual entra como parâmetro. São
+  testes automatizados de verdade, só que escritos sem uma ferramenta como o Jest e rodados à mão,
+  um por um.
+- **Checagens antes de cada versão.** A checagem de tipos do TypeScript, a análise estática
+  (`npm run lint`) e essas rotinas, rodadas por mim antes de gerar o APK.
+- **Build na nuvem pelo EAS** (`eas.json`), disparado à mão.
+
+**O que não tem**
+
+- CI. Nenhum serviço roda as rotinas sozinho a cada envio, e não há pasta `.github/workflows`.
+- CD. A geração e a distribuição do APK são feitas à mão.
+- Testes das telas e da sincronização. As rotinas cobrem as regras do domínio, não o caminho
+  inteiro pelo app.
+
+É isso que o TCC chama de trabalho futuro. Primeiro reunir as rotinas num conjunto único, com
+Jest por exemplo, e depois colocar esse conjunto num CI para rodar a cada alteração.
+
+**Resumo para falar.** Teste é o código que confere o código. CI é rodar esses testes sozinho a
+cada alteração, e CD é publicar sozinho quando passam. O Mapill tem os testes das regras de
+domínio, rodados à mão antes de cada versão, e ainda não tem CI nem CD.
