@@ -913,9 +913,68 @@ por último as telas. A dependência sempre aponta para dentro, então o centro 
 SQLite ou Android. Na prática, isso me deixou trocar a biblioteca de alarme no meio do projeto sem
 mexer em nenhuma regra, e testar as regras no computador, sem celular."
 
-**Armadilhas.** Não diga que são quatro camadas, o TCC fala em três. Os hooks fazem parte da
-apresentação (seção 4.4.4). E a pasta `src/notifications` é camada de fora, porque é ela que
-conhece a biblioteca de alarme.
+**Armadilhas.** O TCC fala em três camadas. O desenho original do Martin tem quatro círculos,
+entidades, casos de uso, adaptadores e frameworks, e o Mapill junta os dois de dentro no domínio e
+os dois de fora em dados e apresentação. Se a banca citar os quatro, é essa a resposta. Os hooks
+fazem parte da apresentação (seção 4.4.4). E a pasta `src/notifications` é camada de fora, porque
+é ela que conhece a biblioteca de alarme.
+
+### O que caracteriza uma Clean Architecture, além de separar em pastas?
+
+Separar em pastas não basta. Muito projeto tem pasta de domínio, pasta de dados e pasta de telas e
+não é Clean Architecture. O que define é **a direção da dependência**.
+
+**A regra que define tudo, a regra de dependência.** O código de dentro nunca pode citar nada que
+está fora. A regra de negócio não pode importar o banco, a biblioteca de alarme nem o React. Quem
+está fora conhece quem está dentro, e nunca o contrário (Martin, 2019).
+
+**O que muda em relação à arquitetura em camadas tradicional.** Na tradicional, a dependência desce
+em cascata. A tela chama a regra, e a regra chama o banco, então a regra depende do banco. Na Clean
+Architecture essa seta é invertida. A regra declara uma interface dizendo do que precisa, a porta,
+e o banco é que se adapta a ela.
+
+| | Camadas tradicional | Clean Architecture |
+| --- | --- | --- |
+| A regra de negócio conhece o banco? | Sim, chama direto | Não, só conhece a porta |
+| Quem se adapta a quem? | A regra se adapta ao banco | O banco se adapta à regra |
+| Trocar o banco mexe na regra? | Mexe | Não mexe |
+
+No Mapill, a porta `DoseScheduleRepository` está em `src/domain/ports`, escrita pelo domínio. A
+classe que fala com o SQLite está em `src/data/repositories` e cumpre essa porta. O domínio não
+sabe que o SQLite existe.
+
+**As características que resultam dessa regra** (Martin, 2019)
+
+- Independente de framework. O React Native é uma ferramenta, não o centro.
+- Independente de interface. A tela pode mudar sem mudar a regra.
+- Independente de banco. O SQLite pode ser trocado.
+- Independente de serviço externo. O alarme e a nuvem são detalhes.
+- Testável. As regras rodam sem tela, sem banco e sem celular.
+
+**Política e detalhe.** O Martin separa o que é política, as regras que dão valor ao sistema, do
+que é detalhe, banco, tela, framework. A arquitetura protege a política dos detalhes. No Mapill, a
+política é "dose sem resposta nunca vira pulada" ou "o estoque desconta a dose". O detalhe é se
+isso fica em SQLite ou se o aviso sai pelo Notifee ou pelo notify-kit.
+
+**Três perguntas para saber se um projeto é Clean.**
+
+1. O domínio importa alguma biblioteca? No Mapill, não.
+2. Dá para trocar o banco ou a biblioteca de alarme sem mexer na regra? No Mapill, sim, e a troca
+   do alarme aconteceu.
+3. Dá para testar a regra sem tela e sem banco? No Mapill, sim, pelas rotinas de conferência.
+
+**Onde o Mapill é pragmático, e não purista.** Vale saber, caso a banca pergunte se é 100% Clean.
+Os hooks da apresentação criam os repositórios concretos direto, com `new InventoryRepository()`,
+em vez de receber tudo por injeção de dependência. E alguns hooks guardam pequenas regras de
+montagem da tela, como escolher a prescrição vigente para a previsão de estoque. Nada disso quebra
+a regra de dependência, porque a seta continua apontando para dentro, mas uma versão purista
+passaria tudo isso para casos de uso. A resposta honesta é que o rigor foi aplicado onde importava,
+nas regras clínicas.
+
+**Resumo para falar.** O que caracteriza a Clean Architecture não é ter camadas, é a direção da
+dependência. A regra de negócio fica no centro e não conhece nada de fora, e quem está fora se
+adapta a ela por meio de interfaces. É isso que torna o centro testável e permite trocar banco,
+tela ou biblioteca sem mexer nas regras.
 
 ### Mais perguntas prováveis, sobre requisitos, regras e arquitetura
 
@@ -977,6 +1036,49 @@ a tela sem saber se o dado vem do SQLite ou de outro lugar.
 Principalmente no D, a inversão de dependência, pelas portas. Também aparece o S, a
 responsabilidade única, já que cada caso de uso faz uma coisa só, como gerar horários ou calcular
 adesão, e por isso cada um pode ser conferido separado.
+
+### Treino de respostas, com correção
+
+As minhas respostas e o ajuste de cada uma.
+
+**Requisito funcional, não funcional e regra de negócio.**
+Minha resposta. O funcional é a funcionalidade em si. O não funcional é sobre o processo, como
+latência e segurança. A regra de negócio é a condição de operação, como "se o usuário acionar o
+lembrete, o alarme precisa tocar independente de tudo".
+Ajuste. Os dois primeiros estão certos. O exemplo da regra de negócio, porém, é um requisito não
+funcional, o RNF 02, porque fala de confiabilidade da plataforma. Um teste que ajuda é perguntar
+se a regra valeria num caderno de papel. "O estoque desconta a dose, e não uma unidade" vale no
+papel, então é regra de negócio. "O alarme toca com o app fechado" só existe no software, então é
+requisito não funcional.
+
+**Por que adiar só uma vez.**
+Minha resposta. Entra na usabilidade, senão vira bagunça.
+Ajuste. "Bagunça" é vago. O motivo é que adiar sem limite vira um jeito de ignorar o alarme sem
+nunca decidir nada, e o alarme perde a função. Com uma vez só, a pessoa ganha cinco minutos e depois
+precisa responder se tomou ou pulou. E adiar não registra desfecho, a dose continua pendente
+(RN 12 e 13).
+
+**Por que um aviso por horário.**
+Minha resposta. O horário é o ponto em comum entre as medicações, faz sentido do ponto de vista de
+classes.
+Ajuste. A ideia do ponto em comum está certa, mas a banca quer o motivo para o paciente, e não para
+o código. Quem toma três remédios às 8h receberia três alarmes tocando juntos. Um aviso só, com as
+três doses numa tela, é menos ruído e combina com o que a pessoa faz, que é tomar tudo de uma vez.
+
+**Por que toda edição refaz todos os avisos.**
+Minha resposta. Para evitar o lembrete de uma posologia incerta.
+Ajuste. Quase. A palavra melhor é desatualizada, e não incerta. Se o horário mudou de 8h para 9h,
+o aviso das 8h não pode continuar agendado. E refazer tudo é mais seguro do que tentar descobrir
+quais avisos mudaram, porque não sobra nenhum alarme órfão (RN 14).
+
+**Por que compromisso não toca alarme.**
+Minha resposta. A configuração define o alarme só para medicações, e o compromisso é menos
+específico.
+Ajuste. "A configuração define" explica como é, mas não por quê. O motivo é que o alarme fica
+reservado para o que tem consequência clínica imediata, que é a dose. A consulta é conhecida com
+dias de antecedência, então uma notificação antes resolve. E se tudo tocasse como alarme, a pessoa
+aprenderia a ignorar o alarme, inclusive o da dose (RN 16). A palavra melhor é menos urgente, e não
+menos específico.
 
 ### De onde vêm as regras de posologia, formas farmacêuticas e frequências?
 
