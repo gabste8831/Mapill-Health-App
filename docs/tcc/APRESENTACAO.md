@@ -381,3 +381,32 @@ errada.
 **Resumo para falar.** Cada registro carrega a hora da sua última edição, e é ela que decide quem
 vence, no aparelho e no servidor. O que muda de mão é o registro inteiro. A hora de chegada à nuvem
 serve só para saber o que ainda falta baixar.
+
+### O que a pergunta "E se o relógio do celular estiver errado?" quer dizer?
+
+O `updated_at` é gravado com a hora do próprio celular (`new Date()`), e não com a hora de um
+servidor. Então o LWW confia que os relógios dos aparelhos estão certos. A pergunta da banca é o
+que acontece quando um deles não está.
+
+**Exemplo com o relógio atrasado.** O celular A está duas horas atrasado. Às 10h de verdade o
+paciente edita a posologia no A, que grava 8h. Às 9h de verdade ele já tinha editado no B, que
+gravou 9h. Na sincronização, 9h é maior que 8h, então vence a edição do B, que na verdade é a mais
+antiga. A edição mais nova se perde sem aviso.
+
+**Exemplo com o relógio adiantado.** Se o celular A estiver um dia adiantado, tudo o que ele editar
+vence qualquer edição dos outros aparelhos até o relógio real alcançar aquela data.
+
+**O que o app faz a respeito.** Para o conflito, nada além de aceitar o risco. É a fraqueza
+conhecida do LWW, apontada pelo Kleppmann e assumida no TCC. O risco é pequeno porque o Android
+acerta a hora sozinho pela rede, e porque o uso previsto é um aparelho principal por paciente,
+então quase nunca há duas edições do mesmo registro competindo.
+
+**Onde entra o `server_updated_at`.** Ele não resolve o conflito, resolve outro problema que também
+vem do relógio do aparelho. Como a marca d'água do recebimento usa a hora do servidor, uma edição
+com data antiga, seja por relógio errado ou por ter ficado dias sem internet, ainda assim desce para
+os outros aparelhos. Ela chega, e só depois o `updated_at` decide se vence.
+
+**Resumo para falar.** O LWW usa a hora do celular, então um relógio errado pode fazer a edição
+errada vencer. É um custo aceito, porque o Android sincroniza a hora pela rede e o uso é de um
+aparelho por paciente. O que o servidor garante é que nenhuma edição deixe de chegar, porque o
+recebimento usa a hora de chegada à nuvem.
