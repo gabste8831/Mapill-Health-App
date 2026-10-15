@@ -319,3 +319,65 @@ aparelho.
 **As fotos e receitas sincronizam?** (6, 6.1, item e)
 Não. Os anexos ficam só no aparelho, e a sincronização leva apenas os dados estruturados. Isso
 está nas limitações e nos trabalhos futuros.
+
+---
+
+## Dúvidas de estudo
+
+Perguntas que fiz para entender melhor o projeto, com a resposta tirada do código.
+
+### Existe um campo em cada registro só para o Last-Write-Wins?
+
+Sim, é o `updated_at`. Mas ele não trabalha sozinho. Toda tabela sincronizável herda o mesmo
+conjunto de colunas de controle, definido em `src/domain/entities/syncable.ts`, e cada uma tem um
+papel diferente.
+
+| Coluna | Onde existe | Para que serve |
+| --- | --- | --- |
+| `id` | aparelho e nuvem | UUID gerado no aparelho, nunca autoincremento, para dois aparelhos não criarem o mesmo id |
+| `updated_at` | aparelho e nuvem | Hora da última edição, pelo relógio de quem editou. É o critério do LWW |
+| `synced_at` | só no aparelho | Até que versão a linha já subiu. Nulo quer dizer que nunca subiu |
+| `deleted_at` | aparelho e nuvem | Exclusão lógica. A linha continua existindo para que a exclusão também viaje |
+| `server_updated_at` | só na nuvem | Hora em que a linha chegou ao servidor, carimbada pelo próprio Postgres |
+
+Além disso, o aparelho tem a tabela `sync_state`, que guarda por tabela a marca d'água do último
+recebimento (`last_pulled_at`).
+
+**Como uma sincronização acontece** (`src/data/remote/sync-service.ts`)
+
+1. Primeiro o envio, sempre antes do recebimento. Se fosse o contrário, a versão antiga do servidor
+   sobrescreveria uma edição local que ainda não subiu.
+2. Sobe toda linha com `synced_at` nulo ou com `updated_at` maior que `synced_at`, ou seja, tudo
+   que mudou desde o último envio. Linhas excluídas também sobem.
+3. Depois que o servidor confirma, o app grava em `synced_at` o próprio `updated_at` da linha. Se a
+   pessoa editar de novo durante o envio, o `updated_at` passa à frente e a linha continua
+   pendente.
+4. Depois vem o recebimento. O app pede ao servidor as linhas com `server_updated_at` maior que a
+   marca d'água daquela tabela.
+5. Para cada linha que desce, compara o `updated_at` remoto com o local. Se o local for igual ou
+   mais novo, a linha remota é descartada. Se o remoto for mais novo, ele substitui o registro
+   inteiro, sem misturar campos.
+6. A linha que desce já é gravada com `synced_at` igual ao `updated_at`, senão o próximo envio a
+   devolveria ao servidor num vaivém sem fim.
+
+**O servidor também aplica o LWW** (`docs/supabase-schema.sql`)
+
+O `upsert` do envio não compara datas. Quem faz isso na nuvem é o trigger `recusar_versao_antiga`,
+que roda antes de cada atualização e ignora em silêncio a versão com `updated_at` mais velho que a
+guardada. Esse foi o ajuste do cenário em que vencia a versão sincronizada por último, e não a
+editada por último. Ele vale só para atualização, porque a exclusão pedida pelo titular na LGPD não
+pode ser barrada por carimbo.
+
+**Por que duas datas, `updated_at` e `server_updated_at`**
+
+Elas respondem perguntas diferentes. O `updated_at` responde qual versão é a mais nova, e por isso
+decide o conflito. O `server_updated_at` responde o que eu ainda não baixei, e por isso guia o
+recebimento. Se o recebimento perguntasse pela data de edição, uma edição feita sem internet na
+segunda e enviada só no domingo chegaria com data de segunda, abaixo da marca d'água de quem ficou
+conectado, e nunca desceria. Esse foi o ajuste das edições offline que não chegavam ao outro
+aparelho. A migration 021 zerou a marca d'água antiga justamente porque ela estava na unidade
+errada.
+
+**Resumo para falar.** Cada registro carrega a hora da sua última edição, e é ela que decide quem
+vence, no aparelho e no servidor. O que muda de mão é o registro inteiro. A hora de chegada à nuvem
+serve só para saber o que ainda falta baixar.
