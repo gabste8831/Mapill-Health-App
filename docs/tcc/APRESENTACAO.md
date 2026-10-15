@@ -500,6 +500,13 @@ tabelas não é um detalhe, é a proteção inteira.
 | No aparelho, os tokens | Ficam no `AsyncStorage`, também na área privada, e não no `expo-secure-store`, que usaria o cofre de chaves do Android |
 | Fotos e anexos | Só no aparelho, na mesma área privada, e não sobem |
 
+**Então os dados têm criptografia?** Têm, mas é a que a infraestrutura garante, e não uma que o
+Mapill implementou. No envio, quem cifra é o HTTPS. Guardados na nuvem, quem cifra é o
+Supabase, no disco onde roda o PostgreSQL. No aparelho, quem cifra é o Android. O app não cifra por
+conta própria nenhum campo nem o banco SQLite. Na banca, o certo é dizer que os dados trafegam e
+ficam armazenados cifrados, pela infraestrutura, e que uma criptografia própria do app no banco
+local é melhoria futura. Dizer que não há criptografia seria pior do que a realidade.
+
 **O que dá para dizer com honestidade.** A proteção entre usuários está no servidor e é sólida,
 porque não depende do app se comportar bem. A proteção dentro do aparelho depende do Android, do
 bloqueio de tela e do isolamento entre apps. Um celular com root ou desbloqueado na mão de outra
