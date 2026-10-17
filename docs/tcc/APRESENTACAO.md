@@ -1285,3 +1285,131 @@ falha de adesão à complexidade do tratamento, e do Goodman & Gilman, que mostr
 entre doses define o efeito do remédio. As formas e apresentações vêm da base oficial da Anvisa. A
 lista de frequências é modelagem própria, feita para cobrir os tratamentos reais que os
 concorrentes não cobrem, como a dose de insulina que muda ao longo do dia.
+
+### Requisito funcional, não funcional e regra de negócio, o panorama completo
+
+Conferido contra `TCC Gabriel Steffens Finalizado - 08_10.docx`, seções 2.5.2, 4.2 e 4.3, Quadros 3
+a 10.
+
+**O que é cada um**
+
+| | Pergunta que responde | Sobre o quê | Exemplo do Mapill |
+| --- | --- | --- | --- |
+| Requisito funcional | O que o sistema faz? | Um serviço, uma ação, a reação a uma entrada do usuário | RF 17, confirmar ou pular cada dose |
+| Requisito não funcional | Com que qualidade, ou sob que restrição? | O sistema como um todo, e não uma tela específica | RNF 01, nenhuma operação clínica depende de rede |
+| Regra de negócio | Qual política o domínio obedece? | Como o mundo do tratamento funciona, independente do software | RN 02, o estoque desconta a dose, e não a unidade |
+
+- **Funcional.** Para Sommerville (2018), é a declaração de um serviço que o sistema oferece, de como
+  ele reage a uma entrada e de como se comporta numa situação. Dá para testar usando o app, e o teste
+  responde sim ou não: a dose foi confirmada?
+- **Não funcional.** É uma restrição sobre os serviços, e costuma valer para o sistema inteiro.
+  Responde ao "como", e não ao "o quê". Ele se liga a um atributo de qualidade, e a ISO/IEC
+  25010:2023, citada na seção 2.5.3, é o catálogo desses atributos (confiabilidade, segurança,
+  usabilidade, manutenibilidade, desempenho, compatibilidade, portabilidade).
+- **Regra de negócio.** É uma política ou uma restrição do domínio, que define ou limita como o
+  negócio opera. Ela existe antes do software e continuaria valendo se o controle fosse feito num
+  caderno. O requisito funcional muitas vezes é a regra virando função: a RN 02 diz "o estoque
+  desconta a dose", e o RF 18 diz "o sistema deve descontar a quantidade da dose".
+
+**Como decidir em qual caixa algo entra**
+
+1. Dá para apontar uma tela ou um botão que faz isso? Se sim, é **funcional**.
+2. É uma qualidade que vale para tudo, e que ninguém "usa" diretamente? Se sim, é **não funcional**.
+3. Valeria num caderno de papel, e alguém que entende do tratamento poderia ter decidido diferente?
+   Se sim, é **regra de negócio**.
+
+Exemplo dos três juntos, no adiamento do alarme:
+- RF 28, o adiamento deve ser permitido uma única vez por horário. É o comportamento.
+- RN 12 e 13, adiar é permitido uma vez, e adiar não registra desfecho. É a política, com a
+  justificativa de que adiar sem limite vira uma forma de ignorar.
+- RNF 02, o lembrete funciona com o app fechado. É a qualidade que torna o adiamento confiável.
+
+**Panorama do Mapill**
+
+*44 requisitos funcionais, em seis categorias, na ordem do caminho do paciente*
+
+| Quadro | Categoria | RF | O essencial |
+| --- | --- | --- | --- |
+| 3 | Identidade e consentimento | 01 a 06 | Uso sem conta, Google opcional, consentimento com data e versão, ficha de saúde |
+| 4 | Cadastro clínico | 07 a 15 | 10 formas, 4 frequências, dose variável por horário, código de barras, base da Anvisa |
+| 5 | Operação diária | 16 a 24 | Agenda do dia, confirmar ou pular, desconto da dose, correção retroativa, estoque |
+| 6 | Lembretes | 25 a 33 | Aviso com app fechado, 3 modos, ações rápidas, adiar uma vez, aviso agrupado |
+| 7 | Agenda clínica | 34 a 38 | Consultas e exames no mesmo calendário, desfecho, receita vencendo |
+| 8 | Dados e direitos | 39 a 44 | Sincronização, LWW, taxa de adesão, exportar, apagar, revogar |
+
+*9 requisitos não funcionais, e o atributo da ISO/IEC 25010 de cada um*
+
+| RNF | Requisito | Atributo |
+| --- | --- | --- |
+| 01 | Offline-first, nenhuma operação clínica depende de rede | Confiabilidade (disponibilidade) |
+| 02 | Lembrete com app fechado e após reinício | Confiabilidade |
+| 03 | Isolamento por usuário em toda tabela da nuvem (RLS) | Segurança |
+| 04 | Migrações sequenciais, versionadas, preservando histórico | Manutenibilidade e confiabilidade |
+| 05 | Respeitar a escala de fonte do sistema | Usabilidade (acessibilidade) |
+| 06 | Nenhuma credencial no repositório | Segurança |
+| 07 | Nenhuma operação falha em silêncio | Confiabilidade e usabilidade |
+| 08 | Temas visuais alternativos | Usabilidade (acessibilidade) |
+| 09 | Domínio sem dependência de bibliotecas externas | Manutenibilidade |
+
+*20 regras de negócio, em seis grupos (seções 4.3.1 a 4.3.6)*
+
+| Grupo | RN | Ideia central |
+| --- | --- | --- |
+| Integridade do registro clínico | 01, 06, 07 | Silêncio não é desfecho, correção não sobrescreve, excluir preserva o passado |
+| Controle de estoque | 02, 03, 04, 05 | Desconta a dose, recusa previsão sem unidade compatível, ajuste é evento, recontar não é repor |
+| Modelagem da posologia | 08, 09, 10 | Horários nascem vazios, unidade decorre da forma, campo sem sentido é limpo |
+| Notificações e lembretes | 11 a 16 | Um aviso por horário, adiar uma vez, adiar não é desfecho, reagendar tudo, texto honesto, compromisso não toca alarme |
+| Sincronização | 17, 18 | Vence o registro inteiro mais recente, a exclusão do titular começa pela nuvem |
+| Cálculo de adesão | 19, 20 | Dose futura não conta, sem dose vencida não há percentual |
+
+**Onde o RF e a RN dizem a mesma coisa, e por que isso não é repetição**
+
+| RF | RN | Assunto |
+| --- | --- | --- |
+| 15 | 07 | Excluir preserva o histórico |
+| 18 | 02 | Descontar a dose, e não a unidade |
+| 20 | 06 | Correção gera novo registro |
+| 23 | 05 | Recontagem diferente de reposição |
+| 28 | 12 | Adiar uma vez |
+| 29 | 11 | Aviso agrupado |
+| 30 | 14 | Alterar tratamento cancela os avisos |
+| 40 | 17 | Last-Write-Wins |
+
+Se a banca perguntar, o RF diz **o que o sistema deve fazer**, e a RN diz **qual política está por
+trás e por quê**. O Quadro 10 tem a coluna de justificativa justamente para isso. Uma regra pode
+gerar mais de um requisito, e um requisito pode existir sem regra nenhuma, como o RF 14, leitura de
+código de barras, que é só uma facilidade.
+
+**Pontos que a banca pode apertar, e como responder**
+
+- **"Qual o seu autor para regra de negócio?"** A seção 2.5.2 tem regra de negócio no título, mas a
+  definição com autor é só a de RF e RNF, de Sommerville. Sobre regra de negócio, o texto se apoia
+  em Pressman e Maxim (2021), na seção 2.5.1, que ligam os dados de configuração e as estruturas de
+  dados ao núcleo das regras. Resposta honesta: "Sommerville classifica os requisitos. As regras de
+  negócio eu tratei como as políticas do domínio clínico que os requisitos operacionalizam, e cada
+  uma tem a justificativa no Quadro 10."
+- **"Não tem nenhum requisito de desempenho?"** Não tem, embora a 4.2 fale em "restrições de
+  qualidade e desempenho". Resposta: o gargalo de um app de adesão não é velocidade, é
+  confiabilidade. Como tudo roda local no SQLite, sem esperar rede, a resposta já é imediata, e por
+  isso os RNF se concentraram em confiabilidade, segurança e usabilidade. O RNF 01 cobre isso
+  indiretamente, porque nenhuma ação clínica espera a internet.
+- **"Temas visuais não seriam funcional?"** (RNF 08) Oferecer a opção de tema é uma função, mas o
+  motivo de existir é acessibilidade, contraste para quem enxerga pior. Por isso entrou como
+  qualidade. As duas leituras são defensáveis, o importante é saber dizer o motivo.
+- **"RN 14, 17 e 18 não são técnicas demais para regra de negócio?"** São as que menos passam no
+  teste do caderno. A defesa é que cada uma é uma **escolha de política**, que poderia ter sido
+  outra. A RN 17 decide qual versão vence num conflito, e daria para mesclar campos, mas o Mapill
+  escolheu não mesclar para não criar um registro que ninguém escreveu. A RN 18 decide a ordem da
+  exclusão para cumprir o direito do titular na LGPD. A RN 14 é a mais próxima de uma decisão de
+  implementação, e a justificativa é clínica: nenhum alarme de tratamento encerrado pode continuar
+  tocando.
+- **"O RNF 02 foi cumprido?"** Com a ressalva da seção 5.3. Após reiniciar, o alarme só tocou depois
+  do desbloqueio enquanto a restrição de inicialização automática do fabricante estava ativa. É uma
+  limitação da plataforma, e o próprio TCC declara isso na conclusão.
+
+**Resumo para falar.** O requisito funcional é o que o sistema faz, como confirmar uma dose. O não
+funcional é com que qualidade ele faz, como funcionar sem internet, e cada um se liga a um atributo
+da ISO 25010. A regra de negócio é a política do tratamento que está por trás, e que valeria até
+num caderno, como descontar a dose real e não uma unidade. No Mapill são 44 funcionais, em seis
+áreas que seguem o caminho do paciente, 9 não funcionais, focados em confiabilidade, segurança e
+usabilidade, e 20 regras de negócio, em seis grupos, cada uma com a sua justificativa no Quadro 10.
