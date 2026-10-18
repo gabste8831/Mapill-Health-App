@@ -1413,3 +1413,456 @@ da ISO 25010. A regra de negócio é a política do tratamento que está por tr�
 num caderno, como descontar a dose real e não uma unidade. No Mapill são 44 funcionais, em seis
 áreas que seguem o caminho do paciente, 9 não funcionais, focados em confiabilidade, segurança e
 usabilidade, e 20 regras de negócio, em seis grupos, cada uma com a sua justificativa no Quadro 10.
+
+### Como funciona o mobile por baixo: permissões e o alarme com a tela bloqueada
+
+Conferido no código, em `app.json`, `src/notifications/permissoes-de-alarme.ts`,
+`src/notifications/notifee-gateway.ts` e `plugins/`.
+
+**A diferença em relação à web.** Na web, o código só roda enquanto a aba está aberta, e o navegador
+quase não pede autorização. No celular, o app passa a maior parte do tempo **fechado**, e quem
+decide se ele pode acordar, tocar som, aparecer na tela ou usar a bateria é o Android. Por isso o
+centro do trabalho mobile não é escrever a função, é **convencer o sistema a deixar a função rodar
+na hora certa**. O alarme do Mapill é exatamente esse problema.
+
+**Os três tipos de permissão do Android**
+
+| Tipo | Como é concedida | Exemplos no Mapill |
+| --- | --- | --- |
+| Normal | Basta declarar no manifesto, e o Android concede na instalação, sem perguntar | `WAKE_LOCK`, `VIBRATE`, `RECEIVE_BOOT_COMPLETED`, `FOREGROUND_SERVICE` |
+| Em tempo de execução | O app abre uma janela pedindo, e a pessoa aceita ou nega | `POST_NOTIFICATIONS` (Android 13+), câmera |
+| Especial | Não tem janela. A pessoa precisa ir numa tela das configurações e ligar uma chave | Alarme exato ("Alarmes e lembretes"), sobrepor outros apps, acesso ao Não perturbe |
+
+E existe uma quarta coisa que **nem é permissão do Android**: o início automático e a economia de
+bateria que fabricantes como Xiaomi e Samsung acrescentam por conta própria. Elas não aparecem em
+nenhuma API, e foi uma delas que causou a ressalva da seção 5.3.
+
+**Onde se declara.** No projeto Expo, o manifesto do Android (`AndroidManifest.xml`) é **gerado** a
+cada build. Por isso as permissões ficam na lista `android.permissions` do `app.json`, e o que
+precisa de mais ajuste no manifesto fica nos config plugins da pasta `plugins/`. Mudou o
+`app.json`, precisa de build nova. Recarregar o app não basta.
+
+**Como saber qual permissão usar.** Não se chuta. O caminho é sempre o mesmo.
+
+1. Começa pelo comportamento. "Quero que toque às 8h exatas, com o celular dormindo."
+2. Descobre qual API do Android faz isso. Aqui, o `AlarmManager`.
+3. A documentação dessa API diz o que ela exige. O alarme exato exige `SCHEDULE_EXACT_ALARM` ou
+   `USE_EXACT_ALARM` a partir do Android 12.
+4. A documentação da biblioteca (o notify-kit) diz o que ela já declara sozinha e o que fica por
+   conta do app.
+5. Testa no aparelho físico. O que faltou aparece como erro ou como comportamento errado, e volta
+   para o passo 2.
+
+O passo 5 foi o que mais ensinou no projeto. Três exemplos reais, registrados nos comentários dos
+plugins:
+
+- **02/09.** O alarme tocou, mas a tela cheia não apareceu. Faltava dizer no manifesto que a tela
+  do alarme pode subir sobre o bloqueio (`showWhenLocked` e `turnScreenOn`).
+- **05/09.** Agendou, reiniciou o celular, o horário passou e nada tocou. O Android apaga os alarmes
+  no reboot, e os receptores que reagendam estavam declarados de um jeito que o Android 12+ ignora.
+  O plugin `alarme-em-tela-cheia.js` corrige isso.
+- **15/09.** Responder o alarme com o celular bloqueado deixava o app inteiro aberto, sem senha. A
+  correção foi dar ao alarme uma tela própria (`AlarmeActivity`), e só ela tem licença de aparecer
+  sobre o bloqueio.
+
+**Cada permissão do `app.json` e para que serve**
+
+| Permissão | Tipo | Para que |
+| --- | --- | --- |
+| `POST_NOTIFICATIONS` | tempo de execução | Mostrar qualquer aviso (Android 13+). Sem ela, nada aparece |
+| `SCHEDULE_EXACT_ALARM` e `USE_EXACT_ALARM` | especial / normal | Tocar na hora exata, e não "por volta de". Duas porque cada versão do Android aceita uma |
+| `USE_FULL_SCREEN_INTENT` | especial no Android 14+ | Abrir a tela do alarme por cima de tudo, como um despertador |
+| `SYSTEM_ALERT_WINDOW` | especial | Abrir a tela do alarme quando a pessoa está usando outro app |
+| `ACCESS_NOTIFICATION_POLICY` | especial | Tocar mesmo no modo Não perturbe |
+| `WAKE_LOCK` e `DISABLE_KEYGUARD` | normal | Acender a tela e manter o aparelho acordado enquanto o alarme toca |
+| `RECEIVE_BOOT_COMPLETED` | normal | Ser avisado quando o celular liga, para reagendar os alarmes |
+| `FOREGROUND_SERVICE` e `..._MEDIA_PLAYBACK` | normal | Manter o som do alarme tocando em loop, sem depender da tela |
+| `VIBRATE` | normal | Vibrar |
+
+**O caminho do alarme, do cadastro até tocar com a tela bloqueada**
+
+1. **Agendar.** Ao salvar o remédio, o app calcula os horários dos próximos sete dias e entrega cada
+   um ao `AlarmManager` do Android, no modo `SET_ALARM_CLOCK` (`notifee-gateway.ts`). É o mesmo modo
+   do despertador do relógio. Os outros modos podem ser adiados pelo Doze, a economia de energia do
+   Android, e no teste o aviso só chegava quando a pessoa pegava o celular.
+2. **O app pode fechar.** Quem guarda o horário agora é o sistema, e não o Mapill. Por isso o app
+   pode estar fora dos recentes.
+3. **Na hora.** O Android acorda o receptor da biblioteca, que publica a notificação num canal de
+   importância alta, com som e com permissão de furar o Não perturbe (`canais-notifee.ts`).
+4. **A tela.** A notificação leva um pedido de tela cheia, que abre a `AlarmeActivity`. Como ela é a
+   única com `showWhenLocked` e `turnScreenOn`, a tela acende e o alarme aparece sobre o bloqueio.
+   Com o celular em uso, o Android troca a tela cheia por um aviso no topo, com os botões de tomar e
+   pular.
+5. **O som.** Um serviço em primeiro plano, do tipo `mediaPlayback`, mantém o som em loop até a
+   pessoa responder. O Android 14 exige que o tipo esteja no manifesto, e é outro ajuste do plugin.
+6. **Depois de reiniciar.** O Android avisa `BOOT_COMPLETED`, e os receptores reagendam tudo.
+   Além disso, toda vez que o app abre ou o paciente responde um aviso, os avisos são reconstruídos.
+
+**Dá para garantir que o alarme vai tocar?** A resposta honesta é que **nenhum app garante 100%**,
+nem o despertador do próprio celular, porque a pessoa pode revogar qualquer autorização. O que o
+Mapill faz é reduzir o risco em quatro camadas.
+
+1. **Declarar** tudo o que o alarme precisa, no `app.json` e nos plugins.
+2. **Pedir** o que tem janela, na primeira execução.
+3. **Conferir de novo** toda vez que o app volta para a frente. O `diagnosticarPermissoes` lê o
+   estado real no sistema, e nunca de uma memória do app, porque a pessoa pode ter desligado algo
+   enquanto o app estava fechado. O que falta aparece na tela inicial, e o toque leva direto à
+   tela do Android onde se resolve, com a instrução do que ligar.
+4. **Testar no aparelho físico**, nas quatro combinações de bloqueado ou em uso, com o app nos
+   recentes ou fora deles, e depois de reiniciar (seção 5.3).
+
+O limite que sobrou é o início automático do fabricante. O Android não deixa nenhum app ler se ele
+está ligado, então o Mapill só consegue levar a pessoa até a tela e confiar que ela ligou. Por isso
+o RNF 02 foi cumprido com ressalva.
+
+**Sobre ter usado IA.** A insegurança é natural, mas o que a banca avalia não é quem digitou cada
+linha, é se você entende as decisões. E as decisões do alarme não saíram prontas da IA. Elas saíram
+de testar no aparelho, ver falhar, entender o motivo e corrigir, como nos três exemplos acima. Isso
+é desenvolvimento mobile de verdade, porque o comportamento no Android só se confirma no celular.
+Se perguntarem, a frase é: "A IA acelerou a escrita do código, mas cada comportamento do alarme foi
+validado por mim no aparelho, e vários só funcionaram depois de eu entender por que o Android
+estava bloqueando."
+
+**Resumo para falar.** No celular, o app fica quase sempre fechado, e quem decide se ele pode tocar
+é o Android. Por isso o alarme do Mapill não depende do app: o horário é entregue ao agendador do
+sistema no modo de despertador, e na hora o sistema abre uma tela própria que tem licença de
+aparecer sobre o bloqueio. As permissões foram escolhidas a partir do comportamento desejado, pela
+documentação do Android, e confirmadas no aparelho. Como nenhuma autorização é garantida para
+sempre, o app confere o estado real a cada abertura e mostra ao paciente o que falta.
+
+### O que é o Expo, e como o JavaScript conversa com o Android?
+
+**Primeiro, o React Native.** É o framework da Meta que deixa escrever o app em JavaScript ou
+TypeScript, com componentes do React, e que desenha **telas nativas de verdade**. Um `<Text>` vira
+um `TextView` do Android, e não uma página web dentro do app. O que ele não resolve sozinho é o
+resto: compilar, configurar o projeto Android, e dar acesso a câmera, notificação, banco e arquivos.
+
+**O Expo é um framework e um conjunto de ferramentas em cima do React Native.** Ele não substitui o
+React Native, ele o completa. No Mapill, quatro partes dele foram usadas.
+
+| Parte | O que faz | No Mapill |
+| --- | --- | --- |
+| SDK de módulos nativos | Bibliotecas prontas que já trazem o código Kotlin e Swift por baixo, com uma interface em JavaScript | `expo-sqlite`, `expo-camera`, `expo-notifications`, `expo-audio`, `expo-secure-store` |
+| Prebuild e config plugins | Gera a pasta `android/` inteira a partir do `app.json`, e os plugins ajustam o manifesto sem editar o projeto nativo à mão | As permissões do `app.json` e os cinco plugins da pasta `plugins/` |
+| Expo Router | A navegação baseada em arquivos, cada arquivo de `src/app` vira uma tela | As rotas do app |
+| EAS Build | Compila o APK na nuvem, sem precisar do Android Studio configurado na máquina | O `eas.json` |
+
+E ele também oferece o **Expo Modules API**, para escrever um módulo nativo próprio quando nenhuma
+biblioteca resolve. Foi o caso do `modules/desbloqueio`, em Kotlin.
+
+**Então dá para dizer que o Expo poupa configuração nativa?** Sim, e é um argumento correto, desde
+que dito com a ressalva certa.
+
+- **O que ele poupa.** Montar o projeto Android à mão, configurar o Gradle, ligar cada biblioteca
+  nativa, escrever o acesso ao banco, à câmera e às notificações. Cada módulo do SDK tem a
+  documentação por versão, com as opções, as permissões que exige e o que precisa ir no `app.json`.
+  É por isso que o TCC diz, na seção 2.7.3, que o esforço pôde se concentrar nas regras de negócio.
+- **O que ele não poupa.** O comportamento que nenhuma biblioteca previu. O alarme sobre a tela de
+  bloqueio exigiu cinco config plugins e um módulo em Kotlin, porque nem o Expo nem a biblioteca de
+  notificação expõem o bloqueio de tela. A diferença é que, com o Expo, essa configuração ficou
+  **versionada em plugins**, e é refeita igual a cada build, em vez de ser uma edição manual que se
+  perde.
+
+Frase para a banca: "O Expo cuidou da configuração nativa padrão, e onde o app precisou de algo que
+nenhuma biblioteca oferecia, como o alarme sobre a tela de bloqueio, o próprio Expo deu o caminho
+oficial para estender, com config plugins e um módulo nativo em Kotlin."
+
+**Como o JavaScript chega no Android? É uma requisição?**
+
+Não é uma requisição de rede. É uma **chamada de função entre duas linguagens, dentro do mesmo
+processo**, no próprio celular. O JavaScript chama uma função, e por baixo ela executa um código
+Kotlin, que chama a API do Android. Mas a forma de usar lembra uma requisição, e a comparação ajuda.
+
+| | Requisição web | Chamada a módulo nativo |
+| --- | --- | --- |
+| Onde roda | Em outro computador, pela internet | No mesmo celular, no mesmo app |
+| Como chama | `fetch(url)` | `modulo.estaBloqueado()` |
+| O que volta | Uma `Promise` com a resposta | Uma `Promise` com o resultado |
+| Pode falhar? | Sim, sem rede ou com erro do servidor | Sim, sem permissão ou sem o módulo na build |
+| Contrato | A API do servidor | As funções que o módulo declara |
+
+Na nova arquitetura do React Native, essa ponte se chama **JSI**. O JavaScript segura uma referência
+direta ao objeto nativo, sem converter tudo em texto como a ponte antiga fazia.
+
+**Exemplo real, do próprio Mapill.** A tela do alarme precisa saber se o celular está bloqueado.
+
+```
+JavaScript   modules/desbloqueio/src/index.ts     modulo.estaBloqueado()
+     ↓  JSI, chamada de função
+Kotlin       DesbloqueioModule.kt                 AsyncFunction("estaBloqueado")
+     ↓  API do Android
+Android      KeyguardManager.isKeyguardLocked     → true ou false
+     ↑  volta como Promise<boolean>
+```
+
+O Kotlin declara a função com `AsyncFunction("estaBloqueado")`, pergunta ao `KeyguardManager` do
+Android e devolve o resultado. O TypeScript recebe uma `Promise<boolean>`, exatamente como receberia
+a resposta de um `fetch`.
+
+**E mostrar uma notificação?** O mesmo princípio, em três passos.
+
+1. O JavaScript chama `notifee.displayNotification({ title, body, android: { channelId } })`.
+2. O módulo nativo da biblioteca monta a notificação em Kotlin e chama o `NotificationManager`, que
+   é o serviço do Android responsável por todas as notificações do aparelho.
+3. O Android desenha a notificação na barra. A `Promise` resolve dizendo que deu certo, ou falha se
+   não houver permissão.
+
+**O caminho de volta, do Android para o JavaScript.** Aqui está a diferença para a web. Além de o
+app perguntar, o **Android também chama o app**, por eventos. Quando a pessoa toca em "Tomei" na
+notificação, o Android avisa a biblioteca, e ela dispara um evento que o JavaScript escuta
+(`src/notifications/escutar-avisos.ts`). Funciona como um `addEventListener` do navegador.
+
+**E o alarme agendado, com o app fechado?** É o caso mais diferente da web. O app entrega o horário
+ao `AlarmManager` e pode ser fechado. Na hora, **o próprio Android acorda o app**, mandando uma
+mensagem interna chamada **Intent**, que é o sistema de mensagens entre componentes do Android. Um
+receptor da biblioteca recebe essa Intent e publica a notificação. Se for comparar com a web, é
+mais parecido com um **webhook** do que com uma requisição: não é o app que pergunta, é o sistema
+que chama o app quando chega a hora.
+
+**Resumo para falar.** O React Native permite escrever o app em TypeScript com telas nativas, e o
+Expo completa com módulos prontos, geração do projeto Android e build na nuvem. O código em
+TypeScript acessa o Android chamando funções de módulos nativos, que respondem com uma `Promise`,
+parecido com uma requisição, só que local. E no caminho contrário o Android chama o app por eventos
+e Intents, que é o que faz o alarme tocar mesmo com o app fechado.
+
+### Se o Expo é um framework, como o RNF 09 se sustenta?
+
+**A pergunta da banca.** "O seu requisito diz independência de frameworks, mas o app inteiro é feito
+com Expo e React Native. Isso não é contraditório?"
+
+**A resposta curta.** Não, porque o RNF 09 não diz que o **app** não usa framework. Ele diz que a
+**camada de domínio** não pode depender de bibliotecas externas. O framework existe, mas fica nas
+bordas, e o centro não sabe que ele existe.
+
+**O que a Clean Architecture pede de verdade.** O Martin não proíbe frameworks. Ele diz que o
+framework é um **detalhe**, uma ferramenta, e que o sistema não deve "se casar" com ele. A regra de
+dependência deixa o framework entrar, desde que fique nos círculos de fora e que a dependência
+aponte sempre para dentro. Um app sem nenhum framework seria impossível no celular, porque alguém
+precisa desenhar a tela e falar com o Android.
+
+**Onde cada coisa mora no Mapill**
+
+| Camada | Usa framework? | Exemplo |
+| --- | --- | --- |
+| Domínio, `src/domain` | **Não.** Só TypeScript puro | Gerar horários, prever o estoque, calcular a adesão |
+| Dados, `src/data` e `src/notifications` | Sim | `expo-sqlite`, Supabase, notify-kit |
+| Apresentação, `src/app`, `src/telas`, `src/hooks` | Sim | React Native, Expo Router |
+
+Conferido no código: nenhum arquivo de `src/domain` importa algo de fora do próprio domínio,
+enquanto 62 arquivos das camadas de fora importam Expo ou React. É a regra de dependência medida.
+
+**Por que a independência vale a pena, se o app usa Expo de qualquer jeito.** Porque framework e
+biblioteca mudam, e a regra clínica não deveria mudar junto.
+
+- **Já aconteceu.** O Notifee foi arquivado no meio do projeto e trocado pelo notify-kit. Mudou um
+  arquivo da camada de fora, e nenhuma regra de horário, adiamento ou agrupamento foi tocada.
+- **Testar sem celular.** Como o domínio não depende de nada, as regras rodam no computador, nas
+  rotinas `scripts/conferir-*.mjs`, sem emulador.
+- **Se um dia trocar o Expo.** O que se reescreve são as telas, o acesso ao banco e o alarme. As
+  regras clínicas, que são o valor do sistema, são aproveitadas inteiras, e poderiam rodar até num
+  servidor ou numa versão web.
+
+**Uma distinção que ajuda.** TypeScript é a **linguagem**, e não um framework. O domínio depende da
+linguagem, como qualquer código depende da sua. O que ele não pode é depender de algo que alguém de
+fora pode arquivar, mudar ou abandonar, como o Expo, o React ou o notify-kit.
+
+**Resumo para falar.** O RNF 09 vale para o domínio, e não para o app inteiro. A Clean Architecture
+não proíbe frameworks, ela os coloca nas bordas. O Expo e o React Native estão nas camadas de dados
+e de apresentação, e o domínio, onde ficam as regras clínicas, é TypeScript puro, sem nenhum import
+de fora. A prova é que a biblioteca de alarme foi trocada sem tocar em nenhuma regra.
+
+### Quando a sincronização acontece?
+
+Conferido em `src/hooks/use-sync.ts`, `src/data/remote/sync-service.ts` e nos hooks que a chamam.
+
+**Não existe timer, e não sincroniza ao trocar de aba.** A sincronização roda em momentos
+escolhidos, e cada passada faz sempre o ciclo completo: primeiro envia tudo o que está pendente,
+depois baixa tudo o que chegou à nuvem, comparando as datas como explicado nas seções anteriores.
+
+| Gatilho | Onde está | Espera a rede? |
+| --- | --- | --- |
+| O app abre | `useSync`, montado em `src/app/_layout.tsx` | Não |
+| O app volta para a frente, vindo do segundo plano | `useSync`, pelo `AppState` mudando para `active` | Não |
+| O paciente confirma ou pula uma dose | `subirDesfecho`, em `use-today-doses.ts` | Não |
+| Cadastra, edita ou exclui um remédio | `use-medication-registration.ts` | Não |
+| Edita a ficha de saúde | `use-patient-profile.ts` | Não |
+| Entra com o Google, ou reinstala com a sessão ainda válida | `use-first-run-gate.ts` | **Sim**, para restaurar os dados antes de pedir a ficha de novo |
+| Toca em sincronizar, na tela de Conta | `ContaScreen.tsx` | Mostra o andamento |
+
+**"Não espera a rede"** quer dizer que a tela não fica esperando. O dado já foi gravado no SQLite, e
+é ele que vale. A sincronização roda por trás, e se falhar por falta de internet a linha continua
+pendente e sobe na próxima passada.
+
+**Por que esses momentos, e não um timer.** O comentário do `useSync` explica. Voltar ao app é
+quando a conexão costuma estar de volta e quando a pessoa vai olhar a tela. Um timer de 15 minutos
+gastaria bateria para descobrir que nada mudou, num celular que passa o dia no bolso.
+
+**Por que alguns dados sobem na hora.** São os que mais custam se ficarem só no aparelho.
+
+- **A dose confirmada ou pulada.** É o histórico que o médico lê. Antes, só subia quando a pessoa
+  abria a tela de Conta, e quem confirma dose todo dia nunca tinha motivo para abrir ali.
+- **A exclusão de remédio.** Enquanto ela não sobe, a nuvem ainda tem o remédio vivo, e um
+  recebimento poderia trazê-lo de volta, com os alarmes junto.
+- **A ficha de saúde.** Quem edita costuma continuar no app, então esperar a próxima volta ao
+  primeiro plano poderia levar horas.
+
+**Proteções de cada passada**
+
+- **Sem conta vinculada**, a função volta na hora, sem erro. É o modo padrão do app.
+- **Duas passadas ao mesmo tempo não acontecem.** Se o paciente confirma uma dose enquanto outra
+  passada roda, a segunda recebe o resultado da primeira (`emAndamento`).
+- **Se algo desceu**, os alarmes são reagendados, porque o Android do aparelho novo não conhece os
+  alarmes do antigo.
+
+**O que vale saber, caso a banca aperte.**
+
+- Com o app **fechado**, não sincroniza. Não há sincronização em segundo plano. O que foi feito
+  offline sobe na próxima abertura.
+- **Não sincroniza ao voltar a internet** enquanto o app está aberto, porque não há um ouvinte de
+  conexão. Sobe na próxima ação que dispara a passada ou na próxima volta ao app.
+- Compromissos e ajustes de estoque feitos à mão não disparam a passada na hora. Eles sobem na
+  próxima passada, que pode vir da próxima dose confirmada ou da próxima abertura. Como cada passada
+  envia **tudo** o que está pendente, nada se perde, só chega um pouco depois.
+
+**Resumo para falar.** A sincronização não roda em intervalo fixo. Ela acontece quando o app abre,
+quando volta para a frente, e logo depois das ações que mais importam, como confirmar uma dose ou
+excluir um remédio. Nenhuma delas trava a tela, porque o dado já está no aparelho. Cada passada
+envia tudo o que está pendente e depois baixa o que chegou, então qualquer coisa que ficou para trás
+sobe na próxima.
+
+### O estoque mudou em outro aparelho. O aviso de estoque se ajusta?
+
+Conferido em `src/notifications/reagendar-avisos.ts`,
+`src/domain/use-cases/planejar-avisos-de-estoque.ts`, `src/data/remote/sync-service.ts` e
+`src/hooks/use-inventory-list.ts`.
+
+**O cenário.** No aparelho A, o estoque dura até o dia 18, com aviso pedido para 15 dias antes. No
+aparelho B, com a mesma conta, a pessoa reconta o estoque de 10 para 5 unidades, e agora ele dura
+só até o dia 13.
+
+**O que acontece, passo a passo**
+
+1. **No B.** A recontagem grava o ajuste e o novo saldo no SQLite, com um `updated_at` novo. Ela não
+   dispara a sincronização na hora (é um dos casos da seção anterior), então sobe na próxima
+   passada do B, quando ele volta ao primeiro plano ou confirma uma dose.
+2. **Na nuvem.** O saldo 5 chega com `updated_at` mais novo, e o servidor aceita.
+3. **No A.** Na próxima passada do A, o recebimento traz o item de estoque com o saldo 5. Como o
+   `updated_at` remoto é mais novo, ele substitui o local inteiro.
+4. **Reagendamento.** Como algo desceu, a sincronização chama `reagendarTodosOsAvisos`. Ele cancela
+   todos os avisos e recalcula tudo a partir do banco, inclusive a previsão de estoque, com o saldo
+   novo. A previsão passa a dizer dia 13, e os avisos de estoque são refeitos a partir dessa data.
+
+Ou seja, **não fica um aviso velho apontando para o dia 18**. É a RN 14: qualquer mudança refaz
+tudo, e o dado novo vem da sincronização. O cartão da tela inicial também mostra a data nova assim
+que o saldo desce, porque ele lê o banco toda vez que a tela aparece.
+
+**Os detalhes que valem saber**
+
+- **O aviso "está acabando" pode não ser enviado.** O app marca esse aviso para o dia em que a
+  previsão entra na antecedência pedida, que aqui seria dia 13 menos 15 dias. Se esse dia já
+  passou, o que acontece justamente quando o estoque cai de uma vez, o aviso é descartado por estar
+  no passado. Sobram o cartão da tela inicial, que mostra o estoque baixo, e o aviso "acaba hoje",
+  no último dia. Isso vale também num aparelho só, sempre que uma recontagem ou uma antecedência
+  maior que o estoque restante põe a previsão dentro da janela de uma vez. É uma limitação real, e a
+  correção seria agendar o aviso para logo em seguida quando a data de entrada já tiver passado.
+- **O aviso "acaba hoje" só é agendado na última semana.** Os avisos são agendados para os próximos
+  sete dias e renovados a cada abertura do app ou resposta a um aviso. Um fim de estoque a doze dias
+  entra no agendamento quando estiver a sete.
+- **Se já avisou, não avisa de novo por uma queda.** O app guarda a quantidade do momento em que
+  avisou, e só volta a avisar depois que o estoque **subir**, por reposição. Consumir mais ou
+  recontar para baixo é a mesma queda já avisada. Isso evita um aviso novo a cada dose confirmada.
+- **Os dois aparelhos sem conexão.** Se o A também descontou doses offline, vale a limitação da
+  seção 4.3.2: vence o saldo inteiro do aparelho que editou por último, e um dos descontos some da
+  conta.
+
+**Resumo para falar.** Quando o estoque muda em outro aparelho, o saldo novo desce na próxima
+sincronização, e como algo desceu, o app cancela e refaz todos os avisos a partir do banco. A
+previsão é recalculada com o saldo novo, então o aviso não fica preso à data antiga. A ressalva é
+que, se a queda já põe o estoque dentro da antecedência pedida, o aviso "está acabando" não sai, e
+o paciente fica com o cartão da tela inicial e o aviso do último dia.
+
+---
+
+## Treino em casa: só as perguntas
+
+Responda em voz alta, sem olhar, e depois confira na seção correspondente acima.
+
+**Problema, escopo e validação**
+- A fala de que a descontinuidade do tratamento é um desafio de saúde pública reconhecido pela OMS se sustenta? De onde vem?
+- Por que o app não verifica interação medicamentosa nem sugere dose?
+- Por que não testou com usuários?
+- A taxa de adesão do app é confiável?
+- Na tela de adesão aparece "sem resposta". Qual a diferença para pulada?
+- De onde vêm as regras de posologia, as formas farmacêuticas e as frequências?
+- Como funciona o catálogo de medicamentos?
+- Como a IA foi usada no projeto?
+
+**Requisitos e regras de negócio**
+- Qual a diferença entre requisito funcional, não funcional e regra de negócio?
+- Como você decide se algo é RF, RNF ou regra de negócio?
+- Quantos requisitos e regras são, e como estão organizados?
+- Por que o RF e a RN às vezes dizem a mesma coisa? Isso não é repetição?
+- Qual o seu autor para regra de negócio?
+- Não tem nenhum requisito de desempenho?
+- Temas visuais não seriam um requisito funcional?
+- As RN 14, 17 e 18 não são técnicas demais para serem regra de negócio?
+- O RNF 02 foi cumprido?
+- Por que o adiamento só é permitido uma vez?
+- Por que um aviso por horário, e não um por remédio?
+- Por que qualquer edição apaga e refaz todos os avisos?
+- Por que compromisso não toca alarme?
+- Por que os horários nascem vazios no cadastro?
+- Por que o app recusa a previsão de estoque em vez de estimar?
+- O que quer dizer que nenhuma operação pode falhar em silêncio?
+
+**Arquitetura e código**
+- O que caracteriza uma Clean Architecture, além de separar em pastas?
+- Explique a Clean Architecture do Mapill em 30 segundos.
+- O TCC fala em três camadas, e o Martin em quatro círculos. Como fica?
+- O seu requisito diz independência de frameworks, mas o app é feito com Expo. Isso não é contraditório?
+- O que é o SOLID, e onde ele aparece no código?
+- Se trocasse o SQLite por outro banco, o que mudaria?
+- A tela acessa o banco direto?
+- O Mapill é 100% Clean Architecture?
+- Por que sem ORM, sem Tailwind e sem gerenciador de estado global?
+- O que é um gerenciador de estado global? Dê um exemplo.
+- Por que Supabase, e não um ORM?
+- Tem testes automatizados?
+- Teste automatizado é a mesma coisa que CI/CD?
+
+**Mobile, Expo e alarme**
+- Por que React Native, e não Kotlin nativo?
+- O React Native se justifica pensando numa versão para iPhone? O que teria de ser refeito?
+- O que é o Expo, e o que ele poupou no projeto?
+- Como o JavaScript conversa com o Android? É uma requisição?
+- Como uma notificação é mostrada, do código até a tela?
+- Quais são os tipos de permissão do Android, e como você soube quais usar?
+- Como o alarme toca com o app fechado?
+- Como o alarme aparece com a tela bloqueada?
+- Dá para garantir que o alarme vai tocar?
+- Por que trocaram de biblioteca de alarme?
+- O alarme falhou depois de reiniciar. Isso não compromete o objetivo?
+
+**Dados e sincronização**
+- Qual é o modelo de dados?
+- Existe um campo em cada registro só para o Last-Write-Wins? Quais são as colunas de controle?
+- Quais colunas aprovam ou recusam algo, e quais só organizam a fila?
+- Por que existem duas datas, `updated_at` e `server_updated_at`?
+- Explique a fila de envio e a fila de recebimento.
+- Quando a sincronização acontece?
+- Em que casos algo não sincroniza ou é recusado?
+- Por que Last-Write-Wins, e não mesclar os campos?
+- E se o relógio do celular estiver errado?
+- Há alguma situação em que o LWW perde informação? Por que o estoque pode perder um desconto?
+- O estoque mudou em outro aparelho. O aviso de estoque se ajusta?
+- Por que as migrações só adicionam e nunca apagam?
+- Exclusão lógica e física: qual a diferença, e quando cada uma é usada?
+- As fotos e receitas sincronizam?
+
+**Segurança e LGPD**
+- Como fica a LGPD?
+- Como funcionam o RLS e o JWT?
+- Por que a chave do Supabase pode ficar dentro do app?
+- Os dados têm criptografia?
+- Como o Google valida o usuário? Ele compara o e-mail?
+- A segurança por RLS foi testada?
