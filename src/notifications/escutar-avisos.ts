@@ -1,4 +1,5 @@
 import notifee, { EventType, type Event } from "react-native-notify-kit";
+import { Platform } from "react-native";
 
 import { InventoryRepository } from "@/data/repositories/inventory-repository";
 import { estaBloqueado } from "@/modules/desbloqueio";
@@ -134,6 +135,9 @@ async function tratar(evento: Event): Promise<void> {
    */
   if (evento.type === EventType.DELIVERED) {
     if (!ehAlarmeDeTelaCheia(id)) return;
+    // No iOS o alarme e a propria notificacao, com os botoes nela. Abrir a tela por cima do que a
+    // pessoa esta fazendo seria um comportamento que o app fechado nunca tem.
+    if (Platform.OS !== "android") return;
 
     /**
      * Antes de qualquer guarda, e e a rede que impede a tela azul vazia.

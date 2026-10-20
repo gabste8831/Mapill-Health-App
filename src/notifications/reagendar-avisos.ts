@@ -60,6 +60,15 @@ export function lerUltimaManutencaoDaGrade(): ManutencaoDaGrade | null {
  */
 const JANELA_DE_AVISOS_EM_DIAS = 7;
 
+/**
+ * Quantos avisos o iOS mantem agendados por app. Acima disso ele descarta o excedente sem erro.
+ *
+ * Sete dias de um paciente polimedicado passam disso facil, e escolher quem fica e o que impede o
+ * descarte de cair justamente no aviso de amanha cedo. O Android aceita bem mais, e la a janela de
+ * sete dias ja e o limite.
+ */
+const LIMITE_DE_AVISOS_NO_IOS = 64;
+
 const gateway = new NotifeeGateway();
 
 /**
@@ -283,12 +292,26 @@ async function executarReagendamento(): Promise<void> {
     await gateway.cancelarTudo();
 
     /**
+     * No iOS ficam os mais proximos, ate o limite.
+     *
+     * O adiado e o de teste sobrevivem ao `cancelarTudo` e ocupam vaga, por isso a conta e feita
+     * depois dele. O que fica de fora nao se perde: cada abertura do app refaz a janela e o puxa
+     * para dentro conforme os de agora vao passando.
+     */
+    const agendaveis =
+      Platform.OS === "ios"
+        ? [...avisos]
+            .sort((a, b) => a.quando.getTime() - b.quando.getTime())
+            .slice(0, Math.max(0, LIMITE_DE_AVISOS_NO_IOS - (await gateway.contarPendentes())))
+        : avisos;
+
+    /**
      * Um aviso que falha nao leva os outros junto.
      *
      * Sem o `catch` por item, uma rejeicao aborta o laco e a grade do dia fica pela metade, sem
      * nada indicar quais entraram. Perder um aviso e ruim; perder os vinte seguintes e pior.
      */
-    for (const aviso of avisos) {
+    for (const aviso of agendaveis) {
       // O modo decide o canal e se abre tela cheia; quem agenda é o mesmo gateway nos dois casos.
       try {
         await gateway.agendar(aviso);

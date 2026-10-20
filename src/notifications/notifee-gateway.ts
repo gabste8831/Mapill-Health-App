@@ -19,7 +19,7 @@ import type {
   NotificationPermission,
 } from "@/domain/ports/notification-gateway";
 import { colors } from "@/shared/theme";
-import { ACAO_PULEI, ACAO_TOMEI } from "./acoes";
+import { ACAO_ADIAR, ACAO_PULEI, ACAO_TOMEI, MINUTOS_DE_ADIAMENTO } from "./acoes";
 import {
   ACTIVITY_DO_ALARME,
   CANAL_ALARME,
@@ -119,11 +119,56 @@ export function lerDadosDoAviso(cru: unknown): DadosDoAviso | null {
   return { chave, doseScheduleIds, scheduledFor };
 }
 
+/**
+ * As categorias do iOS, que fazem ali o papel dos botoes montados por aviso no Android.
+ *
+ * O iOS nao aceita botoes na notificacao: aceita o id de uma categoria registrada antes, e e ela
+ * que traz os botoes. Por isso cada combinacao de rotulo vira uma categoria.
+ *
+ * O alarme ganha "Adiar" aqui, e nao no Android, porque no iOS nao existe tela cheia: a
+ * notificacao e o unico lugar onde o "agora nao posso" da tela do alarme pode morar.
+ *
+ * `foreground: false` em todos: e o que deixa responder sem abrir o app, a mesma promessa do
+ * "Tomei" no Android.
+ */
+const CATEGORIAS_DO_IOS = {
+  uma: "dose",
+  varias: "doses",
+  umaComAdiar: "dose-com-adiar",
+  variasComAdiar: "doses-com-adiar",
+} as const;
+
+async function registrarCategoriasDoIos(): Promise<void> {
+  const tomei = (varias: boolean) => ({ id: ACAO_TOMEI, title: varias ? "Tomei todas" : "Tomei" });
+  const pulei = (varias: boolean) => ({ id: ACAO_PULEI, title: varias ? "Pulei todas" : "Pulei" });
+  const adiar = { id: ACAO_ADIAR, title: `Adiar ${MINUTOS_DE_ADIAMENTO} min` };
+
+  await notifee.setNotificationCategories([
+    { id: CATEGORIAS_DO_IOS.uma, actions: [tomei(false), pulei(false)] },
+    { id: CATEGORIAS_DO_IOS.varias, actions: [tomei(true), pulei(true)] },
+    { id: CATEGORIAS_DO_IOS.umaComAdiar, actions: [tomei(false), pulei(false), adiar] },
+    { id: CATEGORIAS_DO_IOS.variasComAdiar, actions: [tomei(true), pulei(true), adiar] },
+  ]);
+}
+
+/** A categoria do aviso no iOS, ou nenhuma quando ele nao e de dose. */
+function categoriaDoIos(aviso: AvisoDeDose): string | undefined {
+  if (aviso.doseScheduleIds.length === 0) return undefined;
+
+  const varias = aviso.doseScheduleIds.length > 1;
+  // Um adiamento so por horario: depois dele o botao some, em vez de aparecer e nao funcionar.
+  if (aviso.modo === "alarm" && !aviso.semAcoesRapidas) {
+    return varias ? CATEGORIAS_DO_IOS.variasComAdiar : CATEGORIAS_DO_IOS.umaComAdiar;
+  }
+  return varias ? CATEGORIAS_DO_IOS.varias : CATEGORIAS_DO_IOS.uma;
+}
+
 let jaPreparado = false;
 
 async function prepararSistema(): Promise<void> {
   if (jaPreparado) return;
-  await registrarCanais();
+  if (Platform.OS === "ios") await registrarCategoriasDoIos();
+  else await registrarCanais();
   jaPreparado = true;
 }
 
@@ -191,8 +236,8 @@ export class NotifeeGateway implements NotificationGateway {
   }
 
   async agendar(aviso: AvisoDeDose): Promise<void> {
+    if (Platform.OS === "web") return;
     await prepararSistema();
-    if (Platform.OS !== "android") return;
 
     const ehAlarme = aviso.modo === "alarm";
 
@@ -315,6 +360,15 @@ export class NotifeeGateway implements NotificationGateway {
               }),
           actions: acoesDoAviso(aviso),
         },
+        /**
+         * O iOS so deixa furar o silencioso com entitlement que a Apple aprova a dedo, entao a diferenca
+         * entre os modos fica no som: o do Mapill no alarme, o do sistema no lembrete. E toca uma
+         * vez so - o iOS nao repete som de notificacao.
+         */
+        ios: {
+          categoryId: categoriaDoIos(aviso),
+          sound: ehAlarme ? "alarme_de_dose.wav" : "default",
+        },
       },
       gatilho,
     );
@@ -328,7 +382,7 @@ export class NotifeeGateway implements NotificationGateway {
    * maximo, um lembrete adiado que nao volta.
    */
   async cancelarTudo(): Promise<void> {
-    if (Platform.OS !== "android") return;
+    if (Platform.OS === "web") return;
 
     const pendentes = await notifee.getTriggerNotificationIds();
     const alvos = pendentes.filter((id) => !sobreviveAoReagendamento(id));
@@ -336,7 +390,7 @@ export class NotifeeGateway implements NotificationGateway {
   }
 
   async contarPendentes(): Promise<number> {
-    if (Platform.OS !== "android") return 0;
+    if (Platform.OS === "web") return 0;
     return (await notifee.getTriggerNotificationIds()).length;
   }
 
@@ -348,7 +402,7 @@ export class NotifeeGateway implements NotificationGateway {
    * caminho era o que fazia um remedio apagado voltar a ser anunciado pelo nome.
    */
   async cancelarTodosOsAgendamentos(): Promise<void> {
-    if (Platform.OS !== "android") return;
+    if (Platform.OS === "web") return;
 
     const pendentes = await notifee.getTriggerNotificationIds();
     if (pendentes.length > 0) await notifee.cancelTriggerNotifications(pendentes);
@@ -365,7 +419,7 @@ export class NotifeeGateway implements NotificationGateway {
    * deu, e nao pelo que o sistema atribuiu.
    */
   async dispensar(chave: string): Promise<void> {
-    if (Platform.OS !== "android") return;
+    if (Platform.OS === "web") return;
 
     // Quem chama conhece a chave do domínio, não o id do agendamento - e o alarme carrega prefixo.
     // Tentar as duas formas é mais barato que obrigar o chamador a saber qual foi usada.
@@ -381,7 +435,7 @@ export class NotifeeGateway implements NotificationGateway {
  * horario, e o alarme daquele horario e o que precisa sair.
  */
 export async function dispensarAlarmeAtivo(): Promise<void> {
-  if (Platform.OS !== "android") return;
+  if (Platform.OS === "web") return;
 
   // O som para aqui, e nao em cada chamador: o audio e do app e nao morre com a notificacao, e esta
   // funcao e o funil de todos os caminhos que encerram um alarme.

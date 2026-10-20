@@ -148,9 +148,10 @@ export type DiagnosticoDeAlarme = {
  * segundo plano, e um alarme que a pessoa acha armado e nao esta e o pior estado possivel.
  */
 export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
-  if (Platform.OS !== "android") {
+  if (Platform.OS === "web") {
     return { itens: [], vaiTocar: true, temPendencia: false, temPendenciaVerificavel: false };
   }
+  if (Platform.OS === "ios") return diagnosticarNoIos();
 
   // Recria o canal antes de ler: o diagnostico roda a cada volta ao primeiro plano, que e quando a
   // pessoa volta de autorizar o Nao Perturbe. Sem isto o canal ficaria com o `bypassDnd: false` com
@@ -306,6 +307,37 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
 }
 
 /**
+ * No iOS so existe uma autorizacao, a de notificacoes.
+ *
+ * Hora exata, bateria e inicio automatico nao sao ajustes que o iPhone exponha, e furar o
+ * silencioso nao esta ao alcance do app: cobrar qualquer um deles seria mandar procurar o que nao
+ * existe.
+ */
+async function diagnosticarNoIos(): Promise<DiagnosticoDeAlarme> {
+  const { authorizationStatus } = await notifee.getNotificationSettings();
+  const concedida = authorizationStatus === AuthorizationStatus.AUTHORIZED;
+
+  return {
+    itens: [
+      {
+        chave: "notificacoes",
+        titulo: "Mostrar avisos",
+        descricao: "Sem isto o Mapill não consegue avisar de nenhuma dose.",
+        concedida,
+        verificavel: true,
+        essencial: true,
+        abrir: async () => {
+          await notifee.openNotificationSettings();
+        },
+      },
+    ],
+    vaiTocar: concedida,
+    temPendencia: !concedida,
+    temPendenciaVerificavel: !concedida,
+  };
+}
+
+/**
  * Pede as permissões que **ainda podem ser pedidas** por diálogo.
  *
  * Só a de notificações abre diálogo, e só enquanto nunca foi negada. As outras não têm diálogo
@@ -313,7 +345,7 @@ export async function diagnosticarPermissoes(): Promise<DiagnosticoDeAlarme> {
  * diagnóstico completo - quem chama usa o que sobrou para mostrar o que ainda falta.
  */
 export async function pedirPermissoesDeAlarme(): Promise<DiagnosticoDeAlarme> {
-  if (Platform.OS !== "android") {
+  if (Platform.OS === "web") {
     return { itens: [], vaiTocar: true, temPendencia: false, temPendenciaVerificavel: false };
   }
 
