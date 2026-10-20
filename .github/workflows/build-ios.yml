@@ -1,0 +1,74 @@
+# Gera um .ipa sem assinatura, para assinar e instalar pelo Sideloadly com Apple ID gratuito.
+#
+# Só roda à mão (aba Actions > Build iOS > Run workflow): em repositório privado o minuto de macOS
+# conta dez vezes na cota, e uma build por push a esgotaria em poucos dias.
+name: Build iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      configuracao:
+        description: "Debug carrega o JS do Metro no PC (dev client); Release leva o JS dentro e roda sozinho"
+        type: choice
+        options: [Debug, Release]
+        default: Debug
+
+jobs:
+  ipa:
+    runs-on: macos-26
+    # Teto contra build travada consumindo a cota inteira.
+    timeout-minutes: 60
+    env:
+      EXPO_PUBLIC_DIAGNOSTICO: "1"
+      # Só pesam na Release, que embute o JS; na Debug ele vem do Metro, com o .env do PC. Sem os
+      # secrets cadastrados o app sobe sem login e backup, que já são opcionais.
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # O SDK 57 exige Xcode 26.4+, e a imagem pode trazer mais de um instalado.
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Prebuild
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Pods
+        working-directory: ios
+        run: pod install
+
+      - name: Compilar sem assinatura
+        run: |
+          xcodebuild \
+            -workspace ios/Mapill.xcworkspace \
+            -scheme Mapill \
+            -configuration ${{ inputs.configuracao }} \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      # Um .ipa é só a pasta Payload com o .app dentro, zipada. Quem assina é o Sideloadly.
+      - name: Empacotar
+        run: |
+          mkdir Payload
+          cp -R "build/Build/Products/${{ inputs.configuracao }}-iphoneos/Mapill.app" Payload/
+          zip -qry "Mapill-${{ inputs.configuracao }}.ipa" Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mapill-${{ inputs.configuracao }}-ipa
+          path: Mapill-${{ inputs.configuracao }}.ipa
+          retention-days: 14
