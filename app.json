@@ -58,10 +58,11 @@
         "expo-image-picker",
         {
           "photosPermission": "O Mapill acessa suas fotos apenas para você escolher a imagem da sua ficha, da caixa do remédio ou da receita. A foto fica no aparelho.",
-          "cameraPermission": "O Mapill abre a câmera apenas quando você escolhe fotografar a caixa do remédio ou a receita. A foto fica no aparelho e não é enviada para lugar nenhum.",
+          "cameraPermission": "O Mapill usa a câmera para ler o código de barras do remédio ou quando você escolhe fotografar a caixa ou a receita. A foto fica no aparelho e não é enviada para lugar nenhum.",
           "microphonePermission": false
         }
       ],
+      "./plugins/sem-push-no-ios",
       [
         "expo-notifications",
         {
@@ -75,7 +76,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "O Mapill usa a câmera para ler o código de barras da caixa do remédio e preencher o cadastro para você. Nenhuma foto é tirada ou guardada nesse processo.",
+          "cameraPermission": "O Mapill usa a câmera para ler o código de barras do remédio ou quando você escolhe fotografar a caixa ou a receita. A foto fica no aparelho e não é enviada para lugar nenhum.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
