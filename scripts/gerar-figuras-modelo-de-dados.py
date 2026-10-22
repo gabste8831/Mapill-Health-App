@@ -23,7 +23,8 @@ ROW = 20
 GAP_X = 80       # espaço entre colunas, onde correm as ligações
 GAP_Y = 36
 MARGIN = 50
-COLS = [MARGIN + i * (W + GAP_X) for i in range(4)]
+# Duas colunas: a figura entra em página retrato, na largura do texto.
+COLS = [MARGIN + i * (W + GAP_X) for i in range(2)]
 FONT = "Arial, Helvetica, sans-serif"
 
 
@@ -111,24 +112,24 @@ def layout(t, remote):
             y += height(t[n]) + GAP_Y
         return y
 
-    stack(0, ["medications", "inventory_items", "inventory_adjustments"])
-    bottom2 = stack(1, ["prescriptions"])
-    bottom3 = stack(2, ["dose_schedules", "intake_logs"])
-    stack(3, ["appointments", "patient_profiles", "consent_records"])
+    bottom1 = stack(0, ["medications", "inventory_items", "inventory_adjustments", "patient_profiles",
+                        "consent_records"])
+    bottom2 = stack(1, ["prescriptions", "dose_schedules", "intake_logs", "appointments"])
 
     group = None
-    gy = max(bottom2, bottom3) + 10
+    gy = max(bottom1, bottom2) + 4
     if remote:
-        pos["auth.users"] = (COLS[1], gy)
+        pos["auth.users"] = (COLS[0], gy)
     else:
         top = gy + 34
-        pos["cmed_entries"] = (COLS[1], top)
-        pos["cmed_eans"] = (COLS[2], top)
-        pos["sync_state"] = (COLS[1], top + height(t["cmed_entries"]) + GAP_Y)
-        pos["app_state"] = (COLS[2], top + height(t["cmed_entries"]) + GAP_Y)
-        gx = COLS[1] - 20
-        gbottom = pos["app_state"][1] + height(t["app_state"]) + 20
-        group = (gx, gy, COLS[2] + W + 20 - gx, gbottom - gy)
+        pos["cmed_entries"] = (COLS[0], top)
+        y = top
+        for n in ("cmed_eans", "sync_state", "app_state"):
+            pos[n] = (COLS[1], y)
+            y += height(t[n]) + GAP_Y
+        gx = COLS[0] - 20
+        gbottom = max(y - GAP_Y, top + height(t["cmed_entries"])) + 20
+        group = (gx, gy, COLS[1] + W + 20 - gx, gbottom - gy)
     return pos, group
 
 
@@ -233,9 +234,10 @@ def render(remote):
     link(svg, t, pos, "medications", "prescriptions", "medication_id", "across", dashed)
     link(svg, t, pos, "medications", "inventory_items", "medication_id", "left", dashed)
     link(svg, t, pos, "inventory_items", "inventory_adjustments", "inventory_item_id", "right", dashed)
-    link(svg, t, pos, "prescriptions", "dose_schedules", "prescription_id", "across", dashed)
-    link(svg, t, pos, "dose_schedules", "intake_logs", "dose_schedule_id", "right", dashed)
-    link(svg, t, pos, "intake_logs", "intake_logs", "corrects_log_id", "left", dashed, optional=True)
+    # Lados alternados na coluna da direita: no mesmo lado, as duas ligações se cruzariam.
+    link(svg, t, pos, "prescriptions", "dose_schedules", "prescription_id", "right", dashed)
+    link(svg, t, pos, "dose_schedules", "intake_logs", "dose_schedule_id", "left", dashed)
+    link(svg, t, pos, "intake_logs", "intake_logs", "corrects_log_id", "right", dashed, optional=True)
     if not remote:
         link(svg, t, pos, "cmed_entries", "cmed_eans", "entry_id", "across", False)
 
@@ -249,8 +251,8 @@ def render(remote):
                       "de todas as tabelas acima, com chave estrangeira real",
                       "(on delete cascade) e RLS user_id = auth.uid()."]
         for i, s in enumerate(notes_auth):
-            svg.text(ux, uy + height(t["auth.users"]) + 22 + i * 17, s, size=12)
-        bottom = max(bottom, uy + height(t["auth.users"]) + 22 + len(notes_auth) * 17)
+            svg.text(COLS[1], uy + 18 + i * 17, s, size=12)
+        bottom = max(bottom, uy + 18 + len(notes_auth) * 17)
 
     ly = bottom + 40
     lx = COLS[0]
@@ -285,12 +287,12 @@ def render(remote):
             "medications.ean é consultado em cmed_eans.ean, sem chave estrangeira.",
             "As colunas emergency_contact_* são legadas, substituídas por emergency_contacts.",
         ]
-    nx = COLS[1] + 40
+    ny = yy + 36
     for i, s in enumerate(notes):
-        svg.text(nx, ly + 20 + i * 18, s, size=12)
+        svg.text(lx, ny + i * 18, s, size=12)
 
-    width = COLS[3] + W + MARGIN
-    height_total = ly + 20 + max(len(notes) * 18, 70) + MARGIN - 10
+    width = COLS[1] + W + MARGIN
+    height_total = ny + (len(notes) - 1) * 18 + MARGIN
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height_total}" '
             f'viewBox="0 0 {width} {height_total}" font-family="{FONT}">'
             f'<rect width="100%" height="100%" fill="#fff"/>' + "".join(svg.parts) + "</svg>",
