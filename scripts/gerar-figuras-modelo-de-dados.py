@@ -7,7 +7,11 @@ outras tabelas. As nove tabelas sincronizadas ficam no mesmo lugar nas duas figu
 comparação ser feita de olho. Tabela ou coluna nova entra em `schema()` à mão: a fonte de verdade
 continua sendo as migrations e o docs/supabase-schema.sql.
 
-O PNG sai do Edge em modo headless, em escala 3, que é o que o Word precisa para não borrar.
+Duas colunas, sem legenda e com margem mínima: a figura entra em página retrato e o que limita a
+letra é a altura da página. Com tudo numa figura só, cada pixel de altura poupado vira letra maior,
+e a legenda e as notas cabem melhor na legenda da figura e no texto.
+
+O PNG sai do Edge em modo headless, em escala 4, que é o que o Word precisa para não borrar.
 """
 import os
 import subprocess
@@ -17,14 +21,16 @@ from xml.sax.saxutils import escape
 OUT_DIR = sys.argv[1]
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 
-W = 340          # largura da tabela
-HEAD = 26
-ROW = 20
-GAP_X = 80       # espaço entre colunas, onde correm as ligações
-GAP_Y = 36
-MARGIN = 50
-# Duas colunas: a figura entra em página retrato, na largura do texto.
-COLS = [MARGIN + i * (W + GAP_X) for i in range(2)]
+W = 372          # largura da tabela
+HEAD = 24
+ROW = 18
+FONT_NAME = 14.5
+FONT_TYPE = 12.5
+GAP_X = 62       # espaço entre as colunas, onde correm as ligações
+GAP_Y = 16
+GUTTER = 30      # margem das laterais, onde correm as ligações de uma tabela para outra da mesma coluna
+EDGE_Y = 3
+COLS = [GUTTER, GUTTER + W + GAP_X]
 FONT = "Arial, Helvetica, sans-serif"
 
 
@@ -103,33 +109,38 @@ def height(cols):
 # ---------------------------------------------------------------------------
 # Layout fixo: as nove tabelas sincronizadas ocupam o mesmo lugar nas duas figuras
 # ---------------------------------------------------------------------------
+GROUP_LABEL = 26
+GROUP_PAD = 12
+
+
 def layout(t, remote):
     pos = {}
 
-    def stack(col, names, y=MARGIN):
+    def stack(col, names, y):
         for n in names:
             pos[n] = (COLS[col], y)
             y += height(t[n]) + GAP_Y
         return y
 
-    bottom1 = stack(0, ["medications", "inventory_items", "inventory_adjustments", "patient_profiles",
-                        "consent_records"])
-    bottom2 = stack(1, ["prescriptions", "dose_schedules", "intake_logs", "appointments"])
+    left = ["medications", "inventory_items", "inventory_adjustments", "patient_profiles", "consent_records"]
+    right = ["prescriptions", "dose_schedules", "intake_logs", "appointments"]
+    bottom1 = stack(0, left, EDGE_Y)
+    bottom2 = stack(1, right, EDGE_Y)
 
     group = None
-    gy = max(bottom1, bottom2) + 4
     if remote:
-        pos["auth.users"] = (COLS[0], gy)
+        # auth.users vai para o pé da coluna mais curta, sem abrir uma faixa nova na figura.
+        col = 0 if bottom1 <= bottom2 else 1
+        pos["auth.users"] = (COLS[col], min(bottom1, bottom2))
     else:
-        top = gy + 34
+        gy = max(bottom1, bottom2) - GAP_Y + 14
+        top = gy + GROUP_LABEL
         pos["cmed_entries"] = (COLS[0], top)
-        y = top
-        for n in ("cmed_eans", "sync_state", "app_state"):
-            pos[n] = (COLS[1], y)
-            y += height(t[n]) + GAP_Y
-        gx = COLS[0] - 20
-        gbottom = max(y - GAP_Y, top + height(t["cmed_entries"])) + 20
-        group = (gx, gy, COLS[1] + W + 20 - gx, gbottom - gy)
+        stack(0, ["app_state"], top + height(t["cmed_entries"]) + GAP_Y)
+        y = stack(1, ["cmed_eans", "sync_state"], top)
+        bottom = max(y - GAP_Y, pos["app_state"][1] + height(t["app_state"]))
+        gx = COLS[0] - GROUP_PAD
+        group = (gx, gy, COLS[1] + W + GROUP_PAD - gx, bottom + GROUP_PAD - gy)
     return pos, group
 
 
@@ -146,7 +157,7 @@ class Svg:
     def line(self, x1, y1, x2, y2, w=1.2, color="#000"):
         self.add(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="{w}"/>')
 
-    def text(self, x, y, s, size=11.5, anchor="start", weight="normal", style="normal", fill="#000"):
+    def text(self, x, y, s, size, anchor="start", weight="normal", style="normal", fill="#000"):
         self.add(f'<text x="{x}" y="{y}" font-size="{size}" text-anchor="{anchor}" font-weight="{weight}" '
                  f'font-style="{style}" fill="{fill}">{escape(s)}</text>')
 
@@ -155,20 +166,20 @@ def draw_table(svg, name, cols, x, y):
     h = height(cols)
     svg.add(f'<rect x="{x}" y="{y}" width="{W}" height="{h}" fill="#fff" stroke="#000" stroke-width="1.2"/>')
     svg.add(f'<rect x="{x}" y="{y}" width="{W}" height="{HEAD}" fill="#d9d9d9" stroke="#000" stroke-width="1.2"/>')
-    svg.text(x + W / 2, y + 18, name, size=14, anchor="middle", weight="bold")
+    svg.text(x + W / 2, y + 17, name, size=15.5, anchor="middle", weight="bold")
     for i, col in enumerate(cols):
         ry = y + HEAD + ROW * i
         if i:
             svg.line(x, ry, x + W, ry, w=0.5, color="#c8c8c8")
-        base = ry + 14.5
+        base = ry + 13.8
         if col["key"]:
-            svg.text(x + 7, base, col["key"], size=10.5, weight="bold")
-        svg.text(x + 36, base, col["name"], size=12.5,
+            svg.text(x + 5, base, col["key"], size=11.5, weight="bold")
+        svg.text(x + 31, base, col["name"], size=FONT_NAME,
                  weight="bold" if col["key"] == "PK" else "normal",
                  style="italic" if col["key"] == "FK" else "normal")
-        svg.text(x + W - 34, base, col["type"], size=11.5, anchor="end", fill="#333")
+        svg.text(x + W - 29, base, col["type"], size=FONT_TYPE, anchor="end", fill="#333")
         if col["nn"]:
-            svg.text(x + W - 8, base, "NN", size=10, anchor="end", fill="#555")
+            svg.text(x + W - 4, base, "NN", size=10.5, anchor="end", fill="#555")
 
 
 def path(svg, pts, dashed):
@@ -178,18 +189,18 @@ def path(svg, pts, dashed):
 
 
 def mark_one(svg, x, y, d):
-    for off in (8, 13):
-        svg.line(x + d * off, y - 6, x + d * off, y + 6)
+    for off in (6, 10):
+        svg.line(x + d * off, y - 5, x + d * off, y + 5)
 
 
 def mark_many(svg, x, y, d, optional):
-    tip = x + d * 12
-    for dy in (-7, 0, 7):
+    tip = x + d * 10
+    for dy in (-6, 0, 6):
         svg.line(tip, y, x, y + dy)
     if optional:
-        svg.add(f'<circle cx="{x + d * 18}" cy="{y}" r="4" fill="#fff" stroke="#000" stroke-width="1.2"/>')
+        svg.add(f'<circle cx="{x + d * 15}" cy="{y}" r="3.5" fill="#fff" stroke="#000" stroke-width="1.2"/>')
     else:
-        svg.line(x + d * 17, y - 6, x + d * 17, y + 6)
+        svg.line(x + d * 14, y - 5, x + d * 14, y + 5)
 
 
 def row_y(t, pos, table, col):
@@ -226,7 +237,7 @@ def render(remote):
         gx, gy, gw, gh = group
         svg.add(f'<rect x="{gx}" y="{gy}" width="{gw}" height="{gh}" fill="none" stroke="#000" '
                 f'stroke-width="1" stroke-dasharray="6,4"/>')
-        svg.text(gx + 12, gy + 21, "Somente no aparelho, não sincronizadas", size=13, weight="bold")
+        svg.text(gx + 10, gy + 18, "Somente no aparelho, não sincronizadas", size=14.5, weight="bold")
 
     for name, cols in t.items():
         draw_table(svg, name, cols, *pos[name])
@@ -241,63 +252,19 @@ def render(remote):
     if not remote:
         link(svg, t, pos, "cmed_entries", "cmed_eans", "entry_id", "across", False)
 
-    # Rodapé: legenda e notas.
     bottom = max(y + height(t[n]) for n, (x, y) in pos.items())
     if group:
         bottom = max(bottom, group[1] + group[3])
-    if remote:
-        ux, uy = pos["auth.users"]
-        notes_auth = ["Tabela do Supabase Auth. É referenciada pelo user_id",
-                      "de todas as tabelas acima, com chave estrangeira real",
-                      "(on delete cascade) e RLS user_id = auth.uid()."]
-        for i, s in enumerate(notes_auth):
-            svg.text(COLS[1], uy + 18 + i * 17, s, size=12)
-        bottom = max(bottom, uy + 18 + len(notes_auth) * 17)
-
-    ly = bottom + 40
-    lx = COLS[0]
-    svg.text(lx, ly, "Legenda", size=13, weight="bold")
-    # Um texto por item: o SVG junta espaços seguidos e os três rótulos virariam uma frase só.
-    for i, (sigla, rotulo) in enumerate((("PK", "chave primária"), ("FK", "chave estrangeira"),
-                                         ("NN", "não nulo"))):
-        svg.text(lx + i * 150, ly + 21, sigla, size=12, weight="bold")
-        svg.text(lx + i * 150 + 26, ly + 21, rotulo, size=12)
-    yy = ly + 46
-    path(svg, [(lx, yy), (lx + 70, yy)], dashed)
-    mark_one(svg, lx, yy, 1)
-    mark_many(svg, lx + 70, yy, -1, False)
-    svg.text(lx + 84, yy + 4, "um para muitos, obrigatório", size=12)
-    yy += 24
-    path(svg, [(lx, yy), (lx + 70, yy)], dashed)
-    mark_one(svg, lx, yy, 1)
-    mark_many(svg, lx + 70, yy, -1, True)
-    svg.text(lx + 84, yy + 4, "um para muitos, opcional", size=12)
-
-    if remote:
-        notes = [
-            "Linhas tracejadas são vínculos lógicos mantidos pelo aplicativo. Entre as tabelas do",
-            "aplicativo não há chave estrangeira no banco, só a de user_id para auth.users.",
-            "photo_uri e attachment_uri existem, mas sobem sempre vazias, porque os arquivos",
-            "não são sincronizados. notification_id sobe e é ignorado pelos outros aparelhos.",
-        ]
-    else:
-        notes = [
-            "Linhas contínuas são referências declaradas no esquema (REFERENCES). O SQLite só as",
-            "aplica com PRAGMA foreign_keys ligado, e o aplicativo não o liga.",
-            "medications.ean é consultado em cmed_eans.ean, sem chave estrangeira.",
-            "As colunas emergency_contact_* são legadas, substituídas por emergency_contacts.",
-        ]
-    ny = yy + 36
-    for i, s in enumerate(notes):
-        svg.text(lx, ny + i * 18, s, size=12)
-
-    width = COLS[1] + W + MARGIN
-    height_total = ny + (len(notes) - 1) * 18 + MARGIN
+    width = COLS[1] + W + GUTTER
+    height_total = bottom + EDGE_Y + 1
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height_total}" '
             f'viewBox="0 0 {width} {height_total}" font-family="{FONT}">'
             f'<rect width="100%" height="100%" fill="#fff"/>' + "".join(svg.parts) + "</svg>",
             width, height_total)
 
+
+# Área útil da página A4 com as margens da ABNT, menos a legenda e a fonte da figura.
+PAGE_W_CM, PAGE_H_CM = 16.0, 22.5
 
 for remote, name in ((False, "modelo-de-dados-local"), (True, "modelo-de-dados-remoto")):
     content, w, h = render(remote)
@@ -305,7 +272,9 @@ for remote, name in ((False, "modelo-de-dados-local"), (True, "modelo-de-dados-r
     with open(svg_path, "w", encoding="utf-8") as f:
         f.write(content)
     subprocess.run([EDGE, "--headless=new", "--disable-gpu", "--hide-scrollbars",
-                    "--force-device-scale-factor=3", f"--window-size={w},{h}",
+                    "--force-device-scale-factor=4", f"--window-size={w},{h}",
                     f"--screenshot={svg_path[:-4]}.png", "file:///" + svg_path.replace(os.sep, "/")],
                    check=True, stderr=subprocess.DEVNULL)
-    print(name, w, h)
+    cm_por_px = min(PAGE_W_CM / w, PAGE_H_CM / h)
+    pt = FONT_NAME * cm_por_px / 2.54 * 72
+    print(f"{name}: {w}x{h}px, cabe com {w * cm_por_px:.1f} x {h * cm_por_px:.1f} cm, letra ~{pt:.1f} pt")
